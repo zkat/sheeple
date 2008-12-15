@@ -185,13 +185,13 @@ and that they are both of the same class."
   "Simply removes the hash value from the sheep. Leaves parents intact."
   (remhash property-name (sheep-direct-properties sheep)))
 
-(defgeneric set-property (sheep property-name slot-value)
+(defgeneric (setf get-property) (new-value sheep property-name)
   (:documentation "Sets a SLOT-VALUE with PROPERTY-NAME in SHEEP's properties."))
-(defmethod set-property ((sheep standard-sheep-class) property-name slot-value)
+(defmethod (setf get-property) (new-value (sheep standard-sheep-class) property-name)
   "Default behavior is to only set it on a specific sheep. This will override its parents'
 property values for that same property name, and become the new value for its children."
   (setf (gethash property-name (sheep-direct-properties sheep))
-	slot-value))
+	new-value))
 
 (defgeneric has-direct-property-p (sheep property-name)
   (:documentation "Returns NIL if PROPERTY-NAME is not set in this particular sheep."))
@@ -207,7 +207,7 @@ This returns T if the value is set to NIL for that property-name."
 (defmethod get-property ((sheep standard-sheep-class) property-name)
   "Default behavior is differential inheritance: It will look for that property-name up the entire 
 sheep hierarchy."
-  (get-slot-value-with-hierarchy-list (compute-sheep-hierarchy-list sheep) property-name))
+  (get-property-with-hierarchy-list (compute-sheep-hierarchy-list sheep) property-name))
 
 (defun get-property-with-hierarchy-list (list property-name)
   "Finds a property value under PROPERTY-NAME using a hierarchy list."

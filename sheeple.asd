@@ -3,7 +3,7 @@
   :description "Clone-crazy hackery tool"
   :maintainer "Kat <zkat@Dagon>"
   :author "Kat <zkat@Dagon>"
-  :licence "BSD-style"
+  :licence "MIT"
   :depends-on ()
   :serial t
   :components 

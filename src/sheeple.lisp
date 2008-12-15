@@ -92,7 +92,11 @@
   `(list ,@(mapcar #'canonicalize-sheep sheeple)))
 
 (defun canonicalize-sheep (sheep)
-  `,sheep)
+  `(confirm-sheep ,sheep))
+
+(defun confirm-sheep (sheep)
+  (eql (class-of sheep)
+       (find-class 'standard-sheep-class)))
 
 (defun canonicalize-properties (properties)
   `(list ,@(mapcar #'canonicalize-property properties)))

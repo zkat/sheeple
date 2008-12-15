@@ -61,12 +61,6 @@
 ;;; Cloning
 ;;;
 
-;; Example clone call (when it gets written)
-;;
-;; (clone (obj1 obj2)
-;;   ((face "value")
-;;    (gut "value")))
-
 (let ((dolly (make-instance 'standard-sheep-class :id 'dolly)))
 
   ;; TODO: Make sure this is right.
@@ -76,7 +70,7 @@
 	    (set-up-inheritance
 	     (make-instance 'standard-sheep-class)
 	     ,(canonicalize-sheeple sheeple))))
-       (loop for (name . value) in ',(canonicalize-properties properties)
+       (loop for (name . value) in ,(canonicalize-properties properties)
 	  do (setf (get-property sheep name) value))
        sheep))
   
@@ -97,19 +91,16 @@
 (defun canonicalize-sheeple (sheeple)
   `(list ,@(mapcar #'canonicalize-sheep sheeple)))
 
-(defun find-sheep-by-identifier (id)
-  nil)
-
 (defun canonicalize-sheep (sheep)
   `,sheep)
 
 (defun canonicalize-properties (properties)
-  (mapcar #'canonicalize-property properties))
+  `(list ,@(mapcar #'canonicalize-property properties)))
 
 (defun canonicalize-property (property)
   (if (symbolp (car property))
-      (cons (car property) (cadr property))
-      (error "Improper property!")))
+      `(cons ',(car property) ,(cadr property))
+      (error "Improper property: property name must be a symbol.")))
 
 ;;;
 ;;; Inheritance management

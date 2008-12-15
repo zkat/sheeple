@@ -64,7 +64,7 @@
 ;;    (gut "value")))
 
 (let ((dolly (make-instance 'standard-sheep-class :id 'dolly)))
-
+  
   (defun clone (&rest sheeple)
     "Clones a set of SHEEPLE and returns a new SHEEP with them as its parents."
     (set-up-inheritance
@@ -99,7 +99,8 @@
 ;;; Inheritance management
 ;;;
 
-(defun add-parent (new-parent child)
+(defgeneric add-parent (new-parent child &key))
+(defmethod add-parent ((new-parent standard-sheep-class) (child standard-sheep-class) &key)
   "Adds NEW-PARENT as a parent of CHILD. Checks to make sure NEW-PARENT and CHILD are not the same,
 and that they arej both of the same class."
   (cond ((eql new-parent child)
@@ -111,7 +112,8 @@ and that they arej both of the same class."
 	 (pushnew new-parent (sheep-direct-parents child))
 	 child)))
 
-(defun remove-parent (parent child &key (keep-properties nil))
+(defgeneric remove-parent (parent child &key))
+(defmethod remove-parent ((parent standard-sheep-class) (child standard-sheep-class) &key (keep-properties nil))
   "Deletes PARENT from CHILD's parent list."
   (setf (sheep-direct-parents child)
 	(delete parent (sheep-direct-parents child)))

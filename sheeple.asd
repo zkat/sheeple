@@ -3,7 +3,7 @@
   :description "Clone-crazy hackery tool"
   :maintainer "Josh <sykopomp@Dagon>"
   :author "Josh <sykopomp@Dagon>"
-  :licence "BSD-style"
+  :licence "MIT"
   :depends-on ()
   :serial t
   :components 

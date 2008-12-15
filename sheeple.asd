@@ -11,5 +11,6 @@
 	    :serial t
 	    :components
 	    ((:file "packages")
+	     (:file "utils")
 	     (:file "sheeple")))))
 

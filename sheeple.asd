@@ -5,11 +5,11 @@
   :author "Josh <sykopomp@Dagon>"
   :licence "BSD-style"
   :depends-on ()
-  :components 
   :serial t
+  :components 
   ((:module src
-	    :components
 	    :serial t
+	    :components
 	    ((:file "packages")
 	     (:file "sheeple")))))
 

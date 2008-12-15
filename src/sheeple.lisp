@@ -70,14 +70,13 @@
 (let ((dolly (make-instance 'standard-sheep-class :id 'dolly)))
 
   ;; TODO: Make sure this is right.
-  (defmacro clone (sheeple properties)
+  (defmacro clone (sheeple &optional properties)
     "Clones a set of sheeple and returns a new sheep with them as its parents."
     `(let ((sheep
 	    (set-up-inheritance
 	     (make-instance 'standard-sheep-class)
-	     (list ,sheeple)))
-	   (props ',(canonicalize-properties properties)))
-       (loop for (name . value) in props
+	     ,(canonicalize-sheeple sheeple))))
+       (loop for (name . value) in ',(canonicalize-properties properties)
 	  do (setf (get-property sheep name) value))
        sheep))
   
@@ -94,6 +93,15 @@
 	  (add-parent dolly obj))
       obj))
   )
+
+(defun canonicalize-sheeple (sheeple)
+  `(list ,@(mapcar #'canonicalize-sheep sheeple)))
+
+(defun find-sheep-by-identifier (id)
+  nil)
+
+(defun canonicalize-sheep (sheep)
+  `,sheep)
 
 (defun canonicalize-properties (properties)
   (mapcar #'canonicalize-property properties))

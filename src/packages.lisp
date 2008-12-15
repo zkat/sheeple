@@ -6,6 +6,12 @@
    :clone
    :add-parent
    :remove-parent
+   
+   ;; Introspection
+   :sheep-id
+   :sheep-direct-parents
+
+   
 
    ;; Property access
    :set-property

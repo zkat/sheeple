@@ -53,6 +53,10 @@
     :initform nil
     :accessor sheep-direct-talents)))
 
+(defmethod print-object ((sheep standard-sheep-class) stream)
+  (print-unreadable-object (sheep stream :identity t)
+    (format stream "Standard-Sheep ID: ~a" (sheep-id sheep))))
+
 ;;;
 ;;; Cloning
 ;;;
@@ -64,23 +68,19 @@
 ;;    (gut "value")))
 
 (let ((dolly (make-instance 'standard-sheep-class :id 'dolly)))
+
+  ;; TODO: Make sure this is right.
+  (defmacro clone (sheeple properties)
+    "Clones a set of sheeple and returns a new sheep with them as its parents."
+    `(let ((sheep
+	    (set-up-inheritance
+	     (make-instance 'standard-sheep-class)
+	     (list ,sheeple)))
+	   (props ',(canonicalize-properties properties)))
+       (loop for (name . value) in props
+	  do (setf (get-property sheep name) value))
+       sheep))
   
-  (defun clone (&rest sheeple)
-    "Clones a set of SHEEPLE and returns a new SHEEP with them as its parents."
-    (set-up-inheritance
-     (make-instance 'standard-sheep-class)
-     sheeple))
-
-;;;   TODO
-;;;
-;;;   (defun macro-clone (sheeple properties)
-;;;     "Clones a set of sheeple and returns a new sheep with them as its parents."
-;;;     `(let ((obj 
-;;; 	    (set-up-inheritance
-;;; 	     (make-instance 'standard-sheep-class)
-;;; 	     ,sheeple))))
-;;;     ,@())
-
   (defun fetch-dolly ()
     "Returns the standard sheep."
     dolly)
@@ -94,6 +94,14 @@
 	  (add-parent dolly obj))
       obj))
   )
+
+(defun canonicalize-properties (properties)
+  (mapcar #'canonicalize-property properties))
+
+(defun canonicalize-property (property)
+  (if (symbolp (car property))
+      (cons (car property) (cadr property))
+      (error "Improper property!")))
 
 ;;;
 ;;; Inheritance management
@@ -126,6 +134,8 @@ and that they arej both of the same class."
 		(set-slot-value child property-name value)))))
   child)
 
+;;; unusable for now (need references to children)
+
 ;; (defun push-down-properties (sheep)
 ;;   "Pushes sheep's slot-values down to its children, unless the children have 
 ;; overridden the values."
@@ -138,9 +148,6 @@ and that they arej both of the same class."
 ;; 	       do (unless (has-direct-slot-p child property-name)
 ;; 		    (set-slot-value child property-name value))))
 ;;     sheep))
-
-
-;;; unusable for now (need references to children)
 
 ;; (defun sacrifice-sheep (sheep &key (save-properties nil))
 ;;   "Deletes SHEEP from the hierarchy, preserving the hierarchy by expanding references to
@@ -172,10 +179,6 @@ and that they arej both of the same class."
 ;; 		   if (eql child-par sheep)
 ;; 		   append parents
 ;; 		   else collect child-par)))))
-
-(defmethod print-object ((sheep standard-sheep-class) stream)
-  (print-unreadable-object (sheep stream :identity t)
-    (format stream "Standard-Sheep ID: ~a" (sheep-id sheep))))
 
 ;;;
 ;;; Property Access

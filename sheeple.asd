@@ -10,5 +10,6 @@
   ((:module src
 	    :components
 	    :serial t
-	    ((:file "sheeple")))))
+	    ((:file "packages")
+	     (:file "sheeple")))))
 

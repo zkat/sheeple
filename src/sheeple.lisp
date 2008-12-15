@@ -31,12 +31,11 @@
 ;; - Keep cleaning and testing until it's stable
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defpackage #:sheeple
-  (:use :cl))
-
 (in-package :sheeple)
 
+;;;
+;;; The Standard Sheep Definition
+;;;
 (defclass standard-sheep-class ()
   ((identifier
     :initarg :id
@@ -58,7 +57,7 @@
 ;;; Cloning
 ;;;
 
-;; Example clone call
+;; Example clone call (when it gets written)
 ;;
 ;; (clone (obj1 obj2)
 ;;   ((face "value")
@@ -72,7 +71,7 @@
      (make-instance 'standard-sheep-class)
      sheeple))
 
-;;;   WIP
+;;;   TODO
 ;;;
 ;;;   (defun macro-clone (sheeple properties)
 ;;;     "Clones a set of sheeple and returns a new sheep with them as its parents."
@@ -82,7 +81,7 @@
 ;;; 	     ,sheeple))))
 ;;;     ,@())
 
-  (defun inspect-dolly ()
+  (defun fetch-dolly ()
     "Returns the standard sheep."
     dolly)
   
@@ -91,8 +90,8 @@
     (let ((obj new-sheep))
       (if sheeple
 	  (loop for sheep in (nreverse sheeple)
-	     do (inherit-from sheep obj))
-	  (inherit-from dolly obj))
+	     do (add-parent sheep obj))
+	  (add-parent dolly obj))
       obj))
   )
 
@@ -100,7 +99,7 @@
 ;;; Inheritance management
 ;;;
 
-(defun inherit-from (child new-parent)
+(defun add-parent (new-parent child)
   "Adds NEW-PARENT as a parent of CHILD. Checks to make sure NEW-PARENT and CHILD are not the same,
 and that they are both of the same class."
   (cond ((eql new-parent child)
@@ -119,10 +118,10 @@ and that they are both of the same class."
   (when keep-properties
     (with-accessors ((parent-properties sheep-direct-properties))
 	parent
-      (loop for slot-name being the hash-keys of parent-properties
+      (loop for property-name being the hash-keys of parent-properties
 	   using (hash-value value)
-	   do (unless (has-direct-slot-p child slot-name)
-		(set-slot-value child slot-name value)))))
+	   do (unless (has-direct-slot-p child property-name)
+		(set-slot-value child property-name value)))))
   child)
 
 ;; (defun push-down-properties (sheep)
@@ -131,11 +130,11 @@ and that they are both of the same class."
 ;;   (with-accessors ((properties sheep-direct-properties)
 ;; 		   (children proto-children))
 ;;       sheep
-;;     (loop for slot-name being the hash-keys of properties
+;;     (loop for property-name being the hash-keys of properties
 ;;        using (hash-value value)
 ;;        do (loop for child in children
-;; 	       do (unless (has-direct-slot-p child slot-name)
-;; 		    (set-slot-value child slot-name value))))
+;; 	       do (unless (has-direct-slot-p child property-name)
+;; 		    (set-slot-value child property-name value))))
 ;;     sheep))
 
 
@@ -174,60 +173,60 @@ and that they are both of the same class."
 
 (defmethod print-object ((sheep standard-sheep-class) stream)
   (print-unreadable-object (sheep stream :identity t)
-    (format stream "std-sheep ID: ~d" (sheep-id sheep))))
+    (format stream "Standard-Sheep ID: ~a" (sheep-id sheep))))
 
 ;;;
 ;;; Property Access
 ;;;
 
-(defgeneric remove-property (sheep slot-name)
+(defgeneric remove-property (sheep property-name)
   (:documentation "Removes a property from a particular sheep."))
-(defmethod remove-property ((sheep standard-sheep-class) slot-name)
+(defmethod remove-property ((sheep standard-sheep-class) property-name)
   "Simply removes the hash value from the sheep. Leaves parents intact."
-  (remhash slot-name (sheep-direct-properties sheep)))
+  (remhash property-name (sheep-direct-properties sheep)))
 
-(defgeneric set-slot-value (sheep slot-name slot-value)
-  (:documentation "Sets a SLOT-VALUE with SLOT-NAME in SHEEP's properties."))
-(defmethod set-slot-value ((sheep standard-sheep-class) slot-name slot-value)
+(defgeneric set-property (sheep property-name slot-value)
+  (:documentation "Sets a SLOT-VALUE with PROPERTY-NAME in SHEEP's properties."))
+(defmethod set-property ((sheep standard-sheep-class) property-name slot-value)
   "Default behavior is to only set it on a specific sheep. This will override its parents'
 property values for that same property name, and become the new value for its children."
-  (setf (gethash slot-name (sheep-direct-properties sheep))
+  (setf (gethash property-name (sheep-direct-properties sheep))
 	slot-value))
 
-(defgeneric has-direct-slot-p (sheep slot-name)
-  (:documentation "Returns NIL if SLOT-NAME is not set in this particular sheep."))
-(defmethod has-direct-slot-p ((sheep standard-sheep-class) slot-name)
+(defgeneric has-direct-property-p (sheep property-name)
+  (:documentation "Returns NIL if PROPERTY-NAME is not set in this particular sheep."))
+(defmethod has-direct-property-p ((sheep standard-sheep-class) property-name)
   "Simply catches the second value from gethash, which tells us if the hash exists or not.
-This returns T if the value is set to NIL for that slot-name."
-  (multiple-value-bind (value has-p) (gethash slot-name (sheep-direct-properties sheep))
+This returns T if the value is set to NIL for that property-name."
+  (multiple-value-bind (value has-p) (gethash property-name (sheep-direct-properties sheep))
     value
     has-p))
 
-(defgeneric get-slot-value (sheep slot-name)
-  (:documentation "Gets the property value under SLOT-NAME for an sheep, if-exists."))
-(defmethod get-slot-value ((sheep standard-sheep-class) slot-name)
-  "Default behavior is differential inheritance: It will look for that slot-name up the entire 
+(defgeneric get-property (sheep property-name)
+  (:documentation "Gets the property value under PROPERTY-NAME for an sheep, if-exists."))
+(defmethod get-property ((sheep standard-sheep-class) property-name)
+  "Default behavior is differential inheritance: It will look for that property-name up the entire 
 sheep hierarchy."
-  (get-slot-value-with-hierarchy-list (compute-sheep-hierarchy-list sheep) slot-name))
+  (get-slot-value-with-hierarchy-list (compute-sheep-hierarchy-list sheep) property-name))
 
-(defun get-slot-value-with-hierarchy-list (list slot-name)
-  "Finds a property value under SLOT-NAME using a hierarchy list."
+(defun get-property-with-hierarchy-list (list property-name)
+  "Finds a property value under PROPERTY-NAME using a hierarchy list."
   (loop for sheep in list
      do (multiple-value-bind (value has-p) 
-	    (gethash slot-name (sheep-direct-properties sheep))
+	    (gethash property-name (sheep-direct-properties sheep))
 	  (when has-p
-	    (return-from get-slot-value-with-hierarchy-list value)))
+	    (return-from get-property-with-hierarchy-list value)))
      finally (error "No such slot")))
 
-(defgeneric who-sets (sheep slot-name)
-  (:documentation "Returns the sheep defining the value of SHEEP's slot-name."))
-(defmethod who-sets ((sheep standard-sheep-class) slot-name)
+(defgeneric who-sets (sheep property-name)
+  (:documentation "Returns the sheep defining the value of SHEEP's property-name."))
+(defmethod who-sets ((sheep standard-sheep-class) property-name)
   (loop for sheep in (compute-sheep-hierarchy-list sheep)
-       if (has-direct-slot-p sheep slot-name)
+       if (has-direct-slot-p sheep property-name)
        return sheep))
 
 (defgeneric available-properties (sheep)
-  (:documentation "Returns a list of slot-names available to SHEEP."))
+  (:documentation "Returns a list of property-names available to SHEEP."))
 (defmethod available-properties ((sheep standard-sheep-class))
   (let ((obj-keys (loop for keys being the hash-keys of (sheep-direct-properties sheep)
 		     collect keys)))
@@ -244,11 +243,11 @@ sheep hierarchy."
 ;;   (with-accessors ((properties sheep-direct-properties)
 ;; 		   (children proto-children))
 ;;       sheep
-;;     (loop for slot-name being the hash-keys of properties
+;;     (loop for property-name being the hash-keys of properties
 ;;        using (hash-value value)
 ;;        do (loop for child in children
-;; 	       do (unless (has-direct-slot-p child slot-name)
-;; 		    (set-slot-value child slot-name value))))
+;; 	       do (unless (has-direct-slot-p child property-name)
+;; 		    (set-slot-value child property-name value))))
 ;;     sheep))
 
 ;;;

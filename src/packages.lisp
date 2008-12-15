@@ -11,8 +11,6 @@
    :sheep-id
    :sheep-direct-parents
 
-   
-
    ;; Property access
    :set-property
    :get-property

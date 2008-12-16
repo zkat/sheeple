@@ -23,10 +23,9 @@
 
 ;; sheeple.lisp
 ;;
-;; Main file for Sheeple
+;; Sheep class and inheritance/property-related code, as well as sheep cloning.
 ;;
 ;; TODO:
-;; - Talents. Look at CLOS generic function implementation.
 ;; - Figure out a way to reimplement the stuff that was using the children slot
 ;; - Keep cleaning and testing until it's stable
 ;;
@@ -61,18 +60,24 @@
 ;;; Cloning
 ;;;
 
+;; TODO: Make sure this is right.
+(defmacro clone (sheeple &optional properties)
+  "Standard sheep-generation macro"
+  `(create-sheep
+    :sheeple ,(canonicalize-sheeple sheeple)
+    :properties ,(canonicalize-properties properties)))
+
 (let ((dolly (make-instance 'standard-sheep-class :id 'dolly)))
 
-  ;; TODO: Make sure this is right.
-  (defmacro clone (sheeple &optional properties)
-    "Clones a set of sheeple and returns a new sheep with them as its parents."
-    `(let ((sheep
-	    (set-up-inheritance
-	     (make-instance 'standard-sheep-class)
-	     ,(canonicalize-sheeple sheeple))))
-       (loop for (name . value) in ,(canonicalize-properties properties)
-	  do (setf (get-property sheep name) value))
-       sheep))
+  (defun create-sheep (&key sheeple properties)
+    "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
+    (let ((sheep
+	   (set-up-inheritance
+	    (make-instance 'standard-sheep-class)
+	    sheeple)))
+      (loop for (name . value) in properties
+	 do (setf (get-property sheep name) value))
+      sheep))
   
   (defun fetch-dolly ()
     "Returns the standard sheep."
@@ -95,8 +100,9 @@
   `(confirm-sheep ,sheep))
 
 (defun confirm-sheep (sheep)
-  (eql (class-of sheep)
-       (find-class 'standard-sheep-class)))
+  (when (eql (class-of sheep)
+	(find-class 'standard-sheep-class))
+    sheep))
 
 (defun canonicalize-properties (properties)
   `(list ,@(mapcar #'canonicalize-property properties)))

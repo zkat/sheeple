@@ -28,3 +28,25 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
+(defclass standard-talent ()
+  (name
+   lambda-list
+   body
+   function)
+  (:metaclass sb-mop:funcallable-standard-class))
+
+(defclass standard-talent-property ()
+  (name
+   role
+   talent-pointer
+   documentation))
+
+(defun dispatch-talent (&rest args))
+
+(defmacro deftalent (name lambda-list &body body)
+  `(create-talent )
+  )
+
+(defun create-talent (name lambda-list &rest body)
+  (let ((function-name )))
+  )

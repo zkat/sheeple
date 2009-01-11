@@ -23,7 +23,11 @@
 
 ;; talents.lisp
 ;;
-;; Implementation of Sheeple's generic functions (talents)
+;; Implementation of Sheeple's "talents" (methods)
+;;
+;; For now, talents will simply be singly-dispatched in-object methods. Got some figuring
+;; out to do before slate-style multiple-dispatch can be implemented (thus providing a more
+;; CLOSy interface for sheeple)
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
@@ -32,21 +36,17 @@
   (name
    lambda-list
    body
-   function)
+   function
+   documentation)
   (:metaclass sb-mop:funcallable-standard-class))
-
-(defclass standard-talent-property ()
-  (name
-   role
-   talent-pointer
-   documentation))
 
 (defun dispatch-talent (&rest args))
 
+(defun create-talent (name lambda-list &rest body)
+  (let ((function-name ))
+    ;; todo
+    ))
+
 (defmacro deftalent (name lambda-list &body body)
   `(create-talent )
-  )
-
-(defun create-talent (name lambda-list &rest body)
-  (let ((function-name )))
   )

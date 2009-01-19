@@ -44,9 +44,15 @@
   (:metaclass sb-mop:funcallable-standard-class))
 
 (defclass standard-talent-property ()
-  (name
-   role
-   talent-pointer
+  ((name
+    :initarg :name
+    :accessor name)
+   (role
+    :initarg :role
+    :accessor role)
+   (talent-pointer
+    :initarg :talent-pointer
+    :accessor talent-pointer)
    documentation))
 
 (defun slate-dispatch (selector &rest args)
@@ -59,9 +65,9 @@
 	    (loop while ordering-stack
 	       do (let ((arg (pop ordering-stack)))
 		    (loop for role in (roles arg)
-			 (when (and (eql selector (name role))
-				    (eql index (role role)))
-			   (setf most-specific-method (talent-pointer role))))
+		       when (and (eql selector (name role))
+				 (eql index (role role)))
+		       do (setf most-specific-method (talent-pointer role)))
 		    (loop for delegation in (sheep-direct-parents arg)
 		       do (push delegation ordering-stack))
 		    (setf position (1+ position))))))
@@ -97,7 +103,7 @@
   `(create-talent )
   )
 
-(defun create-talent (name lambda-list &rest body)
-  (let ((function-name )))
-  )
 
+;;;
+;;; Tests
+;;;

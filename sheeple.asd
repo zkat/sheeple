@@ -4,7 +4,7 @@
   :maintainer "Kat <zkat@Dagon>"
   :author "Kat <zkat@Dagon>"
   :licence "MIT"
-  :depends-on ()
+  :depends-on (:fiveam)
   :serial t
   :components 
   ((:module src
@@ -12,5 +12,6 @@
 	    :components
 	    ((:file "packages")
 	     (:file "utils")
-	     (:file "sheeple")))))
+	     (:file "sheeple")
+	     (:file "talents")))))
 

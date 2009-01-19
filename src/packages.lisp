@@ -1,5 +1,5 @@
 (defpackage #:sheeple
-  (:use :cl)
+  (:use :cl :fiveam)
   (:export
 
    ;; Cloning and management

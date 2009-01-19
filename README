@@ -44,6 +44,8 @@ Specification:
 
 (clone () ((slot1 value1)))
 
+(defvar *sample-sheep* (clone()))
+
 * An empty parent list when using CLONE will automatically clone DOLLY
 
 * All objects have a numerical SID (Sheep ID)
@@ -81,23 +83,32 @@ sheep's inheritance chain. The value of that ancestor's property is used instead
 
 * The function GET-PROPERTY receives two arguments: a sheep object and a property-name. It returns
   the value of that property, and searches indirect properties. There is no user-level function for
-  only getting the direct property value of a sheep.
+  only getting the direct property value of a sheep. Signals a condition of type UNBOUND-PROPERTY if
+  there is no binding, direct or indirect, for that property-name.
+  -- ex: (get-property *sample-sheep* 'foo)
 
 * The function (SETF GET-PROPERTY) sets a direct property on a sheep. If the property did not exist,
   it adds it, and it changes it if it did.
+  -- ex: (setf (get-property *sample-sheep* 'foo) 'bar)
+
+* The function HAS-DIRECT-PROPERTY-P returns T if a direct property was set on sheep, and NIL
+  otherwise.
+  -- ex: (has-direct-property-p *sample-sheep* 'foo) => T
 
 * The function REMOVE-PROPERTY receives a sheep and a property-name, and removes a direct property
   from sheep. Returns NIL if there was no direct property with that property-name set, and T if it
   removed an existing property.
-
-* The function HAS-DIRECT-PROPERTY-P returns T if a direct property was set on sheep, and NIL
-  otherwise.
+  -- ex: (remove-property *sample-sheep* 'foo) => T
 
 * The function WHO-SETS receives a SHEEP and a PROPERTY-NAME, and returns the sheep that sets a
   particular property visible to SHEEP, whether it be a direct-property or an indirect-property.
+  If the property is unbound, it simply returns NIL.
+  -- ex: (who-sets *sample-sheep* 'foo) => NIL
 
 * The function AVAILABLE-PROPERTIES receives a SHEEP, and returns a list of available bound
   property keys for SHEEP.
+  -- ex: (setf (get-property *sample-sheep* 'baz) 'quux)
+     	 (available-properties *sample-sheep*) ==> (BAZ)
 
 == Talents ==
 

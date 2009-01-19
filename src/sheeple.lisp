@@ -158,6 +158,8 @@ and that they arej both of the same class."
 ;;;
 ;;; Property Access
 ;;;
+(define-condition unbound-property (error)
+  ())
 
 (defgeneric get-property (sheep property-name)
   (:documentation "Gets the property value under PROPERTY-NAME for an sheep, if-exists."))
@@ -173,7 +175,7 @@ sheep hierarchy."
 	    (gethash property-name (sheep-direct-properties sheep))
 	  (when has-p
 	    (return-from get-property-with-hierarchy-list value)))
-     finally (error "No such slot")))
+     finally (error 'unbound-property)))
 
 (defgeneric (setf get-property) (new-value sheep property-name)
   (:documentation "Sets a SLOT-VALUE with PROPERTY-NAME in SHEEP's properties."))

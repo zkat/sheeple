@@ -94,6 +94,7 @@
       obj))
   )
 
+
 (defun canonicalize-sheeple (sheeple)
   `(list ,@(mapcar #'canonicalize-sheep sheeple)))
 
@@ -127,8 +128,15 @@ and that they arej both of the same class."
 		   (class-of child)))
 	 (error "Wrong metaclass for parent"))
 	(t
-	 (pushnew new-parent (sheep-direct-parents child))
-	 child)))
+	 (handler-case
+	     (progn
+	       (pushnew new-parent (sheep-direct-parents child))
+	       (compute-sheep-hierarchy-list child))
+	   (simple-error ()
+	     (progn
+	       (setf (sheep-direct-parents child) (delete new-parent (sheep-direct-parents child)))
+	       (error 'sheep-hierarchy-error :text "Unable to compute sheep hierarchy list.")))))))
+
 
 (defgeneric remove-parent (parent child &key))
 (defmethod remove-parent ((parent standard-sheep-class) (child standard-sheep-class) &key (keep-properties nil))
@@ -221,13 +229,20 @@ sheep hierarchy."
 			     parents)))))))
     (all-parents-loop () (list sheep))))
 
+(define-condition sheep-hierarchy-error (error)
+  ((text :initarg :text :reader text))
+  (:documentation "Signaled whenever there is a problem computing the hierarchy list."))
+
 (defun compute-sheep-hierarchy-list (sheep)
-  (let ((sheeple-to-order (collect-parents sheep)))
-    (topological-sort sheeple-to-order
-		      (remove-duplicates
-		       (mapappend #'local-precedence-ordering
-				  sheeple-to-order))
-		      #'std-tie-breaker-rule)))
+  (handler-case 
+      (let ((sheeple-to-order (collect-parents sheep)))
+	(topological-sort sheeple-to-order
+			  (remove-duplicates
+			   (mapappend #'local-precedence-ordering
+				      sheeple-to-order))
+			  #'std-tie-breaker-rule))
+    (simple-error ()
+      (error 'sheep-hierarchy-error :text "Unable to compute sheep hierarchy list."))))
 
 (defun local-precedence-ordering (sheep)
   (mapcar #'list

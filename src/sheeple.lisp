@@ -132,10 +132,12 @@ and that they arej both of the same class."
 	     (progn
 	       (pushnew new-parent (sheep-direct-parents child))
 	       (compute-sheep-hierarchy-list child))
-	   (simple-error ()
+	   (sheep-hierarchy-error ()
 	     (progn
 	       (setf (sheep-direct-parents child) (delete new-parent (sheep-direct-parents child)))
-	       (error 'sheep-hierarchy-error :text "Unable to compute sheep hierarchy list.")))))))
+	       (error 'sheep-hierarchy-error 
+		       "Adding new-parent would result in a
+                             circular sheeple hierarchy list")))))))
 
 
 (defgeneric remove-parent (parent child &key))

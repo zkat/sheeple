@@ -33,14 +33,17 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
+
 ;;;
 ;;; The Standard Sheep Definition
 ;;;
+(defvar *max-sheep-id* 0)
+
 (defclass standard-sheep-class ()
-  ((identifier
-    :initarg :id
-    :initform (gensym)
-    :accessor sheep-id)
+  ((sid
+    :initarg :sid
+    :initform (incf *max-sheep-id*)
+    :accessor sid)
    (parents
     :initarg :parents
     :initform nil
@@ -55,7 +58,7 @@
 
 (defmethod print-object ((sheep standard-sheep-class) stream)
   (print-unreadable-object (sheep stream :identity t)
-    (format stream "Standard-Sheep ID: ~a" (sheep-id sheep))))
+    (format stream "Standard-Sheep SID: ~a" (sheep-id sheep))))
 
 ;;;
 ;;; Cloning
@@ -69,7 +72,7 @@
     :sheeple ,(canonicalize-sheeple sheeple)
     :properties ,(canonicalize-properties properties)))
 
-(let ((dolly (make-instance 'standard-sheep-class :id 'dolly)))
+(let ((dolly (make-instance 'standard-sheep-class)))
 
   (defun create-sheep (&key sheeple properties)
     "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
@@ -132,7 +135,8 @@ and that they arej both of the same class."
 	 (handler-case
 	     (progn
 	       (pushnew new-parent (sheep-direct-parents child))
-	       (compute-sheep-hierarchy-list child))
+	       (compute-sheep-hierarchy-list child)
+	       child)
 	   (sheep-hierarchy-error ()
 	     (progn
 	       (setf (sheep-direct-parents child) (delete new-parent (sheep-direct-parents child)))

@@ -61,6 +61,7 @@
 ;;;
 
 ;; TODO: Make sure this is right.
+;; Example: (clone (sheep1 sheep2 sheep3) ((property1 value1) (property2 value2)))
 (defmacro clone (sheeple &optional properties)
   "Standard sheep-generation macro"
   `(create-sheep
@@ -139,8 +140,8 @@ and that they arej both of the same class."
 	parent
       (loop for property-name being the hash-keys of parent-properties
 	   using (hash-value value)
-	   do (unless (has-direct-slot-p child property-name)
-		(set-slot-value child property-name value)))))
+	   do (unless (has-direct-property-p child property-name)
+		(setf (get-property child property-name) value)))))
   child)
 
 ;;;
@@ -190,7 +191,7 @@ sheep hierarchy."
   (:documentation "Returns the sheep defining the value of SHEEP's property-name."))
 (defmethod who-sets ((sheep standard-sheep-class) property-name)
   (loop for sheep in (compute-sheep-hierarchy-list sheep)
-       if (has-direct-slot-p sheep property-name)
+       if (has-direct-property-p sheep property-name)
        return sheep))
 
 (defgeneric available-properties (sheep)

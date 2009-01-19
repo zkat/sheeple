@@ -23,30 +23,81 @@
 
 ;; talents.lisp
 ;;
-;; Implementation of Sheeple's "talents" (methods)
-;;
-;; For now, talents will simply be singly-dispatched in-object methods. Got some figuring
-;; out to do before slate-style multiple-dispatch can be implemented (thus providing a more
-;; CLOSy interface for sheeple)
+;; Implementation of Sheeple's generic functions (talents)
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
 (defclass standard-talent ()
-  (name
-   lambda-list
-   body
-   function
-   documentation)
+  ((name
+    :initarg :name
+    :accessor standard-talent-name)
+   (lambda-list
+    :initarg :lambda-list
+    :accessor standard-talent-lambda-list)
+   (body
+    :initarg :body
+    :accessor standard-talent-body)
+   (function
+    :initarg :function
+    :accessor standard-talent-function))
   (:metaclass sb-mop:funcallable-standard-class))
 
-(defun dispatch-talent (&rest args))
+(defclass standard-talent-property ()
+  (name
+   role
+   talent-pointer
+   documentation))
 
-(defun create-talent (name lambda-list &rest body)
-  (let ((function-name ))
-    ;; todo
-    ))
+(defun slate-dispatch (selector &rest args)
+  (let ((n (length args))
+	(most-specific-method nil)
+	(ordering-stack nil))
+    (loop for index upto n
+       do (let ((position 0))
+	    (push (elt args index) ordering-stack)
+	    (loop while ordering-stack
+	       do (let ((arg (pop ordering-stack)))
+		    (loop for role in (roles arg)
+			 (when (and (eql selector (name role))
+				    (eql index (role role)))
+			   (setf most-specific-method (talent-pointer role))))
+		    (loop for delegation in (sheep-direct-parents arg)
+		       do (push delegation ordering-stack))
+		    (setf position (1+ position))))))
+    most-specific-method))
+
+;dispatch(selector, args, n)
+;  for each index below n
+;    position := 0
+;    push args[index] on ordering stack
+;    while ordering stack is not empty
+;      arg := pop ordering stack
+;      for each role on arg with selector and index
+;        rank[role's method][index] := position
+;        if rank[role's method] is fully specified
+;          if no most specific method
+;             or rank[role's method] < rank[most specific method]
+;            most specific method := role's method
+;      for each delegation on arg
+;        push delegation on ordering stack
+;      position := position + 1
+;  return most specific method
+
+(defun dispatch-talent (talent-name &rest args)
+  ;; step 1 - find all talents with talent-name that the first arg 
+  ;; has role position 1 in. (incl. parents), push them into a list.
+  ;; 
+  ;; step 2 -
+
+  args
+  )
 
 (defmacro deftalent (name lambda-list &body body)
   `(create-talent )
   )
+
+(defun create-talent (name lambda-list &rest body)
+  (let ((function-name )))
+  )
+

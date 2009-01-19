@@ -35,10 +35,14 @@ Specification:
   sorting algorithm.
 
 * New sheeple are created by using the CLONE macro. CLONE works similar to DEFCLASS:
+
 (clone (parent1 parent2)
   ((slot1 value1)
    (slot2 value2)))
+
 (clone ()) ;; also valid. Slot spec is optional.
+
+(clone () ((slot1 value1)))
 
 * An empty parent list when using CLONE will automatically clone DOLLY
 
@@ -46,24 +50,54 @@ Specification:
 
 * The list of direct parents is dynamic. Parents can be added or removed at runtime.
 
+* Sheeple does not have a universal addressing mechanism like functions and classes do. Instead,
+there are a number of built-in sheeple, including DOLLY, which can be addressed by symbol where
+useful, such as when setting one of them as a parent, or defining a talent.
 
-== Slot Values ==
+* Built-in sheeple correspond to all built-in Lisp types, as well as any new types defined by
+  DEFTYPE, but not to CLOS-defined classes.
 
-* Sheeple have direct slots and indirect slots
+== Property Values ==
 
-* Direct slots are set directly in a specific sheep object.
+* Properties are key-value pairs, where key is a symbol.
 
-* Indirect slots are accessed by searching for direct slots that have been set along the sheep's
-inheritance chain. The value of that ancestor's slot is used instead.
+* One property may only have one value, although that value can be a collection of some sort.
+
+* Sheeple have direct properties and indirect properties
+
+* Direct properties are set directly in a specific sheep object.
+
+* Indirect properties are accessed by searching for direct properties that have been set along the
+sheep's inheritance chain. The value of that ancestor's property is used instead.
 
 * Changing the value in the parent thus changes the value in the child.
 
-* A child may override the value set by one of its parents at any time by setting a direct slot.
+* A child may override the value set by one of its parents at any time by setting a direct property.
 
-* If an ancestor already sets a slot, a descendant may not remove that slot from itself, unless
-  it removes that slot from the ancestor.
+* If an ancestor already sets a property, a descendant may not remove that property from itself,
+  unless it removes that property from the ancestor.
 
-* When accessing indirect slots, the hierarchy list ordering is obeyed.
+* When accessing indirect properties, the hierarchy list ordering is obeyed.
+
+* The function GET-PROPERTY receives two arguments: a sheep object and a property-name. It returns
+  the value of that property, and searches indirect properties. There is no user-level function for
+  only getting the direct property value of a sheep.
+
+* The function (SETF GET-PROPERTY) sets a direct property on a sheep. If the property did not exist,
+  it adds it, and it changes it if it did.
+
+* The function REMOVE-PROPERTY receives a sheep and a property-name, and removes a direct property
+  from sheep. Returns NIL if there was no direct property with that property-name set, and T if it
+  removed an existing property.
+
+* The function HAS-DIRECT-PROPERTY-P returns T if a direct property was set on sheep, and NIL
+  otherwise.
+
+* The function WHO-SETS receives a SHEEP and a PROPERTY-NAME, and returns the sheep that sets a
+  particular property visible to SHEEP, whether it be a direct-property or an indirect-property.
+
+* The function AVAILABLE-PROPERTIES receives a SHEEP, and returns a list of available bound
+  property keys for SHEEP.
 
 == Talents ==
 

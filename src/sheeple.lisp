@@ -159,29 +159,6 @@ and that they arej both of the same class."
 ;;; Property Access
 ;;;
 
-(defgeneric remove-property (sheep property-name)
-  (:documentation "Removes a property from a particular sheep."))
-(defmethod remove-property ((sheep standard-sheep-class) property-name)
-  "Simply removes the hash value from the sheep. Leaves parents intact."
-  (remhash property-name (sheep-direct-properties sheep)))
-
-(defgeneric (setf get-property) (new-value sheep property-name)
-  (:documentation "Sets a SLOT-VALUE with PROPERTY-NAME in SHEEP's properties."))
-(defmethod (setf get-property) (new-value (sheep standard-sheep-class) property-name)
-  "Default behavior is to only set it on a specific sheep. This will override its parents'
-property values for that same property name, and become the new value for its children."
-  (setf (gethash property-name (sheep-direct-properties sheep))
-	new-value))
-
-(defgeneric has-direct-property-p (sheep property-name)
-  (:documentation "Returns NIL if PROPERTY-NAME is not set in this particular sheep."))
-(defmethod has-direct-property-p ((sheep standard-sheep-class) property-name)
-  "Simply catches the second value from gethash, which tells us if the hash exists or not.
-This returns T if the value is set to NIL for that property-name."
-  (multiple-value-bind (value has-p) (gethash property-name (sheep-direct-properties sheep))
-    value
-    has-p))
-
 (defgeneric get-property (sheep property-name)
   (:documentation "Gets the property value under PROPERTY-NAME for an sheep, if-exists."))
 (defmethod get-property ((sheep standard-sheep-class) property-name)
@@ -197,6 +174,29 @@ sheep hierarchy."
 	  (when has-p
 	    (return-from get-property-with-hierarchy-list value)))
      finally (error "No such slot")))
+
+(defgeneric (setf get-property) (new-value sheep property-name)
+  (:documentation "Sets a SLOT-VALUE with PROPERTY-NAME in SHEEP's properties."))
+(defmethod (setf get-property) (new-value (sheep standard-sheep-class) property-name)
+  "Default behavior is to only set it on a specific sheep. This will override its parents'
+property values for that same property name, and become the new value for its children."
+  (setf (gethash property-name (sheep-direct-properties sheep))
+	new-value))
+
+(defgeneric remove-property (sheep property-name)
+  (:documentation "Removes a property from a particular sheep."))
+(defmethod remove-property ((sheep standard-sheep-class) property-name)
+  "Simply removes the hash value from the sheep. Leaves parents intact."
+  (remhash property-name (sheep-direct-properties sheep)))
+
+(defgeneric has-direct-property-p (sheep property-name)
+  (:documentation "Returns NIL if PROPERTY-NAME is not set in this particular sheep."))
+(defmethod has-direct-property-p ((sheep standard-sheep-class) property-name)
+  "Simply catches the second value from gethash, which tells us if the hash exists or not.
+This returns T if the value is set to NIL for that property-name."
+  (multiple-value-bind (value has-p) (gethash property-name (sheep-direct-properties sheep))
+    value
+    has-p))
 
 (defgeneric who-sets (sheep property-name)
   (:documentation "Returns the sheep defining the value of SHEEP's property-name."))

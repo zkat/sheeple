@@ -62,14 +62,15 @@ useful, such as when setting one of them as a parent, or defining a talent.
 * The function ADD-PARENT receives a NEW-PARENT sheep, and a CHILD sheep. It pushes NEW-PARENT into
 CHILD's direct-parents if NEW-PARENT is not already there. If using ADD-PARENT would result in a
 cyclic hierarchy list, a SHEEP-HIERARCHY-ERROR condition is signaled, and the CHILD is
-unaffected. The new-parent is added to the front of the direct-parents list, like a stack push.
+unaffected. The new-parent is added to the front of the direct-parents list, like a stack
+push. Returns the CHILD object.
 -- ex: (add-parent *mommy* *kiddo*) => <SHEEP SID: 2> (*kiddo*)
        (add-parent *kiddo's-descendant* *kiddo*) => ERROR: SHEEP-HIERARHY-ERROR
 
 * The function REMOVE-PARENT receives a PARENT sheep and a CHILD sheep. It also takes an optional
 :keep-properties value that can be T or NIL. If T, it will copy all of PARENT's direct-properties
 into CHILD before removing the parent from the child's direct-parents. If NIL, the parent's
-direct-properties will no longer apply to child.
+direct-properties will no longer apply to child. Returns the CHILD object.
 -- ex: (remove-parent *daddy* *kiddo*) => KIDDO object, without *daddy*'s direct-slot values.
        (remove-parent *daddy* *kiddo* :keep-properties t) => KIDDO object, with a copy of *daddy*'s
        direct-slots.
@@ -103,7 +104,7 @@ sheep's inheritance chain. The value of that ancestor's property is used instead
   -- ex: (get-property *sample-sheep* 'foo)
 
 * The function (SETF GET-PROPERTY) sets a direct property on a sheep. If the property did not exist,
-  it adds it, and it changes it if it did.
+  it adds it, and it changes it if it did. Returns the new value.
   -- ex: (setf (get-property *sample-sheep* 'foo) 'bar)
 
 * The function HAS-DIRECT-PROPERTY-P returns T if a direct property was set on sheep, and NIL
@@ -121,7 +122,7 @@ sheep's inheritance chain. The value of that ancestor's property is used instead
   -- ex: (who-sets *sample-sheep* 'foo) => NIL
 
 * The function AVAILABLE-PROPERTIES receives a SHEEP, and returns a list of available bound
-  property keys for SHEEP.
+  property keys for SHEEP. An empty list is returned if SHEEP has no available bound properties.
   -- ex: (setf (get-property *sample-sheep* 'baz) 'quux)
      	 (available-properties *sample-sheep*) ==> (BAZ)
 

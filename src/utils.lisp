@@ -22,22 +22,22 @@
 		   (t (rec (car x) (rec (cdr x) acc))))))
     (rec x nil)))
 
+;; This is breaking. Fuck
 (defun topological-sort (elements constraints tie-breaker)
   (let ((remaining-constraints constraints)
         (remaining-elements elements)
         (result ())) 
     (loop
-     (let ((minimal-elements 
+     (let ((minimal-elements
             (remove-if
-             #'(lambda (sheep)
-                 (member sheep  remaining-constraints
-                         :key #'cadr))
+             (lambda (sheep)
+	       (member sheep remaining-constraints
+		       :key #'cadr))
              remaining-elements)))
        (when (null minimal-elements)
              (if (null remaining-elements)
                  (return-from topological-sort result)
-		 (error "Inconsistent precedence graph.")
-		 ))
+		 (error "Inconsistent precedence graph.")))
        (let ((choice (if (null (cdr minimal-elements))
                          (car minimal-elements)
                        (funcall tie-breaker

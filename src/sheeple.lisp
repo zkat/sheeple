@@ -97,7 +97,10 @@
       obj))
   )
 
-
+(defun sheep-p (maybe-sheep)
+  (when (eql (class-of maybe-sheep)
+	     (find-class 'standard-sheep-class))
+    t))
 (defun canonicalize-sheeple (sheeple)
   `(list ,@(mapcar #'canonicalize-sheep sheeple)))
 
@@ -106,7 +109,7 @@
 
 (defun confirm-sheep (sheep)
   (when (eql (class-of sheep)
-	(find-class 'standard-sheep-class))
+	     (find-class 'standard-sheep-class))
     sheep))
 
 (defun canonicalize-properties (properties)

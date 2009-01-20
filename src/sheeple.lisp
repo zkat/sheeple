@@ -41,9 +41,8 @@
 
 (defclass standard-sheep-class ()
   ((sid
-    :initarg :sid
     :initform (incf *max-sheep-id*)
-    :accessor sid)
+    :reader sid)
    (parents
     :initarg :parents
     :initform nil
@@ -52,13 +51,13 @@
     :initarg :properties
     :initform (make-hash-table :test #'eq)
     :accessor sheep-direct-properties)
-   (talents
+   (roles
     :initform nil
-    :accessor sheep-direct-talents)))
+    :accessor sheep-direct-roles)))
 
 (defmethod print-object ((sheep standard-sheep-class) stream)
   (print-unreadable-object (sheep stream :identity t)
-    (format stream "Standard-Sheep SID: ~a" (sheep-id sheep))))
+    (format stream "Standard-Sheep SID: ~a" (sid sheep))))
 
 ;;;
 ;;; Cloning

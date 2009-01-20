@@ -55,7 +55,7 @@
     :accessor talent-pointer)
    documentation))
 
-(defun slate-dispatch (selector &rest args)
+(defun find-most-specific-talent (selector &rest args)
   (let ((n (length args))
 	(most-specific-method nil)
 	(ordering-stack nil))
@@ -64,9 +64,10 @@
 	    (push (elt args index) ordering-stack)
 	    (loop while ordering-stack
 	       do (let ((arg (pop ordering-stack)))
-		    (loop for role in (roles arg)
+		    (loop for role in (sheep-direct-roles arg) with rank = (make-list n :initial-element nil)
 		       when (and (eql selector (name role))
 				 (eql index (role role)))
+		       do 
 		       do (setf most-specific-method (talent-pointer role)))
 		    (loop for delegation in (sheep-direct-parents arg)
 		       do (push delegation ordering-stack))

@@ -1,5 +1,7 @@
 Sheeple is a CLOS-like prototype-based object-oriented system for ANSI Common Lisp. This
-implementation is canonical and is currently implemented only for SBCL.
+implementation is canonical and is currently implemented only for SBCL. This implementation is
+designed from the very beginning with the purpose of having a MetaObject Protocol. The MOP, however,
+is currently written in CLOS.
 
 Vocabulary:
 

@@ -55,7 +55,8 @@
     :accessor talent-pointer)
    documentation))
 
-(defun find-most-specific-talent (selector &rest args)
+(defun applicable-talent-list)
+(defun generate-applicable-talent-list (selector &rest args)
   (let ((n (length args))
 	(most-specific-method nil)
 	(ordering-stack nil))

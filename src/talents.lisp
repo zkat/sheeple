@@ -40,10 +40,7 @@
     :accessor standard-talent-body)
    (function
     :initarg :function
-    :accessor standard-talent-function)
-   (rank
-    :initform nil
-    :accessor rank))
+    :accessor standard-talent-function))
   (:metaclass sb-mop:funcallable-standard-class))
 
 (defclass standard-talent-property ()

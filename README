@@ -113,6 +113,10 @@ sheep's inheritance chain. The value of that ancestor's property is used instead
   otherwise.
   -- ex: (has-direct-property-p *sample-sheep* 'foo) => T
 
+* The function HAS-PROPERTY-P returns T if the property is available to sheep, whether it's direct
+  or indirect.
+  -- ex: (has-property-p *sample-sheep* 'foo) => T
+
 * The function REMOVE-PROPERTY receives a sheep and a property-name, and removes a direct property
   from sheep. Returns NIL if there was no direct property with that property-name set, and T if it
   removed an existing property.

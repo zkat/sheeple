@@ -143,6 +143,19 @@ and that they arej both of the same class."
 		       "Adding new-parent would result in a
                              circular sheeple hierarchy list")))))))
 
+(defun direct-parent-p (maybe-parent child)
+  (when (member maybe-parent (sheep-direct-parents child))
+    t))
+
+(defun ancestor-p (maybe-ancestor descendant)
+  (when (member maybe-ancestor (collect-parents descendant))
+    t))
+
+(defun direct-child-p (maybe-child parent)
+  (direct-parent-p parent maybe-child))
+
+(defun descendant-p (maybe-descendant ancestor)
+  (ancestor-p ancestor maybe-descendant))
 
 (defgeneric remove-parent (parent child &key))
 (defmethod remove-parent ((parent standard-sheep-class) (child standard-sheep-class) &key (keep-properties nil))
@@ -193,6 +206,13 @@ property values for that same property name, and become the new value for its ch
 (defmethod remove-property ((sheep standard-sheep-class) property-name)
   "Simply removes the hash value from the sheep. Leaves parents intact."
   (remhash property-name (sheep-direct-properties sheep)))
+
+(defun has-property-p (sheep property-name)
+  "Returns T if a property with PROPERTY-NAME is available to SHEEP."
+  (handler-case
+      (when (get-property sheep property-name)
+	t)
+    (unbound-property () nil)))
 
 (defgeneric has-direct-property-p (sheep property-name)
   (:documentation "Returns NIL if PROPERTY-NAME is not set in this particular sheep."))
@@ -265,7 +285,3 @@ This returns T if the value is set to NIL for that property-name."
       (when (not (null common))
         (return-from std-tie-breaker-rule (car common))))))
 
-
-;;;
-;;; Tests
-;;;

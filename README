@@ -77,6 +77,9 @@ direct-properties will no longer apply to child. Returns the CHILD object.
        (remove-parent *daddy* *kiddo* :keep-properties t) => KIDDO object, with a copy of *daddy*'s
        direct-slots.
 
+* The functions DIRECT-PARENT-P, ANCESTOR-P, DIRECT-CHILD-P, and DESCENDANT-P return T for their
+corresponding checks.
+
 == Property Values ==
 
 * Properties are key-value pairs, where key is a symbol.

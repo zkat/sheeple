@@ -40,7 +40,10 @@
     :accessor standard-talent-body)
    (function
     :initarg :function
-    :accessor standard-talent-function))
+    :accessor standard-talent-function)
+   (rank
+    :initform nil
+    :accessor rank))
   (:metaclass sb-mop:funcallable-standard-class))
 
 (defclass standard-talent-property ()
@@ -60,19 +63,24 @@
   (let ((n (length args))
 	(most-specific-method nil)
 	(ordering-stack nil))
-    (loop for index upto n
+    (loop 
+       for index upto n
+       fof position upto n
        do (let ((position 0))
 	    (push (elt args index) ordering-stack)
 	    (loop while ordering-stack
 	       do (let ((arg (pop ordering-stack)))
-		    (loop for role in (sheep-direct-roles arg) with rank = (make-list n :initial-element nil)
+		    (loop for role in (sheep-direct-roles arg)
 		       when (and (eql selector (name role))
 				 (eql index (role role)))
-		       do 
+		       do (setf (elt (rank (method role)) index)
+				position)
+		       if (or (fully-specified-p (rank (method role)))
+			      (< (calculate-rank (rank (method role)))
+				 (calculate-rank (rank most-specific-method))))
 		       do (setf most-specific-method (talent-pointer role)))
 		    (loop for delegation in (sheep-direct-parents arg)
-		       do (push delegation ordering-stack))
-		    (setf position (1+ position))))))
+		       do (push delegation ordering-stack))))))
     most-specific-method))
 
 ;dispatch(selector, args, n)
@@ -91,6 +99,7 @@
 ;        push delegation on ordering stack
 ;      position := position + 1
 ;  return most specific method
+;FUCK YOU SLATE
 
 (defun dispatch-talent (talent-name &rest args)
   ;; step 1 - find all talents with talent-name that the first arg 

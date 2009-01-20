@@ -1,17 +1,14 @@
 (asdf:defsystem sheeple
   :version "Baahh"
-  :description "Clone-crazy hackery tool"
+  :description "Clone-crazy hackery tool, unit tests."
   :maintainer "Josh <sykopomp@Dagon>"
   :author "Josh <sykopomp@Dagon>"
   :licence "MIT"
-  :depends-on ()
+  :depends-on (:sheeple :fiveam)
   :serial t
   :components 
-  ((:module src
+  ((:module tests
 	    :serial t
 	    :components
 	    ((:file "packages")
-	     (:file "utils")
-	     (:file "sheeple")
-	     (:file "talents")))))
-
+	     (:file "sheeple")))))

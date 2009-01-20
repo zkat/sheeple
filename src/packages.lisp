@@ -17,7 +17,6 @@
    :sheep-direct-parents
 
    ;; Property access
-   :set-property
    :get-property
    :available-properties
    :remove-property

@@ -28,6 +28,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
+;;;
+;;; Talent and participation (talent-property) base classes
+;;;
+
 (defclass standard-talent ()
   ((name
     :initarg :name
@@ -59,12 +63,19 @@
     :accessor talent-pointer)
    documentation))
 
+
+;;;
+;;; Talent definition
+;;;
+
 (defmacro deftalent (name lambda-list &body body)
   `(create-talent
     )
   )
 
 (defun create-talent (&key name lambda-list specializers body)
+  ;; This shit sucks. It doesn't make the talent a function, and it doesn't make sure that
+  ;; one wasn't already defined on the exact same specializers.
   (let ((talent (make-instance 'standard-talent
 			       :name name
 			       :lambda-list lambda-list
@@ -81,7 +92,31 @@
 		   (sheep-direct-participations specializer)))
     talent))
 
+;;;
+;;; Talent dispatch
+;;;
+
+;; dispatch(selector, args, n)
+;;  for each index below n
+;;    position := 0
+;;    push args[index] on ordering stack
+;;    while ordering stack is not empty
+;;      arg := pop ordering stack
+;;      for each talent-property on arg with selector and index
+;;        rank[talent-property's talent][index] := position
+;;        if rank[talent-property's talent] is fully specified
+;;          if no most specific talent
+;;             or rank[talent-property's talent] < rank[most specific talent]
+;;            most specific talent := talent-property's method
+;;      for each ancestor on arg's hierarchy-list
+;;        push ancestor on ordering stack
+;;      position := position + 1
+;;  return most specific talent-property
+;; FUCK YOU SLATE
+
 (defun find-most-specific-talent (selector &rest args)
+  "Returns the most specific talent using SELECTOR and ARGS."
+  ;; This shit is bugged to all hell and it's a huge, disgusting algorithm. Fix that shit.
   (let ((n (length args))
 	(most-specific-talent nil)
 	(ordering-stack nil)
@@ -98,6 +133,7 @@
 		       for participation in (sheep-direct-participations arg)
 		       when (and (eql selector (name participation))
 				 (eql index (role participation)))
+		       do (pushnew (talent-pointer participation) discovered-talents)
 		       do (setf (elt (standard-talent-rank (talent-pointer participation)) index)
 				position)
 		       if (or (fully-specified-p (standard-talent-rank (talent-pointer participation)))
@@ -118,28 +154,11 @@
   t)
 
 (defun calculate-rank (rank)
-  (reduce #'+ rank))
+  (let ((total 0))
+    (loop for item across rank
+       do (when (numberp item)
+	    (incf total item)))))
 
 (defun reset-talent-rank (talent)
   (loop for item across (standard-talent-rank talent)
      do (setf item nil)))
-
-;dispatch(selector, args, n)
-;  for each index below n
-;    position := 0
-;    push args[index] on ordering stack
-;    while ordering stack is not empty
-;      arg := pop ordering stack
-;      for each talent-property on arg with selector and index
-;        rank[talent-property's talent][index] := position
-;        if rank[talent-property's talent] is fully specified
-;          if no most specific talent
-;             or rank[talent-property's talent] < rank[most specific talent]
-;            most specific talent := talent-property's method
-;      for each ancestor on arg's hierarchy-list
-;        push ancestor on ordering stack
-;      position := position + 1
-;  return most specific talent-property
-;FUCK YOU SLATE
-
-

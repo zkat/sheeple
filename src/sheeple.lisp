@@ -1,4 +1,4 @@
-;; Copyright 2008 Josh Marchan
+;; Copyright 2008, 2009 Josh Marchan
 
 ;; Permission is hereby granted, free of charge, to any person
 ;; obtaining a copy of this software and associated documentation

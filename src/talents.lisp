@@ -1,4 +1,4 @@
-;; Copyright 2008 Josh Marchan
+;; Copyright 2008, 2009 Josh Marchan
 
 ;; Permission is hereby granted, free of charge, to any person
 ;; obtaining a copy of this software and associated documentation
@@ -76,21 +76,36 @@
 (defun create-talent (&key name lambda-list specializers body)
   ;; This shit sucks. It doesn't make the talent a function, and it doesn't make sure that
   ;; one wasn't already defined on the exact same specializers.
-  (let ((talent (make-instance 'standard-talent
-			       :name name
-			       :lambda-list lambda-list
-			       :body body
-			       :function body
-			       :rank (make-array (length lambda-list) :initial-element nil))))
-    (loop 
-       for specializer in specializers
-       for i upto (1- (length specializers))
-       do (pushnew (make-instance 'standard-talent-property
-				  :name name
-				  :role i
-				  :talent-pointer talent) 
-		   (sheep-direct-participations specializer)))
-    talent))
+
+  ;; What does this have to do?:
+  ;; - Check if a function is bound to NAME
+  ;; -- If the function bound is not a talent, signal error
+  ;; -- Otherwise generate a new talent object
+  ;; -- If the function is bound to talent, redefine the talent**** (this involves some messy stuff)
+  ;; -- If it's not bound, create a talent and bind it to that function, then create participations 
+  ;;    for all the relevant specializers
+  ;; Finally, return the talent object.
+
+  (if (and (fboundp name)
+	   (not (eql (class-of (fdefinition name))
+		     (find-class 'standard-talent))))
+      (error "Trying to override a function that isn't a talent.")
+      (let ((talent (make-instance 'standard-talent
+				   :name name
+				   :lambda-list lambda-list
+				   :body body
+				   :function body
+				   :rank (make-array (length lambda-list) :initial-element nil))))
+	(loop 
+	   for specializer in specializers
+	   for i upto (1- (length specializers))
+	   do (pushnew (make-instance 'standard-talent-property
+				      :name name
+				      :role i
+				      :talent-pointer talent) 
+		       (sheep-direct-participations specializer)))
+	talent)))
+
 
 ;;;
 ;;; Talent dispatch

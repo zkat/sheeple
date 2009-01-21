@@ -59,7 +59,12 @@
     :accessor talent-pointer)
    documentation))
 
-(defun define-talent (&key name lambda-list specializers body)
+(defmacro deftalent (name lambda-list &body body)
+  `(create-talent
+    )
+  )
+
+(defun create-talent (&key name lambda-list specializers body)
   (let ((talent (make-instance 'standard-talent
 			       :name name
 			       :lambda-list lambda-list
@@ -79,15 +84,18 @@
 (defun find-most-specific-talent (selector &rest args)
   (let ((n (length args))
 	(most-specific-talent nil)
-	(ordering-stack nil))
+	(ordering-stack nil)
+	(discovered-talents nil))
     (loop 
-       for index upto n
-       for position upto n
+       for index upto (1- n)
+       for position upto (1- n)
        do (let ((position 0))
 	    (push (elt args index) ordering-stack)
-	    (loop while ordering-stack
+	    (loop 
+	       while ordering-stack
 	       do (let ((arg (pop ordering-stack)))
-		    (loop for participation in (sheep-direct-participations arg)
+		    (loop
+		       for participation in (sheep-direct-participations arg)
 		       when (and (eql selector (name participation))
 				 (eql index (role participation)))
 		       do (setf (elt (standard-talent-rank (talent-pointer participation)) index)
@@ -96,8 +104,11 @@
 			      (< (calculate-rank (standard-talent-rank (talent-pointer participation)))
 				 (calculate-rank (standard-talent-rank most-specific-talent))))
 		       do (setf most-specific-talent (talent-pointer participation)))
-		    (loop for ancestor in (compute-sheep-hierarchy-list arg)
-		       do (push ancestor ordering-stack))))))
+		    (loop 
+		       for ancestor in (remove arg (compute-sheep-hierarchy-list arg))
+		       do (push ancestor ordering-stack))
+		    ))))
+    (mapcar #'reset-talent-rank discovered-talents)
     most-specific-talent))
 
 (defun fully-specified-p (rank)
@@ -108,6 +119,10 @@
 
 (defun calculate-rank (rank)
   (reduce #'+ rank))
+
+(defun reset-talent-rank (talent)
+  (loop for item across (standard-talent-rank talent)
+     do (setf item nil)))
 
 ;dispatch(selector, args, n)
 ;  for each index below n
@@ -127,20 +142,4 @@
 ;  return most specific talent-property
 ;FUCK YOU SLATE
 
-(defun dispatch-talent (talent-name &rest args)
-  ;; step 1 - find all talents with talent-name that the first arg 
-  ;; has role position 1 in. (incl. parents), push them into a list.
-  ;; 
-  ;; step 2 -
 
-  args
-  )
-
-(defmacro deftalent (name lambda-list &body body)
-  `(create-talent )
-  )
-
-
-;;;
-;;; Tests
-;;;

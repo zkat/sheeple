@@ -40,7 +40,11 @@
     :accessor standard-talent-body)
    (function
     :initarg :function
-    :accessor standard-talent-function))
+    :accessor standard-talent-function)
+   (rank
+    :initarg :rank
+    :initform (vector nil)
+    :accessor standard-talent-rank))
   (:metaclass sb-mop:funcallable-standard-class))
 
 (defclass standard-talent-property ()
@@ -55,30 +59,55 @@
     :accessor talent-pointer)
    documentation))
 
-(defun applicable-talent-list)
-(defun generate-applicable-talent-list (selector &rest args)
+(defun define-talent (&key name lambda-list specializers body)
+  (let ((talent (make-instance 'standard-talent
+			       :name name
+			       :lambda-list lambda-list
+			       :body body
+			       :function body
+			       :rank (make-array (length lambda-list) :initial-element nil))))
+    (loop 
+       for specializer in specializers
+       for i upto (1- (length specializers))
+       do (pushnew (make-instance 'standard-talent-property
+				  :name name
+				  :role i
+				  :talent-pointer talent) 
+		   (sheep-direct-participations specializer)))
+    talent))
+
+(defun find-most-specific-talent (selector &rest args)
   (let ((n (length args))
-	(most-specific-method nil)
+	(most-specific-talent nil)
 	(ordering-stack nil))
     (loop 
        for index upto n
-       fof position upto n
+       for position upto n
        do (let ((position 0))
 	    (push (elt args index) ordering-stack)
 	    (loop while ordering-stack
 	       do (let ((arg (pop ordering-stack)))
-		    (loop for role in (sheep-direct-roles arg)
-		       when (and (eql selector (name role))
-				 (eql index (role role)))
-		       do (setf (elt (rank (method role)) index)
+		    (loop for participation in (sheep-direct-participations arg)
+		       when (and (eql selector (name participation))
+				 (eql index (role participation)))
+		       do (setf (elt (standard-talent-rank (talent-pointer participation)) index)
 				position)
-		       if (or (fully-specified-p (rank (method role)))
-			      (< (calculate-rank (rank (method role)))
-				 (calculate-rank (rank most-specific-method))))
-		       do (setf most-specific-method (talent-pointer role)))
-		    (loop for delegation in (sheep-direct-parents arg)
-		       do (push delegation ordering-stack))))))
-    most-specific-method))
+		       if (or (fully-specified-p (standard-talent-rank (talent-pointer participation)))
+			      (< (calculate-rank (standard-talent-rank (talent-pointer participation)))
+				 (calculate-rank (standard-talent-rank most-specific-talent))))
+		       do (setf most-specific-talent (talent-pointer participation)))
+		    (loop for ancestor in (compute-sheep-hierarchy-list arg)
+		       do (push ancestor ordering-stack))))))
+    most-specific-talent))
+
+(defun fully-specified-p (rank)
+  (loop for item across rank
+     do (when (eql item nil)
+	  (return-from fully-specified-p nil)))
+  t)
+
+(defun calculate-rank (rank)
+  (reduce #'+ rank))
 
 ;dispatch(selector, args, n)
 ;  for each index below n
@@ -86,16 +115,16 @@
 ;    push args[index] on ordering stack
 ;    while ordering stack is not empty
 ;      arg := pop ordering stack
-;      for each role on arg with selector and index
-;        rank[role's method][index] := position
-;        if rank[role's method] is fully specified
-;          if no most specific method
-;             or rank[role's method] < rank[most specific method]
-;            most specific method := role's method
-;      for each delegation on arg
-;        push delegation on ordering stack
+;      for each talent-property on arg with selector and index
+;        rank[talent-property's talent][index] := position
+;        if rank[talent-property's talent] is fully specified
+;          if no most specific talent
+;             or rank[talent-property's talent] < rank[most specific talent]
+;            most specific talent := talent-property's method
+;      for each ancestor on arg's hierarchy-list
+;        push ancestor on ordering stack
 ;      position := position + 1
-;  return most specific method
+;  return most specific talent-property
 ;FUCK YOU SLATE
 
 (defun dispatch-talent (talent-name &rest args)

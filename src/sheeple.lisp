@@ -51,9 +51,9 @@
     :initarg :properties
     :initform (make-hash-table :test #'eq)
     :accessor sheep-direct-properties)
-   (roles
+   (participations
     :initform nil
-    :accessor sheep-direct-roles)))
+    :accessor sheep-direct-participations)))
 
 (defmethod print-object ((sheep standard-sheep-class) stream)
   (print-unreadable-object (sheep stream :identity t)
@@ -101,6 +101,7 @@
   (when (eql (class-of maybe-sheep)
 	     (find-class 'standard-sheep-class))
     t))
+
 (defun canonicalize-sheeple (sheeple)
   `(list ,@(mapcar #'canonicalize-sheep sheeple)))
 

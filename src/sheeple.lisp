@@ -1,4 +1,4 @@
-;; Copyright 2008 Kat Marchan
+;; Copyright 2008, 2009 Kat Marchan
 
 ;; Permission is hereby granted, free of charge, to any person
 ;; obtaining a copy of this software and associated documentation

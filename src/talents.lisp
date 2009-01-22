@@ -44,11 +44,7 @@
     :accessor standard-talent-body)
    (function
     :initarg :function
-    :accessor standard-talent-function)
-   (rank
-    :initarg :rank
-    :initform (vector nil)
-    :accessor standard-talent-rank))
+    :accessor standard-talent-function))
   (:metaclass sb-mop:funcallable-standard-class))
 
 (defclass standard-talent-property ()
@@ -94,18 +90,31 @@
 				   :name name
 				   :lambda-list lambda-list
 				   :body body
-				   :function body
-				   :rank (make-array (length lambda-list) :initial-element nil))))
-	(loop 
-	   for specializer in specializers
-	   for i upto (1- (length specializers))
-	   do (pushnew (make-instance 'standard-talent-property
-				      :name name
-				      :role i
-				      :talent-pointer talent) 
-		       (sheep-direct-participations specializer)))
+				   :function body)))
+	(when (talent-p (fdefinition name))
+	  (remove-talents-with-name-and-specializers name specializers))
+	(define-talent-function name lambda-list body)
+	(add-talent-to-sheeple name talent specializers)
 	talent)))
 
+(defun remove-talents-with-name-and-specializers (name specializers)
+  (loop
+     for sheep in specializers
+     do (loop
+	   for participation in (sheep-direct-participations sheep)
+	   when (and (eql name (name participation))
+		     (equal ))
+	   do )))
+
+(defun add-talent-to-sheeple (name talent sheeple)
+  (loop 
+     for sheep in sheeple
+     for i upto (1- (length sheeple))
+     do (push (make-instance 'standard-talent-property
+			     :name name
+			     :role i
+			     :talent-pointer talent) 
+	      (sheep-direct-participations sheep))))
 
 ;;;
 ;;; Talent dispatch
@@ -148,19 +157,22 @@
 		       for participation in (sheep-direct-participations arg)
 		       when (and (eql selector (name participation))
 				 (eql index (role participation)))
-		       do (pushnew (talent-pointer participation) discovered-talents)
+		       do (pushnew (talent-pointer participation) 
+				   discovered-talents)
 		       do (setf (elt (standard-talent-rank (talent-pointer participation)) index)
 				position)
 		       if (or (fully-specified-p (standard-talent-rank (talent-pointer participation)))
 			      (< (calculate-rank (standard-talent-rank (talent-pointer participation)))
 				 (calculate-rank (standard-talent-rank most-specific-talent))))
 		       do (setf most-specific-talent (talent-pointer participation)))
-		    (loop 
-		       for ancestor in (remove arg (compute-sheep-hierarchy-list arg))
-		       do (push ancestor ordering-stack))
-		    ))))
+		    (add-ancestors-to-ordering-stack arg ordering-stack)))))
     (mapcar #'reset-talent-rank discovered-talents)
     most-specific-talent))
+
+(defun add-ancestors-to-ordering-stack (arg ordering-stack)
+  (loop 
+     for ancestor in (remove arg (compute-sheep-hierarchy-list arg))
+     do (push ancestor ordering-stack)))
 
 (defun fully-specified-p (rank)
   (loop for item across rank

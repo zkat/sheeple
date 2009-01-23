@@ -29,8 +29,17 @@
 (in-package :sheeple)
 
 ;;;
-;;; Talent and participation (talent-property) base classes
+;;; Talent and participation base classes
 ;;;
+
+(defclass standard-generic-ability ()
+  ((name
+    :initarg :name
+    :accessor standard-generic-ability-name)
+   (lambda-list
+    :initarg :lambda-list
+    :accessor standard-generic-ability-lambda-list))
+  (:metaclass sb-mop:funcallable-standard-class))
 
 (defclass standard-talent ()
   ((name
@@ -39,6 +48,9 @@
    (lambda-list
     :initarg :lambda-list
     :accessor standard-talent-lambda-list)
+   (specializers
+    :initarg :specializers
+    :accessor standard-talent-specializers)
    (body
     :initarg :body
     :accessor standard-talent-body)
@@ -47,7 +59,7 @@
     :accessor standard-talent-function))
   (:metaclass sb-mop:funcallable-standard-class))
 
-(defclass standard-talent-property ()
+(defclass standard-talent-participation ()
   ((name
     :initarg :name
     :accessor name)
@@ -70,47 +82,49 @@
   )
 
 (defun create-talent (&key name lambda-list specializers body)
-  ;; This shit sucks. It doesn't make the talent a function, and it doesn't make sure that
-  ;; one wasn't already defined on the exact same specializers.
-
   ;; What does this have to do?:
   ;; - Check if a function is bound to NAME
   ;; -- If the function bound is not a talent, signal error
   ;; -- Otherwise generate a new talent object
-  ;; -- If the function is bound to talent, redefine the talent**** (this involves some messy stuff)
-  ;; -- If it's not bound, create a talent and bind it to that function, then create participations 
-  ;;    for all the relevant specializers
+  ;; -- when the function is bound to talent, redefine the talent**** (this involves some messy stuff)
+  ;; -- create participations for all the relevant specializers
   ;; Finally, return the talent object.
-
   (if (and (fboundp name)
-	   (not (eql (class-of (fdefinition name))
-		     (find-class 'standard-talent))))
+	   (not (ability-p name)))
       (error "Trying to override a function that isn't a talent.")
       (let ((talent (make-instance 'standard-talent
 				   :name name
 				   :lambda-list lambda-list
+				   :specializers specializers
 				   :body body
 				   :function body)))
-	(when (talent-p (fdefinition name))
+	(when (ability-p name)
 	  (remove-talents-with-name-and-specializers name specializers))
-	(define-talent-function name lambda-list body)
 	(add-talent-to-sheeple name talent specializers)
 	talent)))
 
+(defun ability-p (name)
+  (eql (class-of (fdefinition name))
+       (find-class 'standard-generic-ability)))
+
 (defun remove-talents-with-name-and-specializers (name specializers)
-  (loop
-     for sheep in specializers
-     do (loop
-	   for participation in (sheep-direct-participations sheep)
-	   when (and (eql name (name participation))
-		     (equal ))
-	   do )))
+  ;; Keep a watchful eye on this. It only *seems* to work.
+  (mapc (lambda (sheep) 
+	    (mapc (lambda (participation) 
+		    (when (and (eql name (name participation))
+			       (equal specializers
+				      (standard-talent-specializers
+				       (talent-pointer participation))))
+		      (setf (sheep-direct-participations sheep)
+			    (remove participation (sheep-direct-participations sheep)))))
+		  (sheep-direct-participations sheep)))
+	specializers))
 
 (defun add-talent-to-sheeple (name talent sheeple)
   (loop 
      for sheep in sheeple
      for i upto (1- (length sheeple))
-     do (push (make-instance 'standard-talent-property
+     do (push (make-instance 'standard-talent-participation
 			     :name name
 			     :role i
 			     :talent-pointer talent) 

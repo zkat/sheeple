@@ -25,6 +25,9 @@
 ;;
 ;; Implementation of Sheeple's generic functions (talents)
 ;;
+;; TODO:
+;; * Figure out the basic framework for talent definition before going over to dispatch again
+;; * Consider alternative naming scheme. Talents sound only sort-of okay.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 

@@ -63,17 +63,9 @@
 ;;; Cloning
 ;;;
 
-;; TODO: Make sure this is right.
-;; Example: (clone (sheep1 sheep2 sheep3) ((property1 value1) (property2 value2)))
-(defmacro clone (sheeple &optional properties)
-  "Standard sheep-generation macro"
-  `(create-sheep
-    :sheeple ,(canonicalize-sheeple sheeple)
-    :properties ,(canonicalize-properties properties)))
+(defparameter dolly (make-instance 'standard-sheep-class))
 
-(let ((dolly (make-instance 'standard-sheep-class)))
-
-  (defun create-sheep (&key sheeple properties)
+(defun create-sheep (&key sheeple properties)
     "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
     (let ((sheep
 	   (set-up-inheritance
@@ -83,11 +75,7 @@
 	 do (setf (get-property sheep name) value))
       sheep))
   
-  (defun fetch-dolly ()
-    "Returns the standard sheep."
-    dolly)
-  
-  (defun set-up-inheritance (new-sheep sheeple)
+(defun set-up-inheritance (new-sheep sheeple)
     "If SHEEPLE is non-nil, adds them in order to "
     (let ((obj new-sheep))
       (if sheeple
@@ -95,7 +83,14 @@
 	     do (add-parent sheep obj))
 	  (add-parent dolly obj))
       obj))
-  )
+
+;; TODO: Make sure this is right.
+;; Example: (clone (sheep1 sheep2 sheep3) ((property1 value1) (property2 value2)))
+(defmacro clone (sheeple &optional properties)
+  "Standard sheep-generation macro"
+  `(create-sheep
+    :sheeple ,(canonicalize-sheeple sheeple)
+    :properties ,(canonicalize-properties properties)))
 
 (defun sheep-p (maybe-sheep)
   (when (eql (class-of maybe-sheep)

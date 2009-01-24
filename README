@@ -20,7 +20,7 @@ considered 'cousins'.
 
 *Descendant - For a sheep X, any sheep Y whose hierarchy list will contain X, except Y itself.
 
-*Parent - A direct parent of a sheep, e.g. a sheep object present directly in a sheeps
+*Parent - A direct parent of a sheep, e.g. a sheep object present directly in a sheep's
 sheep-direct-parents list.
 
 *Child - A direct child of a sheep.

@@ -1,9 +1,9 @@
 Sheeple is a Dynamic, CLOS-like Prototype-based Object-Oriented Programming Framework that strives
 to maximize application flexibility, minimize cost while maximizing value, optimize programmer time,
-and empower application implementers to better permit them to better leverage modern paradigms in
+and empower application implementers to better assist them leveraging modern paradigms in
 order to proactively achieve next-gen synergy in tomorrow's web 3.0 world. It is implemented in ANSI
 Common Lisp. This implementation is canonical and is initially implemented only for SBCL. Sheeple is
-fully buzzword-compliant.
+fully buzzword compliant.
 
 Vocabulary:
 

@@ -38,12 +38,12 @@
   ((name
     :initarg :name
     :accessor buzzword-name)
-   (documentation
-    :initarg :documentation
-    :accessor buzzword-documentation)
    (messages
     :initform nil
-    :accessor buzzword-messages)))
+    :accessor buzzword-messages)
+   (documentation
+    :initarg :documentation
+    :accessor buzzword-documentation)))
 
 (defclass standard-message ()
   ((name
@@ -52,76 +52,103 @@
    (lambda-list
     :initarg :lambda-list
     :accessor message-lambda-list)
-   (specializers
-    :initarg :specializers
-    :accessor message-specializers)
+   (participants
+    :initarg :participants
+    :accessor message-participants)
    (body
     :initarg :body
     :accessor message-body)
    (function
     :initarg :function
-    :accessor message-function))
-  (:metaclass sb-mop:funcallable-standard-class))
+    :accessor message-function)
+   (documentation
+    :initarg :documentation
+    :accessor message-documentation)))
 
 (defclass standard-message-role ()
   ((name
     :initarg :name
-    :accessor name)
+    :accessor role-name)
    (position
     :initarg :position
-    :accessor position)
+    :accessor role-position)
    (message-pointer
     :initarg :message-pointer
-    :accessor message-pointer)
-   documentation))
+    :accessor message-pointer)))
 
 ;;;
 ;;; Message definition
 ;;;
 
+(let ((buzzword-table (make-hash-table :test #'equal)))
+
+  (defun find-buzzword (name &optional (errorp t))
+    (let ((buzz (gethash name buzzword-table nil)))
+      (if (and (null buzz) errorp)
+	  (error "No buzzword named ~s." name)
+	  buzz)))
+  
+  (defun (setf find-buzzword) (new-value name)
+    (setf (gethash name buzzword-table) new-value))
+  
+  (defun forget-all-buzzwords ()
+    (clrhash buzzword-table)
+    t)
+
+) ; end buzzword-table closure
+
+(defmacro defbuzzword (name &optional (docstring ""))
+  `(ensure-buzzword
+    :name ,name
+    :documentation ,docstring))
+
+(defun ensure-buzzword (&key name documentation)
+  (if (find-buzzword name nil)
+      (find-buzzword name)
+      (let ((buzzword (make-instance 'standard-buzzword
+				     :name name
+				     :documentation documentation)))
+	(setf (find-buzzword name) buzzword)
+	(setf (fdefinition name) #'dispatch-message)
+	buzzword)))
+
 (defmacro defmessage (name lambda-list &body body)
   `(create-message
-    )
-  )
+    :name ,name
+    :lambda-list (extract-lambda-list ,lambda-list)
+    :participants (extract-participants ,lambda-list)
+    :body ,body))
 
-(defun create-message (&key name lambda-list specializers body)
-  ;; What does this have to do?:
-  ;; - Check if a function is bound to NAME
-  ;; -- If the function bound is not a message, signal error
-  ;; -- Otherwise generate a new message object
-  ;; -- when the function is bound to message, redefine the message**** (this involves some messy stuff)
-  ;; -- create roles for all the relevant specializers
-  ;; Finally, return the message object.
-  (if (and (fboundp name)
-	   (not (ability-p name)))
-      (error "Trying to override a function that isn't a message.")
+(defun extract-lambda-list (lambda-list)
+  nil)
+(defun extract-participants (lambda-list)
+  nil)
+
+(defun create-message (&key name lambda-list participants body)
+  (if (not (find-buzzword name nil))
+      (error "There is no buzzword defined for ~S" name)
       (let ((message (make-instance 'standard-message
-				   :name name
-				   :lambda-list lambda-list
-				   :specializers specializers
-				   :body body
-				   :function body)))
-	(when (ability-p name)
-	  (remove-messages-with-name-and-specializers name specializers))
-	(add-message-to-sheeple name message specializers)
+				    :name name
+				    :lambda-list lambda-list
+				    :participants participants
+				    :body body
+				    :function body)))
+	(remove-messages-with-name-and-participants name participants)
+	(add-message-to-sheeple name message participants)
 	message)))
 
-(defun message-p (name)
-  (eql (class-of (fdefinition name))
-       (find-class 'standard-message)))
-
-(defun remove-messages-with-name-and-specializers (name specializers)
+(defun remove-messages-with-name-and-participants (name participants)
   ;; Keep a watchful eye on this. It only *seems* to work.
   (mapc (lambda (sheep) 
 	    (mapc (lambda (role) 
 		    (when (and (eql name (name role))
-			       (equal specializers
-				      (message-specializers
+			       (equal participants
+				      (message-participants
 				       (message-pointer role))))
 		      (setf (sheep-direct-roles sheep)
 			    (remove role (sheep-direct-roles sheep)))))
 		  (sheep-direct-roles sheep)))
-	specializers))
+	participants))
 
 (defun add-message-to-sheeple (name message sheeple)
   (loop 
@@ -154,6 +181,9 @@
 ;;      position := position + 1
 ;;  return most specific message-property
 ;; FUCK YOU SLATE
+
+(defun dispatch-message (selector &rest args)
+  (apply `(find-most-specific-message ,selector ,@args) args))
 
 (defun find-most-specific-message (selector &rest args)
   "Returns the most specific message using SELECTOR and ARGS."

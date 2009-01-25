@@ -26,8 +26,9 @@
 ;; Implementation of Sheeple's buzzwords+messages (generic functions + methods)
 ;;
 ;; TODO:
-;; * Figure out the basic framework for message definition before going over to dispatch again
-;; * Get multi-dispatch working
+;; * Write unit tests
+;; * AFTER unit tests... clean up code, run tests
+;; * AFTER cleanup... --omg-optimized, run tests
 ;; * Write utilities to make management of dynamic definitions easier
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
@@ -113,7 +114,6 @@
 ) ; end buzzword-table closure
 
 ;;; Buzzword definition
-
 (defun ensure-buzzword (&key name documentation)
   (if (find-buzzword name nil)
       (find-buzzword name)
@@ -121,7 +121,7 @@
 				     :name name
 				     :documentation documentation)))
 	(setf (find-buzzword name) buzzword)
-	(setf (fdefinition name) #'dispatch-message)
+	(setf (fdefinition name) (lambda (&rest args) (dispatch-message name args)))
 	buzzword)))
 
 (defun extract-lambda-list (lambda-list)
@@ -192,40 +192,20 @@
 			     :message-pointer message) 
 	      (sheep-direct-roles sheep))))
 
-
 ;;;
 ;;; Message dispatch
 ;;;
 
-;; Slate's dispatch algorithm:
-;;
-;; dispatch(selector, args, n)
-;;  for each index below n
-;;    position := 0
-;;    push args[index] on ordering stack
-;;    while ordering stack is not empty
-;;      arg := pop ordering stack
-;;      for each message-property on arg with selector and index
-;;        rank[message-property's message][index] := position
-;;        if rank[message-property's message] is fully specified
-;;          if no most specific message
-;;             or rank[message-property's message] < rank[most specific message]
-;;            most specific message := message-property's method
-;;      for each ancestor on arg's hierarchy-list
-;;        push ancestor on ordering stack
-;;      position := position + 1
-;;  return most specific message-property
+(defun dispatch-message (selector args)
+  (apply (message-function (find-most-specific-message selector args)) args))
 
-(defun dispatch-message (selector &rest args)
-  (apply (message-function `(find-most-specific-message ,selector ,@args)) args))
-
-(defun find-most-specific-message (selector &rest args)
+(defun find-most-specific-message (selector args)
   "Returns the most specific message using SELECTOR and ARGS."
   ;; This shit is bugged to all hell and it's a huge, disgusting algorithm. Fix that shit.
+  ;; taken almost verbatim from Slate's algorithm
   (let ((n (length args))
 	(most-specific-message nil)
-	(ordering-stack nil)
-	(discovered-messages nil))
+	(ordering-stack nil))
     (loop 
        for index upto (1- n)
        for position upto (1- n)
@@ -236,19 +216,43 @@
 	       do (let ((arg (pop ordering-stack)))
 		    (loop
 		       for role in (sheep-direct-roles arg)
-		       when (and (eql selector (name role))
-				 (eql index (position role)))
-		       do (pushnew (message-pointer role) 
-				   discovered-messages)
-		       do (setf (elt (message-rank (message-pointer role)) index)
-				position)
+		       when (and (eql selector (role-name role))
+				 (eql index (role-position role)))
+		       do (maybe-add-message-to-table (message-pointer role))
+		       do (setf (elt (message-rank (message-pointer role)) index) ;;have to put this
+				position)					  ;;outside of msgs
 		       if (or (fully-specified-p (message-rank (message-pointer role)))
 			      (< (calculate-rank (message-rank (message-pointer role)))
 				 (calculate-rank (message-rank most-specific-message))))
 		       do (setf most-specific-message (message-pointer role)))
-		    (add-ancestors-to-ordering-stack arg ordering-stack)))))
-    (mapcar #'reset-message-rank discovered-messages)
+		    (add-ancestors-to-ordering-stack arg ordering-stack)
+		    (setf position (1+ position))))))
+    (reset-message-ranks)
     most-specific-message))
+
+;; Message table
+(let ((message-table (make-hash-table)))
+
+  (defun maybe-add-message-to-table (message)
+    (unless (gethash message message-table)
+      (add-message-to-table message)))
+  
+  (defun add-message-to-table (message)
+    (setf (gethash message message-table) (make-array (length (message-participants message))
+						      :initial-element 0)))
+  
+  (defun message-rank (message)
+    (gethash message message-table))
+  
+  (defun reset-message-ranks ()
+    (maphash #'reset-rank message-table))
+  
+  (defun reset-rank (key val)
+    (declare (ignore key))
+    (map 'vector (lambda (element) (setf element 0))
+	 val))
+    
+  ) ; end message table closure
 
 (defun add-ancestors-to-ordering-stack (arg ordering-stack)
   (loop 
@@ -270,3 +274,4 @@
 (defun reset-message-rank (message)
   (loop for item across (message-rank message)
      do (setf item nil)))
+

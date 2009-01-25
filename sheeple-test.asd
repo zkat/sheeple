@@ -4,7 +4,7 @@
   :maintainer "Kat <zkat@Dagon>"
   :author "Kat <zkat@Dagon>"
   :licence "MIT"
-  :depends-on (:fiveam :sheeple)
+  :depends-on (:sheeple :fiveam)
   :serial t
   :components 
   ((:module tests

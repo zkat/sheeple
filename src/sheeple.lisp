@@ -63,6 +63,13 @@
 ;;; Cloning
 ;;;
 
+;; Example: (clone (sheep1 sheep2 sheep3) ((property1 value1) (property2 value2)))
+(defmacro clone (sheeple &optional properties)
+  "Standard sheep-generation macro"
+  `(create-sheep
+    :sheeple ,(canonicalize-sheeple sheeple)
+    :properties ,(canonicalize-properties properties)))
+
 (defparameter =dolly= (make-instance 'standard-sheep-class))
 
 (defun create-sheep (&key sheeple properties)
@@ -83,14 +90,6 @@
 	   do (add-parent sheep obj))
 	(add-parent =dolly= obj))
     obj))
-
-;; TODO: Make sure this is right.
-;; Example: (clone (sheep1 sheep2 sheep3) ((property1 value1) (property2 value2)))
-(defmacro clone (sheeple &optional properties)
-  "Standard sheep-generation macro"
-  `(create-sheep
-    :sheeple ,(canonicalize-sheeple sheeple)
-    :properties ,(canonicalize-properties properties)))
 
 (defun sheep-p (maybe-sheep)
   (when (eql (class-of maybe-sheep)

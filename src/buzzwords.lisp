@@ -143,13 +143,13 @@
   (if (not (find-buzzword name nil))
       (error "There is no buzzword defined for ~S" name)
       (let* ((function (eval `(lambda ,lambda-list ,body))) 
+	     (target-sheeple (ensure-sheeple participants))
 	     (message (make-instance 'standard-message
 				    :name name
 				    :lambda-list lambda-list
 				    :participants participants
 				    :body body
-				    :function function))
-	    (target-sheeple (ensure-sheeple participants)))
+				    :function function)))
 	(add-message-to-buzzword message (find-buzzword name))
 	(remove-messages-with-name-and-participants name target-sheeple)
 	(add-message-to-sheeple name message target-sheeple)
@@ -192,10 +192,13 @@
 			     :message-pointer message) 
 	      (sheep-direct-roles sheep))))
 
+
 ;;;
 ;;; Message dispatch
 ;;;
 
+;; Slate's dispatch algorithm:
+;;
 ;; dispatch(selector, args, n)
 ;;  for each index below n
 ;;    position := 0

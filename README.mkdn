@@ -34,7 +34,7 @@ Specification:
 --------------
 == Sheep Cloning ==
 
-* Objects are prototypes. Objects are called sheep or sheeple. All sheep are children of DOLLY.
+* Objects are prototypes. Objects are called sheep or sheeple. All sheep are children of =DOLLY=.
 
 * Sheep can have multiple direct parents (multiple inheritance)
 
@@ -47,7 +47,7 @@ Specification:
 * The list of direct parents is dynamic. Parents can be added or removed at runtime.
 
 * Sheeple does not have a universal addressing mechanism like functions and classes do. Instead,
-there are a number of built-in sheeple, including DOLLY, which can be addressed by symbol where
+there are a number of built-in sheeple, including =DOLLY=, which can be addressed by symbol where
 useful, such as when setting one of them as a parent, or defining a talent.
 
 * Built-in sheeple correspond to all built-in Lisp types, as well as any new types defined by
@@ -65,7 +65,7 @@ useful, such as when setting one of them as a parent, or defining a talent.
 
          (defvar *sample-sheep* (clone ()))
 
-* An empty parent list when using CLONE will automatically clone DOLLY
+* An empty parent list when using CLONE will automatically clone =DOLLY=
 
 * The function ADD-PARENT receives a NEW-PARENT sheep, and a CHILD sheep. It pushes NEW-PARENT into
 CHILD's direct-parents if NEW-PARENT is not already there. If using ADD-PARENT would result in a

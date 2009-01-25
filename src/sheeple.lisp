@@ -63,7 +63,7 @@
 ;;; Cloning
 ;;;
 
-(defparameter dolly (make-instance 'standard-sheep-class))
+(defparameter =dolly= (make-instance 'standard-sheep-class))
 
 (defun create-sheep (&key sheeple properties)
   "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
@@ -81,7 +81,7 @@
     (if sheeple
 	(loop for sheep in (nreverse sheeple)
 	   do (add-parent sheep obj))
-	(add-parent dolly obj))
+	(add-parent =dolly= obj))
     obj))
 
 ;; TODO: Make sure this is right.

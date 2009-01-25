@@ -142,12 +142,13 @@
 (defun ensure-message (&key name lambda-list participants body)
   (if (not (find-buzzword name nil))
       (error "There is no buzzword defined for ~S" name)
-      (let ((message (make-instance 'standard-message
+      (let* ((function (eval `(lambda ,lambda-list ,body))) 
+	     (message (make-instance 'standard-message
 				    :name name
 				    :lambda-list lambda-list
 				    :participants participants
 				    :body body
-				    :function body))
+				    :function function))
 	    (target-sheeple (ensure-sheeple participants)))
 	(add-message-to-buzzword message (find-buzzword name))
 	(remove-messages-with-name-and-participants name target-sheeple)

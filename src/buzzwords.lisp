@@ -23,11 +23,10 @@
 
 ;; buzzwords.lisp
 ;;
-;; Implementation of Sheeple's generic functions (messages)
+;; Implementation of Sheeple's buzzwords+messages (generic functions + methods)
 ;;
 ;; TODO:
 ;; * Figure out the basic framework for message definition before going over to dispatch again
-;; * Consider alternative naming scheme. Messages sound only sort-of okay.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
@@ -99,7 +98,7 @@
 
 (defmacro defbuzzword (name &optional (docstring ""))
   `(ensure-buzzword
-    :name ,name
+    :name ',name
     :documentation ,docstring))
 
 (defun ensure-buzzword (&key name documentation)
@@ -113,18 +112,27 @@
 	buzzword)))
 
 (defmacro defmessage (name lambda-list &body body)
-  `(create-message
-    :name ,name
-    :lambda-list (extract-lambda-list ,lambda-list)
-    :participants (extract-participants ,lambda-list)
-    :body ,body))
+  `(ensure-message
+    :name ',name
+    :lambda-list (extract-lambda-list ',lambda-list)
+    :participants (extract-participants ',lambda-list)
+    :body (block ,name ',body)))
 
 (defun extract-lambda-list (lambda-list)
-  nil)
-(defun extract-participants (lambda-list)
-  nil)
+  (mapcar #'extract-var-name lambda-list))
+(defun extract-var-name (item)
+  (if (atom item)
+      item
+      (car item)))
 
-(defun create-message (&key name lambda-list participants body)
+(defun extract-participants (lambda-list)
+  (mapcar #'extract-participant-sheep lambda-list))
+(defun extract-participant-sheep (item)
+  (if (atom item)
+      dolly
+      (eval (second item))))
+
+(defun ensure-message (&key name lambda-list participants body)
   (if (not (find-buzzword name nil))
       (error "There is no buzzword defined for ~S" name)
       (let ((message (make-instance 'standard-message
@@ -132,10 +140,23 @@
 				    :lambda-list lambda-list
 				    :participants participants
 				    :body body
-				    :function body)))
-	(remove-messages-with-name-and-participants name participants)
-	(add-message-to-sheeple name message participants)
+				    :function body))
+	    (target-sheeple (ensure-sheeple participants)))
+	(add-message-to-buzzword message (find-buzzword name))
+	(remove-messages-with-name-and-participants name target-sheeple)
+	(add-message-to-sheeple name message target-sheeple)
 	message)))
+
+(defun ensure-sheeple (maybe-sheeple)
+  (mapcar #'ensure-sheep maybe-sheeple))
+
+(defun ensure-sheep (sheep)
+  (if (not (sheep-p sheep))
+      (error "~S is not a sheep." sheep)
+      sheep))
+
+(defun add-message-to-buzzword (message buzzword)
+  (pushnew message (buzzword-messages buzzword)))
 
 (defun remove-messages-with-name-and-participants (name participants)
   ;; Keep a watchful eye on this. It only *seems* to work.
@@ -183,7 +204,7 @@
 ;; FUCK YOU SLATE
 
 (defun dispatch-message (selector &rest args)
-  (apply `(find-most-specific-message ,selector ,@args) args))
+  (apply (message-function `(find-most-specific-message ,selector ,@args)) args))
 
 (defun find-most-specific-message (selector &rest args)
   "Returns the most specific message using SELECTOR and ARGS."

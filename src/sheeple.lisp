@@ -51,9 +51,9 @@
     :initarg :properties
     :initform (make-hash-table :test #'eq)
     :accessor sheep-direct-properties)
-   (participations
+   (roles
     :initform nil
-    :accessor sheep-direct-participations)))
+    :accessor sheep-direct-roles)))
 
 (defmethod print-object ((sheep standard-sheep-class) stream)
   (print-unreadable-object (sheep stream :identity t)

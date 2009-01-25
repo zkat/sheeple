@@ -7,7 +7,6 @@ and empower application implementers to better assist them leveraging modern par
 order to proactively achieve next-gen synergy in tomorrow's web 3.0 world. It is implemented in ANSI
 Common Lisp. This implementation is canonical. Sheeple is fully buzzword compliant.
 
-====================================================================================================
 
 Vocabulary
 ----------
@@ -33,7 +32,6 @@ sheep-direct-parents list.
 
 Specification:
 --------------
-
 == Sheep Cloning ==
 -------------------
 

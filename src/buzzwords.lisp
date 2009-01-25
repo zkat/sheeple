@@ -121,7 +121,7 @@
 				     :name name
 				     :documentation documentation)))
 	(setf (find-buzzword name) buzzword)
-	(setf (fdefinition name) (lambda (&rest args) (dispatch-message name args)))
+	(setf (fdefinition name) (lambda (&rest args) (apply-message name args)))
 	buzzword)))
 
 (defun extract-lambda-list (lambda-list)
@@ -135,7 +135,7 @@
   (mapcar #'extract-participant-sheep lambda-list))
 (defun extract-participant-sheep (item)
   (if (atom item)
-      dolly
+      =dolly=
       (eval (second item))))
 
 ;;; Message definition
@@ -196,8 +196,9 @@
 ;;; Message dispatch
 ;;;
 
-(defun dispatch-message (selector args)
-  (apply (message-function (find-most-specific-message selector args)) args))
+(defun apply-message (selector args)
+  (let ((function (message-function (find-most-specific-message selector args))))
+   (apply function args)))
 
 (defun find-most-specific-message (selector args)
   "Returns the most specific message using SELECTOR and ARGS."

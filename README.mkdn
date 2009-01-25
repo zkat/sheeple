@@ -81,12 +81,12 @@ push. Returns the CHILD object.
 :keep-properties value that can be T or NIL. If T, it will copy all of PARENT's direct-properties
 into CHILD before removing the parent from the child's direct-parents. If NIL, the parent's
 direct-properties will no longer apply to child. Returns the CHILD object.
-
-       (remove-parent *daddy* *kiddo*) 
-       => KIDDO object, without *daddy*'s direct-slot values.
+        
+        (remove-parent *daddy* *kiddo*) 
+        => KIDDO object, without *daddy*'s direct-slot values.
        
-       (remove-parent *daddy* *kiddo* :keep-properties t) 
-       => KIDDO object, with a copy of *daddy*'s direct-slots.
+        (remove-parent *daddy* *kiddo* :keep-properties t) 
+        => KIDDO object, with a copy of *daddy*'s direct-slots.
 
 * The functions DIRECT-PARENT-P, ANCESTOR-P, DIRECT-CHILD-P, and DESCENDANT-P return T for their
 corresponding checks.

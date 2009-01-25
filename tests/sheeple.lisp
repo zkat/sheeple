@@ -26,7 +26,7 @@
 ;; Unit tests for src/sheeple.lisp
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(in-package :sheeple)
+(in-package :sheeple-test)
 
 (export 'sheeple-tests)
 

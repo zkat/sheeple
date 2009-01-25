@@ -117,46 +117,46 @@ sheep's inheritance chain. The value of that ancestor's property is used instead
   only getting the direct property value of a sheep. Signals a condition of type UNBOUND-PROPERTY if
   there is no binding, direct or indirect, for that property-name.
 
-       (get-property *sample-sheep* 'foo)
+        (get-property *sample-sheep* 'foo)
 
 
 * The function (SETF GET-PROPERTY) sets a direct property on a sheep. If the property did not exist,
   it adds it, and it changes it if it did. Returns the new value.
 
-       (setf (get-property *sample-sheep* 'foo) 'bar)
+        (setf (get-property *sample-sheep* 'foo) 'bar)
 
 
 * The function HAS-DIRECT-PROPERTY-P returns T if a direct property was set on sheep, and NIL
   otherwise.
 
-       (has-direct-property-p *sample-sheep* 'foo) => T
+        (has-direct-property-p *sample-sheep* 'foo) => T
 
 
 * The function HAS-PROPERTY-P returns T if the property is available to sheep, whether it's direct
   or indirect.
 
-       (has-property-p *sample-sheep* 'foo) => T
+        (has-property-p *sample-sheep* 'foo) => T
 
 
 * The function REMOVE-PROPERTY receives a sheep and a property-name, and removes a direct property
   from sheep. Returns NIL if there was no direct property with that property-name set, and T if it
   removed an existing property.
 
-       (remove-property *sample-sheep* 'foo) => T
+        (remove-property *sample-sheep* 'foo) => T
 
 
 * The function WHO-SETS receives a SHEEP and a PROPERTY-NAME, and returns the sheep that sets a
   particular property visible to SHEEP, whether it be a direct-property or an indirect-property.
   If the property is unbound, it simply returns NIL.
 
-       (who-sets *sample-sheep* 'foo) => NIL
+        (who-sets *sample-sheep* 'foo) => NIL
 
 
 * The function AVAILABLE-PROPERTIES receives a SHEEP, and returns a list of available bound
   property keys for SHEEP. An empty list is returned if SHEEP has no available bound properties.
 
-       (setf (get-property *sample-sheep* 'baz) 'quux)
-       (available-properties *sample-sheep*) ==> (BAZ)
+        (setf (get-property *sample-sheep* 'baz) 'quux)
+        (available-properties *sample-sheep*) ==> (BAZ)
 
 
 == Buzzwords ==

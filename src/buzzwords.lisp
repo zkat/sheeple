@@ -160,7 +160,7 @@
 
 (defun ensure-sheep (sheep)
   (if (not (sheep-p sheep))
-      (error "~S is not a sheep." sheep)
+      (error "~s is not a Sheep" sheep)
       sheep))
 
 (defun add-message-to-buzzword (message buzzword)
@@ -200,6 +200,12 @@
   (let ((function (message-function (find-most-specific-message selector args))))
    (apply function args)))
 
+(defun sheep-or-dolly (sheeple)
+  (mapcar (lambda (sheep) 
+	    (if (not (sheep-p sheep))
+		=dolly=
+		sheep)) sheeple))
+
 (defun find-most-specific-message (selector args)
   "Returns the most specific message using SELECTOR and ARGS."
   ;; This shit is bugged to all hell and it's a huge, disgusting algorithm. Fix that shit.
@@ -207,6 +213,7 @@
   (let ((n (length args))
 	(most-specific-message nil)
 	(ordering-stack nil))
+    (setf args (sheep-or-dolly args))
     (loop 
        for index upto (1- n)
        for position upto (1- n)
@@ -214,43 +221,44 @@
 	    (push (elt args index) ordering-stack)
 	    (loop 
 	       while ordering-stack
-	       do (let ((arg (pop ordering-stack)))
+	       do (let ((curr-arg (pop ordering-stack)))
 		    (loop
-		       for role in (sheep-direct-roles arg)
+		       for role in (sheep-direct-roles curr-arg)
 		       when (and (eql selector (role-name role))
 				 (eql index (role-position role)))
 		       do (maybe-add-message-to-table (message-pointer role))
 		       do (setf (elt (message-rank (message-pointer role)) index) ;;have to put this
 				position)					  ;;outside of msgs
-		       if (or (fully-specified-p (message-rank (message-pointer role)))
-			      (< (calculate-rank (message-rank (message-pointer role)))
-				 (calculate-rank (message-rank most-specific-message))))
-		       do (setf most-specific-message (message-pointer role)))
-		    (add-ancestors-to-ordering-stack arg ordering-stack)
+		       do (when (or (fully-specified-p (message-rank (message-pointer role)))
+				    (< (calculate-rank-score (message-rank (message-pointer role)))
+				       (calculate-rank-score (message-rank most-specific-message))))
+			    (setf most-specific-message (message-pointer role))))
+		    (add-ancestors-to-ordering-stack curr-arg ordering-stack)
 		    (setf position (1+ position))))))
     (reset-message-ranks)
-    most-specific-message))
+    (if most-specific-message
+	most-specific-message
+	(error "No most specific message for ~s when called with arguments ~a." selector args))))
 
 ;; Message table
-(let ((message-table (make-hash-table)))
+(let ((message-table (make-hash-table :test #'equal)))
 
   (defun maybe-add-message-to-table (message)
-    (unless (gethash message message-table)
-      (add-message-to-table message)))
+    (add-message-to-table message))
   
   (defun add-message-to-table (message)
-    (setf (gethash message message-table) (make-array (length (message-participants message))
-						      :initial-element 0)))
+    (setf (gethash message message-table) (make-array (length (message-lambda-list message))
+						      :initial-element nil)))
   
   (defun message-rank (message)
     (gethash message message-table))
-  
+
   (defun reset-message-ranks ()
     (maphash #'reset-rank message-table))
   
   (defun reset-rank (key val)
     (declare (ignore key))
-    (map 'vector (lambda (element) (setf element 0))
+    (map 'vector (lambda (element) (setf element nil))
 	 val))
     
   ) ; end message table closure
@@ -266,11 +274,12 @@
 	  (return-from fully-specified-p nil)))
   t)
 
-(defun calculate-rank (rank)
+(defun calculate-rank-score (rank)
   (let ((total 0))
     (loop for item across rank
        do (when (numberp item)
-	    (incf total item)))))
+	    (incf total item)))
+    total))
 
 (defun reset-message-rank (message)
   (loop for item across (message-rank message)

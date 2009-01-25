@@ -13,5 +13,5 @@
 	    ((:file "packages")
 	     (:file "utils")
 	     (:file "sheeple")
-	     (:file "talents")))))
+	     (:file "buzzwords")))))
 

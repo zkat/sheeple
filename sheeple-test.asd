@@ -4,7 +4,7 @@
   :maintainer "Josh <sykopomp@Dagon>"
   :author "Josh <sykopomp@Dagon>"
   :licence "MIT"
-  :depends-on (:fiveam :sheeple)
+  :depends-on (:sheeple :fiveam)
   :serial t
   :components 
   ((:module tests

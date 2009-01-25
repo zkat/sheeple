@@ -26,72 +26,73 @@
 ;; Unit tests for src/sheeple.lisp
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(in-package :sheeple-test)
+(in-package :sheeple)
+
 
 (export 'sheeple-tests)
 
-(def-suite sheeple)
+(fiveam:def-suite sheeple)
 (defun sheeple-tests ()
-  (run! 'sheeple))
-(def-suite sheep-cloning-tests :in sheeple)
-(def-suite sheep-properties-tests :in sheeple)
+  (fiveam:run! 'sheeple))
+(fiveam:def-suite sheep-cloning-tests :in sheeple)
+(fiveam:def-suite sheep-properties-tests :in sheeple)
 
-(in-suite sheep-cloning-tests)
-(test clone-basic
+(fiveam:in-suite sheep-cloning-tests)
+(fiveam:test clone-basic
   "Basic cloning tests. Confirm the CLONE macro works correctly, and that cyclic hierarchy lists
 properly signal SHEEP-HIERARCHY-ERROR."
-  (is (eql (car (sheep-direct-parents (clone ()))) (fetch-dolly)))
+  (fiveam:is (eql (car (sheep-direct-parents (clone ()))) dolly))
 
-  (is (= (length (available-properties (clone () ((foo "bar")))))
+  (fiveam:is (= (length (available-properties (clone () ((foo "bar")))))
 	 1))
 
   (let ((obj1 (clone ())))
-    (is (eql obj1
+    (fiveam:is (eql obj1
 	     (car (sheep-direct-parents (clone (obj1)))))))
 
   (let ((obj1 (clone ()))
 	(obj2 (clone ())))
     (add-parent obj1 obj2)
-    (is (eql obj1
+    (fiveam:is (eql obj1
 	     (car (sheep-direct-parents obj2)))))
 
   (let ((obj (clone () ((foo "bar")))))
-    (is (equal "bar" (get-property obj 'foo))))
+    (fiveam:is (equal "bar" (get-property obj 'foo))))
 
   (let ((obj (clone () ((foo "bar") (baz "quux")))))
-    (is (equal "quux" (get-property obj 'baz))))
+    (fiveam:is (equal "quux" (get-property obj 'baz))))
   
-  (signals sheep-hierarchy-error (let ((obj1 (clone ()))
+  (fiveam:signals sheep-hierarchy-error (let ((obj1 (clone ()))
 				       (obj2 (clone ())))
 				   (add-parent obj1 obj2)
 				   (clone (obj1 obj2))))
 
-  (signals sheep-hierarchy-error (let* ((obj1 (clone ()))
+  (fiveam:signals sheep-hierarchy-error (let* ((obj1 (clone ()))
 					(obj2 (clone (obj1))))
 				    (clone (obj1 obj2)))))
 
-(in-suite sheep-properties-tests)
-(test properties-basic
+(fiveam:in-suite sheep-properties-tests)
+(fiveam:test properties-basic
   "Basic property-setting and property-access tests. Ensures they follow spec."
   (let* ((main-sheep (clone ()))
 	(child-sheep (clone (main-sheep))))
-    (is (eql nil (available-properties main-sheep)))
-    (signals unbound-property (get-property main-sheep 'foo))
-    (is (eql "bar" 
+    (fiveam:is (eql nil (available-properties main-sheep)))
+    (fiveam:signals unbound-property (get-property main-sheep 'foo))
+    (fiveam:is (eql "bar" 
 	     (setf (get-property main-sheep 'foo) "bar")))
-    (is (eql t
+    (fiveam:is (eql t
 	     (has-direct-property-p main-sheep 'foo)))
-    (is (eql t
+    (fiveam:is (eql t
 	     (has-property-p main-sheep 'foo)))
-    (is (eql nil
+    (fiveam:is (eql nil
 	     (has-direct-property-p child-sheep 'foo)))
-    (is (eql t
+    (fiveam:is (eql t
 	     (has-property-p child-sheep 'foo)))
-    (is (eql "bar" (get-property main-sheep 'foo)))
-    (is (equal '(foo) (available-properties main-sheep)))
-    (is (eql main-sheep (who-sets main-sheep 'foo)))
-    (is (eql main-sheep (who-sets child-sheep 'foo)))
-    (is (eql t (remove-property main-sheep 'foo)))
-    (signals unbound-property (get-property main-sheep 'foo))
-    (signals unbound-property (get-property child-sheep 'foo))
-    (is (eql nil (remove-property main-sheep 'foo)))))
+    (fiveam:is (eql "bar" (get-property main-sheep 'foo)))
+    (fiveam:is (equal '(foo) (available-properties main-sheep)))
+    (fiveam:is (eql main-sheep (who-sets main-sheep 'foo)))
+    (fiveam:is (eql main-sheep (who-sets child-sheep 'foo)))
+    (fiveam:is (eql t (remove-property main-sheep 'foo)))
+    (fiveam:signals unbound-property (get-property main-sheep 'foo))
+    (fiveam:signals unbound-property (get-property child-sheep 'foo))
+    (fiveam:is (eql nil (remove-property main-sheep 'foo)))))

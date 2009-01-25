@@ -76,9 +76,23 @@
     :accessor message-pointer)))
 
 ;;;
-;;; Message definition
+;;; Buzzword/message definition
 ;;;
 
+;;; Macros
+(defmacro defbuzzword (name &optional (docstring ""))
+  `(ensure-buzzword
+    :name ',name
+    :documentation ,docstring))
+
+(defmacro defmessage (name lambda-list &body body)
+  `(ensure-message
+    :name ',name
+    :lambda-list (extract-lambda-list ',lambda-list)
+    :participants (extract-participants ',lambda-list)
+    :body '(block ,name ,@body)))
+
+;;; Buzzword table
 (let ((buzzword-table (make-hash-table :test #'equal)))
 
   (defun find-buzzword (name &optional (errorp t))
@@ -96,10 +110,7 @@
 
 ) ; end buzzword-table closure
 
-(defmacro defbuzzword (name &optional (docstring ""))
-  `(ensure-buzzword
-    :name ',name
-    :documentation ,docstring))
+;;; Buzzword definition
 
 (defun ensure-buzzword (&key name documentation)
   (if (find-buzzword name nil)
@@ -110,13 +121,6 @@
 	(setf (find-buzzword name) buzzword)
 	(setf (fdefinition name) #'dispatch-message)
 	buzzword)))
-
-(defmacro defmessage (name lambda-list &body body)
-  `(ensure-message
-    :name ',name
-    :lambda-list (extract-lambda-list ',lambda-list)
-    :participants (extract-participants ',lambda-list)
-    :body (block ,name ',body)))
 
 (defun extract-lambda-list (lambda-list)
   (mapcar #'extract-var-name lambda-list))
@@ -132,6 +136,7 @@
       dolly
       (eval (second item))))
 
+;;; Message definition
 (defun ensure-message (&key name lambda-list participants body)
   (if (not (find-buzzword name nil))
       (error "There is no buzzword defined for ~S" name)
@@ -201,7 +206,6 @@
 ;;        push ancestor on ordering stack
 ;;      position := position + 1
 ;;  return most specific message-property
-;; FUCK YOU SLATE
 
 (defun dispatch-message (selector &rest args)
   (apply (message-function `(find-most-specific-message ,selector ,@args)) args))

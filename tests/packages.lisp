@@ -1,2 +1,2 @@
 (defpackage #:sheeple-tests
-  (:use :cl :fiveam))
+  (:use :cl :fiveam :sheeple))

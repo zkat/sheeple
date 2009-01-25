@@ -27,6 +27,8 @@
 ;;
 ;; TODO:
 ;; * Figure out the basic framework for message definition before going over to dispatch again
+;; * Get multi-dispatch working
+;; * Write utilities to make management of dynamic definitions easier
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
@@ -165,14 +167,17 @@
 
 (defun remove-messages-with-name-and-participants (name participants)
   ;; Keep a watchful eye on this. It only *seems* to work.
+  ;; THIS IS UGLY AS ALL FUCK
   (mapc (lambda (sheep) 
 	    (mapc (lambda (role) 
-		    (when (and (eql name (name role))
+		    (when (and (eql name (role-name role))
 			       (equal participants
 				      (message-participants
 				       (message-pointer role))))
 		      (setf (sheep-direct-roles sheep)
-			    (remove role (sheep-direct-roles sheep)))))
+			    (remove role (sheep-direct-roles sheep)))
+		      (setf (buzzword-messages (find-buzzword name))
+			    (remove (message-pointer role) (buzzword-messages (find-buzzword name))))))
 		  (sheep-direct-roles sheep)))
 	participants))
 

@@ -29,6 +29,18 @@ sheep-direct-parents list.
 
 * Child - A direct child of a sheep.
 
+* Buzzword - A Generic function. Holds pointers to all existing messages (methods)
+
+* Message - The message a particular buzzword gets across when given a set of arguments. Messages
+  are defines for a specific set of args, and can be specialized on particular sheeple. Built-in
+  types are supported, with the naming scheme =type-name=.
+
+* Wolf - A built-in lisp type
+
+* Fleece - A wrapper for wolves that allows Sheeple to treat them as any other sheep -- specializing
+methods, cloning, etc.
+
+* Fleeced wolf - A wolf wrapped in a fleece. e.g. an autoboxed built-in type
 
 Specification:
 --------------

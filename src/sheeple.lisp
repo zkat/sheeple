@@ -49,7 +49,7 @@
     :accessor sheep-direct-parents)
    (properties
     :initarg :properties
-    :initform (make-hash-table :test #'eq)
+    :initform (make-hash-table :test #'eql)
     :accessor sheep-direct-properties)
    (roles
     :initform nil
@@ -64,7 +64,7 @@
 ;;;
 
 ;; Example: (clone (sheep1 sheep2 sheep3) ((property1 value1) (property2 value2)))
-(defmacro clone (sheeple &optional properties)
+(defmacro clone (sheeple properties &optional options)
   "Standard sheep-generation macro"
   `(create-sheep
     :sheeple ,(canonicalize-sheeple sheeple)
@@ -114,6 +114,33 @@
   (if (symbolp (car property))
       `(cons ',(car property) ,(cadr property))
       (error "Improper property: property name must be a symbol.")))
+
+;; (defun canonicalize-property (property)
+;;   (if (symbolp property)
+;;       `(list :name ',property)
+;;       (let ((name (car property))
+;; 	    (value (cadr property))
+;;             (readers nil)
+;;             (writers nil)
+;;             (other-options nil))
+;;         (do ((olist (cddr property) (cddr olist)))
+;;             ((null olist))
+;;           (case (car olist)
+;;             (:reader 
+;;              (pushend (cadr olist) readers))
+;;             (:writer 
+;;              (pushend (cadr olist) writers))
+;;             (:accessor
+;;              (pushend (cadr olist) readers)
+;;              (pushend `(setf ,(cadr olist)) writers))
+;;             (otherwise 
+;;              (pushend `',(car olist) other-options)
+;;              (pushend `',(cadr olist) other-options))))
+;;         `(list
+;;            :name ',name
+;; 	   :value ,value
+;;            ,@(when readers `(:readers ',readers))
+;;            ,@(when writers `(:writers ',writers))))))
 
 ;;;
 ;;; Inheritance management
@@ -262,11 +289,11 @@ This returns T if the value is set to NIL for that property-name."
 (defun compute-sheep-hierarchy-list (sheep)
   (handler-case 
       (let ((sheeple-to-order (collect-parents sheep)))
-	(topological-sort sheeple-to-order
-			  (remove-duplicates
-			   (mapappend #'local-precedence-ordering
-				      sheeple-to-order))
-			  #'std-tie-breaker-rule))
+  	(topological-sort sheeple-to-order
+  			  (remove-duplicates
+  			   (mapappend #'local-precedence-ordering
+  				      sheeple-to-order))
+  			  #'std-tie-breaker-rule))
     (simple-error ()
       (error 'sheep-hierarchy-error :text "Unable to compute sheep hierarchy list."))))
 

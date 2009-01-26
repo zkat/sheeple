@@ -146,9 +146,12 @@
 
 ;;; Message definition
 (defun ensure-message (&key name lambda-list participants body)
-  (if (not (find-buzzword name nil))
-      (error "There is no buzzword defined for ~S" name)
-      (let* ((function (eval `(lambda ,lambda-list ,body))) 
+  (when (not (find-buzzword name nil))
+    (progn
+      (warn "STYLE-WARNING: Automatically defining a buzzword for ~S" name)
+      (ensure-buzzword
+       :name name)))
+  (let* ((function (eval `(lambda ,lambda-list ,body))) 
 	     (target-sheeple (sheepify-list participants))
 	     (message (make-instance 'standard-message
 				    :name name
@@ -159,7 +162,7 @@
 	(add-message-to-buzzword message (find-buzzword name))
 	(remove-messages-with-name-and-participants name target-sheeple)
 	(add-message-to-sheeple name message target-sheeple)
-	message)))
+	message))
 
 (defun sheepify-list (sheeple)
   (mapcar #'sheepify sheeple))

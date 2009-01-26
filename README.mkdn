@@ -66,6 +66,7 @@ Features that have not been implemented yet include:
 
 * Dynamic removal of messages, and entire buzzwords
 
+* Identifier slot for sheep metaobject, so helpful information can be printed by print-object
 
 Vocabulary
 ----------

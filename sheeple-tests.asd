@@ -11,4 +11,5 @@
 	    :serial t
 	    :components
 	    ((:file "packages")
-	     (:file "sheeple")))))
+	     (:file "sheeple")
+	     (:file "buzzwords")))))

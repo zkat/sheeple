@@ -26,9 +26,9 @@
 ;; Sheep class and inheritance/property-related code, as well as sheep cloning.
 ;;
 ;; TODO:
-;; - Figure out a way to reimplement the stuff that was using the children slot
 ;; - Write unit tests for everything before doing anything else here
 ;; - Keep cleaning and testing until it's stable
+;; - Expand CLONE so it supports slot options, as well as custom identifiers
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
@@ -71,6 +71,9 @@
     :properties ,(canonicalize-properties properties)))
 
 (defparameter =dolly= (make-instance 'standard-sheep-class))
+(defmethod print-object ((sheep (eql =dolly=)) stream)
+  (print-unreadable-object (sheep stream :identity t)
+    (format stream "Standard Sheep SID: ~a NAME: =DOLLY=" (sid sheep))))
 
 (defun create-sheep (&key sheeple properties)
   "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"

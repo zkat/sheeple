@@ -1,4 +1,4 @@
-(asdf:defsystem sheeple-test
+(asdf:defsystem sheeple-tests
   :version "Baahh"
   :description "Clone-crazy hackery tool, unit tests."
   :maintainer "Kat <zkat@Dagon>"

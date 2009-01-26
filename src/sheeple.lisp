@@ -97,21 +97,27 @@
 	(readers (getf property :readers))
 	(writers (getf property :writers)))
     (setf (get-property sheep name) value)
-    (loop for reader in readers
-       do (ensure-message :name reader
-			  :lambda-list '(sheep)
-			  :participants (list sheep)
-			  :body '(get-property sheep name)))
-    (loop for writer in writers
-       do (if (listp writer) 
-	      (ensure-message :name writer
-			      :lambda-list '(new-value sheep)
-			      :participants (list =dolly= sheep)
-			      :body '(setf (get-property sheep name) new-value))
-	      (ensure-message :name writer
-			      :lambda-list '(sheep new-value)
-			      :participants (list =dolly= sheep)
-			      :body '(setf (get-property sheep name) new-value))))))
+    (add-readers-to-sheep readers sheep)
+    (add-writers-to-sheep writers sheep)))
+
+(defun add-readers-to-sheep (readers sheep)
+  (loop for reader in readers
+     do (ensure-message :name reader
+			:lambda-list '(sheep)
+			:participants (list sheep)
+			:body '(get-property sheep name))))
+
+(defun add-writers-to-sheep (writers sheep)
+  (loop for writer in writers
+     do (if (listp writer) 
+	    (ensure-message :name writer
+			    :lambda-list '(new-value sheep)
+			    :participants (list =dolly= sheep)
+			    :body '(setf (get-property sheep name) new-value))
+	    (ensure-message :name writer
+			    :lambda-list '(sheep new-value)
+			    :participants (list =dolly= sheep)
+			    :body '(setf (get-property sheep name) new-value)))))
 
 (defun set-up-inheritance (new-sheep sheeple)
   "If SHEEPLE is non-nil, adds them in order to "

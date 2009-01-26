@@ -5,7 +5,66 @@ Sheeple is a Dynamic, CLOS-like Prototype-based Object-Oriented Programming Fram
 to maximize application flexibility, minimize cost while maximizing value, optimize programmer time,
 and empower application implementers to better assist them leveraging modern paradigms in
 order to proactively achieve next-gen synergy in tomorrow's web 3.0 world. It is implemented in ANSI
-Common Lisp. This implementation is canonical. Sheeple is fully buzzword compliant.
+Common Lisp, with small parts are based on Closette. Sheeple is fully buzzword compliant.
+
+Notes
+-----
+
+Sheeple should work on just about every implementation out there with a working CLOS
+implementation. It is developed and tested on SBCL, but tests on other implementations would be
+greatly appreciated. 
+
+At the moment, Sheeple performance makes Ruby feel like optimized assembly, so it might not be
+appropriate for large applications. It's quite fun to play around with. Once it has all features
+working and passes all unit tests, there's plenty of fairly easy optimization to do, and it should
+run more acceptably.
+
+Features available so far:
+
+* Simple defclass-like cloning interface
+
+* Dynamic object management tools (inspection of objects, addition/removal of slots, all without any
+  sort of redefinition)
+
+* Dynamic definition of slot values, following a prototype chain
+
+* Full integration with built-in Lisp types by autoboxing (called fleecing) when appropriate
+
+* Multiple inheritance through cloning with dynamic inspection and management of parents
+
+* Multiple dispatch on messages (methods) -- messages specialize on specific instances, and follow
+  inheritance hierarchy. Algorithm is based on Slate (http://slatelanguage.org)
+
+* Multimessages work similarly to CLOS methods -- you define a generic function (defbuzzword), and a
+  set of methods (defmessage), which can optionally have specialized arguments.
+
+* defbuzzword/defmessage have basically the same interface as defgeneric/defmessage.
+
+* Portable across implementations -- no MOP or fancy features required
+
+* CLOS backend allows effortless plug-in to many Lisp libraries that make use of the MOP (such as
+  Elephant, for almost free object persistence)
+
+* Runs on plain CL -- no libraries necessary
+
+* Slow as all hell -- gives you more time to think about what you're doing.
+
+
+Features that have not been implemented yet include:
+
+* :before, :after, and :around messages
+
+* Property options and Sheep options, all through the CLONE macro
+
+* Related to the above -- auto-generated accessors/readers/writers
+
+* Also related to above -- advanced cloning options
+
+* A proper MOP
+
+* CLOS integration, including autoboxing of entire class hierarchies
+
+* Dynamic removal of messages, and entire buzzwords
 
 
 Vocabulary
@@ -175,3 +234,4 @@ sheep's inheritance chain. The value of that ancestor's property is used instead
 
 == Buzzwords ==
 
+TODO - Refer to src/packages.lisp for a peek at the interface

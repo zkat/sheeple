@@ -3,6 +3,7 @@
   (:export
 
    ;; Cloning and management
+   :=dolly=
    :clone
    :sheep-p
    :add-parent
@@ -23,6 +24,38 @@
    :who-sets
    :has-property-p
    :has-direct-property-p
+
+   ;; Buzzwords
+   :defbuzzword
+   :defmessage
+   :find-buzzword
+   :sheepify
+   :sheepify-list
+
+   ;; Fleeces
+   :fleece-of
+   :=symbol=
+   :=sequence=
+   :=array=
+   :=number=
+   :=character=
+   :=function=
+   :=hash-table=
+   :=package=
+   :=pathname=
+   :=readtable=
+   :=stream=
+   :=list=
+   :=null=
+   :=cons=
+   :=vector=
+   :=bit-vector=
+   :=string=
+   :=complex=
+   :=integer=
+   :=float=
+
+   
    ))
 
 (defpackage #:sheeple-user

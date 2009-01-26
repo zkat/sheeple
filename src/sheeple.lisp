@@ -43,6 +43,9 @@
   ((sid
     :initform (incf *max-sheep-id*)
     :reader sid)
+   (nickname
+    :initform "Standard Sheep"
+    :accessor sheep-nickname)
    (parents
     :initarg :parents
     :initform nil
@@ -57,14 +60,14 @@
 
 (defmethod print-object ((sheep standard-sheep-class) stream)
   (print-unreadable-object (sheep stream :identity t)
-    (format stream "Standard-Sheep SID: ~a" (sid sheep))))
+    (format stream "~s SID: ~a" (sheep-nickname sheep) (sid sheep))))
 
 ;;;
 ;;; Cloning
 ;;;
 
 ;; Example: (clone (sheep1 sheep2 sheep3) ((property1 value1) (property2 value2)))
-(defmacro clone (sheeple &optional properties)
+(defmacro clone (sheeple &optional properties &environment env)
   "Standard sheep-generation macro"
   `(create-sheep
     :sheeple ,(canonicalize-sheeple sheeple)
@@ -81,10 +84,35 @@
 	 (set-up-inheritance
 	  (make-instance 'standard-sheep-class)
 	  sheeple)))
-    (loop for (name . value) in properties
-       do (setf (get-property sheep name) value))
+    (set-up-properties properties sheep)
     sheep))
-  
+
+(defun set-up-properties (properties sheep)
+  (loop for property-list in (eval properties)
+       do (set-up-property property-list sheep)))
+
+(defun set-up-property (property sheep)
+  (let ((name (getf property :name))
+	(value (get property :value))
+	(readers (getf property :readers))
+	(writers (getf property :writers)))
+    (setf (get-property sheep name) value)
+    (loop for reader in readers
+       do (ensure-message :name reader
+			  :lambda-list '(sheep)
+			  :participants (list sheep)
+			  :body '(get-property sheep name)))
+    (loop for writer in writers
+       do (if (listp writer) 
+	      (ensure-message :name writer
+			      :lambda-list '(new-value sheep)
+			      :participants (list =dolly= sheep)
+			      :body '(setf (get-property sheep name) new-value))
+	      (ensure-message :name writer
+			      :lambda-list '(sheep new-value)
+			      :participants (list =dolly= sheep)
+			      :body '(setf (get-property sheep name) new-value))))))
+
 (defun set-up-inheritance (new-sheep sheeple)
   "If SHEEPLE is non-nil, adds them in order to "
   (let ((obj new-sheep))
@@ -114,36 +142,37 @@
   `(list ,@(mapcar #'canonicalize-property properties)))
 
 (defun canonicalize-property (property)
-  (if (symbolp (car property))
-      `(cons ',(car property) ,(cadr property))
-      (error "Improper property: property name must be a symbol.")))
-
-;; (defun canonicalize-property (property)
-;;   (if (symbolp property)
-;;       `(list :name ',property)
-;;       (let ((name (car property))
-;; 	    (value (cadr property))
-;;             (readers nil)
-;;             (writers nil)
-;;             (other-options nil))
-;;         (do ((olist (cddr property) (cddr olist)))
-;;             ((null olist))
-;;           (case (car olist)
-;;             (:reader 
-;;              (pushend (cadr olist) readers))
-;;             (:writer 
-;;              (pushend (cadr olist) writers))
-;;             (:accessor
-;;              (pushend (cadr olist) readers)
-;;              (pushend `(setf ,(cadr olist)) writers))
-;;             (otherwise 
-;;              (pushend `',(car olist) other-options)
-;;              (pushend `',(cadr olist) other-options))))
-;;         `(list
-;;            :name ',name
-;; 	   :value ,value
-;;            ,@(when readers `(:readers ',readers))
-;;            ,@(when writers `(:writers ',writers))))))
+  (if (symbolp property)
+      `(list :name ',property)
+      (let ((name (car property))
+	    (value (cadr property))
+            (readers nil)
+            (writers nil)
+            (other-options nil))
+        (do ((olist (cddr property) (cddr olist)))
+            ((null olist))
+	  (case (car olist)
+	    (:value
+	     (setf value (cadr olist)))
+	    (:val
+	     (setf value (cadr olist)))
+            (:reader 
+             (pushnew (cadr olist) readers))
+            (:writer 
+             (pushnew (cadr olist) writers))
+            (:accessor
+             (pushnew (cadr olist) readers)
+             (pushnew `(setf ,(cadr olist)) writers))
+            (otherwise 
+             (pushnew `',(car olist) other-options)
+             (pushnew `',(cadr olist) other-options))))
+        (if other-options
+	    (error "Error parsing CLONE property ~a" property)
+	    `(list
+	      :name ',name
+	      :value ,value
+	      ,@(when readers `(:readers ',readers))
+	      ,@(when writers `(:writers ',writers)))))))
 
 ;;;
 ;;; Inheritance management

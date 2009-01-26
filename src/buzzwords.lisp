@@ -127,23 +127,29 @@
 (defun extract-lambda-list (lambda-list)
   (mapcar #'extract-var-name lambda-list))
 (defun extract-var-name (item)
-  (if (atom item)
-      item
-      (car item)))
+  (cond ((symbolp item)
+	 item)
+	((listp item)
+	 (car item))
+	(t
+	 (error "Invalid variable name: ~a. Must be either a list or a symbol" item))))
 
 (defun extract-participants (lambda-list)
   (mapcar #'extract-participant-sheep lambda-list))
 (defun extract-participant-sheep (item)
-  (if (atom item)
-      =dolly=
-      (eval (second item))))
+  (cond ((symbolp item)
+	 =dolly=)
+	((listp item)
+	 (eval (cadr item)))
+	(t
+	 (error "Invalid variable name: ~a. Must be either a list or a symbol" item))))
 
 ;;; Message definition
 (defun ensure-message (&key name lambda-list participants body)
   (if (not (find-buzzword name nil))
       (error "There is no buzzword defined for ~S" name)
       (let* ((function (eval `(lambda ,lambda-list ,body))) 
-	     (target-sheeple (ensure-sheeple participants))
+	     (target-sheeple (sheepify-list participants))
 	     (message (make-instance 'standard-message
 				    :name name
 				    :lambda-list lambda-list
@@ -155,13 +161,13 @@
 	(add-message-to-sheeple name message target-sheeple)
 	message)))
 
-(defun ensure-sheeple (maybe-sheeple)
-  (mapcar #'ensure-sheep maybe-sheeple))
+(defun sheepify-list (sheeple)
+  (mapcar #'sheepify sheeple))
 
-(defun ensure-sheep (sheep)
-  (if (not (sheep-p sheep))
-      (error "~s is not a Sheep" sheep)
-      sheep))
+(defun sheepify (sheep)
+   (if (not (sheep-p sheep))
+       (find-fleeced-wolf sheep)
+       sheep))
 
 (defun add-message-to-buzzword (message buzzword)
   (pushnew message (buzzword-messages buzzword)))
@@ -197,14 +203,8 @@
 ;;;
 
 (defun apply-message (selector args)
-  (let ((function (message-function (find-most-specific-message selector (sheepify args)))))
-   (apply function args)))
-
-(defun sheepify (sheeple)
-  (mapcar (lambda (sheep) 
-	    (if (not (sheep-p sheep))
-		=dolly=
-		sheep)) sheeple))
+  (let ((function (message-function (find-most-specific-message selector (sheepify-list args)))))
+    (apply function args)))
 
 (defun find-most-specific-message (selector args)
   "Returns the most specific message using SELECTOR and ARGS."
@@ -231,36 +231,9 @@
 					   (calculate-rank-score (message-rank most-specific-message))))
 				(setf most-specific-message curr-message)))))))))
     (reset-message-ranks)
-    most-specific-message))
-
-;; Message table
-(let ((message-table (make-hash-table :test #'equal)))
-
-  (defun maybe-add-message-to-table (message)
-    (unless (gethash message message-table)
-      (add-message-to-table message)))
-  
-  (defun add-message-to-table (message)
-    (setf (gethash message message-table) (make-array (length (message-lambda-list message))
-						      :initial-element nil)))
-  
-  (defun message-rank (message)
-    (gethash message message-table))
-
-  (defun reset-message-ranks ()
-    (clrhash message-table))
-  
-  (defun reset-rank (key val)
-    (declare (ignore key))
-    (map 'vector (lambda (element) (setf element nil))
-	 val))
-    
-  ) ; end message table closure
-
-(defun add-ancestors-to-ordering-stack (arg ordering-stack)
-  (loop 
-     for ancestor in (remove arg (compute-sheep-hierarchy-list arg))
-     do (push ancestor ordering-stack)))
+    (if most-specific-message
+	most-specific-message
+	(error "No most specific message for buzzword ~a when given args:~%~a" selector args))))
 
 (defun fully-specified-p (rank)
   (loop for item across rank
@@ -275,7 +248,23 @@
 	    (incf total item)))
     total))
 
-(defun reset-message-rank (message)
-  (loop for item across (message-rank message)
-     do (setf item nil)))
+;; Message table
+(let ((message-table (make-hash-table :test #'equal)))
+
+  (defun maybe-add-message-to-table (message)
+    (unless (gethash message message-table)
+      (add-message-to-table message)))
+  
+  (defun add-message-to-table (message)
+    (setf (gethash message message-table) 
+	  (make-array (length (message-lambda-list message))
+		      :initial-element nil)))
+  
+  (defun message-rank (message)
+    (gethash message message-table))
+
+  (defun reset-message-ranks ()
+    (clrhash message-table))
+      
+  ) ; end message table closure
 

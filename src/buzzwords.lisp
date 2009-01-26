@@ -197,10 +197,10 @@
 ;;;
 
 (defun apply-message (selector args)
-  (let ((function (message-function (find-most-specific-message selector args))))
+  (let ((function (message-function (find-most-specific-message selector (sheepify args)))))
    (apply function args)))
 
-(defun sheep-or-dolly (sheeple)
+(defun sheepify (sheeple)
   (mapcar (lambda (sheep) 
 	    (if (not (sheep-p sheep))
 		=dolly=
@@ -211,34 +211,27 @@
   ;; This shit is bugged to all hell and it's a huge, disgusting algorithm. Fix that shit.
   ;; taken almost verbatim from Slate's algorithm
   (let ((n (length args))
-	(most-specific-message nil)
-	(ordering-stack nil))
-    (setf args (sheep-or-dolly args))
+	(most-specific-message nil))
     (loop 
+       for arg in args
        for index upto (1- n)
-       for position upto (1- n)
-       do (let ((position 0))
-	    (push (elt args index) ordering-stack)
+       do (let ((curr-sheep-list (compute-sheep-hierarchy-list arg)))
 	    (loop 
-	       while ordering-stack
-	       do (let ((curr-arg (pop ordering-stack)))
-		    (loop
-		       for role in (sheep-direct-roles curr-arg)
-		       when (and (eql selector (role-name role))
-				 (eql index (role-position role)))
-		       do (maybe-add-message-to-table (message-pointer role))
-		       do (setf (elt (message-rank (message-pointer role)) index) ;;have to put this
-				position)					  ;;outside of msgs
-		       do (when (or (fully-specified-p (message-rank (message-pointer role)))
-				    (< (calculate-rank-score (message-rank (message-pointer role)))
-				       (calculate-rank-score (message-rank most-specific-message))))
-			    (setf most-specific-message (message-pointer role))))
-		    (add-ancestors-to-ordering-stack curr-arg ordering-stack)
-		    (setf position (1+ position))))))
-    (reset-message-ranks)
-    (if most-specific-message
-	most-specific-message
-	(error "No most specific message for ~s when called with arguments ~a." selector args))))
+	       for curr-sheep in curr-sheep-list
+	       for hierarchy-position upto (1- (length curr-sheep-list))
+	       do (dolist (role (sheep-direct-roles curr-sheep))
+		    (when (and (eql selector (role-name role))
+				   (eql index (role-position role)))
+			  (let ((curr-message (message-pointer role)))
+			    (maybe-add-message-to-table curr-message)
+			    (setf (elt (message-rank curr-message) index) hierarchy-position)
+			    (when (fully-specified-p (message-rank curr-message)) 
+			      (when (or (not most-specific-message)
+					(< (calculate-rank-score (message-rank curr-message))
+					   (calculate-rank-score (message-rank most-specific-message))))
+				(setf most-specific-message curr-message)))))))))
+;    (reset-message-ranks)
+    most-specific-message))
 
 ;; Message table
 (let ((message-table (make-hash-table :test #'equal)))
@@ -254,7 +247,7 @@
     (gethash message message-table))
 
   (defun reset-message-ranks ()
-    (maphash #'reset-rank message-table))
+    (clrhash message-table))
   
   (defun reset-rank (key val)
     (declare (ignore key))

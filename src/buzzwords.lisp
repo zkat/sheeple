@@ -230,14 +230,15 @@
 					(< (calculate-rank-score (message-rank curr-message))
 					   (calculate-rank-score (message-rank most-specific-message))))
 				(setf most-specific-message curr-message)))))))))
-;    (reset-message-ranks)
+    (reset-message-ranks)
     most-specific-message))
 
 ;; Message table
 (let ((message-table (make-hash-table :test #'equal)))
 
   (defun maybe-add-message-to-table (message)
-    (add-message-to-table message))
+    (unless (gethash message message-table)
+      (add-message-to-table message)))
   
   (defun add-message-to-table (message)
     (setf (gethash message message-table) (make-array (length (message-lambda-list message))

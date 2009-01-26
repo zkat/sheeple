@@ -3,19 +3,20 @@
   (:export
 
    ;; Cloning and management
-   :=dolly=
+   :=dolly= ;Ancestor of everything
    :clone
    :sheep-p
    :add-parent
    :remove-parent
    :direct-parent-p
-   :ancestop-p
+   :ancestor-p
    :direct-child-p
    :descendant-p
    
    ;; Introspection
    :sid
    :sheep-direct-parents
+   :sheep-direct-roles
 
    ;; Property access
    :get-property
@@ -31,9 +32,14 @@
    :find-buzzword
    :sheepify
    :sheepify-list
+   :message-pointer ;used on Roles to get actual message object
+   :message-function ;used on message objects to access executable function
+   :message-body ;Contains list-form of message
 
-   ;; Fleeces
-   :fleece-of
+   ;; Fleeces -- wrappers around built-in types
+   :fleece-of ; returns the fleeced type of object (=string=, if given a string object)
+   :find-fleeced-wolf ; returns a fleeced version of object
+   ;; built-in fleeces
    :=symbol=
    :=sequence=
    :=array=
@@ -54,8 +60,6 @@
    :=complex=
    :=integer=
    :=float=
-
-   
    ))
 
 (defpackage #:sheeple-user

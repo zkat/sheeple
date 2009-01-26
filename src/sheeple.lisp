@@ -64,7 +64,7 @@
 ;;;
 
 ;; Example: (clone (sheep1 sheep2 sheep3) ((property1 value1) (property2 value2)))
-(defmacro clone (sheeple properties &optional options)
+(defmacro clone (sheeple &optional properties)
   "Standard sheep-generation macro"
   `(create-sheep
     :sheeple ,(canonicalize-sheeple sheeple)

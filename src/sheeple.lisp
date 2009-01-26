@@ -97,27 +97,27 @@
 	(readers (getf property :readers))
 	(writers (getf property :writers)))
     (setf (get-property sheep name) value)
-    (add-readers-to-sheep readers sheep)
-    (add-writers-to-sheep writers sheep)))
+    (add-readers-to-sheep readers name sheep)
+    (add-writers-to-sheep writers name sheep)))
 
-(defun add-readers-to-sheep (readers sheep)
+(defun add-readers-to-sheep (readers prop-name sheep)
   (loop for reader in readers
      do (ensure-message :name reader
 			:lambda-list '(sheep)
 			:participants (list sheep)
-			:body '(get-property sheep name))))
+			:body `(block ,reader (get-property ,sheep ,prop-name)))))
 
-(defun add-writers-to-sheep (writers sheep)
+(defun add-writers-to-sheep (writers prop-name sheep)
   (loop for writer in writers
      do (if (listp writer) 
 	    (ensure-message :name writer
 			    :lambda-list '(new-value sheep)
 			    :participants (list =dolly= sheep)
-			    :body '(setf (get-property sheep name) new-value))
+			    :body `(block ,writer (setf (get-property ,sheep ,prop-name) new-value)))
 	    (ensure-message :name writer
 			    :lambda-list '(sheep new-value)
 			    :participants (list =dolly= sheep)
-			    :body '(setf (get-property sheep name) new-value)))))
+			    :body `(block ,writer (setf (get-property ,sheep ,prop-name) new-value))))))
 
 (defun set-up-inheritance (new-sheep sheeple)
   "If SHEEPLE is non-nil, adds them in order to "

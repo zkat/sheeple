@@ -77,7 +77,7 @@
 	(t                                             =dolly=))))
 
 ;; Boxed object table
-(let ((boxed-object-table (make-hash-table)))
+(let ((boxed-object-table (make-hash-table :test #'equal)))
 
   (defun find-fleeced-wolf (wolf)
     (if (sheep-p wolf)

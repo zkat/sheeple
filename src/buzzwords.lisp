@@ -93,6 +93,8 @@
     :name ',name
     :lambda-list ,(extract-lambda-list lambda-list)
     :participants ,(extract-participants lambda-list)
+    :function (lambda ,(eval (extract-lambda-list lambda-list))
+		 (block ,name ,@body))
     :body '(block ,name ,@body)))
 
 ;;; Buzzword table
@@ -125,24 +127,23 @@
 	buzzword)))
 
 ;;; Message definition
-(defun ensure-message (&key name lambda-list participants body)
+(defun ensure-message (&key name lambda-list participants function body)
   (when (not (find-buzzword name nil))
     (progn
       (warn "Automatically defining a buzzword for ~S" name)
       (ensure-buzzword
        :name name)))
-  (let* ((function (eval `(lambda ,lambda-list ,body))) 
-	     (target-sheeple (sheepify-list participants))
-	     (message (make-instance 'standard-message
-				    :name name
-				    :lambda-list lambda-list
-				    :participants participants
-				    :body body
-				    :function function)))
-	(add-message-to-buzzword message (find-buzzword name))
-	(remove-messages-with-name-and-participants name target-sheeple)
-	(add-message-to-sheeple name message target-sheeple)
-	message))
+  (let* ((target-sheeple (sheepify-list participants))
+	 (message (make-instance 'standard-message
+				 :name name
+				 :lambda-list lambda-list
+				 :participants participants
+				 :body body
+				 :function function)))
+    (add-message-to-buzzword message (find-buzzword name))
+    (remove-messages-with-name-and-participants name target-sheeple)
+    (add-message-to-sheeple name message target-sheeple)
+    message))
 
 (defun extract-lambda-list (lambda-list)
   `(list ,@(mapcar #'extract-var-name lambda-list)))
@@ -216,7 +217,7 @@
   (let ((function (message-function (find-most-specific-message selector (sheepify-list args)))))
     (apply function args)))
 
-(defun find-most-specific-message (selector args)
+(defun find-most-specific-message (selector args &optional not-this-message-please)
   "Returns the most specific message using SELECTOR and ARGS."
   ;; This shit is bugged to all hell and it's a huge, disgusting algorithm. Fix that shit.
   ;; taken almost verbatim from Slate's algorithm
@@ -226,7 +227,7 @@
        for arg in args
        for index upto (1- n)
        do (let ((curr-sheep-list (compute-sheep-hierarchy-list arg)))
-	    (loop 
+	    (loop
 	       for curr-sheep in curr-sheep-list
 	       for hierarchy-position upto (1- (length curr-sheep-list))
 	       do (dolist (role (sheep-direct-roles curr-sheep))
@@ -237,6 +238,7 @@
 			    (setf (elt (message-rank curr-message) index) hierarchy-position)
 			    (when (fully-specified-p (message-rank curr-message)) 
 			      (when (or (not most-specific-message)
+					(eql not-this-message-please most-specific-message)
 					(< (calculate-rank-score (message-rank curr-message))
 					   (calculate-rank-score (message-rank most-specific-message))))
 				(setf most-specific-message curr-message)))))))))

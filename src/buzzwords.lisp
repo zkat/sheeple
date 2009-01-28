@@ -91,8 +91,8 @@
 (defmacro defmessage (name lambda-list &body body)
   `(ensure-message
     :name ',name
-    :lambda-list (extract-lambda-list ',lambda-list)
-    :participants (extract-participants ',lambda-list)
+    :lambda-list ,(extract-lambda-list lambda-list)
+    :participants ,(extract-participants lambda-list)
     :body '(block ,name ,@body)))
 
 ;;; Buzzword table
@@ -124,31 +124,11 @@
 	(setf (fdefinition name) (lambda (&rest args) (apply-message name args)))
 	buzzword)))
 
-(defun extract-lambda-list (lambda-list)
-  (mapcar #'extract-var-name lambda-list))
-(defun extract-var-name (item)
-  (cond ((symbolp item)
-	 item)
-	((listp item)
-	 (car item))
-	(t
-	 (error "Invalid variable name: ~a. Must be either a list or a symbol" item))))
-
-(defun extract-participants (lambda-list)
-  (mapcar #'extract-participant-sheep lambda-list))
-(defun extract-participant-sheep (item)
-  (cond ((symbolp item)
-	 =dolly=)
-	((listp item)
-	 (eval (cadr item)))
-	(t
-	 (error "Invalid variable name: ~a. Must be either a list or a symbol" item))))
-
 ;;; Message definition
 (defun ensure-message (&key name lambda-list participants body)
   (when (not (find-buzzword name nil))
     (progn
-      (warn "STYLE-WARNING: Automatically defining a buzzword for ~S" name)
+      (warn "Automatically defining a buzzword for ~S" name)
       (ensure-buzzword
        :name name)))
   (let* ((function (eval `(lambda ,lambda-list ,body))) 
@@ -163,6 +143,28 @@
 	(remove-messages-with-name-and-participants name target-sheeple)
 	(add-message-to-sheeple name message target-sheeple)
 	message))
+
+(defun extract-lambda-list (lambda-list)
+  `(list ,@(mapcar #'extract-var-name lambda-list)))
+(defun extract-var-name (item)
+  (if (listp item)
+      `',(car item)
+      `,item))
+
+(defun extract-participants (lambda-list)
+  `(list ,@(mapcar #'extract-participant-sheep lambda-list)))
+(defun extract-participant-sheep (item)
+  (if (listp item)
+      `(confirm-sheep ,(cadr item))
+      `,item))
+
+(defun get-sheep-from-lambda-item (item)
+  (cond ((symbolp item)
+	 =dolly=)
+	((listp item)
+	 (cadr item))
+	(t
+	 (error "Invalid variable name: ~a. Must be either a list or a symbol" item))))
 
 (defun sheepify-list (sheeple)
   (mapcar #'sheepify sheeple))

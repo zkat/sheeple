@@ -94,15 +94,17 @@
 	    (values (wear-wool wolf) nil))))
 
   (defun wear-wool (wolf)
+    "Autoboxes WOLF"
     (setf (gethash wolf boxed-object-table) (clone ((fleece-of wolf)) ((wolf wolf)))))
 
   (defun shoot-wolf (wolf)
+    "Kills wolf dead"
     (remhash wolf boxed-object-table))
     
   );; end boxed objects
 
 ;; (defun define-fleeced-wolf (lisp-object &optional nickname)
-;;   ;;TODO
+;;   ;;TODO -- This could be useful for integrating with deftype and CLOS
 ;;   )
 
 (defun sheepify-list (obj-list)

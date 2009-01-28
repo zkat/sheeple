@@ -137,9 +137,10 @@
   `(confirm-sheep ,sheep))
 
 (defun confirm-sheep (sheep)
-  (when (eql (class-of sheep)
-	     (find-class 'standard-sheep-class))
-    sheep))
+  (if (eql (class-of sheep)
+	   (find-class 'standard-sheep-class))
+      sheep
+      (sheepify sheep)))
 
 (defun canonicalize-properties (properties)
   `(list ,@(mapcar #'canonicalize-property properties)))

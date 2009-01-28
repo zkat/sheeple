@@ -13,6 +13,7 @@
 	    ((:file "packages")
 	     (:file "utils")
 	     (:file "sheeple")
+	     (:file "clone")
 	     (:file "compatibility")
 	     (:file "buzzwords")))))
 

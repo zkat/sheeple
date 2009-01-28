@@ -101,7 +101,10 @@
   (defun forget-all-buzzwords ()
     (clrhash buzzword-table)
     t)
-
+  
+  (defun forget-buzzword (name)
+    (remhash name buzzword-table))
+  
 ) ; end buzzword-table closure
 
 (defun ensure-buzzword (&key name documentation)
@@ -145,12 +148,15 @@
 			       (equal participants
 				      (message-participants
 				       (message-pointer role))))
-		      (setf (sheep-direct-roles sheep)
-			    (remove role (sheep-direct-roles sheep)))
-		      (setf (buzzword-messages (find-buzzword name))
-			    (remove (message-pointer role) (buzzword-messages (find-buzzword name))))))
+		      (delete-role role sheep)))
 		  (sheep-direct-roles sheep)))
 	participants))
+
+(defun delete-role (role sheep)
+  (setf (sheep-direct-roles sheep)
+	(remove role (sheep-direct-roles sheep)))
+  (setf (buzzword-messages (find-buzzword (role-name role)))
+	(remove (message-pointer role) (buzzword-messages (find-buzzword (role-name role))))))
 
 (defun add-message-to-sheeple (name message sheeple)
   (loop 
@@ -161,6 +167,19 @@
 			     :position i
 			     :message-pointer message) 
 	      (sheep-direct-roles sheep))))
+
+(defun undefine-message (&key name participants)
+  (remove-messages-with-name-and-participants name participants))
+
+(defun undefine-buzzword (&key name)
+  (let ((buzzword (find-buzzword name)))
+    (loop for message in (buzzword-messages buzzword)
+       do (loop for participant in (message-participants message)
+	     do (loop for role in (sheep-direct-roles participant)
+		   do (delete-role role participant))))
+    (forget-buzzword name)
+    (fmakunbound name)
+    buzzword))
 
 ;;; Macros
 (defmacro defbuzzword (name &optional (docstring ""))
@@ -177,6 +196,15 @@
 		 (block ,name ,@body))
     :body '(block ,name ,@body)))
 
+(defmacro undefmessage (name lambda-list)
+  `(undefine-message
+    :name ',name
+    :participants ,(extract-participants lambda-list)))
+
+(defmacro undefbuzzword (name)
+  `(undefine-buzzword
+    :name ',name))
+
 ;;; Macro tools
 (defun extract-lambda-list (lambda-list)
   `(list ,@(mapcar #'extract-var-name lambda-list)))
@@ -188,7 +216,7 @@
 (defun confirm-var-name (var-name)
   (if (symbolp var-name)
       var-name
-      (error "Invalid variable name ~s. Variables must be symbols." var-name)))
+       (error "Invalid variable name ~s. Variables must be symbols." var-name)))
 
 (defun extract-participants (lambda-list)
   `(list ,@(mapcar #'extract-participant-sheep lambda-list)))

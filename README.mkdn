@@ -64,11 +64,9 @@ Features available so far:
 
 Planned features that have not yet been implemented include:
 
-* (call-next-message)
-
 * CLOS integration, including autoboxing of entire class hierarchies.
 
-* :before, :after, and :around messages
+* :before and :after messages (no :around for now)
 
 * A proper MOP. Although at least one version of Sheeple will run on top of CLOS to maintain
   compatibility with some useful tools written for the MOP. A native MOP might get written at some

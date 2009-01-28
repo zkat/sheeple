@@ -149,14 +149,18 @@
 (defun extract-var-name (item)
   (if (listp item)
       `',(car item)
-      `,item))
+      `(confirm-var-name ',item)))
+
+(defun confirm-var-name (var-name)
+  (unless (symbolp var-name)
+    (error "Invalid variable name ~s. Variables must be symbols." var-name)))
 
 (defun extract-participants (lambda-list)
   `(list ,@(mapcar #'extract-participant-sheep lambda-list)))
 (defun extract-participant-sheep (item)
   (if (listp item)
       `(confirm-sheep ,(cadr item))
-      `,item))
+      `=dolly=))
 
 (defun get-sheep-from-lambda-item (item)
   (cond ((symbolp item)

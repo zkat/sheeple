@@ -84,7 +84,7 @@
 	(error "~S seems to already be a sheep." wolf)
 	(if (gethash wolf boxed-object-table)
 	    (gethash wolf boxed-object-table)
-	    (wear-wool wolf))))
+	    (values (wear-wool wolf) nil))))
 
   (defun wear-wool (wolf)
     (setf (gethash wolf boxed-object-table) (clone ((fleece-of wolf)) ((wolf wolf)))))

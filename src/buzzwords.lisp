@@ -152,8 +152,9 @@
       `(confirm-var-name ',item)))
 
 (defun confirm-var-name (var-name)
-  (unless (symbolp var-name)
-    (error "Invalid variable name ~s. Variables must be symbols." var-name)))
+  (if (symbolp var-name)
+      var-name
+      (error "Invalid variable name ~s. Variables must be symbols." var-name)))
 
 (defun extract-participants (lambda-list)
   `(list ,@(mapcar #'extract-participant-sheep lambda-list)))
@@ -229,8 +230,8 @@
 	       for curr-sheep in curr-sheep-list
 	       for hierarchy-position upto (1- (length curr-sheep-list))
 	       do (dolist (role (sheep-direct-roles curr-sheep))
-		    (when (and (eql selector (role-name role))
-				   (eql index (role-position role)))
+		    (when (and (equal selector (role-name role))
+			       (eql index (role-position role)))
 			  (let ((curr-message (message-pointer role)))
 			    (maybe-add-message-to-table curr-message)
 			    (setf (elt (message-rank curr-message) index) hierarchy-position)

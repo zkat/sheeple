@@ -33,7 +33,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-
 ;;;
 ;;; The Standard Sheep Definition
 ;;;
@@ -44,7 +43,8 @@
     :initform (incf *max-sheep-id*)
     :reader sid)
    (nickname
-    :initform "Standard Sheep"
+    :initform nil
+    :initarg :nickname
     :accessor sheep-nickname)
    (parents
     :initarg :parents
@@ -60,32 +60,33 @@
 
 (defmethod print-object ((sheep standard-sheep-class) stream)
   (print-unreadable-object (sheep stream :identity t)
-    (format stream "~s SID: ~a" (sheep-nickname sheep) (sid sheep))))
+    (format stream "Standard Sheep SID: ~a~@[ AKA: ~a~]" (sid sheep) (sheep-nickname sheep))))
 
 ;;;
-;;; Cloning
+;;; Sheep creation
 ;;;
 
-;; Example: (clone (sheep1 sheep2 sheep3) ((property1 value1) (property2 value2)))
-(defmacro clone (sheeple &optional properties)
-  "Standard sheep-generation macro"
-  `(create-sheep
-    :sheeple ,(canonicalize-sheeple sheeple)
-    :properties ,(canonicalize-properties properties)))
+(defparameter =dolly= (make-instance 'standard-sheep-class :nickname "=dolly="))
 
-(defparameter =dolly= (make-instance 'standard-sheep-class))
-(defmethod print-object ((sheep (eql =dolly=)) stream)
-  (print-unreadable-object (sheep stream :identity t)
-    (format stream "Standard Sheep SID: ~a NAME: =DOLLY=" (sid sheep))))
-
-(defun create-sheep (&key sheeple properties)
+(defun create-sheep (&key sheeple properties options)
   "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
   (let ((sheep
 	 (set-up-inheritance
 	  (make-instance 'standard-sheep-class)
 	  sheeple)))
     (set-up-properties properties sheep)
+    (set-up-options options sheep)
     sheep))
+
+(defun sheep-p (maybe-sheep)
+  ;; BUG: This only works for standard-sheep
+  (when (eql (class-of maybe-sheep)
+	     (find-class 'standard-sheep-class))
+    t))
+
+;;;
+;;; Property and property-option setup
+;;;
 
 (defun set-up-properties (properties sheep)
   (loop for property-list in properties
@@ -99,6 +100,30 @@
     (setf (get-property sheep name) value)
     (add-readers-to-sheep readers name sheep)
     (add-writers-to-sheep writers name sheep)))
+
+;;;
+;;; Clone options
+;;;
+
+(defun set-up-options (options sheep)
+  (loop for option in options
+       do (set-up-option option sheep)))
+
+(defun set-up-option (option sheep)
+  (let ((option (car option))
+	(value (cadr option)))
+    (case option
+      (:copy-values (when (eql value t)
+		      (copy-parent-values sheep)))
+      (:nickname (setf (sheep-nickname sheep) value))
+      (otherwise (error 'invalid-option-error "No such option for CLONE: ~s" option)))))
+
+(define-condition invalid-option-error (error) ())
+
+(defun copy-parent-values (sheep)
+  (let ((all-slots (available-properties sheep)))
+    (loop for slot in all-slots
+	 do (setf (get-property sheep `',slot) (get-property sheep `',slot)))))
 
 (defun add-readers-to-sheep (readers prop-name sheep)
   (loop for reader in readers
@@ -124,59 +149,6 @@
 	   do (add-parent sheep obj))
 	(add-parent =dolly= obj))
     obj))
-
-(defun sheep-p (maybe-sheep)
-  (when (eql (class-of maybe-sheep)
-	     (find-class 'standard-sheep-class))
-    t))
-
-(defun canonicalize-sheeple (sheeple)
-  `(list ,@(mapcar #'canonicalize-sheep sheeple)))
-
-(defun canonicalize-sheep (sheep)
-  `(confirm-sheep ,sheep))
-
-(defun confirm-sheep (sheep)
-  (if (eql (class-of sheep)
-	   (find-class 'standard-sheep-class))
-      sheep
-      (sheepify sheep)))
-
-(defun canonicalize-properties (properties)
-  `(list ,@(mapcar #'canonicalize-property properties)))
-
-(defun canonicalize-property (property)
-  (if (symbolp property)
-      `(list :name ',property)
-      (let ((name (car property))
-	    (value (cadr property))
-            (readers nil)
-            (writers nil)
-            (other-options nil))
-        (do ((olist (cddr property) (cddr olist)))
-            ((null olist))
-	  (case (car olist)
-	    (:value
-	     (setf value (cadr olist)))
-	    (:val
-	     (setf value (cadr olist)))
-            (:reader 
-             (pushnew (cadr olist) readers))
-            (:writer 
-             (pushnew (cadr olist) writers))
-            (:accessor
-             (pushnew (cadr olist) readers)
-             (pushnew `(setf ,(cadr olist)) writers))
-            (otherwise 
-             (pushnew `',(car olist) other-options)
-             (pushnew `',(cadr olist) other-options))))
-        (if other-options
-	    (error "Error parsing CLONE property ~a" property)
-	    `(list
-	      :name ',name
-	      :value ,value
-	      ,@(when readers `(:readers ',readers))
-	      ,@(when writers `(:writers ',writers)))))))
 
 ;;;
 ;;; Inheritance management
@@ -204,6 +176,21 @@ and that they arej both of the same class."
 		       "Adding new-parent would result in a
                              circular sheeple hierarchy list")))))))
 
+(defgeneric remove-parent (parent child &key))
+(defmethod remove-parent ((parent standard-sheep-class) (child standard-sheep-class) &key (keep-properties nil))
+  "Deletes PARENT from CHILD's parent list."
+  (setf (sheep-direct-parents child)
+	(delete parent (sheep-direct-parents child)))
+  (when keep-properties
+    (with-accessors ((parent-properties sheep-direct-properties))
+	parent
+      (loop for property-name being the hash-keys of parent-properties
+	   using (hash-value value)
+	   do (unless (has-direct-property-p child property-name)
+		(setf (get-property child property-name) value)))))
+  child)
+
+;;; Inheritance-related predicates
 (defun direct-parent-p (maybe-parent child)
   (when (member maybe-parent (sheep-direct-parents child))
     t))
@@ -218,19 +205,6 @@ and that they arej both of the same class."
 (defun descendant-p (maybe-descendant ancestor)
   (ancestor-p ancestor maybe-descendant))
 
-(defgeneric remove-parent (parent child &key))
-(defmethod remove-parent ((parent standard-sheep-class) (child standard-sheep-class) &key (keep-properties nil))
-  "Deletes PARENT from CHILD's parent list."
-  (setf (sheep-direct-parents child)
-	(delete parent (sheep-direct-parents child)))
-  (when keep-properties
-    (with-accessors ((parent-properties sheep-direct-properties))
-	parent
-      (loop for property-name being the hash-keys of parent-properties
-	   using (hash-value value)
-	   do (unless (has-direct-property-p child property-name)
-		(setf (get-property child property-name) value)))))
-  child)
 
 ;;;
 ;;; Property Access
@@ -300,10 +274,12 @@ This returns T if the value is set to NIL for that property-name."
      (flatten
       (append obj-keys (mapcar #'available-properties (sheep-direct-parents sheep)))))))
 
+
 ;;;
 ;;; Hierarchy Resolution
 ;;; - mostly blatantly stolen from Closette.
 ;;;
+
 (defun collect-parents (sheep)
   (labels ((all-parents-loop (seen parents)
 	     (let ((to-be-processed

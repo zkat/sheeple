@@ -28,7 +28,6 @@
 ;; TODO:
 ;; * Add an option that prevents an object from being edited?
 ;; * Add a property metaobject for more tweaked property options?
-;; * Fix sheep-p
 ;; * Write unit tests for everything before doing anything else here
 ;; * Keep cleaning and testing until it's stable
 ;; * Documentation!!
@@ -81,11 +80,9 @@
     (set-up-options options sheep)
     sheep))
 
-(defun sheep-p (maybe-sheep)
-  ;; BUG: This only works for standard-sheep
-  (when (eql (class-of maybe-sheep)
-	     (find-class 'standard-sheep-class))
-    t))
+(defmethod sheep-p ((sheep standard-sheep-class))
+  (declare (ignore sheep))
+  t)
 
 ;;;
 ;;; Property and property-option setup

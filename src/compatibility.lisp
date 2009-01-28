@@ -54,7 +54,9 @@
 
 (defun fleece-of (x)
   (if (sheep-p x)
-      (error "~S is a real sheep!" x)
+      (progn
+	(warn "This is already a sheep!")
+	x)
       (typecase x
 	(null                                          =null=)
 	((and symbol (not null))                       =symbol=)

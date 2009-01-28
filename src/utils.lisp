@@ -1,6 +1,11 @@
+;;
 ;; utils.lisp
 ;;
 ;; Miscellaneous utilities for Sheeple
+;;
+;; TODO:
+;; * Unit tests for topo-sort?
+;; * DOCUMENTATION!
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
@@ -22,7 +27,7 @@
 		   (t (rec (car x) (rec (cdr x) acc))))))
     (rec x nil)))
 
-;; This is breaking. Fuck
+;; This seems fine. Figure out how to write tests for this beast.
 (defun topological-sort (elements constraints tie-breaker)
   (let ((remaining-constraints constraints)
         (remaining-elements elements)

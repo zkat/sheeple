@@ -26,6 +26,10 @@
 ;; Ensures that sheeple is fully-compatible with regular Common Lisp.
 ;; Fleecing (autoboxing) is implemented here.
 ;;
+;; TODO:
+;; * Write unit tests
+;; * DOCUMENTATION!!!1
+;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
@@ -96,3 +100,14 @@
     (remhash wolf boxed-object-table))
     
   );; end boxed objects
+
+(defun sheepify-list (obj-list)
+  "Converts OBJ-LIST to a list where each item is either a sheep or a fleeced wolf."
+  (mapcar #'sheepify obj-list))
+
+(defun sheepify (sheep)
+  "Returns SHEEP or fleeces it."
+   (if (not (sheep-p sheep))
+       (find-fleeced-wolf sheep)
+       sheep))
+

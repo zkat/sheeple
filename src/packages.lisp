@@ -17,6 +17,7 @@
    :sid
    :sheep-direct-parents
    :sheep-direct-roles
+   :sheep-nickname
 
    ;; Property access
    :get-property
@@ -37,9 +38,10 @@
    :message-body ;Contains list-form of message
 
    ;; Fleeces -- wrappers around built-in types
-   :fleece-of ; returns the fleeced type of object (=string=, if given a string object)
+   :fleece-of ; returns the appropriate fleece for a wolf. Should not be used.
    :find-fleeced-wolf ; returns a fleeced version of object
-   ;; built-in fleeces
+   ;; built-in fleeces, these correspond directly to lisp types
+   :=white-fang=
    :=symbol=
    :=sequence=
    :=array=

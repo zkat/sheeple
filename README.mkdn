@@ -21,24 +21,26 @@ run more acceptably.
 
 Features available so far:
 
-* Simple defclass-like cloning interface
+* Simple, but powerful defclass-like cloning macro.
 
 * Dynamic object management tools (inspection of objects, addition/removal of slots, all without any
-  sort of redefinition)
+  sort of redefinition).
 
-* Dynamic definition of slot values, following a prototype chain
+* Dynamic property value access, following a prototype chain.
 
-* Options for the CLONE macro
+* Options for the CLONE macro.
 
-* Full integration with built-in Lisp types by autoboxing (called fleecing) when appropriate
+* Full integration with built-in Lisp types by autoboxing (called fleecing) when appropriate.
 
-* Multiple inheritance through cloning with dynamic inspection and management of parents
+* Multiple inheritance through cloning with dynamic inspection and management of parents.
 
 * Multiple dispatch on messages (methods) -- messages specialize on specific instances, and follow
-  inheritance hierarchy. Algorithm is based on Slate (http://slatelanguage.org)
+  inheritance hierarchy. Algorithm is based on Slate (http://slatelanguage.org).
 
 * Multimessages work similarly to CLOS methods -- you define a generic function (defbuzzword), and a
   set of methods (defmessage), which can optionally have specialized arguments.
+
+* Variable length lambda-lists for buzzwords.
 
 * defbuzzword/defmessage have basically the same interface as defgeneric/defmessage.
 
@@ -47,27 +49,30 @@ Features available so far:
   vice-versa).
 
 * CLOS backend allows effortless plug-in to many Lisp libraries that make use of the MOP (such as
-  Elephant, for almost free object persistence)
+  Elephant, for almost free object persistence).
 
-* auto-generated accessors/readers/writers, with :accessor, :reader, and :writer slot options
+* Auto-generated readers/writers, with :accessor, :reader, and :writer slot options.
 
-* Runs on plain CL -- no libraries necessary
+* Runs on plain CL -- no libraries necessary.
 
-* Portable across implementations -- no MOP or fancy implementation-specific features required
+* Portable across implementations -- no MOP or fancy implementation-specific features required.
 
-* Identifier slot for sheep metaobject, so helpful information can be printed by print-object
+* Nickname slot for sheep metaobject, so helpful information can be printed by print-object.
 
-Features that have not been implemented yet include:
 
-* :before, :after, and :around messages
+Planned features that have not yet been implemented include:
+
+* Dynamic removal of messages, and entire buzzwords.
 
 * (call-next-message)
 
-* A proper MOP
+* CLOS integration, including autoboxing of entire class hierarchies.
 
-* CLOS integration, including autoboxing of entire class hierarchies
+* :before, :after, and :around messages
 
-* Dynamic removal of messages, and entire buzzwords
+* A proper MOP. Although at least one version of Sheeple will run on top of CLOS to maintain
+  compatibility with some useful tools written for the MOP. A native MOP might get written at some
+  point.
 
 
 Vocabulary
@@ -109,13 +114,13 @@ methods, cloning, etc.
   which is a clone of =dolly=.
 
 
-Specification:
---------------
+(pseudo-)Specification:
+-----------------------
 == Sheep Cloning ==
 
 * Objects are prototypes. Objects are called sheep or sheeple. All sheep are children of =DOLLY=.
 
-* Sheep can have multiple direct parents (multiple inheritance)
+* Sheeple can have multiple direct parents (multiple inheritance)
 
 * Ancestor ordering works the same way as it does with CLOS (first parent defined in CLONE has
   greater precedence than second.) Ancestors are ordered with a breadth-first left-to-right graph
@@ -123,7 +128,7 @@ Specification:
 
 * All objects have a numerical SID (Sheep ID)
 
-* The list of direct parents is dynamic. Parents can be added or removed at runtime.
+* The list of direct parents is dynamic. Parents can be added or removed at run time.
 
 * Sheeple does not have a universal addressing mechanism like functions and classes do. Instead,
 there are a number of built-in sheeple, including =DOLLY=, which can be addressed by symbol where

@@ -25,6 +25,10 @@
 ;;
 ;; Contains the Clone macro, and helper stuff. This is all interface fluff.
 ;;
+;; TODO:
+;; * Unit tests, please
+;; * DOCUMENTATION!!
+;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 

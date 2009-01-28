@@ -45,6 +45,8 @@ Features available so far:
 * CLOS backend allows effortless plug-in to many Lisp libraries that make use of the MOP (such as
   Elephant, for almost free object persistence)
 
+* auto-generated accessors/readers/writers, with :accessor, :reader, and :writer slot options
+
 * Runs on plain CL -- no libraries necessary
 
 * Slow as all hell -- gives you more time to think about what you're doing.
@@ -54,9 +56,9 @@ Features that have not been implemented yet include:
 
 * :before, :after, and :around messages
 
-* Property options and Sheep options, all through the CLONE macro
+* (call-next-message)
 
-* Related to the above -- auto-generated accessors/readers/writers
+* Property options and Sheep options, all through the CLONE macro
 
 * Also related to above -- advanced cloning options
 

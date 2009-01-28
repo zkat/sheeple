@@ -28,6 +28,7 @@
 ;; TODO:
 ;; * Write utilities to make management of dynamic (re-/un-)definitions easier/possible/better
 ;; * Write unit tests
+;; * There should be an error if defbuzzword tries to clobber a function or generic-func
 ;; * AFTER unit tests... clean up code, run tests
 ;; * AFTER cleanup... --omg-optimized, run tests
 ;; * DOCUMENTATION!!1

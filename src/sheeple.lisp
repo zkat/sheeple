@@ -83,6 +83,9 @@
 (defmethod sheep-p ((sheep standard-sheep-class))
   (declare (ignore sheep))
   t)
+(defmethod sheep-p (sheep?)
+  (declare (ignore sheep?))
+  nil)
 
 ;;;
 ;;; Property and property-option setup

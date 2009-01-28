@@ -132,16 +132,18 @@ methods, cloning, etc.
 
 * Sheeple does not have a universal addressing mechanism like functions and classes do. Instead,
 there are a number of built-in sheeple, including =DOLLY=, which can be addressed by symbol where
-useful, such as when setting one of them as a parent, or defining a talent.
+useful, such as when setting one of them as a parent, or defining a talent. For ease of
+identification while working at the REPL, there is a nickname slot in the metaobject, which can be
+accessed with SHEEP-NICKNAME.
 
-* Built-in sheeple correspond to all built-in Lisp types, as well as any new types defined by
-  DEFTYPE, but not to CLOS-defined classes.
+* Built-in sheeple (known as fleeced wolves, or just wolves) correspond to all built-in Lisp types,
+  as well as any new types defined by DEFTYPE, but not to CLOS-defined classes.
 
 * New sheeple are created by using the CLONE macro. CLONE works similar to DEFCLASS:
 
          (clone (parent1 parent2)
            ((slot1 value1)
-            (slot2 value2))
+            (slot2 value2 :slot-option value))
 	   (:clone-option value)
 	   (:another-option value))
 
@@ -149,9 +151,18 @@ useful, such as when setting one of them as a parent, or defining a talent.
 
          (clone () ((foo 10)))
 
-         (defvar *sample-sheep* (clone () ()))
+         (defvar *sample-sheep* (clone () ((my-slot "Wheee" :accessor get-my-slot))))
 
 * An empty parent list when using CLONE will automatically clone =DOLLY=
+
+* The :copy-values CLONE option copies over all values available to the new sheep into the sheep
+  itself. This is useful for ensuring that other objects do not change an available property value.
+
+* The :nickname CLONE option sets a nickname for the sheep metaobject, which is used when printing
+  the object at the REPL:
+
+         SHEEPLE> (clone () () (:nickname "Johnny Bravo"))
+         #<Standard Sheep SID: 22 AKA: Johnny Bravo {B777401}>
 
 * The function ADD-PARENT receives a NEW-PARENT sheep, and a CHILD sheep. It pushes NEW-PARENT into
 CHILD's direct-parents if NEW-PARENT is not already there. If using ADD-PARENT would result in a

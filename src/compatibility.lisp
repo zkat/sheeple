@@ -101,6 +101,10 @@
     
   );; end boxed objects
 
+;; (defun define-fleeced-wolf (lisp-object &optional nickname)
+;;   ;;TODO
+;;   )
+
 (defun sheepify-list (obj-list)
   "Converts OBJ-LIST to a list where each item is either a sheep or a fleeced wolf."
   (mapcar #'sheepify obj-list))

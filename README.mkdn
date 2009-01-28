@@ -48,6 +48,8 @@ Features available so far:
   be explicitly defined, as a matter of style (buzzwords clobber defuns and defgenerics, and
   vice-versa).
 
+* Dynamic removal of messages, as well as entire buzzwords with undefmessage/undefbuzzword.
+
 * CLOS backend allows effortless plug-in to many Lisp libraries that make use of the MOP (such as
   Elephant, for almost free object persistence).
 
@@ -61,8 +63,6 @@ Features available so far:
 
 
 Planned features that have not yet been implemented include:
-
-* Dynamic removal of messages, and entire buzzwords.
 
 * (call-next-message)
 

@@ -26,10 +26,12 @@
 ;; Implementation of Sheeple's buzzwords+messages (generic functions + methods)
 ;;
 ;; TODO:
+;; * Write utilities to make management of dynamic (re-/un-)definitions easier/possible/better
 ;; * Write unit tests
 ;; * AFTER unit tests... clean up code, run tests
 ;; * AFTER cleanup... --omg-optimized, run tests
-;; * Write utilities to make management of dynamic definitions easier
+;; * DOCUMENTATION!!1
+;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
@@ -82,21 +84,7 @@
 ;;; Buzzword/message definition
 ;;;
 
-;;; Macros
-(defmacro defbuzzword (name &optional (docstring ""))
-  `(ensure-buzzword
-    :name ',name
-    :documentation ,docstring))
-
-(defmacro defmessage (name lambda-list &body body)
-  `(ensure-message
-    :name ',name
-    :lambda-list ,(extract-lambda-list lambda-list)
-    :participants ,(extract-participants lambda-list)
-    :function (lambda ,(eval (extract-lambda-list lambda-list))
-		 (block ,name ,@body))
-    :body '(block ,name ,@body)))
-
+;;; Buzzword definition
 ;;; Buzzword table
 (let ((buzzword-table (make-hash-table :test #'equal)))
 
@@ -115,7 +103,6 @@
 
 ) ; end buzzword-table closure
 
-;;; Buzzword definition
 (defun ensure-buzzword (&key name documentation)
   (if (find-buzzword name nil)
       (find-buzzword name)
@@ -123,7 +110,7 @@
 				     :name name
 				     :documentation documentation)))
 	(setf (find-buzzword name) buzzword)
-	(setf (fdefinition name) (lambda (&rest args) (apply-message name args)))
+	(setf (fdefinition name) (lambda (&rest args) (apply-buzzword name args)))
 	buzzword)))
 
 ;;; Message definition
@@ -144,41 +131,6 @@
     (remove-messages-with-name-and-participants name target-sheeple)
     (add-message-to-sheeple name message target-sheeple)
     message))
-
-(defun extract-lambda-list (lambda-list)
-  `(list ,@(mapcar #'extract-var-name lambda-list)))
-(defun extract-var-name (item)
-  (if (listp item)
-      `',(car item)
-      `(confirm-var-name ',item)))
-
-(defun confirm-var-name (var-name)
-  (if (symbolp var-name)
-      var-name
-      (error "Invalid variable name ~s. Variables must be symbols." var-name)))
-
-(defun extract-participants (lambda-list)
-  `(list ,@(mapcar #'extract-participant-sheep lambda-list)))
-(defun extract-participant-sheep (item)
-  (if (listp item)
-      `(confirm-sheep ,(cadr item))
-      `=dolly=))
-
-(defun get-sheep-from-lambda-item (item)
-  (cond ((symbolp item)
-	 =dolly=)
-	((listp item)
-	 (cadr item))
-	(t
-	 (error "Invalid variable name: ~a. Must be either a list or a symbol" item))))
-
-(defun sheepify-list (sheeple)
-  (mapcar #'sheepify sheeple))
-
-(defun sheepify (sheep)
-   (if (not (sheep-p sheep))
-       (find-fleeced-wolf sheep)
-       sheep))
 
 (defun add-message-to-buzzword (message buzzword)
   (pushnew message (buzzword-messages buzzword)))
@@ -209,11 +161,46 @@
 			     :message-pointer message) 
 	      (sheep-direct-roles sheep))))
 
+;;; Macros
+(defmacro defbuzzword (name &optional (docstring ""))
+  `(ensure-buzzword
+    :name ',name
+    :documentation ,docstring))
+
+(defmacro defmessage (name lambda-list &body body)
+  `(ensure-message
+    :name ',name
+    :lambda-list ,(extract-lambda-list lambda-list)
+    :participants ,(extract-participants lambda-list)
+    :function (lambda ,(eval (extract-lambda-list lambda-list)) ;okay to use eval here. Just symbols
+		 (block ,name ,@body))
+    :body '(block ,name ,@body)))
+
+;;; Macro tools
+(defun extract-lambda-list (lambda-list)
+  `(list ,@(mapcar #'extract-var-name lambda-list)))
+(defun extract-var-name (item)
+  (if (listp item)
+      `',(car item)
+      `(confirm-var-name ',item)))
+
+(defun confirm-var-name (var-name)
+  (if (symbolp var-name)
+      var-name
+      (error "Invalid variable name ~s. Variables must be symbols." var-name)))
+
+(defun extract-participants (lambda-list)
+  `(list ,@(mapcar #'extract-participant-sheep lambda-list)))
+(defun extract-participant-sheep (item)
+  (if (listp item)
+      `(confirm-sheep ,(cadr item))
+      `=dolly=))
+
 ;;;
 ;;; Message dispatch
 ;;;
 
-(defun apply-message (selector args)
+(defun apply-buzzword (selector args)
   (let ((function (message-function (find-most-specific-message selector (sheepify-list args)))))
     (apply function args)))
 

@@ -26,9 +26,12 @@
 ;; Sheep class and inheritance/property-related code, as well as sheep cloning.
 ;;
 ;; TODO:
-;; - Write unit tests for everything before doing anything else here
-;; - Keep cleaning and testing until it's stable
-;; - Expand CLONE so it supports slot options, as well as custom identifiers
+;; * Add an option that prevents an object from being edited?
+;; * Add a property metaobject for more tweaked property options?
+;; * Fix sheep-p
+;; * Write unit tests for everything before doing anything else here
+;; * Keep cleaning and testing until it's stable
+;; * Documentation!!
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)

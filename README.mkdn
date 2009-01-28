@@ -58,9 +58,7 @@ Features that have not been implemented yet include:
 
 * (call-next-message)
 
-* Property options and Sheep options, all through the CLONE macro
-
-* Also related to above -- advanced cloning options
+* Options for the CLONE macro
 
 * A proper MOP
 

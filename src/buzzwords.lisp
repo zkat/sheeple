@@ -142,7 +142,9 @@
 (defun ensure-message (&key name lambda-list participants function body)
   (when (not (find-buzzword name nil))
     (progn
-      (warn "Automatically defining a buzzword for ~S" name)
+      (warn 'style-warning 
+	    :format-control"Automatically defining a buzzword for ~S" 
+	    :format-args (list name))
       (ensure-buzzword
        :name name)))
   (let* ((target-sheeple (sheepify-list participants))
@@ -212,8 +214,9 @@
     :name ',name
     :lambda-list ,(extract-lambda-list lambda-list)
     :participants ,(extract-participants lambda-list)
-    :function (lambda ,(eval (extract-lambda-list lambda-list)) ;okay to use eval here. Just symbols
-		 (block ,name ,@body))
+    :function (block ,name 
+		(lambda ,(eval (extract-lambda-list lambda-list)) ;okay to use eval here. Just symbols
+		  ,@body))
     :body '(block ,name ,@body)))
 
 (defmacro undefmessage (name lambda-list)

@@ -78,7 +78,7 @@
 	((string *)                                    =string=)
 	((bit-vector *)                                =bit-vector=)
 	((and vector (not string))                     =vector=)
-	((and array vector)                            =array=)
+	((and array (not vector))                      =array=)
 	((and sequence (not (or vector list)))         =sequence=)
 	(function                                      =function=)
 	(t                                             =dolly=))))

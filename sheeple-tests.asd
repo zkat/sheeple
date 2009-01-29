@@ -12,4 +12,5 @@
 	    :components
 	    ((:file "packages")
 	     (:file "sheeple")
+	     (:file "compatibility")
 	     (:file "buzzwords")))))

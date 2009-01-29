@@ -43,9 +43,7 @@
   "Basic cloning tests. Confirm the CLONE macro works correctly, and that cyclic hierarchy lists
 properly signal SHEEP-HIERARCHY-ERROR."
   (is (eql =dolly= (car (sheep-direct-parents (clone () ())))))
-
   (is (= 1 (length (available-properties (clone () ((foo "bar")))))))
-  
   (let ((obj1 (clone () ())))
     (is (eql obj1
 	     (car (sheep-direct-parents (clone (obj1) ()))))))
@@ -54,18 +52,14 @@ properly signal SHEEP-HIERARCHY-ERROR."
     (add-parent obj1 obj2)
     (is (eql obj1
 	     (car (sheep-direct-parents obj2)))))
-
   (let ((obj (clone () ((foo "bar")))))
     (is (equal "bar" (get-property obj 'foo))))
-
   (let ((obj (clone () ((foo "bar") (baz "quux")))))
     (is (equal "quux" (get-property obj 'baz))))
-
   (signals sheep-hierarchy-error (let ((obj1 (clone () ()))
 					      (obj2 (clone () ())))
 					  (add-parent obj1 obj2)
 					  (clone (obj1 obj2) ())))
-
   (signals sheep-hierarchy-error (let* ((obj1 (clone () ()))
 					       (obj2 (clone (obj1) ())))
 					  (clone (obj1 obj2) ()))))

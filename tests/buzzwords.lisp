@@ -26,13 +26,44 @@
 ;; Unit tests for src/buzzwords.lisp
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(in-package :sheeple)
+(in-package :sheeple-tests)
 
-(export 'buzzword-tests)
+(def-suite buzzword-tests :in sheeple)
 
-(fiveam:def-suite buzzwords)
-(defun buzzword-tests ()
-  (fiveam:run! 'buzzwords))
-(fiveam:def-suite buzzword-definition :in buzzwords)
-(fiveam:def-suite message-definition :in buzzwords)
+(in-suite buzzword-tests)
 
+(test buzzword-definition
+  (defbuzzword test-buzz "This is a test")
+  (is (buzzword-p (find-buzzword 'test-buzz)))
+  (signals no-such-buzzword (find-buzzword 'another-buzzword))
+  (undefbuzzword test-buzz))
+
+(test buzzword-undefinition
+  (defbuzzword test-buzz)
+  (undefbuzzword test-buzz)
+  (signals no-such-buzzword (find-buzzword 'test-buzz))
+  (signals undefined-function (test-buzz))
+  (is (not (sheeple::participant-p =dolly= 'test-buzz)))
+  (defmessage another-buzzer (foo) foo)
+  (defmessage another-buzzer ((foo =string=)) (declare (ignore foo)) "String returned!")
+  (undefmessage another-buzzer ((foo =string=)))
+  (is (equal "hei-ho!" (another-buzzer "hei-ho!")))
+  (undefmessage another-buzzer (foo))
+  (signals sheeple::no-most-specific-message (another-buzzer =dolly=)) ; this package bs pisses me off
+  (is (not (sheeple::participant-p =dolly= 'test-buzz)))
+  (is (not (sheeple::participant-p =string= 'test-buzz)))
+  (undefbuzzword another-buzzer)
+  (signals no-such-buzzword (find-buzzword 'another-buzzer))
+  (signals undefined-function (another-buzzer "WHAT ARE YOU GONNA DO, BLEED ON ME?!")))
+
+(test basic-message-definition
+  (signals warning (defmessage test-message (foo) (print foo)))
+  (undefbuzzword test-buzz)
+  (defmessage test-message (foo) (print foo))
+  (is (buzzword-p (find-buzzword 'test-message)))
+  (is (message-p (car (buzzword-messages (find-buzzword 'test-message)))))
+  (undefbuzzword test-message))
+
+(test more-message-definition
+  (defmessage test-message (foo bar) (print foo) (print bar))
+  (undefbuzzword test-message))

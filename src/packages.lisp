@@ -31,6 +31,7 @@
    :defbuzzword
    :defmessage
    :find-buzzword
+   :participant-p
    :sheepify
    :sheepify-list
    :message-pointer ;used on Roles to get actual message object
@@ -38,7 +39,7 @@
    :message-body ;Contains list-form of message
 
    ;; Fleeces -- wrappers around built-in types
-   :fleece-of ; returns the appropriate fleece for a wolf. Should not be used.
+   :fleece-of ; returns the appropriate fleece for a wolf. Good for getting an idea of what is what.
    :find-fleeced-wolf ; returns a fleeced version of object
    ;; built-in fleeces, these correspond directly to lisp types
    :=white-fang=

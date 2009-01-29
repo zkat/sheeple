@@ -28,6 +28,7 @@
 ;; TODO:
 ;; * Add an option that prevents an object from being edited?
 ;; * Add a property metaobject for more tweaked property options?
+;; * Add :sibling option to CLONE. This involves messing around with create-sheep
 ;; * Write unit tests for everything before doing anything else here
 ;; * Keep cleaning and testing until it's stable
 ;; * Documentation!!
@@ -334,3 +335,62 @@ This returns T if the value is set to NIL for that property-name."
       (when (not (null common))
         (return-from std-tie-breaker-rule (car common))))))
 
+
+;; For later -- these need a direct-children slot
+;;
+;; (defun push-down-properties (sheep)
+;; "Pushes sheep's slot-values down to its children, unless the children have
+;; overridden the values."
+;; (with-accessors ((properties sheep-direct-properties)
+;;      (children proto-children))
+;; sheep
+;; (loop for slot-name being the hash-keys of properties
+;; using (hash-value value)
+;; do (loop for child in children
+;;    do (unless (has-direct-slot-p child slot-name)
+;;      (set-slot-value child slot-name value))))
+;; sheep))
+ 
+;; (defun sacrifice-sheep (sheep &key (save-properties nil))
+;; "Deletes SHEEP from the hierarchy, preserving the hierarchy by expanding references to
+;; SHEEP into all its parents. Optionally, pushes its direct properties into its children."
+;; (give-children-new-parents sheep)
+;; (when save-properties
+;; (push-down-properties sheep)))
+ 
+;; (defun give-parents-new-children (sheep)
+;; "Replaces the reference to SHEEP in its parents' children property with the sheep's children."
+;; (with-accessors ((parents sheep-direct-parents)
+;;      (children proto-children))
+;; sheep
+;; (loop for parent in parents
+;;    do (setf (proto-children parent)
+;;      (loop for par-child in (proto-children parent)
+;;      if (eql par-child sheep)
+;;      append children
+;;      else collect par-child)))))
+ 
+;; (defun give-children-new-parents (sheep)
+;; "Replaces the reference to SHEEP in its children's parents property with the sheep's parents."
+;; (with-accessors ((parents sheep-direct-parents)
+;;      (children proto-children))
+;; sheep
+;; (loop for child in children
+;; do (setf (sheep-direct-parents child)
+;;     (loop for child-par in (sheep-direct-parents child)
+;;      if (eql child-par sheep)
+;;      append parents
+;;      else collect child-par)))))
+;;
+;; (defun push-down-properties (sheep)
+;; "Pushes sheep's slot-values down to its children, unless the children have
+;; overridden the values."
+;; (with-accessors ((properties sheep-direct-properties)
+;;      (children proto-children))
+;; sheep
+;; (loop for slot-name being the hash-keys of properties
+;; using (hash-value value)
+;; do (loop for child in children
+;;    do (unless (has-direct-slot-p child slot-name)
+;;      (set-slot-value child slot-name value))))
+;; sheep))

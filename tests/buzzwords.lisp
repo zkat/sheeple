@@ -33,12 +33,15 @@
 (in-suite buzzword-tests)
 
 (test buzzword-definition
+  "Checks basic buzzword definition, confirms that FIND-BUZZWORD 
+errors when a buzzword doesn't exist."
   (defbuzzword test-buzz "This is a test")
   (is (buzzword-p (find-buzzword 'test-buzz)))
-  (signals no-such-buzzword (find-buzzword 'another-buzzword))
-  (undefbuzzword test-buzz))
+  (signals no-such-buzzword (find-buzzword 'another-buzzword)))
 
 (test buzzword-undefinition
+  "Usage of the undefbuzzword macro, confirmation of removal of all messages and
+relevant role objects from the system."
   (defbuzzword test-buzz)
   (undefbuzzword test-buzz)
   (signals no-such-buzzword (find-buzzword 'test-buzz))
@@ -57,13 +60,26 @@
   (signals undefined-function (another-buzzer "WHAT ARE YOU GONNA DO, BLEED ON ME?!")))
 
 (test basic-message-definition
-  (signals warning (defmessage test-message (foo) (print foo)))
+  "Checks that messages are defined properly, and added to their respective objects.
+also, checks that a style-warning is signaled if there is no buzzword defined."
+  (undefbuzzword test-message)
+  (signals style-warning (defmessage test-message (foo) (print foo)))
   (undefbuzzword test-buzz)
+  (defbuzzword test-message)
   (defmessage test-message (foo) (print foo))
   (is (buzzword-p (find-buzzword 'test-message)))
   (is (message-p (car (buzzword-messages (find-buzzword 'test-message)))))
+  (undefbuzzword test-message)
+  (let ((test-sheep (clone () () (:nickname "testie")))
+	(another-sheep (clone () () (:nickname "rejected-failure"))))
+    (defmessage test-message ((sheep test-sheep)) (sheep-nickname sheep))
+    (is (equal "testie" (test-message test-sheep)))
+    (signals sheeple::no-most-specific-message (test-message another-sheep)))
   (undefbuzzword test-message))
 
-(test more-message-definition
+(test multimessage-definition
+  "Checks that multimessages are defined correctly, with roles added
+to their respective participants, with correct role-indexes, etc."
   (defmessage test-message (foo bar) (print foo) (print bar))
-  (undefbuzzword test-message))
+  (undefbuzzword test-message)
+  )

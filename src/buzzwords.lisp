@@ -26,9 +26,9 @@
 ;; Implementation of Sheeple's buzzwords+messages (generic functions + methods)
 ;;
 ;; TODO:
-;; * Write utilities to make management of dynamic (re-/un-)definitions easier/possible/better
-;; * Write unit tests
+;; * Define some nice user-interface inspection stuff, put it in its own area
 ;; * There should be an error if defbuzzword tries to clobber a function or generic-func
+;; * Write unit tests
 ;; * AFTER unit tests... clean up code, run tests
 ;; * AFTER cleanup... --omg-optimized, run tests
 ;; * DOCUMENTATION!!1
@@ -98,8 +98,9 @@
   t)
 
 (defun participant-p (sheep message-name)
-  (find-if (lambda (role) (equal message-name (role-name role)))
-	     (sheep-direct-roles sheep)))
+  (when (member-if (lambda (role) (equal message-name (role-name role)))
+		   (sheep-direct-roles sheep))
+    t))
 
 ;;;
 ;;; Buzzword/message definition
@@ -163,8 +164,6 @@
   (pushnew message (buzzword-messages buzzword)))
 
 (defun remove-messages-with-name-and-participants (name participants)
-  ;; Keep a watchful eye on this. It only *seems* to work.
-  ;; THIS IS UGLY AS ALL FUCK
   (loop for sheep in participants
        do (loop for role in (sheep-direct-roles sheep)
 	       do (when (and (equal name (role-name role))

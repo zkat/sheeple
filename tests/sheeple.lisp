@@ -28,7 +28,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple-tests)
 
-
 (export 'sheeple-tests)
 
 (def-suite sheeple)
@@ -36,7 +35,8 @@
   (run! 'sheeple))
 
 (def-suite sheep-cloning-tests :in sheeple)
-(def-suite sheep-properties-tests :in sheeple)
+(def-suite sheep-properties-tests :in sheep-cloning-tests)
+(def-suite clone-options :in sheep-cloning-tests)
 
 (in-suite sheep-cloning-tests)
 (test clone-basic
@@ -57,35 +57,40 @@ properly signal SHEEP-HIERARCHY-ERROR."
   (let ((obj (clone () ((foo "bar") (baz "quux")))))
     (is (equal "quux" (get-property obj 'baz))))
   (signals sheep-hierarchy-error (let ((obj1 (clone () ()))
-					      (obj2 (clone () ())))
-					  (add-parent obj1 obj2)
-					  (clone (obj1 obj2) ())))
+				       (obj2 (clone () ())))
+				   (add-parent obj1 obj2)
+				   (clone (obj1 obj2) ())))
   (signals sheep-hierarchy-error (let* ((obj1 (clone () ()))
-					       (obj2 (clone (obj1) ())))
-					  (clone (obj1 obj2) ()))))
+					(obj2 (clone (obj1) ())))
+				   (clone (obj1 obj2) ()))))
 
-(test clone-options
-  "Runs tests on the options feature of CLONE, and checks that existing options work."
+
+(in-suite clone-options)
+(test :copy-values
+  "Tests the :copy-values clone option"
   (let* ((test-sheep (clone () ((var "value" :accessor get-var)) (:nickname "test-sheep")))
 	 (another-sheep (clone (test-sheep) () (:copy-values t))))
-    ;; :copy-values test
     (setf (get-var test-sheep) "new-value")
     (is (equal "new-value" (get-var test-sheep)))
-    (is (equal "value" (get-var another-sheep)))
-    ;; :nickname test
+    (is (equal "value" (get-var another-sheep)))))
+(test :nickname-test
+  "Tests the :nickname clone option"
+  (let* ((test-sheep (clone () ((var "value" :accessor get-var)) (:nickname "test-sheep")))
+	 (another-sheep (clone (test-sheep) () (:copy-values t))))
     (is (equal "test-sheep" (sheep-nickname test-sheep)))
     (setf (sheep-nickname another-sheep) "Johnny Bravo")
-    (is (equal "Johnny Bravo" (sheep-nickname another-sheep)))
-    ;; general
-    (signals invalid-option-error (clone () () (:anything-else)))
-    (signals invalid-option-error (clone () () ()))
-    (signals probably-meant-to-be-option (clone () (:copy-value t)))))
+    (is (equal "Johnny Bravo" (sheep-nickname another-sheep)))))
+(test general-clone-options
+  "Runs tests on the options feature of CLONE, and checks that existing options work."
+  (signals invalid-option-error (clone () () (:anything-else)))
+  (signals invalid-option-error (clone () () ()))
+  (signals probably-meant-to-be-option (clone () (:copy-value t))))
 
 (in-suite sheep-properties-tests)
 (test properties-basic
   "Basic property-setting and property-access tests. Ensures they follow spec."
   (let* ((main-sheep (clone () ()))
-	(child-sheep (clone (main-sheep) ())))
+	 (child-sheep (clone (main-sheep) ())))
     (is (eql nil (available-properties main-sheep)))
     (signals unbound-property (get-property main-sheep 'foo))
     (is (eql "bar" 

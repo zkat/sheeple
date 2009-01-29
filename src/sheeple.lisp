@@ -126,7 +126,7 @@
 (defun copy-parent-values (sheep)
   (let ((all-slots (available-properties sheep)))
     (loop for slot in all-slots
-	 do (setf (get-property sheep `',slot) (get-property sheep `',slot)))))
+	 do (setf (get-property sheep slot) (get-property sheep slot)))))
 
 (defun add-readers-to-sheep (readers prop-name sheep)
   (loop for reader in readers
@@ -134,7 +134,8 @@
      do (ensure-message :name reader
 			:lambda-list '(sheep)
 			:participants (list sheep)
-			:body `(get-property sheep ',prop-name))))
+			:body `(get-property sheep ',prop-name)
+			:function (lambda (sheep) (get-property sheep prop-name)))))
 
 (defun add-writers-to-sheep (writers prop-name sheep)
   (loop for writer in writers
@@ -142,7 +143,9 @@
      do (ensure-message :name writer
 			:lambda-list '(new-value sheep)
 			:participants (list =dolly= sheep)
-			:body `(setf (get-property sheep ',prop-name) new-value))))
+			:body `(setf (get-property sheep ',prop-name) new-value)
+			:function (lambda (new-value sheep) (setf (get-property sheep prop-name)
+								   new-value)))))
 
 (defun set-up-inheritance (new-sheep sheeple)
   "If SHEEPLE is non-nil, adds them in order to "

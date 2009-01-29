@@ -81,18 +81,37 @@
     :initarg :message-pointer
     :accessor message-pointer)))
 
+(defgeneric buzzword-p (buzzword?))
+(defmethod buzzword-p (anything-else)
+  (declare (ignore anything-else))
+  nil)
+(defmethod buzzword-p ((buzzword standard-buzzword))
+  (declare (ignore buzzword))
+  t)
+
+(defgeneric message-p (message?))
+(defmethod message-p (anything-else)
+  (declare (ignore anything-else))
+  nil)
+(defmethod message-p ((message standard-message))
+  (declare (ignore message))
+  t)
+
+(defun participant-p (sheep message-name)
+  (find-if (lambda (role) (equal message-name (role-name role)))
+	     (sheep-direct-roles sheep)))
+
 ;;;
 ;;; Buzzword/message definition
 ;;;
 
-;;; Buzzword definition
 ;;; Buzzword table
 (let ((buzzword-table (make-hash-table :test #'equal)))
 
   (defun find-buzzword (name &optional (errorp t))
     (let ((buzz (gethash name buzzword-table nil)))
       (if (and (null buzz) errorp)
-	  (error "No buzzword named ~s." name)
+	  (error 'no-such-buzzword)
 	  buzz)))
   
   (defun (setf find-buzzword) (new-value name)
@@ -106,7 +125,9 @@
     (remhash name buzzword-table))
   
 ) ; end buzzword-table closure
+(define-condition no-such-buzzword (error) ())
 
+;;; Buzzword definition
 (defun ensure-buzzword (&key name documentation)
   (if (find-buzzword name nil)
       (find-buzzword name)
@@ -142,15 +163,13 @@
 (defun remove-messages-with-name-and-participants (name participants)
   ;; Keep a watchful eye on this. It only *seems* to work.
   ;; THIS IS UGLY AS ALL FUCK
-  (mapc (lambda (sheep) 
-	    (mapc (lambda (role) 
-		    (when (and (eql name (role-name role))
-			       (equal participants
-				      (message-participants
-				       (message-pointer role))))
-		      (delete-role role sheep)))
-		  (sheep-direct-roles sheep)))
-	participants))
+  (loop for sheep in participants
+       do (loop for role in (sheep-direct-roles sheep)
+	       do (when (and (equal name (role-name role))
+			     (equal participants
+				    (message-participants
+				     (message-pointer role))))
+		    (delete-role role sheep)))))
 
 (defun delete-role (role sheep)
   (setf (sheep-direct-roles sheep)
@@ -172,14 +191,15 @@
   (remove-messages-with-name-and-participants name participants))
 
 (defun undefine-buzzword (&key name)
-  (let ((buzzword (find-buzzword name)))
-    (loop for message in (buzzword-messages buzzword)
-       do (loop for participant in (message-participants message)
-	     do (loop for role in (sheep-direct-roles participant)
-		   do (delete-role role participant))))
-    (forget-buzzword name)
-    (fmakunbound name)
-    buzzword))
+  (let ((buzzword (find-buzzword name nil)))
+    (when buzzword
+     (loop for message in (buzzword-messages buzzword)
+	do (loop for participant in (message-participants message)
+	      do (loop for role in (sheep-direct-roles participant)
+		    do (delete-role role participant))))
+     (forget-buzzword name)
+     (fmakunbound name)
+     buzzword)))
 
 ;;; Macros
 (defmacro defbuzzword (name &optional (docstring ""))
@@ -261,7 +281,11 @@
     (reset-message-ranks)
     (if most-specific-message
 	most-specific-message
-	(error "No most specific message for buzzword ~a when given args:~%~a" selector args))))
+	(error 'no-most-specific-message
+	       :format-control "No most specific method found for ~S with arguments ~S"
+	       :format-args (list selector args)))))
+
+(define-condition no-most-specific-message (error) ())
 
 (defun fully-specified-p (rank)
   (loop for item across rank

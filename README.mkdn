@@ -1,5 +1,5 @@
 About
------
+=====
 
 Sheeple is a Dynamic, CLOS-like Prototype-based Object-Oriented Programming Framework that strives
 to maximize application flexibility, minimize cost while maximizing value, optimize programmer time,
@@ -73,6 +73,9 @@ Planned features that have not yet been implemented include:
   might get written at some point.
 
 
+Usage manual
+============
+
 Vocabulary
 ----------
 
@@ -114,7 +117,7 @@ methods, cloning, etc.
 
 (pseudo-)Specification:
 -----------------------
-== Sheep Cloning ==
+### == Sheep Cloning ==
 
 * Objects are prototypes. Objects are called sheep or sheeple. All sheep are children of =DOLLY=.
 
@@ -187,7 +190,7 @@ direct-properties will no longer apply to child. Returns the CHILD object.
 corresponding checks.
 
 
-== Property Values ==
+### == Property Values ==
 
 * Properties are key-value pairs, where key is a symbol.
 
@@ -256,6 +259,6 @@ sheep's inheritance chain. The value of that ancestor's property is used instead
         (available-properties *sample-sheep*) ==> (BAZ)
 
 
-== Buzzwords ==
+### == Buzzwords ==
 
 TODO - Refer to src/packages.lisp for a peek at the interface

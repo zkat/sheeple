@@ -34,6 +34,7 @@
 (def-suite sheeple)
 (defun sheeple-tests ()
   (run! 'sheeple))
+
 (def-suite sheep-cloning-tests :in sheeple)
 (def-suite sheep-properties-tests :in sheeple)
 
@@ -41,11 +42,10 @@
 (test clone-basic
   "Basic cloning tests. Confirm the CLONE macro works correctly, and that cyclic hierarchy lists
 properly signal SHEEP-HIERARCHY-ERROR."
-  (is (eql (car (sheep-direct-parents (clone () ()))) =dolly=))
+  (is (eql =dolly= (car (sheep-direct-parents (clone () ())))))
 
-  (is (= (length (available-properties (clone () ((foo "bar")))))
-	 1))
-
+  (is (= 1 (length (available-properties (clone () ((foo "bar")))))))
+  
   (let ((obj1 (clone () ())))
     (is (eql obj1
 	     (car (sheep-direct-parents (clone (obj1) ()))))))
@@ -60,7 +60,7 @@ properly signal SHEEP-HIERARCHY-ERROR."
 
   (let ((obj (clone () ((foo "bar") (baz "quux")))))
     (is (equal "quux" (get-property obj 'baz))))
-  
+
   (signals sheep-hierarchy-error (let ((obj1 (clone () ()))
 					      (obj2 (clone () ())))
 					  (add-parent obj1 obj2)
@@ -73,12 +73,19 @@ properly signal SHEEP-HIERARCHY-ERROR."
 (test clone-options
   "Runs tests on the options feature of CLONE, and checks that existing options work."
   (let* ((test-sheep (clone () ((var "value" :accessor get-var)) (:nickname "test-sheep")))
-	 (another-sheep (clone (test-sheep) () (:copy-values t) (:nickname "another-sheep"))))
-    (is (equal "test-sheep" (sheep-nickname test-sheep)))
+	 (another-sheep (clone (test-sheep) () (:copy-values t))))
+    ;; :copy-values test
     (setf (get-var test-sheep) "new-value")
     (is (equal "new-value" (get-var test-sheep)))
-;    (is (equal "value" (get-var another-sheep)))
-))
+    (is (equal "value" (get-var another-sheep)))
+    ;; :nickname test
+    (is (equal "test-sheep" (sheep-nickname test-sheep)))
+    (setf (sheep-nickname another-sheep) "Johnny Bravo")
+    (is (equal "Johnny Bravo" (sheep-nickname another-sheep)))
+    ;; general
+    (signals invalid-option-error (clone () () (:anything-else)))
+    (signals invalid-option-error (clone () () ()))
+    (signals probably-meant-to-be-option (clone () (:copy-value t)))))
 
 (in-suite sheep-properties-tests)
 (test properties-basic
@@ -106,3 +113,15 @@ properly signal SHEEP-HIERARCHY-ERROR."
     (signals unbound-property (get-property child-sheep 'foo))
     (is (eql nil (remove-property main-sheep 'foo)))))
 
+(test property-options
+  "Tests to confirm property-option functionality."
+  (let ((test-sheep (clone () ((var "value" :accessor get-var)))))
+    (is (equal "value" (get-var test-sheep)))
+    (is (equal "new-value" (setf (get-var test-sheep) "new-value")))
+    (is (equal "new-value" (get-var test-sheep))))
+  (let ((test-sheep (clone () ((var "value" :reader var :writer set-var)))))
+    (is (equal "value" (var test-sheep)))
+    (signals undefined-function (setf (var test-sheep) "new-value"))
+    (is (equal "value" (var test-sheep)))
+    (is (equal "new-value" (set-var "new-value" test-sheep)))
+    (is (equal "new-value" (var test-sheep)))))

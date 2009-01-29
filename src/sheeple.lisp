@@ -80,6 +80,7 @@
     (set-up-options options sheep)
     sheep))
 
+(defgeneric sheep-p (sheep?))
 (defmethod sheep-p ((sheep standard-sheep-class))
   (declare (ignore sheep))
   t)
@@ -100,9 +101,13 @@
 	(value (getf property-list :value))
 	(readers (getf property-list :readers))
 	(writers (getf property-list :writers)))
+    (when (keywordp name)
+      (error 'probably-meant-to-be-option))
     (setf (get-property sheep name) value)
     (add-readers-to-sheep readers name sheep)
     (add-writers-to-sheep writers name sheep)))
+
+(define-condition probably-meant-to-be-option (error) ())
 
 ;;;
 ;;; Clone options
@@ -124,9 +129,10 @@
 (define-condition invalid-option-error (error) ())
 
 (defun copy-parent-values (sheep)
-  (let ((all-slots (available-properties sheep)))
-    (loop for slot in all-slots
-	 do (setf (get-property sheep slot) (get-property sheep slot)))))
+  (let ((all-property-names (available-properties sheep)))
+    (loop for pname in all-property-names
+	 do (let ((avail-value (get-property sheep pname)))
+	      (setf (get-property sheep pname) avail-value)))))
 
 (defun add-readers-to-sheep (readers prop-name sheep)
   (loop for reader in readers

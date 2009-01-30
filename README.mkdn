@@ -79,7 +79,7 @@ Planned features that have not yet been implemented include:
   might get written at some point.
 
 
-Usage manual
+Usage Manual
 ============
 
 Vocabulary
@@ -126,8 +126,8 @@ methods, cloning, etc.
 
 * Most lisp types have fleeces assigned to them, and they follow the =string= naming scheme.
 
-(pseudo-)Specification:
------------------------
+API
+---
 ### == Sheep Cloning ==
 
 * Objects are prototypes. Objects are called sheep or sheeple. All sheep are children of =DOLLY=.
@@ -328,7 +328,10 @@ CLOS programming should have a fairly easy time wrapping their head around Sheep
   that lambda-list slot.
   Also unlike defmethod, the lambda-lists for messages can be of variable length, while still
   dispatching on all arguments.
-  The format is: (defmessage message-name (plain-variable (specialized-variable object)) @body)
+  The format is: 
+
+        (defmessage message-name (plain-variable (specialized-variable object)) @body)
+
   A Massive example:
 
         (defparameter sheep1 (clone () ()))
@@ -371,8 +374,8 @@ CLOS programming should have a fairly easy time wrapping their head around Sheep
            (concatenate 'string foo bar))
         (synergize "Hey " "Jude") => "Hey Jude"
 
-* undefbuzzword completely undefines a buzzword, removing all messages and making the function
+* UNDEFBUZZWORD completely undefines a buzzword, removing all messages and making the function
   unbound.
 
-* undefmessage accepts the same kind of lambda-list that defmessage does, but undefines whatever
+* UNDEFMESSAGE accepts the same kind of lambda-list that defmessage does, but undefines whatever
   message fits that lambda-list.

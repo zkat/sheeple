@@ -56,6 +56,9 @@ properly signal SHEEP-HIERARCHY-ERROR."
     (is (equal "bar" (get-property obj 'foo))))
   (let ((obj (clone () ((foo "bar") (baz "quux")))))
     (is (equal "quux" (get-property obj 'baz))))
+  (let* ((obj1 (clone () ()))
+	 (obj2 (clone () ())))
+    (is (= 1 (- (sid obj2) (sid obj1)))))
   (signals sheep-hierarchy-error (let ((obj1 (clone () ()))
 				       (obj2 (clone () ())))
 				   (add-parent obj1 obj2)
@@ -64,27 +67,6 @@ properly signal SHEEP-HIERARCHY-ERROR."
 					(obj2 (clone (obj1) ())))
 				   (clone (obj1 obj2) ()))))
 
-
-(in-suite clone-options)
-(test :copy-values
-  "Tests the :copy-values clone option"
-  (let* ((test-sheep (clone () ((var "value" :accessor get-var)) (:nickname "test-sheep")))
-	 (another-sheep (clone (test-sheep) () (:copy-values t))))
-    (setf (get-var test-sheep) "new-value")
-    (is (equal "new-value" (get-var test-sheep)))
-    (is (equal "value" (get-var another-sheep)))))
-(test :nickname-test
-  "Tests the :nickname clone option"
-  (let* ((test-sheep (clone () ((var "value" :accessor get-var)) (:nickname "test-sheep")))
-	 (another-sheep (clone (test-sheep) () (:copy-values t))))
-    (is (equal "test-sheep" (sheep-nickname test-sheep)))
-    (setf (sheep-nickname another-sheep) "Johnny Bravo")
-    (is (equal "Johnny Bravo" (sheep-nickname another-sheep)))))
-(test general-clone-options
-  "Runs tests on the options feature of CLONE, and checks that existing options work."
-  (signals invalid-option-error (clone () () (:anything-else)))
-  (signals invalid-option-error (clone () () ()))
-  (signals probably-meant-to-be-option (clone () (:copy-value t))))
 
 (in-suite sheep-properties-tests)
 (test properties-basic
@@ -124,3 +106,39 @@ properly signal SHEEP-HIERARCHY-ERROR."
     (is (equal "value" (var test-sheep)))
     (is (equal "new-value" (set-var "new-value" test-sheep)))
     (is (equal "new-value" (var test-sheep)))))
+
+(in-suite clone-options)
+(test :copy-all-values
+  "Tests the :copy-all-values clone option"
+  (let* ((test-sheep (clone () ((var "value")) (:nickname "test-sheep")))
+	 (another-sheep (clone (test-sheep) () (:copy-all-values t))))
+    (setf (get-property test-sheep 'var) "new-value")
+    (is (equal "new-value" (get-property test-sheep 'var)))
+    (is (equal "value" (get-property another-sheep 'var)))))
+
+(test :nickname
+  "Tests the :nickname clone option"
+  (let* ((test-sheep (clone () ((var "value")) (:nickname "test-sheep")))
+	 (another-sheep (clone (test-sheep) () (:copy-all-values t))))
+    (is (equal "test-sheep" (sheep-nickname test-sheep)))
+    (setf (sheep-nickname another-sheep) "Johnny Bravo")
+    (is (equal "Johnny Bravo" (sheep-nickname another-sheep)))))
+
+(test :mitosis
+  "Tests to somehow figure out whether the :mitosis option actually works"
+  ;; This is a lost cause. This is a horrible horrible thing to do. Why do I do this?
+  (let* ((the-parent (clone () ((name "Dad")) (:nickname "The-parent")))
+	 (the-bro (clone (the-parent) ((name "Bro")) (:nickname "The Bro")))
+	 (the-younger-bro (clone (the-bro) () (:mitosis t) (:nickname "The lil' bro")))
+	 (the-other-bro (clone (the-bro) () (:mitosis t) (:copy-direct-values t) (:nickname "Another-bro")))
+	 (some-random-dude (clone (the-parent) () (:mitosis nil) (:nickname "The Guy"))))
+    (is (equal (get-property the-parent 'name) (get-property the-younger-bro 'name)))
+    (is (equal (sheep-direct-parents the-bro) (sheep-direct-parents the-younger-bro)))
+    (is (equal (sheep-direct-parents the-bro) (sheep-direct-parents some-random-dude)))
+    (signals sheeple::mitosis-error (clone (the-bro the-other-bro) () (:mitosis t)))))
+
+(test general-clone-options
+  "Runs tests on the options feature of CLONE, and checks that existing options work."
+  (signals invalid-option-error (clone () () (:anything-else)))
+  (signals invalid-option-error (clone () () ()))
+  (signals probably-meant-to-be-option (clone () (:copy-all-values t))))

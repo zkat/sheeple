@@ -30,6 +30,8 @@
    ;; Buzzwords
    :defbuzzword
    :defmessage
+   :undefbuzzword
+   :undefmesage
    :find-buzzword
    :participant-p
    :sheepify

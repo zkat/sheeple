@@ -176,7 +176,8 @@ accessed with SHEEP-NICKNAME.
   direct-values locally, still relying on the hierarchy-list for other properties.
 
 * The :nickname CLONE option sets a nickname for the sheep metaobject, which is used when printing
-  the object at the REPL:
+  the object at the REPL. The nickname can be retrieved and changed at any time with the
+  sheep-nickname accessor function.
 
          SHEEPLE> (clone () () (:nickname "Johnny Bravo"))
          #<Standard Sheep SID: 22 AKA: Johnny Bravo {B777401}>

@@ -190,7 +190,7 @@ accessed with SHEEP-NICKNAME.
 #### Property Options
 
 * :reader - creates a non-setfable reader message for this property. Trying to SETF signals a
-            NO-MOST-SPECIFIC-MESSAGE error.
+  NO-MOST-SPECIFIC-MESSAGE error.
 
         (defparameter *sample-sheep* (clone () ((prop "value" :reader read-prop))))
 	(read-prop *sample-sheep*) => "value"

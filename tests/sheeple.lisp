@@ -141,10 +141,10 @@ the 1-argument restriction. It signals a MITOSIS-ERROR if the list is longer tha
 	 (the-bro (clone (the-parent) ((name "Bro")) (:nickname "The Bro")))
 	 (the-younger-bro (clone (the-bro) () (:mitosis t) (:nickname "The lil' bro")))
 	 (some-random-dude (clone (the-parent) () (:mitosis nil) (:nickname "The Guy"))))
-    (is (equal (get-property the-parent 'name) (get-property the-younger-bro 'name)))
+    (is (equal (get-property the-bro 'name) (get-property the-younger-bro 'name)))
     (is (equal (sheep-direct-parents the-bro) (sheep-direct-parents the-younger-bro)))
     (is (equal (sheep-direct-parents the-bro) (sheep-direct-parents some-random-dude)))
-    (signals sheeple::mitosis-error (clone (the-bro the-other-bro) () (:mitosis t)))))
+    (signals sheeple::mitosis-error (clone (the-bro some-random-dude) () (:mitosis t)))))
 
 (test general-clone-options
   "Runs tests on the options feature of CLONE, and checks that existing options work."

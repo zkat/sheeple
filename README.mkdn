@@ -368,3 +368,9 @@ CLOS programming should have a fairly easy time wrapping their head around Sheep
         (defmessage synergize ((foo =string=) (bar =string=))
            (concatenate 'string foo bar))
         (synergize "Hey " "Jude") => "Hey Jude"
+
+* undefbuzzword completely undefines a buzzword, removing all messages and making the function
+  unbound.
+
+* undefmessage accepts the same kind of lambda-list that defmessage does, but undefines whatever
+  message fits that lambda-list.

@@ -354,7 +354,8 @@ CLOS programming should have a fairly easy time wrapping their head around Sheep
 	
         (defmessage synergize ((foo =float=)) (floatp float)) 
         (synergize 5.0) => T                                ; Sheeple has a CLOS-like hierarchy for
-	(synergize 5) => "FIVE!! THIS IS VERY EXCITING!!1"  ; fleeced wolves.
+        (synergize 5) => "FIVE!! THIS IS VERY EXCITING!!1"  ; fleeced wolves.
+        (synergize 6) => 12
 
         (defmessage synergize ((foo sheep1) (bar sheep2)) 
            (print "I got sheep1 first, then sheep2"))

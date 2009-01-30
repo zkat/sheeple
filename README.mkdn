@@ -147,8 +147,8 @@ accessed with SHEEP-NICKNAME.
 * New sheeple are created by using the CLONE macro. CLONE works similar to DEFCLASS:
 
          (clone (parent1 parent2)
-           ((slot1 value1)
-            (slot2 value2 :slot-option value))
+           ((property1 value1)
+            (property2 value2 :property-option value))
 	   (:clone-option value)
 	   (:another-option value))
 
@@ -156,18 +156,58 @@ accessed with SHEEP-NICKNAME.
 
          (clone () ((foo 10)))
 
-         (defvar *sample-sheep* (clone () ((my-slot "Wheee" :accessor get-my-slot))))
+         (defvar *sample-sheep* (clone () ((my-property "Wheee" :accessor get-my-property))))
 
 * An empty parent list when using CLONE will automatically clone =DOLLY=
 
-* The :copy-values CLONE option copies over all values available to the new sheep into the sheep
+#### Clone Options
+
+* The :copy-all-values CLONE option copies over all values available to the new sheep into the sheep
   itself. This is useful for ensuring that other objects do not change an available property value.
+
+* :copy-direct-values works like :copy-all-values, except it only copies the new sheep's parents'
+  direct-values locally, still relying on the hierarchy-list for other properties.
 
 * The :nickname CLONE option sets a nickname for the sheep metaobject, which is used when printing
   the object at the REPL:
 
          SHEEPLE> (clone () () (:nickname "Johnny Bravo"))
          #<Standard Sheep SID: 22 AKA: Johnny Bravo {B777401}>
+
+* Another option, although highly experimental, is :mitosis. This option is not for the faint of
+  heart. :mitosis basically turns CLONE into a macro that accepts only one item in the parent list.
+  All direct properties, roles, and direct parents are then copied into the new object, without
+  making the object it clones a parent of the new object.
+
+#### Property Options
+
+* :reader - creates a non-setfable reader message for this property. Trying to SETF signals a
+            NO-MOST-SPECIFIC-MESSAGE error.
+
+        (defparameter *sample-sheep* (clone () ((prop "value" :reader read-prop))))
+	(read-prop *sample-sheep*) => "value"
+	(setf (read-prop *sample-sheep*) "new-value" => NO-MOST-SPECIFIC-MESSAGE for (SETF READ-PROP)
+
+* :writer - creates a writer message, without creating a matching reader. The lambda-list for this
+            message is: (new-value sheep-object).
+
+        (defparameter *sample-sheep* (clone () ((prop "value" :reader read-prop :writer set-prop-to))))
+        (set-me-to "new-value" *sample-sheep*) => "new-value"
+        (read-prop *sample-sheep*) => "new-value"
+
+* :accessor - Creates an accessor, which is a reader that you can use SETF on.
+
+        (defparameter *sample-sheep* (clone () ((prop "value" :accessor prop))))
+        (prop *sample-sheep*) => "value"
+        (setf (prop *sample-sheep*) "new-value" => "new-value"
+
+
+#### Sheep Inspection
+
+* The functions DIRECT-PARENT-P, ANCESTOR-P, DIRECT-CHILD-P, and DESCENDANT-P return T for their
+corresponding checks.
+
+#### Sheep Manipulation
 
 * The function ADD-PARENT receives a NEW-PARENT sheep, and a CHILD sheep. It pushes NEW-PARENT into
 CHILD's direct-parents if NEW-PARENT is not already there. If using ADD-PARENT would result in a
@@ -190,11 +230,8 @@ direct-properties will no longer apply to child. Returns the CHILD object.
         (remove-parent *daddy* *kiddo* :keep-properties t) 
         => KIDDO object, with a copy of *daddy*'s direct-slots.
 
-* The functions DIRECT-PARENT-P, ANCESTOR-P, DIRECT-CHILD-P, and DESCENDANT-P return T for their
-corresponding checks.
 
-
-### == Property Values ==
+### == Properties ==
 
 * Properties are key-value pairs, where key is a symbol.
 
@@ -265,4 +302,3 @@ sheep's inheritance chain. The value of that ancestor's property is used instead
 
 ### == Buzzwords ==
 
-TODO - Refer to src/packages.lisp for a peek at the interface

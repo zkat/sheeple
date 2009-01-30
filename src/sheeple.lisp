@@ -91,8 +91,8 @@
 	   (setf sheep (mitosis sheeple sheep)))
 	  (t
 	   (setf sheep (set-up-inheritance sheep sheeple))))
-    (set-up-properties properties sheep)
     (set-up-other-options options sheep)
+    (set-up-properties properties sheep)
     sheep))
 
 (defun set-up-inheritance (new-sheep sheeple)

@@ -64,6 +64,12 @@ Features available so far:
 
 Planned features that have not yet been implemented include:
 
+* Various convenience tools for inspection
+
+* Documentation string parsing for messages
+
+* Read-only sheeple/individual properties
+
 * CLOS integration, including autoboxing of entire class hierarchies.
 
 * :before and :after messages (no :around for now)
@@ -118,6 +124,7 @@ methods, cloning, etc.
 
 * =white-fang= - All fleeced wolves are descendants of =white-fang=, which is a clone of =dolly=.
 
+* Most lisp types have fleeces assigned to them, and they follow the =string= naming scheme.
 
 (pseudo-)Specification:
 -----------------------
@@ -300,5 +307,64 @@ sheep's inheritance chain. The value of that ancestor's property is used instead
         (available-properties *sample-sheep*) ==> (BAZ)
 
 
-### == Buzzwords ==
+### == Buzzwords/Messages ==
 
+Buzzwords and Messages are very similar to CLOS' generic functions/methods. Anyone familiar with
+CLOS programming should have a fairly easy time wrapping their head around Sheeple's system.
+
+#### Main interface
+
+* The DEFBUZZWORD macro is used to define a buzzword that will hold different messages. It accepts
+  an optional documentation value. Buzzwords are automatically defined by defmessage, but the
+  preferred and recommended style is to define buzzwords first. Not doing so signals STYLE-WARNING.
+
+        (defbuzzword synergize "Synergizes its arguments, preparing them for the Next Generation")
+
+* The DEFMESSAGE macro defines a message based on its arguments. Sheeple messages are left-weighted
+  multimessages which can dispatch on multiple different arguments. The syntax follows closely with
+  defmethod's specialized lambda-list syntax, except the specializers are actual objects instead of
+  class names. An unspecialized item in the lambda list will default to dispatching on =dolly= for
+  that lambda-list slot.
+  Also unlike defmethod, the lambda-lists for messages can be of variable length, while still
+  dispatching on all arguments.
+  The format is: (defmessage message-name (plain-variable (specialized-variable object)) @body)
+  A Massive example:
+
+        (defparameter sheep1 (clone () ()))
+	(defparameter sheep2 (clone () ()))
+
+        (defmessage synergize (foo) 
+           (print foo)) ;defaults to =dolly=
+        (synergize "hey!") => 5 ;the message facility autoboxes regular lisp objects
+
+        (defmessage synergize ((something sheep1)) 
+           (format t "~a is the first sheep. FYI"))
+        ;; lambda-list variables do not have to be the same across messages, 
+        ;; I only do it here for convenience.
+        (synergize sheep1) => #<SHEEP SID:3> is the first sheep. FYI
+
+	(defmessage synergize ((foo =number=)) 
+           (* 2 foo)) ;this works inside closures, by the way
+        (synergize 5) => 10
+
+	(defmessage synergize ((foo 5)) ;any object can be dispatched on. Non-sheep are autoboxed.
+           (print "FIVE!! THIS IS VERY EXCITING!!1"))
+        (synergize 5) => "FIVE!! THIS IS VERY EXCITING!!1"
+	
+        (defmessage synergize ((foo =float=)) (floatp float)) 
+	(synergize 5.0) => T                                ; Sheeple has a CLOS-like hierarchy for
+	(synergize 5) => "FIVE!! THIS IS VERY EXCITING!!1"  ; fleeced wolves.
+
+        (defmessage synergize ((foo sheep1) (bar sheep2)) 
+           (print "I got sheep1 first, then sheep2"))
+        (defmessage synergize ((foo sheep2) (bar sheep1)) 
+           (print "I got sheep2 first, then the first sheep."))
+
+        (defmessage synergize ((foo =number=) (bar =number=)) 
+           (+ foo bar))
+	(synergize 3 5) => 8
+        (synergize 4 "hey hey hey!") => ERROR: NO-MOST-SPECIFIC-MESSAGE
+        
+        (defmessage synergize ((foo =string=) (bar =string=))
+           (concatenate 'string foo bar))
+        (synergize "Hey " "Jude") => "Hey Jude"

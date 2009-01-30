@@ -125,4 +125,11 @@ to their respective participants, with correct role-indexes, etc."
   (defmessage foo ((foo =number=))
     foo)
   (defmessage foo ((foo =number=) (bar =number=))
-    (+ foo bar)))
+    (+ foo bar))
+  (defmessage foo (foo bar)
+    foo bar)
+  (is (= 5 (foo 2 3)))
+  (is (= 5 (foo 5)))
+  (is (equal "bar" (foo "foo" "bar"))))
+
+

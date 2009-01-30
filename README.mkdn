@@ -156,8 +156,8 @@ accessed with SHEEP-NICKNAME.
          (clone (parent1 parent2)
            ((property1 value1)
             (property2 value2 :property-option value))
-	   (:clone-option value)
-	   (:another-option value))
+           (:clone-option value)
+           (:another-option value))
 
          (clone () ()) ;; also valid. Options are optional!
 

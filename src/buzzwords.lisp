@@ -279,7 +279,8 @@
 					(eql not-this-message-please most-specific-message)
 					(< (calculate-rank-score (message-rank curr-message))
 					   (calculate-rank-score (message-rank most-specific-message))))
-				(setf most-specific-message curr-message)))))))))
+				(unless (/= n (length (message-lambda-list curr-message)))
+				 (setf most-specific-message curr-message))))))))))
     (reset-message-ranks)
     (if most-specific-message
 	most-specific-message

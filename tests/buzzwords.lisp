@@ -121,6 +121,7 @@ to their respective participants, with correct role-indexes, etc."
   (undefbuzzword test-message))
 
 (test multimessage-dispatch
+  ;; TODO
   "Checks correct multimethod dispatching."
   (defmessage foo ((foo =number=))
     foo)
@@ -130,6 +131,37 @@ to their respective participants, with correct role-indexes, etc."
     foo bar)
   (is (= 5 (foo 2 3)))
   (is (= 5 (foo 5)))
-  (is (equal "bar" (foo "foo" "bar"))))
+  (is (equal "bar" (foo "foo" "bar")))
+  (signals sheeple::no-most-specific-message (foo 1 2 3))
+  (undefbuzzword foo)
+  (let* ((sheep1 (clone () () (:nickname "sheep1")))
+	 (sheep2 (clone (sheep1) () (:nickname "sheep2")))
+	 (sheep3 (clone (sheep1) () (:nickname "sheep3")))
+	 (sheep4 (clone (sheep2) () (:nickname "sheep4")))
+	 (sheep5 (clone (sheep4 sheep3) () (:nickname "sheep5"))))
+    (defmessage foo ((foo sheep1) (bar sheep1)) 
+      (declare (ignore foo bar))
+      (print "sheep1 x2"))
+    (defmessage foo ((foo sheep2) (bar sheep2))
+      (declare (ignore foo bar))
+      (print "sheep2 x2"))
+    (is (equal "sheep1 x2" (foo sheep1 sheep1)))
+    (is (equal "sheep2 x2" (foo sheep2 sheep2)))
+    (is (equal "sheep1 x2" (foo sheep3 sheep3)))
+    (is (equal "sheep1 x2" (foo sheep3 sheep4)))
+    (is (equal "sheep1 x2" (foo sheep5 sheep1)))
+    (is (equal "sheep2 x2" (foo sheep5 sheep2)))
+    (defmessage foo ((foo sheep1) (bar sheep2))
+      (declare (ignore foo bar))
+      (print "sheep1,2"))
+    (defmessage foo ((foo sheep2) (bar sheep1))
+      (declare (ignore foo bar))
+      (print "sheep2,1"))
+    (is (equal "sheep1,2" (foo sheep1 sheep2)))
+    (is (equal "sheep2,1" (foo sheep2 sheep1)))
+    ;; I don't even know how to test the advanced dispatch stuff...
+    ))
+
+
 
 

@@ -332,7 +332,7 @@ CLOS programming should have a fairly easy time wrapping their head around Sheep
   A Massive example:
 
         (defparameter sheep1 (clone () ()))
-	(defparameter sheep2 (clone () ()))
+        (defparameter sheep2 (clone () ()))
 
         (defmessage synergize (foo) 
            (print foo)) ;defaults to =dolly=
@@ -344,16 +344,16 @@ CLOS programming should have a fairly easy time wrapping their head around Sheep
         ;; I only do it here for convenience.
         (synergize sheep1) => #<SHEEP SID:3> is the first sheep. FYI
 
-	(defmessage synergize ((foo =number=)) 
+        (defmessage synergize ((foo =number=)) 
            (* 2 foo)) ;this works inside closures, by the way
         (synergize 5) => 10
 
-	(defmessage synergize ((foo 5)) ;any object can be dispatched on. Non-sheep are autoboxed.
+        (defmessage synergize ((foo 5)) ;any object can be dispatched on. Non-sheep are autoboxed.
            (print "FIVE!! THIS IS VERY EXCITING!!1"))
         (synergize 5) => "FIVE!! THIS IS VERY EXCITING!!1"
 	
         (defmessage synergize ((foo =float=)) (floatp float)) 
-	(synergize 5.0) => T                                ; Sheeple has a CLOS-like hierarchy for
+        (synergize 5.0) => T                                ; Sheeple has a CLOS-like hierarchy for
 	(synergize 5) => "FIVE!! THIS IS VERY EXCITING!!1"  ; fleeced wolves.
 
         (defmessage synergize ((foo sheep1) (bar sheep2)) 
@@ -363,7 +363,7 @@ CLOS programming should have a fairly easy time wrapping their head around Sheep
 
         (defmessage synergize ((foo =number=) (bar =number=)) 
            (+ foo bar))
-	(synergize 3 5) => 8
+        (synergize 3 5) => 8
         (synergize 4 "hey hey hey!") => ERROR: NO-MOST-SPECIFIC-MESSAGE
         
         (defmessage synergize ((foo =string=) (bar =string=))

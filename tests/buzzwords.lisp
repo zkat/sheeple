@@ -122,4 +122,7 @@ to their respective participants, with correct role-indexes, etc."
 
 (test multimessage-dispatch
   "Checks correct multimethod dispatching."
-  )
+  (defmessage foo ((foo =number=))
+    foo)
+  (defmessage foo ((foo =number=) (bar =number=))
+    (+ foo bar)))

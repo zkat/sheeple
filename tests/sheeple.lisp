@@ -94,7 +94,7 @@ properly signal SHEEP-HIERARCHY-ERROR."
     (signals unbound-property (get-property child-sheep 'foo))
     (is (eql nil (remove-property main-sheep 'foo)))))
 
-(test property-options
+(test auto-generated-accessors
   "Tests to confirm property-option functionality."
   (let ((test-sheep (clone () ((var "value" :accessor get-var)))))
     (is (equal "value" (get-var test-sheep)))
@@ -109,12 +109,18 @@ properly signal SHEEP-HIERARCHY-ERROR."
 
 (in-suite clone-options)
 (test :copy-all-values
-  "Tests the :copy-all-values clone option"
+  "Tests the :copy-all-values clone option. It's supposed to pull in
+all available property values from the sheep hierarchy and set them locally."
   (let* ((test-sheep (clone () ((var "value")) (:nickname "test-sheep")))
-	 (another-sheep (clone (test-sheep) () (:copy-all-values t))))
+	 (another-sheep (clone (test-sheep) ((other-var "other-value"))))
+	 (third-sheep (clone (another-sheep) () (:copy-all-values t))))
     (setf (get-property test-sheep 'var) "new-value")
     (is (equal "new-value" (get-property test-sheep 'var)))
     (is (equal "value" (get-property another-sheep 'var)))))
+
+(test :copy-direct-values
+  "Tests the :copy-direct-values clone option. It pulls in only the direct-slots
+defined in the sheep that are being cloned.")
 
 (test :nickname
   "Tests the :nickname clone option"
@@ -125,12 +131,15 @@ properly signal SHEEP-HIERARCHY-ERROR."
     (is (equal "Johnny Bravo" (sheep-nickname another-sheep)))))
 
 (test :mitosis
-  "Tests to somehow figure out whether the :mitosis option actually works"
-  ;; This is a lost cause. This is a horrible horrible thing to do. Why do I do this?
+  "Tests to somehow figure out whether the :mitosis option actually works. This evil little option
+changes the behavior of the CLONE macro almost entirely. For starters, it makes it so that CLONE
+only accepts one argument, the Model. Like mitosis, CLONE then executes this weird cell-splitting
+process where everything about the model except for its nickname and sid is copied over into the new
+sheep object. This is useful, but is certainly shoved in in a very strange way, mostly because of 
+the 1-argument restriction. It signals a MITOSIS-ERROR if the list is longer than 1"
   (let* ((the-parent (clone () ((name "Dad")) (:nickname "The-parent")))
 	 (the-bro (clone (the-parent) ((name "Bro")) (:nickname "The Bro")))
 	 (the-younger-bro (clone (the-bro) () (:mitosis t) (:nickname "The lil' bro")))
-	 (the-other-bro (clone (the-bro) () (:mitosis t) (:copy-direct-values t) (:nickname "Another-bro")))
 	 (some-random-dude (clone (the-parent) () (:mitosis nil) (:nickname "The Guy"))))
     (is (equal (get-property the-parent 'name) (get-property the-younger-bro 'name)))
     (is (equal (sheep-direct-parents the-bro) (sheep-direct-parents the-younger-bro)))

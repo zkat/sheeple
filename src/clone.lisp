@@ -87,7 +87,7 @@
              (pushnew `',(car olist) other-options)
              (pushnew `',(cadr olist) other-options))))
         (if other-options
-	    (error "Error parsing CLONE property ~a" property)
+	    (error "Error parsing CLONE property")
 	    `(list
 	      :name ',name
 	      :value ,value

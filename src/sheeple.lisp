@@ -118,7 +118,7 @@
 	  roles)
     sheep))
 
-(define-condition mitosis-error (error) ())
+(define-condition mitosis-error (sheeple-error) ())
 
 ;;;
 ;;; Property and property-option setup
@@ -139,7 +139,7 @@
     (add-readers-to-sheep readers name sheep)
     (add-writers-to-sheep writers name sheep)))
 
-(define-condition probably-meant-to-be-option (error) ())
+(define-condition probably-meant-to-be-option (sheeple-error) ())
 
 ;;;
 ;;; Clone options
@@ -154,22 +154,23 @@
 	(value (cadr option)))
     (case option
       (:copy-all-values (when (eql value t)
-		      (copy-available-values sheep)))
+		      (copy-all-values sheep)))
       (:copy-direct-values (when (eql value t)
 			     (copy-direct-parent-values sheep)))
       (:nickname (setf (sheep-nickname sheep) value))
       (:mitosis (warn "Mitosis successful. It probably broke everything... continue with care."))
-      (otherwise (error 'invalid-option-error 
-			:format-control "No such option for CLONE: ~s" 
-			:format-args (list option))))))
+      (otherwise (error 'invalid-option-error)))))
 
-(define-condition invalid-option-error (error) ())
+(define-condition invalid-option-error (sheeple-error) ()
+  
+)
 
-(defun copy-available-values (sheep)
+(defun copy-all-values (sheep)
   (let ((all-property-names (available-properties sheep)))
-    (loop for pname in all-property-names
-       do (let ((value (get-property sheep pname)))
-	    (setf (get-property sheep pname) value)))))
+    (mapc (lambda (pname)
+	    (setf (get-property sheep pname)
+		  (get-property sheep pname)))
+	  all-property-names)))
 
 (defun copy-direct-parent-values (sheep)
   (mapc (lambda (parent)
@@ -219,9 +220,7 @@ and that they arej both of the same class."
 	   (sheep-hierarchy-error ()
 	     (progn
 	       (setf (sheep-direct-parents child) (delete new-parent (sheep-direct-parents child)))
-	       (error 'sheep-hierarchy-error 
-		      "Adding new-parent would result in a
-                             circular sheeple hierarchy list")))))))
+	       (error 'sheep-hierarchy-error)))))))
 
 (defgeneric remove-parent (parent child &key))
 (defmethod remove-parent ((parent standard-sheep-class) (child standard-sheep-class) &key (keep-properties nil))
@@ -256,7 +255,7 @@ and that they arej both of the same class."
 ;;;
 ;;; Property Access
 ;;;
-(define-condition unbound-property (error)
+(define-condition unbound-property (sheeple-error)
   ())
 
 (defgeneric get-property (sheep property-name)
@@ -341,8 +340,7 @@ This returns T if the value is set to NIL for that property-name."
 			     parents)))))))
     (all-parents-loop () (list sheep))))
 
-(define-condition sheep-hierarchy-error (error)
-  ((text :initarg :text :reader text))
+(define-condition sheep-hierarchy-error (sheeple-error) ()
   (:documentation "Signaled whenever there is a problem computing the hierarchy list."))
 
 (defun compute-sheep-hierarchy-list (sheep)
@@ -354,7 +352,7 @@ This returns T if the value is set to NIL for that property-name."
   				      sheeple-to-order))
   			  #'std-tie-breaker-rule))
     (simple-error ()
-      (error 'sheep-hierarchy-error :text "Unable to compute sheep hierarchy list."))))
+      (error 'sheep-hierarchy-error))))
 
 (defun local-precedence-ordering (sheep)
   (mapcar #'list

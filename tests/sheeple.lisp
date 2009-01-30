@@ -75,8 +75,8 @@ properly signal SHEEP-HIERARCHY-ERROR."
 	 (child-sheep (clone (main-sheep) ())))
     (is (eql nil (available-properties main-sheep)))
     (signals unbound-property (get-property main-sheep 'foo))
-    (is (eql "bar" 
-	     (setf (get-property main-sheep 'foo) "bar")))
+    (is (equal "bar" 
+	       (setf (get-property main-sheep 'foo) "bar")))
     (is (eql t
 	     (has-direct-property-p main-sheep 'foo)))
     (is (eql t
@@ -85,7 +85,7 @@ properly signal SHEEP-HIERARCHY-ERROR."
 	     (has-direct-property-p child-sheep 'foo)))
     (is (eql t
 	     (has-property-p child-sheep 'foo)))
-    (is (eql "bar" (get-property main-sheep 'foo)))
+    (is (equal "bar" (get-property main-sheep 'foo)))
     (is (equal '(foo) (available-properties main-sheep)))
     (is (eql main-sheep (who-sets main-sheep 'foo)))
     (is (eql main-sheep (who-sets child-sheep 'foo)))
@@ -112,8 +112,7 @@ properly signal SHEEP-HIERARCHY-ERROR."
   "Tests the :copy-all-values clone option. It's supposed to pull in
 all available property values from the sheep hierarchy and set them locally."
   (let* ((test-sheep (clone () ((var "value")) (:nickname "test-sheep")))
-	 (another-sheep (clone (test-sheep) ((other-var "other-value"))))
-	 (third-sheep (clone (another-sheep) () (:copy-all-values t))))
+	 (another-sheep (clone (test-sheep) ((other-var "other-value")) (:copy-all-values t))))
     (setf (get-property test-sheep 'var) "new-value")
     (is (equal "new-value" (get-property test-sheep 'var)))
     (is (equal "value" (get-property another-sheep 'var)))))

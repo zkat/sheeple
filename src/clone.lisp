@@ -39,9 +39,9 @@
 (defmacro clone (sheeple properties &rest options)
   "Standard sheep-generation macro"
   `(create-sheep
-    :sheeple ,(canonize-sheeple sheeple)
-    :properties ,(canonize-properties properties)
-    :options ,(canonize-options options)))
+    ,(canonize-sheeple sheeple)
+    ,(canonize-properties properties)
+    ,(canonize-options options)))
 
 ;;;
 ;;; Canonizers

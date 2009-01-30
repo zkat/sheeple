@@ -28,7 +28,6 @@
 ;; TODO:
 ;; * Add an option that prevents an object from being edited?
 ;; * Add a property metaobject for more tweaked property options?
-;; * Add :sibling option to CLONE. This involves messing around with create-sheep
 ;; * Write unit tests for everything before doing anything else here
 ;; * Keep cleaning and testing until it's stable
 ;; * Documentation!!
@@ -61,26 +60,6 @@
     :initform nil
     :accessor sheep-direct-roles)))
 
-(defmethod print-object ((sheep standard-sheep-class) stream)
-  (print-unreadable-object (sheep stream :identity t)
-    (format stream "Standard Sheep SID: ~a~@[ AKA: ~a~]" (sid sheep) (sheep-nickname sheep))))
-
-;;;
-;;; Sheep creation
-;;;
-
-(defparameter =dolly= (make-instance 'standard-sheep-class :nickname "=dolly="))
-
-(defun create-sheep (&key sheeple properties options)
-  "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
-  (let ((sheep
-	 (set-up-inheritance
-	  (make-instance 'standard-sheep-class)
-	  sheeple)))
-    (set-up-properties properties sheep)
-    (set-up-options options sheep)
-    sheep))
-
 (defgeneric sheep-p (sheep?))
 (defmethod sheep-p ((sheep standard-sheep-class))
   (declare (ignore sheep))
@@ -89,13 +68,65 @@
   (declare (ignore sheep?))
   nil)
 
+(defmethod print-object ((sheep standard-sheep-class) stream)
+  (print-unreadable-object (sheep stream :identity t)
+    (format stream "Standard Sheep SID: ~a~@[ AKA: ~a~]" (sid sheep) (sheep-nickname sheep))))
+;;;
+;;; Sheep creation
+;;;
+
+(defparameter =dolly= (make-instance 'standard-sheep-class :nickname "=dolly=")
+  "=dolly= is the parent object for all Sheeple. Everything and anything in Sheeple has
+=dolly= as its parent object. Even fleeced-wolves.")
+
+(defun create-sheep (sheeple properties &optional options)
+  "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
+  (let ((sheep (make-instance 'standard-sheep-class))
+	(mitosis? (getf (find-if (lambda (option) (equal (car option) :mitosis)) options)
+			   :mitosis)))
+    (cond ((and mitosis?
+		(< 1 (length sheeple)))
+	   (error 'mitosis-error))  ; I think I can make use of this, actually
+	  (mitosis?
+	   (setf sheep (mitosis sheeple sheep)))
+	  (t
+	   (setf sheep (set-up-inheritance sheep sheeple))))
+    (set-up-properties properties sheep)
+    (set-up-other-options options sheep)
+    sheep))
+
+(defun set-up-inheritance (new-sheep sheeple)
+  "If SHEEPLE is non-nil, adds them in order to "
+  (let ((obj new-sheep))
+    (if sheeple
+	(loop for sheep in (nreverse sheeple)
+	   do (add-parent sheep obj))
+	(add-parent =dolly= obj))
+    obj))
+
+(defun mitosis (sheeple sheep)
+  ;; THIS IS GOING TO BE THE END OF ME, I SWEAR.
+  (let* ((model (car sheeple))
+	 (parents (sheep-direct-parents model))
+	 (properties (sheep-direct-properties model))
+	 (roles (sheep-direct-roles model)))
+    (setf (sheep-direct-parents sheep)
+	  parents)
+    (setf (sheep-direct-properties sheep)
+	  properties)
+    (setf (sheep-direct-roles sheep)
+	  roles)
+    sheep))
+
+(define-condition mitosis-error (error) ())
+
 ;;;
 ;;; Property and property-option setup
 ;;;
 
 (defun set-up-properties (properties sheep)
   (loop for property-list in properties
-       do (set-up-property property-list sheep)))
+     do (set-up-property property-list sheep)))
 
 (defun set-up-property (property-list sheep)
   (let ((name (getf property-list :name))
@@ -114,26 +145,38 @@
 ;;; Clone options
 ;;;
 
-(defun set-up-options (options sheep)
+(defun set-up-other-options (options sheep)
   (loop for option in options
-       do (set-up-option option sheep)))
+     do (set-up-option option sheep)))
 
 (defun set-up-option (option sheep)
   (let ((option (car option))
 	(value (cadr option)))
     (case option
-      (:copy-values (when (eql value t)
-		      (copy-parent-values sheep)))
+      (:copy-all-values (when (eql value t)
+		      (copy-available-values sheep)))
+      (:copy-direct-values (when (eql value t)
+			     (copy-direct-parent-values sheep)))
       (:nickname (setf (sheep-nickname sheep) value))
-      (otherwise (error 'invalid-option-error "No such option for CLONE: ~s" option)))))
+      (:mitosis (warn "Mitosis successful. It probably broke everything... continue with care."))
+      (otherwise (error 'invalid-option-error 
+			:format-control "No such option for CLONE: ~s" 
+			:format-args (list option))))))
 
 (define-condition invalid-option-error (error) ())
 
-(defun copy-parent-values (sheep)
+(defun copy-available-values (sheep)
   (let ((all-property-names (available-properties sheep)))
     (loop for pname in all-property-names
-	 do (let ((avail-value (get-property sheep pname)))
-	      (setf (get-property sheep pname) avail-value)))))
+       do (let ((value (get-property sheep pname)))
+	    (setf (get-property sheep pname) value)))))
+
+(defun copy-direct-parent-values (sheep)
+  (mapc (lambda (parent)
+	  (maphash 
+	   (lambda (key value) 
+	     (setf (get-property sheep key) value)) (sheep-direct-properties parent)))
+	(sheep-direct-parents sheep)))
 
 (defun add-readers-to-sheep (readers prop-name sheep)
   (loop for reader in readers
@@ -152,16 +195,7 @@
 			:participants (list =dolly= sheep)
 			:body `(setf (get-property sheep ',prop-name) new-value)
 			:function (lambda (new-value sheep) (setf (get-property sheep prop-name)
-								   new-value)))))
-
-(defun set-up-inheritance (new-sheep sheeple)
-  "If SHEEPLE is non-nil, adds them in order to "
-  (let ((obj new-sheep))
-    (if sheeple
-	(loop for sheep in (nreverse sheeple)
-	   do (add-parent sheep obj))
-	(add-parent =dolly= obj))
-    obj))
+								  new-value)))))
 
 ;;;
 ;;; Inheritance management
@@ -186,7 +220,7 @@ and that they arej both of the same class."
 	     (progn
 	       (setf (sheep-direct-parents child) (delete new-parent (sheep-direct-parents child)))
 	       (error 'sheep-hierarchy-error 
-		       "Adding new-parent would result in a
+		      "Adding new-parent would result in a
                              circular sheeple hierarchy list")))))))
 
 (defgeneric remove-parent (parent child &key))
@@ -198,9 +232,9 @@ and that they arej both of the same class."
     (with-accessors ((parent-properties sheep-direct-properties))
 	parent
       (loop for property-name being the hash-keys of parent-properties
-	   using (hash-value value)
-	   do (unless (has-direct-property-p child property-name)
-		(setf (get-property child property-name) value)))))
+	 using (hash-value value)
+	 do (unless (has-direct-property-p child property-name)
+	      (setf (get-property child property-name) value)))))
   child)
 
 ;;; Inheritance-related predicates
@@ -275,8 +309,8 @@ This returns T if the value is set to NIL for that property-name."
   (:documentation "Returns the sheep defining the value of SHEEP's property-name."))
 (defmethod who-sets ((sheep standard-sheep-class) property-name)
   (loop for sheep in (compute-sheep-hierarchy-list sheep)
-       if (has-direct-property-p sheep property-name)
-       return sheep))
+     if (has-direct-property-p sheep property-name)
+     return sheep))
 
 (defgeneric available-properties (sheep)
   (:documentation "Returns a list of property-names available to SHEEP."))
@@ -350,14 +384,14 @@ This returns T if the value is set to NIL for that property-name."
 ;;    do (unless (has-direct-slot-p child slot-name)
 ;;      (set-slot-value child slot-name value))))
 ;; sheep))
- 
+
 ;; (defun sacrifice-sheep (sheep &key (save-properties nil))
 ;; "Deletes SHEEP from the hierarchy, preserving the hierarchy by expanding references to
 ;; SHEEP into all its parents. Optionally, pushes its direct properties into its children."
 ;; (give-children-new-parents sheep)
 ;; (when save-properties
 ;; (push-down-properties sheep)))
- 
+
 ;; (defun give-parents-new-children (sheep)
 ;; "Replaces the reference to SHEEP in its parents' children property with the sheep's children."
 ;; (with-accessors ((parents sheep-direct-parents)
@@ -369,7 +403,7 @@ This returns T if the value is set to NIL for that property-name."
 ;;      if (eql par-child sheep)
 ;;      append children
 ;;      else collect par-child)))))
- 
+
 ;; (defun give-children-new-parents (sheep)
 ;; "Replaces the reference to SHEEP in its children's parents property with the sheep's parents."
 ;; (with-accessors ((parents sheep-direct-parents)

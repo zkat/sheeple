@@ -342,17 +342,19 @@ CLOS programming should have a fairly easy time wrapping their head around Sheep
         (synergize "hey!") => 5 ;the message facility autoboxes regular lisp objects
 
         (defmessage synergize ((something sheep1)) 
-           (format t "~a is the first sheep. FYI"))
+           (format t "~a is the first sheep. FYI" something))
         ;; lambda-list variables do not have to be the same across messages, 
         ;; I only do it here for convenience.
         (synergize sheep1) => #<SHEEP SID:3> is the first sheep. FYI
 
-        (defmessage synergize ((foo =number=)) 
-           (* 2 foo)) ;this works inside closures, by the way
+        (let ((x 5))
+	   (defmessage synergize ((foo =number=)) 
+	     (* x foo))) ;this works inside closures, by the way
         (synergize 5) => 10
 
         (defmessage synergize ((foo 5)) ;any object can be dispatched on. Non-sheep are autoboxed.
-           (print "FIVE!! THIS IS VERY EXCITING!!1"))
+	   (declare (ignore foo)) ;declarations work
+	   (print "FIVE!! THIS IS VERY EXCITING!!1"))
         (synergize 5) => "FIVE!! THIS IS VERY EXCITING!!1"
 	
         (defmessage synergize ((foo =float=)) (floatp float)) 

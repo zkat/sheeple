@@ -362,9 +362,11 @@ CLOS programming should have a fairly easy time wrapping their head around Sheep
         (synergize 5) => "FIVE!! THIS IS VERY EXCITING!!1"  ; fleeced wolves.
         (synergize 6) => 12
 
-        (defmessage synergize ((foo sheep1) (bar sheep2)) 
+        (defmessage synergize ((foo sheep1) (bar sheep2))
+
            (print "I got sheep1 first, then sheep2"))
         (defmessage synergize ((foo sheep2) (bar sheep1)) 
+           (declare (ignore foo bar))
            (print "I got sheep2 first, then the first sheep."))
 
         (defmessage synergize ((foo =number=) (bar =number=)) 

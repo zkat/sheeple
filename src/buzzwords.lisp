@@ -126,7 +126,7 @@
     (remhash name buzzword-table))
   
 ) ; end buzzword-table closure
-(define-condition no-such-buzzword (error) ())
+(define-condition no-such-buzzword (sheeple-error) ())
 
 ;;; Buzzword definition
 (defun ensure-buzzword (&key name documentation)
@@ -143,9 +143,7 @@
 (defun ensure-message (&key name lambda-list participants function body)
   (when (not (find-buzzword name nil))
     (progn
-      (warn 'style-warning 
-	    :format-control"Automatically defining a buzzword for ~S" 
-	    :format-args (list name))
+      (warn 'style-warning)
       (ensure-buzzword
        :name name)))
   (let* ((target-sheeple (sheepify-list participants))
@@ -238,7 +236,7 @@
 (defun confirm-var-name (var-name)
   (if (symbolp var-name)
       var-name
-       (error "Invalid variable name ~s. Variables must be symbols." var-name)))
+      (error "Invalid var name.")))
 
 (defun extract-participants (lambda-list)
   `(list ,@(mapcar #'extract-participant-sheep lambda-list)))
@@ -257,8 +255,6 @@
 
 (defun find-most-specific-message (selector args &optional not-this-message-please)
   "Returns the most specific message using SELECTOR and ARGS."
-  ;; This shit is bugged to all hell and it's a huge, disgusting algorithm. Fix that shit.
-  ;; taken almost verbatim from Slate's algorithm
   (let ((n (length args))
 	(most-specific-message nil))
     (loop 
@@ -284,11 +280,9 @@
     (reset-message-ranks)
     (if most-specific-message
 	most-specific-message
-	(error 'no-most-specific-message
-	       :format-control "No most specific method found for ~S with arguments ~S"
-	       :format-args (list selector args)))))
+	(error 'no-most-specific-message))))
 
-(define-condition no-most-specific-message (error) ())
+(define-condition no-most-specific-message (sheeple-error) ())
 
 (defun fully-specified-p (rank)
   (loop for item across rank

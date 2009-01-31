@@ -38,6 +38,7 @@ errors when a buzzword doesn't exist."
   (defbuzzword test-buzz "This is a test")
   (is (buzzword-p (find-buzzword 'test-buzz)))
   (signals no-such-buzzword (find-buzzword 'another-buzzword))
+
   (undefbuzzword test-buzz)
   (defun test-buzz () (print "durr hurr"))
   (signals clobbering-function-definition (defbuzzword test-buzz "OHNOES"))
@@ -84,6 +85,7 @@ also, checks that a style-warning is signaled if there is no buzzword defined."
   (defbuzzword test-message)
   (defmessage test-message (foo) (print foo))
   (is (buzzword-p (find-buzzword 'test-message)))
+  (is (member 'test-message (available-messages =dolly=)))
   (is (message-p (car (buzzword-messages (find-buzzword 'test-message)))))
   (undefbuzzword test-message))
 
@@ -94,12 +96,14 @@ to their respective participants, with correct role-indexes, etc."
   (let ((sheep1 (clone () () (:nickname "sheep1")))
 	(sheep2 (clone () () (:nickname "sheep2"))))
     (defmessage test-message ((foo sheep1) (bar sheep2)) foo bar)
-    (is (equal t (sheeple::participant-p sheep1 'test-message)))
-    (is (equal t (sheeple::participant-p sheep2 'test-message)))
+    (is (eql t (sheeple::participant-p sheep1 'test-message)))
+    (is (eql t (sheeple::participant-p sheep2 'test-message)))
+    (is (member 'test-message (available-messages sheep1)))
+    (is (member 'test-message (available-messages sheep2)))
     (let ((sheep1-roles (sheep-direct-roles sheep1))
 	  (sheep2-roles (sheep-direct-roles sheep2)))
-      (is (equal 0 (role-position (car sheep1-roles))))
-      (is (equal 1 (role-position (car sheep2-roles))))))
+      (is (= 0 (role-position (car sheep1-roles))))
+      (is (= 1 (role-position (car sheep2-roles))))))
   (undefbuzzword test-message))
 
 (test message-redefinition

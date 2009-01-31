@@ -1,0 +1,13 @@
+(in-package :sysdef-user)
+(define-system  :sheeple (serial-system)
+  (:documentation "Clone-crazy hackery tool, unit tests")
+  (:author "Josh Marchan <sykopomp@sykosomatic.org>")
+  (:licence "MIT")
+  (:version 0 9 0)
+  (:components
+   ("tests" module
+	  (:components
+	   "packages"
+	   "sheeple"
+	   "compatibility"
+	   "buzzwords"))))

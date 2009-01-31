@@ -67,7 +67,6 @@ properly signal SHEEP-HIERARCHY-ERROR."
 					(obj2 (clone (obj1) ())))
 				   (clone (obj1 obj2) ()))))
 
-
 (in-suite sheep-properties-tests)
 (test properties-basic
   "Basic property-setting and property-access tests. Ensures they follow spec."

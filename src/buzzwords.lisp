@@ -26,7 +26,6 @@
 ;; Implementation of Sheeple's buzzwords+messages (generic functions + methods)
 ;;
 ;; TODO:
-;; * Define some nice user-interface inspection stuff, put it in its own area
 ;; * There should be an error if defbuzzword tries to clobber a function or generic-func
 ;; * Write unit tests
 ;; * AFTER unit tests... clean up code, run tests

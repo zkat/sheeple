@@ -27,8 +27,12 @@
 ;;
 ;; TODO:
 ;; * Add an option that prevents an object from being edited?
-;; * Add a property metaobject for more tweaked property options?
-;; * Write unit tests for everything before doing anything else here
+;; * Add a property metaobject for more tweaked property options
+;; * Add property option that works like :initform
+;; * Add property option to copy individual properties
+;; * Add property option that forces all descendants to copy a property
+;; * Clone option to auto-generate all accessors?
+;; * Write more unit tests
 ;; * Keep cleaning and testing until it's stable
 ;; * Documentation!!
 ;;
@@ -81,7 +85,7 @@
 
 (defun create-sheep (sheeple properties &optional options)
   "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
-  (let ((sheep (make-instance 'standard-sheep-class))
+  (let ((sheep (make-instance 'standard-sheep-class)) ;;this should determine SHEEPLE's classes, and clone that.
 	(mitosis? (getf (find-if (lambda (option) (equal (car option) :mitosis)) options)
 			   :mitosis)))
     (cond ((and mitosis?
@@ -323,15 +327,6 @@ This returns T if the value is set to NIL for that property-name."
     (remove-duplicates
      (flatten
       (append obj-keys (mapcar #'available-properties (sheep-direct-parents sheep)))))))
-
-(defgeneric available-messages (sheep)
-  (:documentation "Returns a list of message-names that SHEEP can participate in."))
-(defmethod available-messages ((sheep standard-sheep-class))
-  (let ((personal-role-names (mapcar (lambda (role) (role-name role))
-				     (sheep-direct-roles sheep))))
-    (remove-duplicates
-     (flatten
-      (append personal-role-names (mapcar #'available-messages (sheep-direct-parents sheep)))))))
 
 ;;;
 ;;; Hierarchy Resolution

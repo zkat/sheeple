@@ -34,6 +34,7 @@
    :undefmesage
    :find-buzzword
    :participant-p
+   :available-messages
    :sheepify
    :sheepify-list
    :message-pointer ;used on Roles to get actual message object

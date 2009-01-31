@@ -4,7 +4,7 @@
   (:author "Josh Marchan <sykopomp@sykosomatic.org>")
   (:licence "MIT")
   (:version 0 9 0)
-  (:needs :fiveam)
+  (:needs :sheeple :fiveam)
   (:components
    ("tests" module
 	  (:components

@@ -31,7 +31,7 @@
 ;; * Add property option that works like :initform
 ;; * Add property option to copy individual properties
 ;; * Add property option that forces all descendants to copy a property
-;; * Clone option to auto-generate all accessors?
+;; * Clone option to auto-generate all accessors (with optional appending?)
 ;; * Write more unit tests
 ;; * Keep cleaning and testing until it's stable
 ;; * Documentation!!
@@ -167,9 +167,7 @@
       (:mitosis (warn "Mitosis successful. It probably broke everything... continue with care."))
       (otherwise (error 'invalid-option-error)))))
 
-(define-condition invalid-option-error (sheeple-error) ()
-  
-)
+(define-condition invalid-option-error (sheeple-error) ())
 
 (defun copy-all-messages (sheep)
   (let ((all-roles ()))))
@@ -250,7 +248,8 @@ and that they arej both of the same class."
     t))
 
 (defun ancestor-p (maybe-ancestor descendant)
-  (when (member maybe-ancestor (collect-parents descendant))
+  (when (and (not (equal maybe-ancestor descendant))
+	     (member maybe-ancestor (collect-parents descendant)))
     t))
 
 (defun direct-child-p (maybe-child parent)

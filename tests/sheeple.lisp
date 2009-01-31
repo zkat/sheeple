@@ -67,6 +67,25 @@ properly signal SHEEP-HIERARCHY-ERROR."
 					(obj2 (clone (obj1) ())))
 				   (clone (obj1 obj2) ()))))
 
+(test inheritance-checkers
+  "Confirms proper function of direct-parent-p, direct-child-p, ancestor-p, and descendant-p"
+  (let* ((grandpa (clone () ()))
+	 (father (clone (grandpa) ()))
+	 (child (clone (father) ())))
+    (is (direct-parent-p father child))
+    (is (not (direct-parent-p grandpa child)))
+    (is (not (direct-parent-p child child)))
+    (is (ancestor-p father child))
+    (is (ancestor-p grandpa child))
+    (is (not (ancestor-p child child)))
+    (is (not (ancestor-p child grandpa)))
+    (is (not (ancestor-p child father)))
+    (is (descendant-p child father))
+    (is (descendant-p child grandpa))
+    (is (not (descendant-p father father)))
+    (is (not (descendant-p father child)))
+    (is (not (descendant-p grandpa child)))))
+
 (in-suite sheep-properties-tests)
 (test properties-basic
   "Basic property-setting and property-access tests. Ensures they follow spec."

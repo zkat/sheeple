@@ -7,8 +7,6 @@ and empower application implementers to better assist them leveraging modern par
 order to proactively achieve next-gen synergy in tomorrow's web 3.0 world. It is implemented in ANSI
 Common Lisp, with small parts are based on Closette. Sheeple is fully buzzword compliant.
 
-So far, Sheeple has been tested on SBCL and CLISP. It was tested on OSX Lispworks with some
-failures that should be fixed by now.
 
 Notes
 -----
@@ -128,6 +126,7 @@ methods, cloning, etc.
 * =white-fang= - All fleeced wolves are descendants of =white-fang=, which is a clone of =dolly=.
 
 * Most lisp types have fleeces assigned to them, and they follow the =string= naming scheme.
+
 
 API
 ---

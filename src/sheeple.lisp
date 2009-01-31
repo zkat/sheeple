@@ -157,6 +157,8 @@
 		      (copy-all-values sheep)))
       (:copy-direct-values (when (eql value t)
 			     (copy-direct-parent-values sheep)))
+      (:deep-copy (when (eql value t)
+		    ()))
       (:nickname (setf (sheep-nickname sheep) value))
       (:mitosis (warn "Mitosis successful. It probably broke everything... continue with care."))
       (otherwise (error 'invalid-option-error)))))
@@ -165,6 +167,8 @@
   
 )
 
+(defun copy-all-messages (sheep)
+  (let ((all-roles ()))))
 (defun copy-all-values (sheep)
   (let ((all-property-names (available-properties sheep)))
     (mapc (lambda (pname)
@@ -320,6 +324,14 @@ This returns T if the value is set to NIL for that property-name."
      (flatten
       (append obj-keys (mapcar #'available-properties (sheep-direct-parents sheep)))))))
 
+(defgeneric available-messages (sheep)
+  (:documentation "Returns a list of message-names that SHEEP can participate in."))
+(defmethod available-messages ((sheep standard-sheep-class))
+  (let ((personal-role-names (mapcar (lambda (role) (role-name role))
+				     (sheep-direct-roles sheep))))
+    (remove-duplicates
+     (flatten
+      (append personal-role-names (mapcar #'available-messages (sheep-direct-parents sheep)))))))
 
 ;;;
 ;;; Hierarchy Resolution

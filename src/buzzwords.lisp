@@ -128,6 +128,15 @@
 ) ; end buzzword-table closure
 (define-condition no-such-buzzword (sheeple-error) ())
 
+(defgeneric available-messages (sheep)
+  (:documentation "Returns a list of message-names that SHEEP can participate in."))
+(defmethod available-messages ((sheep standard-sheep-class))
+  (let ((personal-role-names (mapcar (lambda (role) (role-name role))
+				     (sheep-direct-roles sheep))))
+    (remove-duplicates
+     (flatten
+      (append personal-role-names (mapcar #'available-messages (sheep-direct-parents sheep)))))))
+
 ;;; Buzzword definition
 (defun ensure-buzzword (&key name documentation)
   (if (find-buzzword name nil)

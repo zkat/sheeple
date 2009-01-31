@@ -1,5 +1,5 @@
 (in-package :sysdef-user)
-(define-system  :sheeple (serial-system)
+(define-system  :sheeple-tests (serial-system)
   (:documentation "Clone-crazy hackery tool, unit tests")
   (:author "Kat Marchan <kzm@sykosomatic.org>")
   (:licence "MIT")

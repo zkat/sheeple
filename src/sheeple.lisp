@@ -64,6 +64,26 @@
     :initform nil
     :accessor sheep-direct-roles)))
 
+(defclass standard-sheep-property ()
+  ((name
+    :initarg :name
+    :accessor name)
+   (value
+    :initarg :value
+    :accessor value)
+   (read-only-p
+    :initarg :read-only-p
+    :initform nil
+    :accessor read-only-p)
+   (initform
+    :initarg :initform
+    :accessor initform)
+   (must-copy-p
+    :initarg :must-copy-p
+    :initform nil
+    :accesor must-copy-p
+    :documentation "Must all children always copy this slot's value?")))
+
 (defgeneric sheep-p (sheep?))
 (defmethod sheep-p ((sheep standard-sheep))
   (declare (ignore sheep))

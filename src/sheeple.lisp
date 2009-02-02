@@ -28,7 +28,7 @@
 ;; TODO:
 ;; * Add an option that prevents an object from being edited?
 ;; * Add property option that works like :initform
-;; * Add clone option to copy individual properties
+;; * Add clone option to copy individual properties?
 ;; * Add property option that forces all descendants to copy a property
 ;; * Write tests for locked-property-related stuff.
 ;; * Clone option to auto-generate all accessors (with optional appending a-la defstruct?)
@@ -74,15 +74,7 @@
    (locked-p
     :initarg :locked-p
     :initform nil
-    :accessor %locked-p)
-   (cloneform
-    :initarg :cloneform
-    :accessor cloneform)
-   (must-copy-p
-    :initarg :must-copy-p
-    :initform nil
-    :accessor %must-copy-p
-    :documentation "Must all children always copy this slot's value?")))
+    :accessor %locked-p)))
 
 (defgeneric sheep-p (sheep?))
 (defmethod sheep-p ((sheep standard-sheep))
@@ -92,9 +84,7 @@
   (declare (ignore sheep?))
   nil)
 
-(defmethod print-object ((sheep standard-sheep) stream)
-  (print-unreadable-object (sheep stream :identity t)
-    (format stream "Standard Sheep SID: ~a~@[ AKA: ~a~]" (sid sheep) (sheep-nickname sheep))))
+
 ;;;
 ;;; Sheep creation
 ;;;
@@ -115,8 +105,8 @@
 	   (setf sheep (mitosis sheeple sheep)))
 	  (t
 	   (setf sheep (set-up-inheritance sheep sheeple))))
-    (set-up-other-options options sheep)
     (set-up-properties properties sheep)
+    (set-up-other-options options sheep)
     sheep))
 
 (defun set-up-inheritance (new-sheep sheeple)
@@ -290,7 +280,6 @@ and that they arej both of the same class."
 
 (defgeneric property-locked-p (sheep prop-name)
   (:documentation "Is the property with PROP-NAME in SHEEP locked from editing?"))
-
 (defmethod property-locked-p ((sheep standard-sheep) property-name)
   (%locked-p (%get-property-object sheep property-name)))
 
@@ -305,7 +294,7 @@ and that they arej both of the same class."
   (setf (%locked-p (%get-property-object sheep property-name)) nil))
 
 (defun toggle-lock (sheep property-name)
-  (if (locked-p (%get-property-object sheep property-name))
+  (if (property-locked-p sheep property-name)
       (unlock-property sheep property-name)
       (lock-property sheep property-name)))
 
@@ -325,10 +314,10 @@ sheep hierarchy."
 (defun get-property-with-hierarchy-list (list property-name)
   "Finds a property value under PROPERTY-NAME using a hierarchy list."
   (loop for sheep in list
-     do (multiple-value-bind (value has-p) 
+     do (multiple-value-bind (prop-obj has-p) 
 	    (%get-property-object sheep property-name)
 	  (when has-p
-	    (return-from get-property-with-hierarchy-list value)))
+	    (return-from get-property-with-hierarchy-list (%value prop-obj))))
      finally (error 'unbound-property)))
 
 (defgeneric (setf get-property) (new-value sheep property-name)
@@ -336,16 +325,17 @@ sheep hierarchy."
 (defmethod (setf get-property) (new-value (sheep standard-sheep) property-name)
   "Default behavior is to only set it on a specific sheep. This will override its parents'
 property values for that same property name, and become the new value for its children."
-  (multiple-value-bind (value has-p)
-      (gethash property-name (sheep-direct-properties sheep))
-    (declare (ignore value))
+  (multiple-value-bind (prop-obj has-p)
+      (%get-property-object sheep property-name)
     (if has-p
 	(if (property-locked-p sheep property-name)
 	    (error 'locked-property)
-	    (setf (gethash property-name (sheep-direct-properties sheep))
+	    (setf (%value prop-obj)
 		  new-value))
-	(setf (gethash property-name (sheep-direct-properties sheep))
-	      (make-instance 'standard-sheep-property :name property-name :value new-value)))))
+	(progn
+	  (setf (gethash property-name (sheep-direct-properties sheep))
+		(make-instance 'standard-sheep-property :name property-name :value new-value))
+	  new-value))))
 
 (defgeneric remove-property (sheep property-name)
   (:documentation "Removes a property from a particular sheep."))

@@ -68,6 +68,7 @@
 	    (value (cadr property))
             (readers nil)
             (writers nil)
+	    (locked-p nil)
             (other-options nil))
         (do ((olist (cddr property) (cddr olist)))
             ((null olist))
@@ -83,15 +84,20 @@
             (:accessor
              (pushnew (cadr olist) readers)
              (pushnew `(setf ,(cadr olist)) writers))
-            (otherwise 
+	    (:locked-p
+	     (setf locked-p (cadr olist)))
+	    (otherwise 
              (pushnew (cadr olist) other-options)
              (pushnew (car olist) other-options))))
-        `(list
-	  :name ',name
-	  :value ,value
-	  ,@(when readers `(:readers ',readers))
-	  ,@(when writers `(:writers ',writers))
-	  ,@other-options))))
+	(if other-options
+	    (error "Invalid property option(s)")
+	    `(list
+	      :name ',name
+	      :value ,value
+	      ,@(when readers `(:readers ',readers))
+	      ,@(when writers `(:writers ',writers))
+	      ,@(when locked-p `(:locked-p ,locked-p)))))))
+
 
 (defun canonize-options (options)
   `(list ,@(mapcar #'canonize-option options)))

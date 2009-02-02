@@ -44,7 +44,7 @@
 ;;;
 (defvar *max-sheep-id* 0)
 
-(defclass standard-sheep-class ()
+(defclass standard-sheep ()
   ((sid
     :initform (incf *max-sheep-id*)
     :reader sid)
@@ -65,27 +65,27 @@
     :accessor sheep-direct-roles)))
 
 (defgeneric sheep-p (sheep?))
-(defmethod sheep-p ((sheep standard-sheep-class))
+(defmethod sheep-p ((sheep standard-sheep))
   (declare (ignore sheep))
   t)
 (defmethod sheep-p (sheep?)
   (declare (ignore sheep?))
   nil)
 
-(defmethod print-object ((sheep standard-sheep-class) stream)
+(defmethod print-object ((sheep standard-sheep) stream)
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Standard Sheep SID: ~a~@[ AKA: ~a~]" (sid sheep) (sheep-nickname sheep))))
 ;;;
 ;;; Sheep creation
 ;;;
 
-(defparameter =dolly= (make-instance 'standard-sheep-class :nickname "=dolly=")
+(defparameter =dolly= (make-instance 'standard-sheep :nickname "=dolly=")
   "=dolly= is the parent object for all Sheeple. Everything and anything in Sheeple has
 =dolly= as its parent object. Even fleeced-wolves.")
 
 (defun create-sheep (sheeple properties &optional options)
   "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
-  (let ((sheep (make-instance 'standard-sheep-class)) ;;this should determine SHEEPLE's classes, and clone that.
+  (let ((sheep (make-instance 'standard-sheep)) ;;this should determine SHEEPLE's classes, and clone that.
 	(mitosis? (getf (find-if (lambda (option) (equal (car option) :mitosis)) options)
 			   :mitosis)))
     (cond ((and mitosis?
@@ -209,7 +209,7 @@
 ;;;
 
 (defgeneric add-parent (new-parent child &key))
-(defmethod add-parent ((new-parent standard-sheep-class) (child standard-sheep-class) &key)
+(defmethod add-parent ((new-parent standard-sheep) (child standard-sheep) &key)
   "Adds NEW-PARENT as a parent of CHILD. Checks to make sure NEW-PARENT and CHILD are not the same,
 and that they arej both of the same class."
   (cond ((eql new-parent child)
@@ -229,7 +229,7 @@ and that they arej both of the same class."
 	       (error 'sheep-hierarchy-error)))))))
 
 (defgeneric remove-parent (parent child &key))
-(defmethod remove-parent ((parent standard-sheep-class) (child standard-sheep-class) &key (keep-properties nil))
+(defmethod remove-parent ((parent standard-sheep) (child standard-sheep) &key (keep-properties nil))
   "Deletes PARENT from CHILD's parent list."
   (setf (sheep-direct-parents child)
 	(delete parent (sheep-direct-parents child)))
@@ -267,7 +267,7 @@ and that they arej both of the same class."
 
 (defgeneric get-property (sheep property-name)
   (:documentation "Gets the property value under PROPERTY-NAME for an sheep, if-exists."))
-(defmethod get-property ((sheep standard-sheep-class) property-name)
+(defmethod get-property ((sheep standard-sheep) property-name)
   "Default behavior is differential inheritance: It will look for that property-name up the entire 
 sheep hierarchy."
   (get-property-with-hierarchy-list (compute-sheep-hierarchy-list sheep) property-name))
@@ -283,7 +283,7 @@ sheep hierarchy."
 
 (defgeneric (setf get-property) (new-value sheep property-name)
   (:documentation "Sets a SLOT-VALUE with PROPERTY-NAME in SHEEP's properties."))
-(defmethod (setf get-property) (new-value (sheep standard-sheep-class) property-name)
+(defmethod (setf get-property) (new-value (sheep standard-sheep) property-name)
   "Default behavior is to only set it on a specific sheep. This will override its parents'
 property values for that same property name, and become the new value for its children."
   (setf (gethash property-name (sheep-direct-properties sheep))
@@ -291,7 +291,7 @@ property values for that same property name, and become the new value for its ch
 
 (defgeneric remove-property (sheep property-name)
   (:documentation "Removes a property from a particular sheep."))
-(defmethod remove-property ((sheep standard-sheep-class) property-name)
+(defmethod remove-property ((sheep standard-sheep) property-name)
   "Simply removes the hash value from the sheep. Leaves parents intact."
   (remhash property-name (sheep-direct-properties sheep)))
 
@@ -304,7 +304,7 @@ property values for that same property name, and become the new value for its ch
 
 (defgeneric has-direct-property-p (sheep property-name)
   (:documentation "Returns NIL if PROPERTY-NAME is not set in this particular sheep."))
-(defmethod has-direct-property-p ((sheep standard-sheep-class) property-name)
+(defmethod has-direct-property-p ((sheep standard-sheep) property-name)
   "Simply catches the second value from gethash, which tells us if the hash exists or not.
 This returns T if the value is set to NIL for that property-name."
   (multiple-value-bind (value has-p) (gethash property-name (sheep-direct-properties sheep))
@@ -313,14 +313,14 @@ This returns T if the value is set to NIL for that property-name."
 
 (defgeneric who-sets (sheep property-name)
   (:documentation "Returns the sheep defining the value of SHEEP's property-name."))
-(defmethod who-sets ((sheep standard-sheep-class) property-name)
+(defmethod who-sets ((sheep standard-sheep) property-name)
   (loop for sheep in (compute-sheep-hierarchy-list sheep)
      if (has-direct-property-p sheep property-name)
      return sheep))
 
 (defgeneric available-properties (sheep)
   (:documentation "Returns a list of property-names available to SHEEP."))
-(defmethod available-properties ((sheep standard-sheep-class))
+(defmethod available-properties ((sheep standard-sheep))
   (let ((obj-keys (loop for keys being the hash-keys of (sheep-direct-properties sheep)
 		     collect keys)))
     (remove-duplicates

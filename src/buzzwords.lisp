@@ -129,7 +129,7 @@
 
 (defgeneric available-messages (sheep)
   (:documentation "Returns a list of message-names that SHEEP can participate in."))
-(defmethod available-messages ((sheep standard-sheep-class))
+(defmethod available-messages ((sheep standard-sheep))
   (let ((personal-role-names (mapcar (lambda (role) (role-name role))
 				     (sheep-direct-roles sheep))))
     (remove-duplicates

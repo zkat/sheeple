@@ -54,7 +54,7 @@
 
 (defun confirm-sheep (sheep)
   (if (eql (class-of sheep)
-	   (find-class 'standard-sheep-class))
+	   (find-class 'standard-sheep))
       sheep
       (sheepify sheep)))
 

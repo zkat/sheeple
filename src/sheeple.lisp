@@ -58,7 +58,7 @@
     :accessor sheep-direct-parents)
    (properties
     :initarg :properties
-    :initform (make-hash-table :test #'eql)
+    :initform (make-hash-table :test #'equal)
     :accessor sheep-direct-properties)
    (roles
     :initform nil
@@ -67,21 +67,21 @@
 (defclass standard-sheep-property ()
   ((name
     :initarg :name
-    :accessor name)
+    :accessor %name)
    (value
     :initarg :value
-    :accessor value)
-   (read-only-p
-    :initarg :read-only-p
+    :accessor %value)
+   (locked-p
+    :initarg :locked-p
     :initform nil
-    :accessor read-only-p)
-   (initform
-    :initarg :initform
-    :accessor initform)
+    :accessor %locked-p)
+   (cloneform
+    :initarg :cloneform
+    :accessor cloneform)
    (must-copy-p
     :initarg :must-copy-p
     :initform nil
-    :accesor must-copy-p
+    :accessor %must-copy-p
     :documentation "Must all children always copy this slot's value?")))
 
 (defgeneric sheep-p (sheep?))
@@ -99,7 +99,7 @@
 ;;; Sheep creation
 ;;;
 
-(defparameter =dolly= (make-instance 'standard-sheep :nickname "=dolly=")
+(defvar =dolly= (make-instance 'standard-sheep :nickname "=dolly=")
   "=dolly= is the parent object for all Sheeple. Everything and anything in Sheeple has
 =dolly= as its parent object. Even fleeced-wolves.")
 
@@ -156,7 +156,9 @@
   (let ((name (getf property-list :name))
 	(value (getf property-list :value))
 	(readers (getf property-list :readers))
-	(writers (getf property-list :writers)))
+	(writers (getf property-list :writers))
+	(locked-p (getf property-list :locked-p))
+	(cloneform (getf property-list :cloneform)))
     (when (keywordp name)
       (error 'probably-meant-to-be-option))
     (setf (get-property sheep name) value)
@@ -285,6 +287,27 @@ and that they arej both of the same class."
 (define-condition unbound-property (sheeple-error)
   ())
 
+(defgeneric property-locked-p (sheep prop-name)
+  (:documentation "Is the property with PROP-NAME in SHEEP locked from editing?"))
+
+(defmethod property-locked-p ((sheep standard-sheep) property-name)
+  (%locked-p (%get-property-object sheep property-name)))
+
+(defgeneric lock-property (sheep property-name)
+  (:documentation "Locks a property on a particular object, preventing it from being edited."))
+(defmethod lock-property ((sheep standard-sheep) property-name)
+  (setf (locked-p (%get-property-object sheep property-name)) t))
+
+(defgeneric unlock-property (sheep property-name)
+  (:documentation "Unlocks a property on a particular object, allowing its value to be changed."))
+(defmethod unlock-property ((sheep standard-sheep) property-name)
+  (setf (locked-p (%get-property-object sheep property-name)) nil))
+
+(defun toggle-lock (sheep property-name)
+  (if (locked-p (%get-property-object sheep property-name))
+      (unlock-property sheep property-name)
+      (lock-property sheep property-name)))
+
 (defgeneric get-property (sheep property-name)
   (:documentation "Gets the property value under PROPERTY-NAME for an sheep, if-exists."))
 (defmethod get-property ((sheep standard-sheep) property-name)
@@ -292,11 +315,17 @@ and that they arej both of the same class."
 sheep hierarchy."
   (get-property-with-hierarchy-list (compute-sheep-hierarchy-list sheep) property-name))
 
+(defun %get-property-object (sheep prop-name)
+  (gethash prop-name (sheep-direct-properties sheep)))
+
+(defun (setf %get-property-object) (new-value sheep prop-name)
+  (setf (gethash prop-name (sheep-direct-properties sheep)) new-value))
+
 (defun get-property-with-hierarchy-list (list property-name)
   "Finds a property value under PROPERTY-NAME using a hierarchy list."
   (loop for sheep in list
      do (multiple-value-bind (value has-p) 
-	    (gethash property-name (sheep-direct-properties sheep))
+	    (%get-property-object sheep property-name)
 	  (when has-p
 	    (return-from get-property-with-hierarchy-list value)))
      finally (error 'unbound-property)))

@@ -84,7 +84,9 @@
   (declare (ignore sheep?))
   nil)
 
-
+(defmethod print-object ((sheep standard-sheep) stream)
+  (print-unreadable-object (sheep stream :identity t)
+    (format stream "Standard Sheep SID: ~a~@[ AKA: ~a~]" (sid sheep) (sheep-nickname sheep))))
 ;;;
 ;;; Sheep creation
 ;;;

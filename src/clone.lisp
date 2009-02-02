@@ -84,7 +84,7 @@
             (:accessor
              (pushnew (cadr olist) readers)
              (pushnew `(setf ,(cadr olist)) writers))
-	    (:locked-p
+	    (:lock
 	     (setf locked-p (cadr olist)))
 	    (otherwise 
              (pushnew (cadr olist) other-options)
@@ -96,7 +96,7 @@
 	      :value ,value
 	      ,@(when readers `(:readers ',readers))
 	      ,@(when writers `(:writers ',writers))
-	      ,@(when locked-p `(:locked-p ,locked-p)))))))
+	      ,@(when locked-p `(:lock ,locked-p)))))))
 
 
 (defun canonize-options (options)

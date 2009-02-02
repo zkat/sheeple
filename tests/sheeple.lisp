@@ -112,6 +112,19 @@ properly signal SHEEP-HIERARCHY-ERROR."
     (signals unbound-property (get-property child-sheep 'foo))
     (is (eql nil (remove-property main-sheep 'foo)))))
 
+(test locked-properties
+  "Tests proper behavior of the :lock property option"
+  (let ((locked-sheep (clone () ((var "value" :accessor get-var :lock t))))
+	(unlocked-sheep (clone () ((other-var "value" :accessor get-var :lock nil))))
+	(unspecced-sheep (clone () ((other-var "value" :accessor get-var)))))
+    (is (equal "value" (get-var locked-sheep)))
+    (is (equal "value" (get-var unlocked-sheep)))
+    (is (equal "value" (get-var unspecced-sheep)))
+    (signals sheeple::locked-property (setf (get-var locked-sheep) "new-value"))
+    (is (equal "new-value" (setf (get-var unlocked-sheep) "new-value")))
+    (is (equal "new-value" (setf (get-var unspecced-sheep) "new-value")))))
+
+
 (test auto-generated-accessors
   "Tests to confirm property-option functionality."
   (let ((test-sheep (clone () ((var "value" :accessor get-var)))))

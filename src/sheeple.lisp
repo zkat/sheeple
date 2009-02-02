@@ -147,7 +147,7 @@
 	(value (getf property-list :value))
 	(readers (getf property-list :readers))
 	(writers (getf property-list :writers))
-	(locked-p (getf property-list :locked-p)))
+	(locked-p (getf property-list :lock)))
     (when (keywordp name)
       (error 'probably-meant-to-be-option))
     (setf (get-property sheep name) value)

@@ -84,15 +84,14 @@
              (pushnew (cadr olist) readers)
              (pushnew `(setf ,(cadr olist)) writers))
             (otherwise 
-             (pushnew `',(car olist) other-options)
-             (pushnew `',(cadr olist) other-options))))
-        (if other-options
-	    (error "Error parsing CLONE property")
-	    `(list
-	      :name ',name
-	      :value ,value
-	      ,@(when readers `(:readers ',readers))
-	      ,@(when writers `(:writers ',writers)))))))
+             (pushnew (cadr olist) other-options)
+             (pushnew (car olist) other-options))))
+        `(list
+	  :name ',name
+	  :value ,value
+	  ,@(when readers `(:readers ',readers))
+	  ,@(when writers `(:writers ',writers))
+	  ,@other-options))))
 
 (defun canonize-options (options)
   `(list ,@(mapcar #'canonize-option options)))

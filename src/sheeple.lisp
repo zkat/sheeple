@@ -157,11 +157,12 @@
 	(value (getf property-list :value))
 	(readers (getf property-list :readers))
 	(writers (getf property-list :writers))
-	(locked-p (getf property-list :locked-p))
-	(cloneform (getf property-list :cloneform)))
+	(locked-p (getf property-list :locked-p)))
     (when (keywordp name)
       (error 'probably-meant-to-be-option))
     (setf (get-property sheep name) value)
+    (when locked-p
+      (lock-property sheep name))
     (add-readers-to-sheep readers name sheep)
     (add-writers-to-sheep writers name sheep)))
 
@@ -191,8 +192,6 @@
 
 (define-condition invalid-option-error (sheeple-error) ())
 
-(defun copy-all-messages (sheep)
-  (let ((all-roles ()))))
 (defun copy-all-values (sheep)
   (let ((all-property-names (available-properties sheep)))
     (mapc (lambda (pname)
@@ -286,6 +285,8 @@ and that they arej both of the same class."
 ;;;
 (define-condition unbound-property (sheeple-error)
   ())
+(define-condition locked-property (sheeple-error)
+  ())
 
 (defgeneric property-locked-p (sheep prop-name)
   (:documentation "Is the property with PROP-NAME in SHEEP locked from editing?"))
@@ -296,12 +297,12 @@ and that they arej both of the same class."
 (defgeneric lock-property (sheep property-name)
   (:documentation "Locks a property on a particular object, preventing it from being edited."))
 (defmethod lock-property ((sheep standard-sheep) property-name)
-  (setf (locked-p (%get-property-object sheep property-name)) t))
+  (setf (%locked-p (%get-property-object sheep property-name)) t))
 
 (defgeneric unlock-property (sheep property-name)
   (:documentation "Unlocks a property on a particular object, allowing its value to be changed."))
 (defmethod unlock-property ((sheep standard-sheep) property-name)
-  (setf (locked-p (%get-property-object sheep property-name)) nil))
+  (setf (%locked-p (%get-property-object sheep property-name)) nil))
 
 (defun toggle-lock (sheep property-name)
   (if (locked-p (%get-property-object sheep property-name))
@@ -335,8 +336,16 @@ sheep hierarchy."
 (defmethod (setf get-property) (new-value (sheep standard-sheep) property-name)
   "Default behavior is to only set it on a specific sheep. This will override its parents'
 property values for that same property name, and become the new value for its children."
-  (setf (gethash property-name (sheep-direct-properties sheep))
-	new-value))
+  (multiple-value-bind (value has-p)
+      (gethash property-name (sheep-direct-properties sheep))
+    (declare (ignore value))
+    (if has-p
+	(if (property-locked-p sheep property-name)
+	    (error 'locked-property)
+	    (setf (gethash property-name (sheep-direct-properties sheep))
+		  new-value))
+	(setf (gethash property-name (sheep-direct-properties sheep))
+	      (make-instance 'standard-sheep-property :name property-name :value new-value)))))
 
 (defgeneric remove-property (sheep property-name)
   (:documentation "Removes a property from a particular sheep."))

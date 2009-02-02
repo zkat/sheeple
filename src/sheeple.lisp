@@ -30,10 +30,7 @@
 ;; * Add property option that works like :initform
 ;; * Add clone option to copy individual properties?
 ;; * Add property option that forces all descendants to copy a property
-;; * Write tests for locked-property-related stuff.
 ;; * Clone option to auto-generate all accessors (with optional appending a-la defstruct?)
-;; * Write more unit tests
-;; * Keep cleaning and testing until it's stable
 ;; * Documentation!!
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -87,6 +84,7 @@
 (defmethod print-object ((sheep standard-sheep) stream)
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Standard Sheep SID: ~a~@[ AKA: ~a~]" (sid sheep) (sheep-nickname sheep))))
+
 ;;;
 ;;; Sheep creation
 ;;;
@@ -271,10 +269,10 @@ and that they arej both of the same class."
 (defun descendant-p (maybe-descendant ancestor)
   (ancestor-p ancestor maybe-descendant))
 
-
 ;;;
 ;;; Property Access
 ;;;
+
 (define-condition unbound-property (sheeple-error)
   ())
 (define-condition locked-property (sheeple-error)

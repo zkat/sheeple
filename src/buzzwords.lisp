@@ -325,11 +325,6 @@
       
   ) ; end message table closure
 
-(defmessage print-sheep ((sheep =dolly=) stream)
-  (print-unreadable-object (sheep stream :identity t)
-    (format stream "Standard Sheep SID: ~a~@[ AKA: ~a~]" (sid sheep) (sheep-nickname sheep))))
 
-(defmethod print-object ((sheep standard-sheep) stream)
-  (print-sheep sheep stream))
 
 

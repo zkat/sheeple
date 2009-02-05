@@ -9,6 +9,7 @@
 	  (:components
 	   "packages"
 	   "utils"
+	   "trivial-garbage"
 	   "sheeple"
 	   "clone"
 	   "compatibility"

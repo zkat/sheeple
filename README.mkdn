@@ -8,6 +8,39 @@ order to proactively achieve next-gen synergy in tomorrow's web 3.0 world. It is
 Common Lisp, with small parts are based on Closette. Sheeple is fully buzzword compliant.
 
 
+Loading Sheeple
+---------------
+It's fairly effortless to get Sheeple working. To get started, simply
+
+         (asdf:oos 'asdf:load-op 'sheeple)
+         (in-package sheeple-user)
+
+And mess around from there. Be aware that if your implementation does not include ASDF, you will
+have to acquire it and load it yourself. Clisp, for example, will require this.
+For information on how to do this, check out [Cliki][1], or the [ASDF Homepage][2].
+
+[1]: <http://www.cliki.net/asdf>
+[2]: <http://common-lisp.net/project/asdf/>
+
+Sheeple should work on most Lisp implementations, including:
+* CMUCL
+* SCL
+* SBCL
+* Allegro CL
+* CLISP
+* ECL
+* Clozure CL
+* CormanCL
+* LispWorks
+
+FiveAM is required if you wish to run the test suite. To run it:
+        
+        (asdf:oos 'asdf:load-op 'sheeple-tests)
+        (sheeple-tests:sheeple-tests)
+
+And watch the tests roll by. Two of them should fail, and the rest pass.
+
+
 Notes
 -----
 
@@ -51,9 +84,7 @@ Features available so far:
 
 * Auto-generated readers/writers, with :accessor, :reader, and :writer slot options.
 
-* Runs on plain CL -- no libraries necessary.
-
-* Portable across implementations -- no MOP or fancy implementation-specific features required.
+* Portable
 
 * Nickname slot for sheep metaobject, so helpful information can be printed by print-object.
 

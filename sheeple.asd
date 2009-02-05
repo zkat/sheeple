@@ -12,6 +12,7 @@
 	    :components
 	    ((:file "packages")
 	     (:file "utils")
+	     (:file "trivial-garbage")
 	     (:file "sheeple")
 	     (:file "clone")
 	     (:file "compatibility")

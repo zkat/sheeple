@@ -5,6 +5,10 @@
    ;; Cloning and management
    :=dolly= ;Ancestor of everything
    :clone
+   :sheep-hierarchy-error ;error
+   :mitosis-error ;error
+   :probably-meant-to-be-option ;error
+   :invalid-option-error ;error
    :sheep-p
    :add-parent
    :remove-parent
@@ -20,12 +24,23 @@
    :sheep-nickname
 
    ;; Property access
+   :unbound-property ;error
    :get-property
    :available-properties
    :remove-property
    :who-sets
    :has-property-p
    :has-direct-property-p
+
+   ;; Locking
+   :locked-property ;error
+   :property-locking-error ;error
+   :property-locked-p
+   :lock-property
+   :unlock-property
+   :toggle-lock
+   :lock-sheep
+   :unlock-sheep
 
    ;; Buzzwords
    :defbuzzword

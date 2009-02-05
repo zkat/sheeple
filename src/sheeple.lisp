@@ -594,4 +594,4 @@ This returns T if the value is set to NIL for that property-name."
 ;;        (sheep8 (clone (sheep7) ()))
 ;;        (sheep9 (clone (sheep8) ()))
 ;;        (sheep10 (clone (sheep9) ())))
-;;   (time (dotimes (i 10000) (var sheep10))))
+;;   (time (dotimes (i 100000) (var sheep10))))

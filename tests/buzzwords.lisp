@@ -66,7 +66,7 @@ relevant role objects from the system."
 
 (test message-undefinition
   "Tests undefmessage macro."
-  (defbuzzword test-message)
+  (defbuzzword foo)
   (defmessage foo (foo) foo)
   (is (equal =dolly= (foo =dolly=)))
   (undefmessage foo (foo))

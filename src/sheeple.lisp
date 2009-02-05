@@ -53,13 +53,19 @@
     :initarg :parents
     :initform nil
     :accessor sheep-direct-parents)
+   (children
+    :initform nil
+    :accessor sheep-direct-children)
    (properties
     :initarg :properties
     :initform (make-hash-table :test #'equal)
     :accessor sheep-direct-properties)
    (roles
     :initform nil
-    :accessor sheep-direct-roles)))
+    :accessor sheep-direct-roles)
+   (hierarchy-list
+    :initform nil
+    :accessor sheep-hierarchy-list)))
 
 (defclass standard-sheep-property ()
   ((name
@@ -97,7 +103,7 @@
   "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
   (let ((sheep (make-instance 'standard-sheep)) ;;this should determine SHEEPLE's classes, and clone that.
 	(mitosis? (getf (find-if (lambda (option) (equal (car option) :mitosis)) options)
-			   :mitosis)))
+			:mitosis)))
     (cond ((and mitosis?
 		(< 1 (length sheeple)))
 	   (error 'mitosis-error))  ; I think I can make use of this, actually
@@ -171,7 +177,7 @@
 	(value (cadr option)))
     (case option
       (:copy-all-values (when (eql value t)
-		      (copy-all-values sheep)))
+			  (copy-all-values sheep)))
       (:copy-direct-values (when (eql value t)
 			     (copy-direct-parent-values sheep)))
       (:deep-copy (when (eql value t)
@@ -232,7 +238,13 @@ and that they arej both of the same class."
 	 (handler-case
 	     (progn
 	       (pushnew new-parent (sheep-direct-parents child))
+	       (let ((pointer (make-weak-pointer child)))
+		 (pushnew pointer (sheep-direct-children new-parent))
+		 (finalize child (lambda () (setf (sheep-direct-children new-parent)
+						  (delete pointer 
+							  (sheep-direct-children new-parent))))))
 	       (compute-sheep-hierarchy-list child)
+	       (mapc #'compute-sheep-hierarchy-list (sheep-direct-children child))
 	       child)
 	   (sheep-hierarchy-error ()
 	     (progn
@@ -244,6 +256,10 @@ and that they arej both of the same class."
   "Deletes PARENT from CHILD's parent list."
   (setf (sheep-direct-parents child)
 	(delete parent (sheep-direct-parents child)))
+  (setf (sheep-direct-children parent)
+	(delete child (sheep-direct-children parent)))
+  (compute-sheep-hierarchy-list child)
+  (mapc #'compute-sheep-hierarchy-list (sheep-direct-children child))
   (when keep-properties
     (with-accessors ((parent-properties sheep-direct-properties))
 	parent
@@ -379,7 +395,6 @@ This returns T if the value is set to NIL for that property-name."
 ;;; Hierarchy Resolution
 ;;; - mostly blatantly stolen from Closette.
 ;;;
-
 (defun collect-parents (sheep)
   (labels ((all-parents-loop (seen parents)
 	     (let ((to-be-processed
@@ -394,19 +409,22 @@ This returns T if the value is set to NIL for that property-name."
 			     parents)))))))
     (all-parents-loop () (list sheep))))
 
-(define-condition sheep-hierarchy-error (sheeple-error) ()
-  (:documentation "Signaled whenever there is a problem computing the hierarchy list."))
-
 (defun compute-sheep-hierarchy-list (sheep)
   (handler-case 
       (let ((sheeple-to-order (collect-parents sheep)))
-  	(topological-sort sheeple-to-order
-  			  (remove-duplicates
-  			   (mapappend #'local-precedence-ordering
-  				      sheeple-to-order))
-  			  #'std-tie-breaker-rule))
+  	(setf (sheep-hierarchy-list sheep)
+	      (topological-sort sheeple-to-order
+				(remove-duplicates
+				 (mapappend #'local-precedence-ordering
+					    sheeple-to-order))
+				#'std-tie-breaker-rule)))
     (simple-error ()
       (error 'sheep-hierarchy-error))))
+
+
+
+(define-condition sheep-hierarchy-error (sheeple-error) ()
+  (:documentation "Signaled whenever there is a problem computing the hierarchy list."))
 
 (defun local-precedence-ordering (sheep)
   (mapcar #'list
@@ -421,62 +439,65 @@ This returns T if the value is set to NIL for that property-name."
       (when (not (null common))
         (return-from std-tie-breaker-rule (car common))))))
 
+;;; Set up =dolly=
+(compute-sheep-hierarchy-list =dolly=)
 
-;; For later -- these need a direct-children slot
-;;
+;;;
+;;; Unused at the moment
+;;;
 ;; (defun push-down-properties (sheep)
-;; "Pushes sheep's slot-values down to its children, unless the children have
+;;   "Pushes sheep's slot-values down to its children, unless the children have
 ;; overridden the values."
-;; (with-accessors ((properties sheep-direct-properties)
-;;      (children proto-children))
-;; sheep
-;; (loop for slot-name being the hash-keys of properties
-;; using (hash-value value)
-;; do (loop for child in children
-;;    do (unless (has-direct-slot-p child slot-name)
-;;      (set-slot-value child slot-name value))))
-;; sheep))
+;;   (with-accessors ((properties sheep-direct-properties)
+;; 		   (children sheep-direct-children))
+;;       sheep
+;;     (loop for slot-name being the hash-keys of properties
+;;        using (hash-value value)
+;;        do (loop for child in children
+;; 	     do (unless (has-direct-property-p child slot-name)
+;; 		  (setf (get-property child slot-name) value))))
+;;     sheep))
 
 ;; (defun sacrifice-sheep (sheep &key (save-properties nil))
-;; "Deletes SHEEP from the hierarchy, preserving the hierarchy by expanding references to
+;;   "Deletes SHEEP from the hierarchy, preserving the hierarchy by expanding references to
 ;; SHEEP into all its parents. Optionally, pushes its direct properties into its children."
-;; (give-children-new-parents sheep)
-;; (when save-properties
-;; (push-down-properties sheep)))
+;;   (give-children-new-parents sheep)
+;;   (when save-properties
+;;     (push-down-properties sheep)))
 
 ;; (defun give-parents-new-children (sheep)
-;; "Replaces the reference to SHEEP in its parents' children property with the sheep's children."
-;; (with-accessors ((parents sheep-direct-parents)
-;;      (children proto-children))
-;; sheep
-;; (loop for parent in parents
-;;    do (setf (proto-children parent)
-;;      (loop for par-child in (proto-children parent)
-;;      if (eql par-child sheep)
-;;      append children
-;;      else collect par-child)))))
+;;   "Replaces the reference to SHEEP in its parents' children property with the sheep's children."
+;;   (with-accessors ((parents sheep-direct-parents)
+;; 		   (children sheep-direct-children))
+;;       sheep
+;;     (loop for parent in parents
+;;        do (setf (sheep-direct-children parent)
+;; 		(loop for par-child in (sheep-direct-children parent)
+;; 		   if (equal par-child sheep)
+;; 		   append children
+;; 		   else collect par-child)))))
 
 ;; (defun give-children-new-parents (sheep)
-;; "Replaces the reference to SHEEP in its children's parents property with the sheep's parents."
-;; (with-accessors ((parents sheep-direct-parents)
-;;      (children proto-children))
-;; sheep
-;; (loop for child in children
-;; do (setf (sheep-direct-parents child)
-;;     (loop for child-par in (sheep-direct-parents child)
-;;      if (eql child-par sheep)
-;;      append parents
-;;      else collect child-par)))))
-;;
-;; (defun push-down-properties (sheep)
-;; "Pushes sheep's slot-values down to its children, unless the children have
-;; overridden the values."
-;; (with-accessors ((properties sheep-direct-properties)
-;;      (children proto-children))
-;; sheep
-;; (loop for slot-name being the hash-keys of properties
-;; using (hash-value value)
-;; do (loop for child in children
-;;    do (unless (has-direct-slot-p child slot-name)
-;;      (set-slot-value child slot-name value))))
-;; sheep))
+;;   "Replaces the reference to SHEEP in its children's parents property with the sheep's parents."
+;;   (with-accessors ((parents sheep-direct-parents)
+;; 		   (children sheep-direct-children))
+;;       sheep
+;;     (loop for child in children
+;;        do (setf (sheep-direct-parents child)
+;; 		(loop for child-par in (sheep-direct-parents child)
+;; 		   if (equal child-par sheep)
+;; 		   append parents
+;; 		   else collect child-par)))))
+
+;;; performance test
+;; (let* ((sheep1 (clone () ((var "value" :accessor var))))
+;;        (sheep2 (clone (sheep1) ()))
+;;        (sheep3 (clone (sheep2) ()))
+;;        (sheep4 (clone (sheep3) ()))
+;;        (sheep5 (clone (sheep4) ()))
+;;        (sheep6 (clone (sheep5) ()))
+;;        (sheep7 (clone (sheep6) ()))
+;;        (sheep8 (clone (sheep7) ()))
+;;        (sheep9 (clone (sheep8) ()))
+;;        (sheep10 (clone (sheep9) ())))
+;;   (time (dotimes (i 10000) (var sheep10))))

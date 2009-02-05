@@ -4,15 +4,15 @@
   :maintainer "Kat <zkat@Dagon>"
   :author "Kat <zkat@Dagon>"
   :licence "MIT"
-  :depends-on (:trivial-garbage)
+  :depends-on ()
   :serial t
   :components 
   ((:module src
 	    :serial t
 	    :components
-	    ((:file "packages")
+	    ((:file "trivial-garbage")
+	     (:file "packages")
 	     (:file "utils")
-	     (:file "trivial-garbage")
 	     (:file "sheeple")
 	     (:file "clone")
 	     (:file "compatibility")

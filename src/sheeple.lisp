@@ -70,10 +70,6 @@
     :initform nil
     :accessor sheep-hierarchy-list)))
 
-;; (defmethod sheep-property-owners (sheep)
-;;   (when (weak-pointer-p sheep)
-;;     (sheep-property-owners (weak-pointer-value sheep))))
-
 (defclass standard-sheep-property ()
   ((name
     :initarg :name

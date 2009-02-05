@@ -22,16 +22,8 @@ For information on how to do this, check out [Cliki][1], or the [ASDF Homepage][
 [1]: <http://www.cliki.net/asdf>
 [2]: <http://common-lisp.net/project/asdf/>
 
-Sheeple should work on most Lisp implementations, including:
-* CMUCL
-* SCL
-* SBCL
-* Allegro CL
-* CLISP
-* ECL
-* Clozure CL
-* CormanCL
-* LispWorks
+Sheeple should work on most Lisp implementations, although it's mainly written and tested in SBCL on
+Linux x86.
 
 FiveAM is required if you wish to run the test suite. To run it:
         

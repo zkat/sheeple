@@ -191,10 +191,10 @@
       (:copy-direct-values (when (eql value t)
 			     (copy-direct-parent-values sheep)))
       (:deep-copy (when (eql value t)
-		    ())) ; TODO
+		    (copy-all-values sheep)))
       (:nickname (setf (sheep-nickname sheep) value))
       (:lock (when (eql value t)
-	       ())) ; TODO
+	       (lock-sheep sheep)))
       (:mitosis (warn "Mitosis successful. It probably broke everything... continue with care."))
       (otherwise (error 'invalid-option-error)))))
 
@@ -243,9 +243,9 @@
 (defmethod add-parent ((new-parent standard-sheep) (child standard-sheep) &key)
   "Adds NEW-PARENT as a parent of CHILD. Checks to make sure NEW-PARENT and CHILD are not the same,
 and that they arej both of the same class."
-  (cond ((eql new-parent child)
+  (cond ((equal new-parent child)
 	 (error "Can't inherit from self."))
-	((not (eql (class-of new-parent)
+	((not (equal (class-of new-parent)
 		   (class-of child)))
 	 (error "Wrong metaclass for parent"))
 	(t
@@ -317,6 +317,8 @@ and that they arej both of the same class."
   ())
 (define-condition locked-property (sheeple-error)
   ())
+(define-condition property-locking-error (sheeple-error)
+  ())
 
 (defgeneric property-locked-p (sheep prop-name)
   (:documentation "Is the property with PROP-NAME in SHEEP locked from editing?"))
@@ -326,17 +328,37 @@ and that they arej both of the same class."
 (defgeneric lock-property (sheep property-name)
   (:documentation "Locks a property on a particular object, preventing it from being edited."))
 (defmethod lock-property ((sheep standard-sheep) property-name)
-  (setf (%locked-p (%get-property-object sheep property-name)) t))
+  (if (has-direct-property-p sheep property-name)
+      (setf (%locked-p (%get-property-object sheep property-name)) t)
+      (error 'property-locking-error)))
 
 (defgeneric unlock-property (sheep property-name)
   (:documentation "Unlocks a property on a particular object, allowing its value to be changed."))
 (defmethod unlock-property ((sheep standard-sheep) property-name)
-  (setf (%locked-p (%get-property-object sheep property-name)) nil))
+  (if (has-direct-property-p sheep property-name)
+      (setf (%locked-p (%get-property-object sheep property-name)) nil)
+      (error 'property-locking-error)))
 
 (defun toggle-lock (sheep property-name)
   (if (property-locked-p sheep property-name)
       (unlock-property sheep property-name)
       (lock-property sheep property-name)))
+
+(defgeneric lock-sheep (sheep)
+  (:documentation "Locks all of SHEEP's properties."))
+(defmethod lock-sheep ((sheep standard-sheep))
+  (maphash (lambda (key value)
+	     (declare (ignore value))
+	     (lock-property sheep key))
+	   (sheep-direct-properties sheep)))
+
+(defgeneric unlock-sheep (sheep)
+  (:documentation "Sets all of SHEEP's properties to 'unlocked'"))
+(defmethod unlock-sheep ((sheep standard-sheep))
+  (maphash (lambda (key value)
+	     (declare (ignore value))
+	     (unlock-property sheep key))
+	   (sheep-direct-properties sheep)))
 
 ;;; Getting/setting
 (defgeneric get-property (sheep property-name)

@@ -60,12 +60,20 @@
     :initarg :properties
     :initform (make-hash-table :test #'equal)
     :accessor sheep-direct-properties)
+   (property-owners
+    :initarg :property-owner
+    :initform (make-hash-table :test #'equal)
+    :accessor sheep-property-owners)
    (roles
     :initform nil
     :accessor sheep-direct-roles)
    (hierarchy-list
     :initform nil
     :accessor sheep-hierarchy-list)))
+
+(defmethod sheep-property-owners (sheep)
+  (when (weak-pointer-p sheep)
+    (sheep-property-owners (weak-pointer-value sheep))))
 
 (defclass standard-sheep-property ()
   ((name
@@ -113,6 +121,7 @@
 	   (setf sheep (set-up-inheritance sheep sheeple))))
     (set-up-properties properties sheep)
     (set-up-other-options options sheep)
+    (memoize-property-access sheep)
     sheep))
 
 (defun set-up-inheritance (new-sheep sheeple)
@@ -245,6 +254,7 @@ and that they arej both of the same class."
 							  (sheep-direct-children new-parent))))))
 	       (compute-sheep-hierarchy-list child)
 	       (mapc #'compute-sheep-hierarchy-list (sheep-direct-children child))
+	       (memoize-property-access child)
 	       child)
 	   (sheep-hierarchy-error ()
 	     (progn
@@ -260,6 +270,7 @@ and that they arej both of the same class."
 	(delete child (sheep-direct-children parent)))
   (compute-sheep-hierarchy-list child)
   (mapc #'compute-sheep-hierarchy-list (sheep-direct-children child))
+  (memoize-property-access child)
   (when keep-properties
     (with-accessors ((parent-properties sheep-direct-properties))
 	parent
@@ -268,6 +279,11 @@ and that they arej both of the same class."
 	 do (unless (has-direct-property-p child property-name)
 	      (setf (get-property child property-name) value)))))
   child)
+
+(defun memoize-property-access (sheep)
+  (loop for property in (available-properties sheep)
+     do (let ((owner (get-property-owner-with-hierarchy-list (sheep-hierarchy-list sheep) property)))
+	  (set-property-owner owner property))))
 
 ;;; Inheritance-related predicates
 (defun direct-parent-p (maybe-parent child)
@@ -319,13 +335,24 @@ and that they arej both of the same class."
 (defmethod get-property ((sheep standard-sheep) property-name)
   "Default behavior is differential inheritance: It will look for that property-name up the entire 
 sheep hierarchy."
-  (get-property-with-hierarchy-list (compute-sheep-hierarchy-list sheep) property-name))
+  (get-property-with-memoized-owner sheep property-name))
 
 (defun %get-property-object (sheep prop-name)
   (gethash prop-name (sheep-direct-properties sheep)))
 
 (defun (setf %get-property-object) (new-value sheep prop-name)
   (setf (gethash prop-name (sheep-direct-properties sheep)) new-value))
+
+(defun get-property-with-memoized-owner (sheep property-name)
+  (multiple-value-bind (prop-owner has-p)
+      (gethash property-name (sheep-property-owners sheep))
+    (if has-p
+	(multiple-value-bind (prop-obj has-p)
+	    (gethash property-name (sheep-direct-properties prop-owner))
+	  (if has-p
+	      (%value prop-obj)
+	      (error 'unbound-property)))
+	(error 'unbound-property))))
 
 (defun get-property-with-hierarchy-list (list property-name)
   "Finds a property value under PROPERTY-NAME using a hierarchy list."
@@ -334,6 +361,15 @@ sheep hierarchy."
 	    (%get-property-object sheep property-name)
 	  (when has-p
 	    (return-from get-property-with-hierarchy-list (%value prop-obj))))
+     finally (error 'unbound-property)))
+
+(defun get-property-owner-with-hierarchy-list (list property-name)
+  (loop for sheep in list
+     do (multiple-value-bind (prop-obj has-p)
+	    (%get-property-object sheep property-name)
+	  (declare (ignore prop-obj))
+	  (when has-p
+	    (return-from get-property-owner-with-hierarchy-list sheep)))
      finally (error 'unbound-property)))
 
 (defgeneric (setf get-property) (new-value sheep property-name)
@@ -351,12 +387,24 @@ property values for that same property name, and become the new value for its ch
 	(progn
 	  (setf (gethash property-name (sheep-direct-properties sheep))
 		(make-instance 'standard-sheep-property :name property-name :value new-value))
+	  (set-property-owner sheep property-name)
 	  new-value))))
+
+(defun set-property-owner (sheep property-name)
+  "Sets SHEEP as owner of PROPERTY-NAME, and cascades the info down."
+  (setf (gethash property-name (sheep-property-owners sheep))
+	sheep)
+  (mapc (lambda (child) (setf (gethash property-name (sheep-property-owners child)) 
+			      sheep))
+	(sheep-direct-children sheep)))
 
 (defgeneric remove-property (sheep property-name)
   (:documentation "Removes a property from a particular sheep."))
 (defmethod remove-property ((sheep standard-sheep) property-name)
   "Simply removes the hash value from the sheep. Leaves parents intact."
+  (remhash property-name (sheep-property-owners sheep))
+  (mapc (lambda (child) (remhash property-name (sheep-direct-properties child)))
+	(sheep-direct-children sheep))
   (remhash property-name (sheep-direct-properties sheep)))
 
 (defun has-property-p (sheep property-name)
@@ -378,9 +426,11 @@ This returns T if the value is set to NIL for that property-name."
 (defgeneric who-sets (sheep property-name)
   (:documentation "Returns the sheep defining the value of SHEEP's property-name."))
 (defmethod who-sets ((sheep standard-sheep) property-name)
-  (loop for sheep in (compute-sheep-hierarchy-list sheep)
-     if (has-direct-property-p sheep property-name)
-     return sheep))
+  (multiple-value-bind (owner has-p)
+      (gethash property-name (sheep-property-owners sheep))
+    (if has-p
+	owner
+	(error 'unbound-property))))
 
 (defgeneric available-properties (sheep)
   (:documentation "Returns a list of property-names available to SHEEP."))

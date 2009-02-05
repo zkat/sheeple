@@ -4,7 +4,7 @@
   :maintainer "Josh <sykopomp@Dagon>"
   :author "Josh <sykopomp@Dagon>"
   :licence "MIT"
-  :depends-on ()
+  :depends-on (:trivial-garbage)
   :serial t
   :components 
   ((:module src

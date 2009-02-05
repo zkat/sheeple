@@ -1,5 +1,5 @@
 (defpackage #:sheeple
-  (:use :cl)
+  (:use :cl :trivial-garbage)
   (:export
 
    ;; Cloning and management

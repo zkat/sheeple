@@ -80,7 +80,15 @@
    (locked-p
     :initarg :locked-p
     :initform nil
-    :accessor %locked-p)))
+    :accessor %locked-p)
+   (as-cloneform-p
+    :initarg :as-cloneform-p
+    :initform nil
+    :accessor as-cloneform-p)
+   (cloneform
+    :initarg :cloneform
+    :initform nil
+    :accessor %cloneform)))
 
 (defgeneric sheep-p (sheep?))
 (defmethod sheep-p ((sheep standard-sheep))
@@ -150,6 +158,7 @@
 ;;;
 
 (defun set-up-properties (properties sheep)
+  (set-up-cloneforms sheep)
   (loop for property-list in properties
      do (set-up-property property-list sheep)))
 
@@ -158,10 +167,11 @@
 	(value (getf property-list :value))
 	(readers (getf property-list :readers))
 	(writers (getf property-list :writers))
-	(locked-p (getf property-list :lock)))
+	(locked-p (getf property-list :lock))
+	(as-cloneform (getf property-list :as-cloneform)))
     (when (keywordp name)
       (error 'probably-meant-to-be-option))
-    (setf (get-property sheep name) value)
+    (if as-cloneform (setf (get-property sheep name) value))
     (when locked-p
       (lock-property sheep name))
     (add-readers-to-sheep readers name sheep)

@@ -4,7 +4,7 @@
   :maintainer "Kat <zkat@Dagon>"
   :author "Kat <zkat@Dagon>"
   :licence "MIT"
-  :depends-on ()
+  :depends-on (:trivial-garbage)
   :serial t
   :components 
   ((:module src

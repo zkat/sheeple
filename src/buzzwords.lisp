@@ -34,7 +34,7 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
-
+(declaim (optimize (speed 3) (safety 1)))
 ;;;
 ;;; Message and participation base classes
 ;;;

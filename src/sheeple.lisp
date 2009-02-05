@@ -26,15 +26,15 @@
 ;; Sheep class and inheritance/property-related code, as well as sheep cloning.
 ;;
 ;; TODO:
-;; * Add an option that prevents an object from being edited?
-;; * Add property option that works like :initform
+;; * Add an option that prevents an entire object from being edited?
+;; * Add property option that works like :initform ?
 ;; * Add clone option to copy individual properties?
-;; * Add property option that forces all descendants to copy a property
 ;; * Clone option to auto-generate all accessors (with optional appending a-la defstruct?)
 ;; * Documentation!!
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
+(declaim (optimize (speed 3) (safety 1)))
 
 ;;;
 ;;; The Standard Sheep Definition
@@ -191,8 +191,10 @@
       (:copy-direct-values (when (eql value t)
 			     (copy-direct-parent-values sheep)))
       (:deep-copy (when (eql value t)
-		    ()))
+		    ())) ; TODO
       (:nickname (setf (sheep-nickname sheep) value))
+      (:lock (when (eql value t)
+	       ())) ; TODO
       (:mitosis (warn "Mitosis successful. It probably broke everything... continue with care."))
       (otherwise (error 'invalid-option-error)))))
 
@@ -310,33 +312,6 @@ and that they arej both of the same class."
 ;;; Properties
 ;;;
 
-;;; Memoization
-(defun memoize-property-access (sheep)
-  (loop for property in (available-properties sheep)
-     do (let ((owner (%get-property-owner sheep property)))
-	  (setf (gethash property (sheep-property-owners sheep))
-		owner))))
-
-
-
-(defun %get-property-owner (sheep property-name)
-  (let ((hierarchy-list (sheep-hierarchy-list sheep)))
-    (loop for sheep in hierarchy-list
-       do (multiple-value-bind (prop-obj has-p)
-	      (%get-property-object sheep property-name)
-	    (declare (ignore prop-obj))
-	    (when has-p
-	      (return-from %get-property-owner sheep)))
-       finally (error 'unbound-property))))
-
-(defun memoize-sheep-hierarchy-list (sheep)
-  (let ((list (compute-sheep-hierarchy-list sheep)))
-    (setf (sheep-hierarchy-list sheep)
-	  list)
-    (mapc (lambda (descendant) 
-	    (memoize-sheep-hierarchy-list (weak-pointer-value descendant)))
-	  (sheep-direct-children sheep))))
-
 ;;; locked properties
 (define-condition unbound-property (sheeple-error)
   ())
@@ -414,21 +389,11 @@ property values for that same property name, and become the new value for its ch
 		(make-instance 'standard-sheep-property :name property-name :value new-value))
 	  new-value))))
 
-(defmethod (setf get-property) :after (new-value (sheep standard-sheep) property-name)
-  (declare (ignore new-value property-name))
-  (memoize-property-access sheep)
-  (loop for child-pointer in (sheep-direct-children sheep)
-     do (memoize-property-access (weak-pointer-value child-pointer))))
-
 (defgeneric remove-property (sheep property-name)
   (:documentation "Removes a property from a particular sheep."))
 (defmethod remove-property ((sheep standard-sheep) property-name)
   "Simply removes the hash value from the sheep. Leaves parents intact."
-  (remhash property-name (sheep-property-owners sheep))
   (remhash property-name (sheep-direct-properties sheep)))
-(defmethod remove-property :after ((sheep standard-sheep) property-name)
-  (loop for child-pointer in (sheep-direct-children sheep)
-     do (remhash property-name (sheep-direct-properties (weak-pointer-value child-pointer)))))
 
 (defun has-property-p (sheep property-name)
   "Returns T if a property with PROPERTY-NAME is available to SHEEP."
@@ -464,9 +429,44 @@ This returns T if the value is set to NIL for that property-name."
      (flatten
       (append obj-keys (mapcar #'available-properties (sheep-direct-parents sheep)))))))
 
+;;; Memoization
+(defun memoize-property-access (sheep)
+  (loop for property in (available-properties sheep)
+     do (let ((owner (%get-property-owner sheep property)))
+	  (setf (gethash property (sheep-property-owners sheep))
+		owner))))
+
+(defun %get-property-owner (sheep property-name)
+  (let ((hierarchy-list (sheep-hierarchy-list sheep)))
+    (loop for sheep in hierarchy-list
+       do (multiple-value-bind (prop-obj has-p)
+	      (%get-property-object sheep property-name)
+	    (declare (ignore prop-obj))
+	    (when has-p
+	      (return-from %get-property-owner sheep)))
+       finally (error 'unbound-property))))
+
+(defun memoize-sheep-hierarchy-list (sheep)
+  (let ((list (compute-sheep-hierarchy-list sheep)))
+    (setf (sheep-hierarchy-list sheep)
+	  list)
+    (mapc (lambda (descendant) 
+	    (memoize-sheep-hierarchy-list (weak-pointer-value descendant)))
+	  (sheep-direct-children sheep))))
+
+(defmethod (setf get-property) :after (new-value (sheep standard-sheep) property-name)
+  (declare (ignore new-value property-name))
+  (memoize-property-access sheep)
+  (loop for child-pointer in (sheep-direct-children sheep)
+     do (memoize-property-access (weak-pointer-value child-pointer))))
+
+(defmethod remove-property :after ((sheep standard-sheep) property-name)
+  (remhash property-name (sheep-property-owners sheep))
+  (loop for child-pointer in (sheep-direct-children sheep)
+     do (remhash property-name (sheep-direct-properties (weak-pointer-value child-pointer)))))
 ;;;
 ;;; Hierarchy Resolution
-;;; - mostly blatantly stolen from Closette.
+;;; - blatantly stolen from Closette.
 ;;;
 (defun collect-parents (sheep)
   (labels ((all-parents-loop (seen parents)

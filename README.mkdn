@@ -30,8 +30,7 @@ Sheeple is inspired by a number of Object-Oriented systems, mainly:
 It was written with the purpose of providing a lot of the goodies of CLOS programming, but
 completely prototype-based. As such, it shares a lot of features (and syntax) with CLOS. The most
 notable features are multiple inheritance and multimethods (called multimessages). Several features
-are on the TODO list, such as :before, :after, :around messages, and (call-next-message). For more
-details, read on.
+are on the TODO list, such as :around messages, and (call-next-message). For more details, read on.
 
 This README contains a basic usage guide, and sort-of-spec of Sheeple.
 

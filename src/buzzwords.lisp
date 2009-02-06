@@ -6,7 +6,8 @@
 ;;
 ;; TODO:
 ;; * There should be an error if defbuzzword tries to clobber a function or generic-func
-;; * Write unit tests
+;; * Keep trying to write (call-next-message) and :around
+;; * Write more unit tests
 ;; * AFTER unit tests... clean up code, run tests
 ;; * AFTER cleanup... --omg-optimized, run tests
 ;; * DOCUMENTATION!!1

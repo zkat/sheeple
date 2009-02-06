@@ -5,7 +5,7 @@
 ;; Miscellaneous utilities for Sheeple
 ;;
 ;; TODO:
-;; * Unit tests for topo-sort?
+;; * Move conditions in here, or into a new file?
 ;; * DOCUMENTATION!
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

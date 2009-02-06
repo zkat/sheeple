@@ -162,16 +162,19 @@
   (loop for property-list in properties
      do (set-up-property property-list sheep)))
 
+(defun set-up-cloneforms (sheep)
+  nil) ; STUB
+
 (defun set-up-property (property-list sheep)
   (let ((name (getf property-list :name))
 	(value (getf property-list :value))
 	(readers (getf property-list :readers))
 	(writers (getf property-list :writers))
 	(locked-p (getf property-list :lock))
-	(as-cloneform (getf property-list :as-cloneform)))
+	(as-cloneform (getf property-list :as-cloneform))) ; STUB
     (when (keywordp name)
       (error 'probably-meant-to-be-option))
-    (if as-cloneform (setf (get-property sheep name) value))
+    (setf (get-property sheep name) value)
     (when locked-p
       (lock-property sheep name))
     (add-readers-to-sheep readers name sheep)

@@ -366,14 +366,16 @@
 				(when (fully-specified-p (message-container-rank contained-message))
 				  (pushnew contained-message contained-applicable-messages :test #'equalp))))))))))
     (if contained-applicable-messages
-	(sort-applicable-messages contained-applicable-messages)
+	(unbox-messages (sort-applicable-messages contained-applicable-messages))
 	(error 'no-applicable-messages))))
 
+(defun unbox-messages (messages)
+  (mapcar #'message-container-message messages))
+
 (defun sort-applicable-messages (message-list &key (rank-key #'<))
-  (mapcar #'message-container-message 
-	  (sort message-list rank-key
-		:key (lambda (contained-message)
-		       (calculate-rank-score (message-container-rank contained-message))))))
+  (sort message-list rank-key
+	:key (lambda (contained-message)
+	       (calculate-rank-score (message-container-rank contained-message)))))
 
 (defun contain-message (message)
   (make-message-container

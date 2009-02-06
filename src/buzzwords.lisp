@@ -167,19 +167,22 @@
 				 :body body
 				 :function function)))
     (add-message-to-buzzword message (find-buzzword name))
-    (remove-messages-with-name-and-participants name target-sheeple)
+    (remove-messages-with-name-qualifiers-and-participants name qualifiers target-sheeple)
     (add-message-to-sheeple name message target-sheeple)
     message))
 
 (defun add-message-to-buzzword (message buzzword)
   (pushnew message (buzzword-messages buzzword)))
 
-(defun remove-messages-with-name-and-participants (name participants)
+(defun remove-messages-with-name-qualifiers-and-participants (name qualifiers participants)
   (loop for sheep in participants
        do (loop for role in (sheep-direct-roles sheep)
 	       do (when (and (equal name (role-name role))
 			     (equal participants
 				    (message-participants
+				     (message-pointer role)))
+			     (equal qualifiers
+				    (message-qualifiers
 				     (message-pointer role))))
 		    (delete-role role sheep)))))
 
@@ -199,8 +202,8 @@
 			     :message-pointer message) 
 	      (sheep-direct-roles sheep))))
 
-(defun undefine-message (&key name participants)
-  (remove-messages-with-name-and-participants name participants))
+(defun undefine-message (&key name qualifiers participants)
+  (remove-messages-with-name-qualifiers-and-participants name qualifiers participants))
 
 (defun undefine-buzzword (&key name)
   (let ((buzzword (find-buzzword name nil)))
@@ -219,20 +222,58 @@
     :name ',name
     :documentation ,docstring))
 
-(defmacro defmessage (name lambda-list &body body)
-  `(ensure-message
-    :name ',name
-    :lambda-list ,(extract-lambda-list lambda-list)
-    :participants ,(extract-participants lambda-list)
-    :function (block ,name 
-		(lambda ,(eval (extract-lambda-list lambda-list)) ;okay to use eval here. Just symbols
-		  ,@body))
-    :body '(block ,name ,@body)))
+(defmacro defmessage (&rest args)
+  (multiple-value-bind (name qualifiers lambda-list participants body)
+      (parse-defmessage args)
+    `(ensure-message
+      :name ',name
+      :qualifiers ',qualifiers
+      :lambda-list ,(extract-lambda-list lambda-list)
+      :participants ,(extract-participants participants)
+      :function (block ,name 
+		  (lambda ,(eval (extract-lambda-list lambda-list)) ;okay to use eval here. Just symbols
+		    ,@body))
+      :body '(block ,name ,@body))))
 
-(defmacro undefmessage (name lambda-list)
-  `(undefine-message
-    :name ',name
-    :participants ,(extract-participants lambda-list)))
+(defun parse-defmessage (args)
+  (let ((name (car args))
+	(qualifiers nil)
+	(lambda-list nil)
+	(body nil)
+	(parse-state :qualifiers))
+    (dolist (arg (cdr args))
+      (ecase parse-state
+	(:qualifiers
+	 (if (and (atom arg) (not (null arg)))
+	     (push arg qualifiers)
+	     (progn (setf lambda-list arg)
+		    (setf parse-state :body))))
+	(:body (setf body (list arg)))))
+    (values name
+	    qualifiers
+	    lambda-list
+	    lambda-list
+	    body)))
+
+(defmacro undefmessage (&rest args)
+  (multiple-value-bind (name qualifiers lambda-list)
+      (parse-undefmessage args)
+    `(undefine-message
+      :name ',name
+      :qualifiers ',qualifiers
+      :participants ,(extract-participants lambda-list))))
+
+(defun parse-undefmessage (args)
+  (let ((name (car args))
+	(qualifiers nil)
+	(lambda-list nil))
+    (dolist (arg (cdr args))
+      (if (and (atom arg) (not (null arg)))
+	  (push arg qualifiers)
+	  (setf lambda-list arg)))
+    (values name
+	    qualifiers
+	    lambda-list)))
 
 (defmacro undefbuzzword (name)
   `(undefine-buzzword
@@ -359,6 +400,3 @@
        do (when (numberp item)
 	    (incf total item)))
     total))
-
-
-

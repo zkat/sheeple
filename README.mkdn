@@ -384,11 +384,17 @@ CLOS programming should have a fairly easy time wrapping their head around Sheep
   that lambda-list slot.
   Also unlike defmethod, the lambda-lists for messages can be of variable length, while still
   dispatching on all arguments.
-  The format is: 
+  The basic format is: 
 
         (defmessage message-name (plain-variable (specialized-variable object)) @body)
 
-  A Massive example:
+  Message definitions can also accept qualifiers. Currently, only :before and :after are supported,
+  but they may be added to the definition just as they are in CLOS, and their expected behavior is
+  the same:
+
+        (defmessage message-name :qualifier (...) body)
+
+  This example illustrates usage of sheeple and messages:
 
         (defparameter sheep1 (clone () ()))
         (defparameter sheep2 (clone () ()))
@@ -434,8 +440,33 @@ CLOS programming should have a fairly easy time wrapping their head around Sheep
            (concatenate 'string foo bar))
         (synergize "Hey " "Jude") => "Hey Jude"
 
+        ;; :before and :after
+        (defparameter =test-sheep= (clone () ((var "value" :accessor var))))
+        (var =test-sheep=) => "value"
+         
+        (defmessage var :before ((sheep =test-sheep=))
+          (setf (get-property sheep 'var) "new-value"))
+        (var =test-sheep=) => "new-value"
+        (setf (var =test-sheep=) "old-value")
+        (get-property =test-sheep= 'var) => "old-value"
+        (var =test-sheep=) => "new-value"
+
+        (defmessage var :after ((sheep =test-sheep=))
+          (setf (get-property sheep 'var) "after-value"))
+        (var =test-sheep=) => "new-value"
+        (get-property =test-sheep= 'var) => "after-value"
+
 * UNDEFBUZZWORD completely undefines a buzzword, removing all messages and making the function
   unbound.
 
-* UNDEFMESSAGE accepts the same kind of lambda-list that defmessage does, but undefines whatever
-  message fits that lambda-list.
+         (undefbuzzword synergize) => all definitions of synergize are removed, #'synergize is unbound
+
+* UNDEFMESSAGE accepts the same kind of arguments as defmessage, but reverses the process for a
+  matching message.
+
+         (undefmessage var :before ((x =test-sheep=)))
+         (var =test-sheep=) => "value"
+
+* Potential gotcha:
+  For the time being, CLOS objects and CLOS-defined types are boxed as =white-fang=, not as boxed
+  versions of the classes/objects.

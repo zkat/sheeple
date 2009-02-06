@@ -81,7 +81,7 @@
 	((and array (not vector))                      =array=)
 	((and sequence (not (or vector list)))         =sequence=)
 	(function                                      =function=)
-	(t                                             =dolly=))))
+	(t                                             =white-fang=))))
 
 ;; Boxed object table
 (let ((boxed-object-table (make-hash-table :test #'equal)))

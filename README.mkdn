@@ -109,6 +109,8 @@ Features available so far:
 
 * Auto-generated readers/writers, with :accessor, :reader, and :writer slot options.
 
+* :before and :after messages
+
 * Portable across implementations, although more testing and tweaking is needed.
 
 * Nickname slot for sheep metaobject, so helpful information can be printed by print-object.
@@ -123,7 +125,7 @@ Planned features that have not yet been implemented include:
 
 * CLOS integration, including autoboxing of entire class hierarchies.
 
-* :before, :after, and :around messages
+* :around messages
 
 * (call-next-message)
 

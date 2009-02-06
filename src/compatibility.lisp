@@ -115,5 +115,5 @@
   "Returns SHEEP or fleeces it."
    (if (not (sheep-p sheep))
        (find-fleeced-wolf sheep)
-       sheep))
+       (values sheep nil)))
 

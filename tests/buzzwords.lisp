@@ -57,7 +57,7 @@ relevant role objects from the system."
   (undefmessage another-buzzer ((foo =string=)))
   (is (equal "hei-ho!" (another-buzzer "hei-ho!")))
   (undefmessage another-buzzer (foo))
-  (signals sheeple::no-most-specific-message (another-buzzer =dolly=)) ; this package bs pisses me off
+  (signals sheeple::no-applicable-messages (another-buzzer =dolly=)) ; this package bs pisses me off
   (is (not (sheeple::participant-p =dolly= 'test-buzz)))
   (is (not (sheeple::participant-p =string= 'test-buzz)))
   (undefbuzzword another-buzzer)
@@ -70,12 +70,12 @@ relevant role objects from the system."
   (defmessage foo (foo) foo)
   (is (equal =dolly= (foo =dolly=)))
   (undefmessage foo (foo))
-  (signals sheeple::no-most-specific-message (foo =dolly=))
+  (signals sheeple::no-applicable-messages (foo =dolly=))
   (defmessage foo ((string =string=) (another =string=)) (concatenate 'string string another))
   (is (equal "fullstring" (foo "full" "string")))
   (undefmessage foo ((x =string=) (y =string=)))
-  (signals sheeple::no-most-specific-message (foo "full" "string"))
-  (undefbuzzword test-message))
+  (signals sheeple::no-applicable-messages (foo "full" "string"))
+  (undefbuzzword foo))
 
 (test basic-message-definition
   "Checks that messages are defined properly, and added to their respective objects.
@@ -121,7 +121,7 @@ to their respective participants, with correct role-indexes, etc."
 	(another-sheep (clone () () (:nickname "rejected-failure"))))
     (defmessage test-message ((sheep test-sheep)) (sheep-nickname sheep))
     (is (equal "testie" (test-message test-sheep)))
-    (signals sheeple::no-most-specific-message (test-message another-sheep)))
+    (signals sheeple::no-applicable-messages (test-message another-sheep)))
   (undefbuzzword test-message))
 
 (test multimessage-dispatch
@@ -136,7 +136,7 @@ to their respective participants, with correct role-indexes, etc."
   (is (= 5 (foo 2 3)))
   (is (= 5 (foo 5)))
   (is (equal "bar" (foo "foo" "bar")))
-  (signals sheeple::no-most-specific-message (foo 1 2 3))
+  (signals sheeple::no-applicable-messages (foo 1 2 3))
   (undefbuzzword foo)
   (let* ((sheep1 (clone () () (:nickname "sheep1")))
 	 (sheep2 (clone (sheep1) () (:nickname "sheep2")))

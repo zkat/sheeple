@@ -290,6 +290,32 @@
 	most-specific-message
 	(error 'no-most-specific-message))))
 
+(defun find-applicable-messages  (selector args)
+  "Returns the most specific message using SELECTOR and ARGS."
+  (let ((n (length args))
+	(applicable-messages nil))
+    (loop 
+       for arg in args
+       for index upto (1- n)
+       do (let ((curr-sheep-list (sheep-hierarchy-list arg)))
+	    (loop
+	       for curr-sheep in curr-sheep-list
+	       for hierarchy-position upto (1- (length curr-sheep-list))
+	       do (dolist (role (sheep-direct-roles curr-sheep))
+		    (when (and (equal selector (role-name role))
+			       (eql index (role-position role)))
+			  (let ((curr-message (message-pointer role)))
+			    (when (= n (length (message-lambda-list curr-message)))
+			      (maybe-add-message-to-table curr-message)
+			      (setf (elt (message-rank curr-message) index) hierarchy-position)
+			      (when (fully-specified-p (message-rank curr-message))
+				(pushnew curr-message applicable-messages)))))))))
+    (reset-message-ranks)
+    (if applicable-messages
+	applicable-messages
+	(error 'no-applicable-messages))))
+
+(define-condition no-applicable-messages (sheeple-error) ())
 (define-condition no-most-specific-message (sheeple-error) ())
 
 (defun fully-specified-p (rank)

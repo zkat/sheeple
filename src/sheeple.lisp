@@ -524,7 +524,7 @@ This returns T if the value is set to NIL for that property-name."
 (memoize-sheep-hierarchy-list =dolly=)
 
 ;;;
-;;; Unused at the moment
+;;; Unused at the moment. They're mostly useful for persistent schemes.
 ;;;
 ;; (defun push-down-properties (sheep)
 ;;   "Pushes sheep's slot-values down to its children, unless the children have
@@ -569,16 +569,3 @@ This returns T if the value is set to NIL for that property-name."
 ;; 		   if (equal child-par sheep)
 ;; 		   append parents
 ;; 		   else collect child-par)))))
-
-;;; performance test
-;; (let* ((sheep1 (clone () ((var "value" :accessor var))))
-;;        (sheep2 (clone (sheep1) ()))
-;;        (sheep3 (clone (sheep2) ()))
-;;        (sheep4 (clone (sheep3) ()))
-;;        (sheep5 (clone (sheep4) ()))
-;;        (sheep6 (clone (sheep5) ()))
-;;        (sheep7 (clone (sheep6) ()))
-;;        (sheep8 (clone (sheep7) ()))
-;;        (sheep9 (clone (sheep8) ()))
-;;        (sheep10 (clone (sheep9) ())))
-;;   (time (dotimes (i 100000) (var sheep10))))

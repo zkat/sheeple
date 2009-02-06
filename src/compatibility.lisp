@@ -7,6 +7,7 @@
 ;;
 ;; TODO:
 ;; * Write unit tests
+;; * Write autoboxing scheme for wrapping CLOS objects.
 ;; * DOCUMENTATION!!!1
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

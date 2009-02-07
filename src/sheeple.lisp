@@ -83,7 +83,11 @@
 
 (defun create-sheep (sheeple properties &optional options)
   "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
-  (let ((sheep (make-instance 'standard-sheep)) ;;this should determine SHEEPLE's classes, and clone that.
+  (let ((sheep (make-instance (or (getf (find-if 
+					 (lambda (option) 
+					   (equal (car option) :metaclass)) options) 
+					:metaclass)
+				  'standard-sheep))) ;;this should determine SHEEPLE's classes, and clone that.
 	(mitosis? (getf (find-if (lambda (option) (equal (car option) :mitosis)) options)
 			:mitosis)))
     (cond ((and mitosis?
@@ -105,7 +109,8 @@
   (loop for child-pointer in (sheep-direct-children sheep)
      do (memoize-property-access (weak-pointer-value child-pointer))))
 
-(defun set-up-inheritance (new-sheep sheeple)
+(defgeneric set-up-inheritance (sheep sheeple))
+(defmethod set-up-inheritance ((new-sheep standard-sheep) sheeple)
   "If SHEEPLE is non-nil, adds them in order to "
   (let ((obj new-sheep))
     (if sheeple
@@ -135,14 +140,11 @@
 ;;;
 
 (defun set-up-properties (properties sheep)
-  (set-up-cloneforms sheep)
   (loop for property-list in properties
      do (set-up-property property-list sheep)))
 
-(defun set-up-cloneforms (sheep)
-  nil) ; STUB
-
-(defun set-up-property (property-list sheep)
+(defgeneric set-up-property (property-list sheep))
+(defmethod set-up-property (property-list (sheep standard-sheep))
   (let ((name (getf property-list :name))
 	(value (getf property-list :value))
 	(readers (getf property-list :readers))
@@ -167,7 +169,8 @@
   (loop for option in options
      do (set-up-option option sheep)))
 
-(defun set-up-option (option sheep)
+(defgeneric set-up-option (option sheep))
+(defmethod set-up-option (option (sheep standard-sheep))
   (let ((option (car option))
 	(value (cadr option)))
     (case option
@@ -180,7 +183,8 @@
       (:nickname (setf (sheep-nickname sheep) value))
       (:lock (when (eql value t)
 	       (lock-sheep sheep)))
-      (:mitosis (warn "Mitosis successful. It probably broke everything... continue with care."))
+      (:mitosis (warn "Mitosis successful."))
+      (:metaclass (warn "Cloning ~a as a ~a" sheep value))
       (otherwise (error 'invalid-option-error)))))
 
 (define-condition invalid-option-error (sheeple-error) ())

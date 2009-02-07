@@ -47,6 +47,7 @@
             (readers nil)
             (writers nil)
 	    (locked-p nil)
+	    (metaclass nil)
             (other-options nil))
         (do ((olist (cddr property) (cddr olist)))
             ((null olist))
@@ -64,6 +65,8 @@
              (pushnew `(setf ,(cadr olist)) writers))
 	    (:lock
 	     (setf locked-p (cadr olist)))
+	    (:metaclass
+	     (setf metaclass (cadr olist)))
 	    (otherwise 
              (pushnew (cadr olist) other-options)
              (pushnew (car olist) other-options))))
@@ -74,7 +77,8 @@
 	      :value ,value
 	      ,@(when readers `(:readers ',readers))
 	      ,@(when writers `(:writers ',writers))
-	      ,@(when locked-p `(:lock ,locked-p)))))))
+	      ,@(when locked-p `(:lock ,locked-p))
+	      ,@(when metaclass `(:metaclass ',metaclass)))))))
 
 
 (defun canonize-options (options)

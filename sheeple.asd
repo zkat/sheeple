@@ -1,8 +1,8 @@
 (asdf:defsystem sheeple
   :version "Baahh"
   :description "Clone-crazy hackery tool"
-  :maintainer "Kat <zkat@Dagon>"
-  :author "Kat <zkat@Dagon>"
+  :maintainer "Kat Marchan <kzm@sykosomatic.org>"
+  :author "Kat <kzm@sykosomatic.org>"
   :licence "MIT"
   :depends-on ()
   :serial t

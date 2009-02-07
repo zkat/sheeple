@@ -1,8 +1,8 @@
 (asdf:defsystem sheeple-tests
   :version "Baahh"
   :description "Clone-crazy hackery tool, unit tests."
-  :maintainer "Josh <sykopomp@Dagon>"
-  :author "Josh <sykopomp@Dagon>"
+  :maintainer "Josh Marchan <sykopomp@sykosomatic.org>"
+  :author "Josh <sykopomp@sykosomatic.org>"
   :licence "MIT"
   :depends-on (:sheeple :fiveam)
   :serial t

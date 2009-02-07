@@ -59,15 +59,7 @@
    (locked-p
     :initarg :locked-p
     :initform nil
-    :accessor %locked-p)
-   (as-cloneform-p
-    :initarg :as-cloneform-p
-    :initform nil
-    :accessor as-cloneform-p)
-   (cloneform
-    :initarg :cloneform
-    :initform nil
-    :accessor %cloneform)))
+    :accessor %locked-p)))
 
 (defgeneric sheep-p (sheep?))
 (defmethod sheep-p ((sheep standard-sheep))
@@ -103,9 +95,15 @@
 	   (setf sheep (set-up-inheritance sheep sheeple))))
     (set-up-properties properties sheep)
     (set-up-other-options options sheep)
-    (memoize-sheep-hierarchy-list sheep)
-    (memoize-property-access sheep)
+    (finalize-sheep sheep)
     sheep))
+
+(defgeneric finalize-sheep (sheep))
+(defmethod finalize-sheep ((sheep standard-sheep))
+  (memoize-sheep-hierarchy-list sheep)
+  (memoize-property-access sheep)
+  (loop for child-pointer in (sheep-direct-children sheep)
+     do (memoize-property-access (weak-pointer-value child-pointer))))
 
 (defun set-up-inheritance (new-sheep sheeple)
   "If SHEEPLE is non-nil, adds them in order to "
@@ -252,10 +250,7 @@ and that they arej both of the same class."
 
 (defmethod add-parent :after ((new-parent standard-sheep) (child standard-sheep) &key)
   (declare (ignore new-parent))
-  (memoize-sheep-hierarchy-list child)
-  (memoize-property-access child)
-  (loop for child-pointer in (sheep-direct-children child)
-     do (memoize-property-access (weak-pointer-value child-pointer))))
+  (finalize-sheep child))
 
 (defgeneric remove-parent (parent child &key))
 (defmethod remove-parent ((parent standard-sheep) (child standard-sheep) &key (keep-properties nil))
@@ -274,10 +269,7 @@ and that they arej both of the same class."
   child)
 
 (defmethod remove-parent :after ((parent standard-sheep) (child standard-sheep) &key)
-  (memoize-sheep-hierarchy-list child)
-  (memoize-property-access child)
-  (loop for child-pointer in (sheep-direct-children child)
-     do (memoize-property-access (weak-pointer-value child-pointer))))
+  (finalize-sheep child))
 
 ;;; Inheritance-related predicates
 (defun direct-parent-p (maybe-parent child)
@@ -358,9 +350,6 @@ sheep hierarchy."
 (defun %get-property-object (sheep prop-name)
   (gethash prop-name (sheep-direct-properties sheep)))
 
-(defun (setf %get-property-object) (new-value sheep prop-name)
-  (setf (gethash prop-name (sheep-direct-properties sheep)) new-value))
-
 (defun get-property-with-memoized-owner (sheep property-name)
   (multiple-value-bind (prop-owner has-p)
       (gethash property-name (sheep-property-owners sheep))
@@ -397,6 +386,9 @@ property values for that same property name, and become the new value for its ch
 	  (setf (gethash property-name (sheep-direct-properties sheep))
 		(make-instance 'standard-sheep-property :name property-name :value new-value))
 	  new-value))))
+
+(defun (setf %get-property-object) (new-value sheep prop-name)
+  (setf (gethash prop-name (sheep-direct-properties sheep)) new-value))
 
 (defgeneric remove-property (sheep property-name)
   (:documentation "Removes a property from a particular sheep."))
@@ -522,50 +514,3 @@ This returns T if the value is set to NIL for that property-name."
 
 ;;; Set up =dolly=
 (memoize-sheep-hierarchy-list =dolly=)
-
-;;;
-;;; Unused at the moment. They're mostly useful for persistent schemes.
-;;;
-;; (defun push-down-properties (sheep)
-;;   "Pushes sheep's slot-values down to its children, unless the children have
-;; overridden the values."
-;;   (with-accessors ((properties sheep-direct-properties)
-;; 		   (children sheep-direct-children))
-;;       sheep
-;;     (loop for slot-name being the hash-keys of properties
-;;        using (hash-value value)
-;;        do (loop for child in children
-;; 	     do (unless (has-direct-property-p child slot-name)
-;; 		  (setf (get-property child slot-name) value))))
-;;     sheep))
-
-;; (defun sacrifice-sheep (sheep &key (save-properties nil))
-;;   "Deletes SHEEP from the hierarchy, preserving the hierarchy by expanding references to
-;; SHEEP into all its parents. Optionally, pushes its direct properties into its children."
-;;   (give-children-new-parents sheep)
-;;   (when save-properties
-;;     (push-down-properties sheep)))
-
-;; (defun give-parents-new-children (sheep)
-;;   "Replaces the reference to SHEEP in its parents' children property with the sheep's children."
-;;   (with-accessors ((parents sheep-direct-parents)
-;; 		   (children sheep-direct-children))
-;;       sheep
-;;     (loop for parent in parents
-;;        do (setf (sheep-direct-children parent)
-;; 		(loop for par-child in (sheep-direct-children parent)
-;; 		   if (equal par-child sheep)
-;; 		   append children
-;; 		   else collect par-child)))))
-
-;; (defun give-children-new-parents (sheep)
-;;   "Replaces the reference to SHEEP in its children's parents property with the sheep's parents."
-;;   (with-accessors ((parents sheep-direct-parents)
-;; 		   (children sheep-direct-children))
-;;       sheep
-;;     (loop for child in children
-;;        do (setf (sheep-direct-parents child)
-;; 		(loop for child-par in (sheep-direct-parents child)
-;; 		   if (equal child-par sheep)
-;; 		   append parents
-;; 		   else collect child-par)))))

@@ -81,6 +81,16 @@
    :=complex=
    :=integer=
    :=float=
+
+   ;; MOP
+   :standard-sheep
+   :standard-sheep-property
+   :sid
+   :sheep-nickname
+   :sheep-direct-parents
+   :sheep-direct-children
+   :sheep-direct-roles
+   :sheep-hierarchy-list
    ))
 
 (defpackage #:sheeple-user

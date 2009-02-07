@@ -210,10 +210,21 @@
       :qualifiers ',qualifiers
       :lambda-list ,(extract-lambda-list lambda-list)
       :participants ,(extract-participants participants)
-      :function (block ,name 
-		  (lambda ,(eval (extract-lambda-list lambda-list)) ;okay to use eval here. Just symbols
-		    ,@body))
+      :function (block ,name ,(make-message-lambda lambda-list body))
       :body '(block ,name ,@body))))
+
+(defun make-message-lambda (lambda-list body)
+  `(lambda (args next-messages)
+     (apply
+      (lambda ,(eval (extract-lambda-list lambda-list))
+	(flet ((next-message-p ()
+		 (not (null next-messages)))
+	       (call-next-message (&rest cnm-args)
+		 (funcall (message-function (car next-messages))
+			  (or cnm-args
+			      args)
+			  (cdr next-messages))))
+	  ,@body)) args)))
 
 (defun parse-defmessage (args)
   (let ((name (car args))
@@ -313,9 +324,8 @@
 	(apply-message after args nil)))))
 
 (defun apply-message (message args next-messages)
-  (declare (ignore next-messages))
   (let ((function (message-function message)))
-    (apply function args)))
+    (funcall function args next-messages)))
 
 (defun find-applicable-messages  (selector args)
   "Returns the most specific message using SELECTOR and ARGS."

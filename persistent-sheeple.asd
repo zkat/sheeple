@@ -10,5 +10,6 @@
   ((:module psheep
 	    :serial t
 	    :components
-	    ((:file "psheeple")))))
+	    ((:file "packages")
+	     (:file "psheep")))))
 

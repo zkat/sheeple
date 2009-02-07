@@ -182,7 +182,7 @@
       (:nickname (setf (sheep-nickname sheep) value))
       (:lock (when (eql value t)
 	       (lock-sheep sheep)))
-      (:mitosis (warn "Mitosis successful. It probably broke everything... continue with care."))
+      (:mitosis (warn "Mitosis successful."))
       (otherwise (error 'invalid-option-error)))))
 
 (define-condition invalid-option-error (sheeple-error) ())

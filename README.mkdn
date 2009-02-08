@@ -34,6 +34,14 @@ are on the TODO list, such as :around messages, and (call-next-message). For mor
 
 This README contains a basic usage guide, and sort-of-spec of Sheeple.
 
+
+Disclaimer
+----------
+Because of a combination of the necessity to avoid name collisions in a system very similar to CLOS
+and a desire to amuse myself (and others), Sheeple has been designed from the beginning to be
+maximally groan-worthy with its naming scheme. I apologize in advance.
+
+
 Loading Sheeple
 ---------------
 It's fairly effortless to get Sheeple working. To get started, simply

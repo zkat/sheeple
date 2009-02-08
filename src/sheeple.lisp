@@ -523,7 +523,6 @@ This returns T if the value is set to NIL for that property-name."
 
 (defun extract-the (form)
   (cond ((and (consp form) (eq (car form) 'the))
-         (aver (proper-list-of-length-p 3))
          (third form))
         (t
          form)))
@@ -561,6 +560,6 @@ This returns T if the value is set to NIL for that property-name."
        (symbol-macrolet ,(mapcar (lambda (property-entry)
                                    (let ((var-name (car property-entry))
                                          (manipulator-name (cadr property-entry)))
-                                     `(,var-name (,accessor-name ,in))))
+                                     `(,var-name (,manipulator-name ,in))))
                                  properties)
           ,@body))))

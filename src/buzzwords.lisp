@@ -226,6 +226,7 @@
 			  (or cnm-args
 			      args)
 			  (cdr next-messages))))
+	  (declare (ignorable next-message-p call-next-message))
 	  ,@body)) args)))
 
 (defun parse-defmessage (args)

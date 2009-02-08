@@ -108,7 +108,9 @@ Features available so far:
 
 * Auto-generated readers/writers, with :accessor, :reader, and :writer slot options.
 
-* :before and :after messages
+* :before, :after, and :around messages
+
+* (call-next-message) and (next-message-p)
 
 * Portable across implementations, although more testing and tweaking is needed.
 
@@ -120,17 +122,9 @@ Planned features that have not yet been implemented include:
 
 * Various convenience tools for inspection
 
-* Documentation string parsing for messages
-
 * CLOS integration, including autoboxing of entire class hierarchies.
 
-* :around messages
-
-* (call-next-message)
-
-* A basic MOP. Some of it is already written. Although at least one version of Sheeple will run on
-  top of CLOS to maintain compatibility with some useful tools written for the MOP. A native MOP
-  might get written at some point.
+* A MOP (later... much...)
 
 
 Usage Manual

@@ -21,7 +21,7 @@
 (defvar *jenny*
   (clone (=person=)
 	 ((name "Jenny")
-	  (phone "543-543-5533"))))
+	  (phone "543-867-5309"))))
 
 (defbuzzword greet "Greets a person")
 (defmessage greet ((person =person=))

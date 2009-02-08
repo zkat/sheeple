@@ -114,9 +114,9 @@ properly signal SHEEP-HIERARCHY-ERROR."
 
 (test locked-properties
   "Tests proper behavior of the :lock property option"
-  (let ((locked-sheep (clone () ((var "value" :accessor get-var :lock t))))
-	(unlocked-sheep (clone () ((other-var "value" :accessor get-var :lock nil))))
-	(unspecced-sheep (clone () ((other-var "value" :accessor get-var)))))
+  (let ((locked-sheep (clone () ((var "value" :manipulator get-var :lock t))))
+	(unlocked-sheep (clone () ((other-var "value" :manipulator get-var :lock nil))))
+	(unspecced-sheep (clone () ((other-var "value" :manipulator get-var)))))
     (is (equal "value" (get-var locked-sheep)))
     (is (equal "value" (get-var unlocked-sheep)))
     (is (equal "value" (get-var unspecced-sheep)))
@@ -125,9 +125,9 @@ properly signal SHEEP-HIERARCHY-ERROR."
     (is (equal "new-value" (setf (get-var unspecced-sheep) "new-value")))))
 
 
-(test auto-generated-accessors
+(test auto-generated-manipulators
   "Tests to confirm property-option functionality."
-  (let ((test-sheep (clone () ((var "value" :accessor get-var)))))
+  (let ((test-sheep (clone () ((var "value" :manipulator get-var)))))
     (is (equal "value" (get-var test-sheep)))
     (is (equal "new-value" (setf (get-var test-sheep) "new-value")))
     (is (equal "new-value" (get-var test-sheep))))

@@ -121,6 +121,8 @@
       (append personal-role-names (mapcar #'available-messages (sheep-direct-parents sheep)))))))
 
 ;;; Buzzword definition
+(define-condition clobbering-function-definition (warning) ())
+
 (defun ensure-buzzword (&key name documentation)
   (if (find-buzzword name nil)
       (find-buzzword name)
@@ -128,6 +130,8 @@
 				     :name name
 				     :documentation documentation)))
 	(setf (find-buzzword name) buzzword)
+	(when (fboundp name)
+	  (warn 'clobbering-function-definition))
 	(setf (fdefinition name) (lambda (&rest args) (apply-buzzword name args)))
 	buzzword)))
 

@@ -1,25 +1,4 @@
-;; Copyright 2008 Josh Marchan
-
-;; Permission is hereby granted, free of charge, to any person
-;; obtaining a copy of this software and associated documentation
-;; files (the "Software"), to deal in the Software without
-;; restriction, including without limitation the rights to use,
-;; copy, modify, merge, publish, distribute, sublicense, and/or sell
-;; copies of the Software, and to permit persons to whom the
-;; Software is furnished to do so, subject to the following
-;; conditions:
-
-;; The above copyright notice and this permission notice shall be
-;; included in all copies or substantial portions of the Software.
-
-;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-;; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-;; OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-;; NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-;; HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-;; WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-;; FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-;; OTHER DEALINGS IN THE SOFTWARE.
+;; This file is part of Sheeple
 
 ;; tests/buzzwords.lisp
 ;;
@@ -123,9 +102,72 @@ to their respective participants, with correct role-indexes, etc."
     (signals sheeple::no-applicable-messages (test-message another-sheep)))
   (undefbuzzword test-message))
 
-;; (test before-messages
-;;   "Checks proper dispatch of :before messages."
-;;   (defmessage))
+(test before-messages
+  "Checks proper dispatch of :before messages."
+  (let ((test-sheep (clone () ((var "value")))))
+    (defmessage get-var ((sheep test-sheep))
+      (get-property sheep 'var))
+    (is (equal "value" (get-var test-sheep)))
+    (defmessage get-var :before ((sheep test-sheep))
+		(setf (get-property sheep 'var) "new-value"))
+    (is (equal "value" (get-property test-sheep 'var)))
+    (is (equal "new-value" (get-var test-sheep)))
+    (setf (get-property test-sheep 'var) "different-value")
+    (is (equal "different-value" (get-property test-sheep 'var)))
+    (is (equal "new-value" (get-var test-sheep)))
+    (undefbuzzword get-var)))
+
+(test after-messages
+  "Checks proper dispatch of :after messages."
+  (let ((test-sheep (clone () ((var "value")))))
+    (defmessage get-var ((sheep test-sheep))
+      (get-property sheep 'var))
+    (is (equal "value" (get-var test-sheep)))
+    (defmessage get-var :after ((sheep test-sheep))
+		(setf (get-property sheep 'var) "new-value"))
+    (is (equal "value" (get-var test-sheep)))
+    (is (equal "new-value" (get-property test-sheep 'var)))
+    (setf (get-property test-sheep 'var) "different-value")
+    (is (equal "different-value" (get-var test-sheep)))
+    (is (equal "new-value" (get-property test-sheep 'var)))
+    (undefbuzzword get-var)))
+
+(test around-messages
+  "Checks proper dispatch of :around messages."
+  (let ((test-sheep (clone () ((var "value")))))
+    (defmessage get-var ((sheep test-sheep))
+      (get-property sheep 'var))
+    (is (equal "value" (get-var test-sheep)))
+    (defmessage get-var :around ((sheep test-sheep))
+		(concatenate 'string "a " (call-next-message)))
+    (is (equal "a value" (get-var test-sheep)))
+    (is (equal "value" (get-property test-sheep 'var)))
+    (setf (get-property test-sheep 'var) "different-value")
+    (is (equal "different-value" (get-property test-sheep 'var)))
+    (is (equal "a different-value"  (get-var test-sheep)))
+    (is (equal "different-value" (get-property test-sheep 'var)))
+    (undefbuzzword get-var)))
+
+(test call-next-message
+  "Tests proper dispatch of next-message on a call to (call-next-message)"
+  (let ((test-sheep (clone () ((var "value")))))
+    (defmessage get-var (something) (get-property something 'var))
+    (is (equal "value" (get-var test-sheep)))
+    (defmessage get-var ((sheep test-sheep)) (call-next-message))
+    (is (equal "value" (get-var test-sheep)))
+    (undefbuzzword get-var)))
+
+(test next-message-p
+  "Checks that next-message-p returns T or NIL when appropriate."
+  (let ((test-sheep (clone () ((var "value")))))
+    (defmessage get-var (something) (get-property something 'var))
+    (is (equal "value" (get-var test-sheep)))
+    (defmessage get-var ((sheep test-sheep)) (next-message-p))
+    (is (equal t (get-var test-sheep)))
+    (undefbuzzword get-var)
+    (defmessage get-var ((sheep test-sheep)) (next-message-p))
+    (is (equal nil (get-var test-sheep)))
+    (undefbuzzword get-var)))
 
 (test multimessage-dispatch
   ;; TODO
@@ -169,6 +211,7 @@ to their respective participants, with correct role-indexes, etc."
     ;; I don't even know how to test the advanced dispatch stuff...
     ))
 
-
-
-
+;;; TODO
+;; (test full-method-combination
+;;   "Checks that various method combinations work properly."
+;; )

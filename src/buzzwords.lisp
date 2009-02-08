@@ -5,8 +5,6 @@
 ;; Implementation of Sheeple's buzzwords+messages (generic functions + methods)
 ;;
 ;; TODO:
-;; * There should be an error if defbuzzword tries to clobber a function or generic-func
-;; * Keep trying to write (call-next-message) and :around
 ;; * Write more unit tests
 ;; * AFTER unit tests... clean up code, run tests
 ;; * AFTER cleanup... --omg-optimized, run tests

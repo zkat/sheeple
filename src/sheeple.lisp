@@ -5,7 +5,6 @@
 ;; Sheep class and inheritance/property-related code, as well as sheep cloning.
 ;;
 ;; TODO:
-;; * Add an option that prevents an entire object from being edited?
 ;; * Add property option that works like :initform ?
 ;; * Add clone option to copy individual properties?
 ;; * Clone option to auto-generate all accessors (with optional appending a-la defstruct?)
@@ -77,7 +76,7 @@
 ;;; Sheep creation
 ;;;
 
-(defvar =dolly= (make-instance 'standard-sheep :nickname "=dolly=")
+(defvar =dolly= (make-instance 'standard-sheep :nickname "=dolly=" :parents (list =t=))
   "=dolly= is the parent object for all Sheeple. Everything and anything in Sheeple has
 =dolly= as its parent object. Even fleeced-wolves.")
 
@@ -184,7 +183,6 @@
       (:lock (when (eql value t)
 	       (lock-sheep sheep)))
       (:mitosis (warn "Mitosis successful."))
-      (:metaclass (warn "Cloning ~a as a ~a" sheep value))
       (otherwise (error 'invalid-option-error)))))
 
 (define-condition invalid-option-error (sheeple-error) ())
@@ -297,55 +295,9 @@ and that they arej both of the same class."
 ;;; Properties
 ;;;
 
-;;; locked properties
+;;; Reading/writing
 (define-condition unbound-property (sheeple-error)
   ())
-(define-condition locked-property (sheeple-error)
-  ())
-(define-condition property-locking-error (sheeple-error)
-  ())
-
-(defgeneric property-locked-p (sheep prop-name)
-  (:documentation "Is the property with PROP-NAME in SHEEP locked from editing?"))
-(defmethod property-locked-p ((sheep standard-sheep) property-name)
-  (%locked-p (%get-property-object sheep property-name)))
-
-(defgeneric lock-property (sheep property-name)
-  (:documentation "Locks a property on a particular object, preventing it from being edited."))
-(defmethod lock-property ((sheep standard-sheep) property-name)
-  (if (has-direct-property-p sheep property-name)
-      (setf (%locked-p (%get-property-object sheep property-name)) t)
-      (error 'property-locking-error)))
-
-(defgeneric unlock-property (sheep property-name)
-  (:documentation "Unlocks a property on a particular object, allowing its value to be changed."))
-(defmethod unlock-property ((sheep standard-sheep) property-name)
-  (if (has-direct-property-p sheep property-name)
-      (setf (%locked-p (%get-property-object sheep property-name)) nil)
-      (error 'property-locking-error)))
-
-(defun toggle-lock (sheep property-name)
-  (if (property-locked-p sheep property-name)
-      (unlock-property sheep property-name)
-      (lock-property sheep property-name)))
-
-(defgeneric lock-sheep (sheep)
-  (:documentation "Locks all of SHEEP's properties."))
-(defmethod lock-sheep ((sheep standard-sheep))
-  (maphash (lambda (key value)
-	     (declare (ignore value))
-	     (lock-property sheep key))
-	   (sheep-direct-properties sheep)))
-
-(defgeneric unlock-sheep (sheep)
-  (:documentation "Sets all of SHEEP's properties to 'unlocked'"))
-(defmethod unlock-sheep ((sheep standard-sheep))
-  (maphash (lambda (key value)
-	     (declare (ignore value))
-	     (unlock-property sheep key))
-	   (sheep-direct-properties sheep)))
-
-;;; Getting/setting
 (defgeneric get-property (sheep property-name)
   (:documentation "Gets the property value under PROPERTY-NAME for an sheep, if-exists."))
 (defmethod get-property ((sheep standard-sheep) property-name)
@@ -436,6 +388,61 @@ This returns T if the value is set to NIL for that property-name."
      (flatten
       (append obj-keys (mapcar #'available-properties (sheep-direct-parents sheep)))))))
 
+;;; locked properties
+(define-condition locked-property (sheeple-error)
+  ())
+(define-condition property-locking-error (sheeple-error)
+  ())
+(defgeneric property-locked-p (sheep prop-name)
+  (:documentation "Is the property with PROP-NAME in SHEEP locked from editing?"))
+(defmethod property-locked-p ((sheep standard-sheep) property-name)
+  (%locked-p (%get-property-object sheep property-name)))
+(defgeneric lock-property (sheep property-name)
+  (:documentation "Locks a property on a particular object, preventing it from being edited."))
+(defmethod lock-property ((sheep standard-sheep) property-name)
+  (if (has-direct-property-p sheep property-name)
+      (setf (%locked-p (%get-property-object sheep property-name)) t)
+      (error 'property-locking-error)))
+
+(defgeneric unlock-property (sheep property-name)
+  (:documentation "Unlocks a property on a particular object, allowing its value to be changed."))
+(defmethod unlock-property ((sheep standard-sheep) property-name)
+  (if (has-direct-property-p sheep property-name)
+      (setf (%locked-p (%get-property-object sheep property-name)) nil)
+      (error 'property-locking-error)))
+
+(defun toggle-lock (sheep property-name)
+  (if (property-locked-p sheep property-name)
+      (unlock-property sheep property-name)
+      (lock-property sheep property-name)))
+
+(defun sheep-locked-p (sheep)
+  "Returns T if all direct properties are locked. NIL if there are no properties, 
+or if not all existing ones are locked."
+  (let ((all-property-names (loop 
+			       for prop-name being the hash-keys of (sheep-direct-properties sheep)
+			       collect prop-name)))
+    (if all-property-names
+	(every (lambda (pname) (property-locked-p sheep pname))
+	       all-property-names)
+	nil)))
+
+(defgeneric lock-sheep (sheep)
+  (:documentation "Locks all of SHEEP's properties."))
+(defmethod lock-sheep ((sheep standard-sheep))
+  (maphash (lambda (key value)
+	     (declare (ignore value))
+	     (lock-property sheep key))
+	   (sheep-direct-properties sheep)))
+
+(defgeneric unlock-sheep (sheep)
+  (:documentation "Sets all of SHEEP's properties to 'unlocked'"))
+(defmethod unlock-sheep ((sheep standard-sheep))
+  (maphash (lambda (key value)
+	     (declare (ignore value))
+	     (unlock-property sheep key))
+	   (sheep-direct-properties sheep)))
+
 ;;; Memoization
 (defun memoize-property-access (sheep)
   (loop for property in (available-properties sheep)
@@ -471,9 +478,10 @@ This returns T if the value is set to NIL for that property-name."
   (remhash property-name (sheep-property-owners sheep))
   (loop for child-pointer in (sheep-direct-children sheep)
      do (remhash property-name (sheep-direct-properties (weak-pointer-value child-pointer)))))
+
 ;;;
 ;;; Hierarchy Resolution
-;;; - blatantly stolen from Closette.
+;;; - blatantly taken from Closette.
 ;;;
 (defun collect-parents (sheep)
   (labels ((all-parents-loop (seen parents)
@@ -500,8 +508,6 @@ This returns T if the value is set to NIL for that property-name."
     (simple-error ()
       (error 'sheep-hierarchy-error))))
 
-
-
 (define-condition sheep-hierarchy-error (sheeple-error) ()
   (:documentation "Signaled whenever there is a problem computing the hierarchy list."))
 
@@ -521,45 +527,47 @@ This returns T if the value is set to NIL for that property-name."
 ;;; Set up =dolly=
 (memoize-sheep-hierarchy-list =dolly=)
 
-(defun extract-the (form)
-  (cond ((and (consp form) (eq (car form) 'the))
-         (third form))
-        (t
-         form)))
 
-(defmacro with-properties (properties instance &body body)
-  (let ((in (gensym)))
-    `(let ((,in ,instance))
-       (declare (ignorable ,in))
-       ,@(let ((instance (extract-the instance)))
-           (and (symbolp instance)
-                `((declare (%variable-rebinding ,in ,instance)))))
-       ,in
-       (symbol-macrolet ,(mapcar (lambda (property-entry)
-                                   (let ((var-name
-                                          (if (symbolp property-entry)
-                                              property-entry
-                                              (car property-entry)))
-                                         (property-name
-                                          (if (symbolp property-entry)
-                                              property-entry
-                                              (cadr property-entry))))
-                                     `(,var-name
-                                       (get-property ,in ',property-name))))
-                                 properties)
-                        ,@body))))
+;;; TODO!
+;; (defun extract-the (form)
+;;   (cond ((and (consp form) (eq (car form) 'the))
+;;          (third form))
+;;         (t
+;;          form)))
 
-(defmacro with-manipulators (properties instance &body body)
-  (let ((in (gensym)))
-    `(let ((,in ,instance))
-       (declare (ignorable ,in))
-       ,@(let ((instance (extract-the instance)))
-           (and (symbolp instance)
-                `((declare (%variable-rebinding ,in ,instance)))))
-       ,in
-       (symbol-macrolet ,(mapcar (lambda (property-entry)
-                                   (let ((var-name (car property-entry))
-                                         (manipulator-name (cadr property-entry)))
-                                     `(,var-name (,manipulator-name ,in))))
-                                 properties)
-          ,@body))))
+;; (defmacro with-properties (properties instance &body body)
+;;   (let ((in (gensym)))
+;;     `(let ((,in ,instance))
+;;        (declare (ignorable ,in))
+;;        ,@(let ((instance (extract-the instance)))
+;;            (and (symbolp instance)
+;;                 `((declare (%variable-rebinding ,in ,instance)))))
+;;        ,in
+;;        (symbol-macrolet ,(mapcar (lambda (property-entry)
+;;                                    (let ((var-name
+;;                                           (if (symbolp property-entry)
+;;                                               property-entry
+;;                                               (car property-entry)))
+;;                                          (property-name
+;;                                           (if (symbolp property-entry)
+;;                                               property-entry
+;;                                               (cadr property-entry))))
+;;                                      `(,var-name
+;;                                        (get-property ,in ',property-name))))
+;;                                  properties)
+;;                         ,@body))))
+
+;; (defmacro with-manipulators (properties instance &body body)
+;;   (let ((in (gensym)))
+;;     `(let ((,in ,instance))
+;;        (declare (ignorable ,in))
+;;        ,@(let ((instance (extract-the instance)))
+;;            (and (symbolp instance)
+;;                 `((declare (%variable-rebinding ,in ,instance)))))
+;;        ,in
+;;        (symbol-macrolet ,(mapcar (lambda (property-entry)
+;;                                    (let ((var-name (car property-entry))
+;;                                          (manipulator-name (cadr property-entry)))
+;;                                      `(,var-name (,manipulator-name ,in))))
+;;                                  properties)
+;;           ,@body))))

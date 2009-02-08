@@ -1,0 +1,23 @@
+;; This is a demonstration of Sheeple usage.
+
+;; Since class-based OOP is basically a subset of prototype-based OOP, this is a demonstration
+;; of how to implement class-like semantics in Sheeple.
+
+(defvar =person= 
+  (clone ()
+	 ((name 
+	   "NoName"
+	   :manipulator name)
+	  (phone
+	   "NoPhone"
+	   :manipulator phone))))
+
+(defvar *charles*
+  (clone (=person=)
+	 ((name "Charles")
+	  (phone "555-555-5555"))))
+
+(defvar *jenny*
+  (clone (=person=)
+	 ((name "Jenny")
+	  (phone "543-543-5533"))))

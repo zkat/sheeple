@@ -65,8 +65,6 @@
              (pushnew `(setf ,(cadr olist)) writers))
 	    (:lock
 	     (setf locked-p (cadr olist)))
-	    (:metaclass
-	     (setf metaclass (cadr olist)))
 	    (otherwise 
              (pushnew (cadr olist) other-options)
              (pushnew (car olist) other-options))))
@@ -77,8 +75,7 @@
 	      :value ,value
 	      ,@(when readers `(:readers ',readers))
 	      ,@(when writers `(:writers ',writers))
-	      ,@(when locked-p `(:lock ,locked-p))
-	      ,@(when metaclass `(:metaclass ',metaclass)))))))
+	      ,@(when locked-p `(:lock ,locked-p)))))))
 
 
 (defun canonize-options (options)

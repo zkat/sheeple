@@ -76,7 +76,7 @@
 ;;; Sheep creation
 ;;;
 
-(defvar =dolly= (make-instance 'standard-sheep :nickname "=dolly=" :parents (list =t=))
+(defvar =dolly= (make-instance 'standard-sheep :nickname "=dolly=")
   "=dolly= is the parent object for all Sheeple. Everything and anything in Sheeple has
 =dolly= as its parent object. Even fleeced-wolves.")
 

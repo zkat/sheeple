@@ -38,10 +38,9 @@ errors when a buzzword doesn't exist."
   (defbuzzword test-buzz "This is a test")
   (is (buzzword-p (find-buzzword 'test-buzz)))
   (signals no-such-buzzword (find-buzzword 'another-buzzword))
-
   (undefbuzzword test-buzz)
   (defun test-buzz () (print "durr hurr"))
-  (signals clobbering-function-definition (defbuzzword test-buzz "OHNOES"))
+  (signals sheeple::clobbering-function-definition (defbuzzword test-buzz "OHNOES"))
   (fmakunbound 'test-buzz))
 
 (test buzzword-undefinition
@@ -123,6 +122,10 @@ to their respective participants, with correct role-indexes, etc."
     (is (equal "testie" (test-message test-sheep)))
     (signals sheeple::no-applicable-messages (test-message another-sheep)))
   (undefbuzzword test-message))
+
+;; (test before-messages
+;;   "Checks proper dispatch of :before messages."
+;;   (defmessage))
 
 (test multimessage-dispatch
   ;; TODO

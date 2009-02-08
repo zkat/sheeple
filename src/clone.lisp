@@ -60,7 +60,7 @@
              (pushnew (cadr olist) readers))
             (:writer 
              (pushnew (cadr olist) writers))
-            (:accessor
+            (:manipulator
              (pushnew (cadr olist) readers)
              (pushnew `(setf ,(cadr olist)) writers))
 	    (:lock

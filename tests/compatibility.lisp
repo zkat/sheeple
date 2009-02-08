@@ -57,4 +57,4 @@
 (test clos-fleecing
   "These will all fail for now."
   (defclass foo () ())
-  (is (not (equal =dolly= (fleece-of (make-instance 'foo))))))
+  (is (not (equal =white-fang= (fleece-of (make-instance 'foo))))))

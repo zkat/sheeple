@@ -106,7 +106,7 @@ Features available so far:
 * CLOS backend allows effortless plug-in to many Lisp libraries that make use of the MOP (such as
   Elephant, for almost free object persistence).
 
-* Auto-generated readers/writers, with :accessor, :reader, and :writer slot options.
+* Auto-generated readers/writers, with :manipulator, :reader, and :writer slot options.
 
 * :before, :after, and :around messages
 
@@ -212,7 +212,7 @@ accessed with SHEEP-NICKNAME.
 
          (clone () ((foo 10)))
 
-         (defvar *sample-sheep* (clone () ((my-property "Wheee" :accessor get-my-property))))
+         (defvar *sample-sheep* (clone () ((my-property "Wheee" :manipulator get-my-property))))
 
 * An empty parent list when using CLONE will automatically clone =DOLLY=
 
@@ -226,7 +226,7 @@ accessed with SHEEP-NICKNAME.
 
 * The :nickname CLONE option sets a nickname for the sheep metaobject, which is used when printing
   the object at the REPL. The nickname can be retrieved and changed at any time with the
-  sheep-nickname accessor function.
+  sheep-nickname manipulator function.
 
          SHEEPLE> (clone () () (:nickname "Johnny Bravo"))
          #<Standard Sheep SID: 22 AKA: Johnny Bravo {B777401}>
@@ -252,9 +252,9 @@ accessed with SHEEP-NICKNAME.
         (set-me-to "new-value" *sample-sheep*) => "new-value"
         (read-prop *sample-sheep*) => "new-value"
 
-* :accessor - Creates an accessor, which is a reader that you can use SETF on.
+* :manipulator - Creates an manipulator, which is a reader that you can use SETF on.
 
-        (defparameter *sample-sheep* (clone () ((prop "value" :accessor prop))))
+        (defparameter *sample-sheep* (clone () ((prop "value" :manipulator prop))))
         (prop *sample-sheep*) => "value"
         (setf (prop *sample-sheep*) "new-value" => "new-value"
 
@@ -434,7 +434,7 @@ CLOS programming should have a fairly easy time wrapping their head around Sheep
         (synergize "Hey " "Jude") => "Hey Jude"
 
         ;; :before and :after
-        (defparameter =test-sheep= (clone () ((var "value" :accessor var))))
+        (defparameter =test-sheep= (clone () ((var "value" :manipulator var))))
         (var =test-sheep=) => "value"
          
         (defmessage var :before ((sheep =test-sheep=))

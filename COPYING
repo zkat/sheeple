@@ -1,0 +1,27 @@
+This software is composed of a mishmash of original code, and code taken at times with only small
+modifications from SBCL's version of PCL, and Closette. Copying and distribution of this software
+must retain the copyright notice for Xerox, as well as Josh Marchan's (see LICENSE).
+
+Xerox's copyright:
+
+copyright information from original PCL sources:
+
+Copyright (c) 1985, 1986, 1987, 1988, 1989, 1990 Xerox Corporation.
+All rights reserved.
+
+Use and copying of this software and preparation of derivative works based
+upon this software are permitted. Any distribution of this software or
+derivative works must comply with all applicable United States export
+control laws.
+
+This software is made available AS IS, and Xerox Corporation makes no
+warranty about the software, its performance or its conformity to any
+specification.
+
+Additionally, Sheeple uses Luis Oliveira's trivial-garbage for portability across
+implementations. trivial-garbage is in the public domain, but I'm including the statement it came
+with here anyways. Copies and Derivatives of sheeple need not include it:
+
+This software is placed in the public domain by Luis Oliveira
+<loliveira@common-lisp.net> and is provided with absolutely no
+warranty.

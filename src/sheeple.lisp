@@ -212,7 +212,8 @@
 			:lambda-list '(sheep)
 			:participants (list sheep)
 			:body `(get-property sheep ',prop-name)
-			:function (lambda (sheep) (get-property sheep prop-name)))))
+			:function (eval (make-message-lambda '(sheep) 
+							     `((get-property sheep ',prop-name)))))))
 
 (defun add-writers-to-sheep (writers prop-name sheep)
   (loop for writer in writers
@@ -221,8 +222,9 @@
 			:lambda-list '(new-value sheep)
 			:participants (list =dolly= sheep)
 			:body `(setf (get-property sheep ',prop-name) new-value)
-			:function (lambda (new-value sheep) (setf (get-property sheep prop-name)
-								  new-value)))))
+			:function (eval (make-message-lambda '(new-value sheep) 
+							     `((setf (get-property sheep ',prop-name)
+								     new-value)))))))
 
 ;;;
 ;;; Inheritance management
@@ -518,3 +520,47 @@ This returns T if the value is set to NIL for that property-name."
 
 ;;; Set up =dolly=
 (memoize-sheep-hierarchy-list =dolly=)
+
+(defun extract-the (form)
+  (cond ((and (consp form) (eq (car form) 'the))
+         (aver (proper-list-of-length-p 3))
+         (third form))
+        (t
+         form)))
+
+(defmacro with-properties (properties instance &body body)
+  (let ((in (gensym)))
+    `(let ((,in ,instance))
+       (declare (ignorable ,in))
+       ,@(let ((instance (extract-the instance)))
+           (and (symbolp instance)
+                `((declare (%variable-rebinding ,in ,instance)))))
+       ,in
+       (symbol-macrolet ,(mapcar (lambda (property-entry)
+                                   (let ((var-name
+                                          (if (symbolp property-entry)
+                                              property-entry
+                                              (car property-entry)))
+                                         (property-name
+                                          (if (symbolp property-entry)
+                                              property-entry
+                                              (cadr property-entry))))
+                                     `(,var-name
+                                       (get-property ,in ',property-name))))
+                                 properties)
+                        ,@body))))
+
+(defmacro with-manipulators (properties instance &body body)
+  (let ((in (gensym)))
+    `(let ((,in ,instance))
+       (declare (ignorable ,in))
+       ,@(let ((instance (extract-the instance)))
+           (and (symbolp instance)
+                `((declare (%variable-rebinding ,in ,instance)))))
+       ,in
+       (symbol-macrolet ,(mapcar (lambda (property-entry)
+                                   (let ((var-name (car property-entry))
+                                         (manipulator-name (cadr property-entry)))
+                                     `(,var-name (,accessor-name ,in))))
+                                 properties)
+          ,@body))))

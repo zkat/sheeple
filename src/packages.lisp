@@ -44,6 +44,7 @@
 
    ;; Buzzwords
    :defbuzzword
+   :clobbering-function-definition
    :defmessage
    :undefbuzzword
    :undefmesage

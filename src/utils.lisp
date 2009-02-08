@@ -32,6 +32,18 @@
 		   (t (rec (car x) (rec (cdr x) acc))))))
     (rec x nil)))
 
+(defun proper-list-of-length-p (x min &optional (max min))
+  (cond ((minusp max) nil)
+        ((null x) (zerop min))
+        ((consp x)
+         (and (plusp max)
+              (proper-list-of-length-p (cdr x)
+                                       (if (plusp (1- min))
+                                           (1- min)
+                                           0)
+                                       (1- max))))
+        (t nil)))
+
 (defun topological-sort (elements constraints tie-breaker)
   (let ((remaining-constraints constraints)
         (remaining-elements elements)

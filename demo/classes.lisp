@@ -14,8 +14,7 @@
 
 (defvar *charles*
   (clone (=person=)
-	 ((name "Charles")
-	  (phone "555-555-5555"))))
+	 ((name "Charles"))))
 
 (defvar *jenny*
   (clone (=person=)
@@ -38,4 +37,11 @@
 ;; SHEEPLE-USER> (greet *jenny*)
 ;; Hullo, Jenny!!!
 ;; NIL
-;; SHEEPLE-USER> 
+;; SHEEPLE-USER> (phone *charles*)
+;; "NoPhone"
+;; SHEEPLE-USER> (phone *jenny*)
+;; "543-543-5533"
+;; SHEEPLE-USER> (setf (phone *charles*) "555-555-5555")
+;; "555-555-5555"
+;; SHEEPLE-USER> (phone =person=)
+;; "NoPhone"

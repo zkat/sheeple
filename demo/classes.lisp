@@ -59,6 +59,8 @@
 ;;   sugar denoting that the object is used more as a prototype.
 ;; * Message definition is on actual objects, not on classes or 'named prototypes'
 ;; * The hierarchy list for sheep works identically to CLOS's class precedence list (same sorting)
+;; * Since Sheeple's messages can dispatch on arg lists of variable length, there is no
+;;   readily available information about what arguments a buzzword expects.
 
 (defvar *max-acc-num* 0)
 (defparameter *minimum-balance* 500)

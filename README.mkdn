@@ -1,11 +1,12 @@
 About
 =====
 
-Sheeple is a Dynamic, CLOS-like Prototype-based Object-Oriented Programming Framework that strives
-to maximize application flexibility, minimize cost while maximizing value, optimize programmer time,
-and empower application implementers to better assist them leveraging modern paradigms in
-order to proactively achieve next-gen synergy in tomorrow's web 3.0 world. It is implemented in ANSI
-Common Lisp, with small parts are based on Closette. Sheeple is fully buzzword compliant.
+Sheeple is a Dynamic, CLOS-like Prototype-based Object-Oriented Programming System (or "POOPS") that
+strives to maximize application flexibility, minimize cost while maximizing value, optimize
+programmer time, and empower application implementers to better assist them leveraging modern
+paradigms in order to proactively achieve next-gen synergy in tomorrow's web 3.0 world. It is
+implemented in ANSI Common Lisp, with small parts are based on Closette. Sheeple is fully buzzword
+compliant.
 
 Initially written as the object system of a text-based game online game engine ([Sykosomatic][9]),
 Sheeple is provided as a module separate from its persistent counterpart, Persistent-Sheeple, as a

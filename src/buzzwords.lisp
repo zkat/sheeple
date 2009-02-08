@@ -305,23 +305,30 @@
   (when (member :after (message-qualifiers message))
     t))
 
+(defun around-message-p (message)
+  (when (member :around (message-qualifiers message))
+    t))
+
 (defun apply-buzzword (selector args)
   (let ((messages (find-applicable-messages selector
 					    (sheepify-list args))))
     (apply-messages messages args)))
 
 (defun apply-messages (messages args)
-  (let ((primaries (remove-if-not #'primary-message-p messages))
-	(befores (remove-if-not #'before-message-p messages))
-	(afters (remove-if-not #'after-message-p messages)))
-    (when (null primaries)
-      (error "No primary messages"))
-    (dolist (before befores)
-      (apply-message before args nil))
-    (multiple-value-prog1
-	(apply-message (car primaries) args (cdr primaries))
-      (dolist (after (reverse afters))
-	(apply-message after args nil)))))
+  (let ((around (find-if #'around-message-p messages)))
+    (if around
+	(apply-message around args (remove around messages))
+    	(let ((primaries (remove-if-not #'primary-message-p messages))
+	      (befores (remove-if-not #'before-message-p messages))
+	      (afters (remove-if-not #'after-message-p messages)))
+	  (when (null primaries)
+	    (error "No primary messages"))
+	  (dolist (before befores)
+	    (apply-message before args nil))
+	  (multiple-value-prog1
+	      (apply-message (car primaries) args (cdr primaries))
+	    (dolist (after (reverse afters))
+	      (apply-message after args nil)))))))
 
 (defun apply-message (message args next-messages)
   (let ((function (message-function message)))

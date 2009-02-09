@@ -45,15 +45,11 @@
 	    secret-sheep-identifier)))
 
 (defun sheep-metaobject (sheep)
-  (if (std-instance-p sheep)
-      (gethash 'metaobject sheep)
-      (sheep-metaobject-with-metaobject sheep)))
+  (get-property sheep 'metaobject))
 
 ;;;
 ;;; Bootstrap
 ;;;
-(format t "Bootstrapping Sheeplette...")
-
 (defvar =standard-sheep-metaobject=
   (let ((object (std-generate-sheep-instance)))
     (setf (gethash 'metaobject object) object)
@@ -187,13 +183,10 @@
   (let ((name (getf property-list :name))
 	(value (getf property-list :value))
 	(readers (getf property-list :readers))
-	(writers (getf property-list :writers))
-	(locked-p (getf property-list :lock)))
+	(writers (getf property-list :writers)))
     (when (keywordp name)
       (error 'probably-meant-to-be-option))
     (setf (get-property sheep name) value)
-    (when locked-p
-      (lock-property sheep name))
     (add-readers-to-sheep readers name sheep)
     (add-writers-to-sheep writers name sheep))))
 

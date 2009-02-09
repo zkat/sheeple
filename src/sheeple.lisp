@@ -97,10 +97,6 @@
     (finalize-sheep sheep)
     sheep))
 
-(defun execute-cloneforms (sheep)
-  (let ((avail-properties (available-properties sheep)))
-    (mapcar (lambda (prop-name) (run-cloneform sheep prop-name)) avail-properties)))
-
 (defgeneric finalize-sheep (sheep))
 (defmethod finalize-sheep ((sheep standard-sheep))
   (memoize-sheep-hierarchy-list sheep)
@@ -303,8 +299,7 @@ and that they arej both of the same class."
 ;;;
 
 ;;; Reading/writing
-(define-condition unbound-property (sheeple-error)
-  ())
+
 (defgeneric get-property (sheep property-name)
   (:documentation "Gets the property value under PROPERTY-NAME for an sheep, if-exists."))
 (defmethod get-property ((sheep standard-sheep) property-name)

@@ -47,7 +47,7 @@
             (readers nil)
             (writers nil)
 	    (locked-p nil)
-	    (metaclass nil)
+	    (cloneform *secret-unbound-value*)
             (other-options nil))
         (do ((olist (cddr property) (cddr olist)))
             ((null olist))
@@ -65,6 +65,8 @@
              (pushnew `(setf ,(cadr olist)) writers))
 	    (:lock
 	     (setf locked-p (cadr olist)))
+	    (:cloneform
+	     (setf cloneform (cadr olist)))
 	    (otherwise 
              (pushnew (cadr olist) other-options)
              (pushnew (car olist) other-options))))
@@ -73,10 +75,10 @@
 	    `(list
 	      :name ',name
 	      :value ,value
+	      :cloneform ',cloneform
 	      ,@(when readers `(:readers ',readers))
 	      ,@(when writers `(:writers ',writers))
 	      ,@(when locked-p `(:lock ,locked-p)))))))
-
 
 (defun canonize-options (options)
   `(list ,@(mapcar #'canonize-option options)))

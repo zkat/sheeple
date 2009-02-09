@@ -4,6 +4,7 @@
 
    ;; Cloning and management
    :=dolly= ;Ancestor of everything
+   :print-sheep
    :clone
    :sheep-hierarchy-error ;error
    :mitosis-error ;error
@@ -48,6 +49,7 @@
    :defmessage
    :undefbuzzword
    :undefmesage
+   :search-messages
    :find-buzzword
    :participant-p
    :available-messages

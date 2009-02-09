@@ -83,7 +83,7 @@
 ;; Example: (clone (sheep1 sheep2 sheep3) ((property1 value1) (property2 value2)))
 (defmacro clone (sheeple properties &rest options)
   "Standard sheep-generation macro"
-  `(create-sheep
+  `(spawn-sheep
     ,(canonize-sheeple sheeple)
     ,(canonize-properties properties)
     ,@(canonize-options options)))
@@ -130,10 +130,6 @@
             (:manipulator
              (pushnew (cadr olist) readers)
              (pushnew `(setf ,(cadr olist)) writers))
-	    (:lock
-	     (setf locked-p (cadr olist)))
-	    (:cloneform
-	     (setf cloneform (cadr olist)))
 	    (otherwise 
              (pushnew (cadr olist) other-options)
              (pushnew (car olist) other-options))))
@@ -142,10 +138,8 @@
 	    `(list
 	      :name ',name
 	      :value ,value
-	      :cloneform ',cloneform
 	      ,@(when readers `(:readers ',readers))
-	      ,@(when writers `(:writers ',writers))
-	      ,@(when locked-p `(:lock ,locked-p)))))))
+	      ,@(when writers `(:writers ',writers)))))))
 
 (defun canonize-options (options)
   `(list ,@(mapcar #'canonize-option options)))

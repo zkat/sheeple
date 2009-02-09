@@ -318,14 +318,14 @@
     (apply-messages messages args)))
 
 (defun apply-messages (messages args)
-  (let ((around (find-if #'around-message-p messages)))
-    (if around
-	(apply-message around args (remove around messages))
-    	(let ((primaries (remove-if-not #'primary-message-p messages))
-	      (befores (remove-if-not #'before-message-p messages))
-	      (afters (remove-if-not #'after-message-p messages)))
+  (let ((around (find-if #'around-message-p messages))
+	(primaries (remove-if-not #'primary-message-p messages)))
 	  (when (null primaries)
 	    (error "No primary messages"))
+    (if around
+	(apply-message around args (remove around messages))
+    	(let ((befores (remove-if-not #'before-message-p messages))
+	      (afters (remove-if-not #'after-message-p messages)))
 	  (dolist (before befores)
 	    (apply-message before args nil))
 	  (multiple-value-prog1

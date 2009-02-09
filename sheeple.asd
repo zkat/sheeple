@@ -16,5 +16,7 @@
 	     (:file "sheeple")
 	     (:file "clone")
 	     (:file "compatibility")
-	     (:file "buzzwords")))))
+	     (:file "buzzwords")
+	     (:file "post-boot")))))
+
 

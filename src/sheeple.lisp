@@ -68,14 +68,10 @@
   (declare (ignore sheep?))
   nil)
 
-(defmethod print-object ((sheep standard-sheep) stream)
-  (print-unreadable-object (sheep stream :identity t)
-    (format stream "Standard Sheep SID: ~a~@[ AKA: ~a~]" (sid sheep) (sheep-nickname sheep))))
-
 ;;;
 ;;; Sheep creation
 ;;;
-
+(defparameter *secret-unbound-value* (gensym))
 (defvar =dolly= (make-instance 'standard-sheep :nickname "=dolly=")
   "=dolly= is the parent object for all Sheeple. Everything and anything in Sheeple has
 =dolly= as its parent object. Even fleeced-wolves.")
@@ -100,6 +96,10 @@
     (set-up-other-options options sheep)
     (finalize-sheep sheep)
     sheep))
+
+(defun execute-cloneforms (sheep)
+  (let ((avail-properties (available-properties sheep)))
+    (mapcar (lambda (prop-name) (run-cloneform sheep prop-name)) avail-properties)))
 
 (defgeneric finalize-sheep (sheep))
 (defmethod finalize-sheep ((sheep standard-sheep))
@@ -148,8 +148,7 @@
 	(value (getf property-list :value))
 	(readers (getf property-list :readers))
 	(writers (getf property-list :writers))
-	(locked-p (getf property-list :lock))
-	(as-cloneform (getf property-list :as-cloneform))) ; STUB
+	(locked-p (getf property-list :lock)))
     (when (keywordp name)
       (error 'probably-meant-to-be-option))
     (setf (get-property sheep name) value)
@@ -223,6 +222,14 @@
 			:function (eval (make-message-lambda '(new-value sheep) 
 							     `((setf (get-property sheep ',prop-name)
 								     new-value)))))))
+;; (defun set-up-cloneform (cloneform prop-name sheep)
+;;   (ensure-message :name 'run-cloneform
+;; 		  :lambda-list '(sheep prop-name)
+;; 		  :participants (list sheep =dolly=)
+;; 		  :body `(setf (get-property sheep prop-name) ,cloneform)
+;; 		  :function (eval (make-message-lambda '(sheep prop-name)
+;; 						       `((setf (get-property sheep prop-name)
+;; 							       ,cloneform))))))
 
 ;;;
 ;;; Inheritance management

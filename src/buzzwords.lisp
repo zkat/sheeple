@@ -337,7 +337,7 @@
   (let ((function (message-function message)))
     (funcall function args next-messages)))
 
-(defun find-applicable-messages  (selector args)
+(defun find-applicable-messages  (selector args &key (errorp t))
   "Returns the most specific message using SELECTOR and ARGS."
   (let ((n (length args))
 	(discovered-messages nil)
@@ -367,7 +367,8 @@
 				  (pushnew contained-message contained-applicable-messages :test #'equalp))))))))))
     (if contained-applicable-messages
 	(unbox-messages (sort-applicable-messages contained-applicable-messages))
-	(error 'no-applicable-messages))))
+	(when errorp
+	  (error 'no-applicable-messages)))))
 
 (defun unbox-messages (messages)
   (mapcar #'message-container-message messages))

@@ -30,14 +30,53 @@
 	      value
 	      (error 'unbound-property)))
 	(error 'unbound-property))))
-
 (defun (setf get-property) (new-value sheep property-name)
   (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
       (setf (std-get-property sheep property-name) new-value)
       (setf-get-property-using-metasheep 
        new-value (sheep-metasheep sheep) sheep property-name)))
 (defun (setf std-get-property) (new-value sheep property-name)
-  (setf (gethash property-name sheep) new-value))
+  (setf (gethash property-name (sheep-direct-properties sheep)) new-value))
+
+(defun get-cloneform (sheep property-name)
+  (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
+      (std-get-cloneform sheep property-name)
+      (get-cloneform-using-metasheep (sheep-metasheep sheep) sheep property-name)))
+(defun std-get-cloneform (the-sheep property-name)
+  (loop for sheep in (sheep-hierarchy-list sheep)
+       do (let ((cloneform-table (sheep-direct-cloneforms sheep)))
+	    (multiple-value-bind (value has-p)
+		(gethash property-name cloneform-table)
+	      (when has-p
+		(return-from std-get-cloneform value))))
+       finally *secret-unbound-value*))
+(defun (setf get-cloneform) (new-value sheep property-name)
+  (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
+      (setf (std-get-cloneform sheep property-name) new-value)
+      (setf-get-cloneform-using-metasheep
+       new-value (sheep-metasheep sheep) sheep property-name)))
+(defun (setf std-get-cloneform) (new-value sheep property-name)
+  (setf (gethash property-name (sheep-direct-cloneforms sheep)) new-value))
+
+(defun get-clonefunction (sheep property-name)
+  (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
+      (std-get-clonefunction sheep property-name)
+      (get-clonefunction-using-metasheep (sheep-metasheep sheep) sheep property-name)))
+(defun std-get-clonefunction (the-sheep property-name)
+  (loop for sheep in (sheep-hierarchy-list sheep)
+       do (let ((clonefunction-table (sheep-direct-clonefunctions sheep)))
+	    (multiple-value-bind (value has-p)
+		(gethash property-name clonefunctions-table)
+	      (when has-p
+		(return-from std-get-clonefunctions value))))
+       finally *secret-unbound-value*))
+(defun (setf get-clonefunction) (new-value sheep property-name)
+  (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
+      (setf (std-get-clonefunction sheep property-name) new-value)
+      (setf-get-clonefunction-using-metasheep
+       new-value (sheep-metasheep sheep) sheep property-name)))
+(defun (setf std-get-clonefunction) (new-value sheep property-name)
+  (setf (gethash property-name (sheep-direct-clonefunctions sheep)) new-value))
 
 (defun remove-property (sheep property-name)
   (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
@@ -76,7 +115,7 @@
 	(error 'unbound-property))))
 
 (defun available-properties (sheep)
-  (if (eql (sheep-metaobjct sheep) =standard-sheep-metasheep=)
+  (if (eql (sheep-metaobject sheep) =standard-sheep-metasheep=)
       (std-available-properties sheep)
       (available-properties-using-metasheep (sheep-metasheep sheep) sheep)))
 (defun std-available-properties (sheep)
@@ -85,6 +124,17 @@
     (remove-duplicates
      (flatten
       (append obj-keys (mapcar #'available-properties (sheep-direct-parents sheep)))))))
+
+(defun available-cloneforms (sheep)
+  (if (eql (sheep-metaobject sheep) =standard-sheep-metasheep=)
+      (std-available-cloneforms sheep)
+      (available-cloneforms-using-metasheep (sheep-metasheep sheep) sheep)))
+(defun std-available-cloneforms (sheep)
+  (let ((obj-keys (loop for keys being the hash-keys of (sheep-direct-cloneforms sheep)
+		     collect keys)))
+    (remove-duplicates
+     (flatten
+      (append obj-keys (mapcar #'available-cloneforms (sheep-direct-parents sheep)))))))
 
 ;;; Memoization
 (defun memoize-property-access (sheep)
@@ -95,12 +145,12 @@
 
 (defun %get-property-owner (sheep property-name)
   (let ((hierarchy-list (sheep-hierarchy-list sheep)))
-    (loop for sheep in hierarchy-list
-       do (multiple-value-bind (value has-p)
-	      (%get-property-object sheep property-name)
-	    (declare (ignore value))
-	    (when has-p
-	      (return-from %get-property-owner sheep)))
+    (loop for sheep-obj in hierarchy-list
+       do (when (handler-case
+		    (get-property sheep-obj property-name)
+		  (unbound-property () nil))
+	    (return-from %get-property-owner
+	      sheep-obj))
        finally (error 'unbound-property))))
 
 (defun memoize-sheep-hierarchy-list (sheep)
@@ -189,6 +239,7 @@
 (defun (setf sheep-metasheep) (new-mo sheep)
   (error "Changing metasheeps is not supported right now"))
 
+;;; A lot of these should really be buzzwordified
 (defun sheep-nickname (sheep)
   (get-property sheep 'nickname))
 (defun (setf sheep-nickname) (new-value sheep)
@@ -233,7 +284,6 @@
   (get-property sheep 'hierarchy-list))
 (defun (setf sheep-hierarchy-list) (new-value sheep)
   (setf (get-property sheep 'hierarchy-list) new-value))
-
 
 ;;;
 ;;; Cloning
@@ -290,7 +340,9 @@
 (defun std-add-parents (sheep parents)
   (let ((real-parents (or parents
 			  (list =dolly=))))
-    (setf (sheep-direct-parents sheep) real-parents)))
+    (setf (sheep-direct-parents sheep) real-parents)
+    (memoize-sheep-hierarchy-list sheep)
+    sheep))
 
 (defun set-up-properties (sheep properties)
   (loop for property-list in properties
@@ -306,6 +358,18 @@
     (setf (get-property sheep name) value)
     (add-readers-to-sheep readers name sheep)
     (add-writers-to-sheep writers name sheep))))
+
+(defun execute-clonefunctions (sheep)
+  (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
+      (std-execute-clonefunctions sheep)
+      (execute-clonefunctions-using-metasheep 
+       (sheep-metasheep sheep) sheep)))
+(defun std-execute-clonefunctions (sheep)
+  (let ((functions (loop for propname in (available-cloneforms the-sheep)
+		      collect (get-clonefunction sheep propname))))
+    (loop for fn in functions
+	 (unless (eql fn *secret-unbound-value*)
+	   (setf (get-property sheep propname) (funcall fn))))))
 
 (define-condition invalid-option-error (sheeple-error) ())
 (defun set-up-other-options (options sheep)
@@ -355,8 +419,6 @@
 	   (lambda (key value) 
 	     (setf (get-property sheep key) value)) (sheep-direct-properties parent)))
 	(sheep-direct-parents sheep)))
-
-
 
 ;;; Inheritance setup
 (defun add-parent (new-parent child)

@@ -963,8 +963,8 @@
 
 (defvar =dolly= 
   (clone (=t=)
-	 ((nickname
-	   "=dolly="))))
+	 ()
+	 (:nickname "=dolly=")))
 
 (setf (sheep-direct-parents =standard-sheep-metasheep=)
       (list =dolly=))

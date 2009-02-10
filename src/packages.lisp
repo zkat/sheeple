@@ -98,3 +98,6 @@
 
 (defpackage #:sheeple-user
   (:use :cl :sheeple))
+
+(defpackage #:sheeplette
+  (:use :cl :trivial-garbage))

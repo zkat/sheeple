@@ -4,7 +4,7 @@
 ;;
 ;; An attempt at implementing a version of sheeple with a MOP.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(in-package :sheeple)
+(in-package :sheeplette)
 
 (defparameter *secret-unbound-value* (gensym))
 (defparameter *secret-sheep-identifier* (gensym))
@@ -356,27 +356,6 @@
 	     (setf (get-property sheep key) value)) (sheep-direct-properties parent)))
 	(sheep-direct-parents sheep)))
 
-(defun add-readers-to-sheep (readers prop-name sheep)
-  (loop for reader in readers
-     do (ensure-buzzword :name reader)
-     do (ensure-message :name reader
-			:lambda-list '(sheep)
-			:participants (list sheep)
-			:body `(get-property sheep ',prop-name)
-			:function (eval (make-message-lambda '(sheep) 
-							     `((get-property sheep ',prop-name)))))))
-
-(defun add-writers-to-sheep (writers prop-name sheep)
-  (loop for writer in writers
-     do (ensure-buzzword :name writer)
-     do (ensure-message :name writer
-			:lambda-list '(new-value sheep)
-			:participants (list =dolly= sheep)
-			:body `(setf (get-property sheep ',prop-name) new-value)
-			:function (eval (make-message-lambda '(new-value sheep) 
-							     `((setf (get-property sheep ',prop-name)
-								     new-value)))))))
-
 
 
 ;;; Inheritance setup
@@ -426,6 +405,50 @@
 	    (setf (get-property child property-name) value))))
   (finalize-sheep child)
   child)
+
+;;;
+;;; Hierarchy Resolution
+;;;
+(defun collect-parents (sheep)
+  (labels ((all-parents-loop (seen parents)
+	     (let ((to-be-processed
+		    (set-difference parents seen)))
+	       (if (null to-be-processed)
+		   parents
+		   (let ((sheep-to-process
+			  (car to-be-processed)))
+		     (all-parents-loop
+		      (cons sheep-to-process seen)
+		      (union (sheep-direct-parents sheep-to-process)
+			     parents)))))))
+    (all-parents-loop () (list sheep))))
+
+(defun compute-sheep-hierarchy-list (sheep)
+  (handler-case 
+      (let ((sheeple-to-order (collect-parents sheep)))
+  	(topological-sort sheeple-to-order
+			  (remove-duplicates
+			   (mapappend #'local-precedence-ordering
+				      sheeple-to-order))
+			  #'std-tie-breaker-rule))
+    (simple-error ()
+      (error 'sheep-hierarchy-error))))
+
+(define-condition sheep-hierarchy-error (sheeple-error) ()
+  (:documentation "Signaled whenever there is a problem computing the hierarchy list."))
+
+(defun local-precedence-ordering (sheep)
+  (mapcar #'list
+	  (cons sheep
+		(butlast (sheep-direct-parents sheep)))
+	  (sheep-direct-parents sheep)))
+
+(defun std-tie-breaker-rule (minimal-elements cpl-so-far)
+  (dolist (cpl-constituent (reverse cpl-so-far))
+    (let* ((supers (sheep-direct-parents cpl-constituent))
+           (common (intersection minimal-elements supers)))
+      (when (not (null common))
+        (return-from std-tie-breaker-rule (car common))))))
 
 ;;; The Macro
 ;; Example: (clone (sheep1 sheep2 sheep3) ((property1 value1) (property2 value2)))
@@ -616,28 +639,38 @@
 (defparameter the-standard-message-metaobject-form
   '(clone ()
     ((name
-      'standard-message-metaobject)
+      'standard-message-metaobject
+      :cloneform 'standard-message)
      (qualifiers
-      nil)
+      nil
+      :cloneform nil)
      (lambda-list
-      nil)
+      nil
+      :cloneform nil)
      (participants
-      nil)
+      nil
+      :cloneform nil)
      (body
-      nil)
+      nil
+      :cloneform '(lambda () nil))
      (function
-      nil)
+      nil
+      :cloneform (lambda () nil))
      (documentation
-      nil))))
+      "standard message metaobject"
+      :cloneform ""))))
 
 (defparameter the-standard-role-metaobject-form
   '(clone ()
     ((name
-      'standard-role-metaobject)
+      'standard-role-metaobject
+      :cloneform 'standard-role)
      (position
-      0)
+      0
+      :cloneform nil)
      (message-pointer
-      nil))))
+      nil
+      :cloneform nil))))
 
 (defun ensure-message (&key name qualifiers lambda-list participants function body)
   (when (not (find-buzzword name nil))
@@ -657,6 +690,224 @@
     (remove-messages-with-name-qualifiers-and-participants name qualifiers target-sheeple)
     (add-message-to-sheeple name message target-sheeple)
     message))
+;; TODO
+;(defun find-message (selector qualifiers participants &optional (errorp t)))
+(defun add-readers-to-sheep (readers prop-name sheep)
+  (loop for reader in readers
+     do (ensure-buzzword :name reader)
+     do (ensure-message :name reader
+			:lambda-list '(sheep)
+			:participants (list sheep)
+			:body `(get-property sheep ',prop-name)
+			:function (eval (make-message-lambda '(sheep) 
+							     `((get-property sheep ',prop-name)))))))
+
+(defun add-writers-to-sheep (writers prop-name sheep)
+  (loop for writer in writers
+     do (ensure-buzzword :name writer)
+     do (ensure-message :name writer
+			:lambda-list '(new-value sheep)
+			:participants (list =dolly= sheep)
+			:body `(setf (get-property sheep ',prop-name) new-value)
+			:function (eval (make-message-lambda '(new-value sheep) 
+							     `((setf (get-property sheep ',prop-name)
+								     new-value)))))))
+
+;;; Macro
+(defmacro defmessage (&rest args)
+  (multiple-value-bind (name qualifiers lambda-list participants body)
+      (parse-defmessage args)
+    `(ensure-message
+      :name ',name
+      :qualifiers ',qualifiers
+      :lambda-list ,(extract-lambda-list lambda-list)
+      :participants ,(extract-participants participants)
+      :function (block ,name ,(make-message-lambda lambda-list body))
+      :body '(block ,name ,@body))))
+
+(defun make-message-lambda (lambda-list body)
+  `(lambda (args next-messages)
+     (apply
+      (lambda ,(eval (extract-lambda-list lambda-list))
+	(flet ((next-message-p ()
+		 (not (null next-messages)))
+	       (call-next-message (&rest cnm-args)
+		 (funcall (message-function (car next-messages))
+			  (or cnm-args
+			      args)
+			  (cdr next-messages))))
+	  (declare (ignorable #'next-message-p #'call-next-message))
+	  ,@body)) args)))
+
+(defun parse-defmessage (args)
+  (let ((name (car args))
+	(qualifiers nil)
+	(lambda-list nil)
+	(body nil)
+	(parse-state :qualifiers))
+    (dolist (arg (cdr args))
+      (ecase parse-state
+	(:qualifiers
+	 (if (and (atom arg) (not (null arg)))
+	     (push arg qualifiers)
+	     (progn (setf lambda-list arg)
+		    (setf parse-state :body))))
+	(:body (setf body (list arg)))))
+    (values name
+	    qualifiers
+	    lambda-list
+	    lambda-list
+	    body)))
+
+(defun extract-lambda-list (lambda-list)
+  `(list ,@(mapcar #'extract-var-name lambda-list)))
+(defun extract-var-name (item)
+  (if (listp item)
+      `',(car item)
+      `(confirm-var-name ',item)))
+
+(defun confirm-var-name (var-name)
+  (if (symbolp var-name)
+      var-name
+      (error "Invalid var name.")))
+
+(defun extract-participants (lambda-list)
+  `(list ,@(mapcar #'extract-participant-sheep lambda-list)))
+(defun extract-participant-sheep (item)
+  (if (listp item)
+      `(confirm-sheep ,(cadr item))
+      `=dolly=))
+
+(defmacro undefmessage (&rest args)
+  (multiple-value-bind (name qualifiers lambda-list)
+      (parse-undefmessage args)
+    `(undefine-message
+      :name ',name
+      :qualifiers ',qualifiers
+      :participants ,(extract-participants lambda-list))))
+
+(defun parse-undefmessage (args)
+  (let ((name (car args))
+	(qualifiers nil)
+	(lambda-list nil))
+    (dolist (arg (cdr args))
+      (if (and (atom arg) (not (null arg)))
+	  (push arg qualifiers)
+	  (setf lambda-list arg)))
+    (values name
+	    qualifiers
+	    lambda-list)))
+
+;;;
+;;; Message dispatch
+;;;
+
+(defun primary-message-p (message)
+  (null (message-qualifiers message)))
+
+(defun before-message-p (message)
+  (when (member :before (message-qualifiers message))
+    t))
+
+(defun after-message-p (message)
+  (when (member :after (message-qualifiers message))
+    t))
+
+(defun around-message-p (message)
+  (when (member :around (message-qualifiers message))
+    t))
+
+(defun apply-buzzword (selector args)
+  (let ((messages (find-applicable-messages selector
+					    (sheepify-list args))))
+    (apply-messages messages args)))
+
+(defun apply-messages (messages args)
+  (let ((around (find-if #'around-message-p messages))
+	(primaries (remove-if-not #'primary-message-p messages)))
+	  (when (null primaries)
+	    (error "No primary messages"))
+    (if around
+	(apply-message around args (remove around messages))
+    	(let ((befores (remove-if-not #'before-message-p messages))
+	      (afters (remove-if-not #'after-message-p messages)))
+	  (dolist (before befores)
+	    (apply-message before args nil))
+	  (multiple-value-prog1
+	      (apply-message (car primaries) args (cdr primaries))
+	    (dolist (after (reverse afters))
+	      (apply-message after args nil)))))))
+
+(defun apply-message (message args next-messages)
+  (let ((function (message-function message)))
+    (funcall function args next-messages)))
+
+(defun find-applicable-messages  (selector args &key (errorp t))
+  "Returns the most specific message using SELECTOR and ARGS."
+  (let ((n (length args))
+	(discovered-messages nil)
+	(contained-applicable-messages nil))
+    (loop 
+       for arg in args
+       for index upto (1- n)
+       do (let ((curr-sheep-list (sheep-hierarchy-list arg)))
+	    (loop
+	       for curr-sheep in curr-sheep-list
+	       for hierarchy-position upto (1- (length curr-sheep-list))
+	       do (dolist (role (sheep-direct-roles curr-sheep))
+		    (when (and (equal selector (role-name role))
+			       (eql index (role-position role)))
+			  (let ((curr-message (message-pointer role)))
+			    (when (= n (length (message-lambda-list curr-message)))
+			      (when (not (member curr-message
+						 discovered-messages
+						 :key #'message-container-message))
+				(pushnew (contain-message curr-message) discovered-messages))
+			      (let ((contained-message (find curr-message
+							     discovered-messages
+							     :key #'message-container-message)))
+				(setf (elt (message-container-rank contained-message) index) 
+				      hierarchy-position)
+				(when (fully-specified-p (message-container-rank contained-message))
+				  (pushnew contained-message contained-applicable-messages :test #'equalp))))))))))
+    (if contained-applicable-messages
+	(unbox-messages (sort-applicable-messages contained-applicable-messages))
+	(when errorp
+	  (error 'no-applicable-messages)))))
+
+(defun unbox-messages (messages)
+  (mapcar #'message-container-message messages))
+
+(defun sort-applicable-messages (message-list &key (rank-key #'<))
+  (sort message-list rank-key
+	:key (lambda (contained-message)
+	       (calculate-rank-score (message-container-rank contained-message)))))
+
+(defun contain-message (message)
+  (make-message-container
+   :message message
+   :rank (make-array (length (message-lambda-list message))
+		     :initial-element nil)))
+
+(defstruct message-container
+  message
+  rank)
+
+(define-condition no-applicable-messages (sheeple-error) ())
+(define-condition no-most-specific-message (sheeple-error) ())
+
+(defun fully-specified-p (rank)
+  (loop for item across rank
+     do (when (eql item nil)
+	  (return-from fully-specified-p nil)))
+  t)
+
+(defun calculate-rank-score (rank)
+  (let ((total 0))
+    (loop for item across rank
+       do (when (numberp item)
+	    (incf total item)))
+    total))
 
 ;;;
 ;;; Bootstrap
@@ -718,6 +969,7 @@
 (setf (sheep-direct-parents =standard-sheep-metasheep=)
       (list =dolly=))
 
+;;; Wolves and wolf-handling
 (defvar =white-fang= (clone (=t=) () (:nickname "=white-fang=")))
 (defvar =symbol= (clone (=white-fang=)()(:nickname "=symbol=")))
 (defvar =sequence= (clone (=white-fang=)()(:nickname "=sequence=")))
@@ -797,3 +1049,6 @@
        (find-fleeced-wolf sheep)
        (values sheep nil)))
 
+;;;
+;;; Safe to define buzzwords and messages now, as well as use CLONE normally
+;;;

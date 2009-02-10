@@ -1,7 +1,6 @@
 (asdf:defsystem sheeple
   :version "Baahh"
   :description "Clone-crazy hackery tool"
-  :maintainer "Josh Marchan <sykopomp@sykosomatic.org>"
   :author "Josh <sykopomp@sykosomatic.org>"
   :licence "MIT"
   :depends-on ()

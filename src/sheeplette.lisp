@@ -1052,3 +1052,9 @@
 ;;;
 ;;; Safe to define buzzwords and messages now, as well as use CLONE normally
 ;;;
+(defbuzzword print-sheep "Defines the expression print-object uses.")
+(defmessage print-sheep (sheep stream)
+  (print-unreadable-object (sheep stream :identity t)
+    (format stream "Standard Sheep SID: ~a~@[ AKA: ~a~]" (sid sheep) (sheep-nickname sheep))))
+(defmethod print-object ((sheep standard-sheep) stream)
+  (print-sheep sheep stream))

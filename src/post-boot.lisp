@@ -19,11 +19,11 @@
 ;;     (format stream "Standard Sheep SID: ~a~@[ AKA: ~a~]" (sid sheep) (sheep-nickname sheep))))
  
 ;; FIXME: This forces an autoboxing loop. Find where this can be fixed.
-(defbuzzword run-cloneform "Runs a cloneform on a property.")
-(defmessage run-cloneform (foo bar)
-   (declare (ignorable foo bar))
-   foo bar
-   (values))
+;; (defbuzzword run-cloneform "Runs a cloneform on a property.")
+;; (defmessage run-cloneform (foo bar)
+;;    (declare (ignorable foo bar))
+;;    foo bar
+;;    (values))
 ;; (defmethod set-up-property :before (property-list (sheep standard-sheep))
 ;;   "Run-cloneform runs the form defined for this property."
 ;;   (let ((prop-name (getf property-list :name)))

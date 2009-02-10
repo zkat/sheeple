@@ -239,7 +239,6 @@
 (defun (setf sheep-metasheep) (new-mo sheep)
   (error "Changing metasheeps is not supported right now"))
 
-;;; A lot of these should really be buzzwordified
 (defun sheep-nickname (sheep)
   (get-property sheep 'nickname))
 (defun (setf sheep-nickname) (new-value sheep)
@@ -353,11 +352,12 @@
 	(value (getf property-list :value))
 	(readers (getf property-list :readers))
 	(writers (getf property-list :writers)))
-    (when (keywordp name)
-      (error 'probably-meant-to-be-option))
+    (when (not (symbolp name))
+      (error "Property names must be symbols"))
     (setf (get-property sheep name) value)
     (add-readers-to-sheep readers name sheep)
     (add-writers-to-sheep writers name sheep))))
+
 
 (defun execute-clonefunctions (sheep)
   (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
@@ -580,14 +580,7 @@
 (defun canonize-option (option)
   `(list ,@option))
 
-;;;
-;;; Create-a-sheep
-;;;
-
-
-
 ;;; Inheritance predicates
-;;; These, probably not (buzzwordable)
 (defun direct-parent-p (maybe-parent child)
   (when (member maybe-parent (sheep-direct-parents child))
     t))

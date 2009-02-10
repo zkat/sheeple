@@ -521,7 +521,7 @@
 ;;;
 ;;; Buzzwords
 ;;;
-(defparameter the-standard-buzzword-form
+(defparameter the-standard-buzzword-metaobject-form
   '(clone ()
     ((name
       'buzzword-metaobject
@@ -613,7 +613,7 @@
 ;;;
 ;;; Messages
 ;;;
-(defparameter the-standard-message-form
+(defparameter the-standard-message-metaobject-form
   '(clone ()
     ((name
       'standard-message-metaobject)
@@ -630,7 +630,7 @@
      (documentation
       nil))))
 
-(defparameter the-standard-role-form
+(defparameter the-standard-role-metaobject-form
   '(clone ()
     ((name
       'standard-role-metaobject)

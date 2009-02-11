@@ -10,9 +10,16 @@
 (defparameter *secret-sheep-identifier* (gensym))
 (define-condition unbound-property (sheeple-error) ())
 
+(defun sheep-metasheep (sheep)
+  (gethash 'metasheep sheep))
+(defun (setf sheep-metasheep) (new-mo sheep)
+  (declare (ignore new-mo sheep))
+  (error "Changing metasheeps is not supported right now"))
+
 ;;;
 ;;; Slot access
 ;;;
+
 (defun get-property (sheep property-name)
   (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
       (std-get-property sheep property-name)
@@ -22,11 +29,13 @@
 
 ;; This bitch
 (defun get-property-with-memoized-owner (sheep property-name)
+  ;; Find who the owner is...
   (multiple-value-bind (prop-owner has-p)
-      (gethash property-name (sheep-property-owners sheep))
+      (gethash property-name (gethash 'property-owners sheep))
     (if has-p
+	;; Get the actual value from that owner..
 	(multiple-value-bind (value has-p)
-	    (gethash property-name (sheep-direct-properties prop-owner))
+	    (gethash property-name (gethash 'properties prop-owner))
 	  (if has-p
 	      value
 	      (error 'unbound-property)))
@@ -38,7 +47,8 @@
       (setf-get-property-using-metasheep 
        new-value (sheep-metasheep sheep) sheep property-name)))
 (defun (setf std-get-property) (new-value sheep property-name)
-  (setf (gethash property-name (sheep-direct-properties sheep)) new-value))
+  (setf (gethash property-name (gethash 'properties sheep)) new-value)
+  (memoize-property-access sheep))
 
 (defun get-cloneform (sheep property-name)
   (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
@@ -86,7 +96,8 @@
       (std-remove-property sheep property-name)
       (remove-property-using-metasheep (sheep-metasheep sheep) sheep property-name)))
 (defun std-remove-property (sheep property-name)
-  (remhash property-name (sheep-direct-propertes sheep)))
+  (remhash property-name (gethash 'properties sheep))
+  (memoize-property-access sheep))
 
 (defun has-property-p (sheep property-name)
   "Returns T if a property with PROPERTY-NAME is available to SHEEP."
@@ -102,7 +113,7 @@
        (sheep-metasheep sheep) sheep property-name)))
 (defun std-has-direct-property-p (sheep property-name)
   (multiple-value-bind (value has-p)
-      (gethash property-name (sheep-direct-properties sheep))
+      (gethash property-name (gethash 'properties sheep))
     value
     has-p))
 
@@ -122,11 +133,11 @@
       (std-available-properties sheep)
       (available-properties-using-metasheep (sheep-metasheep sheep) sheep)))
 (defun std-available-properties (sheep)
-  (let ((obj-keys (loop for keys being the hash-keys of (sheep-direct-properties sheep)
+  (let ((obj-keys (loop for keys being the hash-keys of (gethash 'properties sheep)
 		     collect keys)))
     (remove-duplicates
      (flatten
-      (append obj-keys (mapcar #'available-properties (sheep-direct-parents sheep)))))))
+      (append obj-keys (mapcar #'available-properties (gethash 'parents sheep)))))))
 
 (defun available-cloneforms (sheep)
   (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
@@ -143,14 +154,14 @@
 (defun memoize-property-access (sheep)
   (loop for property in (available-properties sheep)
      do (let ((owner (%get-property-owner sheep property)))
-	  (setf (gethash property (sheep-property-owners sheep))
+	  (setf (gethash property (gethash 'property-owners sheep))
 		owner))))
 
 (defun %get-property-owner (sheep property-name)
-  (let ((hierarchy-list (sheep-hierarchy-list sheep)))
+  (let ((hierarchy-list (gethash 'hierarchy-list sheep)))
     (loop for sheep-obj in hierarchy-list
        do (when (handler-case
-		    (get-property sheep-obj property-name)
+		    (gethash property-name sheep-obj)
 		  (unbound-property () nil))
 	    (return-from %get-property-owner
 	      sheep-obj))
@@ -158,11 +169,11 @@
 
 (defun memoize-sheep-hierarchy-list (sheep)
   (let ((list (compute-sheep-hierarchy-list sheep)))
-    (setf (sheep-hierarchy-list sheep)
+    (setf (gethash 'hierarchy-list sheep)
 	  list)
     (mapc (lambda (descendant) 
 	    (memoize-sheep-hierarchy-list (weak-pointer-value descendant)))
-	  (sheep-direct-children sheep))))
+	  (gethash 'children sheep))))
 
 ;;;
 ;;; Hierarchy Resolution
@@ -178,7 +189,7 @@
 			  (car to-be-processed)))
 		     (all-parents-loop
 		      (cons sheep-to-process seen)
-		      (union (sheep-direct-parents sheep-to-process)
+		      (union (gethash 'parents sheep-to-process)
 			     parents)))))))
     (all-parents-loop () (list sheep))))
 
@@ -199,8 +210,8 @@
 (defun local-precedence-ordering (sheep)
   (mapcar #'list
 	  (cons sheep
-		(butlast (sheep-direct-parents sheep)))
-	  (sheep-direct-parents sheep)))
+		(butlast (gethash 'parents sheep)))
+	  (gethash 'parents sheep)))
 
 (defun std-tie-breaker-rule (minimal-elements cpl-so-far)
   (dolist (cpl-constituent (reverse cpl-so-far))
@@ -237,11 +248,6 @@
       :cloneform nil))))
 
 ;; NOTE: the setf for this should really reinitialize the sheep
-(defun sheep-metasheep (sheep)
-  (gethash 'metasheep sheep))
-(defun (setf sheep-metasheep) (new-mo sheep)
-  (declare (ignore new-mo sheep))
-  (error "Changing metasheeps is not supported right now"))
 
 (defun sheep-nickname (sheep)
   (get-property sheep 'nickname))
@@ -412,7 +418,7 @@
 (defun std-finalize-sheep (sheep)
   (memoize-sheep-hierarchy-list sheep)
   (memoize-property-access sheep)
-  (loop for child-pointer in (sheep-direct-children sheep)
+  (loop for child-pointer in (gethash 'children sheep)
      do (memoize-property-access (weak-pointer-value child-pointer))))
 
 (define-condition probably-meant-to-be-option (sheeple-error) ())
@@ -1161,30 +1167,30 @@
 ;;; Bootstrap
 ;;;
 
-;;; These two help set up all the initial cloneform/clonefunction pairs.
-(defun set-up-standard-sheep-metasheep-cloneforms (cloneform-table)
-  (setf (gethash 'metasheep cloneform-table) '=standard-sheep-metasheep=)
-  (setf (gethash 'nickname cloneform-table) 'nil)
-  (setf (gethash 'parents cloneform-table) 'nil)
-  (setf (gethash 'children cloneform-table) 'nil)
-  (setf (gethash 'properties cloneform-table) '(make-hash-table :test #'equal))
-  (setf (gethash 'property-owners cloneform-table) '(make-weak-hash-table :weakness :value :test #'equal))
-  (setf (gethash 'roles cloneform-table) 'nil)
-  (setf (gethash 'hierarchy-list cloneform-table) 'nil)
-  (setf (gethash 'cloneforms cloneform-table) '(make-hash-table :test #'equal))
-  (setf (gethash 'clonefunctions cloneform-table) '(make-hash-table :test #'equal)))
+;; These are what reinitializing metasheep is for...
+;; (defun set-up-standard-sheep-metasheep-cloneforms (cloneform-table)
+;;   (setf (gethash 'metasheep cloneform-table) '=standard-sheep-metasheep=)
+;;   (setf (gethash 'nickname cloneform-table) 'nil)
+;;   (setf (gethash 'parents cloneform-table) 'nil)
+;;   (setf (gethash 'children cloneform-table) 'nil)
+;;   (setf (gethash 'properties cloneform-table) '(make-hash-table :test #'equal))
+;;   (setf (gethash 'property-owners cloneform-table) '(make-weak-hash-table :weakness :value :test #'equal))
+;;   (setf (gethash 'roles cloneform-table) 'nil)
+;;   (setf (gethash 'hierarchy-list cloneform-table) 'nil)
+;;   (setf (gethash 'cloneforms cloneform-table) '(make-hash-table :test #'equal))
+;;   (setf (gethash 'clonefunctions cloneform-table) '(make-hash-table :test #'equal)))
 
-(defun set-up-standard-sheep-metasheep-clonefunctions (clonefun-table)
-  (setf (gethash 'metasheep clonefun-table) (lambda () =standard-sheep-metasheep=))
-  (setf (gethash 'nickname clonefun-table) (lambda () nil))
-  (setf (gethash 'parents clonefun-table) (lambda () nil))
-  (setf (gethash 'children clonefun-table) (lambda () nil))
-  (setf (gethash 'properties clonefun-table) (lambda () (make-hash-table :test #'equal)))
-  (setf (gethash 'property-owners clonefun-table) (lambda () (make-weak-hash-table :weakness :value :test #'equal)))
-  (setf (gethash 'roles clonefun-table) (lambda () nil))
-  (setf (gethash 'hierarchy-list clonefun-table) (lambda () nil))
-  (setf (gethash 'cloneforms clonefun-table) (lambda () (make-hash-table :test #'equal)))
-  (setf (gethash 'clonefunctions clonefun-table) (lambda () (make-hash-table :test #'equal))))
+;; (defun set-up-standard-sheep-metasheep-clonefunctions (clonefun-table)
+;;   (setf (gethash 'metasheep clonefun-table) (lambda () =standard-sheep-metasheep=))
+;;   (setf (gethash 'nickname clonefun-table) (lambda () nil))
+;;   (setf (gethash 'parents clonefun-table) (lambda () nil))
+;;   (setf (gethash 'children clonefun-table) (lambda () nil))
+;;   (setf (gethash 'properties clonefun-table) (lambda () (make-hash-table :test #'equal)))
+;;   (setf (gethash 'property-owners clonefun-table) (lambda () (make-weak-hash-table :weakness :value :test #'equal)))
+;;   (setf (gethash 'roles clonefun-table) (lambda () nil))
+;;   (setf (gethash 'hierarchy-list clonefun-table) (lambda () nil))
+;;   (setf (gethash 'cloneforms clonefun-table) (lambda () (make-hash-table :test #'equal)))
+;;   (setf (gethash 'clonefunctions clonefun-table) (lambda () (make-hash-table :test #'equal))))
 
 (defvar =standard-sheep-metasheep=
   (let ((object (make-hash-table :test #'equal)))
@@ -1197,10 +1203,7 @@
     (setf (gethash 'property-owners object) (make-weak-hash-table :weakness :value :test #'equal))
     (setf (gethash 'roles object) nil)
     (setf (gethash 'hierarchy-list object) nil)
-    (setf (gethash 'cloneforms object) 
-	  (set-up-standard-sheep-metasheep-cloneforms (make-hash-table :test #'equal)))
-    (setf (gethash 'clonefunctions object) 
-	  (set-up-standard-sheep-metasheep-clonefunctions (make-hash-table :test #'equal)))    
+    (std-finalize-sheep object)
     object))
 
 (defvar =t=

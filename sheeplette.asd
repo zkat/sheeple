@@ -10,6 +10,9 @@
 	    :serial t
 	    :components
 	    ((:file "trivial-garbage")
-	     (:file "packages")
-	     (:file "utils")
-	     (:file "sheeplette")))))
+	     (:module sheeplette
+		      :serial t
+		      :components
+		      ((:file "packages")
+		       (:file "utils")
+		       (:file "sheeplette")))))))

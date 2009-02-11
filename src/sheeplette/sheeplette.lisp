@@ -20,6 +20,7 @@
 (defun std-get-property (sheep property-name)
   (get-property-with-memoized-owner sheep property-name))
 
+;; This bitch
 (defun get-property-with-memoized-owner (sheep property-name)
   (multiple-value-bind (prop-owner has-p)
       (gethash property-name (sheep-property-owners sheep))
@@ -30,6 +31,7 @@
 	      value
 	      (error 'unbound-property)))
 	(error 'unbound-property))))
+
 (defun (setf get-property) (new-value sheep property-name)
   (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
       (setf (std-get-property sheep property-name) new-value)
@@ -42,14 +44,15 @@
   (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
       (std-get-cloneform sheep property-name)
       (get-cloneform-using-metasheep (sheep-metasheep sheep) sheep property-name)))
-(defun std-get-cloneform (the-sheep property-name)
-  (loop for sheep in (sheep-hierarchy-list sheep)
-       do (let ((cloneform-table (sheep-direct-cloneforms sheep)))
+(defun std-get-cloneform (sheep property-name)
+  (loop for obj in (sheep-hierarchy-list sheep)
+       do (let ((cloneform-table (sheep-direct-cloneforms obj)))
 	    (multiple-value-bind (value has-p)
 		(gethash property-name cloneform-table)
 	      (when has-p
 		(return-from std-get-cloneform value))))
-       finally *secret-unbound-value*))
+       finally (return *secret-unbound-value*)))
+
 (defun (setf get-cloneform) (new-value sheep property-name)
   (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
       (setf (std-get-cloneform sheep property-name) new-value)
@@ -62,14 +65,14 @@
   (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
       (std-get-clonefunction sheep property-name)
       (get-clonefunction-using-metasheep (sheep-metasheep sheep) sheep property-name)))
-(defun std-get-clonefunction (the-sheep property-name)
-  (loop for sheep in (sheep-hierarchy-list sheep)
-       do (let ((clonefunction-table (sheep-direct-clonefunctions sheep)))
+(defun std-get-clonefunction (sheep property-name)
+  (loop for obj in (sheep-hierarchy-list sheep)
+       do (let ((clonefunction-table (sheep-direct-clonefunctions obj)))
 	    (multiple-value-bind (value has-p)
-		(gethash property-name clonefunctions-table)
+		(gethash property-name clonefunction-table)
 	      (when has-p
-		(return-from std-get-clonefunctions value))))
-       finally *secret-unbound-value*))
+		(return-from std-get-clonefunction value))))
+       finally (return *secret-unbound-value*)))
 (defun (setf get-clonefunction) (new-value sheep property-name)
   (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
       (setf (std-get-clonefunction sheep property-name) new-value)
@@ -235,7 +238,7 @@
 
 ;; NOTE: the setf for this should really reinitialize the sheep
 (defun sheep-metasheep (sheep)
-  (get-property sheep 'metasheep))
+  (gethash 'metasheep sheep))
 (defun (setf sheep-metasheep) (new-mo sheep)
   (declare (ignore new-mo sheep))
   (error "Changing metasheeps is not supported right now"))
@@ -435,7 +438,7 @@
   (if (and (eql =standard-sheep-metasheep= (sheep-metasheep child))
 	   (eql =standard-sheep-metasheep= (sheep-metasheep new-parent)))
       (std-add-parent new-parent child)
-      (add-parent-using-metasheep
+      (add-parent-using-metasheeps
        (sheep-metasheep new-parent) (sheep-metasheep child)
        new-parent child)))
 (defun std-add-parent (new-parent child)
@@ -737,10 +740,16 @@
      (fmakunbound name)
      buzzword)))
 
+(defun canonize-buzzword-options (options)
+  (mapappend #'canonize-buzzword-option options))
+
+(defun canonize-buzzword-option (option)
+  (list `',(car option) `',(cadr option)))
+
 (defmacro defbuzzword (name &rest options)
   `(ensure-buzzword
     :name ',name
-    ,@(canonize-options options)))
+    ,@(canonize-buzzword-options options)))
 
 (defmacro undefbuzzword (name)
   `(undefine-buzzword
@@ -860,13 +869,9 @@
     (add-message-to-sheeple name message participants)))
 
 (defun ensure-message (name &rest all-keys
-		       &key
-		       qualifiers
-		       lambda-list
-		       participants
-		       function
-		       body
-		       (documentation ""))
+		       &key participants
+		       &allow-other-keys)
+  
   (when (not (find-buzzword name nil))
     (progn
       (warn 'style-warning)
@@ -880,6 +885,7 @@
 		       #'generate-sheep)
 		   (buzzword-message-metasheep buzzword)
 		   :name name
+		   :participants target-sheeple
 		   all-keys)))
     message))
 
@@ -911,9 +917,9 @@
        for sheep in sheeple
        for i upto (1- (length sheeple))
        do (let ((role (clone (role-metasheep)
-			(name name)
-			(position i)
-			(message-pointer message))))
+			((name name)
+			 (position i)
+			 (message-pointer message)))))
 		  (push role
 			(sheep-direct-roles sheep))))))
 

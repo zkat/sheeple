@@ -115,7 +115,7 @@
 	(error 'unbound-property))))
 
 (defun available-properties (sheep)
-  (if (eql (sheep-metaobject sheep) =standard-sheep-metasheep=)
+  (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
       (std-available-properties sheep)
       (available-properties-using-metasheep (sheep-metasheep sheep) sheep)))
 (defun std-available-properties (sheep)
@@ -126,7 +126,7 @@
       (append obj-keys (mapcar #'available-properties (sheep-direct-parents sheep)))))))
 
 (defun available-cloneforms (sheep)
-  (if (eql (sheep-metaobject sheep) =standard-sheep-metasheep=)
+  (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
       (std-available-cloneforms sheep)
       (available-cloneforms-using-metasheep (sheep-metasheep sheep) sheep)))
 (defun std-available-cloneforms (sheep)
@@ -428,11 +428,11 @@
 
 ;;; Inheritance setup
 (defun add-parent (new-parent child)
-  (if (and (eql =standard-sheep-metaobject= (sheep-metaobject child))
-	   (eql =standard-sheep-metaobject= (sheep-metaobject new-parent)))
+  (if (and (eql =standard-sheep-metasheep= (sheep-metasheep child))
+	   (eql =standard-sheep-metasheep= (sheep-metasheep new-parent)))
       (std-add-parent new-parent child)
-      (add-parent-using-metaobjects 
-       (sheep-metaobject new-parent) (sheep-metaobject child)
+      (add-parent-using-metasheeps 
+       (sheep-metasheep new-parent) (sheep-metasheep child)
        new-parent child)))
 (defun std-add-parent (new-parent child)
   (cond ((equal new-parent child)
@@ -455,11 +455,11 @@
 	 child)))
 
 (defun remove-parent (parent child)
-  (if (and (eql =standard-sheep-metaobject= (sheep-metaobject child))
-	   (eql =standard-sheep-metaobject= (sheep-metaobject new-parent)))
+  (if (and (eql =standard-sheep-metasheep= (sheep-metasheep child))
+	   (eql =standard-sheep-metasheep= (sheep-metasheep new-parent)))
       (std-remove-parent parent child)
-      (remove-parent-using-metaobjects
-       (sheep-metaobject parent) (sheep-metaobject child)
+      (remove-parent-using-metasheeps
+       (sheep-metasheep parent) (sheep-metasheep child)
        parent child)))
 (defun std-remove-parent (parent child)
   (setf (sheep-direct-parents child)
@@ -605,7 +605,7 @@
 ;;;
 ;;; Buzzwords
 ;;;
-(defparameter the-standard-buzzword-metaobject-form
+(defparameter the-standard-buzzword-metasheep-form
   '(clone ()
     ((name
       'buzzword-metasheep
@@ -674,9 +674,9 @@
 ) ; end buzzword table closure
 
 (defun available-messages (sheep)
-  (if (eql =standard-sheep-metaobject= (sheep-metaobject sheep))
+  (if (eql =standard-sheep-metasheep= (sheep-metasheep sheep))
       (std-available-messages sheep)
-      (available-messages-using-metaobject (sheep-metaobject sheep))))
+      (available-messages-using-metasheep (sheep-metasheep sheep))))
 
 (defun std-finalize-buzzword (buzzword)
   (let ((name (buzzword-name buzzword)))
@@ -740,10 +740,10 @@
 ;;;
 ;;; Messages
 ;;;
-(defparameter the-standard-message-metaobject-form
+(defparameter the-standard-message-metasheep-form
   '(clone ()
     ((name
-      'standard-message-metaobject
+      'standard-message-metasheep
       :cloneform 'standard-message)
      (buzzword
       nil
@@ -764,13 +764,13 @@
       nil
       :cloneform (lambda () nil))
      (documentation
-      "standard message metaobject"
+      "standard message metasheep"
       :cloneform ""))))
 
-(defparameter the-standard-role-metaobject-form
+(defparameter the-standard-role-metasheep-form
   '(clone ()
     ((name
-      'standard-role-metaobject
+      'standard-role-metasheep
       :cloneform 'standard-role)
      (position
       0
@@ -1247,11 +1247,21 @@
        (values sheep nil)))
 
 ;;;
+;;; Now we create the buzzword, message, and role metasheeps
+;;;
+(defvar =standard-buzzword-metasheep=
+  (eval the-standard-buzzword-metasheep-form))
+(defvar =standard-message-metasheep=
+  (eval the-standard-message-metasheep-form))
+(defvar =standard-role-metasheep=
+  (eval the-standard-role-metasheep-form))
+
+;;;
 ;;; Safe to define buzzwords and messages now, as well as use CLONE normally
 ;;;
 (defbuzzword sheep-p-using-sheep)
 (defmessage sheep-p-using-sheep (sheep)
-)
+  (std-sheep-object-p sheep))
 
 (defbuzzword print-sheep
     (:documentation "Defines the expression print-object uses."))

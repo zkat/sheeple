@@ -206,7 +206,7 @@
       (when (not (null common))
         (return-from std-tie-breaker-rule (car common))))))
 
-(defparameter the-standards-sheep-metasheep-form
+(defparameter the-standard-sheep-metasheep-form
   '(clone ()
     ((metasheep
       =standard-sheep-metasheep=
@@ -289,11 +289,12 @@
 ;;;
 
 ;;; sheep storage
-(defun std-generate-sheep-instance ()
+(defun std-generate-sheep-instance ((metasheep =standard-sheep-metasheep=))
   "Ex Nihilo creation of a standard sheep instance."
   (let ((table (make-hash-table :test #'equal)))
     (setf (gethash *secret-sheep-identifier* table)
 	  *secret-sheep-identifier*)
+    (setf (gethash 'metasheep table) metasheep)
     table))
 
 (defun std-sheep-object-p (sheep)
@@ -301,13 +302,18 @@
        (eql (gethash *secret-sheep-identifier* sheep)
 	    *secret-sheep-identifier*)))
 
-(defun std-generate-sheep (metasheep &key parents options &allow-other-keys)
+(defun sheep-p (sheep)
+  (if (and (std-sheep-object-p)
+	   (eql (sheep-metasheep sheep) =standard-sheep-metasheep))
+      t
+      (sheep-p-using-sheep sheep)))
+
+(defun generate-sheep-std-metasheep (metasheep &key parents options &allow-other-keys)
   (declare (ignore metasheep))
-  (let ((sheep (std-generate-sheep-instance)))
+  (let ((sheep (std-generate-sheep-instance metasheep)))
     ;; First we actually set up all the properties
     ;; The canonical required properties...
-    (setf (gethash sheep 'metasheep) =standard-sheep-metasheep=) ; (setf sheep-metasheep) is
-    (setf (sheep-direct-parents sheep) nil)                      ; unsupported right now
+    (setf (sheep-direct-parents sheep) nil)
     (setf (sheep-direct-properties sheep) (make-hash-table :test #'equal))
     (setf (sheep-direct-roles sheep) nil)
     (setf (sheep-direct-cloneforms sheep) nil)
@@ -331,7 +337,7 @@
 		    &allow-other-keys)
   "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
   (let ((sheep (apply (if (eql metasheep =standard-sheep-metasheep=)
-			  #'std-generate-sheep
+			  #'generate-sheep-std-metasheep
 			  #'generate-sheep
 			  metasheep sheeple properties all-keys))))
     sheep))
@@ -602,8 +608,14 @@
 (defparameter the-standard-buzzword-metaobject-form
   '(clone ()
     ((name
-      'buzzword-metaobject
+      'buzzword-metasheep
       :cloneform nil)
+     (message-metasheep
+      =standard-message-metasheep=
+      :cloneform =standard-message-metasheep=)
+     (role-metasheep
+      =standard-role-metasheep=
+      :cloneform =standard-role-metasheep=)
      (messages
       nil
       :cloneform nil)
@@ -612,19 +624,29 @@
       :cloneform ""))))
 
 (defun buzzword-name (buzzword)
-  (get-property 'name buzzword))
+  (get-property buzzword name))
 (defun (setf buzzword-name) (new-value buzzword)
-  (setf (get-property 'name buzzword) new-value))
+  (setf (get-property buzzword 'name) new-value))
+
+(defun buzzword-message-metasheep (buzzword)
+  (get-property buzzword 'message-metasheep))
+(defun (setf buzzword-message-metasheep) (new-value buzzword)
+  (setf (get-property buzzword 'message-metasheep) new-value))
+
+(defun buzzword-role-metasheep (buzzword)
+  (get-property buzzword 'role-metasheep))
+(defun (setf buzzword-role-metasheep) (new-value buzzword)
+  (setf (get-property buzzword 'role-metasheep) new-value))
 
 (defun buzzword-messages (buzzword)
-  (get-property 'messages buzzword))
+  (get-property buzzword 'messages))
 (defun (setf buzzword-messages) (new-value buzzword)
-  (setf (get-property 'messages buzzword) new-value))
+  (setf (get-property buzzword 'messages) new-value))
 
 (defun buzzword-documentation (buzzword)
-  (get-property 'documentation buzzword))
+  (get-property buzzword 'documentation))
 (defun (setf buzzword-documentation) (new-value buzzword)
-  (setf (get-property 'documentation buzzword) new-value))
+  (setf (get-property buzzword 'documentation) new-value))
 
 ;;;
 ;;; Buzzword definition
@@ -650,6 +672,51 @@
   (defun forget-buzzword (name)
     (remhash name buzzword-table))
 ) ; end buzzword table closure
+
+(defun available-messages (sheep)
+  (if (eql =standard-sheep-metaobject= (sheep-metaobject sheep))
+      (std-available-messages sheep)
+      (available-messages-using-metaobject (sheep-metaobject sheep))))
+
+(defun std-finalize-buzzword (buzzword)
+  (let ((name (buzzword-name buzzword)))
+    (when (fboundp name)
+     (warn 'clobbering-function-definition))
+    (setf (fdefinition name) (lambda (&rest args) (apply-buzzword name args)))))
+
+(define-condition clobbering-function-definition (warning) ())
+(defun generate-sheep-standard-buzzword (metasheep 
+					 &key name
+					 message-metasheep
+					 (documentation "") 
+					 &allow-other-keys)
+  (let (buzzword (clone (metasheep) 
+		   ((name name)
+		    (message-metasheep
+		     metasheep)
+		    (documentation documentation))))
+    (std-finalize-buzzword buzzword)
+    buzzword))
+
+(defun ensure-buzzword (name
+			&rest all-keys 
+			&key (buzzword-metasheep =standard-buzzword-metasheep=)
+			&key (message-metasheep =standard-message-metasheep=)
+			&key (role-metasheep =standard-role-metasheep=)
+			&allow-other-keys)
+  (if (find-buzzword name nil)
+      (find-buzzword name)
+      (let ((buzzword (apply (if (eql buzzword-metasheep =standard-buzzword-metasheep=)
+				 #'generate-sheep-standard-buzzword
+				 #'generate-sheep)
+			     buzzword-metasheep
+			     :name name
+			     :message-metasheep message-metasheep
+			     :role-metasheep role-metasheep
+			     all-keys)))
+	(setf (find-buzzword name) buzzword)
+	buzzword)))
+
 (defun undefine-buzzword (&key name)
   (let ((buzzword (find-buzzword name nil)))
     (when buzzword
@@ -661,29 +728,11 @@
      (fmakunbound name)
      buzzword)))
 
-(defun available-messages (sheep)
-  (if (eql =standard-sheep-metaobject= (sheep-metaobject sheep))
-      (std-available-messages sheep)
-      (available-messages-using-metaobject (sheep-metaobject sheep))))
-
-(define-condition clobbering-function-definition (warning) ())
-(defun ensure-buzzword (&key name documentation)
-  (if (find-buzzword name nil)
-      (find-buzzword name)
-      (let ((buzzword (make-instance 'standard-buzzword
-				     :name name
-				     :documentation documentation)))
-	(setf (find-buzzword name) buzzword)
-	(when (fboundp name)
-	  (warn 'clobbering-function-definition))
-	(setf (fdefinition name) (lambda (&rest args) (apply-buzzword name args)))
-	buzzword)))
-
-;; TODO: This should take options instead of just a docstring, at some point
-(defmacro defbuzzword (name &optional (docstring ""))
+(defmacro defbuzzword (name &rest options)
   `(ensure-buzzword
     :name ',name
-    :documentation ,docstring))
+    ,@(canonize-options options)))
+
 (defmacro undefbuzzword (name)
   `(undefine-buzzword
     :name ',name))
@@ -696,6 +745,9 @@
     ((name
       'standard-message-metaobject
       :cloneform 'standard-message)
+     (buzzword
+      nil
+      :cloneform nil)
      (qualifiers
       nil
       :cloneform nil)
@@ -727,26 +779,117 @@
       nil
       :cloneform nil))))
 
-(defun ensure-message (&key name qualifiers lambda-list participants function body)
+(defun message-name (message)
+  (get-property message 'name))
+(defun (setf message-name) (new-value message)
+  (setf (get-property message 'name) new-value))
+(defun message-buzzword (message)
+  (get-property message 'buzzword))
+(defun (setf message-buzzword) (new-value message)
+  (setf (get-property message 'buzzword) new-value))
+(defun message-qualifiers (message)
+  (get-property message 'qualifiers))
+(defun (setf message-qualifiers) (new-value message)
+  (setf (get-property message 'qualifiers) new-value))
+(defun message-lambda-list (message)
+  (get-property message 'lambda-list))
+(defun (setf message-lambda-list) (new-value message)
+  (setf (get-property message 'lambda-list) new-value))
+(defun message-participants (message)
+  (get-property message 'participants))
+(defun (setf message-participants) (new-value message)
+  (setf (get-property message 'participants) new-value))
+(defun message-body (message)
+  (get-property message 'body))
+(defun (setf message-body) (new-value message)
+  (setf (get-property message 'body) new-value))
+(defun message-function (message)
+  (get-property message 'function))
+(defun (setf message-function) (new-value message)
+  (setf (get-property message 'function) new-value))
+(defun message-documentation (message)
+  (get-property message 'documentation))
+(defun (setf message-documentation) (new-value message)
+  (setf (get-property message 'documentation) new-value))
+
+(defun generate-sheep-standard-message (metasheep
+					&key name
+					buzzword
+					qualifiers
+					lambda-list
+					participants
+					function
+					body
+					(documentation ""))
+  (let ((message (clone (=standard-message-metasheep=)
+			((name name)
+			 (buzzword buzzword)
+			 (qualifiers qualifiers)
+			 (lambda-list lambda-list)
+			 (participants participants)
+			 (function function)
+			 (body body)
+			 (documentation documentation)))))
+    (add-message-to-buzzword message buzzword)
+    (remove-messages-with-name-qualifiers-and-participants name qualifiers target-sheeple)
+    (add-message-to-sheeple name message target-sheeple)))
+
+(defun ensure-message (name &rest all-keys)
   (when (not (find-buzzword name nil))
     (progn
       (warn 'style-warning)
       (ensure-buzzword
        :name name)))
-  (let* ((target-sheeple (sheepify-list participants))
-	 (message (make-instance 'standard-message
-				 :name name
-				 :qualifiers qualifiers
-				 :lambda-list lambda-list
-				 :participants participants
-				 :body body
-				 :function function)))
-    (add-message-to-buzzword message (find-buzzword name))
-    (remove-messages-with-name-qualifiers-and-participants name qualifiers target-sheeple)
-    (add-message-to-sheeple name message target-sheeple)
+  (let* ((buzzword (find-buzzword name))
+	 (target-sheeple (sheepify-list participants))
+	 (message (apply
+		   (if (eql (sheep-metobject buzzword) =standard-buzzword-metasheep=)
+		       #'generate-sheep-standard-message
+		       #'generate-sheep
+		       (buzzword-message-metasheep buzzword)
+		       :name name
+		       :buzzword buzzword
+		       all-keys))))
     message))
+
+(defun add-message-to-buzzword (message buzzword)
+  (pushnew message (buzzword-messages buzzword)))
+
+(defun remove-messages-with-name-qualifiers-and-participants (name qualifiers participants)
+  (loop for sheep in participants
+       do (loop for role in (sheep-direct-roles sheep)
+	       do (when (and (equal name (role-name role))
+			     (equal participants
+				    (message-participants
+				     (message-pointer role)))
+			     (equal qualifiers
+				    (message-qualifiers
+				     (message-pointer role))))
+		    (delete-role role sheep)))))
+
+(defun delete-role (role sheep)
+  (setf (sheep-direct-roles sheep)
+	(remove role (sheep-direct-roles sheep)))
+  (setf (buzzword-messages (find-buzzword (role-name role)))
+	(remove (message-pointer role) (buzzword-messages (find-buzzword (role-name role))))))
+
+(defun add-message-to-sheeple (name message sheeple)
+  (let ((role-metasheep (buzzword-role-metasheep (find-buzzword name))))
+    (loop 
+       for sheep in sheeple
+       for i upto (1- (length sheeple))
+       do (push (clone (role-metasheep)
+		       (name name)
+		       (position i)
+		       (message-pointer message))
+		(sheep-direct-roles sheep)))))
+
+(defun undefine-message (&key name qualifiers participants)
+  (remove-messages-with-name-qualifiers-and-participants name qualifiers participants))
+
 ;; TODO
 ;(defun find-message (selector qualifiers participants &optional (errorp t)))
+
 (defun add-readers-to-sheep (readers prop-name sheep)
   (loop for reader in readers
      do (ensure-buzzword :name reader)
@@ -1010,9 +1153,9 @@
     object))
 
 (defvar =t=
-  (let ((obj (std-generate-sheep =standard-sheep-metasheep=
-				 :parents nil
-				 :options nil)))
+  (let ((obj (generate-sheep-std-metasheep =standard-sheep-metasheep=
+					   :parents nil
+					   :options nil)))
     (setf (get-property obj 'nickname) "=t=")
     obj))
 
@@ -1021,8 +1164,7 @@
 	 ()
 	 (:nickname "=dolly=")))
 
-(setf (sheep-direct-parents =standard-sheep-metasheep=)
-      (list =dolly=))
+(add-parent =dolly= =standard-sheep-metasheep=)
 
 ;;; Wolves and wolf-handling
 (defvar =white-fang= (clone (=t=) () (:nickname "=white-fang=")))
@@ -1107,9 +1249,96 @@
 ;;;
 ;;; Safe to define buzzwords and messages now, as well as use CLONE normally
 ;;;
-(defbuzzword print-sheep "Defines the expression print-object uses.")
+(defbuzzword sheep-p-using-sheep)
+(defmessage sheep-p-using-sheep (sheep)
+)
+
+(defbuzzword print-sheep
+    (:documentation "Defines the expression print-object uses."))
 (defmessage print-sheep (sheep stream)
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Standard Sheep SID: ~a~@[ AKA: ~a~]" (sid sheep) (sheep-nickname sheep))))
-(defmethod print-object ((sheep standard-sheep) stream)
-  (print-sheep sheep stream))
+(defmethod print-object :around (sheep stream)
+  (if (sheep-p sheep)
+      (print-sheep sheep stream)
+      (call-next-method)))
+
+;;; Property access again
+(defbuzzword get-property-using-metasheep)
+(defmessage get-property-using-metasheep ((metasheep =standard-sheep-metasheep=) sheep property-name)
+  (declare (ignore metasheep))
+  (std-get-property sheep property-name))
+
+(defbuzzword setf-get-property-using-metasheep
+    (:documentation "Sets the property, dispatching on the metasheep."))
+(defmessage setf-get-property-using-metasheep (new-value
+					       (metasheep =standard-sheep-metasheep=) 
+					       sheep property-name)
+  (declare (ignore metasheep))
+  (setf (std-get-property sheep property-name) new-value))
+
+
+(defbuzzword get-cloneform-using-metasheep)
+(defmessage get-cloneform-using-metasheep ((metasheep =standard-sheep-metasheep=) sheep property-name)
+  (declare (ignore metasheep))
+  (std-get-cloneform sheep property-name))
+
+(defbuzzword setf-get-cloneform-using-metasheep
+    (:documentation "Sets the cloneform, dispatching on the metasheep."))
+(defmessage setf-get-cloneform-using-metasheep (new-value
+					       (metasheep =standard-sheep-metasheep=) 
+					       sheep property-name)
+  (declare (ignore metasheep))
+  (setf (std-get-cloneform sheep property-name) new-value))
+
+(defbuzzword get-clonefunction-using-metasheep)
+(defmessage get-clonefunction-using-metasheep ((metasheep =standard-sheep-metasheep=) sheep property-name)
+  (declare (ignore metasheep))
+  (std-get-clonefunction sheep property-name))
+
+(defbuzzword setf-get-clonefunction-using-metasheep
+    (:documentation "Sets the clonefunction, dispatching on the metasheep."))
+(defmessage setf-get-clonefunction-using-metasheep (new-value
+					       (metasheep =standard-sheep-metasheep=) 
+					       sheep property-name)
+  (declare (ignore metasheep))
+  (setf (std-get-clonefunction sheep property-name) new-value))
+
+(defbuzzword remove-property-using-metasheep
+    (:documentation "Locally removes the specified property"))
+(defmessage remove-property-using-metasheep ((metasheep =standard-sheep-metasheep=)
+					     sheep property-name)
+  (declare (ignore metasheep))
+  (std-remove-property sheep property-name))
+
+(defbuzzword has-direct-property-p-using-metasheep
+    (:documentation "Returns T if the specified property is present locally."))
+(defmessage has-direct-property-p-using-metasheep ((metasheep =standard-sheep-metasheep=)
+						   sheep property-name)
+  (declare (ignore metasheep))
+  (std-has-direct-property-p sheep property-name))
+
+(defbuzzword who-sets-using-metasheep
+    (:documentation "Returns the sheep object that SHEEP inherits the property-value from."))
+(defmessage who-sets-using-metasheep ((metasheep =standard-sheep-metasheep=)
+				      sheep property-name)
+  (declare (ignore metasheep))
+  (std-who-sets sheep property-name))
+
+(defbuzzword available-properties-using-metasheep
+    (:documentation "Returns a list of symbols of available properties."))
+(defmessage available-properties-using-metasheep ((metasheep =standard-sheep-metasheep=)
+						  sheep)
+  (declare (ignore metasheep))
+  (std-available-properties sheep))
+
+(defbuzzword available-cloneforms-using-metasheep
+    (:documentation "Returns a list of symbols of available cloneforms."))
+(defmessage available-cloneforms-using-metasheep ((metasheep =standard-sheep-metasheep=)
+						  sheep)
+  (declare (ignore metasheep))
+  (std-available-cloneforms sheep))
+
+;;; lol i dunno
+(defbuzzword generate-sheep
+    (:documentation "Creates a new sheep object."))

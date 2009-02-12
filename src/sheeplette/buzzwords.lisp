@@ -1,7 +1,8 @@
+;; buzzwords.lisp
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeplette)
-;;;
-;;; Buzzwords
-;;;
+
 (defparameter the-standard-buzzword-metasheep-form
   '(clone ()
     ((name

@@ -1,7 +1,8 @@
+;; message-generation.lisp
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeplette)
-;;;
-;;; Messages
-;;;
+
 (defparameter the-standard-message-metasheep-form
   '(clone ()
     ((name

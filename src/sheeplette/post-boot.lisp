@@ -1,6 +1,7 @@
-;;;
-;;; Safe to define buzzwords and messages now, as well as use CLONE normally
-;;;
+;; post-boot.lisp
+;;
+;; Once sheeplette is booted up, we can define buzzwords/messages normally
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defbuzzword sheep-p-using-sheep)
 (defmessage sheep-p-using-sheep (sheep)
   (std-sheep-object-p sheep))

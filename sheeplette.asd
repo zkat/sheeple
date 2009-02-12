@@ -9,17 +9,17 @@
   ((:module src
 	    :serial t
 	    :components
-	    ((:file "trivial-garbage")
-	     (:module sheeplette
-		      :serial t
-		      :components
-		      ((:file "packages")
-		       (:file "utils")
-		       (:file "property-access")
-		       (:file "sheep-creation")
-		       (:file "buzzwords")
-		       (:file "message-generation")
-		       (:file "message-dispatch")
-		       (:file "bootstrap")
-		       (:file "post-boot")))))))
+	    ((:file "trivial-garbage")))
+   (:module sheeplette
+	    :serial t
+	    :components
+	    ((:file "packages")
+	     (:file "utils")
+	     (:file "property-access")
+	     (:file "sheep-creation")
+	     (:file "buzzwords")
+	     (:file "message-generation")
+	     (:file "message-dispatch")
+	     (:file "bootstrap")
+	     (:file "post-boot")))))
 

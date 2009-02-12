@@ -15,4 +15,11 @@
 		      :components
 		      ((:file "packages")
 		       (:file "utils")
-		       (:file "sheeplette")))))))
+		       (:file "property-access")
+		       (:file "sheep-creation")
+		       (:file "buzzwords")
+		       (:file "message-generation")
+		       (:file "message-dispatch")
+		       (:file "bootstrap")
+		       (:file "post-boot")))))))
+

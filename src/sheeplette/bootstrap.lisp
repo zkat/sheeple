@@ -1,3 +1,33 @@
+;; bootstrap.lisp
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(in-package :sheeplette)
+
+;; These are what reinitializing metasheep is for...
+;; (defun set-up-standard-sheep-metasheep-cloneforms (cloneform-table)
+;;   (setf (gethash 'metasheep cloneform-table) '=standard-sheep-metasheep=)
+;;   (setf (gethash 'nickname cloneform-table) 'nil)
+;;   (setf (gethash 'parents cloneform-table) 'nil)
+;;   (setf (gethash 'children cloneform-table) 'nil)
+;;   (setf (gethash 'properties cloneform-table) '(make-hash-table :test #'equal))
+;;   (setf (gethash 'property-owners cloneform-table) '(make-weak-hash-table :weakness :value :test #'equal))
+;;   (setf (gethash 'roles cloneform-table) 'nil)
+;;   (setf (gethash 'hierarchy-list cloneform-table) 'nil)
+;;   (setf (gethash 'cloneforms cloneform-table) '(make-hash-table :test #'equal))
+;;   (setf (gethash 'clonefunctions cloneform-table) '(make-hash-table :test #'equal)))
+
+;; (defun set-up-standard-sheep-metasheep-clonefunctions (clonefun-table)
+;;   (setf (gethash 'metasheep clonefun-table) (lambda () =standard-sheep-metasheep=))
+;;   (setf (gethash 'nickname clonefun-table) (lambda () nil))
+;;   (setf (gethash 'parents clonefun-table) (lambda () nil))
+;;   (setf (gethash 'children clonefun-table) (lambda () nil))
+;;   (setf (gethash 'properties clonefun-table) (lambda () (make-hash-table :test #'equal)))
+;;   (setf (gethash 'property-owners clonefun-table) (lambda () (make-weak-hash-table :weakness :value :test #'equal)))
+;;   (setf (gethash 'roles clonefun-table) (lambda () nil))
+;;   (setf (gethash 'hierarchy-list clonefun-table) (lambda () nil))
+;;   (setf (gethash 'cloneforms clonefun-table) (lambda () (make-hash-table :test #'equal)))
+;;   (setf (gethash 'clonefunctions clonefun-table) (lambda () (make-hash-table :test #'equal))))
+
 (defvar =standard-sheep-metasheep=
   (let ((object (make-hash-table :test #'equal)))
     (setf (gethash *secret-sheep-identifier* object) *secret-sheep-identifier*)
@@ -102,30 +132,4 @@
   (eval the-standard-message-metasheep-form))
 (defvar =standard-role-metasheep=
   (eval the-standard-role-metasheep-form))
-
-
-;; These are what reinitializing metasheep is for...
-;; (defun set-up-standard-sheep-metasheep-cloneforms (cloneform-table)
-;;   (setf (gethash 'metasheep cloneform-table) '=standard-sheep-metasheep=)
-;;   (setf (gethash 'nickname cloneform-table) 'nil)
-;;   (setf (gethash 'parents cloneform-table) 'nil)
-;;   (setf (gethash 'children cloneform-table) 'nil)
-;;   (setf (gethash 'properties cloneform-table) '(make-hash-table :test #'equal))
-;;   (setf (gethash 'property-owners cloneform-table) '(make-weak-hash-table :weakness :value :test #'equal))
-;;   (setf (gethash 'roles cloneform-table) 'nil)
-;;   (setf (gethash 'hierarchy-list cloneform-table) 'nil)
-;;   (setf (gethash 'cloneforms cloneform-table) '(make-hash-table :test #'equal))
-;;   (setf (gethash 'clonefunctions cloneform-table) '(make-hash-table :test #'equal)))
-
-;; (defun set-up-standard-sheep-metasheep-clonefunctions (clonefun-table)
-;;   (setf (gethash 'metasheep clonefun-table) (lambda () =standard-sheep-metasheep=))
-;;   (setf (gethash 'nickname clonefun-table) (lambda () nil))
-;;   (setf (gethash 'parents clonefun-table) (lambda () nil))
-;;   (setf (gethash 'children clonefun-table) (lambda () nil))
-;;   (setf (gethash 'properties clonefun-table) (lambda () (make-hash-table :test #'equal)))
-;;   (setf (gethash 'property-owners clonefun-table) (lambda () (make-weak-hash-table :weakness :value :test #'equal)))
-;;   (setf (gethash 'roles clonefun-table) (lambda () nil))
-;;   (setf (gethash 'hierarchy-list clonefun-table) (lambda () nil))
-;;   (setf (gethash 'cloneforms clonefun-table) (lambda () (make-hash-table :test #'equal)))
-;;   (setf (gethash 'clonefunctions clonefun-table) (lambda () (make-hash-table :test #'equal))))
 

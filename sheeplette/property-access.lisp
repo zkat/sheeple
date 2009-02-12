@@ -43,8 +43,8 @@
       (setf-get-property-using-metasheep 
        new-value (sheep-metasheep sheep) sheep property-name)))
 (defun (setf std-get-property) (new-value sheep property-name)
-  (setf (gethash property-name (gethash property-name sheep)) new-value)
-  (memoize-property-access sheep))
+  (let ((property-table (gethash 'properties sheep)))
+    (setf (gethash property-name property-table) new-value)))
 
 (defun get-cloneform (sheep property-name)
   (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)

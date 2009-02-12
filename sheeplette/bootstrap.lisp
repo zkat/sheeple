@@ -3,9 +3,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeplette)
 
-;; These are what reinitializing metasheep is for...
-;; (defun set-up-standard-sheep-metasheep-cloneforms (cloneform-table)
-;;   (setf (gethash 'metasheep cloneform-table) '=standard-sheep-metasheep=)
+;; ;; These are what reinitializing metasheep is for...
+;; (defun set-up-standard-cloneforms (cloneform-table)
 ;;   (setf (gethash 'nickname cloneform-table) 'nil)
 ;;   (setf (gethash 'parents cloneform-table) 'nil)
 ;;   (setf (gethash 'children cloneform-table) 'nil)
@@ -16,8 +15,7 @@
 ;;   (setf (gethash 'cloneforms cloneform-table) '(make-hash-table :test #'equal))
 ;;   (setf (gethash 'clonefunctions cloneform-table) '(make-hash-table :test #'equal)))
 
-;; (defun set-up-standard-sheep-metasheep-clonefunctions (clonefun-table)
-;;   (setf (gethash 'metasheep clonefun-table) (lambda () =standard-sheep-metasheep=))
+;; (defun set-up-standard-clonefunctions (clonefun-table)
 ;;   (setf (gethash 'nickname clonefun-table) (lambda () nil))
 ;;   (setf (gethash 'parents clonefun-table) (lambda () nil))
 ;;   (setf (gethash 'children clonefun-table) (lambda () nil))
@@ -32,16 +30,7 @@
   (let ((object (make-hash-table :test #'equal)))
     (setf (gethash *secret-sheep-identifier* object) *secret-sheep-identifier*)
     (setf (gethash 'metasheep object) object)
-    (setf (gethash 'nickname object) nil)
-    (setf (gethash 'parents object) nil)
-    (setf (gethash 'children object) nil)
-    (setf (gethash 'properties object) (make-hash-table :test #'equal))
-    (setf (gethash 'property-owners object) (make-weak-hash-table :weakness :value :test #'equal))
-    (setf (gethash 'roles object) nil)
-    (setf (gethash 'hierarchy-list object) nil)
     object))
-
-(std-finalize-sheep =standard-sheep-metasheep=)
 
 (defvar =t=
   (let ((sheep (std-generate-sheep-instance =standard-sheep-metasheep=)))
@@ -49,8 +38,8 @@
     (setf (gethash 'parents sheep) nil)
     (setf (gethash 'properties sheep) (make-hash-table :test #'equal))
     (setf (gethash 'roles sheep) nil)
-    (setf (gethash 'cloneforms sheep) nil)
-    (setf (gethash 'clonefunctions sheep) nil)
+    (setf (gethash 'cloneforms sheep) (make-hash-table :test #'equal))
+    (setf (gethash 'clonefunctions sheep) (make-hash-table :test #'equal))
     (setf (gethash 'children sheep) nil)
     (setf (gethash 'property-owners sheep) (make-weak-hash-table :weakness :value :test #'equal))
     (setf (gethash 'hierarchy-list sheep) nil)

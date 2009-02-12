@@ -33,49 +33,49 @@
 ;; NOTE: the setf for this should really reinitialize the sheep
 
 (defun sheep-nickname (sheep)
-  (get-property sheep 'nickname))
+  (gethash 'nickname sheep))
 (defun (setf sheep-nickname) (new-value sheep)
-  (setf (get-property sheep 'nickname) new-value))
+  (setf (gethash 'nickname sheep) new-value))
 
 (defun sheep-direct-parents (sheep)
-  (get-property sheep 'parents))
+  (gethash 'parents sheep))
 (defun (setf sheep-direct-parents) (new-value sheep)
-  (setf (get-property sheep 'parents) new-value))
+  (setf (gethash 'parents sheep) new-value))
 
 (defun sheep-direct-children (sheep)
-  (get-property sheep 'children))
+  (gethash 'children sheep))
 (defun (setf sheep-direct-children) (new-value sheep)
-  (setf (get-property sheep 'children) new-value))
+  (setf (gethash 'children sheep) new-value))
 
 (defun sheep-direct-properties (sheep)
-  (get-property sheep 'properties))
+  (gethash 'properties sheep))
 (defun (setf sheep-direct-properties) (new-value sheep)
-  (setf (get-property sheep 'properties) new-value))
+  (setf (gethash 'properties sheep) new-value))
 
 (defun sheep-direct-cloneforms (sheep)
-  (get-property sheep 'cloneforms))
+  (gethash 'cloneforms sheep))
 (defun (setf sheep-direct-cloneforms) (new-value sheep)
-  (setf (get-property sheep 'cloneforms) new-value))
+  (setf (gethash 'cloneforms sheep) new-value))
 
 (defun sheep-direct-clonefunctions (sheep)
-  (get-property sheep 'clonefunctions))
+  (gethash 'clonefunctions sheep))
 (defun (setf sheep-direct-clonefunctions) (new-value sheep)
-  (setf (get-property sheep 'clonefunctions) new-value))
+  (setf (gethash 'clonefunctions sheep) new-value))
 
 (defun sheep-property-owners (sheep)
-  (get-property sheep 'property-owners))
+  (gethash 'property-owners sheep))
 (defun (setf sheep-property-owners) (new-value sheep)
-  (setf (get-property sheep 'property-owners) new-value))
+  (setf (gethash 'property-owners sheep) new-value))
 
 (defun sheep-direct-roles (sheep)
-  (get-property sheep 'roles))
+  (gethash 'roles sheep))
 (defun (setf sheep-direct-roles) (new-value sheep)
-  (setf (get-property sheep 'roles) new-value))
+  (setf (gethash 'roles sheep) new-value))
 
 (defun sheep-hierarchy-list (sheep)
-  (get-property sheep 'hierarchy-list))
+  (gethash 'hierarchy-list sheep))
 (defun (setf sheep-hierarchy-list) (new-value sheep)
-  (setf (get-property sheep 'hierarchy-list) new-value))
+  (setf (gethash 'hierarchy-list sheep) new-value))
 
 ;;;
 ;;; Cloning
@@ -109,18 +109,18 @@
     (setf (sheep-direct-parents sheep) nil)
     (setf (sheep-direct-properties sheep) (make-hash-table :test #'equal))
     (setf (sheep-direct-roles sheep) nil)
-    (setf (sheep-direct-cloneforms sheep) nil)
-    (setf (sheep-direct-clonefunctions sheep) nil)
+    (setf (sheep-direct-cloneforms sheep) (make-hash-table :test #'equal))
+    (setf (sheep-direct-clonefunctions sheep) (make-hash-table :test #'equal))
     ;; Additional =standard-sheep-metasheep= properties
     (setf (sheep-nickname sheep) nil)
     (setf (sheep-direct-children sheep) nil)
     (setf (sheep-property-owners sheep) (make-weak-hash-table :weakness :value :test #'equal))
-    (setf (sheep-hierarchy-list) nil)
+    (setf (sheep-hierarchy-list sheep) nil)
     ;; Then we deal with the options
     (std-add-parents sheep parents)
     (std-execute-clonefunctions sheep)
     (std-set-up-properties sheep properties)
-    (std-set-up-options sheep options)
+    (set-up-other-options options sheep)
     (std-finalize-sheep sheep)
     sheep))
 
@@ -132,7 +132,10 @@
   (let ((sheep (apply (if (eql metasheep =standard-sheep-metasheep=)
 			  #'generate-sheep-std-metasheep
 			  #'generate-sheep)
-		      metasheep sheeple properties all-keys)))
+		      metasheep
+		      :parents sheeple 
+		      :properties properties
+		      all-keys)))
     sheep))
 
 (defun std-add-parents (sheep parents)
@@ -142,9 +145,9 @@
     (memoize-sheep-hierarchy-list sheep)
     sheep))
 
-(defun set-up-properties (sheep properties)
+(defun std-set-up-properties (sheep properties)
   (loop for property-list in properties
-     do (set-up-property property-list sheep)))
+     do (set-up-property sheep property-list)))
 (defun set-up-property (sheep property-list)
   (if (eql =standard-sheep-metasheep= (sheep-metasheep sheep))
       (std-set-up-property sheep property-list)

@@ -40,11 +40,22 @@
     (setf (gethash 'roles object) nil)
     (setf (gethash 'hierarchy-list object) nil)
     object))
+
 (std-finalize-sheep =standard-sheep-metasheep=)
+
 (defvar =t=
-  (let ((obj (std-generate-sheep-instance =standard-sheep-metasheep=)))
-    (setf (gethash 'nickname obj) "=t=")
-    obj))
+  (let ((sheep (std-generate-sheep-instance =standard-sheep-metasheep=)))
+    (setf (gethash 'nickname sheep) "=t=")
+    (setf (gethash 'parents sheep) nil)
+    (setf (gethash 'properties sheep) (make-hash-table :test #'equal))
+    (setf (gethash 'roles sheep) nil)
+    (setf (gethash 'cloneforms sheep) nil)
+    (setf (gethash 'clonefunctions sheep) nil)
+    (setf (gethash 'children sheep) nil)
+    (setf (gethash 'property-owners sheep) (make-weak-hash-table :weakness :value :test #'equal))
+    (setf (gethash 'hierarchy-list sheep) nil)
+    (std-finalize-sheep sheep)
+    sheep))
 
 (defvar =dolly= 
   (clone (=t=)

@@ -7,13 +7,13 @@
 (define-condition unbound-property (sheeple-error) ())
 
 (defun sheep-metasheep (sheep)
-  (gethash 'metasheep sheep))
+  (get-metasheep sheep))
 (defun (setf sheep-metasheep) (new-mo sheep)
   (declare (ignore new-mo sheep))
   (error "Changing metasheeps is not supported right now"))
 
 ;;;
-;;; Slot access
+;;; property access
 ;;;
 
 (defun get-property (sheep property-name)

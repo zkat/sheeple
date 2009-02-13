@@ -23,7 +23,16 @@
 (defun std-get-property (sheep property-name)
   (get-property-with-memoized-owner sheep property-name))
 
-;; This bitch
+(defun get-property-with-hierarchy-list (sheep property-name)
+  "Finds a property value under PROPERTY-NAME using a hierarchy list."
+  (let ((list (sheep-hierarchy-list sheep)))
+   (loop for sheep in list
+      do (multiple-value-bind (prop-obj has-p) 
+	     (%get-property-object sheep property-name)
+	   (when has-p
+	     (return-from get-property-with-hierarchy-list (%value prop-obj))))
+      finally (error 'unbound-property))))
+
 (defun get-property-with-memoized-owner (sheep property-name)
   ;; Find who the owner is...
   (multiple-value-bind (prop-owner has-p)

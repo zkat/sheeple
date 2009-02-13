@@ -87,3 +87,12 @@
 ;;   ;;TODO -- This could be useful for integrating with deftype and CLOS
 ;;   )
 
+(defun sheepify-list (obj-list)
+  "Converts OBJ-LIST to a list where each item is either a sheep or a fleeced wolf."
+  (mapcar #'sheepify obj-list))
+
+(defun sheepify (sheep)
+  "Returns SHEEP or fleeces it."
+   (if (not (sheep-p sheep))
+       (find-fleeced-wolf sheep)
+       (values sheep nil)))

@@ -32,50 +32,50 @@
 
 ;; NOTE: the setf for this should really reinitialize the sheep
 
-(defun sheep-nickname (sheep)
-  (gethash 'nickname sheep))
-(defun (setf sheep-nickname) (new-value sheep)
-  (setf (gethash 'nickname sheep) new-value))
+(defun metasheep-nickname (sheep)
+  (property-value sheep 'nickname))
+(defun (setf metasheep-nickname) (new-value sheep)
+  (setf (property-value sheep 'nickname) new-value))
 
-(defun sheep-direct-parents (sheep)
-  (gethash 'parents sheep))
-(defun (setf sheep-direct-parents) (new-value sheep)
-  (setf (gethash 'parents sheep) new-value))
+(defun metasheep-direct-parents (sheep)
+  (property-value sheep 'parents))
+(defun (setf metasheep-direct-parents) (new-value sheep)
+  (setf (property-value sheep 'parents) new-value))
 
-(defun sheep-direct-children (sheep)
-  (gethash 'children sheep))
-(defun (setf sheep-direct-children) (new-value sheep)
-  (setf (gethash 'children sheep) new-value))
+(defun metasheep-direct-children (sheep)
+  (property-value sheep 'children))
+(defun (setf metasheep-direct-children) (new-value sheep)
+  (setf (property-value sheep 'children) new-value))
 
-(defun sheep-direct-properties (sheep)
-  (gethash 'properties sheep))
-(defun (setf sheep-direct-properties) (new-value sheep)
-  (setf (gethash 'properties sheep) new-value))
+(defun metasheep-direct-properties (sheep)
+  (property-value 'properties sheep))
+(defun (setf metasheep-direct-properties) (new-value sheep)
+  (setf (property-value 'properties sheep) new-value))
 
-(defun sheep-direct-cloneforms (sheep)
-  (gethash 'cloneforms sheep))
-(defun (setf sheep-direct-cloneforms) (new-value sheep)
-  (setf (gethash 'cloneforms sheep) new-value))
+(defun metasheep-direct-cloneforms (sheep)
+  (property-value sheep 'cloneforms))
+(defun (setf metasheep-direct-cloneforms) (new-value sheep)
+  (setf (property-value sheep 'cloneforms) new-value))
 
-(defun sheep-direct-clonefunctions (sheep)
-  (gethash 'clonefunctions sheep))
-(defun (setf sheep-direct-clonefunctions) (new-value sheep)
-  (setf (gethash 'clonefunctions sheep) new-value))
+(defun metasheep-direct-clonefunctions (sheep)
+  (property-value sheep 'clonefunctions))
+(defun (setf metasheep-direct-clonefunctions) (new-value sheep)
+  (setf (property-value	sheep 'clonefunctions) new-value))
 
-(defun sheep-property-owners (sheep)
-  (gethash 'property-owners sheep))
-(defun (setf sheep-property-owners) (new-value sheep)
-  (setf (gethash 'property-owners sheep) new-value))
+(defun metasheep-property-owners (sheep)
+  (property-value sheep 'property-owners))
+(defun (setf metasheep-property-owners) (new-value sheep)
+  (setf (property-value sheep 'property-owners) new-value))
 
-(defun sheep-direct-roles (sheep)
-  (gethash 'roles sheep))
-(defun (setf sheep-direct-roles) (new-value sheep)
-  (setf (gethash 'roles sheep) new-value))
+(defun metasheep-direct-roles (sheep)
+  (property-value sheep 'roles))
+(defun (setf metasheep-direct-roles) (new-value sheep)
+  (setf (property-value sheep 'roles) new-value))
 
-(defun sheep-hierarchy-list (sheep)
-  (gethash 'hierarchy-list sheep))
-(defun (setf sheep-hierarchy-list) (new-value sheep)
-  (setf (gethash 'hierarchy-list sheep) new-value))
+(defun metasheep-hierarchy-list (sheep)
+  (property-value sheep 'hierarchy-list))
+(defun (setf metasheep-hierarchy-list) (new-value sheep)
+  (setf (property-value sheep 'hierarchy-list) new-value))
 
 ;;;
 ;;; Cloning
@@ -101,7 +101,7 @@
       t
       (sheep-p-using-sheep sheep)))
 
-(defun generate-sheep-std-metasheep (metasheep &key parents properties options &allow-other-keys)
+(defun spawn-sheep-std-metasheep (metasheep &key parents properties options &allow-other-keys)
   (declare (ignore metasheep))
   (let ((sheep (std-generate-sheep-instance =standard-sheep-metasheep=)))
     ;; First we actually set up all the properties
@@ -130,8 +130,8 @@
 		    &allow-other-keys)
   "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
   (let ((sheep (apply (if (eql metasheep =standard-sheep-metasheep=)
-			  #'generate-sheep-std-metasheep
-			  #'generate-sheep)
+			  #'spawn-sheep-std-metasheep
+			  #'spawn-sheep-using-metasheep)
 		      metasheep
 		      :parents sheeple 
 		      :properties properties

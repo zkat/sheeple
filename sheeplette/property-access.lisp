@@ -16,24 +16,24 @@
 ;;; property access
 ;;;
 
-(defun get-property (sheep property-name)
+(defun property-value (sheep property-name)
   (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
-      (std-get-property sheep property-name)
-      (get-property-using-metasheep (sheep-metasheep sheep) sheep property-name)))
-(defun std-get-property (sheep property-name)
-  (get-property-with-memoized-owner sheep property-name))
+      (std-property-value sheep property-name)
+      (property-value-using-metasheep (sheep-metasheep sheep) sheep property-name)))
+(defun std-property-value (sheep property-name)
+  (property-value-with-memoized-owner sheep property-name))
 
-(defun get-property-with-hierarchy-list (sheep property-name)
+(defun property-value-with-hierarchy-list (sheep property-name)
   "Finds a property value under PROPERTY-NAME using a hierarchy list."
   (let ((list (sheep-hierarchy-list sheep)))
    (loop for sheep in list
       do (multiple-value-bind (prop-obj has-p) 
-	     (%get-property-object sheep property-name)
+	     (%property-value-object sheep property-name)
 	   (when has-p
-	     (return-from get-property-with-hierarchy-list (%value prop-obj))))
+	     (return-from property-value-with-hierarchy-list (%value prop-obj))))
       finally (error 'unbound-property))))
 
-(defun get-property-with-memoized-owner (sheep property-name)
+(defun property-value-with-memoized-owner (sheep property-name)
   ;; Find who the owner is...
   (multiple-value-bind (prop-owner has-p)
       (gethash property-name (gethash 'property-owners sheep))
@@ -46,12 +46,12 @@
 	      (error 'unbound-property)))
 	(error 'unbound-property))))
 
-(defun (setf get-property) (new-value sheep property-name)
+(defun (setf property-value) (new-value sheep property-name)
   (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
-      (setf (std-get-property sheep property-name) new-value)
-      (setf-get-property-using-metasheep 
+      (setf (std-property-value sheep property-name) new-value)
+      (setf-property-value-using-metasheep 
        new-value (sheep-metasheep sheep) sheep property-name)))
-(defun (setf std-get-property) (new-value sheep property-name)
+(defun (setf std-property-value) (new-value sheep property-name)
   (let ((property-table (gethash 'properties sheep)))
     (setf (gethash property-name property-table) new-value)))
 
@@ -108,7 +108,7 @@
 (defun has-property-p (sheep property-name)
   "Returns T if a property with PROPERTY-NAME is available to SHEEP."
   (handler-case
-      (when (get-property sheep property-name)
+      (when (property-value sheep property-name)
 	t)
     (unbound-property () nil)))
 
@@ -159,18 +159,18 @@
 ;;; Memoization
 (defun memoize-property-access (sheep)
   (loop for property in (available-properties sheep)
-     do (let ((owner (%get-property-owner sheep property)))
+     do (let ((owner (%property-value-owner sheep property)))
 	  (setf (gethash property (gethash 'property-owners sheep))
 		owner))))
 
-(defun %get-property-owner (sheep property-name)
+(defun %property-value-owner (sheep property-name)
   (let ((hierarchy-list (gethash 'hierarchy-list sheep)))
     (loop for sheep-obj in hierarchy-list
        do (multiple-value-bind (value has-p)
 	      (gethash property-name sheep-obj)
 	    (declare (ignore value))
 	    (when has-p
-	      (return-from %get-property-owner sheep-obj))) 
+	      (return-from %property-value-owner sheep-obj))) 
        finally (error 'unbound-property))))
 
 (defun memoize-sheep-hierarchy-list (sheep)

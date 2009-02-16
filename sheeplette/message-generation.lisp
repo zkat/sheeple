@@ -230,7 +230,9 @@
 			      args)
 			  (cdr next-messages))))
 	  (declare (ignorable #'next-message-p #'call-next-message))
-	  ,@body)) args)))
+	  (funcall 
+	   (lambda ()
+	     ,@body)))) args)))
 
 (defun parse-defmessage (args)
   (let ((name (car args))

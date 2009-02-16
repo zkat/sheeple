@@ -7,17 +7,25 @@
 (define-condition unbound-property (sheeple-error) ())
 
 (defun sheep-metasheep (sheep)
-  (get-metasheep sheep))
-(defun (setf sheep-metasheep) (new-mo sheep)
-  (declare (ignore new-mo sheep))
+  (gethash 'metasheep sheep))
+
+(defun (setf sheep-metasheep) (new-value sheep)
+  (declare (ignore new-value sheep))
   (error "Changing metasheeps is not supported right now"))
+
+(defun std-metasheep-p (sheep)
+  (and (hash-table-p sheep)
+       (or (eql sheep =standard-sheep-metasheep=)
+	   (eql (gethash 'parents sheep) (list =standard-sheep-metasheep=)))
+       (eql (gethash 'metasheep sheep)
+	    nil)))
 
 ;;;
 ;;; property access
 ;;;
 
 (defun property-value (sheep property-name)
-  (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
+  (if (std-metasheep-p sheep)
       (std-property-value sheep property-name)
       (property-value-using-metasheep (sheep-metasheep sheep) sheep property-name)))
 (defun std-property-value (sheep property-name)
@@ -47,7 +55,7 @@
 	(error 'unbound-property))))
 
 (defun (setf property-value) (new-value sheep property-name)
-  (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
+  (if (std-metasheep-p sheep)
       (setf (std-property-value sheep property-name) new-value)
       (setf-property-value-using-metasheep 
        new-value (sheep-metasheep sheep) sheep property-name)))
@@ -56,7 +64,7 @@
     (setf (gethash property-name property-table) new-value)))
 
 (defun get-cloneform (sheep property-name)
-  (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
+  (if (std-metasheep-p sheep)
       (std-get-cloneform sheep property-name)
       (get-cloneform-using-metasheep (sheep-metasheep sheep) sheep property-name)))
 (defun std-get-cloneform (sheep property-name)
@@ -69,7 +77,7 @@
        finally (return *secret-unbound-value*)))
 
 (defun (setf get-cloneform) (new-value sheep property-name)
-  (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
+  (if (std-metasheep-p sheep)
       (setf (std-get-cloneform sheep property-name) new-value)
       (setf-get-cloneform-using-metasheep
        new-value (sheep-metasheep sheep) sheep property-name)))
@@ -77,7 +85,7 @@
   (setf (gethash property-name (gethash 'cloneforms sheep)) new-value))
 
 (defun get-clonefunction (sheep property-name)
-  (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
+  (if (std-metasheep-p sheep)
       (std-get-clonefunction sheep property-name)
       (get-clonefunction-using-metasheep (sheep-metasheep sheep) sheep property-name)))
 (defun std-get-clonefunction (sheep property-name)
@@ -90,7 +98,7 @@
        finally (return *secret-unbound-value*)))
 
 (defun (setf get-clonefunction) (new-value sheep property-name)
-  (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
+  (if (std-metasheep-p sheep)
       (setf (std-get-clonefunction sheep property-name) new-value)
       (setf-get-clonefunction-using-metasheep
        new-value (sheep-metasheep sheep) sheep property-name)))
@@ -98,7 +106,7 @@
   (setf (gethash property-name (gethash 'clonefunctions sheep)) new-value))
 
 (defun remove-property (sheep property-name)
-  (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
+  (if (std-metasheep-p sheep)
       (std-remove-property sheep property-name)
       (remove-property-using-metasheep (sheep-metasheep sheep) sheep property-name)))
 (defun std-remove-property (sheep property-name)
@@ -113,7 +121,7 @@
     (unbound-property () nil)))
 
 (defun has-direct-property-p (sheep property-name)
-  (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
+  (if (std-metasheep-p sheep)
       (std-has-direct-property-p sheep property-name)
       (has-direct-property-p-using-metasheep 
        (sheep-metasheep sheep) sheep property-name)))
@@ -124,7 +132,7 @@
     has-p))
 
 (defun who-sets (sheep property-name)
-  (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
+  (if (std-metasheep-p sheep)
       (std-who-sets sheep property-name)
       (who-sets-using-metasheep (sheep-metasheep sheep) sheep property-name)))
 (defun std-who-sets (sheep property-name)
@@ -135,7 +143,7 @@
 	(error 'unbound-property))))
 
 (defun available-properties (sheep)
-  (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
+  (if (std-metasheep-p sheep)
       (std-available-properties sheep)
       (available-properties-using-metasheep (sheep-metasheep sheep) sheep)))
 (defun std-available-properties (sheep)
@@ -146,7 +154,7 @@
       (append obj-keys (mapcar #'available-properties (gethash 'parents sheep)))))))
 
 (defun available-cloneforms (sheep)
-  (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
+  (if (std-metasheep-p sheep)
       (std-available-cloneforms sheep)
       (available-cloneforms-using-metasheep (sheep-metasheep sheep) sheep)))
 (defun std-available-cloneforms (sheep)

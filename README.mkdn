@@ -320,18 +320,18 @@ sheep's inheritance chain. The value of that ancestor's property is used instead
 
 * When accessing indirect properties, the hierarchy list ordering is obeyed.
 
-* The function GET-PROPERTY receives two arguments: a sheep object and a property-name. It returns
+* The function PROPERTY-VALUE receives two arguments: a sheep object and a property-name. It returns
   the value of that property, and searches indirect properties. There is no user-level function for
   only getting the direct property value of a sheep. Signals a condition of type UNBOUND-PROPERTY if
   there is no binding, direct or indirect, for that property-name.
 
-        (get-property *sample-sheep* 'foo)
+        (property-value *sample-sheep* 'foo)
 
 
-* The function (SETF GET-PROPERTY) sets a direct property on a sheep. If the property did not exist,
+* The function (SETF PROPERTY-VALUE) sets a direct property on a sheep. If the property did not exist,
   it adds it, and it changes it if it did. Returns the new value.
 
-        (setf (get-property *sample-sheep* 'foo) 'bar)
+        (setf (property-value *sample-sheep* 'foo) 'bar)
 
 
 * The function HAS-DIRECT-PROPERTY-P returns T if a direct property was set on sheep, and NIL
@@ -363,7 +363,7 @@ sheep's inheritance chain. The value of that ancestor's property is used instead
 * The function AVAILABLE-PROPERTIES receives a SHEEP, and returns a list of available bound
   property keys for SHEEP. An empty list is returned if SHEEP has no available bound properties.
 
-        (setf (get-property *sample-sheep* 'baz) 'quux)
+        (setf (property-value *sample-sheep* 'baz) 'quux)
         (available-properties *sample-sheep*) ==> (BAZ)
 
 
@@ -448,16 +448,16 @@ CLOS programming should have a fairly easy time wrapping their head around Sheep
         (var =test-sheep=) => "value"
          
         (defmessage var :before ((sheep =test-sheep=))
-          (setf (get-property sheep 'var) "new-value"))
+          (setf (property-value sheep 'var) "new-value"))
         (var =test-sheep=) => "new-value"
         (setf (var =test-sheep=) "old-value")
-        (get-property =test-sheep= 'var) => "old-value"
+        (property-value =test-sheep= 'var) => "old-value"
         (var =test-sheep=) => "new-value"
 
         (defmessage var :after ((sheep =test-sheep=))
-          (setf (get-property sheep 'var) "after-value"))
+          (setf (property-value sheep 'var) "after-value"))
         (var =test-sheep=) => "new-value"
-        (get-property =test-sheep= 'var) => "after-value"
+        (property-value =test-sheep= 'var) => "after-value"
 
 * UNDEFBUZZWORD completely undefines a buzzword, removing all messages and making the function
   unbound.

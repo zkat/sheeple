@@ -127,3 +127,7 @@
   (declare (ignore message))
   t)
 
+(defbuzzword available-messages-using-metasheep)
+(defmessage available-messages-using-metasheep ((metasheep =standard-sheep-metasheep=) sheep)
+  (declare (ignore metasheep))
+  (std-available-messages sheep))

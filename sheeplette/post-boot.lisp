@@ -25,18 +25,18 @@
     (format stream "Standard Message: ~a" (message-name sheep))))
 
 ;;; Property access again
-(defbuzzword get-property-using-metasheep)
-(defmessage get-property-using-metasheep ((metasheep =standard-sheep-metasheep=) sheep property-name)
+(defbuzzword property-value-using-metasheep)
+(defmessage property-value-using-metasheep ((metasheep =standard-sheep-metasheep=) sheep property-name)
   (declare (ignore metasheep))
-  (std-get-property sheep property-name))
+  (std-property-value sheep property-name))
 
-(defbuzzword setf-get-property-using-metasheep
+(defbuzzword setf-property-value-using-metasheep
     (:documentation "Sets the property, dispatching on the metasheep."))
-(defmessage setf-get-property-using-metasheep (new-value
+(defmessage setf-property-value-using-metasheep (new-value
 					       (metasheep =standard-sheep-metasheep=) 
 					       sheep property-name)
   (declare (ignore metasheep))
-  (setf (std-get-property sheep property-name) new-value))
+  (setf (std-property-value sheep property-name) new-value))
 
 
 (defbuzzword get-cloneform-using-metasheep)

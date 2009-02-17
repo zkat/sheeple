@@ -128,7 +128,7 @@
     table))
 
 (defun std-spawn-sheep (metasheep-prototype 
-				  &key parents properties options 
+				  &key parents properties nickname
 				  &allow-other-keys)
   (declare (ignore metasheep-prototype))
   (let ((sheep (std-generate-sheep-instance nil)))
@@ -148,9 +148,12 @@
     (std-add-parents sheep parents)
     (std-execute-clonefunctions sheep)
     (std-set-up-properties sheep properties)
-    (set-up-other-options options sheep)
+    (std-set-nickname sheep nickname)
     (std-finalize-sheep sheep)
     sheep))
+
+(defun std-set-nickname (sheep nickname)
+  (setf (gethash 'nickname sheep) nickname))
 
 (defun spawn-sheep (sheeple properties
 		    &rest all-keys
@@ -208,14 +211,6 @@
 	    (setf (property-value sheep propname) (funcall fn))))))
 
 (define-condition invalid-option-error (sheeple-error) ())
-(defun set-up-other-options (options sheep)
-  (loop for option in options
-     do (set-up-option option sheep)))
-(defun set-up-option (sheep option)
-  (if (std-sheep-p)
-      (std-set-up-option sheep option)
-      (set-up-option-using-metasheep
-       (sheep-metasheep sheep) sheep option)))
 (defun std-set-up-option (sheep option)
   (let ((option (car option))
 	(value (cadr option)))
@@ -409,7 +404,7 @@
   (mapappend #'canonize-clone-option options))
 
 (defun canonize-clone-option (option)
-  (list `',(car option) `',(cadr option)))
+  (list `',(car option) (cadr option)))
 
 ;;; Inheritance predicates
 (defun direct-parent-p (maybe-parent child)

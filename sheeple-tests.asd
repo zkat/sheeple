@@ -1,16 +1,19 @@
-(asdf:defsystem sheeple-tests
+(asdf:defsystem sheeplette-tests
   :version "Baahh"
   :description "Clone-crazy hackery tool, unit tests."
   :maintainer "Josh Marchan <sykopomp@sykosomatic.org>"
   :author "Josh <sykopomp@sykosomatic.org>"
   :licence "MIT"
-  :depends-on (:sheeple :fiveam)
+  :depends-on (:sheeplette :fiveam)
   :serial t
   :components 
-  ((:module tests
+  ((:module sheeplette
 	    :serial t
 	    :components
-	    ((:file "packages")
-	     (:file "sheeple")
-	     (:file "compatibility")
-	     (:file "buzzwords")))))
+	    ((:module tests
+		      :serial t
+		      :components
+		      ((:file "packages")
+		       (:file "sheeple")
+		       (:file "compatibility")
+		       (:file "buzzwords")))))))

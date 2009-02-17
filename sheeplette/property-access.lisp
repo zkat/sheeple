@@ -20,8 +20,7 @@
     t))
 
 (defun std-sheep-p (sheep)
-  (and (hash-table-p sheep)
-       (std-sheep-object-p sheep)
+  (and (sheep-p sheep)
        (eql (sheep-metasheep sheep)
 	    nil)))
 
@@ -180,7 +179,7 @@
   (let ((hierarchy-list (gethash 'hierarchy-list sheep)))
     (loop for sheep-obj in hierarchy-list
        do (multiple-value-bind (value has-p)
-	      (gethash property-name sheep-obj)
+	      (gethash property-name (gethash 'properties sheep-obj))
 	    (declare (ignore value))
 	    (when has-p
 	      (return-from %property-value-owner sheep-obj))) 

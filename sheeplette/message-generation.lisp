@@ -31,37 +31,37 @@
       :cloneform ""))))
 
 (defun message-name (message)
-  (get-property message 'name))
+  (property-value message 'name))
 (defun (setf message-name) (new-value message)
-  (setf (get-property message 'name) new-value))
+  (setf (property-value message 'name) new-value))
 (defun message-buzzword (message)
-  (get-property message 'buzzword))
+  (property-value message 'buzzword))
 (defun (setf message-buzzword) (new-value message)
-  (setf (get-property message 'buzzword) new-value))
+  (setf (property-value message 'buzzword) new-value))
 (defun message-qualifiers (message)
-  (get-property message 'qualifiers))
+  (property-value message 'qualifiers))
 (defun (setf message-qualifiers) (new-value message)
-  (setf (get-property message 'qualifiers) new-value))
+  (setf (property-value message 'qualifiers) new-value))
 (defun message-lambda-list (message)
-  (get-property message 'lambda-list))
+  (property-value message 'lambda-list))
 (defun (setf message-lambda-list) (new-value message)
-  (setf (get-property message 'lambda-list) new-value))
+  (setf (property-value message 'lambda-list) new-value))
 (defun message-participants (message)
-  (get-property message 'participants))
+  (property-value message 'participants))
 (defun (setf message-participants) (new-value message)
-  (setf (get-property message 'participants) new-value))
+  (setf (property-value message 'participants) new-value))
 (defun message-body (message)
-  (get-property message 'body))
+  (property-value message 'body))
 (defun (setf message-body) (new-value message)
-  (setf (get-property message 'body) new-value))
+  (setf (property-value message 'body) new-value))
 (defun message-function (message)
-  (get-property message 'function))
+  (property-value message 'function))
 (defun (setf message-function) (new-value message)
-  (setf (get-property message 'function) new-value))
+  (setf (property-value message 'function) new-value))
 (defun message-documentation (message)
-  (get-property message 'documentation))
+  (property-value message 'documentation))
 (defun (setf message-documentation) (new-value message)
-  (setf (get-property message 'documentation) new-value))
+  (setf (property-value message 'documentation) new-value))
 
 (defparameter the-standard-role-metasheep-form
   '(clone ()
@@ -76,39 +76,39 @@
       :cloneform nil))))
 
 (defun role-name (role)
-  (get-property role 'name))
+  (property-value role 'name))
 (defun (setf role-name) (new-value role)
-  (setf (get-property role 'name) new-value))
+  (setf (property-value role 'name) new-value))
 
 (defun role-position (role)
-  (get-property role 'position))
+  (property-value role 'position))
 (defun (setf role-position) (new-value role)
-  (setf (get-property role 'position) new-value))
+  (setf (property-value role 'position) new-value))
 
 (defun message-pointer (role)
-  (get-property role 'message-pointer))
+  (property-value role 'message-pointer))
 (defun (setf message-pointer) (new-value role)
-  (setf (get-property role 'message-pointer) new-value))
+  (setf (property-value role 'message-pointer) new-value))
 
-(defun generate-sheep-standard-message (metasheep
-					&key name
-					qualifiers
-					lambda-list
-					participants
-					function
-					body
-					(documentation "")
-					&allow-other-keys)
+(defun spawn-sheep-standard-message (metasheep
+				     &key name
+				     qualifiers
+				     lambda-list
+				     participants
+				     function
+				     body
+				     (documentation "")
+				     &allow-other-keys)
   (let* ((buzzword (find-buzzword name))
-	(message (clone (metasheep)
-			((name name)
-			 (buzzword buzzword)
-			 (qualifiers qualifiers)
-			 (lambda-list lambda-list)
-			 (participants participants)
-			 (function function)
-			 (body body)
-			 (documentation documentation)))))
+	 (message (clone (metasheep)
+			 ((name name)
+			  (buzzword buzzword)
+			  (qualifiers qualifiers)
+			  (lambda-list lambda-list)
+			  (participants participants)
+			  (function function)
+			  (body body)
+			  (documentation documentation)))))
     (add-message-to-buzzword message buzzword)
     (remove-messages-with-name-qualifiers-and-participants name qualifiers participants)
     (add-message-to-sheeple name message participants)))
@@ -125,9 +125,9 @@
   (let* ((buzzword (find-buzzword name))
 	 (target-sheeple (sheepify-list participants))
 	 (message (apply
-		   (if (eql (sheep-metasheep buzzword) =standard-buzzword-metasheep=)
-		       #'generate-sheep-standard-message
-		       #'generate-sheep)
+		   (if (eql (buzzword-message-metasheep buzzword) =standard-message-metasheep=)
+		       #'spawn-sheep-standard-message
+		       #'spawn-sheep-using-metasheep-prototype)
 		   (buzzword-message-metasheep buzzword)
 		   :name name
 		   :participants target-sheeple
@@ -168,7 +168,7 @@
 		  (push role
 			(sheep-direct-roles sheep))))))
 
-(defun undefine-message (&key name qualifiers participants)
+(defun undefine-message (name &key qualifiers participants)
   (remove-messages-with-name-qualifiers-and-participants name qualifiers participants))
 
 (defun available-messages (sheep)
@@ -191,19 +191,19 @@
      do (ensure-message reader
 			:lambda-list '(sheep)
 			:participants (list sheep)
-			:body `(get-property sheep ',prop-name)
+			:body `(property-value sheep ',prop-name)
 			:function (eval (make-message-lambda '(sheep) 
-							     `((get-property sheep ',prop-name)))))))
+							     `((property-value sheep ',prop-name)))))))
 
 (defun add-writers-to-sheep (writers prop-name sheep)
   (loop for writer in writers
      do (ensure-buzzword writer)
      do (ensure-message writer
 			:lambda-list '(new-value sheep)
-			:participants (list =dolly= sheep)
-			:body `(setf (get-property sheep ',prop-name) new-value)
+			:participants (list =t= sheep)
+			:body `(setf (property-value sheep ',prop-name) new-value)
 			:function (eval (make-message-lambda '(new-value sheep) 
-							     `((setf (get-property sheep ',prop-name)
+							     `((setf (property-value sheep ',prop-name)
 								     new-value)))))))
 
 ;;; Macro
@@ -211,7 +211,7 @@
   (multiple-value-bind (name qualifiers lambda-list participants body)
       (parse-defmessage args)
     `(ensure-message
-      :name ',name
+      ',name
       :qualifiers ',qualifiers
       :lambda-list ,(extract-lambda-list lambda-list)
       :participants ,(extract-participants participants)
@@ -230,9 +230,7 @@
 			      args)
 			  (cdr next-messages))))
 	  (declare (ignorable #'next-message-p #'call-next-message))
-	  (funcall 
-	   (lambda ()
-	     ,@body)))) args)))
+	  ,@body)) args)))
 
 (defun parse-defmessage (args)
   (let ((name (car args))
@@ -271,13 +269,13 @@
 (defun extract-participant-sheep (item)
   (if (listp item)
       `(confirm-sheep ,(cadr item))
-      `=dolly=))
+      `=t=))
 
 (defmacro undefmessage (&rest args)
   (multiple-value-bind (name qualifiers lambda-list)
       (parse-undefmessage args)
     `(undefine-message
-      :name ',name
+      ',name
       :qualifiers ',qualifiers
       :participants ,(extract-participants lambda-list))))
 

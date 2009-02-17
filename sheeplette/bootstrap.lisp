@@ -10,7 +10,7 @@
     object))
 
 (defvar =t=
-  (let ((sheep (std-generate-sheep-instance =standard-sheep-metasheep=)))
+  (let ((sheep (std-generate-sheep-instance nil)))
     (setf (gethash 'nickname sheep) "=t=")
     (setf (gethash 'parents sheep) nil)
     (setf (gethash 'properties sheep) (make-hash-table :test #'equal))
@@ -54,10 +54,9 @@
 (defvar =float= (clone (=number=) () (:nickname "=float=")))
 
 ;;; Now we create the buzzword, message, and role metasheeps
-(defvar =standard-buzzword-metasheep=
-  (eval the-standard-buzzword-metasheep-form))
 (defvar =standard-message-metasheep=
   (eval the-standard-message-metasheep-form))
 (defvar =standard-role-metasheep=
   (eval the-standard-role-metasheep-form))
-
+(defvar =standard-buzzword-metasheep=
+  (eval the-standard-buzzword-metasheep-form))

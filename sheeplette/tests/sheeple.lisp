@@ -35,9 +35,9 @@ properly signal SHEEP-HIERARCHY-ERROR."
     (is (equal "bar" (property-value obj 'foo))))
   (let ((obj (clone () ((foo "bar") (baz "quux")))))
     (is (equal "quux" (property-value obj 'baz))))
-  (let* ((obj1 (clone () ()))
-	 (obj2 (clone () ())))
-    (is (= 1 (- (sid obj2) (sid obj1)))))
+  ;; (let* ((obj1 (clone () ())) ;; no SIDs in sheeplette
+  ;; 	 (obj2 (clone () ())))
+  ;;   (is (= 1 (- (sid obj2) (sid obj1)))))
   (signals sheep-hierarchy-error (let ((obj1 (clone () ()))
 				       (obj2 (clone () ())))
 				   (add-parent obj1 obj2)

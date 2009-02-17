@@ -24,6 +24,7 @@
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Standard Message: ~a" (message-name sheep))))
 
+;;; some stuff
 ;;; Property access again
 (defbuzzword property-value-using-metasheep)
 (defmessage property-value-using-metasheep ((metasheep =standard-sheep-metasheep=) sheep property-name)
@@ -103,3 +104,26 @@
 ;;; lol i dunno
 (defbuzzword generate-sheep
     (:documentation "Creates a new sheep object."))
+
+;;; buzzwords/messages
+(defun participant-p (sheep message-name)
+  (when (member-if (lambda (role) (equal message-name (role-name role)))
+		   (sheep-direct-roles sheep))
+    t))
+
+(defbuzzword buzzword-p)
+(defmessage buzzword-p (anything-else)
+  (declare (ignore anything-else))
+  nil)
+(defmessage buzzword-p ((buzzword =standard-buzzword-metasheep=))
+  (declare (ignore buzzword))
+  t)
+
+(defbuzzword message-p)
+(defmessage message-p (anything-else)
+  (declare (ignore anything-else))
+  nil)
+(defmessage message-p ((message =standard-message-metasheep=))
+  (declare (ignore message))
+  t)
+

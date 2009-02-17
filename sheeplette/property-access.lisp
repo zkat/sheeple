@@ -65,7 +65,11 @@
        new-value (sheep-metasheep sheep) sheep property-name)))
 (defun (setf std-property-value) (new-value sheep property-name)
   (let ((property-table (gethash 'properties sheep)))
-    (setf (gethash property-name property-table) new-value)))
+    (setf (gethash property-name property-table) new-value))
+  (memoize-property-access sheep)
+  (loop for child-pointer in (gethash 'children sheep)
+     do (memoize-property-access (weak-pointer-value child-pointer)))
+  new-value)
 
 (defun get-cloneform (sheep property-name)
   (if (std-sheep-p sheep)

@@ -173,6 +173,12 @@
   (let ((real-parents (or parents
 			  (list =dolly=))))
     (setf (sheep-direct-parents sheep) real-parents)
+    (loop for parent in parents
+       do (let ((pointer (make-weak-pointer sheep)))
+	    (pushnew pointer (sheep-direct-children parent))
+	    (finalize sheep (lambda () (setf (sheep-direct-children parent)
+					     (delete pointer
+						     (sheep-direct-children parent)))))))
     (memoize-sheep-hierarchy-list sheep)
     sheep))
 

@@ -33,7 +33,11 @@
       (std-property-value sheep property-name)
       (property-value-using-metasheep (sheep-metasheep sheep) sheep property-name)))
 (defun std-property-value (sheep property-name)
-  (property-value-with-memoized-owner sheep property-name))
+  (multiple-value-bind (value has-p)
+      (gethash property-name (gethash 'properties sheep))
+    (if has-p
+	value
+	(property-value-with-memoized-owner sheep property-name))))
 
 (defun property-value-with-hierarchy-list (sheep property-name)
   "Finds a property value under PROPERTY-NAME using a hierarchy list."

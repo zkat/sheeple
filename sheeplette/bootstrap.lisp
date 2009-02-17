@@ -3,29 +3,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeplette)
 
-;; ;; These are what reinitializing metasheep is for...
-;; (defun set-up-standard-cloneforms (cloneform-table)
-;;   (setf (gethash 'nickname cloneform-table) 'nil)
-;;   (setf (gethash 'parents cloneform-table) 'nil)
-;;   (setf (gethash 'children cloneform-table) 'nil)
-;;   (setf (gethash 'properties cloneform-table) '(make-hash-table :test #'equal))
-;;   (setf (gethash 'property-owners cloneform-table) '(make-weak-hash-table :weakness :value :test #'equal))
-;;   (setf (gethash 'roles cloneform-table) 'nil)
-;;   (setf (gethash 'hierarchy-list cloneform-table) 'nil)
-;;   (setf (gethash 'cloneforms cloneform-table) '(make-hash-table :test #'equal))
-;;   (setf (gethash 'clonefunctions cloneform-table) '(make-hash-table :test #'equal)))
-
-;; (defun set-up-standard-clonefunctions (clonefun-table)
-;;   (setf (gethash 'nickname clonefun-table) (lambda () nil))
-;;   (setf (gethash 'parents clonefun-table) (lambda () nil))
-;;   (setf (gethash 'children clonefun-table) (lambda () nil))
-;;   (setf (gethash 'properties clonefun-table) (lambda () (make-hash-table :test #'equal)))
-;;   (setf (gethash 'property-owners clonefun-table) (lambda () (make-weak-hash-table :weakness :value :test #'equal)))
-;;   (setf (gethash 'roles clonefun-table) (lambda () nil))
-;;   (setf (gethash 'hierarchy-list clonefun-table) (lambda () nil))
-;;   (setf (gethash 'cloneforms clonefun-table) (lambda () (make-hash-table :test #'equal)))
-;;   (setf (gethash 'clonefunctions clonefun-table) (lambda () (make-hash-table :test #'equal))))
-
 (defvar =standard-sheep-metasheep=
   (let ((object (make-hash-table :test #'equal)))
     (setf (gethash *secret-sheep-identifier* object) *secret-sheep-identifier*)
@@ -76,56 +53,7 @@
 (defvar =integer= (clone (=number=) () (:nickname "=integer=")))
 (defvar =float= (clone (=number=) () (:nickname "=float=")))
 
-(defun fleece-of (x)
-  (if (sheep-p x)
-      (progn
-	(warn "This is already a sheep!")
-	x)
-      (typecase x
-	(null                                          =null=)
-	((and symbol (not null))                       =symbol=)
-	((complex *)                                   =complex=)
-	((integer * *)                                 =integer=)
-	((float * *)                                   =float=)
-	(cons                                          =cons=)
-	(character                                     =character=)
-	(hash-table                                    =hash-table=)
-	(package                                       =package=)
-	(pathname                                      =pathname=)
-	(readtable                                     =readtable=)
-	(stream                                        =stream=)
-	((and number (not (or integer complex float))) =number=)
-	((string *)                                    =string=)
-	((bit-vector *)                                =bit-vector=)
-	((and vector (not string))                     =vector=)
-	((and array (not vector))                      =array=)
-	((and sequence (not (or vector list)))         =sequence=)
-	(function                                      =function=)
-	(t                                             =white-fang=))))
-
-;; Boxed object table
-(let ((boxed-object-table (make-hash-table :test #'equal)))
-
-  (defun find-fleeced-wolf (wolf)
-    (if (sheep-p wolf)
-	(error "~S seems to already be a sheep." wolf)
-	(if (gethash wolf boxed-object-table)
-	    (gethash wolf boxed-object-table)
-	    (values (wear-wool wolf) nil))))
-
-  (defun wear-wool (wolf)
-    "Autoboxes WOLF"
-    (setf (gethash wolf boxed-object-table) (clone ((fleece-of wolf)) ((wolf wolf)))))
-
-  (defun shoot-wolf (wolf)
-    "Kills wolf dead"
-    (remhash wolf boxed-object-table))
-    
-  ) ; end boxed object table
-
-;;;
 ;;; Now we create the buzzword, message, and role metasheeps
-;;;
 (defvar =standard-buzzword-metasheep=
   (eval the-standard-buzzword-metasheep-form))
 (defvar =standard-message-metasheep=

@@ -13,8 +13,15 @@
   (declare (ignore new-value sheep))
   (error "Adding or changing metasheep is not supported right now."))
 
+(defun sheep-p (sheep)
+  (when (and (hash-table-p sheep)
+	     (eql (gethash *secret-sheep-identifier* sheep)
+		  *secret-sheep-identifier*))
+    t))
+
 (defun std-sheep-p (sheep)
   (and (hash-table-p sheep)
+       (std-sheep-object-p sheep)
        (eql (sheep-metasheep sheep)
 	    nil)))
 

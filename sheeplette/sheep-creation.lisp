@@ -90,20 +90,13 @@
     (setf (gethash 'metasheep table) metasheep)
     table))
 
-(defun std-sheep-object-p (sheep)
-  (and (hash-table-p sheep)
-       (eql (gethash *secret-sheep-identifier* sheep)
-	    *secret-sheep-identifier*)))
 
-(defun sheep-p (sheep)
-  (if (and (std-sheep-object-p sheep)
-	   (eql (sheep-metasheep sheep) =standard-sheep-metasheep=))
-      t
-      (sheep-p-using-sheep sheep)))
 
-(defun spawn-sheep-std-metasheep (metasheep &key parents properties options &allow-other-keys)
+(defun std-spawn-sheep (metasheep-prototype 
+				  &key parents properties options 
+				  &allow-other-keys)
   (declare (ignore metasheep))
-  (let ((sheep (std-generate-sheep-instance =standard-sheep-metasheep=)))
+  (let ((sheep (std-generate-sheep-instance nil)))
     ;; First we actually set up all the properties
     ;; The canonical required properties...
     (setf (sheep-direct-parents sheep) nil)
@@ -126,13 +119,13 @@
 
 (defun spawn-sheep (sheeple properties
 		    &rest all-keys
-		    &key (metasheep =standard-sheep-metasheep=)
+		    &key (metasheep-prototype nil)
 		    &allow-other-keys)
   "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
-  (let ((sheep (apply (if (eql metasheep =standard-sheep-metasheep=)
-			  #'spawn-sheep-std-metasheep
-			  #'spawn-sheep-using-metasheep)
-		      metasheep
+  (let ((sheep (apply (if (eql metasheep nil)
+			  #'std-spawn-sheep
+			  #'spawn-sheep-using-metasheep-prototype)
+		      metasheep-prototype
 		      :parents sheeple 
 		      :properties properties
 		      all-keys)))
@@ -149,7 +142,7 @@
   (loop for property-list in properties
      do (set-up-property sheep property-list)))
 (defun set-up-property (sheep property-list)
-  (if (eql =standard-sheep-metasheep= (sheep-metasheep sheep))
+  (if (std-sheep-p sheep)
       (std-set-up-property sheep property-list)
       (set-up-property-using-metasheep (sheep-metasheep sheep)
 				       sheep property-list)))
@@ -165,7 +158,7 @@
     (add-writers-to-sheep writers name sheep)))
 
 (defun execute-clonefunctions (sheep)
-  (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
+  (if (std-sheep-p sheep)
       (std-execute-clonefunctions sheep)
       (execute-clonefunctions-using-metasheep 
        (sheep-metasheep sheep) sheep)))
@@ -184,7 +177,7 @@
   (loop for option in options
      do (set-up-option option sheep)))
 (defun set-up-option (sheep option)
-  (if (eql (sheep-metasheep sheep) =standard-sheep-metasheep=)
+  (if (std-sheep-p)
       (std-set-up-option sheep option)
       (set-up-option-using-metasheep
        (sheep-metasheep sheep) sheep option)))
@@ -227,8 +220,8 @@
 
 ;;; Inheritance setup
 (defun add-parent (new-parent child)
-  (if (and (eql =standard-sheep-metasheep= (sheep-metasheep child))
-	   (eql =standard-sheep-metasheep= (sheep-metasheep new-parent)))
+  (if (and (std-sheep-p new-parent)
+	   (std-sheep-p child))
       (std-add-parent new-parent child)
       (add-parent-using-metasheeps
        (sheep-metasheep new-parent) (sheep-metasheep child)
@@ -254,8 +247,8 @@
 	 child)))
 
 (defun remove-parent (parent child)
-  (if (and (eql =standard-sheep-metasheep= (sheep-metasheep child))
-	   (eql =standard-sheep-metasheep= (sheep-metasheep parent)))
+  (if (and (std-sheep-p parent)
+	   (std-sheep-p child))
       (std-remove-parent parent child)
       (remove-parent-using-metasheeps
        (sheep-metasheep parent) (sheep-metasheep child)
@@ -316,6 +309,57 @@
            (common (intersection minimal-elements supers)))
       (when (not (null common))
         (return-from std-tie-breaker-rule (car common))))))
+
+;;;
+;;; Wolves and fleecing
+;;;
+
+(defun fleece-of (x)
+  (if (sheep-p x)
+      (progn
+	(warn "This is already a sheep!")
+	x)
+      (typecase x
+	(null                                          =null=)
+	((and symbol (not null))                       =symbol=)
+	((complex *)                                   =complex=)
+	((integer * *)                                 =integer=)
+	((float * *)                                   =float=)
+	(cons                                          =cons=)
+	(character                                     =character=)
+	(hash-table                                    =hash-table=)
+	(package                                       =package=)
+	(pathname                                      =pathname=)
+	(readtable                                     =readtable=)
+	(stream                                        =stream=)
+	((and number (not (or integer complex float))) =number=)
+	((string *)                                    =string=)
+	((bit-vector *)                                =bit-vector=)
+	((and vector (not string))                     =vector=)
+	((and array (not vector))                      =array=)
+	((and sequence (not (or vector list)))         =sequence=)
+	(function                                      =function=)
+	(t                                             =white-fang=))))
+
+;; Boxed object table
+(let ((boxed-object-table (make-hash-table :test #'equal)))
+
+  (defun find-fleeced-wolf (wolf)
+    (if (sheep-p wolf)
+	(error "~S seems to already be a sheep." wolf)
+	(if (gethash wolf boxed-object-table)
+	    (gethash wolf boxed-object-table)
+	    (values (wear-wool wolf) nil))))
+
+  (defun wear-wool (wolf)
+    "Autoboxes WOLF"
+    (setf (gethash wolf boxed-object-table) (clone ((fleece-of wolf)) ((wolf wolf)))))
+
+  (defun shoot-wolf (wolf)
+    "Kills wolf dead"
+    (remhash wolf boxed-object-table))
+    
+  ) ; end boxed object table
 
 (defun sheepify-list (obj-list)
   "Converts OBJ-LIST to a list where each item is either a sheep or a fleeced wolf."

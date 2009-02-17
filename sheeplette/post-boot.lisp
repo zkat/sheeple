@@ -109,10 +109,6 @@
   (declare (ignore metasheep))
   (std-available-cloneforms sheep))
 
-;;; lol i dunno
-(defbuzzword generate-sheep
-    (:documentation "Creates a new sheep object."))
-
 ;;; buzzwords/messages
 (defun participant-p (sheep message-name)
   (when (member-if (lambda (role) (equal message-name (role-name role)))

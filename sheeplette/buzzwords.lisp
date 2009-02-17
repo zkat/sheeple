@@ -22,29 +22,29 @@
       :cloneform ""))))
 
 (defun buzzword-name (buzzword)
-  (get-property buzzword 'name))
+  (property-value buzzword 'name))
 (defun (setf buzzword-name) (new-value buzzword)
-  (setf (get-property buzzword 'name) new-value))
+  (setf (property-value buzzword 'name) new-value))
 
 (defun buzzword-message-metasheep (buzzword)
-  (get-property buzzword 'message-metasheep))
+  (property-value buzzword 'message-metasheep))
 (defun (setf buzzword-message-metasheep) (new-value buzzword)
-  (setf (get-property buzzword 'message-metasheep) new-value))
+  (setf (property-value buzzword 'message-metasheep) new-value))
 
 (defun buzzword-role-metasheep (buzzword)
-  (get-property buzzword 'role-metasheep))
+  (property-value buzzword 'role-metasheep))
 (defun (setf buzzword-role-metasheep) (new-value buzzword)
-  (setf (get-property buzzword 'role-metasheep) new-value))
+  (setf (property-value buzzword 'role-metasheep) new-value))
 
 (defun buzzword-messages (buzzword)
-  (get-property buzzword 'messages))
+  (property-value buzzword 'messages))
 (defun (setf buzzword-messages) (new-value buzzword)
-  (setf (get-property buzzword 'messages) new-value))
+  (setf (property-value buzzword 'messages) new-value))
 
 (defun buzzword-documentation (buzzword)
-  (get-property buzzword 'documentation))
+  (property-value buzzword 'documentation))
 (defun (setf buzzword-documentation) (new-value buzzword)
-  (setf (get-property buzzword 'documentation) new-value))
+  (setf (property-value buzzword 'documentation) new-value))
 
 ;;;
 ;;; Buzzword definition
@@ -110,7 +110,7 @@
 	(setf (find-buzzword name) buzzword)
 	buzzword)))
 
-(defun undefine-buzzword (&key name)
+(defun undefine-buzzword (name)
   (let ((buzzword (find-buzzword name nil)))
     (when buzzword
      (loop for message in (buzzword-messages buzzword)
@@ -129,10 +129,10 @@
 
 (defmacro defbuzzword (name &rest options)
   `(ensure-buzzword
-    :name ',name
+    ',name
     ,@(canonize-buzzword-options options)))
 
 (defmacro undefbuzzword (name)
   `(undefine-buzzword
-    :name ',name))
+    ',name))
 

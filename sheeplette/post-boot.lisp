@@ -2,6 +2,7 @@
 ;;
 ;; Once sheeplette is booted up, we can define buzzwords/messages normally
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(in-package :sheeplette)
 (defbuzzword sheep-p-using-sheep)
 (defmessage sheep-p-using-sheep (sheep)
   (std-sheep-object-p sheep))
@@ -10,7 +11,7 @@
     (:documentation "Defines the expression print-object uses."))
 (defmessage print-sheep (sheep stream)
   (print-unreadable-object (sheep stream :identity t)
-    (format stream "Standard Sheep SID: ~a~@[ AKA: ~a~]" (sid sheep) (sheep-nickname sheep))))
+    (format stream "Standard Sheep~@[ AKA: ~a~]" (sheep-nickname sheep))))
 (defmethod print-object :around (sheep stream)
   (if (sheep-p sheep)
       (print-sheep sheep stream)

@@ -3,10 +3,10 @@
 ;; Once sheeplette is booted up, we can define buzzwords/messages normally
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeplette)
-(defbuzzword sheep-p-using-sheep)
-(defmessage sheep-p-using-sheep (sheep)
-  (std-sheep-object-p sheep))
 
+;;;
+;;; Printing sheep!
+;;;
 (defbuzzword print-sheep
     (:documentation "Defines the expression print-object uses."))
 (defmessage print-sheep (sheep stream)
@@ -33,8 +33,7 @@
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Standard Role: ~a" (role-name sheep))))
 
-;;; some stuff
-;;; Property access again
+;;; Property access
 (defbuzzword property-value-using-metasheep)
 (defmessage property-value-using-metasheep ((metasheep =standard-sheep-metasheep=) sheep property-name)
   (declare (ignore metasheep))

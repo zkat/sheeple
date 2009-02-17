@@ -21,7 +21,7 @@
   (is (equal =cons= (fleece-of (cons 1 2))))
   (is (equal =character= (fleece-of #\a)))
   (is (equal =hash-table= (fleece-of (make-hash-table))))
-  (is (equal =package= (fleece-of (find-package :sheeple-tests))))
+  (is (equal =package= (fleece-of (find-package :sheeplette-tests))))
   (is (equal =pathname= (fleece-of #P"compatibility.lisp")))
 ;;  (is (equal =readtable= (fleece-of ???))) ; uhhh??
 ;;  (is (equal =stream= (fleece-of ???))) ; dunno

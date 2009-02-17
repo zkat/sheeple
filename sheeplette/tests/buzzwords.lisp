@@ -14,12 +14,13 @@
 (test buzzword-definition
   "Checks basic buzzword definition, confirms that FIND-BUZZWORD 
 errors when a buzzword doesn't exist."
-  (defbuzzword test-buzz "This is a test")
+  (defbuzzword test-buzz (:documentation "This is a test"))
   (is (buzzword-p (find-buzzword 'test-buzz)))
   (signals no-such-buzzword (find-buzzword 'another-buzzword))
   (undefbuzzword test-buzz)
   (defun test-buzz () (print "durr hurr"))
-  (signals sheeplette::clobbering-function-definition (defbuzzword test-buzz "OHNOES"))
+  (signals sheeplette::clobbering-function-definition (defbuzzword test-buzz
+							  (:documentation "OHNOES")))
   (fmakunbound 'test-buzz))
 
 (test buzzword-undefinition

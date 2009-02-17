@@ -17,12 +17,21 @@
       (print-sheep sheep stream)
       (call-next-method)))
 
+(defmessage print-sheep ((sheep =white-fang=) stream)
+  (print-unreadable-object (sheep stream :identity t)
+    (format stream "Fleeced Wolf ~@[ AKA: ~a~]" (sheep-nickname sheep))))
+(defmessage print-sheep ((sheep =standard-sheep-metasheep=) stream)
+  (print-unreadable-object (sheep stream :identity t)
+    (format stream "Standard Metasheep~@[ AKA: ~a~]" (sheep-nickname sheep))))
 (defmessage print-sheep ((sheep =standard-buzzword-metasheep=) stream)
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Standard Buzzword: ~a" (buzzword-name sheep))))
 (defmessage print-sheep ((sheep =standard-message-metasheep=) stream)
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Standard Message: ~a" (message-name sheep))))
+(defmessage print-sheep ((sheep =standard-role-metasheep=) stream)
+  (print-unreadable-object (sheep stream :identity t)
+    (format stream "Standard Role: ~a" (role-name sheep))))
 
 ;;; some stuff
 ;;; Property access again

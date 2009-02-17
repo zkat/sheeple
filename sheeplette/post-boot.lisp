@@ -42,8 +42,8 @@
 (defbuzzword setf-property-value-using-metasheep
     (:documentation "Sets the property, dispatching on the metasheep."))
 (defmessage setf-property-value-using-metasheep (new-value
-					       (metasheep =standard-sheep-metasheep=) 
-					       sheep property-name)
+						 (metasheep =standard-sheep-metasheep=) 
+						 sheep property-name)
   (declare (ignore metasheep))
   (setf (std-property-value sheep property-name) new-value))
 
@@ -56,8 +56,8 @@
 (defbuzzword setf-get-cloneform-using-metasheep
     (:documentation "Sets the cloneform, dispatching on the metasheep."))
 (defmessage setf-get-cloneform-using-metasheep (new-value
-					       (metasheep =standard-sheep-metasheep=) 
-					       sheep property-name)
+						(metasheep =standard-sheep-metasheep=) 
+						sheep property-name)
   (declare (ignore metasheep))
   (setf (std-get-cloneform sheep property-name) new-value))
 
@@ -69,8 +69,8 @@
 (defbuzzword setf-get-clonefunction-using-metasheep
     (:documentation "Sets the clonefunction, dispatching on the metasheep."))
 (defmessage setf-get-clonefunction-using-metasheep (new-value
-					       (metasheep =standard-sheep-metasheep=) 
-					       sheep property-name)
+						    (metasheep =standard-sheep-metasheep=) 
+						    sheep property-name)
   (declare (ignore metasheep))
   (setf (std-get-clonefunction sheep property-name) new-value))
 

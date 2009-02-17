@@ -5,7 +5,7 @@ Sheeple is a Dynamic, CLOS-like Prototype-based Object-Oriented Programming Syst
 strives to maximize application flexibility, minimize cost while maximizing value, optimize
 programmer time, and empower application implementers to better assist them leveraging modern
 paradigms in order to proactively achieve next-gen synergy in tomorrow's web 3.0 world. It is
-implemented in (mostly) ANSI Common Lisp. Sheeple is fully buzzword compliant.
+implemented in (mostly)^ ANSI Common Lisp. Sheeple is fully buzzword compliant.
 
 Initially written as the object system of a text-based game online game engine ([Sykosomatic][9]),
 Sheeple is provided as a module separate from its persistent counterpart, Persistent-Sheeple, as a
@@ -37,13 +37,18 @@ CLOS. The most notable features are multiple inheritance and multimethods (calle
 This README contains a basic usage guide, and sort-of-spec of Sheeple. Much heavier documentation,
 including a tutorial and a MSP spec is to come. Meanwhile, have fun reading the code (hohoho).
 
+^this implementation makes use of trivial-garbage for weak-pointers, finalizers, and
+ weak-hash-tables. If your lisp does not support those or has issues with them, you might run into
+ problems. 
+
 Disclaimer
 ----------
 Because of a combination of the necessity to avoid name collisions in a system very similar to CLOS
 and a desire to amuse myself (and others), Sheeple has been designed from the beginning to be
 maximally groan-worthy with its naming scheme. I apologize in advance, and I am not responsible for
-any issues the naming scheme might cause.
+any issues the naming scheme might cause, such as Chronic Smug Weenie Nose-Tilting Syndrome.
 
+I assure you, Sheeple is Serious Business(tm).
 
 Loading Sheeple
 ---------------
@@ -77,11 +82,13 @@ Sheeple should work on just about every implementation out there with a working 
 implementation. It is developed and tested on SBCL, but tests on other implementations would be
 greatly appreciated. 
 
-Features available so far:
+
+Features
+--------
 
 * Simple, but powerful defclass-like cloning macro, with cloning options.
 
-* Dynamic object management tools (inspection of objects, addition/removal of slots, all without any
+* Dynamic object management tools (inspection of objects, addition/removal of properties, all without any
   sort of redefinition).
 
 * Dynamic property value access, following a prototype chain (the value of the nearest parent that
@@ -111,7 +118,7 @@ Features available so far:
 * CLOS backend allows effortless plug-in to many Lisp libraries that make use of the MOP (such as
   Elephant, for almost free object persistence).
 
-* Auto-generated readers/writers, with :manipulator, :reader, and :writer slot options.
+* Auto-generated readers/writers, with :manipulator, :reader, and :writer property options.
 
 * :before, :after, and :around messages
 
@@ -119,9 +126,10 @@ Features available so far:
 
 * Portable across implementations, although more testing and tweaking is needed.
 
-* Nickname slot for sheep metaobject, so helpful information can be printed by print-sheep.
+* Nickname property for sheep metaobject, so helpful information can be printed by print-sheep.
 
 * A Metaobject Protocol (or Metasheep Protocol, if you will), similar to the one described in AMOP.
+
 
 Planned features that have not yet been implemented include:
 
@@ -130,8 +138,8 @@ Planned features that have not yet been implemented include:
 * CLOS integration, including autoboxing of entire class hierarchies.
 
 
-Usage Manual
-============
+Using Sheeple
+=============
 
 Vocabulary
 ----------
@@ -193,15 +201,13 @@ API
   greater precedence than second.) Ancestors are ordered with a breadth-first left-to-right graph
   sorting algorithm.
 
-* All objects have a numerical SID (Sheep ID)
-
 * The list of direct parents is dynamic. Parents can be added or removed at run time.
 
 * Sheeple does not have a universal addressing mechanism like functions and classes do. Instead,
-there are a number of built-in sheeple, including =DOLLY=, which can be addressed by symbol where
-useful, such as when setting one of them as a parent, or defining a talent. For ease of
-identification while working at the REPL, there is a nickname slot in the metaobject, which can be
-accessed with SHEEP-NICKNAME.
+  there are a number of built-in sheeple, including =DOLLY=, which can be addressed by symbol where
+  useful, such as when setting one of them as a parent, or defining a talent. For ease of
+  identification while working at the REPL, there is a nickname property in the metaobject, which
+  can be accessed with SHEEP-NICKNAME.
 
 * Built-in sheeple (known as fleeced wolves, or just wolves) correspond to all built-in Lisp types,
   as well as any new types defined by DEFTYPE, but not to CLOS-defined classes.
@@ -225,7 +231,8 @@ accessed with SHEEP-NICKNAME.
 #### Clone Options
 
 * The :copy-all-values CLONE option copies over all values available to the new sheep into the sheep
-  itself. This is useful for ensuring that other objects do not change an available property value.
+  itself. This is useful for ensuring that other objects do not change an available property
+  value. Using the :deep-copy option yields identical results.
 
 * :copy-direct-values works like :copy-all-values, except it only copies the new sheep's parents'
   direct-values locally, still relying on the hierarchy-list for other properties.
@@ -235,12 +242,7 @@ accessed with SHEEP-NICKNAME.
   sheep-nickname manipulator function.
 
          SHEEPLE> (clone () () (:nickname "Johnny Bravo"))
-         #<Standard Sheep SID: 22 AKA: Johnny Bravo {B777401}>
-
-* Another option, although highly experimental, is :mitosis. This option is not for the faint of
-  heart. :mitosis basically turns CLONE into a macro that accepts only one item in the parent list.
-  All direct properties, roles, and direct parents are then copied into the new object, without
-  making the object it clones a parent of the new object.
+         #<Standard Sheep AKA: Johnny Bravo {B777401}>
 
 #### Property Options
 
@@ -291,10 +293,10 @@ into CHILD before removing the parent from the child's direct-parents. If NIL, t
 direct-properties will no longer apply to child. Returns the CHILD object.
         
         (remove-parent *daddy* *kiddo*) 
-        => KIDDO object, without *daddy*'s direct-slot values.
+        => KIDDO object, without *daddy*'s direct-property values.
        
         (remove-parent *daddy* *kiddo* :keep-properties t) 
-        => KIDDO object, with a copy of *daddy*'s direct-slots.
+        => KIDDO object, with a copy of *daddy*'s direct-properties.
 
 
 ### == Properties ==
@@ -383,7 +385,7 @@ CLOS programming should have a fairly easy time wrapping their head around Sheep
   multimessages which can dispatch on multiple different arguments. The syntax follows closely with
   defmethod's specialized lambda-list syntax, except the specializers are actual objects instead of
   class names. An unspecialized item in the lambda list will default to dispatching on =dolly= for
-  that lambda-list slot.
+  that lambda-list property.
   Also unlike defmethod, the lambda-lists for messages can be of variable length, while still
   dispatching on all arguments.
   The basic format is: 

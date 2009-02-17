@@ -111,7 +111,8 @@
 			  (documentation documentation)))))
     (add-message-to-buzzword message buzzword)
     (remove-messages-with-name-qualifiers-and-participants name qualifiers participants)
-    (add-message-to-sheeple name message participants)))
+    (add-message-to-sheeple name message participants)
+    message))
 
 (defun ensure-message (name &rest all-keys
 		       &key participants
@@ -206,15 +207,15 @@
 							     `((setf (property-value sheep ',prop-name)
 								     new-value)))))))
 
-;;; Macro
+;;; macro
 (defmacro defmessage (&rest args)
-  (multiple-value-bind (name qualifiers lambda-list participants body)
+  (multiple-value-bind (name qualifiers lambda-list body)
       (parse-defmessage args)
     `(ensure-message
       ',name
       :qualifiers ',qualifiers
       :lambda-list ,(extract-lambda-list lambda-list)
-      :participants ,(extract-participants participants)
+      :participants ,(extract-participants lambda-list)
       :function (block ,name ,(make-message-lambda lambda-list body))
       :body '(block ,name ,@body))))
 
@@ -230,7 +231,9 @@
 			      args)
 			  (cdr next-messages))))
 	  (declare (ignorable #'next-message-p #'call-next-message))
-	  ,@body)) args)))
+	  (funcall 
+	   (lambda ()
+	     ,@body)))) args)))
 
 (defun parse-defmessage (args)
   (let ((name (car args))
@@ -245,12 +248,11 @@
 	     (push arg qualifiers)
 	     (progn (setf lambda-list arg)
 		    (setf parse-state :body))))
-	(:body (setf body (list arg)))))
+	(:body (push arg body))))
     (values name
 	    qualifiers
 	    lambda-list
-	    lambda-list
-	    body)))
+	    (nreverse body))))
 
 (defun extract-lambda-list (lambda-list)
   `(list ,@(mapcar #'extract-var-name lambda-list)))

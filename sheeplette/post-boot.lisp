@@ -17,6 +17,13 @@
       (print-sheep sheep stream)
       (call-next-method)))
 
+(defmessage print-sheep ((sheep =standard-buzzword-metasheep=) stream)
+  (print-unreadable-object (sheep stream :identity t)
+    (format stream "Standard Buzzword: ~a" (buzzword-name sheep))))
+(defmessage print-sheep ((sheep =standard-message-metasheep=) stream)
+  (print-unreadable-object (sheep stream :identity t)
+    (format stream "Standard Message: ~a" (message-name sheep))))
+
 ;;; Property access again
 (defbuzzword get-property-using-metasheep)
 (defmessage get-property-using-metasheep ((metasheep =standard-sheep-metasheep=) sheep property-name)

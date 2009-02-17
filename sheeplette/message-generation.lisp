@@ -173,9 +173,9 @@
   (remove-messages-with-name-qualifiers-and-participants name qualifiers participants))
 
 (defun available-messages (sheep)
-  (if (eql =standard-sheep-metasheep= (sheep-metasheep sheep))
+  (if (std-sheep-p sheep)
       (std-available-messages sheep)
-      (available-messages-using-metasheep (sheep-metasheep sheep))))
+      (available-messages-using-metasheep (sheep-metasheep sheep) sheep)))
 (defun std-available-messages (sheep)
   (let ((personal-role-names (mapcar (lambda (role) (role-name role))
 				     (sheep-direct-roles sheep))))

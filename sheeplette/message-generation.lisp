@@ -221,9 +221,7 @@
 
 (defun make-message-lambda (lambda-list body)
   `(lambda (args next-messages)
-     (apply
-      (lambda ,(eval (extract-lambda-list lambda-list))
-	(flet ((next-message-p ()
+     (flet ((next-message-p ()
 		 (not (null next-messages)))
 	       (call-next-message (&rest cnm-args)
 		 (funcall (message-function (car next-messages))
@@ -231,9 +229,9 @@
 			      args)
 			  (cdr next-messages))))
 	  (declare (ignorable #'next-message-p #'call-next-message))
-	  (funcall 
-	   (lambda ()
-	     ,@body)))) args)))
+	  (apply
+	   (lambda ,(eval (extract-lambda-list lambda-list))
+	     ,@body) args))))
 
 (defun parse-defmessage (args)
   (let ((name (car args))

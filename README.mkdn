@@ -122,9 +122,7 @@ Features available so far:
 
 * Portable across implementations, although more testing and tweaking is needed.
 
-* Nickname slot for sheep metaobject, so helpful information can be printed by print-object.
-
-* Lockable properties - you can lock a slot and prevent it from being edited
+* Nickname slot for sheep metaobject, so helpful information can be printed by print-sheep.
 
 Planned features that have not yet been implemented include:
 

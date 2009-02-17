@@ -118,8 +118,9 @@
       (std-remove-property sheep property-name)
       (remove-property-using-metasheep (sheep-metasheep sheep) sheep property-name)))
 (defun std-remove-property (sheep property-name)
-  (remhash property-name (gethash 'properties sheep))
-  (memoize-property-access sheep))
+  (when (remhash property-name (gethash 'properties sheep))
+    (memoize-property-access sheep)
+    t))
 
 (defun has-property-p (sheep property-name)
   "Returns T if a property with PROPERTY-NAME is available to SHEEP."

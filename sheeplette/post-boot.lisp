@@ -19,7 +19,7 @@
 
 (defmessage print-sheep ((sheep =white-fang=) stream)
   (print-unreadable-object (sheep stream :identity t)
-    (format stream "Fleeced Wolf ~@[ AKA: ~a~]" (sheep-nickname sheep))))
+    (format stream "Fleeced Wolf~@[ AKA: ~a~]" (sheep-nickname sheep))))
 (defmessage print-sheep ((sheep =standard-sheep-metasheep=) stream)
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Standard Metasheep~@[ AKA: ~a~]" (sheep-nickname sheep))))

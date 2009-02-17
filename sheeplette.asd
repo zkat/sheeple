@@ -17,6 +17,7 @@
 	     (:file "utils")
 	     (:file "property-access")
 	     (:file "sheep-creation")
+	     (:file "wolves")
 	     (:file "buzzwords")
 	     (:file "message-generation")
 	     (:file "message-dispatch")

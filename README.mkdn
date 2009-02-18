@@ -72,7 +72,7 @@ FiveAM is required if you wish to run the test suite. To run it:
         (asdf:oos 'asdf:load-op 'sheeple-tests)
         (sheeple-tests:sheeple-tests)
 
-And watch the tests roll by. Two of them should fail, and the rest pass.
+And watch the tests roll by. Only one should fail (CLOS Fleecing)
 
 
 Notes
@@ -115,9 +115,6 @@ Features
 
 * Dynamic removal of messages, as well as entire buzzwords with undefbuzzword/undefmessage.
 
-* CLOS backend allows effortless plug-in to many Lisp libraries that make use of the MOP (such as
-  Elephant, for almost free object persistence).
-
 * Auto-generated readers/writers, with :manipulator, :reader, and :writer property options.
 
 * :before, :after, and :around messages
@@ -128,8 +125,9 @@ Features
 
 * Nickname property for sheep metaobject, so helpful information can be printed by print-sheep.
 
-* A Metaobject Protocol (or Metasheep Protocol, if you will), similar to the one described in AMOP.
-
+* A Metaobject Protocol (or Metasheep Protocol, if you will), similar to the one described in
+  AMOP. The basics of the MOP are available and undocumented... the feature is still under
+  development. 
 
 Planned features that have not yet been implemented include:
 
@@ -230,11 +228,11 @@ API
 
 #### Clone Options
 
-* The :copy-all-values CLONE option copies over all values available to the new sheep into the sheep
+* The :deep-copy CLONE option copies over all values available to the new sheep into the sheep
   itself. This is useful for ensuring that other objects do not change an available property
   value. Using the :deep-copy option yields identical results.
 
-* :copy-direct-values works like :copy-all-values, except it only copies the new sheep's parents'
+* :shallow-copy works like :deep-copy, except it only copies the new sheep's parents'
   direct-values locally, still relying on the hierarchy-list for other properties.
 
 * The :nickname CLONE option sets a nickname for the sheep metaobject, which is used when printing
@@ -266,6 +264,19 @@ API
         (prop *sample-sheep*) => "value"
         (setf (prop *sample-sheep*) "new-value" => "new-value"
 
+* :cloneform - The form is compiled and saved. Any new children that are created will evaluate this
+  form and set it as the property-value for that property, prior to setting any values defined in
+  the new child's CLONE call. This form is not used as the value for the property of the current
+  CLONE call -- a value must still be provided.
+
+        (defvar *sample-sheep* 
+           (clone () 
+                  ((account-number 
+                    (incf *max-acc-nums*)
+                    :reader account-number
+                    :cloneform (incf *max-acc-nums*)))))
+        (account-number *sample-sheep*) => 1
+        (account-number (clone (*sample-sheep*) ())) => 2
 
 #### Sheep Inspection
 
@@ -283,7 +294,7 @@ cyclic hierarchy list, a SHEEP-HIERARCHY-ERROR condition is signaled, and the CH
 unaffected. The new-parent is added to the front of the direct-parents list, like a stack
 push. Returns the CHILD object.
 
-        (add-parent *mommy* *kiddo*) => <SHEEP SID: 2> (*kiddo*)
+        (add-parent *mommy* *kiddo*) => <SHEEP {numbers}> (*kiddo*)
         (add-parent *kiddo's-descendant* *kiddo*) => ERROR: SHEEP-HIERARHY-ERROR
 
 
@@ -307,17 +318,18 @@ direct-properties will no longer apply to child. Returns the CHILD object.
 
 * Sheeple have direct properties and indirect properties
 
-* Direct properties are set directly in a specific sheep object.
+* Direct properties are available directly from a specific sheep object.
 
-* Indirect properties are accessed by searching for direct properties that have been set along the
-sheep's inheritance chain. The value of that ancestor's property is used instead.
+* Indirect property values come from the nearest parent in sheep-hierarchy-list that has a
+  direct property value for that property.
 
 * Changing the value in the parent thus changes the value in the child.
 
 * A child may override the value set by one of its parents at any time by setting a direct property.
 
 * If an ancestor already sets a property, a descendant may not remove that property from itself,
-  unless it removes that property from the ancestor.
+  unless it removes that property from the ancestor. (all children are guaranteed to at least have
+  NIL as the value for a property)
 
 * When accessing indirect properties, the hierarchy list ordering is obeyed.
 

@@ -54,9 +54,9 @@
 (defvar =float= (clone (=number=) () (:nickname "=float=")))
 
 ;;; Now we create the buzzword, message, and role metasheeps
-(defvar =standard-message-metasheep=
-  (eval the-standard-message-metasheep-form))
 (defvar =standard-role-metasheep=
   (eval the-standard-role-metasheep-form))
+(defvar =standard-message-metasheep=
+  (eval the-standard-message-metasheep-form))
 (defvar =standard-buzzword-metasheep=
   (eval the-standard-buzzword-metasheep-form))

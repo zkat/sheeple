@@ -211,13 +211,14 @@
 (defmacro defmessage (&rest args)
   (multiple-value-bind (name qualifiers lambda-list body)
       (parse-defmessage args)
-    `(ensure-message
-      ',name
-      :qualifiers ',qualifiers
-      :lambda-list ,(extract-lambda-list lambda-list)
-      :participants ,(extract-participants lambda-list)
-      :function (block ,name ,(make-message-lambda lambda-list body))
-      :body '(block ,name ,@body))))
+    (eval-when (:compile-toplevel :load-toplevel :execute)
+      `(ensure-message
+	',name
+	:qualifiers ',qualifiers
+	:lambda-list ,(extract-lambda-list lambda-list)
+	:participants ,(extract-participants lambda-list)
+	:function (block ,name ,(make-message-lambda lambda-list body))
+	:body '(block ,name ,@body)))))
 
 (defun make-message-lambda (lambda-list body)
   `(lambda (args next-messages)

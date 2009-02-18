@@ -104,6 +104,19 @@ properly signal SHEEP-HIERARCHY-ERROR."
     (is (equal "new-value" (set-var "new-value" test-sheep)))
     (is (equal "new-value" (var test-sheep)))))
 
+(test cloneforms
+  (let* ((max-acc-nums 0)
+	 (sheep (clone ()
+		       ((acc-num
+			 (incf max-acc-nums)
+			 :cloneform (incf max-acc-nums)
+			 :reader account-number)))))
+    (is (= 1 (account-number sheep)))
+    (is (= 1 max-acc-nums))
+    (let ((new-sheep (clone (sheep) ())))
+      (is (= 2 (account-number sheep)))
+      (is (= 2 max-acc-nums)))))
+
 (in-suite clone-options)
 (test :deep-copy
   "Tests the :deep-copy clone option. It's supposed to pull in

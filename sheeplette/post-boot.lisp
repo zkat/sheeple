@@ -29,7 +29,7 @@
 (defmessage print-sheep ((sheep =standard-message-metasheep=) stream)
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Standard Message: ~a" (message-name sheep))))
-(defmessage print-sheep ((sheep =standard-role-metasheep=) stream)
+ (defmessage print-sheep ((sheep =standard-role-metasheep=) stream)
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Standard Role: ~a" (role-name sheep))))
 

@@ -215,12 +215,26 @@
   (let ((name (getf property-list :name))
 	(value (getf property-list :value))
 	(readers (getf property-list :readers))
-	(writers (getf property-list :writers)))
+	(writers (getf property-list :writers))
+	(cloneform-present-p (member :cloneform property-list))
+	(cloneform (getf property-list :cloneform)))
     (when (not (symbolp name))
       (error "Property names must be symbols"))
+    (when cloneform-present-p
+      (std-set-up-cloneform sheep name cloneform))
     (setf (property-value sheep name) value)
     (add-readers-to-sheep readers name sheep)
     (add-writers-to-sheep writers name sheep)))
+
+(defun set-up-cloneform (sheep pname form)
+  (if (std-sheep-p sheep)
+      (std-set-up-cloneform sheep pname form)
+      (set-up-cloneform-using-metasheep
+       (sheep-metasheep sheep) sheep pname form)))
+(defun std-set-up-cloneform (sheep pname form)
+  (let ((function (lambda () form)))
+    (setf (get-cloneform sheep pname) form)
+    (setf (get-clonefunction sheep pname) function)))
 
 (defun execute-clonefunctions (sheep)
   (if (std-sheep-p sheep)

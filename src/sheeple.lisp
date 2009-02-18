@@ -114,19 +114,7 @@
 	(add-parent =dolly= obj))
     obj))
 
-(defun mitosis (sheeple sheep)
-  ;; THIS IS GOING TO BE THE END OF ME, I SWEAR.
-  (let* ((model (car sheeple))
-	 (parents (sheep-direct-parents model))
-	 (properties (sheep-direct-properties model))
-	 (roles (sheep-direct-roles model)))
-    (setf (sheep-direct-parents sheep)
-	  parents)
-    (setf (sheep-direct-properties sheep)
-	  properties)
-    (setf (sheep-direct-roles sheep)
-	  roles)
-    sheep))
+
 
 (define-condition mitosis-error (sheeple-error) ())
 

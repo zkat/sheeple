@@ -105,14 +105,14 @@ properly signal SHEEP-HIERARCHY-ERROR."
     (is (equal "new-value" (var test-sheep)))))
 
 (in-suite clone-options)
-;; (test :copy-all-values
-;;   "Tests the :copy-all-values clone option. It's supposed to pull in
-;; all available property values from the sheep hierarchy and set them locally."
-;;   (let* ((test-sheep (clone () ((var "value")) (:nickname "test-sheep")))
-;; 	 (another-sheep (clone (test-sheep) ((other-var "other-value")) (:copy-all-values t))))
-;;     (setf (property-value test-sheep 'var) "new-value")
-;;     (is (equal "new-value" (property-value test-sheep 'var)))
-;;     (is (equal "value" (property-value another-sheep 'var)))))
+(test :deep-copy
+  "Tests the :deep-copy clone option. It's supposed to pull in
+all available property values from the sheep hierarchy and set them locally."
+  (let* ((test-sheep (clone () ((var "value")) (:nickname "test-sheep")))
+	 (another-sheep (clone (test-sheep) ((other-var "other-value")) (:deep-copy t))))
+    (setf (property-value test-sheep 'var) "new-value")
+    (is (equal "new-value" (property-value test-sheep 'var)))
+    (is (equal "value" (property-value another-sheep 'var)))))
 
 ;; (test :copy-direct-values
 ;;   "Tests the :copy-direct-values clone option. It pulls in only the direct-slots
@@ -121,13 +121,7 @@ properly signal SHEEP-HIERARCHY-ERROR."
 (test :nickname
   "Tests the :nickname clone option"
   (let* ((test-sheep (clone () ((var "value")) (:nickname "test-sheep")))
-	 (another-sheep (clone (test-sheep) () (:copy-all-values t))))
+	 (another-sheep (clone (test-sheep) () (:deep-copy t))))
     (is (equal "test-sheep" (sheep-nickname test-sheep)))
     (setf (sheep-nickname another-sheep) "Johnny Bravo")
     (is (equal "Johnny Bravo" (sheep-nickname another-sheep)))))
-
-;; (test general-clone-options
-;;   "Runs tests on the options feature of CLONE, and checks that existing options work."
-;;   (signals invalid-option-error (clone () () (:anything-else)))
-;;   (signals invalid-option-error (clone () () ()))
-;;   (signals probably-meant-to-be-option (clone () (:copy-all-values t))))

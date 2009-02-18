@@ -128,8 +128,11 @@
     table))
 
 (defun std-spawn-sheep (metasheep-prototype 
-				  &key parents properties nickname
-				  &allow-other-keys)
+			&key parents
+			properties
+			nickname
+			deep-copy
+			shallow-copy)
   (declare (ignore metasheep-prototype))
   (let ((sheep (std-generate-sheep-instance nil)))
     ;; First we actually set up all the properties
@@ -150,6 +153,10 @@
     (std-set-up-properties sheep properties)
     (std-set-nickname sheep nickname)
     (std-finalize-sheep sheep)
+    (when shallow-copy
+      (shallow-copy sheep))
+    (when deep-copy
+      (deep-copy sheep))
     sheep))
 
 (defun std-set-nickname (sheep nickname)
@@ -168,6 +175,20 @@
 		      :properties properties
 		      all-keys)))
     sheep))
+
+(defun mitosis (model)
+  (let* ((parents (sheep-direct-parents model))
+	 (properties (sheep-direct-properties model))
+	 (roles (sheep-direct-roles model))
+	 (metasheep (sheep-metasheep model))
+	 (new-sheep (clone () () (:metasheep-prototype metasheep))))
+    (setf (sheep-direct-parents new-sheep)
+	  parents)
+    (setf (sheep-direct-properties new-sheep)
+	  properties)
+    (setf (sheep-direct-roles new-sheep)
+	  roles)
+    new-sheep))
 
 (defun std-add-parents (sheep parents)
   (let ((real-parents (or parents
@@ -216,38 +237,21 @@
        do (unless (eql fn *secret-unbound-value*)
 	    (setf (property-value sheep propname) (funcall fn))))))
 
-(define-condition invalid-option-error (sheeple-error) ())
-(defun std-set-up-option (sheep option)
-  (let ((option (car option))
-	(value (cadr option)))
-    (case option
-      (:copy-all-values (when (eql value t)
-			  (copy-all-values sheep)))
-      (:copy-direct-values (when (eql value t)
-			     (copy-direct-parent-values sheep)))
-      (:deep-copy (when (eql value t)
-		    (copy-all-values sheep)))
-      (:nickname (setf (sheep-nickname sheep) value))
-      (otherwise (error 'invalid-option-error)))))
-
 (defun std-finalize-sheep (sheep)
   (memoize-sheep-hierarchy-list sheep)
   (memoize-property-access sheep)
   (loop for child-pointer in (gethash 'children sheep)
      do (memoize-property-access (weak-pointer-value child-pointer))))
 
-(define-condition probably-meant-to-be-option (sheeple-error) ())
-
-(defun copy-all-values (sheep)
-  (let ((all-property-names (available-properties (if (weak-pointer-p sheep)
-						      (weak-pointer-value sheep)
-						      sheep))))
+(defun deep-copy (sheep)
+  (let ((all-property-names (available-properties sheep)))
     (mapc (lambda (pname)
-	    (setf (property-value sheep pname)
-		  (property-value sheep pname)))
+	    (let ((value (property-value sheep pname)))
+	      (setf (property-value sheep pname)
+		    value)))
 	  all-property-names)))
 
-(defun copy-direct-parent-values (sheep)
+(defun shallow-copy (sheep)
   (mapc (lambda (parent)
 	  (maphash 
 	   (lambda (key value) 

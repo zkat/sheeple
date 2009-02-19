@@ -6,6 +6,7 @@
    :=t=
    :=dolly=
    :print-sheep
+   :print-object
    :clone
    :sheep-hierarchy-error
    :sheep-p

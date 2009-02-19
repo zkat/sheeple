@@ -14,12 +14,13 @@
 (test buzzword-definition
   "Checks basic buzzword definition, confirms that FIND-BUZZWORD 
 errors when a buzzword doesn't exist."
-  (defbuzzword test-buzz "This is a test")
+  (defbuzzword test-buzz (:documentation "This is a test"))
   (is (buzzword-p (find-buzzword 'test-buzz)))
   (signals no-such-buzzword (find-buzzword 'another-buzzword))
   (undefbuzzword test-buzz)
   (defun test-buzz () (print "durr hurr"))
-  (signals sheeple::clobbering-function-definition (defbuzzword test-buzz "OHNOES"))
+  (signals sheeple::clobbering-function-definition (defbuzzword test-buzz
+							  (:documentation "OHNOES")))
   (fmakunbound 'test-buzz))
 
 (test buzzword-undefinition
@@ -106,14 +107,14 @@ to their respective participants, with correct role-indexes, etc."
   "Checks proper dispatch of :before messages."
   (let ((test-sheep (clone () ((var "value")))))
     (defmessage get-var ((sheep test-sheep))
-      (get-property sheep 'var))
+      (property-value sheep 'var))
     (is (equal "value" (get-var test-sheep)))
     (defmessage get-var :before ((sheep test-sheep))
-		(setf (get-property sheep 'var) "new-value"))
-    (is (equal "value" (get-property test-sheep 'var)))
+		(setf (property-value sheep 'var) "new-value"))
+    (is (equal "value" (property-value test-sheep 'var)))
     (is (equal "new-value" (get-var test-sheep)))
-    (setf (get-property test-sheep 'var) "different-value")
-    (is (equal "different-value" (get-property test-sheep 'var)))
+    (setf (property-value test-sheep 'var) "different-value")
+    (is (equal "different-value" (property-value test-sheep 'var)))
     (is (equal "new-value" (get-var test-sheep)))
     (undefbuzzword get-var)))
 
@@ -121,37 +122,37 @@ to their respective participants, with correct role-indexes, etc."
   "Checks proper dispatch of :after messages."
   (let ((test-sheep (clone () ((var "value")))))
     (defmessage get-var ((sheep test-sheep))
-      (get-property sheep 'var))
+      (property-value sheep 'var))
     (is (equal "value" (get-var test-sheep)))
     (defmessage get-var :after ((sheep test-sheep))
-		(setf (get-property sheep 'var) "new-value"))
+		(setf (property-value sheep 'var) "new-value"))
     (is (equal "value" (get-var test-sheep)))
-    (is (equal "new-value" (get-property test-sheep 'var)))
-    (setf (get-property test-sheep 'var) "different-value")
+    (is (equal "new-value" (property-value test-sheep 'var)))
+    (setf (property-value test-sheep 'var) "different-value")
     (is (equal "different-value" (get-var test-sheep)))
-    (is (equal "new-value" (get-property test-sheep 'var)))
+    (is (equal "new-value" (property-value test-sheep 'var)))
     (undefbuzzword get-var)))
 
 (test around-messages
   "Checks proper dispatch of :around messages."
   (let ((test-sheep (clone () ((var "value")))))
     (defmessage get-var ((sheep test-sheep))
-      (get-property sheep 'var))
+      (property-value sheep 'var))
     (is (equal "value" (get-var test-sheep)))
     (defmessage get-var :around ((sheep test-sheep))
 		(concatenate 'string "a " (call-next-message)))
     (is (equal "a value" (get-var test-sheep)))
-    (is (equal "value" (get-property test-sheep 'var)))
-    (setf (get-property test-sheep 'var) "different-value")
-    (is (equal "different-value" (get-property test-sheep 'var)))
+    (is (equal "value" (property-value test-sheep 'var)))
+    (setf (property-value test-sheep 'var) "different-value")
+    (is (equal "different-value" (property-value test-sheep 'var)))
     (is (equal "a different-value"  (get-var test-sheep)))
-    (is (equal "different-value" (get-property test-sheep 'var)))
+    (is (equal "different-value" (property-value test-sheep 'var)))
     (undefbuzzword get-var)))
 
 (test call-next-message
   "Tests proper dispatch of next-message on a call to (call-next-message)"
   (let ((test-sheep (clone () ((var "value")))))
-    (defmessage get-var (something) (get-property something 'var))
+    (defmessage get-var (something) (property-value something 'var))
     (is (equal "value" (get-var test-sheep)))
     (defmessage get-var ((sheep test-sheep)) (call-next-message))
     (is (equal "value" (get-var test-sheep)))
@@ -160,7 +161,7 @@ to their respective participants, with correct role-indexes, etc."
 (test next-message-p
   "Checks that next-message-p returns T or NIL when appropriate."
   (let ((test-sheep (clone () ((var "value")))))
-    (defmessage get-var (something) (get-property something 'var))
+    (defmessage get-var (something) (property-value something 'var))
     (is (equal "value" (get-var test-sheep)))
     (defmessage get-var ((sheep test-sheep)) (next-message-p))
     (is (equal t (get-var test-sheep)))

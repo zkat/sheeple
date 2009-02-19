@@ -1,5 +1,5 @@
 (asdf:defsystem sheeple
-  :version "Baahh"
+  :version "0.1"
   :description "Cheeky prototypes for Common Lisp"
   :author "Josh Marchan <sykopomp@sykosomatic.org>"
   :licence "MIT"

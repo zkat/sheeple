@@ -5,7 +5,7 @@ Sheeple is a Dynamic, CLOS-like Prototype-based Object-Oriented Programming Syst
 strives to maximize application flexibility, minimize cost while maximizing value, optimize
 programmer time, and empower application implementers to better assist them leveraging modern
 paradigms in order to proactively achieve next-gen synergy in tomorrow's web 3.0 world. It is
-implemented in (mostly)^ ANSI Common Lisp. Sheeple is fully buzzword compliant.
+implemented in (mostly) ANSI Common Lisp. Sheeple is fully buzzword compliant.
 
 Initially written as the object system of a text-based game online game engine ([Sykosomatic][9]),
 Sheeple is provided as a module separate from its persistent counterpart, Persistent-Sheeple, as a
@@ -38,9 +38,7 @@ This README contains a basic usage guide, and sort-of-spec of Sheeple. Much heav
 including a tutorial and a MSP spec is to come. Meanwhile, have fun reading the code (hohoho).
 
 ^this implementation makes use of trivial-garbage for weak-pointers, finalizers, and
- weak-hash-tables. If your lisp does not support those or has issues with them, you might run into
- problems. The use of these is mostly for efficiency purposes, and an older implementation that uses
- only plain CL is available in the `stable' branch on github.
+ weak-hash-tables. The current version also only supports SBCL.
 
 Disclaimer
 ----------
@@ -81,13 +79,11 @@ FiveAM is required if you wish to run the test suite. To run it:
 
 And watch the tests roll by. Only one should fail (CLOS Fleecing)
 
-
 Notes
 -----
-
-Sheeple should work on just about every implementation out there with a working CLOS
-implementation. It is developed and tested on SBCL, but tests on other implementations would be
-greatly appreciated. 
+If you want to get Sheeple to run on your favorite platform, feel free to e-mail me: sykopomp
+. sykosomatic dot org, I'll help as much as I can (or even do the work for you). Any and all
+comments are also greatly appreciated.
 
 
 Features
@@ -292,17 +288,11 @@ push. Returns the CHILD object.
         (add-parent *kiddo's-descendant* *kiddo*) => ERROR: SHEEP-HIERARHY-ERROR
 
 
-* The function REMOVE-PARENT receives a PARENT sheep and a CHILD sheep. It also takes an optional
-:keep-properties value that can be T or NIL. If T, it will copy all of PARENT's direct-properties
-into CHILD before removing the parent from the child's direct-parents. If NIL, the parent's
-direct-properties will no longer apply to child. Returns the CHILD object.
+* The function REMOVE-PARENT receives a PARENT sheep and a CHILD sheep.
         
         (remove-parent *daddy* *kiddo*) 
         => KIDDO object, without *daddy*'s direct-property values.
        
-        (remove-parent *daddy* *kiddo* :keep-properties t) 
-        => KIDDO object, with a copy of *daddy*'s direct-properties.
-
 
 ### == Properties ==
 

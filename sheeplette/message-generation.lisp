@@ -163,11 +163,11 @@
        for sheep in sheeple
        for i upto (1- (length sheeple))
        do (let ((role (clone (role-metasheep)
-			((name name)
-			 (position i)
-			 (message-pointer message)))))
-		  (push role
-			(sheep-direct-roles sheep))))))
+			     ((name name)
+			      (position i)
+			      (message-pointer message)))))
+	    (push role
+		  (sheep-direct-roles sheep))))))
 
 (defun undefine-message (name &key qualifiers participants)
   (remove-messages-with-name-qualifiers-and-participants name qualifiers participants))

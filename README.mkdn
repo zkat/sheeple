@@ -9,7 +9,7 @@ implemented in (mostly)^ ANSI Common Lisp. Sheeple is fully buzzword compliant.
 
 Initially written as the object system of a text-based game online game engine ([Sykosomatic][9]),
 Sheeple is provided as a module separate from its persistent counterpart, Persistent-Sheeple, as a
-standalone portable library for use with any regular Lisp application.
+standalone library for use with any regular Lisp application.
 
 Following the implementation of Sheeple's Metasheep Protocol, Persistent-Sheeple is being rewritten
 to take full advantage of the protocol, allowing parallel operation of regular sheeple with psheep.
@@ -50,6 +50,12 @@ maximally groan-worthy with its naming scheme. I apologize in advance, and I am 
 any issues the naming scheme might cause, such as Chronic Smug Weenie Nose-Tilting Syndrome.
 
 I assure you, Sheeple is Serious Business(tm) for Serious Applications(tm).
+
+Supported Platforms
+-------------------
+While portability is one of the goals for Sheeple, only SBCL is officially supported right now. It
+has been tested on several platforms and operating systems, and passes all tests on them.
+
 
 Loading Sheeple
 ---------------
@@ -123,6 +129,8 @@ Planned features that have not yet been implemented include:
 * More convenience tools for inspection
 
 * CLOS integration, including autoboxing of entire class hierarchies.
+
+* Support more than just SBCL
 
 
 Using Sheeple

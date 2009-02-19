@@ -3,13 +3,11 @@
   (:export
 
    ;; Cloning and management
-   :=dolly= ;Ancestor of everything
+   :=t=
+   :=dolly=
    :print-sheep
    :clone
-   :sheep-hierarchy-error ;error
-   :mitosis-error ;error
-   :probably-meant-to-be-option ;error
-   :invalid-option-error ;error
+   :sheep-hierarchy-error
    :sheep-p
    :add-parent
    :remove-parent
@@ -17,52 +15,30 @@
    :ancestor-p
    :direct-child-p
    :descendant-p
-   
-   ;; Introspection
-   :sid
-   :sheep-direct-parents
-   :sheep-direct-roles
-   :sheep-nickname
 
    ;; Property access
    :unbound-property ;error
-   :get-property
+   :property-value
    :available-properties
    :remove-property
    :who-sets
    :has-property-p
    :has-direct-property-p
-
-   ;; Locking
-   :locked-property ;error
-   :property-locking-error ;error
-   :property-locked-p
-   :lock-property
-   :unlock-property
-   :toggle-lock
-   :lock-sheep
-   :unlock-sheep
-
+   
    ;; Buzzwords
-   :defbuzzword
    :clobbering-function-definition
+   :defbuzzword
    :defmessage
    :undefbuzzword
-   :undefmesage
-   :search-messages
-   :find-buzzword
+   :undefmessage
    :participant-p
    :available-messages
    :sheepify
-   :sheepify-list
-   :message-pointer ;used on Roles to get actual message object
-   :message-function ;used on message objects to access executable function
-   :message-body ;Contains list-form of message
 
-   ;; Fleeces -- wrappers around built-in types
-   :fleece-of ; returns the appropriate fleece for a wolf. Good for getting an idea of what is what.
-   :find-fleeced-wolf ; returns a fleeced version of object
-   ;; built-in fleeces, these correspond directly to lisp types
+   ;; Fleeces
+   :fleece-of ;returns the appropriate sheep for a wolf. Good for getting an idea of what is what.
+   :find-fleeced-wolf ;returns a fleeced version of a wolf
+   ;; built-in fleeces
    :=white-fang=
    :=symbol=
    :=sequence=
@@ -85,14 +61,11 @@
    :=integer=
    :=float=
 
-   ;; MOP
-   :standard-sheep
-   :standard-sheep-property
-   :sid
-   :sheep-nickname
+   ;; MOP-related
+   ;; It's a little small right now...
    :sheep-direct-parents
-   :sheep-direct-children
    :sheep-direct-roles
+   :sheep-nickname
    :sheep-hierarchy-list
    ))
 

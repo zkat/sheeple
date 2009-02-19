@@ -1,7 +1,7 @@
 ;; bootstrap.lisp
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(in-package :sheeplette)
+(in-package :sheeple)
 
 (defvar =standard-sheep-metasheep=
   (let ((object (make-hash-table :test #'equal)))

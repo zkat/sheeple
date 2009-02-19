@@ -1,7 +1,7 @@
 ;; sheep-creation.lisp
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(in-package :sheeplette)
+(in-package :sheeple)
 
 (defparameter the-standard-sheep-metasheep-form
   '(clone ()

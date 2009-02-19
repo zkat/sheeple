@@ -114,7 +114,7 @@ properly signal SHEEP-HIERARCHY-ERROR."
     (is (= 1 (account-number sheep)))
     (is (= 1 max-acc-nums))
     (let ((new-sheep (clone (sheep) ())))
-      (is (= 2 (account-number sheep)))
+      (is (= 2 (account-number new-sheep)))
       (is (= 2 max-acc-nums)))))
 
 (in-suite clone-options)

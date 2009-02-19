@@ -269,7 +269,8 @@
   (mapc (lambda (parent)
 	  (maphash 
 	   (lambda (key value) 
-	     (setf (property-value sheep key) value)) (sheep-direct-properties parent)))
+	     (setf (property-value sheep key) value))
+	   (sheep-direct-properties parent)))
 	(sheep-direct-parents sheep)))
 
 ;;; Inheritance setup

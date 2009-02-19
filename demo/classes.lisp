@@ -23,7 +23,8 @@
 	 ((name "Jenny")
 	  (phone "543-867-5309"))))
 
-(defbuzzword greet "Greets a person")
+(defbuzzword greet
+    (:documentation "Greets a person"))
 (defmessage greet ((person =person=))
   (format t "Hello, ~a" (name person)))
 (defmessage greet ((person *jenny*))
@@ -52,12 +53,11 @@
 ;;
 ;; Things to note:
 ;; * No advanced method combination
-;; * Currently no :initform equivalent (planned)
 ;; * No need for class allocation (can simply keep data in prototype)
 ;; * with-properties and with-manipulators macros have not been written yet.
-;; * No distinction between classes and objects. The =foo= scheme is only stylistic
-;;   sugar denoting that the object is used more as a prototype.
-;; * Message definition is on actual objects, not on classes or 'named prototypes'
+;; * No distinction between classes and objects. The =foo= scheme is only stylistic,
+;;   denoting that the object is used as a prototype.
+;; * Message definition is on actual objects, not on classes or 'named prototypes'.
 ;; * The hierarchy list for sheep works identically to CLOS's class precedence list (same sorting)
 ;; * Since Sheeple's messages can dispatch on arg lists of variable length, there is no
 ;;   readily available information about what arguments a buzzword expects.
@@ -74,11 +74,12 @@
 	   0
 	   :manipulator balance)
 	  (account-number 
-	   (incf *max-acc-num*)    ; :initform-like behavior can be achieved by defining messages.
-	   :reader account-number) ; I'm working on including auto-generation of the message with
-	  (account-type            ; a :cloneform option. Being a regular message, it can be changed
-	   :bronze                 ; or removed completely later.
-	   :manipulator type))))
+	   (incf *max-acc-num*)    
+	   :reader account-number
+	   :cloneform (incf *max-acc-num*))
+	  (account-type            
+	   :bronze                 
+	   :manipulator account-type))))
 
 (defvar =checking-account=
   (clone (=bank-account=)
@@ -102,29 +103,25 @@
 	 ((customer-name
 	   "The Prez Man")
 	  (balance
-	   9001)
-	  (account-number
-	   (incf *max-acc-num*)))))
+	   9001))))
 
 (defvar *account*
-  (clone (=bank-acount=)
+  (clone (=bank-account=)
 	 ((customer-name
 	   "Jane Doe")
 	  (balance
-	   1000)
-	  (account-number
-	   (incf *max-acc-num*))))) ; note the annoying repetition. 
-                                    ; Again, a :cloneform option will solve it.
+	   1000))))
 
-(defbuzzword withdraw "Withdraw the specified amount from the account.
-Signal an error if the current balance is less than AMOUNT.")
+(defbuzzword withdraw
+    (:documentation "Withdraw the specified amount from the account.
+Signal an error if the current balance is less than AMOUNT."))
 (defmessage withdraw ((account =bank-account=) amount)
   (when (< (balance account) amount)
     (error "Account overdrawn."))
   (decf (balance account) amount))
 
 (defmessage withdraw :before ((account =checking-account=) amount)
-	    (let ((overdraft (- amount (balance-account))))
+	    (let ((overdraft (- amount (balance account))))
 	      (when (plusp overdraft)
 		(withdraw (overdraft-account account) overdraft)
 		(incf (balance account) overdraft))))
@@ -138,6 +135,6 @@ Signal an error if the current balance is less than AMOUNT.")
       (incf (balance account) (embezzle *bank* overdraft)))))
 
 ;; This is written in PCL using the with-slots macro.
-(defmessage asses-low-balance-penalty ((account =bank-account=))
+(defmessage assess-low-balance-penalty ((account =bank-account=))
   (when (< (balance account) *minimum-balance*)
     (decf (balance account) (* (balance account) .01))))

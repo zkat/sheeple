@@ -1,7 +1,7 @@
 ;; message-dispatch.lisp
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(in-package :sheeplette)
+(in-package :sheeple)
 
 (defun primary-message-p (message)
   (null (message-qualifiers message)))

@@ -1,7 +1,7 @@
 (asdf:defsystem sheeple
   :version "Baahh"
-  :description "Clone-crazy hackery tool"
-  :author "Josh <sykopomp@sykosomatic.org>"
+  :description "Cheeky prototypes for Common Lisp"
+  :author "Josh Marchan <sykopomp@sykosomatic.org>"
   :licence "MIT"
   :depends-on ()
   :serial t
@@ -12,10 +12,14 @@
 	    ((:file "trivial-garbage")
 	     (:file "packages")
 	     (:file "utils")
-	     (:file "sheeple")
-	     (:file "clone")
-	     (:file "compatibility")
+	     (:file "property-access")
+	     (:file "sheep-creation")
+	     (:file "wolves")
 	     (:file "buzzwords")
-	     (:file "post-boot")))))
+	     (:file "message-generation")
+	     (:file "message-dispatch")
+	     (:file "bootstrap")
+	     (:file "post-boot")
+	     (:file "glue")))))
 
 

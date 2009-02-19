@@ -1,6 +1,6 @@
 ;; property-access.lisp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(in-package :sheeplette)
+(in-package :sheeple)
 
 (defparameter *secret-unbound-value* (gensym))
 (defparameter *secret-sheep-identifier* (gensym))

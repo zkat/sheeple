@@ -1,4 +1,4 @@
-(in-package :sheeplette)
+(in-package :sheeple)
 ;;;
 ;;; Wolves and fleecing
 ;;;

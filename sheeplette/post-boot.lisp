@@ -12,11 +12,6 @@
 (defmessage print-sheep (sheep stream)
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Standard Sheep~@[ AKA: ~a~]" (sheep-nickname sheep))))
-(defmethod print-object :around (sheep stream)
-  (if (sheep-p sheep)
-      (print-sheep sheep stream)
-      (call-next-method)))
-
 (defmessage print-sheep ((sheep =white-fang=) stream)
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Fleeced Wolf~@[ AKA: ~a~]" (sheep-nickname sheep))))
@@ -29,7 +24,7 @@
 (defmessage print-sheep ((sheep =standard-message-metasheep=) stream)
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Standard Message: ~a" (message-name sheep))))
- (defmessage print-sheep ((sheep =standard-role-metasheep=) stream)
+(defmessage print-sheep ((sheep =standard-role-metasheep=) stream)
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Standard Role: ~a" (role-name sheep))))
 

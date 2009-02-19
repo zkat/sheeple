@@ -22,5 +22,7 @@
 	     (:file "message-generation")
 	     (:file "message-dispatch")
 	     (:file "bootstrap")
-	     (:file "post-boot")))))
+	     (:file "post-boot")
+	     (:file "glue")))))
+
 

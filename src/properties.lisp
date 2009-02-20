@@ -1,6 +1,6 @@
 ;; This file is part of Sheeple
 
-;; property-access.lisp
+;; properties.lisp
 ;;
 ;; Property access, inspection, and management stuff, for the most part.
 ;;

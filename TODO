@@ -1,29 +1,20 @@
-Minor (1-2 hours)
-* Port some PCL code to Sheeple as a demo
+0.2
+* Write stuff to inspect and manipulate cloneforms
 * Reorganize code a bit (see header comments)
 
-Medium (3-5 hours)
-* Implement fixed-size lambda lists?
-* Write proper documentation (maybe wait until design is stable?)
+0.3
+* Write enough of a property-access MOP to be able to write psheep
 * Write more unit tests, with more detail
+* Implement fixed-size lambda lists?
 
-Major (6+ hours)
+0.5
+* Write two small sample applications
+
+1.0
+Minor
+* Proper documentation with tutorial and user's guide
+* Port some PCL code to Sheeple as a demo
+Major
 * Optimize the shit out of property-access
 * Optimize the shit out of message dispatch
-* Write enough of a property-access MOP to be able to write psheep
-* Fleece CLOS?
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+* Fleece CLOS

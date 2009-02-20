@@ -8,13 +8,6 @@
 
 (defparameter *secret-sheep-identifier* (gensym))
 
-(defun sheep-metasheep (sheep)
-  (gethash 'metasheep sheep))
-
-(defun (setf sheep-metasheep) (new-value sheep)
-  (declare (ignore new-value sheep))
-  (error "Adding or changing metasheep is not supported right now."))
-
 (defun sheep-p (sheep)
   (when (and (hash-table-p sheep)
 	     (eql (gethash *secret-sheep-identifier* sheep)
@@ -53,7 +46,11 @@
       nil
       :cloneform nil))))
 
-;; NOTE: the setf for this should really reinitialize the sheep
+(defun sheep-metasheep (sheep)
+  (gethash 'metasheep sheep))
+(defun (setf sheep-metasheep) (new-value sheep)
+  (declare (ignore new-value sheep))
+  (error "Adding or changing metasheep is not supported right now."))
 
 (defun sheep-nickname (sheep)
   (if (std-sheep-p sheep)
@@ -388,72 +385,6 @@
       (when (not (null common))
         (return-from std-tie-breaker-rule (car common))))))
 
-;;;
-;;; Macro
-;;;
-(defmacro clone (sheeple properties &rest options)
-  "Standard sheep-generation macro"
-  `(spawn-sheep
-    ,(canonize-sheeple sheeple)
-    ,(canonize-properties properties)
-    ,@(canonize-clone-options options)))
-
-(defun canonize-sheeple (sheeple)
-  `(list ,@(mapcar #'canonize-sheep sheeple)))
-
-(defun canonize-sheep (sheep)
-  `(confirm-sheep ,sheep))
-
-(defun confirm-sheep (sheep)
-  sheep)
-
-(defun canonize-properties (properties)
-  `(list ,@(mapcar #'canonize-property properties)))
-
-(defun canonize-property (property)
-  (if (symbolp property)
-      `(list :name ',property)
-      (let ((name (car property))
-	    (value (cadr property))
-            (readers nil)
-            (writers nil)
-	    (cloneform *secret-unbound-value*)
-            (other-options nil))
-        (do ((olist (cddr property) (cddr olist)))
-            ((null olist))
-	  (case (car olist)
-	    (:value
-	     (setf value (cadr olist)))
-	    (:val
-	     (setf value (cadr olist)))
-            (:reader 
-             (pushnew (cadr olist) readers))
-            (:writer 
-             (pushnew (cadr olist) writers))
-            (:manipulator
-             (pushnew (cadr olist) readers)
-             (pushnew `(setf ,(cadr olist)) writers))
-	    (:cloneform
-	     (setf cloneform (cadr olist)))
-	    (otherwise 
-             (pushnew (cadr olist) other-options)
-             (pushnew (car olist) other-options))))
-	(if other-options
-	    (error "Invalid property option(s)")
-	    `(list
-	      :name ',name
-	      :value ,value
-	      ,@(when (not (eql cloneform *secret-unbound-value*))
-		      `(:cloneform ',cloneform :clonefunction (lambda () ,cloneform)))
-	      ,@(when readers `(:readers ',readers))
-	      ,@(when writers `(:writers ',writers)))))))
-
-(defun canonize-clone-options (options)
-  (mapappend #'canonize-clone-option options))
-
-(defun canonize-clone-option (option)
-  (list `',(car option) (cadr option)))
-
 ;;; Inheritance predicates
 (defun direct-parent-p (maybe-parent child)
   (when (member maybe-parent (gethash 'parents child))
@@ -469,47 +400,3 @@
 
 (defun descendant-p (maybe-descendant ancestor)
   (ancestor-p ancestor maybe-descendant))
-
-;;;
-;;; Hierarchy Resolution
-;;;
-(defun collect-parents (sheep)
-  (labels ((all-parents-loop (seen parents)
-	     (let ((to-be-processed
-		    (set-difference parents seen)))
-	       (if (null to-be-processed)
-		   parents
-		   (let ((sheep-to-process
-			  (car to-be-processed)))
-		     (all-parents-loop
-		      (cons sheep-to-process seen)
-		      (union (gethash 'parents sheep-to-process)
-			     parents)))))))
-    (all-parents-loop () (list sheep))))
-
-(defun compute-sheep-hierarchy-list (sheep)
-  (handler-case 
-      (let ((sheeple-to-order (collect-parents sheep)))
-  	(topological-sort sheeple-to-order
-			  (remove-duplicates
-			   (mapappend #'local-precedence-ordering
-				      sheeple-to-order))
-			  #'std-tie-breaker-rule))
-    (simple-error ()
-      (error 'sheep-hierarchy-error))))
-
-(define-condition sheep-hierarchy-error (sheeple-error) ()
-  (:documentation "Signaled whenever there is a problem computing the hierarchy list."))
-
-(defun local-precedence-ordering (sheep)
-  (mapcar #'list
-	  (cons sheep
-		(butlast (gethash 'parents sheep)))
-	  (gethash 'parents sheep)))
-
-(defun std-tie-breaker-rule (minimal-elements cpl-so-far)
-  (dolist (cpl-constituent (reverse cpl-so-far))
-    (let* ((supers (gethash 'parents cpl-constituent))
-           (common (intersection minimal-elements supers)))
-      (when (not (null common))
-        (return-from std-tie-breaker-rule (car common))))))

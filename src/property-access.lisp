@@ -217,6 +217,12 @@
 	    (remhash property-name cloneform-table)
 	    (remhash property-name clonefun-table))))))
 
+(defmacro add-cloneform (sheep property-name form)
+  `(let ((clonefun (lambda () ,form)))
+     (setf (get-cloneform ,sheep ,property-name) ,form)
+     (setf (get-clonefunction ,sheep ,property-name) clonefun)
+     (values)))
+
 ;;;
 ;;; Memoization
 ;;;

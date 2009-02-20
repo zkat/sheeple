@@ -5,33 +5,12 @@
 ;; Property access, inspection, and management stuff, for the most part.
 ;;
 ;; TODO:
-;; * Get all the non-property-access-related stuff out of here
-;;   (sheep-p and company, sheep-hierarchy-list-related stuff)
 ;; * Write stuff to inspect and manage cloneforms in a nicer way.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
 (defparameter *secret-unbound-value* (gensym))
-(defparameter *secret-sheep-identifier* (gensym))
 (define-condition unbound-property (sheeple-error) ())
-
-(defun sheep-metasheep (sheep)
-  (gethash 'metasheep sheep))
-
-(defun (setf sheep-metasheep) (new-value sheep)
-  (declare (ignore new-value sheep))
-  (error "Adding or changing metasheep is not supported right now."))
-
-(defun sheep-p (sheep)
-  (when (and (hash-table-p sheep)
-	     (eql (gethash *secret-sheep-identifier* sheep)
-		  *secret-sheep-identifier*))
-    t))
-
-(defun std-sheep-p (sheep)
-  (and (sheep-p sheep)
-       (eql (sheep-metasheep sheep)
-	    nil)))
 
 ;;;
 ;;; Property Access
@@ -249,47 +228,3 @@
     (mapc (lambda (descendant) 
 	    (memoize-sheep-hierarchy-list (weak-pointer-value descendant)))
 	  (gethash 'children sheep))))
-
-;;;
-;;; Hierarchy Resolution
-;;;
-(defun collect-parents (sheep)
-  (labels ((all-parents-loop (seen parents)
-	     (let ((to-be-processed
-		    (set-difference parents seen)))
-	       (if (null to-be-processed)
-		   parents
-		   (let ((sheep-to-process
-			  (car to-be-processed)))
-		     (all-parents-loop
-		      (cons sheep-to-process seen)
-		      (union (gethash 'parents sheep-to-process)
-			     parents)))))))
-    (all-parents-loop () (list sheep))))
-
-(defun compute-sheep-hierarchy-list (sheep)
-  (handler-case 
-      (let ((sheeple-to-order (collect-parents sheep)))
-  	(topological-sort sheeple-to-order
-			  (remove-duplicates
-			   (mapappend #'local-precedence-ordering
-				      sheeple-to-order))
-			  #'std-tie-breaker-rule))
-    (simple-error ()
-      (error 'sheep-hierarchy-error))))
-
-(define-condition sheep-hierarchy-error (sheeple-error) ()
-  (:documentation "Signaled whenever there is a problem computing the hierarchy list."))
-
-(defun local-precedence-ordering (sheep)
-  (mapcar #'list
-	  (cons sheep
-		(butlast (gethash 'parents sheep)))
-	  (gethash 'parents sheep)))
-
-(defun std-tie-breaker-rule (minimal-elements cpl-so-far)
-  (dolist (cpl-constituent (reverse cpl-so-far))
-    (let* ((supers (gethash 'parents cpl-constituent))
-           (common (intersection minimal-elements supers)))
-      (when (not (null common))
-        (return-from std-tie-breaker-rule (car common))))))

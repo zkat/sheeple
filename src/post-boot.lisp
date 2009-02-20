@@ -6,6 +6,34 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
+;;; with-*
+(defmacro with-properties (properties sheep &body body)
+  (let ((sh (gensym)))
+    `(let ((,sh ,sheep))
+       (symbol-macrolet ,(mapcar (lambda (property-entry)
+				   (let ((var-name
+					  (if (symbolp property-entry)
+					      property-entry
+					      (car property-entry)))
+					 (property-name
+					  (if (symbolp property-entry)
+					      property-entry
+					      (cadr property-entry))))
+				     `(,var-name
+				       (property-value ,sh ',property-name))))
+				 properties)
+	 ,@body))))
+
+(defmacro with-manipulators (properties sheep &body body)
+  (let ((sh (gensym)))
+    `(let ((,sh ,sheep))
+       (symbol-macrolet ,(mapcar (lambda (property-entry)
+				   (let ((var-name (car property-entry))
+					 (manipulator-name (cadr property-entry)))
+				     `(,var-name (,manipulator-name ,sh))))
+				 properties)
+	 ,@body))))
+
 ;;;
 ;;; Printing sheep!
 ;;;

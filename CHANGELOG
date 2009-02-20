@@ -9,3 +9,6 @@ Features -
   * small code cleanup
   * New tools for inspecting and manipulating cloneforms
   * Property access speedup -- all property keys must now be symbols
+
+Bugfixes -
+  NIL

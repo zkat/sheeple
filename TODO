@@ -1,16 +1,32 @@
 0.3
-* Write enough of a property-access MOP to be able to write psheep
-* Write more unit tests, with more detail
 * Implement fixed-size lambda lists
+
+0.4
+* Write more unit tests, with more detail
+* Fix all the bugs tests come up with
 
 0.5
 * Write two small sample applications
+* Write enough of a property-access MOP to be able to write psheep
+
+0.6
+* Port some PCL code to Sheeple as a demo
+* Set up a framework for writing docs for everything, maybe some webpages
+* Continue writing MOP stuff, based on AMOP
+
+0.7
+* Fleece CLOS
+* More MOP
+
+0.8
+* Optimize the shit out of property-access
+
+0.9
+* Optimize the shit out of message dispatch
 
 1.0
-Minor
-* Proper documentation with tutorial and user's guide
-* Port some PCL code to Sheeple as a demo
-Major
-* Optimize the shit out of property-access
-* Optimize the shit out of message dispatch
-* Fleece CLOS
+* Complete documentation with tutorial and user's guide
+
+
+
+

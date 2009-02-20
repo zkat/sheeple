@@ -1,5 +1,8 @@
+;; This file is part of Sheeple
+
 ;; sheep-creation.lisp
 ;;
+;; Sheep creation, cloning, inspection
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 

@@ -1,3 +1,5 @@
+;; This file is part of Sheeple
+
 ;; post-boot.lisp
 ;;
 ;; Once sheeple is booted up, we can define buzzwords/messages normally

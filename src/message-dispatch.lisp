@@ -1,5 +1,8 @@
+;; This file is part of Sheeple
+
 ;; message-dispatch.lisp
 ;;
+;; Message execution and dispatch
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 

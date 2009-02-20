@@ -34,7 +34,7 @@
 	    nil)))
 
 ;;;
-;;; property access
+;;; Property Access
 ;;;
 
 (defun property-value (sheep property-name)
@@ -83,48 +83,6 @@
   (loop for child-pointer in (gethash 'children sheep)
      do (memoize-property-access (weak-pointer-value child-pointer)))
   new-value)
-
-(defun get-cloneform (sheep property-name)
-  (if (std-sheep-p sheep)
-      (std-get-cloneform sheep property-name)
-      (get-cloneform-using-metasheep (sheep-metasheep sheep) sheep property-name)))
-(defun std-get-cloneform (sheep property-name)
-  (loop for obj in (sheep-hierarchy-list sheep)
-       do (let ((cloneform-table (gethash 'cloneforms obj)))
-	    (multiple-value-bind (value has-p)
-		(gethash property-name cloneform-table)
-	      (when has-p
-		(return-from std-get-cloneform value))))
-       finally (return *secret-unbound-value*)))
-
-(defun (setf get-cloneform) (new-value sheep property-name)
-  (if (std-sheep-p sheep)
-      (setf (std-get-cloneform sheep property-name) new-value)
-      (setf-get-cloneform-using-metasheep
-       new-value (sheep-metasheep sheep) sheep property-name)))
-(defun (setf std-get-cloneform) (new-value sheep property-name)
-  (setf (gethash property-name (gethash 'cloneforms sheep)) new-value))
-
-(defun get-clonefunction (sheep property-name)
-  (if (std-sheep-p sheep)
-      (std-get-clonefunction sheep property-name)
-      (get-clonefunction-using-metasheep (sheep-metasheep sheep) sheep property-name)))
-(defun std-get-clonefunction (sheep property-name)
-  (loop for obj in (sheep-hierarchy-list sheep)
-       do (let ((clonefunction-table (gethash 'clonefunctions obj)))
-	    (multiple-value-bind (value has-p)
-		(gethash property-name clonefunction-table)
-	      (when has-p
-		(return-from std-get-clonefunction value))))
-       finally (return *secret-unbound-value*)))
-
-(defun (setf get-clonefunction) (new-value sheep property-name)
-  (if (std-sheep-p sheep)
-      (setf (std-get-clonefunction sheep property-name) new-value)
-      (setf-get-clonefunction-using-metasheep
-       new-value (sheep-metasheep sheep) sheep property-name)))
-(defun (setf std-get-clonefunction) (new-value sheep property-name)
-  (setf (gethash property-name (gethash 'clonefunctions sheep)) new-value))
 
 (defun remove-property (sheep property-name)
   (if (std-sheep-p sheep)
@@ -175,6 +133,51 @@
      (flatten
       (append obj-keys (mapcar #'available-properties (gethash 'parents sheep)))))))
 
+;;;
+;;; Cloneforms/functions
+;;;
+(defun get-cloneform (sheep property-name)
+  (if (std-sheep-p sheep)
+      (std-get-cloneform sheep property-name)
+      (get-cloneform-using-metasheep (sheep-metasheep sheep) sheep property-name)))
+(defun std-get-cloneform (sheep property-name)
+  (loop for obj in (sheep-hierarchy-list sheep)
+       do (let ((cloneform-table (gethash 'cloneforms obj)))
+	    (multiple-value-bind (value has-p)
+		(gethash property-name cloneform-table)
+	      (when has-p
+		(return-from std-get-cloneform value))))
+       finally (return *secret-unbound-value*)))
+
+(defun (setf get-cloneform) (new-value sheep property-name)
+  (if (std-sheep-p sheep)
+      (setf (std-get-cloneform sheep property-name) new-value)
+      (setf-get-cloneform-using-metasheep
+       new-value (sheep-metasheep sheep) sheep property-name)))
+(defun (setf std-get-cloneform) (new-value sheep property-name)
+  (setf (gethash property-name (gethash 'cloneforms sheep)) new-value))
+
+(defun get-clonefunction (sheep property-name)
+  (if (std-sheep-p sheep)
+      (std-get-clonefunction sheep property-name)
+      (get-clonefunction-using-metasheep (sheep-metasheep sheep) sheep property-name)))
+(defun std-get-clonefunction (sheep property-name)
+  (loop for obj in (sheep-hierarchy-list sheep)
+       do (let ((clonefunction-table (gethash 'clonefunctions obj)))
+	    (multiple-value-bind (value has-p)
+		(gethash property-name clonefunction-table)
+	      (when has-p
+		(return-from std-get-clonefunction value))))
+       finally (return *secret-unbound-value*)))
+
+(defun (setf get-clonefunction) (new-value sheep property-name)
+  (if (std-sheep-p sheep)
+      (setf (std-get-clonefunction sheep property-name) new-value)
+      (setf-get-clonefunction-using-metasheep
+       new-value (sheep-metasheep sheep) sheep property-name)))
+(defun (setf std-get-clonefunction) (new-value sheep property-name)
+  (setf (gethash property-name (gethash 'clonefunctions sheep)) new-value))
+
 (defun available-cloneforms (sheep)
   (if (std-sheep-p sheep)
       (std-available-cloneforms sheep)
@@ -186,7 +189,21 @@
      (flatten
       (append obj-keys (mapcar #'available-cloneforms (gethash 'parents sheep)))))))
 
+(defun cloneform-owner (sheep property-name)
+  (if (std-sheep-p sheep)
+      (std-cloneform-owner sheep property-name)
+      (cloneform-owner-using-metashep (sheep-metasheep sheep) sheep property-name)))
+(defun std-cloneform-owner (sheep property-name)
+  (find-if (lambda (sheep-obj)
+	     (multiple-value-bind (value has-p)
+		 (gethash property-name (gethash 'cloneforms sheep-obj))
+	       (declare (ignore value))
+	       has-p))
+	   (sheep-hierarchy-list sheep)))
+
+;;;
 ;;; Memoization
+;;;
 (defun memoize-property-access (sheep)
   (loop for property in (available-properties sheep)
      do (let ((owner (%property-value-owner sheep property)))
@@ -213,7 +230,6 @@
 
 ;;;
 ;;; Hierarchy Resolution
-;;; - blatantly taken from Closette.
 ;;;
 (defun collect-parents (sheep)
   (labels ((all-parents-loop (seen parents)

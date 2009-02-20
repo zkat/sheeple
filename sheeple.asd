@@ -12,7 +12,7 @@
 	    ((:file "trivial-garbage")
 	     (:file "packages")
 	     (:file "utils")
-	     (:file "property-access")
+	     (:file "properties")
 	     (:file "sheep-creation")
 	     (:file "wolves")
 	     (:file "buzzwords")

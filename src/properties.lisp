@@ -17,6 +17,8 @@
 ;;;
 
 (defun property-value (sheep property-name)
+  (unless (symbolp property-name)
+    (error "Property-name must be a symbol"))
   (if (std-sheep-p sheep)
       (std-property-value sheep property-name)
       (property-value-using-metasheep (sheep-metasheep sheep) sheep property-name)))
@@ -51,6 +53,8 @@
 	(error 'unbound-property))))
 
 (defun (setf property-value) (new-value sheep property-name)
+  (unless (symbolp property-name)
+    (error "Property-name must be a symbol"))
   (if (std-sheep-p sheep)
       (setf (std-property-value sheep property-name) new-value)
       (setf-property-value-using-metasheep 
@@ -64,6 +68,8 @@
   new-value)
 
 (defun remove-property (sheep property-name)
+  (unless (symbolp property-name)
+    (error "Property-name must be a symbol"))
   (if (std-sheep-p sheep)
       (std-remove-property sheep property-name)
       (remove-property-using-metasheep (sheep-metasheep sheep) sheep property-name)))
@@ -80,6 +86,8 @@
     (unbound-property () nil)))
 
 (defun has-direct-property-p (sheep property-name)
+  (unless (symbolp property-name)
+    (error "Property-name must be a symbol"))
   (if (std-sheep-p sheep)
       (std-has-direct-property-p sheep property-name)
       (has-direct-property-p-using-metasheep 
@@ -91,6 +99,8 @@
     has-p))
 
 (defun who-sets (sheep property-name)
+  (unless (symbolp property-name)
+    (error "Property-name must be a symbol"))
   (if (std-sheep-p sheep)
       (std-who-sets sheep property-name)
       (who-sets-using-metasheep (sheep-metasheep sheep) sheep property-name)))
@@ -169,6 +179,8 @@
       (append obj-keys (mapcar #'available-cloneforms (gethash 'parents sheep)))))))
 
 (defun cloneform-owner (sheep property-name)
+  (unless (symbolp property-name)
+    (error "Property-name must be a symbol"))
   (if (std-sheep-p sheep)
       (std-cloneform-owner sheep property-name)
       (cloneform-owner-using-metasheep (sheep-metasheep sheep) sheep property-name)))
@@ -181,6 +193,8 @@
 	   (sheep-hierarchy-list sheep)))
 
 (defun remove-cloneform (sheep property-name)
+  (unless (symbolp property-name)
+    (error "Property-name must be a symbol"))
   (if (std-sheep-p sheep)
       (std-remove-cloneform sheep property-name)
       (remove-cloneform-using-metasheep (sheep-metasheep sheep) sheep property-name)))
@@ -198,6 +212,8 @@
 
 (defmacro add-cloneform (sheep property-name form)
   `(let ((clonefun (lambda () ,form)))
+     (unless (symbolp ,property-name)
+       (error "Property-name must be a symbol"))
      (setf (get-cloneform ,sheep ,property-name) ,form)
      (setf (get-clonefunction ,sheep ,property-name) clonefun)
      (values)))

@@ -1,6 +1,3 @@
-0.2
-* Reorganize code a bit (see header comments)
-
 0.3
 * Write enough of a property-access MOP to be able to write psheep
 * Write more unit tests, with more detail

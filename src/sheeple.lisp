@@ -34,11 +34,11 @@
       nil
       :cloneform nil)
      (properties
-      (make-hash-table :test #'equal)
-      :cloneform (make-hash-table :test #'equal))
+      (make-hash-table :test #'eq)
+      :cloneform (make-hash-table :test #'eq))
      (property-owners
-      (make-weak-hash-table :weakness :value :test #'equal)
-      :cloneform (make-weak-hash-table :test #'equal))
+      (make-weak-hash-table :weakness :value :test #'eq)
+      :cloneform (make-weak-hash-table :test #'eq))
      (roles
       nil
       :cloneform nil)
@@ -141,7 +141,7 @@
 ;;; sheep storage
 (defun std-generate-sheep-instance (metasheep)
   "Ex Nihilo creation of a standard sheep instance."
-  (let ((table (make-hash-table :test #'equal)))
+  (let ((table (make-hash-table :test #'eq)))
     (setf (gethash *secret-sheep-identifier* table)
 	  *secret-sheep-identifier*)
     (setf (gethash 'metasheep table) metasheep)
@@ -158,14 +158,14 @@
     ;; First we actually set up all the properties
     ;; The canonical required properties...
     (setf (gethash 'parents sheep) nil)
-    (setf (gethash 'properties sheep) (make-hash-table :test #'equal))
+    (setf (gethash 'properties sheep) (make-hash-table :test #'eq))
     (setf (gethash 'roles sheep) nil)
-    (setf (gethash 'cloneforms sheep) (make-hash-table :test #'equal))
-    (setf (gethash 'clonefunctions sheep) (make-hash-table :test #'equal))
+    (setf (gethash 'cloneforms sheep) (make-hash-table :test #'eq))
+    (setf (gethash 'clonefunctions sheep) (make-hash-table :test #'eq))
     ;; Additional properties
     (setf (gethash 'nickname sheep) nil)
     (setf (gethash 'children sheep) nil)
-    (setf (gethash 'property-owners sheep) (make-weak-hash-table :weakness :value :test #'equal))
+    (setf (gethash 'property-owners sheep) (make-weak-hash-table :weakness :value :test #'eq))
     (setf (gethash 'hierarchy-list sheep) nil)
     ;; Then we deal with the options
     (std-add-parents sheep parents)

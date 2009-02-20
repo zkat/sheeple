@@ -25,7 +25,14 @@
    :who-sets
    :has-property-p
    :has-direct-property-p
-   
+
+   ;; Cloneforms
+   :available-cloneforms
+   :cloneform-owner
+   :add-cloneform
+   :remove-cloneform
+   :get-cloneform ; don't setf this, please
+
    ;; Buzzwords
    :clobbering-function-definition
    :defbuzzword
@@ -40,7 +47,7 @@
    :fleece-of ;returns the appropriate sheep for a wolf. Good for getting an idea of what is what.
    :find-fleeced-wolf ;returns a fleeced version of a wolf
    ;; built-in fleeces
-   :=white-fang=
+   :=white-fang= ; parent of all built-in fleeces
    :=symbol=
    :=sequence=
    :=array=

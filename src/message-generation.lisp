@@ -1,5 +1,8 @@
+;; This file is part of Sheeple
+
 ;; message-generation.lisp
 ;;
+;; Message and role metasheeple, message definition and undefinition, role management.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 

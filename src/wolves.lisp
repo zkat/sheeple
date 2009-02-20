@@ -1,7 +1,10 @@
+;; This file is part of Sheeple
+
+;; wolves.lisp
+;;
+;; Fleecing and sheepification
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
-;;;
-;;; Wolves and fleecing
-;;;
 
 (defun fleece-of (x)
   (if (sheep-p x)

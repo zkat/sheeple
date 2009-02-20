@@ -1,4 +1,8 @@
+;; This file is part of Sheeple
+
 ;; bootstrap.lisp
+;;
+;; This creates all the base objects that will be used during cloning.
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)

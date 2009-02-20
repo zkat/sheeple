@@ -192,7 +192,7 @@
 (defun cloneform-owner (sheep property-name)
   (if (std-sheep-p sheep)
       (std-cloneform-owner sheep property-name)
-      (cloneform-owner-using-metashep (sheep-metasheep sheep) sheep property-name)))
+      (cloneform-owner-using-metasheep (sheep-metasheep sheep) sheep property-name)))
 (defun std-cloneform-owner (sheep property-name)
   (find-if (lambda (sheep-obj)
 	     (multiple-value-bind (value has-p)
@@ -200,6 +200,22 @@
 	       (declare (ignore value))
 	       has-p))
 	   (sheep-hierarchy-list sheep)))
+
+(defun remove-cloneform (sheep property-name)
+  (if (std-sheep-p sheep)
+      (std-remove-cloneform sheep property-name)
+      (remove-cloneform-using-metasheep (sheep-metasheep sheep) sheep property-name)))
+(defun std-remove-cloneform (sheep property-name)
+  (let ((cloneform-table (gethash 'cloneforms sheep))
+	(clonefun-table (gethash 'clonefunctions sheep)))
+    (multiple-value-bind (form has-p)
+	(gethash property-name cloneform-table)
+      (declare (ignore form))
+      (if (not has-p)
+	  nil
+	  (prog1 t
+	    (remhash property-name cloneform-table)
+	    (remhash property-name clonefun-table))))))
 
 ;;;
 ;;; Memoization

@@ -1,11 +1,10 @@
 0.2
-* Write stuff to inspect and manipulate cloneforms
 * Reorganize code a bit (see header comments)
 
 0.3
 * Write enough of a property-access MOP to be able to write psheep
 * Write more unit tests, with more detail
-* Implement fixed-size lambda lists?
+* Implement fixed-size lambda lists
 
 0.5
 * Write two small sample applications

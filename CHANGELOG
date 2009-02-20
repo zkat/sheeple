@@ -1,0 +1,11 @@
+0.1
+---
+Initial release
+
+0.2
+---
+Features - 
+  * with-properties and with-manipulators implemented
+  * small code cleanup
+  * New tools for inspecting and manipulating cloneforms
+  * Property access speedup -- all property keys must now be symbols

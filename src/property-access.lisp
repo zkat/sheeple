@@ -1,4 +1,13 @@
+;; This file is part of Sheeple
+
 ;; property-access.lisp
+;;
+;; Property access, inspection, and management stuff, for the most part.
+;;
+;; TODO:
+;; * Get all the non-property-access-related stuff out of here
+;;   (sheep-p and company, sheep-hierarchy-list-related stuff)
+;; * Write stuff to inspect and manage cloneforms in a nicer way.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 

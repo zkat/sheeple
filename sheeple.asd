@@ -14,6 +14,7 @@
 	     (:file "utils")
 	     (:file "properties")
 	     (:file "sheeple")
+	     (:file "clone")
 	     (:file "wolves")
 	     (:file "buzzwords")
 	     (:file "message-generation")

@@ -13,7 +13,7 @@
 	     (:file "packages")
 	     (:file "utils")
 	     (:file "properties")
-	     (:file "sheep-creation")
+	     (:file "sheeple")
 	     (:file "wolves")
 	     (:file "buzzwords")
 	     (:file "message-generation")

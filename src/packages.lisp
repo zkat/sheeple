@@ -25,6 +25,8 @@
    :who-sets
    :has-property-p
    :has-direct-property-p
+   :with-properties
+   :with-manipulators
 
    ;; Cloneforms
    :available-cloneforms

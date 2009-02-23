@@ -4,6 +4,9 @@
 ;;
 ;; Unit tests for src/sheeple.lisp
 ;;
+;; TODO:
+;; * cloneform inspection/manipulation tests
+;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple-tests)
 
@@ -16,6 +19,7 @@
 (def-suite sheep-cloning-tests :in sheeple)
 (def-suite sheep-properties-tests :in sheep-cloning-tests)
 (def-suite clone-options :in sheep-cloning-tests)
+(def-suite cloneform-tests :in sheep-cloning-tests)
 
 (in-suite sheep-cloning-tests)
 (test clone-basic
@@ -35,9 +39,6 @@ properly signal SHEEP-HIERARCHY-ERROR."
     (is (equal "bar" (property-value obj 'foo))))
   (let ((obj (clone () ((foo "bar") (baz "quux")))))
     (is (equal "quux" (property-value obj 'baz))))
-  ;; (let* ((obj1 (clone () ())) ;; no SIDs in sheeple
-  ;; 	 (obj2 (clone () ())))
-  ;;   (is (= 1 (- (sid obj2) (sid obj1)))))
   (signals sheep-hierarchy-error (let ((obj1 (clone () ()))
 				       (obj2 (clone () ())))
 				   (add-parent obj1 obj2)
@@ -104,6 +105,7 @@ properly signal SHEEP-HIERARCHY-ERROR."
     (is (equal "new-value" (set-var "new-value" test-sheep)))
     (is (equal "new-value" (var test-sheep)))))
 
+(in-suite cloneform-tests)
 (test cloneforms
   (let* ((max-acc-nums 0)
 	 (sheep (clone ()
@@ -116,6 +118,11 @@ properly signal SHEEP-HIERARCHY-ERROR."
     (let ((new-sheep (clone (sheep) ())))
       (is (= 2 (account-number new-sheep)))
       (is (= 2 max-acc-nums)))))
+
+;; (test cloneform-inspection
+;;   "Checks that the cloneform inspection tools return The Right Thing(tm)")
+;; (test cloneform-manipulation
+;;   "Changes to cloneforms should happen properly!")
 
 (in-suite clone-options)
 (test :deep-copy

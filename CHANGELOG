@@ -12,3 +12,10 @@ Features -
 
 Bugfixes -
   NIL
+
+0.3
+---
+Features -
+
+Bugfixes -
+  * Blocks are actually used in make-message-lambda. Oops.

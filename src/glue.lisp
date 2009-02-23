@@ -2,7 +2,7 @@
 
 ;; glue.lisp
 ;;
-;; Extra things that need to be run once sheeple itself is loaded.
+;; Extra glue things
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 

@@ -220,7 +220,7 @@
 	:qualifiers ',qualifiers
 	:lambda-list ,(extract-lambda-list lambda-list)
 	:participants ,(extract-participants lambda-list)
-	:function (block ,name ,(make-message-lambda lambda-list body))
+	:function ,(make-message-lambda lambda-list `((block ,name ,@body)))
 	:body '(block ,name ,@body)))))
 
 (defun make-message-lambda (lambda-list body)

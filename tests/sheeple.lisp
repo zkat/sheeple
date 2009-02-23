@@ -122,14 +122,25 @@ properly signal SHEEP-HIERARCHY-ERROR."
   "Tests the :deep-copy clone option. It's supposed to pull in
 all available property values from the sheep hierarchy and set them locally."
   (let* ((test-sheep (clone () ((var "value")) (:nickname "test-sheep")))
-	 (another-sheep (clone (test-sheep) ((other-var "other-value")) (:deep-copy t))))
+	 (another-sheep (clone (test-sheep) ((other-var "other-value"))))
+	 (third-sheep (clone (another-sheep) ((third-var "third-value")) (:deep-copy t))))
     (setf (property-value test-sheep 'var) "new-value")
     (is (equal "new-value" (property-value test-sheep 'var)))
-    (is (equal "value" (property-value another-sheep 'var)))))
+    (is (equal "value" (property-value third-sheep 'var)))))
 
-;; (test :copy-direct-values
-;;   "Tests the :copy-direct-values clone option. It pulls in only the direct-slots
-;; defined in the sheep that are being cloned.")
+(test :shallow-copy
+  "Tests the :copy-direct-values clone option. It pulls in only the direct-slots
+defined in the sheep that are being cloned."
+  (let* ((test-sheep (clone () ((var "value")) (:nickname "test-sheep")))
+	 (another-sheep (clone (test-sheep) ((other-var "other-value"))))
+	 (third-sheep (clone (another-sheep) ((third-var "third-value")) (:shallow-copy t))))
+    (setf (property-value test-sheep 'var) "new-value")
+    (is (equal "new-value" (property-value test-sheep 'var)))
+    (is (equal "new-value" (property-value third-sheep 'var)))
+    (is (equal "other-value" (property-value third-sheep 'other-var)))
+    (setf (property-value another-sheep 'other-var) "final-value")
+    (is (equal "other-value" (property-value third-sheep 'other-var)))
+    (is (equal "final-value" (property-value another-sheep 'other-var)))))
 
 (test :nickname
   "Tests the :nickname clone option"

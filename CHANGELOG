@@ -16,6 +16,7 @@ Bugfixes -
 0.3
 ---
 Features -
+  * More tests written
 
 Bugfixes -
-  * Blocks are actually used in make-message-lambda. Oops.
+  * Fixed issue with message blocks

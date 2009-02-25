@@ -196,7 +196,8 @@
 			:lambda-list '(sheep)
 			:participants (list sheep)
 			:body `(property-value sheep ',prop-name)
-			:function (eval (make-message-lambda '(sheep) 
+			:function (eval (make-message-lambda reader
+							     '(sheep) 
 							     `((property-value sheep ',prop-name)))))))
 
 (defun add-writers-to-sheep (writers prop-name sheep)
@@ -206,7 +207,8 @@
 			:lambda-list '(new-value sheep)
 			:participants (list =t= sheep)
 			:body `(setf (property-value sheep ',prop-name) new-value)
-			:function (eval (make-message-lambda '(new-value sheep) 
+			:function (eval (make-message-lambda writer
+							     '(new-value sheep) 
 							     `((setf (property-value sheep ',prop-name)
 								     new-value)))))))
 
@@ -233,8 +235,10 @@
 			      args)
 			  (cdr next-messages))))
 	  (declare (ignorable #'next-message-p #'call-next-message))
-	  (block ,name
-	   (apply
+	  (block ,(if (listp name)
+		      (cadr name)
+		      name)
+	    (apply
 	    (lambda ,(eval (extract-lambda-list lambda-list))
 	      ,@body) args)))))
 

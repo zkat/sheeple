@@ -1,6 +1,8 @@
 0.3
 * Write more unit tests, with more detail
 * Fix all the bugs tests come up with
+* Work out the whole conditions thing, and what they print out. Put them all somewhere.
+* Implement fixed-length lambda-lists
 
 0.4
 * Port some PCL code to Sheeple as a demo
@@ -25,6 +27,3 @@
 
 1.0
 * Complete documentation with tutorial and user's guide
-
-2.0
-* Decide if fixed-length lambda-lists are actually needed

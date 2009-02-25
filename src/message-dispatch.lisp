@@ -24,7 +24,7 @@
 (defun apply-buzzword (selector args)
   (let ((messages (find-applicable-messages selector
 					    (sheepify-list args))))
-    (apply-messages messages args)))
+    (block selector (apply-messages messages args))))
 
 (defun apply-messages (messages args)
   (let ((around (find-if #'around-message-p messages))

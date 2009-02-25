@@ -220,10 +220,10 @@
 	:qualifiers ',qualifiers
 	:lambda-list ,(extract-lambda-list lambda-list)
 	:participants ,(extract-participants lambda-list)
-	:function ,(make-message-lambda lambda-list `((block ,name ,@body)))
+	:function ,(make-message-lambda name lambda-list body)
 	:body '(block ,name ,@body)))))
 
-(defun make-message-lambda (lambda-list body)
+(defun make-message-lambda (name lambda-list body)
   `(lambda (args next-messages)
      (flet ((next-message-p ()
 		 (not (null next-messages)))
@@ -233,9 +233,10 @@
 			      args)
 			  (cdr next-messages))))
 	  (declare (ignorable #'next-message-p #'call-next-message))
-	  (apply
-	   (lambda ,(eval (extract-lambda-list lambda-list))
-	     ,@body) args))))
+	  (block ,name
+	   (apply
+	    (lambda ,(eval (extract-lambda-list lambda-list))
+	      ,@body) args)))))
 
 (defun parse-defmessage (args)
   (let ((name (car args))

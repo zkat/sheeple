@@ -15,6 +15,9 @@
     ((name
       'buzzword-metasheep
       :cloneform nil)
+     (lambda-list
+      nil
+      :cloneform nil)
      (message-metasheep
       =standard-message-metasheep=
       :cloneform =standard-message-metasheep=)

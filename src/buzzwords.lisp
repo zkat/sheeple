@@ -82,10 +82,16 @@
 ) ; end buzzword table closure
 
 (defun std-finalize-buzzword (buzzword)
-  (let ((name (buzzword-name buzzword)))
+  (let ((name (buzzword-name buzzword))
+	(fn (std-make-buzzword-lambda buzzword)))
     (when (fboundp name)
      (warn 'clobbering-function-definition))
-    (setf (fdefinition name) (lambda (&rest args) (apply-buzzword name args)))))
+    (setf (fdefinition name) fn)))
+
+;; TODO - this is gonna be pretty tricky ;|
+(defun std-make-buzzword-lambda (buzzword)
+  (let ((lambda-list (buzzword-lambda-list buzzword)))
+    (eval `(lambda lambda-list (apply-buzzword name args)))))
 
 (define-condition clobbering-function-definition (warning) ())
 (defun generate-sheep-standard-buzzword (metasheep 

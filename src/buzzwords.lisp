@@ -111,7 +111,7 @@
 
 (defun ensure-buzzword (name
 			&rest all-keys 
-			&key 
+			&key
 			(buzzword-metasheep =standard-buzzword-metasheep=)
 			(message-metasheep =standard-message-metasheep=)
 			(role-metasheep =standard-role-metasheep=)

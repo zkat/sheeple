@@ -45,6 +45,11 @@
 			      &rest all-keys)
   (apply #'std-initialize-sheep metaproto all-keys))
 
+(defbuzzword finalize-sheep-using-metasheep (metasheep sheep))
+(defmessage finalize-sheep-using-metasheep ((metasheep =standard-sheep-metasheep=)
+					    sheep)
+  (std-finalize-sheep sheep))
+
 (defbuzzword add-parent-using-metasheeple (parent-metasheep child-metasheep parent child))
 (defmessage add-parent-using-metasheeple ((parent-metasheep =standard-sheep-metasheep=)
 					  (child-metasheep =standard-sheep-metasheep=)

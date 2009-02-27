@@ -35,7 +35,8 @@ completely prototype-based environment. As such, it shares a lot of features (an
 CLOS. The most notable features are multiple inheritance and multimethods (called multimessages).
 
 This README contains a basic usage guide, and sort-of-spec of Sheeple. Much heavier documentation,
-including a tutorial and a MSP spec is to come. Meanwhile, have fun reading the code (hohoho).
+including a tutorial and a MSP spec is to come. Meanwhile, have fun reading the code (hohoho). (You
+can also contact me directly, using zkat located-at sykosomatic no-spam-dot org)
 
 ^this implementation makes use of trivial-garbage for weak-pointers, finalizers, and
  weak-hash-tables. The current version also only supports SBCL.

@@ -15,8 +15,8 @@
   ((format-control :initarg :format-control :reader sheeple-error-format-control)
    (format-args :initarg :format-args :reader sheeple-error-format-args)))
 
-(defun pushend (obj list)
-  (setf list (nconc list (cons obj nil))))
+(defmacro pushend (obj list)
+  `(setf ,list (nconc ,list (cons ,obj nil))))
 
 (defun mapappend (fun &rest args)
   (if (some #'null args)

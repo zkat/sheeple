@@ -300,3 +300,93 @@
 	    qualifiers
 	    lambda-list)))
 
+;;; Yoinked from closette...
+;;; Several tedious functions for analyzing lambda lists
+
+(defun required-portion (buzzword args)
+  (let ((number-required (length (buzzword-required-arglist buzzword))))
+    (when (< (length args) number-required)
+      (error "Too few arguments to generic function ~S." buzzword))
+    (subseq args 0 number-required)))
+
+(defun buzzword-required-arglist (buzzword)
+  (let ((plist
+          (analyze-lambda-list 
+            (buzzword-lambda-list buzzword))))
+    (getf plist ':required-args)))
+
+(defun extract-lambda-list (specialized-lambda-list)
+  (let* ((plist (analyze-lambda-list specialized-lambda-list))
+         (requireds (getf plist ':required-names))
+         (rv (getf plist ':rest-var))
+         (ks (getf plist ':key-args))
+         (aok (getf plist ':allow-other-keys))
+         (opts (getf plist ':optional-args))
+         (auxs (getf plist ':auxiliary-args)))
+    `(,@requireds 
+      ,@(if rv `(&rest ,rv) ())
+      ,@(if (or ks aok) `(&key ,@ks) ())
+      ,@(if aok '(&allow-other-keys) ())
+      ,@(if opts `(&optional ,@opts) ())
+      ,@(if auxs `(&aux ,@auxs) ()))))
+
+(defun extract-participants (specialized-lambda-list)
+  (let ((plist (analyze-lambda-list specialized-lambda-list)))
+    (getf plist ':participants)))
+
+(defun analyze-lambda-list (lambda-list)
+  (labels ((make-keyword (symbol)
+              (intern (symbol-name symbol)
+                      (find-package 'keyword)))
+           (get-keyword-from-arg (arg)
+              (if (listp arg)
+                  (if (listp (car arg))
+                      (caar arg)
+                      (make-keyword (car arg)))
+                  (make-keyword arg))))
+    (let ((keys ())           ; Just the keywords
+          (key-args ())       ; Keywords argument specs
+          (required-names ()) ; Just the variable names
+          (required-args ())  ; Variable names & participants
+          (participants ())   ; Just the participants
+          (rest-var nil)
+          (optionals ())
+          (auxs ())
+          (allow-other-keys nil)
+          (state :parsing-required))
+      (dolist (arg lambda-list)
+        (if (member arg lambda-list-keywords)
+	    (ecase arg
+	      (&optional
+	       (setq state :parsing-optional))
+	      (&rest
+	       (setq state :parsing-rest))
+	      (&key
+	       (setq state :parsing-key))
+	      (&allow-other-keys
+	       (setq allow-other-keys =t=))
+	      (&aux
+	       (setq state :parsing-aux)))
+	    (case state
+	      (:parsing-required 
+	       (pushend arg required-args)
+	       (if (listp arg)
+		   (progn (pushend (car arg) required-names)
+			  (pushend (cadr arg) participants))
+		   (progn (pushend arg required-names)
+			  (pushend =t= participants))))
+	      (:parsing-optional (pushend arg optionals))
+	      (:parsing-rest (setq rest-var arg))
+	      (:parsing-key
+	       (pushend (get-keyword-from-arg arg) keys)
+	       (pushend arg key-args))
+	      (:parsing-aux (pushend arg auxs)))))
+      (list  :required-names required-names
+             :required-args required-args
+             :participants participants
+             :rest-var rest-var
+             :keywords keys
+             :key-args key-args
+             :auxiliary-args auxs
+             :optional-args optionals
+             :allow-other-keys allow-other-keys))))

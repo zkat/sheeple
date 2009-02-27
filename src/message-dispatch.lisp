@@ -21,9 +21,10 @@
   (when (member :around (message-qualifiers message))
     t))
 
-(defun apply-buzzword (selector args)
-  (let ((messages (find-applicable-messages selector
-					    (sheepify-list args))))
+(defun apply-buzzword (buzzword args)
+  (let* ((selector (buzzword-name buzzword))
+	 (messages (find-applicable-messages selector
+					     (sheepify-list args))))
     (block selector (apply-messages messages args))))
 
 (defun apply-messages (messages args)

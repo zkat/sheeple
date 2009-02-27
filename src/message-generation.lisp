@@ -139,7 +139,14 @@
     message))
 
 (defun add-message-to-buzzword (message buzzword)
-  (pushnew message (buzzword-messages buzzword)))
+  (let ((buzzword-number-required-args (length (buzzword-required-arglist buzzword)))
+	(message-provided-number-of-args (length (message-specialized-portion message))))
+    (cond ((> buzzword-number-required-args message-provided-number-of-args)
+	   (error "Message does not have enough required arguments"))
+	  ((< buzzword-number-required-args message-provided-number-of-args)
+	   (error "Message defines too many arguments"))
+	  (t
+	   (pushnew message (buzzword-messages buzzword))))))
 
 (defun remove-messages-with-name-qualifiers-and-participants (name qualifiers participants)
   (loop for sheep in participants
@@ -313,7 +320,13 @@
   (let ((plist
           (analyze-lambda-list 
             (buzzword-lambda-list buzzword))))
-    (getf plist ':required-args)))
+    (getf plist :required-args)))
+
+(defun message-specialized-portion (message)
+  (let ((plist
+	 (analyze-lambda-list
+	  (message-lambda-list message))))
+    (getf plist :required-args)))
 
 (defun extract-lambda-list (specialized-lambda-list)
   (let* ((plist (analyze-lambda-list specialized-lambda-list))

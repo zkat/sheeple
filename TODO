@@ -1,7 +1,10 @@
 0.4
-* Write enough of a property-access MOP to be able to write psheep
+-* Write enough of a property-access MOP to be able to write psheep ;I think I have enough to start
+                                                                    ;playing around with stuff
+* Export the appropriate MOP symbols
 * Port some PCL code to Sheeple as a demo
 * Remove participants property from message metasheep. It only serves to keep an unwanted pointer.
+* Consider making equalp work somehow...
 
 0.5
 * Work out the whole conditions thing, and what they print out. Put them all somewhere.

@@ -147,7 +147,7 @@
     (setf (gethash 'metasheep table) metasheep)
     table))
 
-(defun std-spawn-sheep (metasheep-prototype 
+(defun std-initialize-sheep (metasheep-prototype 
 			&key parents
 			properties
 			nickname
@@ -188,8 +188,8 @@
 		    &allow-other-keys)
   "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
   (let ((sheep (apply (if (eql metasheep-prototype nil)
-			  #'std-spawn-sheep
-			  #'spawn-sheep-using-metasheep-prototype)
+			  #'std-initialize-sheep
+			  #'initialize-sheep)
 		      metasheep-prototype
 		      :parents sheeple 
 		      :properties properties
@@ -298,7 +298,7 @@
   (if (and (std-sheep-p new-parent)
 	   (std-sheep-p child))
       (std-add-parent new-parent child)
-      (add-parent-using-metasheeps
+      (add-parent-using-metasheeple
        (sheep-metasheep new-parent) (sheep-metasheep child)
        new-parent child)))
 (defun std-add-parent (new-parent child)
@@ -325,7 +325,7 @@
   (if (and (std-sheep-p parent)
 	   (std-sheep-p child))
       (std-remove-parent parent child)
-      (remove-parent-using-metasheeps
+      (remove-parent-using-metasheeple
        (sheep-metasheep parent) (sheep-metasheep child)
        parent child)))
 (defun std-remove-parent (parent child &key (keep-properties nil))

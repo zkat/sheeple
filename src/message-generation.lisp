@@ -309,7 +309,7 @@
   (let ((plist
           (analyze-lambda-list 
             (buzzword-lambda-list buzzword))))
-    (getf plist :required-args)))
+    (eval (getf plist :required-args))))
 
 (defun message-specialized-portion (message)
   (let ((plist

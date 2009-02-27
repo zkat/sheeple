@@ -62,7 +62,8 @@
 
 (defmacro clone (sheeple properties &rest options)
   "Standard sheep-generation macro"
-  `(spawn-sheep
-    ,(canonize-sheeple sheeple)
-    ,(canonize-properties properties)
-    ,@(canonize-clone-options options)))
+  (eval-when (:compile-toplevel :load-toplevel :execute)
+   `(spawn-sheep
+     ,(canonize-sheeple sheeple)
+     ,(canonize-properties properties)
+     ,@(canonize-clone-options options))))

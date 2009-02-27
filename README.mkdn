@@ -22,7 +22,7 @@ Sheeple is inspired by a number of Object-Oriented systems, mainly:
 * [Slate][6], a Smalltalk-like language with Prototype Multiple Dispatch that Sheeple bases its
   message dispatch system on.
 
-[3]: <http://en.wikipedia.org/wiki/CLOS>
+[3]: http://en.wikipedia.org/wiki/CLOS
 [4]: <http://en.wikipedia.org/wiki/LPC_(programming_language)>
 [5]: <http://en.wikipedia.org/wiki/MOO_programming_language>
 [6]: <http://slatelanguage.org/>
@@ -125,7 +125,7 @@ Planned features that have not yet been implemented include:
 * Support more than just SBCL
 
 
-Learning Sheeple
-================
+Using Sheeple
+=============
 
 Please refer to doc/user-guide for a quick-and-dirty intro to Sheeple and how to use it.

@@ -1,6 +1,7 @@
 0.4
 * Write enough of a property-access MOP to be able to write psheep
 * Port some PCL code to Sheeple as a demo
+* Remove participants property from message metasheep. It only serves to keep an unwanted pointer.
 
 0.5
 * Work out the whole conditions thing, and what they print out. Put them all somewhere.

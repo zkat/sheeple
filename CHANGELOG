@@ -3,7 +3,7 @@
 Features -
 
 Bugfixes -
-
+  * Fixed a bug with undefbuzzword that undefined all messages
 
 0.3
 ---

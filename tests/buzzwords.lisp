@@ -14,11 +14,11 @@
 (test buzzword-definition
   "Checks basic buzzword definition, confirms that FIND-BUZZWORD 
 errors when a buzzword doesn't exist."
-  (undefbuzzword test-buzz)
+  (undefbuzzword test-buzz nil)
   (defbuzzword test-buzz (x) (:documentation "This is a test"))
   (is (buzzword-p (find-buzzword 'test-buzz)))
   (signals no-such-buzzword (find-buzzword 'another-buzzword))
-  (undefbuzzword test-buzz)
+  (undefbuzzword test-buzz nil)
   (defun test-buzz () (print "durr hurr"))
   (signals sheeple::clobbering-function-definition (defbuzzword test-buzz
 							  (:documentation "OHNOES"))))
@@ -26,10 +26,10 @@ errors when a buzzword doesn't exist."
 (test buzzword-undefinition
   "Usage of the undefbuzzword macro, confirmation of removal of all messages and
 relevant role objects from the system."
-  (undefbuzzword test-buzz)
-  (undefbuzzword another-buzzer)
+  (undefbuzzword test-buzz nil)
+  (undefbuzzword another-buzzer nil)
   (defbuzzword test-buzz (x))
-  (undefbuzzword test-buzz)
+  (undefbuzzword test-buzz nil)
   (is (eql nil (find-buzzword 'test-buzz nil)))
   (signals undefined-function (test-buzz))
   (is (not (sheeple::participant-p =dolly= 'test-buzz)))
@@ -41,13 +41,13 @@ relevant role objects from the system."
   (signals sheeple::no-applicable-messages (another-buzzer =dolly=)) ; this package bs pisses me off
   (is (not (sheeple::participant-p =dolly= 'test-buzz)))
   (is (not (sheeple::participant-p =string= 'test-buzz)))
-  (undefbuzzword another-buzzer)
+  (undefbuzzword another-buzzer nil)
   (signals no-such-buzzword (find-buzzword 'another-buzzer))
   (signals undefined-function (another-buzzer "WHAT ARE YOU GONNA DO, BLEED ON ME?!")))
 
 (test message-undefinition
   "Tests undefmessage macro."
-  (undefbuzzword foo)
+  (undefbuzzword foo nil)
   (defbuzzword foo (x y))
   (defmessage foo (foo bar) foo)
   (is (equal =dolly= (foo =dolly= =dolly=)))
@@ -61,7 +61,7 @@ relevant role objects from the system."
 (test basic-message-definition
   "Checks that messages are defined properly, and added to their respective objects.
 also, checks that a style-warning is signaled if there is no buzzword defined."
-  (undefbuzzword test-message)
+  (undefbuzzword test-message nil)
   (signals style-warning (defmessage test-message (foo) (print foo)))
   (defbuzzword test-message (x))
   (defmessage test-message (foo) (print foo))
@@ -72,7 +72,7 @@ also, checks that a style-warning is signaled if there is no buzzword defined."
 (test multimessage-definition
   "Checks that multimessages are defined correctly, with roles added
 to their respective participants, with correct role-indexes, etc."
-  (undefbuzzword test-message)
+  (undefbuzzword test-message nil)
   (defmessage test-message (foo bar) bar foo)
   (let ((sheep1 (clone () () (:nickname "sheep1")))
 	(sheep2 (clone () () (:nickname "sheep2"))))
@@ -88,7 +88,7 @@ to their respective participants, with correct role-indexes, etc."
 
 (test message-redefinition
   "Confirms correct redefinition of messages"
-  (undefbuzzword synergize)
+  (undefbuzzword synergize nil)
   (defbuzzword synergize (x y))
   (defmessage synergize ((x =number=) (y =number=)) (+ x y))
   (is (= 10 (synergize 6 4)))
@@ -97,7 +97,7 @@ to their respective participants, with correct role-indexes, etc."
 
 (test basic-message-dispatch
   "Checks that basic single-dispatch messages work."
-  (undefbuzzword test-message)
+  (undefbuzzword test-message nil)
   (let ((test-sheep (clone () () (:nickname "testie")))
 	(another-sheep (clone () () (:nickname "rejected-failure"))))
     (defmessage test-message ((sheep test-sheep)) (sheep-nickname sheep))
@@ -106,7 +106,7 @@ to their respective participants, with correct role-indexes, etc."
 
 (test before-messages
   "Checks proper dispatch of :before messages."
-  (undefbuzzword get-var)
+  (undefbuzzword get-var nil)
   (let ((test-sheep (clone () ((var "value")))))
     (defmessage get-var ((sheep test-sheep))
       (property-value sheep 'var))
@@ -122,7 +122,7 @@ to their respective participants, with correct role-indexes, etc."
 
 (test after-messages
   "Checks proper dispatch of :after messages."
-  (undefbuzzword get-var)
+  (undefbuzzword get-var nil)
   (let ((test-sheep (clone () ((var "value")))))
     (defmessage get-var ((sheep test-sheep))
       (property-value sheep 'var))
@@ -137,7 +137,7 @@ to their respective participants, with correct role-indexes, etc."
 
 (test around-messages
   "Checks proper dispatch of :around messages."
-  (undefbuzzword get-var)
+  (undefbuzzword get-var nil)
   (let ((test-sheep (clone () ((var "value")))))
     (defmessage get-var ((sheep test-sheep))
       (property-value sheep 'var))
@@ -153,7 +153,7 @@ to their respective participants, with correct role-indexes, etc."
 
 (test call-next-message
   "Tests proper dispatch of next-message on a call to (call-next-message)"
-  (undefbuzzword get-var)
+  (undefbuzzword get-var nil)
   (let ((test-sheep (clone () ((var "value")))))
     (defmessage get-var (something) (property-value something 'var))
     (is (equal "value" (get-var test-sheep)))
@@ -162,7 +162,7 @@ to their respective participants, with correct role-indexes, etc."
 
 (test next-message-p
   "Checks that next-message-p returns T or NIL when appropriate."
-  (undefbuzzword get-var)
+  (undefbuzzword get-var nil)
   (let ((test-sheep (clone () ((var "value")))))
     (defmessage get-var (something) (property-value something 'var))
     (is (equal "value" (get-var test-sheep)))
@@ -175,7 +175,7 @@ to their respective participants, with correct role-indexes, etc."
 (test multimessage-dispatch
   ;; TODO
   "Checks correct multimethod dispatching."
-  (undefbuzzword foo)
+  (undefbuzzword foo nil)
   (defmessage foo ((foo =number=) (bar =number=))
     (+ foo bar))
   (defmessage foo (foo bar)
@@ -183,7 +183,7 @@ to their respective participants, with correct role-indexes, etc."
   (is (= 5 (foo 2 3)))
   (is (equal "bar" (foo "foo" "bar")))
   (signals sheeple::no-applicable-messages (foo 1 2 3))
-  (undefbuzzword foo)
+  (undefbuzzword foo nil)
   (let* ((sheep1 (clone () () (:nickname "sheep1")))
 	 (sheep2 (clone (sheep1) () (:nickname "sheep2")))
 	 (sheep3 (clone (sheep1) () (:nickname "sheep3")))
@@ -209,7 +209,7 @@ to their respective participants, with correct role-indexes, etc."
       (print "sheep2,1"))
     (is (equal "sheep1,2" (foo sheep1 sheep2)))
     (is (equal "sheep2,1" (foo sheep2 sheep1)))
-    (undefbuzzword foo)
+    (undefbuzzword foo nil)
     ;; I don't even know how to test the advanced dispatch stuff...
     ))
 

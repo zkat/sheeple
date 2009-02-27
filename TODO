@@ -1,7 +1,7 @@
 0.3
+-* Implement fixed-length lambda-lists
 * Fix all the bugs tests come up with
 * Work out the whole conditions thing, and what they print out. Put them all somewhere.
-* Implement fixed-length lambda-lists
 * Rewrite README to reflect changes
 * Update CHANGELOG
 

@@ -96,11 +96,14 @@
 (define-condition clobbering-function-definition (warning) ())
 (defun generate-sheep-standard-buzzword (metasheep 
 					 &key name
+					 lambda-list
 					 message-metasheep
 					 (documentation "") 
 					 &allow-other-keys)
   (let ((buzzword (clone (metasheep) 
 			 ((name name)
+			  (lambda-list
+			   lambda-list)
 			  (message-metasheep
 			   message-metasheep)
 			  (documentation documentation)))))
@@ -144,9 +147,10 @@
 (defun canonize-buzzword-option (option)
   (list `',(car option) `',(cadr option)))
 
-(defmacro defbuzzword (name &rest options)
+(defmacro defbuzzword (name lambda-list &rest options)
   `(ensure-buzzword
     ',name
+    :lambda-list ',lambda-list
     ,@(canonize-buzzword-options options)))
 
 (defmacro undefbuzzword (name)

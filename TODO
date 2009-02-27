@@ -1,16 +1,9 @@
-0.3
--* Implement fixed-length lambda-lists
--* Fix all the bugs tests come up with
-* Rewrite README to reflect changes
-* Update CHANGELOG
-
 0.4
 * Write more unit tests, with more detail
 * Port some PCL code to Sheeple as a demo
 * Set up a framework for writing docs for everything, maybe some webpages
 
 0.5
-* Write two small sample applications
 * Write enough of a property-access MOP to be able to write psheep
 
 0.6

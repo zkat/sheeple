@@ -14,21 +14,23 @@
 (test buzzword-definition
   "Checks basic buzzword definition, confirms that FIND-BUZZWORD 
 errors when a buzzword doesn't exist."
+  (undefbuzzword test-buzz)
   (defbuzzword test-buzz (x) (:documentation "This is a test"))
   (is (buzzword-p (find-buzzword 'test-buzz)))
   (signals no-such-buzzword (find-buzzword 'another-buzzword))
   (undefbuzzword test-buzz)
   (defun test-buzz () (print "durr hurr"))
   (signals sheeple::clobbering-function-definition (defbuzzword test-buzz
-							  (:documentation "OHNOES")))
-  (fmakunbound 'test-buzz))
+							  (:documentation "OHNOES"))))
 
 (test buzzword-undefinition
   "Usage of the undefbuzzword macro, confirmation of removal of all messages and
 relevant role objects from the system."
+  (undefbuzzword test-buzz)
+  (undefbuzzword another-buzzer)
   (defbuzzword test-buzz (x))
   (undefbuzzword test-buzz)
-  (signals no-such-buzzword (find-buzzword 'test-buzz))
+  (is (eql nil (find-buzzword 'test-buzz nil)))
   (signals undefined-function (test-buzz))
   (is (not (sheeple::participant-p =dolly= 'test-buzz)))
   (defmessage another-buzzer (foo) foo)
@@ -45,16 +47,16 @@ relevant role objects from the system."
 
 (test message-undefinition
   "Tests undefmessage macro."
-  (defbuzzword foo (x))
-  (defmessage foo (foo) foo)
-  (is (equal =dolly= (foo =dolly=)))
-  (undefmessage foo (foo))
-  (signals sheeple::no-applicable-messages (foo =dolly=))
+  (undefbuzzword foo)
+  (defbuzzword foo (x y))
+  (defmessage foo (foo bar) foo)
+  (is (equal =dolly= (foo =dolly= =dolly=)))
+  (undefmessage foo (foo bar))
+  (signals sheeple::no-applicable-messages (foo =dolly= =dolly=))
   (defmessage foo ((string =string=) (another =string=)) (concatenate 'string string another))
   (is (equal "fullstring" (foo "full" "string")))
   (undefmessage foo ((x =string=) (y =string=)))
-  (signals sheeple::no-applicable-messages (foo "full" "string"))
-  (undefbuzzword foo))
+  (signals sheeple::no-applicable-messages (foo "full" "string")))
 
 (test basic-message-definition
   "Checks that messages are defined properly, and added to their respective objects.
@@ -65,12 +67,12 @@ also, checks that a style-warning is signaled if there is no buzzword defined."
   (defmessage test-message (foo) (print foo))
   (is (buzzword-p (find-buzzword 'test-message)))
   (is (member 'test-message (available-messages =dolly=)))
-  (is (message-p (car (buzzword-messages (find-buzzword 'test-message)))))
-  (undefbuzzword test-message))
+  (is (message-p (car (buzzword-messages (find-buzzword 'test-message))))))
 
 (test multimessage-definition
   "Checks that multimessages are defined correctly, with roles added
 to their respective participants, with correct role-indexes, etc."
+  (undefbuzzword test-message)
   (defmessage test-message (foo bar) bar foo)
   (let ((sheep1 (clone () () (:nickname "sheep1")))
 	(sheep2 (clone () () (:nickname "sheep2"))))
@@ -82,29 +84,29 @@ to their respective participants, with correct role-indexes, etc."
     (let ((sheep1-roles (sheep-direct-roles sheep1))
 	  (sheep2-roles (sheep-direct-roles sheep2)))
       (is (= 0 (role-position (car sheep1-roles))))
-      (is (= 1 (role-position (car sheep2-roles))))))
-  (undefbuzzword test-message))
+      (is (= 1 (role-position (car sheep2-roles)))))))
 
 (test message-redefinition
   "Confirms correct redefinition of messages"
+  (undefbuzzword synergize)
   (defbuzzword synergize (x y))
   (defmessage synergize ((x =number=) (y =number=)) (+ x y))
   (is (= 10 (synergize 6 4)))
   (defmessage synergize ((y =number=) (x =number=)) (* x y))
-  (is (= 24 (synergize 6 4)))
-  (undefbuzzword synergize))
+  (is (= 24 (synergize 6 4))))
 
 (test basic-message-dispatch
   "Checks that basic single-dispatch messages work."
+  (undefbuzzword test-message)
   (let ((test-sheep (clone () () (:nickname "testie")))
 	(another-sheep (clone () () (:nickname "rejected-failure"))))
     (defmessage test-message ((sheep test-sheep)) (sheep-nickname sheep))
     (is (equal "testie" (test-message test-sheep)))
-    (signals sheeple::no-applicable-messages (test-message another-sheep)))
-  (undefbuzzword test-message))
+    (signals sheeple::no-applicable-messages (test-message another-sheep))))
 
 (test before-messages
   "Checks proper dispatch of :before messages."
+  (undefbuzzword get-var)
   (let ((test-sheep (clone () ((var "value")))))
     (defmessage get-var ((sheep test-sheep))
       (property-value sheep 'var))
@@ -115,11 +117,12 @@ to their respective participants, with correct role-indexes, etc."
     (is (equal "new-value" (get-var test-sheep)))
     (setf (property-value test-sheep 'var) "different-value")
     (is (equal "different-value" (property-value test-sheep 'var)))
-    (is (equal "new-value" (get-var test-sheep)))
-    (undefbuzzword get-var)))
+    (is (equal "new-value" (get-var test-sheep)))))
+
 
 (test after-messages
   "Checks proper dispatch of :after messages."
+  (undefbuzzword get-var)
   (let ((test-sheep (clone () ((var "value")))))
     (defmessage get-var ((sheep test-sheep))
       (property-value sheep 'var))
@@ -130,11 +133,11 @@ to their respective participants, with correct role-indexes, etc."
     (is (equal "new-value" (property-value test-sheep 'var)))
     (setf (property-value test-sheep 'var) "different-value")
     (is (equal "different-value" (get-var test-sheep)))
-    (is (equal "new-value" (property-value test-sheep 'var)))
-    (undefbuzzword get-var)))
+    (is (equal "new-value" (property-value test-sheep 'var)))))
 
 (test around-messages
   "Checks proper dispatch of :around messages."
+  (undefbuzzword get-var)
   (let ((test-sheep (clone () ((var "value")))))
     (defmessage get-var ((sheep test-sheep))
       (property-value sheep 'var))
@@ -146,20 +149,20 @@ to their respective participants, with correct role-indexes, etc."
     (setf (property-value test-sheep 'var) "different-value")
     (is (equal "different-value" (property-value test-sheep 'var)))
     (is (equal "a different-value"  (get-var test-sheep)))
-    (is (equal "different-value" (property-value test-sheep 'var)))
-    (undefbuzzword get-var)))
+    (is (equal "different-value" (property-value test-sheep 'var)))))
 
 (test call-next-message
   "Tests proper dispatch of next-message on a call to (call-next-message)"
+  (undefbuzzword get-var)
   (let ((test-sheep (clone () ((var "value")))))
     (defmessage get-var (something) (property-value something 'var))
     (is (equal "value" (get-var test-sheep)))
     (defmessage get-var ((sheep test-sheep)) (call-next-message))
-    (is (equal "value" (get-var test-sheep)))
-    (undefbuzzword get-var)))
+    (is (equal "value" (get-var test-sheep)))))
 
 (test next-message-p
   "Checks that next-message-p returns T or NIL when appropriate."
+  (undefbuzzword get-var)
   (let ((test-sheep (clone () ((var "value")))))
     (defmessage get-var (something) (property-value something 'var))
     (is (equal "value" (get-var test-sheep)))
@@ -167,18 +170,17 @@ to their respective participants, with correct role-indexes, etc."
     (is (equal t (get-var test-sheep)))
     (undefbuzzword get-var)
     (defmessage get-var ((sheep test-sheep)) (declare (ignore sheep)) (next-message-p))
-    (is (equal nil (get-var test-sheep)))
-    (undefbuzzword get-var)))
+    (is (equal nil (get-var test-sheep)))))
 
 (test multimessage-dispatch
   ;; TODO
   "Checks correct multimethod dispatching."
+  (undefbuzzword foo)
   (defmessage foo ((foo =number=) (bar =number=))
     (+ foo bar))
   (defmessage foo (foo bar)
     foo bar)
   (is (= 5 (foo 2 3)))
-  (is (= 5 (foo 5)))
   (is (equal "bar" (foo "foo" "bar")))
   (signals sheeple::no-applicable-messages (foo 1 2 3))
   (undefbuzzword foo)
@@ -207,6 +209,7 @@ to their respective participants, with correct role-indexes, etc."
       (print "sheep2,1"))
     (is (equal "sheep1,2" (foo sheep1 sheep2)))
     (is (equal "sheep2,1" (foo sheep2 sheep1)))
+    (undefbuzzword foo)
     ;; I don't even know how to test the advanced dispatch stuff...
     ))
 

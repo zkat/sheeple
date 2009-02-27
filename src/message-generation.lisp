@@ -211,7 +211,7 @@
 
 (defun add-readers-to-sheep (readers prop-name sheep)
   (loop for reader in readers
-     do (ensure-buzzword reader)
+     do (ensure-buzzword reader :lambda-list '(sheep))
      do (ensure-message reader
 			:lambda-list '(sheep)
 			:participants (list sheep)
@@ -222,7 +222,7 @@
 
 (defun add-writers-to-sheep (writers prop-name sheep)
   (loop for writer in writers
-     do (ensure-buzzword writer)
+     do (ensure-buzzword writer :lambda-list '(new-value sheep))
      do (ensure-message writer
 			:lambda-list '(new-value sheep)
 			:participants (list =t= sheep)

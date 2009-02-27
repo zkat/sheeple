@@ -38,6 +38,26 @@
 				 properties)
 	 ,@body))))
 
+;;; Sheep creation
+(defbuzzword initialize-sheep (metasheep-prototype 
+			       &rest all-keys))
+(defmessage initialize-sheep ((metaproto =standard-sheep-metasheep=)
+			      &rest all-keys)
+  (apply #'std-initialize-sheep metaproto all-keys))
+
+(defbuzzword add-parent-using-metasheeple (parent-metasheep child-metasheep parent child))
+(defmessage add-parent-using-metasheeple ((parent-metasheep =standard-sheep-metasheep=)
+					  (child-metasheep =standard-sheep-metasheep=)
+					  parent child)
+  (std-add-parent parent child))
+
+(defbuzzword remove-parent-using-metasheeple (parent-metasheep child-metasheep parent child))
+(defmessage remove-parent-using-metasheeple ((parent-metasheep =standard-sheep-metasheep=)
+					     (child-metasheep =standard-sheep-metasheep=)
+					     parent child)
+  (std-remove-parent parent child))
+
+
 ;;;
 ;;; Printing sheep!
 ;;;

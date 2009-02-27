@@ -144,10 +144,11 @@
   (list `',(car option) `',(cadr option)))
 
 (defmacro defbuzzword (name lambda-list &rest options)
-  `(ensure-buzzword
-    ',name
-    :lambda-list ',lambda-list
-    ,@(canonize-buzzword-options options)))
+  (eval-when (:compile-toplevel :load-toplevel :execute)
+   `(ensure-buzzword
+     ',name
+     :lambda-list ',lambda-list
+     ,@(canonize-buzzword-options options))))
 
 (defmacro undefbuzzword (name)
   `(undefine-buzzword

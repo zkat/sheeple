@@ -234,16 +234,17 @@
 
 ;;; macro
 (defmacro defmessage (&rest args)
-  (multiple-value-bind (name qualifiers specialized-lambda-list body)
-      (parse-defmessage args)
-    (eval-when (:compile-toplevel :load-toplevel :execute)
-      `(ensure-message
-	',name
-	:qualifiers ',qualifiers
-	:lambda-list ,(extract-lambda-list specialized-lambda-list)
-	:participants ,(extract-participants specialized-lambda-list)
-	:function ,(make-message-lambda name specialized-lambda-list body)
-	:body '(block ,name ,@body)))))
+  (eval-when (:compile-toplevel :load-toplevel :execute)
+   (multiple-value-bind (name qualifiers specialized-lambda-list body)
+       (parse-defmessage args)
+     (eval-when (:compile-toplevel :load-toplevel :execute)
+       `(ensure-message
+	 ',name
+	 :qualifiers ',qualifiers
+	 :lambda-list ,(extract-lambda-list specialized-lambda-list)
+	 :participants ,(extract-participants specialized-lambda-list)
+	 :function ,(make-message-lambda name specialized-lambda-list body)
+	 :body '(block ,name ,@body))))))
 
 (defun extract-lambda-list (specialized-lambda-list)
   (let* ((plist (analyze-lambda-list specialized-lambda-list))

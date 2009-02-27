@@ -1,7 +1,7 @@
 (asdf:defsystem sheeple
   :version "0.1"
   :description "Cheeky prototypes for Common Lisp"
-  :author "Kat Marchan <kzm@sykosomatic.org>"
+  :author "Kat Marchan <zkat at sykosomatic-dot-org>"
   :licence "MIT"
   :depends-on ()
   :serial t

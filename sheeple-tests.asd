@@ -1,8 +1,7 @@
 (asdf:defsystem sheeple-tests
   :version "Baahh"
   :description "Clone-crazy hackery tool, unit tests."
-  :maintainer "Kat Marchan <kzm@sykosomatic.org>"
-  :author "Kat <kzm@sykosomatic.org>"
+  :author "Kat Marchan <zkat at sykosomatic-dot-org>"
   :licence "MIT"
   :depends-on (:sheeple :fiveam)
   :serial t

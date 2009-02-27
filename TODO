@@ -23,9 +23,11 @@
 
 0.8
 * Optimize the shit out of property-access
+* Allow individual message documentation
 
 0.9
 * Optimize the shit out of message dispatch
+* Implement CLOS-style :message option for defbuzzword
 
 1.0
 * Complete documentation with tutorial and user's guide

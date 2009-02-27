@@ -280,12 +280,9 @@
       var-name
       (error "Invalid var name.")))
 
-(defun extract-participants (lambda-list)
-  `(list ,@(mapcar #'extract-participant-sheep lambda-list)))
-(defun extract-participant-sheep (item)
-  (if (listp item)
-      `(confirm-sheep ,(cadr item))
-      `=t=))
+(defun extract-participants (specialized-lambda-list)
+  (let ((plist (analyze-lambda-list specialized-lambda-list)))
+    `(list ,@(getf plist :participants))))
 
 (defmacro undefmessage (&rest args)
   (multiple-value-bind (name qualifiers lambda-list)
@@ -309,13 +306,6 @@
 
 ;;; Yoinked from closette...
 ;;; Several tedious functions for analyzing lambda lists
-
-(defun required-portion (buzzword args)
-  (let ((number-required (length (buzzword-required-arglist buzzword))))
-    (when (< (length args) number-required)
-      (error "Too few arguments to generic function ~S." buzzword))
-    (subseq args 0 number-required)))
-
 (defun buzzword-required-arglist (buzzword)
   (let ((plist
           (analyze-lambda-list 
@@ -342,10 +332,6 @@
       ,@(if aok '(&allow-other-keys) ())
       ,@(if opts `(&optional ,@opts) ())
       ,@(if auxs `(&aux ,@auxs) ()))))
-
-(defun extract-participants (specialized-lambda-list)
-  (let ((plist (analyze-lambda-list specialized-lambda-list)))
-    (getf plist ':participants)))
 
 (defun analyze-lambda-list (lambda-list)
   (labels ((make-keyword (symbol)
@@ -377,7 +363,7 @@
 	      (&key
 	       (setq state :parsing-key))
 	      (&allow-other-keys
-	       (setq allow-other-keys =t=))
+	       (setq allow-other-keys t))
 	      (&aux
 	       (setq state :parsing-aux)))
 	    (case state
@@ -385,9 +371,9 @@
 	       (pushend arg required-args)
 	       (if (listp arg)
 		   (progn (pushend (car arg) required-names)
-			  (pushend (cadr arg) participants))
+			  (pushend `(confirm-sheep ,(cadr arg)) participants))
 		   (progn (pushend arg required-names)
-			  (pushend =t= participants))))
+			  (pushend '=t= participants))))
 	      (:parsing-optional (pushend arg optionals))
 	      (:parsing-rest (setq rest-var arg))
 	      (:parsing-key

@@ -14,7 +14,7 @@
 (test buzzword-definition
   "Checks basic buzzword definition, confirms that FIND-BUZZWORD 
 errors when a buzzword doesn't exist."
-  (defbuzzword test-buzz (:documentation "This is a test"))
+  (defbuzzword test-buzz (x) (:documentation "This is a test"))
   (is (buzzword-p (find-buzzword 'test-buzz)))
   (signals no-such-buzzword (find-buzzword 'another-buzzword))
   (undefbuzzword test-buzz)
@@ -26,7 +26,7 @@ errors when a buzzword doesn't exist."
 (test buzzword-undefinition
   "Usage of the undefbuzzword macro, confirmation of removal of all messages and
 relevant role objects from the system."
-  (defbuzzword test-buzz)
+  (defbuzzword test-buzz (x))
   (undefbuzzword test-buzz)
   (signals no-such-buzzword (find-buzzword 'test-buzz))
   (signals undefined-function (test-buzz))
@@ -45,7 +45,7 @@ relevant role objects from the system."
 
 (test message-undefinition
   "Tests undefmessage macro."
-  (defbuzzword foo)
+  (defbuzzword foo (x))
   (defmessage foo (foo) foo)
   (is (equal =dolly= (foo =dolly=)))
   (undefmessage foo (foo))
@@ -61,7 +61,7 @@ relevant role objects from the system."
 also, checks that a style-warning is signaled if there is no buzzword defined."
   (undefbuzzword test-message)
   (signals style-warning (defmessage test-message (foo) (print foo)))
-  (defbuzzword test-message)
+  (defbuzzword test-message (x))
   (defmessage test-message (foo) (print foo))
   (is (buzzword-p (find-buzzword 'test-message)))
   (is (member 'test-message (available-messages =dolly=)))
@@ -87,7 +87,7 @@ to their respective participants, with correct role-indexes, etc."
 
 (test message-redefinition
   "Confirms correct redefinition of messages"
-  (defbuzzword synergize)
+  (defbuzzword synergize (x y))
   (defmessage synergize ((x =number=) (y =number=)) (+ x y))
   (is (= 10 (synergize 6 4)))
   (defmessage synergize ((y =number=) (x =number=)) (* x y))
@@ -163,18 +163,16 @@ to their respective participants, with correct role-indexes, etc."
   (let ((test-sheep (clone () ((var "value")))))
     (defmessage get-var (something) (property-value something 'var))
     (is (equal "value" (get-var test-sheep)))
-    (defmessage get-var ((sheep test-sheep)) (next-message-p))
+    (defmessage get-var ((sheep test-sheep)) (declare (ignore sheep)) (next-message-p))
     (is (equal t (get-var test-sheep)))
     (undefbuzzword get-var)
-    (defmessage get-var ((sheep test-sheep)) (next-message-p))
+    (defmessage get-var ((sheep test-sheep)) (declare (ignore sheep)) (next-message-p))
     (is (equal nil (get-var test-sheep)))
     (undefbuzzword get-var)))
 
 (test multimessage-dispatch
   ;; TODO
   "Checks correct multimethod dispatching."
-  (defmessage foo ((foo =number=))
-    foo)
   (defmessage foo ((foo =number=) (bar =number=))
     (+ foo bar))
   (defmessage foo (foo bar)

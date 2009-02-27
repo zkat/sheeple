@@ -5,8 +5,6 @@
    ;; Cloning and management
    :=t=
    :=dolly=
-   :print-sheep
-   :print-object
    :clone
    :sheep-hierarchy-error
    :sheep-p
@@ -77,6 +75,13 @@
    :sheep-direct-roles
    :sheep-nickname
    :sheep-hierarchy-list
+   :print-sheep
+
+   ;; Sheep creation
+   :initialize-sheep
+   :finalize-sheep
+   :add-parent-using-metasheeple
+   :remove-parent-using-metasheeple
    ))
 
 (defpackage #:sheeple-user

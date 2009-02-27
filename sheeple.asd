@@ -1,7 +1,7 @@
 (asdf:defsystem sheeple
   :version "0.1"
   :description "Cheeky prototypes for Common Lisp"
-  :author "Josh Marchan <sykopomp@sykosomatic.org>"
+  :author "Josh Marchan <sykopomp at sykosomatic-dot-org>"
   :licence "MIT"
   :depends-on ()
   :serial t

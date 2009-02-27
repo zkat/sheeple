@@ -317,8 +317,6 @@
 	  (message-lambda-list message))))
     (getf plist :required-args)))
 
-(defun old-extract-lambda-list (lambda-list)
-  `(list ,@(mapcar #'extract-var-name lambda-list)))
 (defun extract-lambda-list (specialized-lambda-list)
   (let* ((plist (analyze-lambda-list specialized-lambda-list))
          (requireds (getf plist ':required-names))

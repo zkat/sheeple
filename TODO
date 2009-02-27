@@ -1,26 +1,29 @@
 0.4
-* Write more unit tests, with more detail
+* Write enough of a property-access MOP to be able to write psheep
 * Port some PCL code to Sheeple as a demo
-* Set up a framework for writing docs for everything, maybe some webpages
 
 0.5
-* Write enough of a property-access MOP to be able to write psheep
-
-0.6
 * Work out the whole conditions thing, and what they print out. Put them all somewhere.
 * Continue writing MOP stuff, based on AMOP
 
-0.7
+0.6
 * Fleece CLOS
 * More MOP
 
-0.8
+0.7
 * Optimize the shit out of property-access
 * Allow individual message documentation
 
-0.9
+0.8
 * Optimize the shit out of message dispatch
 * Implement CLOS-style :message option for defbuzzword
 
-1.0
+0.9
 * Complete documentation with tutorial and user's guide
+
+1.0
+* Thoroughly test sheeple, make sure everything's stable
+* Make sure user's guide and documentation is good, then make it better
+
+2.0
+* Write a graphical editing interface for it?

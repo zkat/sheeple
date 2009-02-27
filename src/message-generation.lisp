@@ -134,6 +134,7 @@
 		       #'spawn-sheep-using-metasheep-prototype)
 		   (buzzword-message-metasheep buzzword)
 		   :name name
+		   :lambda-list lambda-list
 		   :participants target-sheeple
 		   all-keys)))
     message))
@@ -147,6 +148,18 @@
 	   (error "Message defines too many arguments"))
 	  (t
 	   (pushnew message (buzzword-messages buzzword))))))
+
+(defun buzzword-required-arglist (buzzword)
+  (let ((plist
+          (analyze-lambda-list 
+            (buzzword-lambda-list buzzword))))
+    (getf plist :required-args)))
+
+(defun message-specialized-portion (message)
+  (let ((plist
+	 (analyze-lambda-list
+	  (message-lambda-list message))))
+    (getf plist :required-args)))
 
 (defun remove-messages-with-name-qualifiers-and-participants (name qualifiers participants)
   (loop for sheep in participants
@@ -232,91 +245,6 @@
 	:function ,(make-message-lambda name specialized-lambda-list body)
 	:body '(block ,name ,@body)))))
 
-(defun make-message-lambda (name lambda-list body)
-  `(lambda (args next-messages)
-     (flet ((next-message-p ()
-		 (not (null next-messages)))
-	       (call-next-message (&rest cnm-args)
-		 (funcall (message-function (car next-messages))
-			  (or cnm-args
-			      args)
-			  (cdr next-messages))))
-	  (declare (ignorable #'next-message-p #'call-next-message))
-	  (block ,(if (listp name)
-		      (cadr name)
-		      name)
-	    (apply
-	    (lambda ,(eval (extract-lambda-list lambda-list))
-	      ,@body) args)))))
-
-(defun parse-defmessage (args)
-  (let ((name (car args))
-	(qualifiers nil)
-	(lambda-list nil)
-	(body nil)
-	(parse-state :qualifiers))
-    (dolist (arg (cdr args))
-      (ecase parse-state
-	(:qualifiers
-	 (if (and (atom arg) (not (null arg)))
-	     (push arg qualifiers)
-	     (progn (setf lambda-list arg)
-		    (setf parse-state :body))))
-	(:body (push arg body))))
-    (values name
-	    qualifiers
-	    lambda-list
-	    (nreverse body))))
-
-
-(defun extract-var-name (item)
-  (if (listp item)
-      `',(car item)
-      `(confirm-var-name ',item)))
-
-(defun confirm-var-name (var-name)
-  (if (symbolp var-name)
-      var-name
-      (error "Invalid var name.")))
-
-(defun extract-participants (specialized-lambda-list)
-  (let ((plist (analyze-lambda-list specialized-lambda-list)))
-    `(list ,@(getf plist :participants))))
-
-(defmacro undefmessage (&rest args)
-  (multiple-value-bind (name qualifiers lambda-list)
-      (parse-undefmessage args)
-    `(undefine-message
-      ',name
-      :qualifiers ',qualifiers
-      :participants ,(extract-participants lambda-list))))
-
-(defun parse-undefmessage (args)
-  (let ((name (car args))
-	(qualifiers nil)
-	(lambda-list nil))
-    (dolist (arg (cdr args))
-      (if (and (atom arg) (not (null arg)))
-	  (push arg qualifiers)
-	  (setf lambda-list arg)))
-    (values name
-	    qualifiers
-	    lambda-list)))
-
-;;; Yoinked from closette...
-;;; Several tedious functions for analyzing lambda lists
-(defun buzzword-required-arglist (buzzword)
-  (let ((plist
-          (analyze-lambda-list 
-            (buzzword-lambda-list buzzword))))
-    (eval (getf plist :required-args))))
-
-(defun message-specialized-portion (message)
-  (let ((plist
-	 (analyze-lambda-list
-	  (message-lambda-list message))))
-    (getf plist :required-args)))
-
 (defun extract-lambda-list (specialized-lambda-list)
   (let* ((plist (analyze-lambda-list specialized-lambda-list))
          (requireds (getf plist ':required-names))
@@ -388,3 +316,74 @@
              :auxiliary-args auxs
              :optional-args optionals
              :allow-other-keys allow-other-keys))))
+
+(defun make-message-lambda (name lambda-list body)
+  `(lambda (args next-messages)
+     (flet ((next-message-p ()
+		 (not (null next-messages)))
+	       (call-next-message (&rest cnm-args)
+		 (funcall (message-function (car next-messages))
+			  (or cnm-args
+			      args)
+			  (cdr next-messages))))
+	  (declare (ignorable #'next-message-p #'call-next-message))
+	  (block ,(if (listp name)
+		      (cadr name)
+		      name)
+	    (apply
+	    (lambda ,(eval (extract-lambda-list lambda-list))
+	      ,@body) args)))))
+
+(defun parse-defmessage (args)
+  (let ((name (car args))
+	(qualifiers nil)
+	(lambda-list nil)
+	(body nil)
+	(parse-state :qualifiers))
+    (dolist (arg (cdr args))
+      (ecase parse-state
+	(:qualifiers
+	 (if (and (atom arg) (not (null arg)))
+	     (push arg qualifiers)
+	     (progn (setf lambda-list arg)
+		    (setf parse-state :body))))
+	(:body (push arg body))))
+    (values name
+	    qualifiers
+	    lambda-list
+	    (nreverse body))))
+
+(defun extract-var-name (item)
+  (if (listp item)
+      `',(car item)
+      `(confirm-var-name ',item)))
+
+(defun confirm-var-name (var-name)
+  (if (symbolp var-name)
+      var-name
+      (error "Invalid var name.")))
+
+(defun extract-participants (specialized-lambda-list)
+  (let ((plist (analyze-lambda-list specialized-lambda-list)))
+    `(list ,@(getf plist :participants))))
+
+(defmacro undefmessage (&rest args)
+  (multiple-value-bind (name qualifiers lambda-list)
+      (parse-undefmessage args)
+    `(undefine-message
+      ',name
+      :qualifiers ',qualifiers
+      :participants ,(extract-participants lambda-list))))
+
+(defun parse-undefmessage (args)
+  (let ((name (car args))
+	(qualifiers nil)
+	(lambda-list nil))
+    (dolist (arg (cdr args))
+      (if (and (atom arg) (not (null arg)))
+	  (push arg qualifiers)
+	  (setf lambda-list arg)))
+    (values name
+	    qualifiers
+	    lambda-list)))
+

@@ -1,10 +1,12 @@
 0.3
-* Write more unit tests, with more detail
 * Fix all the bugs tests come up with
 * Work out the whole conditions thing, and what they print out. Put them all somewhere.
 * Implement fixed-length lambda-lists
+* Rewrite README to reflect changes
+* Update CHANGELOG
 
 0.4
+* Write more unit tests, with more detail
 * Port some PCL code to Sheeple as a demo
 * Set up a framework for writing docs for everything, maybe some webpages
 

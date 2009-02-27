@@ -4,9 +4,6 @@
 ;;
 ;; Buzzword metasheep, buzzword definition and management
 ;;
-;; TODO:
-;; * Screw this variable-length LL thing. Turn defbuzzword into a defgeneric clone.
-;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 

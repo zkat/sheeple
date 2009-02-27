@@ -4,8 +4,6 @@
 ;;
 ;; Property access, inspection, and management stuff, for the most part.
 ;;
-;; TODO:
-;; * Write stuff to inspect and manage cloneforms in a nicer way.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 

@@ -94,6 +94,10 @@ properly signal SHEEP-HIERARCHY-ERROR."
 
 (test auto-generated-manipulators
   "Tests to confirm property-option functionality."
+  (undefbuzzword var)
+  (undefbuzzword get-var)
+  (undefbuzzword (setf get-var))
+  (undefbuzzword set-var)
   (let ((test-sheep (clone () ((var "value" :manipulator get-var)))))
     (is (equal "value" (get-var test-sheep)))
     (is (equal "new-value" (setf (get-var test-sheep) "new-value")))
@@ -107,6 +111,7 @@ properly signal SHEEP-HIERARCHY-ERROR."
 
 (in-suite cloneform-tests)
 (test cloneforms
+  (undefbuzzword account-number)
   (let* ((max-acc-nums 0)
 	 (sheep (clone ()
 		       ((acc-num

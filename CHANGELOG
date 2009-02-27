@@ -16,8 +16,10 @@ Bugfixes -
 0.3
 ---
 Features -
-  * More tests written
   * CLOS-style lambda-lists for buzzwords and messages implemented
+  * Updated README to reflect new defbuzzword
+  * More tests written -- all pass on SBCL/Lin32
 
 Bugfixes -
   * Fixed issue with message blocks
+  * Fixed issue caused by fixing issue with message blocks

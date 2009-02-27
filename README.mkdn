@@ -91,8 +91,8 @@ Features
 
 * Simple, but powerful defclass-like CLONE macro, with cloning options.
 
-* Dynamic object management tools (inspection of objects, addition/removal of properties, all without any
-  sort of redefinition).
+* Dynamic object management tools (inspection of objects, addition/removal of properties, all
+  without any sort of redefinition).
 
 * Dynamic property value access, following a prototype chain (the value of the nearest parent that
   set the value for a particular property is used if the child did not set one).
@@ -105,8 +105,6 @@ Features
 * Multiple dispatch on messages (methods) -- messages specialize on specific instances, and follow
   inheritance hierarchy. Multimessage definition is almost identical to CLOS methods, and shares
   similar semantics.
-
-* Variable length lambda-lists for buzzwords.
 
 * Dynamic removal of messages, as well as entire buzzwords with undefbuzzword/undefmessage.
 
@@ -121,8 +119,6 @@ Features
   development.
 
 Planned features that have not yet been implemented include:
-
-* More convenience tools for inspection
 
 * CLOS integration, including autoboxing of entire class hierarchies.
 
@@ -375,19 +371,16 @@ CLOS programming should have a fairly easy time wrapping their head around Sheep
   an optional documentation option. Buzzwords are automatically defined by defmessage, but the
   preferred and recommended style is to define buzzwords first. Not doing so signals STYLE-WARNING.
 
-        (defbuzzword synergize 
-          (:documentation "Synergizes its arguments, preparing them for the Next Generation"))
+        (defbuzzword synergize (foo bar)
+          (:documentation "Synergizes FOO and BAR, preparing them for the Next Generation"))
 
 * The DEFMESSAGE macro defines a message based on its arguments. Sheeple messages are left-weighted
-  multimessages which can dispatch on multiple different arguments. The syntax follows closely with
-  defmethod's specialized lambda-list syntax, except the specializers are actual objects instead of
-  class names. An unspecialized item in the lambda list will default to dispatching on =dolly= for
-  that lambda-list property.
-  Also unlike defmethod, the lambda-lists for messages can be of variable length, while still
-  dispatching on all arguments.
-  The basic format is: 
+  multimessages (by default) which can dispatch on multiple different arguments. The syntax follows
+  closely with defmethod's specialized lambda-list syntax, except the specializers are actual
+  objects instead of class names. An unspecialized item in the lambda list will default to
+  dispatching on =dolly= for that lambda-list property. The basic format is:
 
-        (defmessage message-name (plain-variable (specialized-variable object)) @body)
+        (defmessage message-name (plain-variable* (specialized-variable object)*) @body)
 
   Message definitions can also accept qualifiers. The standard method combination supports three
   qualifiers: :before, :after, and :around.
@@ -399,34 +392,35 @@ CLOS programming should have a fairly easy time wrapping their head around Sheep
         (defparameter sheep1 (clone () ()))
         (defparameter sheep2 (clone () ()))
 
-        (defmessage synergize (foo) 
+        (defmessage do-it (foo)
            (print foo)) ;defaults to =dolly=
-        (synergize "hey!") => 5 ;the message facility autoboxes regular lisp objects
+        (do-it "hey!") => hey! ;the message facility autoboxes regular lisp objects
 
-        (defmessage synergize ((something sheep1)) 
-           (format t "~a is the first sheep. FYI" something))
+        (defmessage do-it ((something sheep1)) 
+           (format t "~a is sheep1. FYI" something))
         ;; lambda-list variables do not have to be the same across messages, 
         ;; I only do it here for convenience.
-        (synergize sheep1) => #<SHEEP SID:3> is the first sheep. FYI
+        (do-it sheep1) => #<Standard Sheep {BA28B89}> is the first sheep. FYI
 
         (let ((x 5))
-	   (defmessage synergize ((foo =number=)) 
+	   (defmessage do-it ((foo =number=)) 
 	     (* x foo))) ;this works inside closures, by the way
-        (synergize 5) => 10
+        (do-it 5) => 10
 
-        (defmessage synergize ((foo 5)) ;any object can be dispatched on. Non-sheep are autoboxed.
+        (defmessage do-it ((foo 5)) ;any object can be dispatched on. Non-sheep are autoboxed.
 	   (declare (ignore foo)) ;declarations work
 	   (print "FIVE!! THIS IS VERY EXCITING!!1"))
-        (synergize 5) => "FIVE!! THIS IS VERY EXCITING!!1"
+        (do-it 5) => "FIVE!! THIS IS VERY EXCITING!!1"
+
+        (defmessage do-it ((foo =float=)) (floatp float))
+
+        (do-it 5.0) => T                                ; Sheeple has a CLOS-like hierarchy for
+        (do-it 5) => "FIVE!! THIS IS VERY EXCITING!!1"  ; fleeced wolves.
+        (do-it 6) => 12
 	
-        (defmessage synergize ((foo =float=)) (floatp float)) 
-        (synergize 5.0) => T                                ; Sheeple has a CLOS-like hierarchy for
-        (synergize 5) => "FIVE!! THIS IS VERY EXCITING!!1"  ; fleeced wolves.
-        (synergize 6) => 12
-
         (defmessage synergize ((foo sheep1) (bar sheep2))
-
            (print "I got sheep1 first, then sheep2"))
+
         (defmessage synergize ((foo sheep2) (bar sheep1)) 
            (declare (ignore foo bar))
            (print "I got sheep2 first, then the first sheep."))
@@ -466,6 +460,11 @@ CLOS programming should have a fairly easy time wrapping their head around Sheep
 
          (undefmessage var :before ((x =test-sheep=)))
          (var =test-sheep=) => "value"
+
+* You can define messages on PRINT-SHEEP in order to change a particular sheep's printout...
+
+         (defmessage print-sheep ((sheep my-special-sheep) stream)
+           (format stream "~a is the most specialest sheep ever!" sheep))
 
 * Potential gotchas:
 

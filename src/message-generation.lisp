@@ -119,13 +119,13 @@
 
 (defun ensure-message (name &rest all-keys
 		       &key participants
+		       lambda-list
 		       &allow-other-keys)
-  
   (when (not (find-buzzword name nil))
     (progn
       (warn 'style-warning)
       (ensure-buzzword
-       name)))
+       name :lambda-list lambda-list)))
   (let* ((buzzword (find-buzzword name))
 	 (target-sheeple (sheepify-list participants))
 	 (message (apply
@@ -221,15 +221,15 @@
 
 ;;; macro
 (defmacro defmessage (&rest args)
-  (multiple-value-bind (name qualifiers lambda-list body)
+  (multiple-value-bind (name qualifiers specialized-lambda-list body)
       (parse-defmessage args)
     (eval-when (:compile-toplevel :load-toplevel :execute)
       `(ensure-message
 	',name
 	:qualifiers ',qualifiers
-	:lambda-list ,(extract-lambda-list lambda-list)
-	:participants ,(extract-participants lambda-list)
-	:function ,(make-message-lambda name lambda-list body)
+	:lambda-list ,(extract-lambda-list specialized-lambda-list)
+	:participants ,(extract-participants specialized-lambda-list)
+	:function ,(make-message-lambda name specialized-lambda-list body)
 	:body '(block ,name ,@body)))))
 
 (defun make-message-lambda (name lambda-list body)
@@ -268,8 +268,7 @@
 	    lambda-list
 	    (nreverse body))))
 
-(defun extract-lambda-list (lambda-list)
-  `(list ,@(mapcar #'extract-var-name lambda-list)))
+
 (defun extract-var-name (item)
   (if (listp item)
       `',(car item)
@@ -318,6 +317,8 @@
 	  (message-lambda-list message))))
     (getf plist :required-args)))
 
+(defun old-extract-lambda-list (lambda-list)
+  `(list ,@(mapcar #'extract-var-name lambda-list)))
 (defun extract-lambda-list (specialized-lambda-list)
   (let* ((plist (analyze-lambda-list specialized-lambda-list))
          (requireds (getf plist ':required-names))
@@ -326,7 +327,7 @@
          (aok (getf plist ':allow-other-keys))
          (opts (getf plist ':optional-args))
          (auxs (getf plist ':auxiliary-args)))
-    `(,@requireds 
+    `'(,@requireds 
       ,@(if rv `(&rest ,rv) ())
       ,@(if (or ks aok) `(&key ,@ks) ())
       ,@(if aok '(&allow-other-keys) ())

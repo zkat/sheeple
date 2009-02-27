@@ -17,6 +17,7 @@ Bugfixes -
 ---
 Features -
   * More tests written
+  * CLOS-style lambda-lists for buzzwords and messages implemented
 
 Bugfixes -
   * Fixed issue with message blocks

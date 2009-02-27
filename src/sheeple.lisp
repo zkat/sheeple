@@ -271,6 +271,11 @@
        do (unless (eql fn *secret-unbound-value*)
 	    (setf (property-value sheep propname) (funcall fn))))))
 
+(defun finalize-sheep (sheep)
+  (if (std-sheep-p sheep)
+      (std-finalize-sheep sheep)
+      (finalize-sheep-using-metasheep (sheep-metasheep sheep)
+				      sheep)))
 (defun std-finalize-sheep (sheep)
   (memoize-sheep-hierarchy-list sheep)
   (memoize-property-access sheep)

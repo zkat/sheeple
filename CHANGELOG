@@ -1,6 +1,20 @@
-0.1
+0.4
 ---
-Initial release
+Features -
+
+Bugfixes -
+  * Apparently fixed that bug with compiling sheeple?
+
+0.3
+---
+Features -
+  * CLOS-style lambda-lists for buzzwords and messages implemented
+  * Updated README to reflect new defbuzzword
+  * More tests written -- all pass on SBCL/Lin32
+
+Bugfixes -
+  * Fixed issue with message blocks
+  * Fixed issue caused by fixing issue with message blocks
 
 0.2
 ---
@@ -13,13 +27,7 @@ Features -
 Bugfixes -
   NIL
 
-0.3
+0.1
 ---
-Features -
-  * CLOS-style lambda-lists for buzzwords and messages implemented
-  * Updated README to reflect new defbuzzword
-  * More tests written -- all pass on SBCL/Lin32
+Initial release
 
-Bugfixes -
-  * Fixed issue with message blocks
-  * Fixed issue caused by fixing issue with message blocks

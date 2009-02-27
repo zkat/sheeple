@@ -67,7 +67,7 @@
 (let ((buzzword-table (make-hash-table :test #'equal)))
 
   (defun find-buzzword (name &optional (errorp t))
-    (let ((buzz (gethash name buzzword-table nil)))
+    (let ((buzz (gethash name buzzword-table)))
       (if (and (null buzz) errorp)
 	  (error 'no-such-buzzword)
 	  buzz)))
@@ -126,13 +126,14 @@
 	(setf (find-buzzword name) buzzword)
 	buzzword)))
 
-(defun undefine-buzzword (name)
-  (let ((buzzword (find-buzzword name nil)))
+(defun undefine-buzzword (name &optional (errorp nil))
+  (let ((buzzword (find-buzzword name errorp)))
     (when buzzword
      (loop for message in (buzzword-messages buzzword)
 	do (loop for participant in (message-participants message)
 	      do (loop for role in (sheep-direct-roles participant)
-		    do (delete-role role participant))))
+		    do (when (equal (role-name role) name)
+			 (delete-role role participant)))))
      (forget-buzzword name)
      (fmakunbound name)
      buzzword)))
@@ -150,6 +151,7 @@
      :lambda-list ',lambda-list
      ,@(canonize-buzzword-options options))))
 
-(defmacro undefbuzzword (name)
+(defmacro undefbuzzword (name &optional (errorp t))
   `(undefine-buzzword
-    ',name))
+    ',name
+    ,errorp))

@@ -22,10 +22,9 @@
     t))
 
 (defun apply-buzzword (buzzword args)
-  (let* ((selector (buzzword-name buzzword))
-	 (messages (find-applicable-messages selector
-					     (sheepify-list args))))
-    (block selector (apply-messages messages args))))
+  (let ((messages (find-applicable-messages buzzword
+					    (sheepify-list args))))
+    (apply-messages messages args)))
 
 (defun apply-messages (messages args)
   (let ((around (find-if #'around-message-p messages))
@@ -47,9 +46,10 @@
   (let ((function (message-function message)))
     (funcall function args next-messages)))
 
-(defun find-applicable-messages  (selector args &key (errorp t))
+(defun find-applicable-messages  (buzzword args &key (errorp t))
   "Returns the most specific message using SELECTOR and ARGS."
-  (let ((n (length args))
+  (let ((selector (buzzword-name buzzword))
+	(n (length args))
 	(discovered-messages nil)
 	(contained-applicable-messages nil))
     (loop 

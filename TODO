@@ -6,7 +6,6 @@ Features-
 -* "Why Poop?" -- for README. Write about why sheeple might be useful.
 
 Fixes-
-* Remove participants property from message metasheep. It only serves to keep an unwanted pointer.
 * Consider making equalp work somehow...
 
 0.5

@@ -167,7 +167,6 @@ runtime. CLOS is, too, but certainly not to the same extent, or with the same ea
 you to change and fine-tweak individual objects at run-time, including changing their individual
 property definitions, their place on the prototype hierarchy, and the messages defined on them
 (including removing messages). 
-
 This level of dynamicity is not necessary for most applications, but in certain scenarios (such as
 high-activity live applications that you might not want to stop and restart just to get some changes
 through), it can become very valuable.
@@ -176,7 +175,6 @@ prototype, a =std-human= prototype, and finally some =charlie= object. The =game
 defines basic game object stuff, and =std-human= defines a (potentially large) set of
 characteristics that all humans should share. These are inherited by =charlie=, who is controlled by
 some user.
-
 In a regular class-based system, in order to change =std-human= and have the changes apply to
 =charlie=, one would have to write a fair amount of code very carefully to ensure that =charlie= was
 recreated and all the relevant values are copied over properly. Furthermore, anything that relied on
@@ -184,7 +182,6 @@ recreated and all the relevant values are copied over properly. Furthermore, any
 more code was rewritten. If you just wanted to add a facial-hair slot, you might figure it's not
 worth it once you have several thousand humans running about, since that's several thousand
 potentially angry users.
-
 The situation in CLOS is less dire. The MOP allows easier changes to the 'schema' of these objects,
 but it still proves to be more of a hassle than I think it could be.  In a system such as Sheeple,
 giving all humans (and thus, =charlie=) facial hair is a matter of simply setting the property in
@@ -213,7 +210,6 @@ their own classes. Doing so creates essentially a "bottomless" hierarchy, that c
 will whenever the need arises. I feel this is of greater value when experimenting or
 rapid-prototyping, and I admit I am yet to find a solid advantage to this fact. The implication is
 certainly interesting, though.
-
 By "bottomless", I mean that you can have, say, =charlie=, who currently resides on the bottom of
 our pretend-hierarchy. For some reason, you may want to not only have an object that is a
 =std-human=, but in fact have one that is very much like =charlie=, and shares any traits (and

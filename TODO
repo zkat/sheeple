@@ -23,4 +23,5 @@
 * Make sure user's guide and documentation is good, then make it better
 
 2.0
+* Add :method-combination option, and some combinations.
 * Write a graphical editing interface for it?

@@ -169,8 +169,8 @@
     (setf (gethash 'hierarchy-list sheep) nil)
     ;; Then we deal with the options
     (std-add-parents sheep parents)
-    (std-execute-clonefunctions sheep)
     (std-set-up-properties sheep properties)
+    (std-execute-clonefunctions sheep)
     (std-set-nickname sheep nickname)
     (std-finalize-sheep sheep)
     (when shallow-copy
@@ -268,7 +268,8 @@
     (loop
        for fn in functions
        for propname in available-cloneforms
-       do (unless (eql fn *secret-unbound-value*)
+       do (unless (or (eql fn *secret-unbound-value*)
+		      (std-has-direct-property-p sheep propname))
 	    (setf (property-value sheep propname) (funcall fn))))))
 
 (defun finalize-sheep (sheep)

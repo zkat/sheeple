@@ -23,8 +23,8 @@
 	 ((name "Jenny")
 	  (phone "543-867-5309"))))
 
-(defbuzzword greet
-    (:documentation "Greets a person"))
+(defbuzzword greet (person)
+  (:documentation "Greets a person"))
 (defmessage greet ((person =person=))
   (format t "Hello, ~a" (name person)))
 (defmessage greet ((person *jenny*))
@@ -81,6 +81,9 @@
 	   :bronze                 
 	   :manipulator account-type))))
 
+;; SHEEPLE-USER> (property-value =bank-account= 'customer-name) => "NoName"
+;; SHEEPLE-USER> (property-value =bank-account= 'balance) => 0
+
 (defvar =checking-account=
   (clone (=bank-account=)
 	 ()))
@@ -112,8 +115,8 @@
 	  (balance
 	   1000))))
 
-(defbuzzword withdraw
-    (:documentation "Withdraw the specified amount from the account.
+(defbuzzword withdraw (account amount)
+  (:documentation "Withdraw the specified amount from the account.
 Signal an error if the current balance is less than AMOUNT."))
 (defmessage withdraw ((account =bank-account=) amount)
   (when (< (balance account) amount)
@@ -121,20 +124,28 @@ Signal an error if the current balance is less than AMOUNT."))
   (decf (balance account) amount))
 
 (defmessage withdraw :before ((account =checking-account=) amount)
-	    (let ((overdraft (- amount (balance account))))
-	      (when (plusp overdraft)
-		(withdraw (overdraft-account account) overdraft)
-		(incf (balance account) overdraft))))
+  (let ((overdraft (- amount (balance account))))
+    (when (plusp overdraft)
+      (withdraw (overdraft-account account) overdraft)
+      (incf (balance account) overdraft))))
 
 (defmessage withdraw ((account =proxy-account=) amount)
   (withdraw (proxied-account proxy) amount))
 
 (defmessage withdraw :before ((account *account-of-bank-president*) amount)
+  ;; Note a big difference here between this and its CLOS equivalent:
+  ;; It's easy here to simply start cloning *account-of-bank-president* and make
+  ;; several different accounts, based on that. This method will apply to all of them.
+  ;; The EQL-specializer version simply "bottoms out", and a change like this to the code
+  ;; would involve redefinition of this method, reinitialization of the instance, and a
+  ;; change to the class hierarchy.
   (let ((overdraft (- amount (balance account))))
     (when (plusp overdraft)
       (incf (balance account) (embezzle *bank* overdraft)))))
 
-;; This is written in PCL using the with-slots macro.
 (defmessage assess-low-balance-penalty ((account =bank-account=))
-  (when (< (balance account) *minimum-balance*)
-    (decf (balance account) (* (balance account) .01))))
+  (with-properties (balance) account
+    (when (< balance *minimum-balance*)
+      (decf balance (* balance .01)))))
+
+

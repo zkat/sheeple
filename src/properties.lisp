@@ -8,7 +8,6 @@
 (in-package :sheeple)
 
 (defparameter *secret-unbound-value* (gensym))
-(define-condition unbound-property (sheeple-error) ())
 
 ;;;
 ;;; Property Access
@@ -35,7 +34,9 @@
 	     (%property-value-object sheep property-name)
 	   (when has-p
 	     (return-from property-value-with-hierarchy-list (%value prop-obj))))
-      finally (error 'unbound-property))))
+      finally (error 'unbound-property
+		     :format-control "Property ~A is unbound for sheep ~S"
+		     :format-args (list property-name sheep)))))
 
 (defun property-value-with-memoized-owner (sheep property-name)
   ;; Find who the owner is...
@@ -47,8 +48,12 @@
 	    (gethash property-name (gethash 'properties prop-owner))
 	  (if has-p
 	      value
-	      (error 'unbound-property)))
-	(error 'unbound-property))))
+	      (error 'unbound-property
+		     :format-control "Property ~A is unbound for sheep ~S"
+		     :format-args (list property-name sheep))))
+	(error 'unbound-property
+	       :format-control "Property ~A is unbound for sheep ~S"
+	       :format-args (list property-name sheep)))))
 
 (defun (setf property-value) (new-value sheep property-name)
   (unless (symbolp property-name)
@@ -107,7 +112,9 @@
       (gethash property-name (gethash 'property-owners sheep))
     (if has-p
 	owner
-	(error 'unbound-property))))
+	(error 'unbound-property
+	       :format-control "Property ~A is unbound for sheep ~S"
+	       :format-args (list property-name sheep)))))
 
 (defun available-properties (sheep)
   (if (std-sheep-p sheep)
@@ -233,7 +240,9 @@
 	    (declare (ignore value))
 	    (when has-p
 	      (return-from %property-value-owner sheep-obj))) 
-       finally (error 'unbound-property))))
+       finally (error 'unbound-property
+		      :format-control "Property ~A is unbound for sheep ~S"
+		      :format-args (list property-name sheep)))))
 
 (defun memoize-sheep-hierarchy-list (sheep)
   (let ((list (compute-sheep-hierarchy-list sheep)))

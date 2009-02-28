@@ -375,9 +375,6 @@
     (simple-error ()
       (error 'sheep-hierarchy-error))))
 
-(define-condition sheep-hierarchy-error (sheeple-error) ()
-  (:documentation "Signaled whenever there is a problem computing the hierarchy list."))
-
 (defun local-precedence-ordering (sheep)
   (mapcar #'list
 	  (cons sheep

@@ -69,7 +69,8 @@
   (clone ()
 	 ((customer-name
 	   "NoName"
-	   :manipulator customer-name)
+	   :manipulator customer-name
+	   :cloneform (error "Must supply a customer name."))
 	  (balance
 	   0
 	   :manipulator balance)
@@ -144,8 +145,13 @@ Signal an error if the current balance is less than AMOUNT."))
       (incf (balance account) (embezzle *bank* overdraft)))))
 
 (defmessage assess-low-balance-penalty ((account =bank-account=))
-  (with-properties (balance) account
-    (when (< balance *minimum-balance*)
-      (decf balance (* balance .01)))))
+  (with-properties ((bal balance)) account
+    (when (< bal *minimum-balance*)
+      (decf bal (* bal .01)))))
 
+(defmessage merge-accounts ((acc1 =bank-account=) (acc2 =bank-account=))
+  (with-manipulators ((balance1 balance)) acc1
+    (with-manipulators ((balance2 balance)) acc2
+      (incf balance1 balance2)
+      (setf balance2 0))))
 

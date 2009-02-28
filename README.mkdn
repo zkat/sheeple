@@ -117,9 +117,7 @@ Features
 
 * (call-next-message) and (next-message-p)
 
-* A Metaobject Protocol (or Metasheep Protocol, if you will), similar to the one described in
-  AMOP. The basics of the MOP are available and undocumented... the feature is still under
-  development.
+* A sheep creation and property-access Metaobject Protocol, with a larger MOP in development.
 
 Planned features that have not yet been implemented include:
 

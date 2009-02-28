@@ -141,10 +141,6 @@ on Freenode (as zkat).
 Why Poop?
 =========
 
-I like CLOS. One of the things I want to make sure I can do with Sheeple is interoperate with CLOS
-code when I want (which isn't very hard in Lisp). There are certain problems I ran into, though, for
-which CLOS isn't as well suited as I'd want it to be. First, though, a short story...
-
 When I started volunteering in a MUD I like, as a builder/programmer, I was able to play with a
 custom subset of LPC (a C-like prototype-based language) that the MUD used for game objects and
 scripting. Over time, I made a list of interesting tasks that were easy and useful in LPC, yet
@@ -153,75 +149,21 @@ couldn't be done either as nicely, or at all, when using CLOS.
 In a nutshell, the biggest advantages of using a prototype-based system are as follows:
 
 1. Much greater dynamicity
+  - Objects can be changed, and those changes can be distributed down the object hierarchy in a much
+  easier and cleaner way than can be done with class-based systems (including CLOS)
 
 2. Hierarchical data sharing
+  - Not only are slots and methods shared -- so is data. Being able to alter `default' or `common'
+  values and have them change the values of all children can be useful (although there are
+  facilities to just as easily enforce unique values for each object -- such as collections)
 
 3. "Bottomless" hierarchy
+  - If you decide that your `instance' isn't the end-all of your hierarchy, you can flexibly expand
+  your hierarchy further down. This is incredibly nice and useful for rapid prototyping and
+  exploratory programming, since it does not force you to destroy existing instances, create a new
+  class because that previous class wasn't quite the bottom of the hierarchy that you can just make
+  instances of.
 
-Expanding upon each...
-
-1. In a prototype-based system such as sheeple, just about everything is fully dynamic, alterable at
-runtime. CLOS is, too, but certainly not to the same extent, or with the same ease. Sheeple allows
-you to change and fine-tweak individual objects at run-time, including changing their individual
-property definitions, their place on the prototype hierarchy, and the messages defined on them
-(including removing messages). 
-This level of dynamicity is not necessary for most applications, but in certain scenarios (such as
-high-activity live applications that you might not want to stop and restart just to get some changes
-through), it can become very valuable.
-Using the example of the MUD, please imagine a simple fantasy game hierarchy with a =game-object=
-prototype, a =std-human= prototype, and finally some =charlie= object. The =game-object= object
-defines basic game object stuff, and =std-human= defines a (potentially large) set of
-characteristics that all humans should share. These are inherited by =charlie=, who is controlled by
-some user.
-In a regular class-based system, in order to change =std-human= and have the changes apply to
-=charlie=, one would have to write a fair amount of code very carefully to ensure that =charlie= was
-recreated and all the relevant values are copied over properly. Furthermore, anything that relied on
-=charlie='s object identity will potentially break unless the language is capable enough and yet
-more code was rewritten. If you just wanted to add a facial-hair slot, you might figure it's not
-worth it once you have several thousand humans running about, since that's several thousand
-potentially angry users.
-The situation in CLOS is less dire. The MOP allows easier changes to the 'schema' of these objects,
-but it still proves to be more of a hassle than I think it could be.  In a system such as Sheeple,
-giving all humans (and thus, =charlie=) facial hair is a matter of simply setting the property in
-=std-human=. The new property will automatically apply to all descendants of
-=std-human=. Furthermore, changing =std-human= doesn't actually alter the structure of any of its
-descendants, so taking one of =std-human='s descendants and removing =std-human= as an ancestor
-would take away anything defined solely in =std-human=, but nothing directly defined in that
-descendant.
-
-
-2. There's another interesting side effect of giving =std-human= facial hair: The value placed in
-that property will be the value that all of =std-human='s children use. So, if our new facial-hair
-property is set to "fuzzy beard" in =std-human=, =charlie= will automatically have a "fuzzy beard"
-(and so will all other descendants of =std-human=.
-This data sharing is critical in building certain kids of systems where being able to share a value
-are critical (such as cascading default values down the entire inheritance hierarchy).
-Again, this is also possible in class-based systems, but not without a web of code that simulates
-the behavior.
-An implementation-dependent advantage of a system like this is also that since all this data is
-being shared, it does not necessarily need to be copied over constantly. This can be leveraged to
-reduce both memory and CPU costs as necessary.
-
-
-3. Related strongly to #1, but deserving a mention of its own is the effect of having the objects be
-their own classes. Doing so creates essentially a "bottomless" hierarchy, that can be expanded at
-will whenever the need arises. I feel this is of greater value when experimenting or
-rapid-prototyping, and I admit I am yet to find a solid advantage to this fact. The implication is
-certainly interesting, though.
-By "bottomless", I mean that you can have, say, =charlie=, who currently resides on the bottom of
-our pretend-hierarchy. For some reason, you may want to not only have an object that is a
-=std-human=, but in fact have one that is very much like =charlie=, and shares any traits (and
-methods) with him. Being able to construct your army of =charlie=-clones may not sound terribly
-exciting at the time, but my gut instinct tells me this is the path to world domination, so you
-better jump on the bandwagon.
-
-
-It's worth noting that Sheeple does not require all values to be fetched through the hierarchy
-list. In certain cases, such as local lists, it might be troublesome to share data. In those cases,
-Sheeple provides something called "cloneforms", that work similarly to CLOS' :initform slot option.
-
-
-If I haven't scared you off yet, maybe the following section will...
 
 Why not Sheeple?
 ================

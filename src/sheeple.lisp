@@ -8,6 +8,37 @@
 
 (defparameter *secret-sheep-identifier* (gensym))
 
+;;;
+;;; Standard sheeple
+;;;
+(defvar =t=)
+(defvar =dolly=)
+(defvar =white-fang=)
+(defvar =symbol=)
+(defvar =sequence=)
+(defvar =array=)
+(defvar =number=)
+(defvar =character=)
+(defvar =function=)
+(defvar =hash-table=)
+(defvar =package=)
+(defvar =pathname=)
+(defvar =readtable=)
+(defvar =stream=)
+(defvar =list=)
+(defvar =null=)
+(defvar =cons=)
+(defvar =vector=)
+(defvar =bit-vector=)
+(defvar =string=)
+(defvar =complex=)
+(defvar =integer=)
+(defvar =float=)
+(defvar =standard-sheep-metasheep=)
+(defvar =standard-role-metasheep=)
+(defvar =standard-message-metasheep=)
+(defvar =standard-buzzword-metasheep=)
+
 (defun sheep-p (sheep)
   (when (and (hash-table-p sheep)
 	     (eql (gethash *secret-sheep-identifier* sheep)
@@ -22,8 +53,8 @@
 (defparameter the-standard-sheep-metasheep-form
   '(clone ()
     ((metasheep
-      =standard-sheep-metasheep=
-      :cloneform =standard-sheep-metasheep=)
+      nil
+      :cloneform nil)
      (nickname
       "=standard-sheep-metasheep="
       :cloneform nil)

@@ -1,6 +1,7 @@
 0.4
 ---
 Features -
+  * Several MOP-related symbols made available, including sheep creation and property access.
 
 Bugfixes -
   * Fixed a bug with undefbuzzword that undefined all messages

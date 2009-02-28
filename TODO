@@ -1,6 +1,7 @@
 0.5
 -* Work out the whole conditions thing, and what they print out. Put them all in conditions.lisp?
 * Continue writing MOP stuff
+* Get it to run on CCL
 
 0.6
 * Fleece CLOS

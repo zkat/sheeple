@@ -121,10 +121,8 @@ API
         (prop *sample-sheep*) => "value"
         (setf (prop *sample-sheep*) "new-value" => "new-value"
 
-* :cloneform - The form is compiled and saved. Any new children that are created will evaluate this
-  form and set it as the property-value for that property, prior to setting any values defined in
-  the new child's CLONE call. This form is not used as the value for the property of the current
-  CLONE call -- a value must still be provided.
+* :cloneform - The form is compiled and evaluated as that property's value if a value is not
+               provided by something cloning this sheep.
 
         (defvar *sample-sheep* 
            (clone () 

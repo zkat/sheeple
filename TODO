@@ -1,10 +1,3 @@
-0.4
-Features-
--* Write enough of a property-access MOP to be able to write psheep ;I think I have enough to start
-                                                                    ;playing around with stuff
--* Export the appropriate MOP symbols
--* "Why Poop?" -- for README. Write about why sheeple might be useful.
-
 0.5
 * Work out the whole conditions thing, and what they print out. Put them all in conditions.lisp?
 * Continue writing MOP stuff, based on AMOP
@@ -22,6 +15,7 @@ Features-
 * Implement CLOS-style :message option for defbuzzword
 
 0.9
+* Add :method option to defbuzzword
 * Complete documentation with tutorial and user's guide
 
 1.0

@@ -30,7 +30,11 @@
   (let ((around (find-if #'around-message-p messages))
 	(primaries (remove-if-not #'primary-message-p messages)))
 	  (when (null primaries)
-	    (error "No primary messages"))
+	    (let ((name (message-name (car messages))))
+	      (error 'no-primary-messages
+		     :format-control 
+		     "There are no primary messages for buzzword ~A When called with args:~%~S"
+		     :format-args (list name args))))
     (if around
 	(apply-message around args (remove around messages))
     	(let ((befores (remove-if-not #'before-message-p messages))
@@ -79,7 +83,10 @@
     (if contained-applicable-messages
 	(unbox-messages (sort-applicable-messages contained-applicable-messages))
 	(when errorp
-	  (error 'no-applicable-messages)))))
+	  (error 'no-applicable-messages
+		 :format-control
+		 "There are no applicable messages for buzzword ~A when called with args:~%~S"
+		 :format-args (list selector args))))))
 
 (defun unbox-messages (messages)
   (mapcar #'message-container-message messages))
@@ -98,9 +105,6 @@
 (defstruct message-container
   message
   rank)
-
-(define-condition no-applicable-messages (sheeple-error) ())
-(define-condition no-most-specific-message (sheeple-error) ())
 
 (defun fully-specified-p (rank)
   (loop for item across rank

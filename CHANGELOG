@@ -5,6 +5,7 @@ Features -
   provided)
 
 Bugfixes -
+  * Conditions work nicer now. Reorganized them and put them in their place.
 
 0.4
 ---

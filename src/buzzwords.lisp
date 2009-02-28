@@ -63,13 +63,14 @@
 ;;;
 
 ;;; Buzzword table
-(define-condition no-such-buzzword (sheeple-error) ())
 (let ((buzzword-table (make-hash-table :test #'equal)))
 
   (defun find-buzzword (name &optional (errorp t))
     (let ((buzz (gethash name buzzword-table)))
       (if (and (null buzz) errorp)
-	  (error 'no-such-buzzword)
+	  (error 'no-such-buzzword
+		 :format-control "There is no buzzword named ~A"
+		 :format-args (list name))
 	  buzz)))
   
   (defun (setf find-buzzword) (new-value name)
@@ -86,10 +87,11 @@
 (defun std-finalize-buzzword (buzzword)
   (let ((name (buzzword-name buzzword)))
     (when (fboundp name)
-     (warn 'clobbering-function-definition))
+     (warn 'clobbering-function-definition
+	   :format-control "Clobbering regular function or generic function definition for ~A"
+	   :format-args (list name)))
     (setf (fdefinition name) (lambda (&rest args) (apply-buzzword buzzword args)))))
 
-(define-condition clobbering-function-definition (warning) ())
 (defun generate-sheep-standard-buzzword (metasheep 
 					 &key name
 					 lambda-list

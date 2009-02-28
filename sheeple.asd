@@ -11,15 +11,16 @@
 	    :components
 	    ((:file "trivial-garbage")
 	     (:file "packages")
+	     (:file "conditions")
 	     (:file "utils")
 	     (:file "properties")
 	     (:file "sheeple")
 	     (:file "clone")
-	     (:file "wolves")
 	     (:file "buzzwords")
 	     (:file "message-generation")
 	     (:file "message-dispatch")
 	     (:file "bootstrap")
+	     (:file "wolves")
 	     (:file "post-boot")
 	     (:file "glue")))))
 

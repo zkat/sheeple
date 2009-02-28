@@ -58,8 +58,8 @@ And mess around from there. Be aware that if your implementation does not includ
 have to acquire it and load it yourself. Clisp, for example, will require this.
 For information on how to do this, check out [Cliki][1], or the [ASDF Homepage][2].
 
-[1]: <http://www.cliki.net/asdf>
-[2]: <http://common-lisp.net/project/asdf/>
+[1]: http://www.cliki.net/asdf
+[2]: http://common-lisp.net/project/asdf/
 
 Sheeple should work on most Lisp implementations, although it's mainly written and tested in SBCL on
 Linux x86.

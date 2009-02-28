@@ -151,20 +151,28 @@ couldn't be done either as nicely, or at all, when using CLOS.
 In a nutshell, the biggest advantages of using a prototype-based system are as follows:
 
 1. Much greater dynamicity
-  - Objects can be changed, and those changes can be distributed down the object hierarchy in a much
-  easier and cleaner way than can be done with class-based systems (including CLOS)
+ 
+      Objects can be changed, and those changes can be distributed down the object hierarchy in a
+      much easier and cleaner way than can be done with class-based systems (including CLOS)
 
 2. Hierarchical data sharing
-  - Not only are slots and methods shared -- so is data. Being able to alter `default' or `common'
-  values and have them change the values of all children can be useful (although there are
-  facilities to just as easily enforce unique values for each object -- such as collections)
+      
+      Not only are slots and methods shared -- so is data. Being able to alter `default' or `common'
+      values and have them change the values of all children can be useful (although there are
+      facilities to just as easily enforce unique values for each object -- such as collections)
 
 3. "Bottomless" hierarchy
-  - If you decide that your `instance' isn't the end-all of your hierarchy, you can flexibly expand
-  your hierarchy further down. This is incredibly nice and useful for rapid prototyping and
-  exploratory programming, since it does not force you to destroy existing instances, create a new
-  class because that previous class wasn't quite the bottom of the hierarchy that you can just make
-  instances of.
+      
+      If you decide that your `instance' isn't the end-all of your hierarchy, you can flexibly
+      expand your hierarchy further down. This is incredibly nice and useful for rapid prototyping
+      and exploratory programming, since it does not force you to destroy existing instances, create
+      a new class because that previous class wasn't quite the bottom of the hierarchy that you can
+      just make instances of.
+
+4. It makes more sense
+ 
+      The Self people argue that manipulating objects directly makes more sense that having the
+      divide with classes. I agree.
 
 
 Why not Sheeple?

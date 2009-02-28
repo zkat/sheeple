@@ -43,8 +43,10 @@ can also contact me directly, using zkat located-at sykosomatic no-spam-dot org)
 
 Supported Platforms
 -------------------
-While portability is one of the goals for Sheeple, only SBCL is officially supported right now. It
-has been tested on several platforms and operating systems, and passes all tests on them.
+While portability is one of the goals for Sheeple, only SBCL is officially supported right now. You
+are free to test it on other platforms and send patches in if you're interested in using it on
+that. The code itself is mostly portable, so getting SBCL to run on most major platforms should be a
+matter of patching up the holes that are left to make it more agreeable with other compilers.
 
 
 Loading Sheeple

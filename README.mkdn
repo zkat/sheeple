@@ -23,12 +23,12 @@ Sheeple is inspired by a number of Object-Oriented systems, mainly:
   message dispatch system on.
 
 [3]: http://en.wikipedia.org/wiki/CLOS
-[4]: <http://en.wikipedia.org/wiki/LPC_(programming_language)>
-[5]: <http://en.wikipedia.org/wiki/MOO_programming_language>
-[6]: <http://slatelanguage.org/>
-[7]: <http://en.wikipedia.org/wiki/MUD>
-[8]: <http://en.wikipedia.org/wiki/Lambdamoo>
-[9]: <http://github.com/zkat/sykosomatic/>
+[4]: http://en.wikipedia.org/wiki/LPC_(programming_language)
+[5]: http://en.wikipedia.org/wiki/MOO_programming_language
+[6]: http://slatelanguage.org/
+[7]: http://en.wikipedia.org/wiki/MUD
+[8]: http://en.wikipedia.org/wiki/Lambdamoo
+[9]: http://github.com/zkat/sykosomatic/
 
 It was written with the purpose of providing a lot of the goodies of CLOS programming in a
 completely prototype-based environment. As such, it shares a lot of features (and syntax) with

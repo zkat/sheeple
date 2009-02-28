@@ -5,9 +5,6 @@ Features-
 -* Export the appropriate MOP symbols
 -* "Why Poop?" -- for README. Write about why sheeple might be useful.
 
-Fixes-
-* Consider making equalp work somehow...
-
 0.5
 * Work out the whole conditions thing, and what they print out. Put them all in conditions.lisp?
 * Continue writing MOP stuff, based on AMOP

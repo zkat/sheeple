@@ -1,3 +1,11 @@
+0.5
+---
+Features -
+  * Cloneforms actually work more like CLOS initforms now (they don't execute if a value is already
+  provided)
+
+Bugfixes -
+
 0.4
 ---
 Features -

@@ -78,7 +78,7 @@
    :print-sheep
 
    ;; Sheep creation
-   :initialize-sheep
+   :initialize-sheep ; shitsux
    :finalize-sheep-using-metasheep
    :add-parent-using-metasheeple
    :remove-parent-using-metasheeple

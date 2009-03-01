@@ -9,10 +9,7 @@
 
 (progn
   (setf =standard-sheep-metasheep=
-       (let ((object (make-hash-table :test #'equal)))
-	 (setf (gethash *secret-sheep-identifier* object) *secret-sheep-identifier*)
-	 (setf (gethash 'metasheep object) nil)
-	 object))
+	(std-generate-sheep-instance nil))
 
   (setf =t=
 	(let ((sheep (std-generate-sheep-instance nil)))

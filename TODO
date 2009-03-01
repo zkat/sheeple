@@ -1,11 +1,9 @@
 0.5
 -* Work out the whole conditions thing, and what they print out. Put them all in conditions.lisp?
-* Continue writing MOP stuff
-* Get it to run on CCL
+* Write plenty more unit tests. Even unit tests for unimplemented features.
 
 0.6
-* Fleece CLOS
-* More MOP
+* Rewrite entire MOP system ("Always plan to throw one away")
 
 0.7
 * Optimize the shit out of property-access
@@ -24,5 +22,6 @@
 * Make sure user's guide and documentation is good, then make it better
 
 2.0
+* Fleece CLOS
 * Add :method-combination option, and some combinations.
 * Write a graphical editing interface for it?

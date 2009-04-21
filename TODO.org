@@ -1,14 +1,14 @@
-
-* Write a replace-sheep function that swaps a sheep's properties/contents with a new 'definition',
+* TODO Write a replace-sheep function
+  it should swap a sheep's properties/contents with a new 'definition',
   while maintaining identity.
-* Wrap replace-sheep with a DEFSHEEP macro.
+* TODO Wrap replace-sheep with a DEFSHEEP macro.
 -* Work out the whole conditions thing, and what they print out. Put them all in conditions.lisp?
-* Write plenty more unit tests. Even unit tests for unimplemented features.
-* Optimize the shit out of property-access
-* Allow individual message documentation
-* Optimize the shit out of message dispatch
-* Implement :message option for defbuzzword (like CLOS' :method option)
-* Complete documentation with tutorial and user's guide
-* Thoroughly test sheeple, make sure everything's stable
-* Make sure user's guide and documentation is good, then make it better
+* TODO Write plenty more unit tests. Even unit tests for unimplemented features.
+* TODO Optimize the shit out of property-access
+* TODO Allow individual message documentation
+* TODO Optimize the shit out of message dispatch
+* TODO Implement :message option for defbuzzword (like CLOS' :method option)
+* TODO Complete documentation with tutorial and user's guide
+* TODO Thoroughly test sheeple, make sure everything's stable
+* TODO Make sure user's guide and documentation is good, then make it better
 

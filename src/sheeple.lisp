@@ -273,7 +273,7 @@
     t))
 
 (defun ancestor-p (maybe-ancestor descendant)
-  (when (and (not (equal maybe-ancestor descendant))
+  (when (and (not (eql maybe-ancestor descendant))
 	     (member maybe-ancestor (collect-parents descendant)))
     t))
 

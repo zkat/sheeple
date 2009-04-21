@@ -75,7 +75,7 @@
 		    ,(canonize-sheeple sheeple) 
 		    ,(canonize-properties properties) 
 		    ,@(canonize-clone-options options)))
-      `(defparameter ,name (clone ,sheeple ,properties ,@options))))
+      `(defvar ,name (clone ,sheeple ,properties ,@options))))
 
 (defun replace-or-reinitialize-sheep (maybe-sheep parents properties &rest options)
   (if (sheep-p maybe-sheep)

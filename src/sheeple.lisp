@@ -283,4 +283,11 @@
 (defun descendant-p (maybe-descendant ancestor)
   (ancestor-p ancestor maybe-descendant))
 
-;; Instance swapping
+;; Memoization
+(defun memoize-sheep-hierarchy-list (sheep)
+  (let ((list (compute-sheep-hierarchy-list sheep)))
+    (setf (sheep-hierarchy-list sheep)
+	  list)
+    (mapc (lambda (descendant) 
+	    (memoize-sheep-hierarchy-list (weak-pointer-value descendant)))
+	  (sheep-direct-children sheep))))

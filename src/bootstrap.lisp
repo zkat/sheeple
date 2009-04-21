@@ -8,29 +8,16 @@
 (in-package :sheeple)
 
 (progn
-  (setf =standard-sheep-metasheep=
-	(std-generate-sheep-instance nil))
-
   (setf =t=
-	(let ((sheep (std-generate-sheep-instance nil)))
-	  (setf (gethash 'nickname sheep) "=t=")
-	  (setf (gethash 'parents sheep) nil)
-	  (setf (gethash 'properties sheep) (make-hash-table :test #'equal))
-	  (setf (gethash 'roles sheep) nil)
-	  (setf (gethash 'cloneforms sheep) (make-hash-table :test #'equal))
-	  (setf (gethash 'clonefunctions sheep) (make-hash-table :test #'equal))
-	  (setf (gethash 'children sheep) nil)
-	  (setf (gethash 'property-owners sheep) (make-weak-hash-table :weakness :value :test #'equal))
-	  (setf (gethash 'hierarchy-list sheep) nil)
-	  (std-finalize-sheep sheep)
+	(let ((sheep (%make-sheep)))
+	  (setf (sheep-nickname sheep) "=t=")
+	  (finalize-sheep sheep)
 	  sheep))
 
   (setf =dolly= 
 	(clone (=t=)
 	       ()
-	       (:nickname "=dolly=")))
-
-  (setf =standard-sheep-metasheep= (eval the-standard-sheep-metasheep-form)))
+	       (:nickname "=dolly="))))
 
 ;;; Wolves and wolf-handling
 (setf =white-fang= (clone (=t=) () (:nickname "=white-fang=")))

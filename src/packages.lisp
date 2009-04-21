@@ -70,31 +70,11 @@
    :=float=
 
    ;; MOP-related
-   ;; It's a little small right now...
    :sheep-direct-parents
    :sheep-direct-roles
    :sheep-nickname
    :sheep-hierarchy-list
    :print-sheep
-
-   ;; Sheep creation
-   :initialize-sheep ; shitsux
-   :finalize-sheep-using-metasheep
-   :add-parent-using-metasheeple
-   :remove-parent-using-metasheeple
-
-   ;; Properties
-   :property-value-using-metasheep
-   :setf-property-value-using-metasheep
-   :get-cloneform-using-metasheep
-   :setf-get-cloneform-using-metasheep
-   :get-clonefunction-using-metasheep
-   :setf-get-clonefunction-using-metasheep
-   :remove-property-using-metasheep
-   :has-direct-property-p-using-metasheep
-   :who-sets-using-metasheep
-   :available-properties-using-metasheep
-   :available-cloneforms-using-metasheep
    ))
 
 (defpackage #:sheeple-user

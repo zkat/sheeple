@@ -143,7 +143,8 @@
   (memoize-sheep-hierarchy-list sheep)
   (memoize-property-access sheep)
   (loop for child-pointer in (sheep-direct-children sheep)
-     do (memoize-property-access (weak-pointer-value child-pointer))))
+     do (memoize-property-access (weak-pointer-value child-pointer)))
+  sheep)
 
 (defun deep-copy (sheep)
   (let ((all-property-names (available-properties sheep)))
@@ -231,7 +232,7 @@
 
 (defun std-tie-breaker-rule (minimal-elements cpl-so-far)
   (dolist (cpl-constituent (reverse cpl-so-far))
-    (let* ((supers (gethash 'parents cpl-constituent))
+    (let* ((supers (sheep-direct-parents cpl-constituent))
            (common (intersection minimal-elements supers)))
       (when (not (null common))
         (return-from std-tie-breaker-rule (car common))))))

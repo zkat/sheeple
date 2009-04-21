@@ -79,6 +79,36 @@
 		      all-keys)))
     sheep))
 
+(defun reinitialize-sheep (sheep new-parents new-properties &key nickname deep-copy shallow-copy)
+  (loop for parent in (sheep-direct-parents sheep)
+       do (remove-parent parent sheep))
+  (setf (sheep-direct-properties sheep) (make-hash-table :test #'eq))
+  (add-parents sheep new-parents)
+  (set-up-properties sheep new-properties)
+  (execute-clonefunctions sheep)
+  (setf (sheep-nickname sheep) nickname)
+  (finalize-sheep sheep)
+  (when shallow-copy
+    (shallow-copy sheep))
+  (when deep-copy
+    (deep-copy sheep))
+  sheep)
+
+(defun swap-sheep (old-sheep new-sheep)
+  "swaps stuff from new-sheep into old-sheep while maintaining old-sheep's identity"
+  (let ((new-parents (sheep-direct-parents new-sheep))
+	(new-properties (sheep-direct-properties new-sheep)))
+    (loop for parent in (sheep-direct-parents old-sheep)
+	 do (remove-parent parent old-sheep))
+    (setf (sheep-direct-parents old-sheep) new-parents)
+    (setf (sheep-direct-properties old-sheep) new-properties)
+    old-sheep))
+
+(defun swap-sheep-or-make-new (old-sheep new-sheep)
+  (if (sheep-p old-sheep)
+      (swap-sheep old-sheep new-sheep)
+      new-sheep))
+
 (defun mitosis (model)
   (let* ((parents (sheep-direct-parents model))
 	 (properties (sheep-direct-properties model))
@@ -253,3 +283,4 @@
 (defun descendant-p (maybe-descendant ancestor)
   (ancestor-p ancestor maybe-descendant))
 
+;; Instance swapping

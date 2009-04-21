@@ -67,3 +67,17 @@
      ,(canonize-sheeple sheeple)
      ,(canonize-properties properties)
      ,@(canonize-clone-options options))))
+
+(defmacro defsheep (name sheeple properties &rest options)
+  (if (boundp name)
+      `(defparameter ,name (replace-or-reinitialize-sheep 
+			    ,name 
+			    ,(canonize-sheeple sheeple) 
+			    ,(canonize-properties properties) 
+			    ,@(canonize-clone-options options)))
+      `(defparameter ,name (clone ,sheeple ,properties ,@options))))
+
+(defun replace-or-reinitialize-sheep (maybe-sheep parents properties &rest options)
+  (if (sheep-p maybe-sheep)
+      (apply #'reinitialize-sheep maybe-sheep parents properties options)
+      (apply #'spawn-sheep parents properties options)))

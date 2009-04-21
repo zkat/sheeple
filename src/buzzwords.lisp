@@ -18,7 +18,7 @@
 ;;;
 
 ;;; Buzzword table
-(let ((buzzword-table (make-hash-table :test #'equal)))
+(let ((buzzword-table (make-hash-table :test #'eq)))
 
   (defun find-buzzword (name &optional (errorp t))
     (let ((buzz (gethash name buzzword-table)))

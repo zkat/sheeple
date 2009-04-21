@@ -28,7 +28,8 @@
 WARNING: This tests blows the stack if some weird circularity pops up."
   (let ((sheep1 (clone () ()))
 	(sheep2 (clone () ())))
-;    (is (equalp sheep1 sheep2))
+    ;; using equalp blows the heap (circular hash tables).
+    ;; (is (equalp sheep1 sheep2))
     (is (eql sheep1 sheep1))))
 
 (in-suite sheep-cloning-tests)

@@ -1,12 +1,15 @@
-* TODO Write a replace-sheep function
+* DONE Write a replace-sheep function
   it should swap a sheep's properties/contents with a new 'definition',
   while maintaining identity.
-* TODO Wrap replace-sheep with a DEFSHEEP macro.
--* Work out the whole conditions thing, and what they print out. Put them all in conditions.lisp?
+* DONE Wrap replace-sheep with a DEFSHEEP macro.
+* TODO Write unit tests for defsheep
+* TODO Work out the whole conditions thing, and what they print out. Put them all in conditions.lisp?
 * TODO Write plenty more unit tests. Even unit tests for unimplemented features.
-* TODO Optimize the shit out of property-access
+* DONE Optimize the shit out of property-access
+  Done for now -- it's only slightly slower than PCL right now
 * TODO Allow individual message documentation
-* TODO Optimize the shit out of message dispatch
+* DONE Optimize the shit out of message dispatch
+  Fast enough for now. Again, only a few times slower than PCL.
 * TODO Implement :message option for defbuzzword (like CLOS' :method option)
 * TODO Complete documentation with tutorial and user's guide
 * TODO Thoroughly test sheeple, make sure everything's stable

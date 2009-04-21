@@ -7,56 +7,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(defparameter the-standard-buzzword-metasheep-form
-  '(clone ()
-    ((name
-      'buzzword-metasheep
-      :cloneform nil)
-     (lambda-list
-      nil
-      :cloneform nil)
-     (message-metasheep
-      =standard-message-metasheep=
-      :cloneform =standard-message-metasheep=)
-     (role-metasheep
-      =standard-role-metasheep=
-      :cloneform =standard-role-metasheep=)
-     (messages
-      nil
-      :cloneform nil)
-     (documentation
-      "standard buzzword"
-      :cloneform ""))))
-
-(defun buzzword-name (buzzword)
-  (property-value buzzword 'name))
-(defun (setf buzzword-name) (new-value buzzword)
-  (setf (property-value buzzword 'name) new-value))
-
-(defun buzzword-lambda-list (buzzword)
-  (property-value buzzword 'lambda-list))
-(defun (setf buzzword-lambda-list) (new-value buzzword)
-  (setf (property-value buzzword 'lambda-list) new-value))
-
-(defun buzzword-message-metasheep (buzzword)
-  (property-value buzzword 'message-metasheep))
-(defun (setf buzzword-message-metasheep) (new-value buzzword)
-  (setf (property-value buzzword 'message-metasheep) new-value))
-
-(defun buzzword-role-metasheep (buzzword)
-  (property-value buzzword 'role-metasheep))
-(defun (setf buzzword-role-metasheep) (new-value buzzword)
-  (setf (property-value buzzword 'role-metasheep) new-value))
-
-(defun buzzword-messages (buzzword)
-  (property-value buzzword 'messages))
-(defun (setf buzzword-messages) (new-value buzzword)
-  (setf (property-value buzzword 'messages) new-value))
-
-(defun buzzword-documentation (buzzword)
-  (property-value buzzword 'documentation))
-(defun (setf buzzword-documentation) (new-value buzzword)
-  (setf (property-value buzzword 'documentation) new-value))
+(defstruct (buzzword (:constructor %make-buzzword))
+  (name nil)
+  (lambda-list nil)
+  (messages nil)
+  (documentation ""))
 
 ;;;
 ;;; Buzzword definition

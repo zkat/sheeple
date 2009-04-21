@@ -1,3 +1,16 @@
+*****
+DO IT
+*****
+
+* Write a replace-sheep function that swaps a sheep's properties/contents with a new 'definition',
+  while maintaining identity.
+* Wrap replace-sheep with a DEFSHEEP macro.
+
+
+*********************************
+FORGET THIS SHIT. WE START OVER.
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv this shit right here. Gone
+
 0.5
 -* Work out the whole conditions thing, and what they print out. Put them all in conditions.lisp?
 * Write plenty more unit tests. Even unit tests for unimplemented features.

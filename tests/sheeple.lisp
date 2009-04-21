@@ -16,10 +16,20 @@
 (defun sheeple-tests ()
   (run! 'sheeple))
 
+(def-suite sheep-general :in sheeple)
 (def-suite sheep-cloning-tests :in sheeple)
 (def-suite sheep-properties-tests :in sheep-cloning-tests)
 (def-suite clone-options :in sheep-cloning-tests)
 (def-suite cloneform-tests :in sheep-cloning-tests)
+
+(in-suite sheep-general)
+(test equitable-sheep
+  "Tests that sheep are correctly identified as equalp.
+WARNING: This tests blows the stack if some weird circularity pops up."
+  (let ((sheep1 (clone () ()))
+	(sheep2 (clone () ())))
+    (is (equalp sheep1 sheep2))
+    (is (eql sheep1 sheep1))))
 
 (in-suite sheep-cloning-tests)
 (test clone-basic
@@ -117,12 +127,16 @@ properly signal SHEEP-HIERARCHY-ERROR."
 		       ((acc-num
 			 (incf max-acc-nums)
 			 :cloneform (incf max-acc-nums)
-			 :reader account-number)))))
+			 :reader account-number))))
+	 (esheep (clone ()
+			((name "Zing" :cloneform (error))))))
     (is (= 1 (account-number sheep)))
     (is (= 1 max-acc-nums))
     (let ((new-sheep (clone (sheep) ())))
       (is (= 2 (account-number new-sheep)))
-      (is (= 2 max-acc-nums)))))
+      (is (= 2 max-acc-nums)))
+    (signals 'error (clone (esheep) ()))
+    (is (equal "foo" (property-value (clone (esheep) ((name "foo"))) 'name)))))
 
 ;; (test cloneform-inspection
 ;;   "Checks that the cloneform inspection tools return The Right Thing(tm)")

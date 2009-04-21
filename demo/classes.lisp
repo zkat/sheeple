@@ -5,14 +5,13 @@
 ;; over CLOS, but simply its ability to perform tasks in a similar way to CLOS.
 (in-package :sheeple-user)
 
-(defvar =person= 
-  (clone ()
-	 ((name 
-	   "NoName"
-	   :manipulator name)
-	  (phone
-	   "NoPhone"
-	   :manipulator phone))))
+(defsheep =person= ()
+  ((name 
+    "NoName"
+    :manipulator name)
+   (phone
+    "NoPhone"
+    :manipulator phone)))
 
 (defvar *charles*
   (clone (=person=)

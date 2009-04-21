@@ -1,40 +1,14 @@
-*****
-DO IT
-*****
 
 * Write a replace-sheep function that swaps a sheep's properties/contents with a new 'definition',
   while maintaining identity.
 * Wrap replace-sheep with a DEFSHEEP macro.
-
-
-*********************************
-FORGET THIS SHIT. WE START OVER.
-vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv this shit right here. Gone
-
-0.5
 -* Work out the whole conditions thing, and what they print out. Put them all in conditions.lisp?
 * Write plenty more unit tests. Even unit tests for unimplemented features.
-
-0.6
-* Rewrite entire MOP system ("Always plan to throw one away")
-
-0.7
 * Optimize the shit out of property-access
 * Allow individual message documentation
-
-0.8
 * Optimize the shit out of message dispatch
-* Implement CLOS-style :message option for defbuzzword
-
-0.9
-* Add :method option to defbuzzword
+* Implement :message option for defbuzzword (like CLOS' :method option)
 * Complete documentation with tutorial and user's guide
-
-1.0
 * Thoroughly test sheeple, make sure everything's stable
 * Make sure user's guide and documentation is good, then make it better
 
-2.0
-* Fleece CLOS
-* Add :method-combination option, and some combinations.
-* Write a graphical editing interface for it?

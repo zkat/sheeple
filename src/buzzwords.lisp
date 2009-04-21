@@ -39,7 +39,7 @@
     (remhash name buzzword-table))
 ) ; end buzzword table closure
 
-(defun std-finalize-buzzword (buzzword)
+(defun finalize-buzzword (buzzword)
   (let ((name (buzzword-name buzzword)))
     (when (fboundp name)
      (warn 'clobbering-function-definition
@@ -47,38 +47,22 @@
 	   :format-args (list name)))
     (setf (fdefinition name) (lambda (&rest args) (apply-buzzword buzzword args)))))
 
-(defun generate-sheep-standard-buzzword (metasheep 
-					 &key name
-					 lambda-list
-					 message-metasheep
-					 (documentation "") 
-					 &allow-other-keys)
-  (let ((buzzword (clone (metasheep) 
-			 ((name name)
-			  (lambda-list
-			   lambda-list)
-			  (message-metasheep
-			   message-metasheep)
-			  (documentation documentation)))))
-    (std-finalize-buzzword buzzword)
+(defun generate-buzzword (&key name
+			  lambda-list
+			  (documentation ""))
+  (let ((buzzword (%make-buzzword 
+		   :name name
+		   :lambda-list lambda-list
+		   :documentation documentation)))
+    (finalize-buzzword buzzword)
     buzzword))
 
 (defun ensure-buzzword (name
-			&rest all-keys 
-			&key
-			(buzzword-metasheep =standard-buzzword-metasheep=)
-			(message-metasheep =standard-message-metasheep=)
-			(role-metasheep =standard-role-metasheep=)
-			&allow-other-keys)
+			&rest all-keys)
   (if (find-buzzword name nil)
       (find-buzzword name)
-      (let ((buzzword (apply (if (eql buzzword-metasheep =standard-buzzword-metasheep=)
-				 #'generate-sheep-standard-buzzword
-				 #'generate-sheep)
-			     buzzword-metasheep
+      (let ((buzzword (apply #'generate-buzzword
 			     :name name
-			     :message-metasheep message-metasheep
-			     :role-metasheep role-metasheep
 			     all-keys)))
 	(setf (find-buzzword name) buzzword)
 	buzzword)))

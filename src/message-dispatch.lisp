@@ -67,7 +67,7 @@
 	       do (dolist (role (sheep-direct-roles curr-sheep))
 		    (when (and (equal selector (role-name role)) ;(eql buzzword (role-buzzword role))
 			       (eql index (role-position role)))
-			  (let ((curr-message (message-pointer role)))
+			  (let ((curr-message (role-message-pointer role)))
 			    (when (= n (length (message-lambda-list curr-message)))
 			      (when (not (member curr-message
 						 discovered-messages

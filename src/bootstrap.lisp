@@ -41,11 +41,3 @@
 (setf =complex= (clone (=number=) () (:nickname "=complex=")))
 (setf =integer= (clone (=number=) () (:nickname "=integer=")))
 (setf =float= (clone (=number=) () (:nickname "=float=")))
-
-;;; Now we create the buzzword, message, and role metasheeps
-(setf =standard-role-metasheep=
-  (eval the-standard-role-metasheep-form))
-(setf =standard-message-metasheep=
-  (eval the-standard-message-metasheep-form))
-(setf =standard-buzzword-metasheep=
-  (eval the-standard-buzzword-metasheep-form))

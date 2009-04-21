@@ -6,112 +6,38 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(defparameter the-standard-message-metasheep-form
-  '(clone ()
-    ((name
-      'standard-message-metasheep
-      :cloneform 'standard-message)
-     (buzzword
-      nil
-      :cloneform nil)
-     (qualifiers
-      nil
-      :cloneform nil)
-     (lambda-list
-      nil
-      :cloneform nil)
-     (participants
-      nil
-      :cloneform nil)
-     (body
-      nil
-      :cloneform '(lambda () nil))
-     (function
-      nil
-      :cloneform (lambda () nil))
-     (documentation
-      "standard message metasheep"
-      :cloneform ""))))
+(defstruct (message (:constructor %make-message))
+  (name nil)
+  (buzzword nil)
+  (qualifiers nil)
+  (lambda-list nil)
+  (participants nil)
+  (body '(lambda () nil))
+  (function (lambda () nil))
+  (documentation ""))
 
-(defun message-name (message)
-  (property-value message 'name))
-(defun (setf message-name) (new-value message)
-  (setf (property-value message 'name) new-value))
-(defun message-buzzword (message)
-  (property-value message 'buzzword))
-(defun (setf message-buzzword) (new-value message)
-  (setf (property-value message 'buzzword) new-value))
-(defun message-qualifiers (message)
-  (property-value message 'qualifiers))
-(defun (setf message-qualifiers) (new-value message)
-  (setf (property-value message 'qualifiers) new-value))
-(defun message-lambda-list (message)
-  (property-value message 'lambda-list))
-(defun (setf message-lambda-list) (new-value message)
-  (setf (property-value message 'lambda-list) new-value))
-(defun message-participants (message)
-  (property-value message 'participants))
-(defun (setf message-participants) (new-value message)
-  (setf (property-value message 'participants) new-value))
-(defun message-body (message)
-  (property-value message 'body))
-(defun (setf message-body) (new-value message)
-  (setf (property-value message 'body) new-value))
-(defun message-function (message)
-  (property-value message 'function))
-(defun (setf message-function) (new-value message)
-  (setf (property-value message 'function) new-value))
-(defun message-documentation (message)
-  (property-value message 'documentation))
-(defun (setf message-documentation) (new-value message)
-  (setf (property-value message 'documentation) new-value))
+(defstruct (role (:constructor %make-role))
+  (name nil)
+  (position 0)
+  (message-pointer nil))
 
-(defparameter the-standard-role-metasheep-form
-  '(clone ()
-    ((name
-      'standard-role-metasheep
-      :cloneform 'standard-role)
-     (position
-      0
-      :cloneform nil)
-     (message-pointer
-      nil
-      :cloneform nil))))
-
-(defun role-name (role)
-  (property-value role 'name))
-(defun (setf role-name) (new-value role)
-  (setf (property-value role 'name) new-value))
-
-(defun role-position (role)
-  (property-value role 'position))
-(defun (setf role-position) (new-value role)
-  (setf (property-value role 'position) new-value))
-
-(defun message-pointer (role)
-  (property-value role 'message-pointer))
-(defun (setf message-pointer) (new-value role)
-  (setf (property-value role 'message-pointer) new-value))
-
-(defun spawn-sheep-standard-message (metasheep
-				     &key name
-				     qualifiers
-				     lambda-list
-				     participants
-				     function
-				     body
-				     (documentation "")
-				     &allow-other-keys)
-  (let* ((buzzword (find-buzzword name))
-	 (message (clone (metasheep)
-			 ((name name)
-			  (buzzword buzzword)
-			  (qualifiers qualifiers)
-			  (lambda-list lambda-list)
-			  (participants participants)
-			  (function function)
-			  (body body)
-			  (documentation documentation)))))
+(defun generate-message (&key name
+			 qualifiers
+			 lambda-list
+			 buzzword
+			 participants
+			 function
+			 body
+			 (documentation ""))
+  (let ((message (%make-message
+		   :name name
+		   :buzzword buzzword
+		   :lambda-list lambda-list
+		   :qualifiers qualifiers
+		   :participants participants
+		   :function function
+		   :body body
+		   :documentation documentation)))
     (add-message-to-buzzword message buzzword)
     (remove-messages-with-name-qualifiers-and-participants name qualifiers participants)
     (add-message-to-sheeple name message participants)
@@ -129,11 +55,9 @@
   (let* ((buzzword (find-buzzword name))
 	 (target-sheeple (sheepify-list participants))
 	 (message (apply
-		   (if (eql (buzzword-message-metasheep buzzword) =standard-message-metasheep=)
-		       #'spawn-sheep-standard-message
-		       #'spawn-sheep-using-metasheep-prototype)
-		   (buzzword-message-metasheep buzzword)
+		   #'generate-message
 		   :name name
+		   :buzzword buzzword
 		   :lambda-list lambda-list
 		   :participants target-sheeple
 		   all-keys)))
@@ -167,39 +91,34 @@
 	       do (when (and (equal name (role-name role))
 			     (equal participants
 				    (message-participants
-				     (message-pointer role)))
+				     (role-message-pointer role)))
 			     (equal qualifiers
 				    (message-qualifiers
-				     (message-pointer role))))
+				     (role-message-pointer role))))
 		    (delete-role role sheep)))))
 
 (defun delete-role (role sheep)
   (setf (sheep-direct-roles sheep)
 	(remove role (sheep-direct-roles sheep)))
   (setf (buzzword-messages (find-buzzword (role-name role)))
-	(remove (message-pointer role) (buzzword-messages (find-buzzword (role-name role))))))
+	(remove (role-message-pointer role) (buzzword-messages (find-buzzword (role-name role))))))
 
 ;; TODO: make a role factory thing
 (defun add-message-to-sheeple (name message sheeple)
-  (let ((role-metasheep (buzzword-role-metasheep (find-buzzword name))))
-    (loop 
-       for sheep in sheeple
-       for i upto (1- (length sheeple))
-       do (let ((role (clone (role-metasheep)
-			     ((name name)
-			      (position i)
-			      (message-pointer message)))))
-	    (push role
-		  (sheep-direct-roles sheep))))))
+  (loop 
+     for sheep in sheeple
+     for i upto (1- (length sheeple))
+     do (let ((role (%make-role
+		     :name name
+		     :position i
+		     :message-pointer message)))
+	  (push role
+		(sheep-direct-roles sheep)))))
 
 (defun undefine-message (name &key qualifiers participants)
   (remove-messages-with-name-qualifiers-and-participants name qualifiers participants))
 
 (defun available-messages (sheep)
-  (if (std-sheep-p sheep)
-      (std-available-messages sheep)
-      (available-messages-using-metasheep (sheep-metasheep sheep) sheep)))
-(defun std-available-messages (sheep)
   (let ((personal-role-names (mapcar (lambda (role) (role-name role))
 				     (sheep-direct-roles sheep))))
     (remove-duplicates

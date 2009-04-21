@@ -7,9 +7,9 @@ optimize programmer time, and empower application implementers to better assist 
 modern paradigms in order to proactively achieve next-gen synergy in tomorrow's web 3.0 world. It is
 implemented in (mostly) ANSI Common Lisp. Sheeple is fully buzzword compliant.
 
-Initially written as the object system of a text-based game online game engine ([Sykosomatic][9]),
-Sheeple is provided as a module separate from its persistent counterpart, Persistent-Sheeple, as a
-standalone library for use with any regular Lisp application.
+Initially written as the object system for [Sykosomatic][9], Sheeple is provided as a module
+separate from its persistent counterpart, Persistent-Sheeple, as a standalone library for use with
+any regular Lisp application.
 
 Following the implementation of Sheeple's Metasheep Protocol, Persistent-Sheeple is being rewritten
 to take full advantage of the protocol, allowing parallel operation of regular sheeple with psheep.
@@ -21,6 +21,8 @@ Sheeple is inspired by a number of Object-Oriented systems, mainly:
 * [MOO][5], implemented and used by [LambdaMOO][8]
 * [Slate][6], a Smalltalk-like language with Prototype Multiple Dispatch that Sheeple bases its
   message dispatch system on.
+* [Self][10], another Smalltalk-like language with lots of papers written about it, and the concept
+  of prototype OO.
 
 [3]: http://en.wikipedia.org/wiki/CLOS
 [4]: http://en.wikipedia.org/wiki/LPC_(programming_language)
@@ -29,17 +31,11 @@ Sheeple is inspired by a number of Object-Oriented systems, mainly:
 [7]: http://en.wikipedia.org/wiki/MUD
 [8]: http://en.wikipedia.org/wiki/Lambdamoo
 [9]: http://github.com/sykopomp/sykosomatic/
+[10]: http://research.sun.com/self/
 
 It was written with the purpose of providing a lot of the goodies of CLOS programming in a
-completely prototype-based environment. As such, it shares a lot of features (and syntax) with
-CLOS. The most notable features are multiple inheritance and multimethods (called multimessages).
-
-This README contains a basic usage guide, and sort-of-spec of Sheeple. Much heavier documentation,
-including a tutorial and a MSP spec is to come. Meanwhile, have fun reading the code (hohoho). (You
-can also contact me directly, using sykopomp located-at sykosomatic no-spam-dot org)
-
-^this implementation makes use of trivial-garbage for weak-pointers, finalizers, and
- weak-hash-tables. The current version also only supports SBCL.
+completely prototype-based environment. As such, it shares a lot of features and syntax with
+CLOS. The most notable features are multiple inheritance and multimethods, called multimessages).
 
 Supported Platforms
 -------------------
@@ -72,8 +68,6 @@ FiveAM is required if you wish to run the test suite. To run it:
         (asdf:oos 'asdf:load-op 'sheeple-tests)
         (sheeple-tests:sheeple-tests)
 
-And watch the tests roll by. Only one should fail (CLOS Fleecing)
-
 
 Notes
 -----
@@ -95,22 +89,21 @@ I assure you, Sheeple is Serious Business(tm) for Serious Applications(tm).
 Features
 --------
 
-* Simple, but powerful defclass-like CLONE macro, with cloning options.
+* CLOS-like DEFSHEEP and CLONE macros.
 
 * Dynamic object management tools (inspection of objects, addition/removal of properties, all
-  without any sort of redefinition).
+  without requiring full redefinition/object updating).
 
-* Dynamic property value access, following a prototype chain (the value of the nearest parent that
-  set the value for a particular property is used if the child did not set one).
+* Delegative property value access.
 
-* Full integration with built-in Lisp types (wolves) by transparent autoboxing (called fleecing).
+* Full integration with built-in Lisp types (wolves) through autoboxing (called fleecing).
 
 * Multiple inheritance through cloning with dynamic inspection and management (adding/removing) of
   parents.
 
 * Multiple dispatch on messages (methods) -- messages specialize on specific instances, and follow
-  inheritance hierarchy. Multimessage definition is almost identical to CLOS methods, and shares
-  similar semantics.
+  inheritance hierarchy. Multimessage definition is almost identical to the core of CLOS methods,
+  and shares similar semantics.
 
 * Dynamic removal of messages, as well as entire buzzwords with undefbuzzword/undefmessage.
 
@@ -120,19 +113,15 @@ Features
 
 * (call-next-message) and (next-message-p)
 
-* A sheep creation and property-access Metaobject Protocol, with a larger MOP in development.
+Planned features:
 
-Planned features that have not yet been implemented include:
-
-* CLOS integration, including autoboxing of entire class hierarchies.
-
-* Support more than just SBCL
+* A metaobject protocol
 
 
 Using Sheeple
 =============
 
-Please refer to doc/user-guide for a quick-and-dirty intro to Sheeple and how to use it.
+Please refer to #P"doc;user-guide" for a quick-and-dirty intro to Sheeple and how to use it.
 
 If you're extra-patient, you can wait for me to write a full-fledged user guide (slated for
 completion by the time 1.0 gets pooped out).
@@ -180,13 +169,14 @@ Why not Sheeple?
 ================
 There are, of course, some caveats to using the current implementation of Sheeple...
 
-1. It's considerably slower than CLOS -
+1. It can be slower than PCL -
    
      This should not come as a surprise considering the sheer speed of implementations like
      PCL. Considerable optimization is planned as time goes on and interfaces stabilize, but Sheeple
-     would most probably never be as fast as CLOS. On the other hand, it's considerable faster on
-     SBCL than CLOS on GNU clisp, for both slot-access and dispatch, so it is certainly usable for a
-     certain number of applications, even in this sub-optimal state.
+     would most probably never be as fast as CLOS, due to how dynamic it has to be. On the other
+     hand, it's considerable faster on SBCL than CLOS on GNU clisp, for both property access and
+     message dispatch, so it is certainly usable for a certain number of applications, even in this
+     sub-optimal state.
 
 2. It's buggy right now -
 
@@ -206,3 +196,10 @@ There are, of course, some caveats to using the current implementation of Sheepl
      bad sense of humor wrote a bunch of alias macros around CLOS... but it's not CLOS. Many
      concepts are different, and it might be hard to get used to them, or even find any use in
      them. YMMV
+
+5. It's not as integrated - 
+     
+     CLOS itself is quite integrated into Common Lisp. Implementations can do a lot of
+     under-the-hood magic to get it running nice and fast, and to get some parts working in the
+     first place. Since Sheeple runs on -top- of Common Lisp, it doesn't have the same kind of
+     access, and might not 'feel' as integrated.

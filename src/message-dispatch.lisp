@@ -50,7 +50,6 @@
   (let ((function (message-function message)))
     (funcall function args next-messages)))
 
-;; TODO - probably replace this selector thing with an in-role pointer to the actual buzzword
 (defun find-applicable-messages  (buzzword args &key (errorp t))
   "Returns the most specific message using SELECTOR and ARGS."
   (let ((selector (buzzword-name buzzword))
@@ -66,7 +65,7 @@
 	       for hierarchy-position upto (1- (length curr-sheep-list))
 	       do (dolist (role (sheep-direct-roles curr-sheep))
 		    (when (and (equal selector (role-name role)) ;(eql buzzword (role-buzzword role))
-			       (eql index (role-position role)))
+			       (= index (role-position role)))
 			  (let ((curr-message (role-message-pointer role)))
 			    (when (= n (length (message-lambda-list curr-message)))
 			      (when (not (member curr-message

@@ -53,12 +53,12 @@
 ;;;
 
 ;;; sheep storage
-(defun initialize-sheep (&key parents
+(defun initialize-sheep (sheep
+			 &key parents
 			 properties
 			 nickname
 			 deep-copy
 			 shallow-copy)
-  (let ((sheep (%make-sheep)))
     (add-parents sheep parents)
     (set-up-properties sheep properties)
     (execute-clonefunctions sheep)
@@ -68,31 +68,27 @@
       (shallow-copy sheep))
     (when deep-copy
       (deep-copy sheep))
-    sheep))
+    sheep)
 
 (defun spawn-sheep (sheeple properties
 		    &rest all-keys)
   "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
   (let ((sheep (apply #'initialize-sheep
+		      (%make-sheep)
 		      :parents sheeple 
 		      :properties properties
 		      all-keys)))
     sheep))
 
 (defun reinitialize-sheep (sheep new-parents new-properties &key nickname deep-copy shallow-copy)
+  ;; cleanup
   (loop for parent in (sheep-direct-parents sheep)
        do (remove-parent parent sheep))
-  (setf (sheep-direct-properties sheep) (make-hash-table :test #'eq))
-  (add-parents sheep new-parents)
-  (set-up-properties sheep new-properties)
-  (execute-clonefunctions sheep)
-  (setf (sheep-nickname sheep) nickname)
-  (finalize-sheep sheep)
-  (when shallow-copy
-    (shallow-copy sheep))
-  (when deep-copy
-    (deep-copy sheep))
-  sheep)
+  (clrhash (sheep-cloneforms sheep))
+  (clrhash (sheep-clonefunctions sheep))
+  (clrhash (sheep-direct-properties sheep))
+  ;; reinitialize
+  (initialize-sheep sheep))
 
 (defun swap-sheep (old-sheep new-sheep)
   "swaps stuff from new-sheep into old-sheep while maintaining old-sheep's identity"

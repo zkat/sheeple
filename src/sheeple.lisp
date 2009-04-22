@@ -87,8 +87,13 @@
   (clrhash (sheep-cloneforms sheep))
   (clrhash (sheep-clonefunctions sheep))
   (clrhash (sheep-direct-properties sheep))
-  ;; reinitialize
-  (initialize-sheep sheep))
+  ;; initialize again
+  (initialize-sheep sheep 
+		    :parents new-parents
+		    :properties new-properties
+		    :nickname nickname
+		    :deep-copy deep-copy
+		    :shallow-copy shallow-copy))
 
 (defun swap-sheep (old-sheep new-sheep)
   "swaps stuff from new-sheep into old-sheep while maintaining old-sheep's identity"

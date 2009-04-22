@@ -70,11 +70,13 @@
 
 (defmacro defsheep (name sheeple properties &rest options)
   (if (boundp name)
-      `(setf ,name (replace-or-reinitialize-sheep 
-		    ,name 
-		    ,(canonize-sheeple sheeple) 
-		    ,(canonize-properties properties) 
-		    ,@(canonize-clone-options options)))
+      `(progn
+	 (setf ,name (replace-or-reinitialize-sheep 
+		      ,name 
+		      ,(canonize-sheeple sheeple) 
+		      ,(canonize-properties properties) 
+		      ,@(canonize-clone-options options)))
+	 ',name)
       `(defvar ,name (clone ,sheeple ,properties ,@options))))
 
 (defun replace-or-reinitialize-sheep (maybe-sheep parents properties &rest options)

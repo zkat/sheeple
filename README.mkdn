@@ -39,13 +39,13 @@ CLOS. The most notable features are multiple inheritance and multimethods, calle
 
 Supported Platforms
 -------------------
-As of right now, only Clozure CL and SBCL pass all tests. CLISP seems to work reasonably, although
-it dies while the test suite is being run (I have not been able to track down why. It might be a
-problem with the test suite instead of sheeple). An old version of Sheeple was tested on
-LispWorks. If you are able and willing to test Sheeple on your platform, please run the test suite
-and e-mail me the results, and I will update this.  Sheeple only really supports lisps with weak
-pointers and weak hash tables, and only those that are supported by trivial-garbage, so some lisps
-won't work at all.
+Confirmed to work (pass all tests):
+* SBCL
+* Clozure CL
+* LispWorks
+
+Others:
+* CLISP: compiles, and seems to work, but is very unstable, and crashes during tests
 
 Loading Sheeple
 ---------------

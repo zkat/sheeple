@@ -11,12 +11,15 @@
 * Performance
 ** DONE Optimize the shit out of property-access
   Done for now -- it's only slightly slower than PCL right now
-** DONE Optimize the shit out of message dispatch
-  Fast enough for now. Again, only a few times slower than PCL.
-
-* Fancy features
+** TODO Optimize the shit out of message dispatch
+   It's pretty fast right now, but nothing compared to PCL.
+   I should read through the Slate paper again and see if I can implement any of their
+   suggested optimizations.
+  
+* More features
 ** TODO Implement :message option for defbuzzword (like CLOS' :method option)
 
+** TODO Make initialize-instance a buzzword so :after messages can be defined
 * Stability
 ** TODO Write unit tests for defsheep
 

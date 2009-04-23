@@ -40,11 +40,13 @@ CLOS. The most notable features are multiple inheritance and multimethods, calle
 Supported Platforms
 -------------------
 Confirmed to work (pass all tests):
+
 * SBCL
 * Clozure CL
 * LispWorks
 
 Others:
+
 * CLISP: compiles, and seems to work, but is very unstable, and crashes during tests
 
 Loading Sheeple

@@ -1,8 +1,13 @@
+0.6
+---
+Stuff I don't even remember. I feel like releasing, so I will.
+
 0.5
 ---
 Features -
   * Cloneforms actually work more like CLOS initforms now (they don't execute if a value is already
   provided)
+  * Faster implementation.
 
 Bugfixes -
   * Conditions work nicer now. Reorganized them and put them in their place.

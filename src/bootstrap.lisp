@@ -7,37 +7,76 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(progn
-  (setf =t=
-	(let ((sheep (%make-sheep)))
-	  (setf (sheep-nickname sheep) "=t=")
-	  (finalize-sheep sheep)
-	  sheep))
+(defvar =t=
+  (let ((sheep (%make-sheep)))
+    (setf (sheep-nickname sheep) "=t=")
+    (finalize-sheep sheep)
+    sheep))
 
-  (setf =dolly= 
-	(clone (=t=)
-	       ()
-	       (:nickname "=dolly="))))
+(defsheep =dolly= (=t=)
+  () (:nickname "=dolly="))
 
 ;;; Wolves and wolf-handling
-(setf =white-fang= (clone (=t=) () (:nickname "=white-fang=")))
-(setf =symbol= (clone (=white-fang=)()(:nickname "=symbol=")))
-(setf =sequence= (clone (=white-fang=)()(:nickname "=sequence=")))
-(setf =array= (clone (=white-fang=)()(:nickname "=array=")))
-(setf =number= (clone (=white-fang=) () (:nickname "=number=")))
-(setf =character= (clone (=white-fang=) () (:nickname "=character=")))
-(setf =function= (clone (=white-fang=) () (:nickname "=function=")))
-(setf =hash-table= (clone (=white-fang=) () (:nickname "=hash-table=")))
-(setf =package= (clone (=white-fang=) () (:nickname "=package=")))
-(setf =pathname= (clone (=white-fang=) () (:nickname "=pathname=")))
-(setf =readtable= (clone (=white-fang=) () (:nickname "=readtable=")))
-(setf =stream= (clone (=white-fang=) () (:nickname "=stream=")))
-(setf =list= (clone (=sequence=) () (:nickname "=list=")))
-(setf =null= (clone (=symbol= =list=) () (:nickname "=null=")))
-(setf =cons= (clone (=list=) () (:nickname "=cons=")))
-(setf =vector= (clone (=array= =sequence=) () (:nickname "=vector=")))
-(setf =bit-vector= (clone (=vector=) () (:nickname "=bit-vector=")))
-(setf =string= (clone (=vector=) () (:nickname "=string=")))
-(setf =complex= (clone (=number=) () (:nickname "=complex=")))
-(setf =integer= (clone (=number=) () (:nickname "=integer=")))
-(setf =float= (clone (=number=) () (:nickname "=float=")))
+(defsheep =white-fang= (=t=)
+  () (:nickname "=white-fang="))
+
+(defsheep =symbol=  (=white-fang=)
+  () (:nickname "=symbol="))
+
+(defsheep =sequence=  (=white-fang=)
+  () (:nickname "=sequence="))
+
+(defsheep =array=  (=white-fang=)
+  () (:nickname "=array="))
+
+(defsheep =number=  (=white-fang=)
+  () (:nickname "=number="))
+
+(defsheep =character= (=white-fang=)
+  () (:nickname "=character="))
+
+(defsheep =function=  (=white-fang=)
+  () (:nickname "=function="))
+
+(defsheep =hash= (=white-fang=)
+  () (:nickname "=hash-table=") (clone  ()))
+
+(defsheep =package=  (=white-fang=)
+  () (:nickname "=package="))
+
+(defsheep =pathname=  (=white-fang=)
+  () (:nickname "=pathname="))
+
+(defsheep =readtable=  (=white-fang=)
+  () (:nickname "=readtable="))
+
+(defsheep =stream=  (=white-fang=)
+  () (:nickname "=stream="))
+
+(defsheep =list=  (=sequence=)
+  () (:nickname "=list="))
+
+(defsheep =null=  (=symbol= =list=)
+  () (:nickname "=null="))
+
+(defsheep =cons=  (=list=)
+  () (:nickname "=cons="))
+
+(defsheep =vector=  (=array= =sequence=)
+  () (:nickname "=vector="))
+
+(defsheep =bit-vector=  (=vector=)
+  () (:nickname "=bit-vector="))
+
+(defsheep =string=  (=vector=)
+  () (:nickname "=string="))
+
+(defsheep =complex=  (=number=)
+  () (:nickname "=complex="))
+
+(defsheep =integer=  (=number=)
+  () (:nickname "=integer="))
+
+(defsheep =float=  (=number=)
+  () (:nickname "=float="))
+

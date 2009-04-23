@@ -1,13 +1,18 @@
 0.6
 ---
-Stuff I don't even remember. I feel like releasing, so I will.
+Features -
+  * Nothing worth noting
+
+Bugfixes -
+  * defsheep wasn't actually redefining sheeple.
+  * Lots of minor bugfixes
 
 0.5
 ---
 Features -
   * Cloneforms actually work more like CLOS initforms now (they don't execute if a value is already
   provided)
-  * Faster implementation.
+  * Major, faster reimplementation of Sheeple. The MOP stuff is gone for now, though.
 
 Bugfixes -
   * Conditions work nicer now. Reorganized them and put them in their place.

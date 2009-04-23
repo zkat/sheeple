@@ -59,13 +59,11 @@
 
 (defun ensure-buzzword (name
 			&rest all-keys)
-  (if (find-buzzword name nil)
-      (find-buzzword name)
-      (let ((buzzword (apply #'generate-buzzword
-			     :name name
-			     all-keys)))
-	(setf (find-buzzword name) buzzword)
-	buzzword)))
+  (let ((buzzword (apply #'generate-buzzword
+			 :name name
+			 all-keys)))
+    (setf (find-buzzword name) buzzword)
+    buzzword))
 
 (defun undefine-buzzword (name &optional (errorp nil))
   (let ((buzzword (find-buzzword name errorp)))

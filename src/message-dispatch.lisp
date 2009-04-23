@@ -22,8 +22,10 @@
     t))
 
 (defun apply-buzzword (buzzword args)
-  (let ((messages (find-applicable-messages buzzword
-					    (sheepify-list args))))
+  (let* ((relevant-args-length (length (buzzword-required-arglist buzzword)))
+	 (messages (find-applicable-messages buzzword
+					    (sheepify-list 
+					     (subseq args 0 relevant-args-length)))))
     (apply-messages messages args)))
 
 (defun apply-messages (messages args)
@@ -67,7 +69,7 @@
 		    (when (and (equal selector (role-name role)) ;(eql buzzword (role-buzzword role))
 			       (= index (role-position role)))
 			  (let ((curr-message (role-message-pointer role)))
-			    (when (= n (length (message-lambda-list curr-message)))
+			    (when (= n (length (message-specialized-portion curr-message)))
 			      (when (not (member curr-message
 						 discovered-messages
 						 :key #'message-container-message))
@@ -98,7 +100,7 @@
 (defun contain-message (message)
   (make-message-container
    :message message
-   :rank (make-array (length (message-lambda-list message))
+   :rank (make-array (length (message-specialized-portion message))
 		     :initial-element nil)))
 
 (defstruct message-container

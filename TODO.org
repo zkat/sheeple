@@ -22,9 +22,6 @@
 ** TODO Make initialize-instance a buzzword so :after messages can be defined
 * Stability
 ** TODO Write unit tests for defsheep
-
-
-
 ** TODO Work out the whole conditions thing, and what they print out. 
    Put them all in conditions.lisp?
 ** TODO Write plenty more unit tests.

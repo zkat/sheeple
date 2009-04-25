@@ -182,7 +182,6 @@ to their respective participants, with correct role-indexes, etc."
     foo bar)
   (is (= 5 (foo 2 3)))
   (is (equal "bar" (foo "foo" "bar")))
-  (signals sheeple::no-applicable-messages (foo 1 2 3))
   (undefbuzzword foo nil)
   (let* ((sheep1 (clone () () (:nickname "sheep1")))
 	 (sheep2 (clone (sheep1) () (:nickname "sheep2")))

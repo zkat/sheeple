@@ -64,26 +64,8 @@
     message))
 
 (defun add-message-to-buzzword (message buzzword)
-  (let ((buzzword-number-required-args (length (buzzword-required-arglist buzzword)))
-	(message-provided-number-of-args (length (message-specialized-portion message))))
-    (cond ((> buzzword-number-required-args message-provided-number-of-args)
-	   (error "Message does not have enough required arguments"))
-	  ((< buzzword-number-required-args message-provided-number-of-args)
-	   (error "Message defines too many arguments"))
-	  (t
-	   (pushnew message (buzzword-messages buzzword))))))
-
-(defun buzzword-required-arglist (buzzword)
-  (let ((plist
-          (analyze-lambda-list 
-            (buzzword-lambda-list buzzword))))
-    (getf plist :required-args)))
-
-(defun message-specialized-portion (message)
-  (let ((plist
-	 (analyze-lambda-list
-	  (message-lambda-list message))))
-    (getf plist :required-args)))
+  (set-arg-info buzzword :new-message message)
+  (pushnew message (buzzword-messages buzzword)))
 
 (defun remove-messages-with-name-qualifiers-and-participants (name qualifiers participants)
   (loop for sheep in participants
@@ -103,7 +85,6 @@
   (setf (buzzword-messages (find-buzzword (role-name role)))
 	(remove (role-message-pointer role) (buzzword-messages (find-buzzword (role-name role))))))
 
-;; TODO: make a role factory thing
 (defun add-message-to-sheeple (name message sheeple)
   (loop 
      for sheep in sheeple
@@ -153,89 +134,20 @@
 
 ;;; macro
 (defmacro defmessage (&rest args)
-  (eval-when (:compile-toplevel :load-toplevel :execute)
-   (multiple-value-bind (name qualifiers specialized-lambda-list body)
-       (parse-defmessage args)
-     (eval-when (:compile-toplevel :load-toplevel :execute)
-       `(ensure-message
-	 ',name
-	 :qualifiers ',qualifiers
-	 :lambda-list ,(extract-lambda-list specialized-lambda-list)
-	 :participants ,(extract-participants specialized-lambda-list)
-	 :function ,(make-message-lambda name specialized-lambda-list body)
-	 :body '(block ,name ,@body))))))
-
-(defun extract-lambda-list (specialized-lambda-list)
-  (let* ((plist (analyze-lambda-list specialized-lambda-list))
-         (requireds (getf plist ':required-names))
-         (rv (getf plist ':rest-var))
-         (ks (getf plist ':key-args))
-         (aok (getf plist ':allow-other-keys))
-         (opts (getf plist ':optional-args))
-         (auxs (getf plist ':auxiliary-args)))
-    `'(,@requireds 
-      ,@(if rv `(&rest ,rv) ())
-      ,@(if (or ks aok) `(&key ,@ks) ())
-      ,@(if aok '(&allow-other-keys) ())
-      ,@(if opts `(&optional ,@opts) ())
-      ,@(if auxs `(&aux ,@auxs) ()))))
-
-(defun analyze-lambda-list (lambda-list)
-  (labels ((make-keyword (symbol)
-              (intern (symbol-name symbol)
-                      (find-package 'keyword)))
-           (get-keyword-from-arg (arg)
-              (if (listp arg)
-                  (if (listp (car arg))
-                      (caar arg)
-                      (make-keyword (car arg)))
-                  (make-keyword arg))))
-    (let ((keys ())           ; Just the keywords
-          (key-args ())       ; Keywords argument specs
-          (required-names ()) ; Just the variable names
-          (required-args ())  ; Variable names & participants
-          (participants ())   ; Just the participants
-          (rest-var nil)
-          (optionals ())
-          (auxs ())
-          (allow-other-keys nil)
-          (state :parsing-required))
-      (dolist (arg lambda-list)
-        (if (member arg lambda-list-keywords)
-	    (ecase arg
-	      (&optional
-	       (setq state :parsing-optional))
-	      (&rest
-	       (setq state :parsing-rest))
-	      (&key
-	       (setq state :parsing-key))
-	      (&allow-other-keys
-	       (setq allow-other-keys t))
-	      (&aux
-	       (setq state :parsing-aux)))
-	    (case state
-	      (:parsing-required 
-	       (pushend arg required-args)
-	       (if (listp arg)
-		   (progn (pushend (car arg) required-names)
-			  (pushend `(confirm-sheep ,(cadr arg)) participants))
-		   (progn (pushend arg required-names)
-			  (pushend '=t= participants))))
-	      (:parsing-optional (pushend arg optionals))
-	      (:parsing-rest (setq rest-var arg))
-	      (:parsing-key
-	       (pushend (get-keyword-from-arg arg) keys)
-	       (pushend arg key-args))
-	      (:parsing-aux (pushend arg auxs)))))
-      (list  :required-names required-names
-             :required-args required-args
-             :participants participants
-             :rest-var rest-var
-             :keywords keys
-             :key-args key-args
-             :auxiliary-args auxs
-             :optional-args optionals
-             :allow-other-keys allow-other-keys))))
+  (multiple-value-bind (name qualifiers specialized-lambda-list body)
+      (parse-defmessage args)
+    (multiple-value-bind (parameters ll participants required)
+	(parse-specialized-lambda-list specialized-lambda-list)
+      (declare (ignore parameters))
+      (declare (ignore required))
+      `(ensure-message
+	',name
+	:qualifiers ',qualifiers
+	;; TODO - use the new stuff
+	:lambda-list ',ll
+	:participants (list ,@participants)
+	:function ,(make-message-lambda name ll body)
+	:body '(block ,name ,@body)))))
 
 (defun make-message-lambda (name lambda-list body)
   `(lambda (args next-messages)
@@ -251,7 +163,7 @@
 		      (cadr name)
 		      name)
 	    (apply
-	    (lambda ,(eval (extract-lambda-list lambda-list))
+	    (lambda ',lambda-list
 	      ,@body) args)))))
 
 (defun parse-defmessage (args)
@@ -283,17 +195,15 @@
       var-name
       (error "Invalid var name.")))
 
-(defun extract-participants (specialized-lambda-list)
-  (let ((plist (analyze-lambda-list specialized-lambda-list)))
-    `(list ,@(getf plist :participants))))
-
 (defmacro undefmessage (&rest args)
   (multiple-value-bind (name qualifiers lambda-list)
       (parse-undefmessage args)
-    `(undefine-message
-      ',name
-      :qualifiers ',qualifiers
-      :participants ,(extract-participants lambda-list))))
+    (multiple-value-bind (iggy1 iggy2 participants iggy3)
+	(parse-specialized-lambda-list lambda-list)
+      `(undefine-message
+	',name
+	:qualifiers ',qualifiers
+	:participants ,(extract-participants lambda-list)))))
 
 (defun parse-undefmessage (args)
   (let ((name (car args))

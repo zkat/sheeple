@@ -37,7 +37,7 @@
 ;;;
 (define-condition no-such-buzzword (sheeple-error) ())
 (define-condition clobbering-function-definition (sheeple-warning) ())
-
+(define-condition buzzword-lambda-list-error (sheeple-error) ())
 
 ;;;
 ;;; Messages

@@ -21,64 +21,6 @@
 ;;; Cloning
 ;;;
 
-;;; sheep storage
-(defun initialize-sheep (sheep
-			 &key parents
-			 properties
-			 nickname
-			 deep-copy
-			 shallow-copy)
-    (add-parents sheep parents)
-    (set-up-properties sheep properties)
-    (execute-clonefunctions sheep)
-    (setf (sheep-nickname sheep) nickname)
-    (finalize-sheep sheep)
-    (when shallow-copy
-      (shallow-copy sheep))
-    (when deep-copy
-      (deep-copy sheep))
-    sheep)
-
-(defun spawn-sheep (sheeple properties
-		    &rest all-keys)
-  "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
-  (let ((sheep (apply #'initialize-sheep
-		      (%make-sheep)
-		      :parents sheeple 
-		      :properties properties
-		      all-keys)))
-    sheep))
-
-(defun reinitialize-sheep (sheep new-parents new-properties &key nickname deep-copy shallow-copy)
-  ;; cleanup
-  (loop for parent in (sheep-direct-parents sheep)
-       do (remove-parent parent sheep))
-  (clrhash (sheep-cloneforms sheep))
-  (clrhash (sheep-clonefunctions sheep))
-  (clrhash (sheep-direct-properties sheep))
-  ;; initialize again
-  (initialize-sheep sheep 
-		    :parents new-parents
-		    :properties new-properties
-		    :nickname nickname
-		    :deep-copy deep-copy
-		    :shallow-copy shallow-copy))
-
-(defun swap-sheep (old-sheep new-sheep)
-  "swaps stuff from new-sheep into old-sheep while maintaining old-sheep's identity"
-  (let ((new-parents (sheep-direct-parents new-sheep))
-	(new-properties (sheep-direct-properties new-sheep)))
-    (loop for parent in (sheep-direct-parents old-sheep)
-	 do (remove-parent parent old-sheep))
-    (setf (sheep-direct-parents old-sheep) new-parents)
-    (setf (sheep-direct-properties old-sheep) new-properties)
-    old-sheep))
-
-(defun swap-sheep-or-make-new (old-sheep new-sheep)
-  (if (sheep-p old-sheep)
-      (swap-sheep old-sheep new-sheep)
-      new-sheep))
-
 (defun mitosis (model)
   (let* ((parents (sheep-direct-parents model))
 	 (properties (sheep-direct-properties model))

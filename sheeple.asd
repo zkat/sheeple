@@ -17,6 +17,7 @@
 	     (:file "sheeple")
 	     (:file "clone")
 	     (:file "wolves")
+	     (:file "parse-lambda-list")
 	     (:file "buzzwords")
 	     (:file "message-generation")
 	     (:file "message-dispatch")

@@ -13,6 +13,52 @@
     (finalize-sheep sheep)
     sheep))
 
+(defun spawn-sheep (sheeple &rest all-keys)
+  "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
+  (let ((sheep (apply #'initialize-sheep
+		      (let ((sheep (add-parents (%make-sheep) sheeple)))
+			(finalize-sheep sheep)
+			sheep)
+		      all-keys)))
+    sheep))
+
+(defbuzzword initialize-sheep (sheep &key))
+(defmessage initialize-sheep (sheep
+			      &key 
+			      properties
+			      nickname
+			      deep-copy
+			      shallow-copy)
+  (set-up-properties sheep properties)
+  (execute-clonefunctions sheep)
+  (setf (sheep-nickname sheep) nickname)
+  (finalize-sheep sheep)
+  (when shallow-copy
+    (shallow-copy sheep))
+  (when deep-copy
+    (deep-copy sheep))
+  sheep)
+
+(defbuzzword reinitialize-sheep (sheep &key))
+(defmessage reinitialize-sheep (sheep
+				&key new-parents
+				new-properties
+				nickname
+				deep-copy shallow-copy)
+  ;; cleanup
+  (loop for parent in (sheep-direct-parents sheep)
+       do (remove-parent parent sheep))
+  (clrhash (sheep-cloneforms sheep))
+  (clrhash (sheep-clonefunctions sheep))
+  (clrhash (sheep-direct-properties sheep))
+  (add-parents sheep new-parents)
+  ;; initialize again
+  (initialize-sheep sheep 
+		    :properties new-properties
+		    :nickname nickname
+		    :deep-copy deep-copy
+		    :shallow-copy shallow-copy))
+
 (defsheep =dolly= (=t=)
   () (:nickname "=dolly="))
 
@@ -38,8 +84,8 @@
 (defsheep =function=  (=white-fang=)
   () (:nickname "=function="))
 
-(defsheep =hash= (=white-fang=)
-  () (:nickname "=hash-table=") (clone  ()))
+(defsheep =hash-table= (=white-fang=)
+  () (:nickname "=hash-table="))
 
 (defsheep =package=  (=white-fang=)
   () (:nickname "=package="))

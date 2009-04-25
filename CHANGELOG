@@ -1,3 +1,13 @@
+0.7
+---
+Features -
+  * Can now define messages on initialize-sheep and reinitialize-sheep
+  * Message lambda-list congruence now follows the same rules as CLOS:
+    http://www.lispworks.com/documentation/HyperSpec/Body/07_fd.htm
+
+Bugs -
+  * buzzwords with &key, &rest, etc, actually work now
+
 0.6
 ---
 Features -

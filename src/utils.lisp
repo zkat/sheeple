@@ -67,3 +67,10 @@
                (remove choice
                        remaining-constraints
                        :test #'member)))))))
+
+(defun memq (item list)
+  "Return tail of LIST beginning with first element EQ to ITEM."
+  (do ((i list (cdr i)))
+      ((null i))
+    (when (eq (car i) item)
+      (return i))))

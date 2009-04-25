@@ -65,7 +65,7 @@
   (eval-when (:compile-toplevel :load-toplevel :execute)
    `(spawn-sheep
      ,(canonize-sheeple sheeple)
-     ,(canonize-properties properties)
+     :properties ,(canonize-properties properties)
      ,@(canonize-clone-options options))))
 
 (defmacro defsheep (name sheeple properties &rest options)
@@ -73,13 +73,13 @@
       `(progn
 	 (setf ,name (replace-or-reinitialize-sheep 
 		      ,name 
-		      ,(canonize-sheeple sheeple) 
-		      ,(canonize-properties properties) 
+		      ,(canonize-sheeple sheeple)
+		      :properties ,(canonize-properties properties) 
 		      ,@(canonize-clone-options options)))
 	 ',name)
       `(defvar ,name (clone ,sheeple ,properties ,@options))))
 
 (defun replace-or-reinitialize-sheep (maybe-sheep parents properties &rest options)
   (if (sheep-p maybe-sheep)
-      (apply #'reinitialize-sheep maybe-sheep parents properties options)
+      (apply #'reinitialize-sheep maybe-sheep :new-parents parents :new-properties properties options)
       (apply #'spawn-sheep parents properties options)))

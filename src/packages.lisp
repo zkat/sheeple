@@ -71,6 +71,8 @@
    :=float=
 
    ;; MOP-related
+   :initialize-sheep
+   :reinitialize-sheep
    :sheep-direct-parents
    :sheep-direct-roles
    :sheep-nickname

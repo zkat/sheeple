@@ -7,10 +7,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
+;; We currently use structs for storage, since they're more convenient atm.
 (defstruct (buzzword (:constructor %make-buzzword))
   (name nil)
   (lambda-list nil)
   (messages nil)
+  ;; This contains an arg-info object that is used to maintain
+  ;; lambda-list congruence.
   (arg-info (make-arg-info))
   (documentation ""))
 
@@ -19,6 +22,7 @@
 ;;;
 
 ;;; Buzzword table
+;;; - We store all buzzwords here, making them globally accessible by using #'find-buzzword
 (let ((buzzword-table (make-hash-table :test #'equal)))
 
   (defun find-buzzword (name &optional (errorp t))
@@ -40,6 +44,8 @@
     (remhash name buzzword-table))
   ) ; end buzzword table closure
 
+;; Finalizing a buzzword sets the function definition of the buzzword to a
+;; lambda that calls the top-level dispatch function on the bw args.
 (defun finalize-buzzword (buzzword)
   (let ((name (buzzword-name buzzword)))
     (when (and (fboundp name))
@@ -48,6 +54,7 @@
 	    :format-args (list name)))
     (setf (fdefinition name) (lambda (&rest args) (apply-buzzword buzzword args)))))
 
+;; This handles actual setup of the buzzword object (and finalization)
 (defun generate-buzzword (&key name
 			  lambda-list
 			  (documentation ""))
@@ -58,6 +65,8 @@
     (finalize-buzzword buzzword)
     buzzword))
 
+;; The defbuzzword macro basically expands to a call to this function (after processing
+;; its args, checking lamda-list, etc.)
 (defun ensure-buzzword (name
 			&rest all-keys)
   (let ((buzzword (apply #'generate-buzzword
@@ -66,6 +75,8 @@
     (setf (find-buzzword name) buzzword)
     buzzword))
 
+;; This takes care of removing a buzzword entirely, including all roles associated with it.
+;; It also makes the function unbound (so the dispatcher is no longer called)
 (defun undefine-buzzword (name &optional (errorp nil))
   (let ((buzzword (find-buzzword name errorp)))
     (when buzzword
@@ -78,12 +89,9 @@
       (fmakunbound name)
       buzzword)))
 
-(defun canonize-buzzword-options (options)
-  (mapappend #'canonize-buzzword-option options))
-
-(defun canonize-buzzword-option (option)
-  (list `',(car option) `',(cadr option)))
-
+;; This is the actual buzzword definition macro.
+;; It first verifies that the lambda-list provided is a valid buzzword ll,
+;; then expands to a call to ensure-buzzword
 (defmacro defbuzzword (name lambda-list &rest options)
   (declare (type list lambda-list))
   (check-bw-lambda-list lambda-list)
@@ -92,10 +100,57 @@
     :lambda-list ',lambda-list
     ,@(canonize-buzzword-options options)))
 
+;; This pair just pretties up the options during macro expansion
+(defun canonize-buzzword-options (options)
+  (mapappend #'canonize-buzzword-option options))
+(defun canonize-buzzword-option (option)
+  (list `',(car option) `',(cadr option)))
+
+;; Like defbuzzword. This is just a convenient macro to undefine bws.
 (defmacro undefbuzzword (name &optional (errorp t))
   `(undefine-buzzword
     ',name
     ,errorp))
+
+;;; LL analysis
+(defun check-bw-lambda-list (lambda-list)
+  (flet ((ensure (arg ok)
+           (unless ok
+             (error 'buzzword-lambda-list-error
+                    :format-control
+                    "~@<invalid ~S ~_in the generic function lambda list ~S~:>"
+                    :format-arguments (list arg lambda-list)))))
+    (multiple-value-bind (required optional restp rest keyp keys allowp
+				   auxp aux morep more-context more-count)
+        (parse-lambda-list lambda-list)
+      (declare (ignore required)) ; since they're no different in a bw ll
+      (declare (ignore restp rest)) ; since they're no different in a bw ll
+      (declare (ignore allowp)) ; since &ALLOW-OTHER-KEYS is fine either way
+      (declare (ignore aux)) ; since we require AUXP=NIL
+      (declare (ignore more-context more-count)) ; safely ignored unless MOREP
+      ;; no defaults allowed for &OPTIONAL arguments
+      (dolist (i optional)
+        (ensure i (or (symbolp i)
+                      (and (consp i) (symbolp (car i)) (null (cdr i))))))
+      ;; no defaults allowed for &KEY arguments
+      (when keyp
+        (dolist (i keys)
+          (ensure i (or (symbolp i)
+                        (and (consp i)
+                             (or (symbolp (car i))
+                                 (and (consp (car i))
+                                      (symbolp (caar i))
+                                      (symbolp (cadar i))
+                                      (null (cddar i))))
+                             (null (cdr i)))))))
+      ;; no &AUX allowed
+      (when auxp
+        (error "&AUX is not allowed in a generic function lambda list: ~S"
+               lambda-list))
+      ;; Oh, *puhlease*... not specifically as per section 3.4.2 of
+      ;; the ANSI spec, but the CMU CL &MORE extension does not
+      ;; belong here!
+      (assert (not morep)))))
 
 (defun analyze-lambda-list (lambda-list)
   (labels ((make-keyword (symbol)
@@ -143,45 +198,12 @@
               (reverse keywords)
               (reverse keyword-parameters)))))
 
-(defun check-bw-lambda-list (lambda-list)
-  (flet ((ensure (arg ok)
-           (unless ok
-             (error 'buzzword-lambda-list-error
-                    :format-control
-                    "~@<invalid ~S ~_in the generic function lambda list ~S~:>"
-                    :format-arguments (list arg lambda-list)))))
-    (multiple-value-bind (required optional restp rest keyp keys allowp
-				   auxp aux morep more-context more-count)
-        (parse-lambda-list lambda-list)
-      (declare (ignore required)) ; since they're no different in a bw ll
-      (declare (ignore restp rest)) ; since they're no different in a bw ll
-      (declare (ignore allowp)) ; since &ALLOW-OTHER-KEYS is fine either way
-      (declare (ignore aux)) ; since we require AUXP=NIL
-      (declare (ignore more-context more-count)) ; safely ignored unless MOREP
-      ;; no defaults allowed for &OPTIONAL arguments
-      (dolist (i optional)
-        (ensure i (or (symbolp i)
-                      (and (consp i) (symbolp (car i)) (null (cdr i))))))
-      ;; no defaults allowed for &KEY arguments
-      (when keyp
-        (dolist (i keys)
-          (ensure i (or (symbolp i)
-                        (and (consp i)
-                             (or (symbolp (car i))
-                                 (and (consp (car i))
-                                      (symbolp (caar i))
-                                      (symbolp (cadar i))
-                                      (null (cddar i))))
-                             (null (cdr i)))))))
-      ;; no &AUX allowed
-      (when auxp
-        (error "&AUX is not allowed in a generic function lambda list: ~S"
-               lambda-list))
-      ;; Oh, *puhlease*... not specifically as per section 3.4.2 of
-      ;; the ANSI spec, but the CMU CL &MORE extension does not
-      ;; belong here!
-      (assert (not morep)))))
-
+;;;
+;;; Arg info
+;;; - The stuff in here contains the arg-info object, plus code to handle it.
+;;;   Present is also the function that confirms validity of message lambda-lists,
+;;;   and the code that updates the valid arg info for a buzzword whenever a message
+;;;   is added. The add-message function, though, is in message-generation.lisp
 (defstruct (arg-info
 	     (:conc-name nil)
 	     (:constructor make-arg-info ())
@@ -214,12 +236,6 @@
 
 (defun arg-info-nkeys (arg-info)
   (count-if (lambda (x) (not (eq x t))) (arg-info-metatypes arg-info)))
-
-(defun create-bw-lambda-list (lambda-list)
-  ;;; Create a buzzword lambda list from a message lambda list
-  (loop for x in lambda-list
-     collect (if (consp x) (list (car x)) x)
-     if (eq x '&key) do (loop-finish)))
 
 (defun set-arg-info (bw &key new-message (lambda-list nil lambda-list-p))
   (let* ((arg-info (buzzword-arg-info bw))
@@ -256,6 +272,12 @@
     (when new-message
       (check-message-arg-info bw arg-info new-message))
     arg-info))
+
+(defun create-bw-lambda-list (lambda-list)
+  ;;; Create a buzzword lambda list from a message lambda list
+  (loop for x in lambda-list
+     collect (if (consp x) (list (car x)) x)
+     if (eq x '&key) do (loop-finish)))
 
 (defun check-message-arg-info (bw arg-info message)
   (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)

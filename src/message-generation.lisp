@@ -50,6 +50,7 @@
   (when (not (find-buzzword name nil))
     (progn
       (warn 'style-warning)
+      ;; FIXME: can't just give the lambda-list over. Should prepare it for buzzwords
       (ensure-buzzword
        name :lambda-list lambda-list)))
   (let* ((buzzword (find-buzzword name))

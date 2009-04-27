@@ -1,3 +1,10 @@
+0.8
+---
+Features -
+
+Bugs -
+  * &allow-other-keys is no longer necessary when using &key args with buzzwords.
+
 0.7
 --- 
 Features -

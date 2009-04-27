@@ -22,7 +22,7 @@
     t))
 
 (defun apply-buzzword (buzzword args)
-  (let* ((relevant-args-length (length (buzzword-required-arglist buzzword)))
+  (let* ((relevant-args-length (arg-info-number-required (buzzword-arg-info buzzword)))
 	 (messages (find-applicable-messages buzzword
 					    (sheepify-list 
 					     (subseq args 0 relevant-args-length)))))
@@ -119,3 +119,6 @@
        do (when (numberp item)
 	    (incf total item)))
     total))
+
+(defun message-specialized-portion (msg)
+  (parse-lambda-list (message-lambda-list msg)))

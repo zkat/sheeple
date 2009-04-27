@@ -3,7 +3,6 @@
 ** TODO Write a small sample application (maybe convert yashmup?)
 * TODO 0.95
   the "I should have done all that shit in the first place" release
-** TODO Allow individual message documentation
 ** TODO Complete documentation with tutorial and user's guide
 ** TODO Make sure user's guide and documentation is good, then make it better
 * TODO 0.9
@@ -11,7 +10,7 @@
 ** TODO Write unit tests for new LL stuff
 ** TODO Write plenty more unit tests.
    I need to write unit-tests for the defsheep stuff, at least.
-
+** TODO Allow individual message :documentation
 * TODO 0.8
 ** TODO Optimize the shit out of message dispatch
    It's pretty fast right now, but nothing compared to PCL.
@@ -19,12 +18,13 @@
    suggested optimizations.
    Additionally, I found a paper that talks about how PCL's caching works. I think I can
    implement something similar in sheeple, which would then make message dispatch absurdly fast.
-
+   One word: MEMOIZATION. Do it.
 ** TODO Implement :message option for defbuzzword (like CLOS' :method option)
+   I don't care about this feature all that much, so I might just keep bumping it until someone
+   who -does- care asks for it.
 * DONE 0.7
 ** DONE Make initialize-instance a buzzword so :after messages can be defined
    both initialize-instance and reinitialize-instance are regular buzzwords now.
-
 ** DONE Have buzzwords accept &keywords in lambda lists, and maintain congruence as per CLOS
    This seemed to be working, but I have to put &allow-other-keys in all methods in order for it
    to work, which is sub-optimal. This can be fixed, and I should do it by 0.8
@@ -36,17 +36,7 @@
 ** DONE Wrap replace-sheep with a DEFSHEEP macro.
 ** DONE Optimize the shit out of property-access
   Done for now -- it's only slightly slower than PCL right now
-
 ** DONE Work out the whole conditions thing, and what they print out. 
    Put them all in conditions.lisp?
-
-
-
-
-
-
-
-
-
 * DONE 0.5
 ** DONE Get all pre-0.6 done by 0.5

@@ -3,6 +3,9 @@
 ;; message-dispatch.lisp
 ;;
 ;; Message execution and dispatch
+;;
+;; TODO
+;; * memoize message dispatch
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 

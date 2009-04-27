@@ -12,6 +12,7 @@
   (name nil)
   (lambda-list nil)
   (messages nil)
+  (memo-table (make-hash-table :test #'eq))
   ;; This contains an arg-info object that is used to maintain
   ;; lambda-list congruence.
   (arg-info (make-arg-info))

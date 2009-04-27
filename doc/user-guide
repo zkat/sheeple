@@ -81,7 +81,22 @@ API
 
          (defvar *sample-sheep* (clone () ((my-property "Wheee" :manipulator get-my-property))))
 
+
+* Starting with 0.6, a special wrapper macro DEFSHEEP can be used to ease development. Basically,
+  DEFSHEEP wraps CLONE and creates a special variable holding the created sheep. The difference
+  between putting the cloned sheep in a variable and using DEFSHEEP is that DEFSHEEP takes care to
+  redefine the same sheep's properties while retaining identity.
+
+         (defsheep =sample-sheep= ()
+           ((my-property "wheeee" :manipulator get-my-property)))
+
+
 * An empty parent list when using CLONE will automatically clone =DOLLY=
+
+* Additionally, you may define messages for the buzzword INITIALIZE-SHEEP. This message handles all
+  set-up of sheeple after its direct-parents are added.  This is most useful for defining 'complex'
+  constructors that need access to a sheep. These constructors usually take the form of :before,
+  :after, or :around messages, since defining a primary message would override standard sheep setup.
 
 #### Clone Options
 
@@ -238,6 +253,8 @@ CLOS programming should have a fairly easy time wrapping their head around Sheep
 * The DEFBUZZWORD macro is used to define a buzzword that will hold different messages. It accepts
   an optional documentation option. Buzzwords are automatically defined by defmessage, but the
   preferred and recommended style is to define buzzwords first. Not doing so signals STYLE-WARNING.
+  Note: buzzword and message lambda-lists follow the rules described in
+  http://www.lispworks.com/documentation/HyperSpec/Body/07_fd.htm
 
         (defbuzzword synergize (foo bar)
           (:documentation "Synergizes FOO and BAR, preparing them for the Next Generation"))

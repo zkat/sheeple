@@ -52,7 +52,7 @@
       (warn 'style-warning)
       ;; FIXME: can't just give the lambda-list over. Should prepare it for buzzwords
       (ensure-buzzword
-       name :lambda-list lambda-list)))
+       name :lambda-list (create-bw-lambda-list lambda-list))))
   (let* ((buzzword (find-buzzword name))
 	 (target-sheeple (sheepify-list participants))
 	 (message (apply
@@ -63,6 +63,12 @@
 		   :participants target-sheeple
 		   all-keys)))
     message))
+
+(defun create-bw-lambda-list (lambda-list)
+  ;;; Create a buzzword lambda list from a message lambda list
+  (loop for x in lambda-list
+     collect (if (consp x) (list (car x)) x)
+     if (eq x '&key) do (loop-finish)))
 
 (defun add-message-to-buzzword (message buzzword)
   (set-arg-info buzzword :new-message message)
@@ -164,7 +170,7 @@
 		      (cadr name)
 		      name)
 	    (apply
-	    (lambda ',lambda-list
+	    (lambda ,lambda-list
 	      ,@body) args)))))
 
 (defun parse-defmessage (args)
@@ -201,10 +207,11 @@
       (parse-undefmessage args)
     (multiple-value-bind (iggy1 iggy2 participants iggy3)
 	(parse-specialized-lambda-list lambda-list)
+      (declare (ignore iggy1 iggy2 iggy3))
       `(undefine-message
 	',name
 	:qualifiers ',qualifiers
-	:participants ,(extract-participants lambda-list)))))
+	:participants (list ,@participants)))))
 
 (defun parse-undefmessage (args)
   (let ((name (car args))

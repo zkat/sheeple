@@ -62,6 +62,7 @@
 		   :name name
 		   :lambda-list lambda-list
 		   :documentation documentation)))
+    (set-arg-info buzzword :lambda-list lambda-list)
     (finalize-buzzword buzzword)
     buzzword))
 
@@ -118,7 +119,7 @@
            (unless ok
              (error 'buzzword-lambda-list-error
                     :format-control
-                    "~@<invalid ~S ~_in the generic function lambda list ~S~:>"
+                    "~@<invalid ~S ~_in the buzzword lambda list ~S~:>"
                     :format-arguments (list arg lambda-list)))))
     (multiple-value-bind (required optional restp rest keyp keys allowp
 				   auxp aux morep more-context more-count)
@@ -145,58 +146,12 @@
                              (null (cdr i)))))))
       ;; no &AUX allowed
       (when auxp
-        (error "&AUX is not allowed in a generic function lambda list: ~S"
+        (error "&AUX is not allowed in a buzzword lambda list: ~S"
                lambda-list))
       ;; Oh, *puhlease*... not specifically as per section 3.4.2 of
       ;; the ANSI spec, but the CMU CL &MORE extension does not
       ;; belong here!
       (assert (not morep)))))
-
-(defun analyze-lambda-list (lambda-list)
-  (labels ((make-keyword (symbol)
-	     (intern (symbol-name symbol)
-		     (find-package 'keyword)))
-	   (parse-key-arg (arg)
-	     (if (listp arg)
-		 (if (listp (car arg))
-		     (caar arg)
-		     (make-keyword (car arg)))
-		 (make-keyword arg))))
-    (let ((nrequired 0)
-          (noptional 0)
-          (keysp nil)
-          (restp nil)
-          (nrest 0)
-          (allow-other-keys-p nil)
-          (keywords ())
-          (keyword-parameters ())
-          (state 'required))
-      (dolist (x lambda-list)
-        (if (memq x lambda-list-keywords)
-            (case x
-              (&optional         (setq state 'optional))
-              (&key              (setq keysp t
-                                       state 'key))
-              (&allow-other-keys (setq allow-other-keys-p t))
-              (&rest             (setq restp t
-                                       state 'rest))
-              (&aux           (return t))
-              (otherwise
-	       (error "encountered the non-standard lambda list keyword ~S"
-		      x)))
-            (ecase state
-              (required  (incf nrequired))
-              (optional  (incf noptional))
-              (key       (push (parse-key-arg x) keywords)
-                         (push x keyword-parameters))
-              (rest      (incf nrest)))))
-      (when (and restp (zerop nrest))
-        (error "Error in lambda-list:~%~
-                After &REST, a DEFGENERIC lambda-list ~
-                must be followed by at least one variable."))
-      (values nrequired noptional keysp restp allow-other-keys-p
-              (reverse keywords)
-              (reverse keyword-parameters)))))
 
 ;;;
 ;;; Arg info
@@ -273,11 +228,51 @@
       (check-message-arg-info bw arg-info new-message))
     arg-info))
 
-(defun create-bw-lambda-list (lambda-list)
-  ;;; Create a buzzword lambda list from a message lambda list
-  (loop for x in lambda-list
-     collect (if (consp x) (list (car x)) x)
-     if (eq x '&key) do (loop-finish)))
+(defun analyze-lambda-list (lambda-list)
+  (labels ((make-keyword (symbol)
+	     (intern (symbol-name symbol)
+		     (find-package 'keyword)))
+	   (parse-key-arg (arg)
+	     (if (listp arg)
+		 (if (listp (car arg))
+		     (caar arg)
+		     (make-keyword (car arg)))
+		 (make-keyword arg))))
+    (let ((nrequired 0)
+          (noptional 0)
+          (keysp nil)
+          (restp nil)
+          (nrest 0)
+          (allow-other-keys-p nil)
+          (keywords ())
+          (keyword-parameters ())
+          (state 'required))
+      (dolist (x lambda-list)
+        (if (memq x lambda-list-keywords)
+            (case x
+              (&optional         (setq state 'optional))
+              (&key              (setq keysp t
+                                       state 'key))
+              (&allow-other-keys (setq allow-other-keys-p t))
+              (&rest             (setq restp t
+                                       state 'rest))
+              (&aux           (return t))
+              (otherwise
+	       (error "encountered the non-standard lambda list keyword ~S"
+		      x)))
+            (ecase state
+              (required  (incf nrequired))
+              (optional  (incf noptional))
+              (key       (push (parse-key-arg x) keywords)
+                         (push x keyword-parameters))
+              (rest      (incf nrest)))))
+      (when (and restp (zerop nrest))
+        (error "Error in lambda-list:~%~
+                After &REST, a DEFBUZZWORD lambda-list ~
+                must be followed by at least one variable."))
+      (values nrequired noptional keysp restp allow-other-keys-p
+              (reverse keywords)
+              (reverse keyword-parameters)))))
 
 (defun check-message-arg-info (bw arg-info message)
   (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)
@@ -285,7 +280,7 @@
     (flet ((lose (string &rest args)
              (error 'simple-error
                     :format-control "~@<attempt to add the message~2I~_~S~I~_~
-                                     to the generic function~2I~_~S;~I~_~
+                                     to the buzzword~2I~_~S;~I~_~
                                      but ~?~:>"
                     :format-arguments (list message bw string args)))
            (comparison-description (x y)
@@ -296,15 +291,15 @@
             (bw-keywords (arg-info-keys arg-info)))
         (unless (= nreq bw-nreq)
           (lose
-           "the message has ~A required arguments than the generic function."
+           "the message has ~A required arguments than the buzzword."
            (comparison-description nreq bw-nreq)))
         (unless (= nopt bw-nopt)
           (lose
-           "the message has ~A optional arguments than the generic function."
+           "the message has ~A optional arguments than the buzzword."
            (comparison-description nopt bw-nopt)))
         (unless (eq (or keysp restp) bw-key/rest-p)
           (lose
-           "the message and generic function differ in whether they accept~_~
+           "the message and buzzword differ in whether they accept~_~
             &REST or &KEY arguments."))
         (when (consp bw-keywords)
           (unless (or (and restp (not keysp))

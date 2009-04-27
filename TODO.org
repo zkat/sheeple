@@ -6,11 +6,13 @@
 ** TODO Allow individual message documentation
 ** TODO Complete documentation with tutorial and user's guide
 ** TODO Make sure user's guide and documentation is good, then make it better
+* TODO 0.9
 ** TODO Write unit tests for defsheep
 ** TODO Write unit tests for new LL stuff
 ** TODO Write plenty more unit tests.
    I need to write unit-tests for the defsheep stuff, at least.
-* TODO 0.9
+
+* TODO 0.8
 ** TODO Optimize the shit out of message dispatch
    It's pretty fast right now, but nothing compared to PCL.
    I should read through the Slate paper again and see if I can implement any of their
@@ -18,7 +20,6 @@
    Additionally, I found a paper that talks about how PCL's caching works. I think I can
    implement something similar in sheeple, which would then make message dispatch absurdly fast.
 
-* TODO 0.8
 ** TODO Implement :message option for defbuzzword (like CLOS' :method option)
 * DONE 0.7
 ** DONE Make initialize-instance a buzzword so :after messages can be defined
@@ -38,7 +39,6 @@
 
 ** DONE Work out the whole conditions thing, and what they print out. 
    Put them all in conditions.lisp?
-
 
 
 

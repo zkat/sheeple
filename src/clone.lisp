@@ -74,7 +74,7 @@
 	 (setf ,name (replace-or-reinitialize-sheep 
 		      ,name 
 		      ,(canonize-sheeple sheeple)
-		      :properties ,(canonize-properties properties) 
+		      ,(canonize-properties properties) 
 		      ,@(canonize-clone-options options)))
 	 ',name)
       `(defvar ,name (clone ,sheeple ,properties ,@options))))

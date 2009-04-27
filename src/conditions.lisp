@@ -45,4 +45,4 @@
 (define-condition no-applicable-messages (sheeple-error) ())
 (define-condition no-most-specific-message (sheeple-error) ())
 (define-condition no-primary-messages (sheeple-error) ())
-
+(define-condition specialized-lambda-list-error (sheeple-error) ())

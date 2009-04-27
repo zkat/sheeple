@@ -42,23 +42,6 @@
 ;;                            (values list list boolean t boolean list boolean
 ;;                                    boolean list boolean t t))
 ;;                 parse-lambda-list))
-(defun collect-normal-expander (n-value fun forms)
-    `(progn
-       ,@(mapcar (lambda (form) `(setq ,n-value (,fun ,form ,n-value))) forms)
-       ,n-value))
-(defun collect-list-expander (n-value n-tail forms)
-    (let ((n-res (gensym)))
-      `(progn
-         ,@(mapcar (lambda (form)
-                     `(let ((,n-res (cons ,form nil)))
-                        (cond (,n-tail
-                               (setf (cdr ,n-tail) ,n-res)
-                               (setq ,n-tail ,n-res))
-                              (t
-                               (setq ,n-tail ,n-res  ,n-value ,n-res)))))
-                   forms)
-         ,n-value)))
-
 (defmacro collect (collections &body body)
   (let ((macros ())
         (binds ()))

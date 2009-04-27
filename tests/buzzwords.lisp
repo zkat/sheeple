@@ -20,8 +20,8 @@ errors when a buzzword doesn't exist."
   (signals no-such-buzzword (find-buzzword 'another-buzzword))
   (undefbuzzword test-buzz nil)
   (defun test-buzz () (print "durr hurr"))
-  (signals sheeple::clobbering-function-definition (defbuzzword test-buzz
-							  (:documentation "OHNOES"))))
+  (signals sheeple::clobbering-function-definition (defbuzzword test-buzz (foo)
+						     (:documentation "OHNOES"))))
 
 (test buzzword-undefinition
   "Usage of the undefbuzzword macro, confirmation of removal of all messages and

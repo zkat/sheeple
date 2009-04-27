@@ -156,22 +156,29 @@
 	:function ,(make-message-lambda name ll body)
 	:body '(block ,name ,@body)))))
 
+;; KLUDGE: This is usually called during macroexpansion-time, which is very bad. Ideally, this
+;;         would instead be called during message creation...
 (defun make-message-lambda (name lambda-list body)
-  `(lambda (args next-messages)
-     (flet ((next-message-p ()
-		 (not (null next-messages)))
-	       (call-next-message (&rest cnm-args)
-		 (funcall (message-function (car next-messages))
-			  (or cnm-args
-			      args)
-			  (cdr next-messages))))
-	  (declare (ignorable #'next-message-p #'call-next-message))
-	  (block ,(if (listp name)
-		      (cadr name)
-		      name)
-	    (apply
-	    (lambda ,lambda-list
-	      ,@body) args)))))
+  (let* ((bw (find-buzzword name nil))
+	 (key/restp (when bw (arg-info-key/rest-p (buzzword-arg-info bw))))
+	 (ll (if key/restp
+		 (append lambda-list '(&allow-other-keys))
+		 lambda-list)))
+    `(lambda (args next-messages)
+      (flet ((next-message-p ()
+	       (not (null next-messages)))
+	     (call-next-message (&rest cnm-args)
+	       (funcall (message-function (car next-messages))
+			(or cnm-args
+			    args)
+			(cdr next-messages))))
+	(declare (ignorable #'next-message-p #'call-next-message))
+	(block ,(if (listp name)
+		    (cadr name)
+		    name)
+	  (apply
+	   (lambda ,ll
+	     ,@body) args))))))
 
 (defun parse-defmessage (args)
   (let ((name (car args))

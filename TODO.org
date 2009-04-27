@@ -15,13 +15,17 @@
    It's pretty fast right now, but nothing compared to PCL.
    I should read through the Slate paper again and see if I can implement any of their
    suggested optimizations.
-  
+   Additionally, I found a paper that talks about how PCL's caching works. I think I can
+   implement something similar in sheeple, which would then make message dispatch absurdly fast.
 * More features
 ** TODO Implement :message option for defbuzzword (like CLOS' :method option)
 
-** TODO Make initialize-instance a buzzword so :after messages can be defined
+** DONE Make initialize-instance a buzzword so :after messages can be defined
+   both initialize-instance and reinitialize-instance are regular buzzwords now.
+** DONE Have buzzwords accept &keywords in lambda lists, and maintain congruence as per CLOS
 * Stability
 ** TODO Write unit tests for defsheep
+** TODO Write unit tests for new LL stuff
 ** TODO Work out the whole conditions thing, and what they print out. 
    Put them all in conditions.lisp?
 ** TODO Write plenty more unit tests.

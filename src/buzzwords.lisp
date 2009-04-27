@@ -120,7 +120,7 @@
              (error 'buzzword-lambda-list-error
                     :format-control
                     "~@<invalid ~S ~_in the buzzword lambda list ~S~:>"
-                    :format-arguments (list arg lambda-list)))))
+                    :format-args (list arg lambda-list)))))
     (multiple-value-bind (required optional restp rest keyp keys allowp
 				   auxp aux morep more-context more-count)
         (parse-lambda-list lambda-list)
@@ -282,7 +282,7 @@
                     :format-control "~@<attempt to add the message~2I~_~S~I~_~
                                      to the buzzword~2I~_~S;~I~_~
                                      but ~?~:>"
-                    :format-arguments (list message bw string args)))
+                    :format-args (list message bw string args)))
            (comparison-description (x y)
              (if (> x y) "more" "fewer")))
       (let ((bw-nreq (arg-info-number-required arg-info))

@@ -147,8 +147,8 @@
                ;; appearing in LAMBDA-LIST-KEYWORDS cannot be
                ;; parameter specifiers.]
                (error 'simple-error
-                               :format-control "Bad lambda list keyword ~S in: ~S"
-                               :format-arguments (list arg list))))
+		      :format-control "Bad lambda list keyword ~S in: ~S"
+		      :format-args (list arg list))))
             (progn
               (when (symbolp arg)
                 (let ((name (symbol-name arg)))
@@ -247,19 +247,19 @@
              (error 'specialized-lambda-list-error
                     :format-control "unknown specialized-lambda-list ~
                                      keyword ~S~%"
-                    :format-arguments (list arg)))
+                    :format-args (list arg)))
            ;; no multiple &rest x &rest bla specifying
            (when (memq arg supplied-keywords)
              (error 'specialized-lambda-list-error
                     :format-control "multiple occurrence of ~
                                      specialized-lambda-list keyword ~S~%"
-                    :format-arguments (list arg)))
+                    :format-args (list arg)))
            ;; And no placing &key in front of &optional, either.
            (unless (memq arg allowed-keywords)
              (error 'specialized-lambda-list-error
                     :format-control "misplaced specialized-lambda-list ~
                                      keyword ~S~%"
-                    :format-arguments (list arg)))
+                    :format-args (list arg)))
            ;; When we are at a lambda-list keyword, the parameters
            ;; don't include the lambda-list keyword; the lambda-list
            ;; does include the lambda-list keyword; and no
@@ -283,7 +283,7 @@
                       :format-control
                       "in a specialized-lambda-list, excactly one ~
                        variable must follow &REST.~%"
-                      :format-arguments nil))
+                      :format-args nil))
              (values parameters
                      (cons arg lambda-list)
                      ()

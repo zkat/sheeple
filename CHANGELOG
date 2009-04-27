@@ -7,6 +7,7 @@ Features -
 
 Bugs -
   * buzzwords with &key, &rest, etc, actually work now
+  * some mostly-inconsequential whoopsies with conditions were patched
 
 0.6
 ---

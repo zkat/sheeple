@@ -1,5 +1,5 @@
 0.7
----
+--- 
 Features -
   * Can now define messages on initialize-sheep and reinitialize-sheep
   * Message lambda-list congruence now follows the same rules as CLOS:

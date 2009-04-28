@@ -8,15 +8,14 @@
 * TODO 0.95
   the "I should have done all that shit in the first place" release
 ** TODO Complete documentation with tutorial and user's guide
-** TODO Make sure user's guide and documentation is good, then make it better
 * TODO 0.9
-** TODO Write unit tests for defsheep
-** TODO Write unit tests for new LL stuff
 ** TODO Write plenty more unit tests.
-   I need to write unit-tests for the defsheep stuff, at least.
+*** TODO Write unit tests for defsheep 
+*** TODO Write unit tests for new LL stuff
+*** TODO Write more thorough tests to make sure caching schemes aren't broken
 ** TODO Allow individual message :documentation
 * TODO 0.8
-** TODO Optimize the shit out of message dispatch
+** DONE Optimize the shit out of message dispatch
    It's pretty fast right now, but nothing compared to PCL.
    I should read through the Slate paper again and see if I can implement any of their
    suggested optimizations.
@@ -31,6 +30,11 @@
    There will be a time in the future when heavy-optimization and code-uglying will be appropriate.
    But for now, while the system is still being designed, it's best to keep things clean and
    flexible (and slow...).
+   UPDATE: New caching system has made shit run hella-fast. According to sb-sprof, the next step
+   would be to have a nicer hashing scheme, since using a list and using equal to fetch stuff from
+   a hash table isn't really very speedy. For now, though, this will do! :) (haven't really tested
+   this too much, though. Hm.)
+** DONE Fix lambda-list keyword things
 * DONE 0.7
 ** DONE Make initialize-instance a buzzword so :after messages can be defined
    both initialize-instance and reinitialize-instance are regular buzzwords now.

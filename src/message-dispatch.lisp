@@ -55,7 +55,19 @@
   (let ((function (message-function message)))
     (funcall function args next-messages)))
 
-(defun find-applicable-messages  (buzzword args &key (errorp t))
+(defun find-applicable-messages (buzzword args &key (errorp t))
+  (multiple-value-bind (msg-list has-p)
+      (gethash args (buzzword-memo-table buzzword))
+    (if has-p
+	msg-list
+	(let ((new-msg-list (%find-applicable-messages buzzword args :errorp errorp)))
+	  (memoize-message-dispatch buzzword args new-msg-list)
+	  new-msg-list))))
+
+(defun memoize-message-dispatch (buzzword args msg-list)
+  (setf (gethash args (buzzword-memo-table buzzword)) msg-list))
+
+(defun %find-applicable-messages  (buzzword args &key (errorp t))
   "Returns the most specific message using SELECTOR and ARGS."
   (let ((selector (buzzword-name buzzword))
 	(n (length args))

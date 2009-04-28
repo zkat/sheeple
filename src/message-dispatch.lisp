@@ -113,21 +113,21 @@
   (let ((msg-cache (create-message-cache buzzword msg-list))
 	(maybe-index (mod (sheep-id (sheepify (car args)))
 			  8)))
-    (add-entry-to-memo-vector msg-cache buzzword maybe-index)
+    (add-entry-to-buzzword msg-cache buzzword maybe-index)
     msg-cache))
 
-(defun add-entry-to-memo-vector (cache buzzword index)
+(defun add-entry-to-buzzword (cache buzzword index)
   (let ((memo-vector (buzzword-memo-vector buzzword)))
    (when (>= index (length memo-vector))
-     (adjust-array memo-vector (+ (length memo-vector) 8))
-     (if (not (elt memo-vector index))
+     (adjust-array memo-vector (+ (length memo-vector) 8)))
+   (if (not (elt memo-vector index))
 	 ;; no entry, safe to put a new one in
 	 (setf (elt memo-vector index) cache)
 	 ;; we'll try again with the next one
-	 (add-entry-to-memo-vector cache memo-vector (1+ index))))))
+	 (add-entry-to-memo-vector cache buzzword (1+ index)))))
 
 (defun %find-applicable-messages  (buzzword args &key (errorp t))
-  "Returns the most specific message using SELECTOR and ARGS."
+  "Returns the most specific message using BUZZWORD and ARGS."
   (let ((selector (buzzword-name buzzword))
 	(n (length args))
 	(discovered-messages nil)

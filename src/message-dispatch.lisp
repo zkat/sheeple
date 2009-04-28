@@ -27,8 +27,7 @@
 (defun apply-buzzword (buzzword args)
   (let* ((relevant-args-length (arg-info-number-required (buzzword-arg-info buzzword)))
 	 (messages (find-applicable-messages buzzword
-					    (sheepify-list 
-					     (subseq args 0 relevant-args-length)))))
+					     (subseq args 0 relevant-args-length))))
     (apply-messages messages args)))
 
 (defstruct cache
@@ -95,26 +94,29 @@
     (loop 
        for arg in args
        for index upto (1- n)
-       do (let ((curr-sheep-list (sheep-hierarchy-list arg)))
+       do (let* ((arg (if (sheep-p arg)
+			  arg
+			  (sheepify arg)))
+		 (curr-sheep-list (sheep-hierarchy-list arg)))
 	    (loop
 	       for curr-sheep in curr-sheep-list
 	       for hierarchy-position upto (1- (length curr-sheep-list))
 	       do (dolist (role (sheep-direct-roles curr-sheep))
 		    (when (and (equal selector (role-name role)) ;(eql buzzword (role-buzzword role))
 			       (= index (role-position role)))
-			  (let ((curr-message (role-message-pointer role)))
-			    (when (= n (length (message-specialized-portion curr-message)))
-			      (when (not (member curr-message
-						 discovered-messages
-						 :key #'message-container-message))
-				(pushnew (contain-message curr-message) discovered-messages))
-			      (let ((contained-message (find curr-message
-							     discovered-messages
-							     :key #'message-container-message)))
-				(setf (elt (message-container-rank contained-message) index) 
-				      hierarchy-position)
-				(when (fully-specified-p (message-container-rank contained-message))
-				  (pushnew contained-message contained-applicable-messages :test #'equalp))))))))))
+		      (let ((curr-message (role-message-pointer role)))
+			(when (= n (length (message-specialized-portion curr-message)))
+			  (when (not (member curr-message
+					     discovered-messages
+					     :key #'message-container-message))
+			    (pushnew (contain-message curr-message) discovered-messages))
+			  (let ((contained-message (find curr-message
+							 discovered-messages
+							 :key #'message-container-message)))
+			    (setf (elt (message-container-rank contained-message) index) 
+				  hierarchy-position)
+			    (when (fully-specified-p (message-container-rank contained-message))
+			      (pushnew contained-message contained-applicable-messages :test #'equalp))))))))))
     (if contained-applicable-messages
 	(unbox-messages (sort-applicable-messages contained-applicable-messages))
 	(when errorp

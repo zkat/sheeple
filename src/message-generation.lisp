@@ -174,7 +174,7 @@
 			(or cnm-args
 			    args)
 			(cdr next-messages))))
-	(declare (ignorable #'next-message-p #'call-next-message next-messages))
+	(declare (ignorable #'next-message-p #'call-next-message))
 	(block ,(if (listp name)
 		    (cadr name)
 		    name)

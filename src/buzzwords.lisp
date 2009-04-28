@@ -20,7 +20,7 @@
   (documentation ""))
 
 (defun clear-memo-table (buzzword)
-  (loop for i from 0 upto (length (buzzword-memo-vector buzzword))
+  (loop for i from 0 upto (1- (length (buzzword-memo-vector buzzword)))
        do (setf (elt (buzzword-memo-vector buzzword) i) nil))
   (clrhash (buzzword-memo-table buzzword)))
 

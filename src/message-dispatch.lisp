@@ -101,7 +101,7 @@
      (loop 
 	for arg in args
 	for v-arg in vector-args
-	do (when (eql arg v-arg)
+	do (when (equal arg v-arg)
 	     (return-from desired-vector-entry-p t))
 	finally (return nil)))))
 
@@ -113,18 +113,18 @@
   (let ((msg-cache (create-message-cache buzzword msg-list))
 	(maybe-index (mod (sheep-id (sheepify (car args)))
 			  8)))
-    (add-entry-to-buzzword msg-cache buzzword maybe-index)
+    (add-entry-to-buzzword msg-cache buzzword args maybe-index)
     msg-cache))
 
-(defun add-entry-to-buzzword (cache buzzword index)
+(defun add-entry-to-buzzword (cache buzzword args index)
   (let ((memo-vector (buzzword-memo-vector buzzword)))
-   (when (>= index (length memo-vector))
-     (adjust-array memo-vector (+ (length memo-vector) 8)))
-   (if (not (elt memo-vector index))
-	 ;; no entry, safe to put a new one in
-	 (setf (elt memo-vector index) cache)
-	 ;; we'll try again with the next one
-	 (add-entry-to-memo-vector cache buzzword (1+ index)))))
+    (loop for i from index
+       if (> i (length memo-vector))
+       do (adjust-array memo-vector (+ (length memo-vector) 8))
+       if (not (elt memo-vector i))
+       do (setf (elt memo-vector index) (make-vector-entry 
+				       :args args
+				       :msg-cache cache)))))
 
 (defun %find-applicable-messages  (buzzword args &key (errorp t))
   "Returns the most specific message using BUZZWORD and ARGS."

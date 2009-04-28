@@ -1,3 +1,7 @@
+* TODO 1.1+
+** TODO Implement :message option for defbuzzword (like CLOS' :method option)
+   I don't care about this feature all that much, so I might just keep bumping it until someone
+   who -does- care asks for it.
 * TODO 1.0
 ** TODO Thoroughly test sheeple, make sure everything's stable
 ** TODO Write a small sample application (maybe convert yashmup?)
@@ -19,9 +23,14 @@
    Additionally, I found a paper that talks about how PCL's caching works. I think I can
    implement something similar in sheeple, which would then make message dispatch absurdly fast.
    One word: MEMOIZATION. Do it.
-** TODO Implement :message option for defbuzzword (like CLOS' :method option)
-   I don't care about this feature all that much, so I might just keep bumping it until someone
-   who -does- care asks for it.
+   Memoization done, but profiling shows that there's other stuff in the way (such as the
+   numerous calls to remove-if-not -during- dispatch time. Shit.
+   As far as this remove-if-not, etc stuff goes -- I think I can figure out some fancy
+   message-list caching system. The problem is that make-message-lambda might get confused, and
+   I want to avoid changing stuff outside of message-dispatch.lisp as much as possible.
+   There will be a time in the future when heavy-optimization and code-uglying will be appropriate.
+   But for now, while the system is still being designed, it's best to keep things clean and
+   flexible (and slow...).
 * DONE 0.7
 ** DONE Make initialize-instance a buzzword so :after messages can be defined
    both initialize-instance and reinitialize-instance are regular buzzwords now.

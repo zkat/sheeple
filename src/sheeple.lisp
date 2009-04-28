@@ -6,6 +6,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
+(defvar *max-sheep-id* 0)
+
 (defstruct (sheep (:constructor %make-sheep))
   (nickname nil)
   (direct-parents nil)
@@ -15,7 +17,8 @@
   (direct-roles nil)
   (clonefunctions (make-hash-table :test #'eq))
   (cloneforms (make-hash-table :test #'eq))
-  (hierarchy-list nil))
+  (hierarchy-list nil)
+  (id (incf *max-sheep-id*)))
 
 ;;;
 ;;; Cloning

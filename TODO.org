@@ -14,7 +14,11 @@
 *** TODO Write unit tests for new LL stuff
 *** TODO Write more thorough tests to make sure caching schemes aren't broken
 ** TODO Allow individual message :documentation
-* TODO 0.8
+** TODO More optimization
+   The goal here is to have manipulator dispatch be at a maximum 2x slower than property-value. If I
+   can get it as fast as direct property-access, even better, but this shit can go so much faster
+   without too much magic.
+* DONE 0.8
 ** DONE Optimize the shit out of message dispatch
    It's pretty fast right now, but nothing compared to PCL.
    I should read through the Slate paper again and see if I can implement any of their

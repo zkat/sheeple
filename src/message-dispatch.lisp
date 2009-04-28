@@ -74,41 +74,57 @@
     (funcall function args next-messages)))
 
 (defun find-applicable-messages (buzzword args relevant-args-length &key (errorp t))
-  (let ((relevant-args (subseq args 0 relevant-args-length)))
-   (multiple-value-bind (msg-cache has-p)
-       (gethash relevant-args (buzzword-memo-table buzzword))
-     (if has-p
-	 msg-cache
-	 (let ((new-msg-list (%find-applicable-messages buzzword relevant-args :errorp errorp)))
-	   (memoize-message-dispatch buzzword relevant-args new-msg-list))))))
+  (let* ((relevant-args (subseq args 0 relevant-args-length)))
+    (multiple-value-bind (msg-cache has-p)
+	(fetch-memo-vector-entry relevant-args buzzword)
+      (if has-p
+	  msg-cache
+	  (let ((new-msg-list (%find-applicable-messages buzzword relevant-args :errorp errorp)))
+	    (memoize-message-dispatch buzzword relevant-args new-msg-list))))))
 
 (defun fetch-memo-vector-entry (relevant-args buzzword)
   (let* ((memo-vector (buzzword-memo-vector buzzword))
 	 (orig-index (mod (sheep-id (sheepify (car relevant-args)))
 			  8)))
     (let ((attempt (elt memo-vector orig-index)))
-      (if (desired-vector-entry-p relevant-args vector-entry)
-	  vector-entry
-	  (loop from i upto (length memo-vector)
+      (if (desired-vector-entry-p relevant-args attempt)
+	  (vector-entry-msg-cache attempt)
+	  (loop for i upto (1- (length memo-vector))
 	     do (let ((entry (elt memo-vector i)))
 		  (when (desired-vector-entry-p relevant-args entry)
-		    (return-from fetch-memo-vector-entry entry))))))))
+		    (return-from fetch-memo-vector-entry (values (vector-entry-msg-cache entry) t))))
+	     finally (return (values nil nil)))))))
 
 (defun desired-vector-entry-p (args vector-entry)
-  (let ((vector-args (vector-entry-args vector-entry)))
-    (loop 
-       for arg in args
-       for v-arg in vector-args
-       do (when (eql arg v-arg)
-	    (return-from desired-vector-entry-p t))
-       finally (return nil))))
+  (when (vector-entry-p vector-entry)
+   (let ((vector-args (vector-entry-args vector-entry)))
+     (loop 
+	for arg in args
+	for v-arg in vector-args
+	do (when (eql arg v-arg)
+	     (return-from desired-vector-entry-p t))
+	finally (return nil)))))
 
 (defstruct vector-entry
   args
   msg-cache)
 
 (defun memoize-message-dispatch (buzzword args msg-list)
-  (setf (gethash args (buzzword-memo-table buzzword)) (create-message-cache buzzword msg-list)))
+  (let ((msg-cache (create-message-cache buzzword msg-list))
+	(maybe-index (mod (sheep-id (sheepify (car args)))
+			  8)))
+    (add-entry-to-memo-vector msg-cache buzzword maybe-index)
+    msg-cache))
+
+(defun add-entry-to-memo-vector (cache buzzword index)
+  (let ((memo-vector (buzzword-memo-vector buzzword)))
+   (when (>= index (length memo-vector))
+     (adjust-array memo-vector (+ (length memo-vector) 8))
+     (if (not (elt memo-vector index))
+	 ;; no entry, safe to put a new one in
+	 (setf (elt memo-vector index) cache)
+	 ;; we'll try again with the next one
+	 (add-entry-to-memo-vector cache memo-vector (1+ index))))))
 
 (defun %find-applicable-messages  (buzzword args &key (errorp t))
   "Returns the most specific message using SELECTOR and ARGS."

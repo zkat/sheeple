@@ -62,6 +62,7 @@
 		   :lambda-list lambda-list
 		   :participants target-sheeple
 		   all-keys)))
+    (clear-memo-table buzzword)
     message))
 
 (defun create-bw-lambda-list (lambda-list)
@@ -104,7 +105,8 @@
 		(sheep-direct-roles sheep)))))
 
 (defun undefine-message (name &key qualifiers participants)
-  (remove-messages-with-name-qualifiers-and-participants name qualifiers participants))
+  (remove-messages-with-name-qualifiers-and-participants name qualifiers participants)
+  (clear-all-buzzword-caches))
 
 (defun available-messages (sheep)
   (let ((personal-role-names (mapcar (lambda (role) (role-name role))

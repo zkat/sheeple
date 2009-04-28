@@ -12,11 +12,14 @@
   (name nil)
   (lambda-list nil)
   (messages nil)
-  (memo-table (make-hash-table :test #'eq))
+  (memo-table (make-hash-table :test #'equal))
   ;; This contains an arg-info object that is used to maintain
   ;; lambda-list congruence.
   (arg-info (make-arg-info))
   (documentation ""))
+
+(defun clear-memo-table (buzzword)
+  (clrhash (buzzword-memo-table buzzword)))
 
 ;;;
 ;;; Buzzword definition
@@ -40,6 +43,12 @@
   (defun forget-all-buzzwords ()
     (clrhash buzzword-table)
     t)
+
+  (defun clear-all-buzzword-caches ()
+    (maphash (lambda (k v)
+	       (declare (ignore k))
+	       (clear-memo-table v))
+	     buzzword-table))
   
   (defun forget-buzzword (name)
     (remhash name buzzword-table))

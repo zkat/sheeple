@@ -2,6 +2,7 @@
 ** TODO Implement :message option for defbuzzword (like CLOS' :method option)
    I don't care about this feature all that much, so I might just keep bumping it until someone
    who -does- care asks for it.
+** TODO Allow individual message :documentation
 * TODO 1.0
 ** TODO Thoroughly test sheeple, make sure everything's stable
 ** TODO Write a small sample application (maybe convert yashmup?)
@@ -13,7 +14,6 @@
 *** TODO Write unit tests for defsheep 
 *** TODO Write unit tests for new LL stuff
 *** TODO Write more thorough tests to make sure caching schemes aren't broken
-** TODO Allow individual message :documentation
 ** TODO More optimization
    The goal here is to have manipulator dispatch be at a maximum 2x slower than property-value. If I
    can get it as fast as direct property-access, even better, but this shit can go so much faster

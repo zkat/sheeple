@@ -26,8 +26,7 @@
 
 (defun apply-buzzword (buzzword args)
   (let* ((relevant-args-length (arg-info-number-required (buzzword-arg-info buzzword)))
-	 (messages (find-applicable-messages buzzword
-					     (subseq args 0 relevant-args-length))))
+	 (messages (find-applicable-messages buzzword args relevant-args-length)))
     (apply-messages messages args)))
 
 (defstruct cache
@@ -74,13 +73,39 @@
   (let ((function (message-function message)))
     (funcall function args next-messages)))
 
-(defun find-applicable-messages (buzzword args &key (errorp t))
-  (multiple-value-bind (msg-cache has-p)
-      (gethash args (buzzword-memo-table buzzword))
-    (if has-p
-	msg-cache
-	(let ((new-msg-list (%find-applicable-messages buzzword args :errorp errorp)))
-	  (memoize-message-dispatch buzzword args new-msg-list)))))
+(defun find-applicable-messages (buzzword args relevant-args-length &key (errorp t))
+  (let ((relevant-args (subseq args 0 relevant-args-length)))
+   (multiple-value-bind (msg-cache has-p)
+       (gethash relevant-args (buzzword-memo-table buzzword))
+     (if has-p
+	 msg-cache
+	 (let ((new-msg-list (%find-applicable-messages buzzword relevant-args :errorp errorp)))
+	   (memoize-message-dispatch buzzword relevant-args new-msg-list))))))
+
+(defun fetch-memo-vector-entry (relevant-args buzzword)
+  (let* ((memo-vector (buzzword-memo-vector buzzword))
+	 (orig-index (mod (sheep-id (sheepify (car relevant-args)))
+			  8)))
+    (let ((attempt (elt memo-vector orig-index)))
+      (if (desired-vector-entry-p relevant-args vector-entry)
+	  vector-entry
+	  (loop from i upto (length memo-vector)
+	     do (let ((entry (elt memo-vector i)))
+		  (when (desired-vector-entry-p relevant-args entry)
+		    (return-from fetch-memo-vector-entry entry))))))))
+
+(defun desired-vector-entry-p (args vector-entry)
+  (let ((vector-args (vector-entry-args vector-entry)))
+    (loop 
+       for arg in args
+       for v-arg in vector-args
+       do (when (eql arg v-arg)
+	    (return-from desired-vector-entry-p t))
+       finally (return nil))))
+
+(defstruct vector-entry
+  args
+  msg-cache)
 
 (defun memoize-message-dispatch (buzzword args msg-list)
   (setf (gethash args (buzzword-memo-table buzzword)) (create-message-cache buzzword msg-list)))

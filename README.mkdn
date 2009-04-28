@@ -1,18 +1,15 @@
 About
 =====
 
-Sheeple is a Dynamic, CLOS-like Prototype-based Object-Oriented Programming Framework (or "POOP
-Framework") that strives to maximize application flexibility, minimize cost while maximizing value,
-optimize programmer time, and empower application implementers to better assist them leveraging
-modern paradigms in order to proactively achieve next-gen synergy in tomorrow's web 3.0 world. It is
-implemented in (mostly) ANSI Common Lisp. Sheeple is fully buzzword compliant.
+Sheeple is a Dynamic, CLOS-like, Delegative Prototype-based Object-Oriented Programming Framework
+(or "POOP Framework") that strives to maximize application flexibility, minimize cost while
+maximizing value, optimize programmer time, and empower application implementers to better assist
+them leveraging modern paradigms in order to proactively achieve next-gen synergy in tomorrow's web
+3.0 world. It is implemented in (mostly) ANSI Common Lisp. Sheeple is fully buzzword compliant.
 
-Initially written as the object system for [Sykosomatic][9], Sheeple is provided as a module
-separate from its persistent counterpart, Persistent-Sheeple, as a standalone library for use with
-any regular Lisp application.
-
-Following the implementation of Sheeple's Metasheep Protocol, Persistent-Sheeple is being rewritten
-to take full advantage of the protocol, allowing parallel operation of regular sheeple with psheep.
+Sheeple was originally written as a persistent library for use with [Sykosomatic][9]. When that
+didn't work out, it was simply rewritten as a regular prototype object system and provided as a
+standalone library meant for general-purpose OO hackery.
 
 Sheeple is inspired by a number of Object-Oriented systems, mainly:
 
@@ -47,7 +44,11 @@ Confirmed to work (pass all tests):
 
 Others:
 
-* CLISP: compiles, and seems to work, but is very unstable, and crashes during tests
+* CLISP - manually testing it seems to work. Test suite crashes clisp, although after closer
+  inspection it seems this is most likely because of 5am, not sheeple.
+
+Sheeple doesn't use any OS-specific code (or threads), so it should be fairly stable on all
+operating systems. OSX and Linux x86 have both been actually tested on the aforementioned platforms.
 
 Loading Sheeple
 ---------------
@@ -74,9 +75,9 @@ FiveAM is required if you wish to run the test suite. To run it:
 
 Notes
 -----
-If you want to get Sheeple to run on your favorite platform, feel free to e-mail me: sykopomp
-. sykosomatic dot org, I'll help as much as I can (or even do the work for you). Any and all
-comments are also greatly appreciated.
+If you want to get Sheeple to run on your favorite platform, feel free to e-mail me: sykopomp, in
+the domain of sykosomatic, tld org. I'll help as much as I can (or even do the work for you). Any
+and all comments are also greatly appreciated.
 
 
 Disclaimer
@@ -129,80 +130,6 @@ Please refer to #P"doc;user-guide" for a quick-and-dirty intro to Sheeple and ho
 If you're extra-patient, you can wait for me to write a full-fledged user guide (slated for
 completion by the time 1.0 gets pooped out).
 
-Again, you can always contact me directly with questions. I also regularly lurk in the #lisp channel
-on Freenode (as sykopomp).
+Again, you can always contact me directly with questions. I also regularly lurk in #lisp@freenode
+(as sykopomp).
 
-
-Why Poop?
-=========
-
-When I started volunteering in a MUD I like, as a builder/programmer, I was able to play with a
-custom subset of LPC (a C-like prototype-based language) that the MUD used for game objects and
-scripting. Over time, I made a list of interesting tasks that were easy and useful in LPC, yet
-couldn't be done either as nicely, or at all, when using CLOS.
-
-In a nutshell, the biggest advantages of using a prototype-based system are as follows:
-
-1. Much greater dynamicity
- 
-      Objects can be changed, and those changes can be distributed down the object hierarchy in a
-      much easier and cleaner way than can be done with class-based systems (including CLOS)
-
-2. Hierarchical data sharing
-      
-      Not only are slots and methods shared -- so is data. Being able to alter `default' or `common'
-      values and have them change the values of all children can be useful (although there are
-      facilities to just as easily enforce unique values for each object -- such as collections)
-
-3. "Bottomless" hierarchy
-      
-      If you decide that your `instance' isn't the end-all of your hierarchy, you can flexibly
-      expand your hierarchy further down. This is incredibly nice and useful for rapid prototyping
-      and exploratory programming, since it does not force you to destroy existing instances, create
-      a new class because that previous class wasn't quite the bottom of the hierarchy that you can
-      just make instances of.
-
-4. It makes more sense
- 
-      The Self people argue that manipulating objects directly makes more sense that having the
-      divide with classes. I agree.
-
-
-Why not Sheeple?
-================
-There are, of course, some caveats to using the current implementation of Sheeple...
-
-1. It can be slower than PCL -
-   
-     This should not come as a surprise considering the sheer speed of implementations like
-     PCL. Considerable optimization is planned as time goes on and interfaces stabilize, but Sheeple
-     would most probably never be as fast as CLOS, due to how dynamic it has to be. On the other
-     hand, it's considerable faster on SBCL than CLOS on GNU clisp, for both property access and
-     message dispatch, so it is certainly usable for a certain number of applications, even in this
-     sub-optimal state.
-
-2. It's buggy right now -
-
-     It really is. The API isn't guaranteed to stay as it is until 1.0 ships, and is regularly
-     changing as requirements come up.
-
-3. It doesn't have a toolkit as complete as CLOS' (yet) -
-
-     Conceptually, I think of Sheeple as a superset of CLOS: It can be made to easily emulate the
-     behaviors of class-based systems through a number of tools (some of which are still in the
-     works). A large number of CLOS goodies are planned, including a sizeable MOP, but it may never
-     really reach CLOS-level glory (or bloat, depending on who you ask).
-
-4. It's not CLOS
-
-     It looks a hell of a lot like CLOS, it might even trick people into thinking some jerk with a
-     bad sense of humor wrote a bunch of alias macros around CLOS... but it's not CLOS. Many
-     concepts are different, and it might be hard to get used to them, or even find any use in
-     them. YMMV
-
-5. It's not as integrated - 
-     
-     CLOS itself is quite integrated into Common Lisp. Implementations can do a lot of
-     under-the-hood magic to get it running nice and fast, and to get some parts working in the
-     first place. Since Sheeple runs on -top- of Common Lisp, it doesn't have the same kind of
-     access, and might not 'feel' as integrated.

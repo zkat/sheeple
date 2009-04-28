@@ -1,7 +1,7 @@
 0.8
 ---
 Features -
-  * Small speedup for message dispatch
+  * Significant speedup for message dispatch, using a simple caching system.
 
 Bugs -
   * &allow-other-keys is no longer necessary when using &key args with buzzwords.

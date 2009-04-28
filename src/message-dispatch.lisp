@@ -71,28 +71,6 @@
    :before (remove-if-not #'before-message-p messages)
    :after (remove-if-not #'after-message-p messages)))
 
-(defun slow-apply-messages (messages args)
-  (let ((around (find-if #'around-message-p messages))
-	(primaries (remove-if-not #'primary-message-p messages)))
-    (when (null primaries)
-	    (let ((name (message-name (car messages))))
-	      (error 'no-primary-messages
-		     :format-control 
-		     "There are no primary messages for buzzword ~A When called with args:~%~S"
-		     :format-args (list name args))))
-    (if around
-	(apply-message around args (remove around messages))
-    	(let ((befores (remove-if-not #'before-message-p messages))
-	      (afters (remove-if-not #'after-message-p messages)))
-	  (when befores
-	    (dolist (before befores)
-	      (apply-message before args nil)))
-	  (multiple-value-prog1
-	      (apply-message (car primaries) args (cdr primaries))
-	    (when afters
-	      (dolist (after (reverse afters))
-		(apply-message after args nil))))))))
-
 (defun apply-message (message args next-messages)
   (let ((function (message-function message)))
     (funcall function args next-messages)))

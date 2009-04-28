@@ -1,6 +1,7 @@
 0.8
 ---
 Features -
+  * Small speedup for message dispatch
 
 Bugs -
   * &allow-other-keys is no longer necessary when using &key args with buzzwords.

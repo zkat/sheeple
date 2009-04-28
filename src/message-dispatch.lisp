@@ -31,10 +31,50 @@
 					     (subseq args 0 relevant-args-length)))))
     (apply-messages messages args)))
 
-(defun apply-messages (messages args)
+(defstruct cache
+  name
+  around
+  primary
+  before
+  after
+  messages)
+
+(defun apply-messages (cache args)
+  (let ((messages (cache-messages cache))
+	(around (cache-around cache))
+	(primaries (cache-primary cache)))
+    (when (null primaries)
+      (let ((name (cache-name cache)))
+	(error 'no-primary-messages
+	       :format-control 
+	       "There are no primary messages for buzzword ~A When called with args:~%~S"
+	       :format-args (list name args))))
+    (if around
+	(apply-message (car around) args (remove around messages))
+    	(let ((befores (cache-before cache))
+	      (afters (cache-after cache)))
+	  (when befores
+	    (dolist (before befores)
+	      (apply-message before args nil)))
+	  (multiple-value-prog1
+	      (apply-message (car primaries) args (cdr primaries))
+	    (when afters
+	      (dolist (after (reverse afters))
+		(apply-message after args nil))))))))
+
+(defun create-message-cache (buzzword messages)
+  (make-cache
+   :name (buzzword-name buzzword)
+   :messages messages
+   :primary (remove-if-not #'primary-message-p messages)
+   :around (remove-if-not #'around-message-p messages)
+   :before (remove-if-not #'before-message-p messages)
+   :after (remove-if-not #'after-message-p messages)))
+
+(defun slow-apply-messages (messages args)
   (let ((around (find-if #'around-message-p messages))
 	(primaries (remove-if-not #'primary-message-p messages)))
-	  (when (null primaries)
+    (when (null primaries)
 	    (let ((name (message-name (car messages))))
 	      (error 'no-primary-messages
 		     :format-control 
@@ -58,16 +98,15 @@
     (funcall function args next-messages)))
 
 (defun find-applicable-messages (buzzword args &key (errorp t))
-  (multiple-value-bind (msg-list has-p)
+  (multiple-value-bind (msg-cache has-p)
       (gethash args (buzzword-memo-table buzzword))
     (if has-p
-	msg-list
+	msg-cache
 	(let ((new-msg-list (%find-applicable-messages buzzword args :errorp errorp)))
-	  (memoize-message-dispatch buzzword args new-msg-list)
-	  new-msg-list))))
+	  (memoize-message-dispatch buzzword args new-msg-list)))))
 
 (defun memoize-message-dispatch (buzzword args msg-list)
-  (setf (gethash args (buzzword-memo-table buzzword)) msg-list))
+  (setf (gethash args (buzzword-memo-table buzzword)) (create-message-cache buzzword msg-list)))
 
 (defun %find-applicable-messages  (buzzword args &key (errorp t))
   "Returns the most specific message using SELECTOR and ARGS."

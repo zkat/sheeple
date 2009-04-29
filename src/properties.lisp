@@ -8,7 +8,7 @@
 (in-package :sheeple)
 
 (defparameter *secret-unbound-value* (gensym))
-
+(declaim (optimize (speed 3) (debug 0) (safety 0)))
 ;;;
 ;;; Property Access
 ;;;

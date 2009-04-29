@@ -6,6 +6,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
+(declaim (optimize (speed 3) (safety 0)))
 (defstruct (message (:constructor %make-message))
   (name nil)
   (buzzword nil)

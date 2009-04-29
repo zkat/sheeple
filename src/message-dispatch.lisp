@@ -9,7 +9,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(declaim (optimize (safety 0) (speed 3)))
+(declaim (optimize (safety 0) (speed 3) (debug 0)))
 (defun primary-message-p (message)
   (null (message-qualifiers message)))
 
@@ -26,8 +26,7 @@
     t))
 
 (defun apply-buzzword (buzzword args)
-  (let* ((relevant-args-length (arg-info-number-required (buzzword-arg-info buzzword)))
-	 (messages (find-applicable-messages buzzword args relevant-args-length)))
+  (let ((messages (find-applicable-messages buzzword args)))
     (apply-messages messages args)))
 
 (defstruct cache
@@ -74,37 +73,39 @@
   (let ((function (message-function message)))
     (funcall (the function function) args next-messages)))
 
-(defun find-applicable-messages (buzzword args relevant-args-length &key (errorp t))
+(defun find-applicable-messages (buzzword args &key (errorp t))
   (declare (list args))
-  (declare (integer relevant-args-length))
   (declare (buzzword buzzword))
-  (let* ((relevant-args (subseq args 0 relevant-args-length))
-	 (memo-entry (fetch-memo-vector-entry relevant-args buzzword)))
-    (declare (list relevant-args))
+  (let* ((relevant-args-length (the fixnum (arg-info-number-required (buzzword-arg-info buzzword))))
+	 (memo-entry (fetch-memo-vector-entry args buzzword relevant-args-length)))
     (or memo-entry
 	memo-entry
-	(let ((new-msg-list (%find-applicable-messages buzzword relevant-args :errorp errorp)))
+	(let* ((relevant-args (the list (subseq args 0 relevant-args-length)))
+	       (new-msg-list (%find-applicable-messages buzzword 
+							relevant-args
+							:errorp errorp)))
 	  (memoize-message-dispatch buzzword relevant-args new-msg-list)))))
 
-(defun fetch-memo-vector-entry (relevant-args buzzword)
+(defun fetch-memo-vector-entry (args buzzword relevant-args-length)
   (let* ((memo-vector (buzzword-memo-vector buzzword))
-	 (orig-index (mod (the fixnum (sheep-id (sheepify (car relevant-args))))
+	 (orig-index (mod (the fixnum (sheep-id (sheepify (car args))))
 			  8)))
-    (declare (simple-array memo-vector))
+    (declare (vector memo-vector))
     (declare (fixnum orig-index))
-    (let ((attempt (elt memo-vector orig-index)))
-      (if (desired-vector-entry-p relevant-args attempt)
+    (let ((attempt (elt (the (not simple-array) memo-vector) orig-index)))
+      (if (desired-vector-entry-p args attempt relevant-args-length)
 	  (vector-entry-msg-cache attempt)
 	  (progn
 	    (loop for entry across memo-vector
-	       do (when (desired-vector-entry-p relevant-args entry)
+	       do (when (desired-vector-entry-p args entry relevant-args-length)
 		    (return-from fetch-memo-vector-entry (vector-entry-msg-cache entry))))
 	    nil)))))
 
-(defun desired-vector-entry-p (args vector-entry)
+(defun desired-vector-entry-p (args vector-entry relevant-args-length)
   (when (vector-entry-p vector-entry)
     (let ((vector-args (vector-entry-args vector-entry)))
       (loop
+	 for i upto relevant-args-length
 	 for v-arg in vector-args
 	 for arg in args
 	 do (when (not (eql v-arg arg))

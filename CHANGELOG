@@ -1,6 +1,7 @@
 0.9
 ---
 Features -
+  * HUGE optimization for message dispatch.
 
 Bugs -
 

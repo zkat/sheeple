@@ -39,8 +39,7 @@
   (defun find-fleeced-wolf (wolf)
     (if (sheep-p wolf)
 	(error "~S seems to already be a sheep." wolf)
-	(if (gethash wolf boxed-object-table)
-	    (gethash wolf boxed-object-table)
+	(or (gethash wolf boxed-object-table)
 	    (values (wear-wool wolf) nil))))
 
   (defun wear-wool (wolf)

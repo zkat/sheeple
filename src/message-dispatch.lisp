@@ -9,6 +9,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
+(declaim (optimize (debug 0) (safety 0) (speed 3)))
 (defun primary-message-p (message)
   (null (message-qualifiers message)))
 
@@ -71,39 +72,44 @@
 
 (defun apply-message (message args next-messages)
   (let ((function (message-function message)))
-    (funcall function args next-messages)))
+    (funcall (the function function) args next-messages)))
 
 (defun find-applicable-messages (buzzword args relevant-args-length &key (errorp t))
-  (let* ((relevant-args (subseq args 0 relevant-args-length)))
-    (multiple-value-bind (msg-cache has-p)
-	(fetch-memo-vector-entry relevant-args buzzword)
-      (if has-p
-	  msg-cache
-	  (let ((new-msg-list (%find-applicable-messages buzzword relevant-args :errorp errorp)))
-	    (memoize-message-dispatch buzzword relevant-args new-msg-list))))))
+  (declare (list args))
+  (declare (integer relevant-args-length))
+  (declare (buzzword buzzword))
+  (let* ((relevant-args (subseq args 0 relevant-args-length))
+	 (memo-entry (fetch-memo-vector-entry relevant-args buzzword)))
+    (declare (list relevant-args))
+    (or memo-entry
+	memo-entry
+	(let ((new-msg-list (%find-applicable-messages buzzword relevant-args :errorp errorp)))
+	  (memoize-message-dispatch buzzword relevant-args new-msg-list)))))
 
 (defun fetch-memo-vector-entry (relevant-args buzzword)
   (let* ((memo-vector (buzzword-memo-vector buzzword))
-	 (orig-index (mod (sheep-id (sheepify (car relevant-args)))
+	 (orig-index (mod (the fixnum (sheep-id (sheepify (car relevant-args))))
 			  8)))
+    (declare (simple-array memo-vector))
+    (declare (fixnum orig-index))
     (let ((attempt (elt memo-vector orig-index)))
       (if (desired-vector-entry-p relevant-args attempt)
 	  (vector-entry-msg-cache attempt)
-	  (loop for i upto (1- (length memo-vector))
-	     do (let ((entry (elt memo-vector i)))
-		  (when (desired-vector-entry-p relevant-args entry)
-		    (return-from fetch-memo-vector-entry (values (vector-entry-msg-cache entry) t))))
-	     finally (return (values nil nil)))))))
+	  (progn
+	    (loop for entry across memo-vector
+	       do (when (desired-vector-entry-p relevant-args entry)
+		    (return-from fetch-memo-vector-entry (vector-entry-msg-cache entry))))
+	    nil)))))
 
 (defun desired-vector-entry-p (args vector-entry)
   (when (vector-entry-p vector-entry)
-   (let ((vector-args (vector-entry-args vector-entry)))
-     (loop 
-	for arg in args
-	for v-arg in vector-args
-	do (when (equal arg v-arg)
-	     (return-from desired-vector-entry-p t))
-	finally (return nil)))))
+    (let ((vector-args (vector-entry-args vector-entry)))
+      (loop
+	 for v-arg in vector-args
+	 for arg in args
+	 do (when (not (eql v-arg arg))
+	      (return-from desired-vector-entry-p nil)))
+      t)))
 
 (defstruct vector-entry
   args
@@ -111,27 +117,32 @@
 
 (defun memoize-message-dispatch (buzzword args msg-list)
   (let ((msg-cache (create-message-cache buzzword msg-list))
-	(maybe-index (mod (sheep-id (sheepify (car args)))
+	(maybe-index (mod (the fixnum (sheep-id (sheepify (car args))))
 			  8)))
     (add-entry-to-buzzword msg-cache buzzword args maybe-index)
     msg-cache))
 
 (defun add-entry-to-buzzword (cache buzzword args index)
   (let ((memo-vector (buzzword-memo-vector buzzword)))
+    (declare (fixnum index))
+    (declare (simple-array memo-vector))
     (loop for i from index
-       if (> i (length memo-vector))
-       do (adjust-array memo-vector (+ (length memo-vector) 8))
-       if (not (elt memo-vector i))
-       do (setf (elt memo-vector index) (make-vector-entry 
-				       :args args
-				       :msg-cache cache)))))
+       do (progn
+	    (when (>= i (length memo-vector))
+	      (adjust-array memo-vector (+ (length memo-vector) 8)))
+	    (when (eql (elt memo-vector i) 0)
+	      (setf (elt memo-vector index) (make-vector-entry 
+					     :args args
+					     :msg-cache cache))
+	      (loop-finish))))))
 
 (defun %find-applicable-messages  (buzzword args &key (errorp t))
   "Returns the most specific message using BUZZWORD and ARGS."
   (let ((selector (buzzword-name buzzword))
-	(n (length args))
+	(n (length (the list args)))
 	(discovered-messages nil)
 	(contained-applicable-messages nil))
+    (declare (list discovered-messages contained-applicable-messages))
     (loop 
        for arg in args
        for index upto (1- n)
@@ -144,13 +155,14 @@
 	       for hierarchy-position upto (1- (length curr-sheep-list))
 	       do (dolist (role (sheep-direct-roles curr-sheep))
 		    (when (and (equal selector (role-name role)) ;(eql buzzword (role-buzzword role))
-			       (= index (role-position role)))
+			       (= (the fixnum index) (the fixnum (role-position role))))
 		      (let ((curr-message (role-message-pointer role)))
-			(when (= n (length (message-specialized-portion curr-message)))
+			(when (= n (length (the list (message-specialized-portion curr-message))))
 			  (when (not (member curr-message
 					     discovered-messages
 					     :key #'message-container-message))
-			    (pushnew (contain-message curr-message) discovered-messages))
+			    (pushnew (the message-container (contain-message curr-message))
+				     discovered-messages))
 			  (let ((contained-message (find curr-message
 							 discovered-messages
 							 :key #'message-container-message)))
@@ -177,7 +189,7 @@
 (defun contain-message (message)
   (make-message-container
    :message message
-   :rank (make-array (length (message-specialized-portion message))
+   :rank (make-array (length (the list (message-specialized-portion message)))
 		     :initial-element nil)))
 
 (defstruct message-container
@@ -191,10 +203,12 @@
   t)
 
 (defun calculate-rank-score (rank)
+  (declare (simple-array rank))
   (let ((total 0))
+    (declare (fixnum total))
     (loop for item across rank
        do (when (numberp item)
-	    (incf total item)))
+	    (incf total (the fixnum item))))
     total))
 
 (defun message-specialized-portion (msg)

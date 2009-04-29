@@ -7,6 +7,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
+(declaim (optimize (speed 3) (safety 0)))
 ;; We currently use structs for storage, since they're more convenient atm.
 (defstruct (buzzword (:constructor %make-buzzword))
   (name nil)
@@ -195,11 +196,11 @@
   (not (null (arg-info-number-optional arg-info))))
 
 (defun arg-info-applyp (arg-info)
-  (or (plusp (arg-info-number-optional arg-info))
+  (or (plusp (the fixnum (arg-info-number-optional arg-info)))
       (arg-info-key/rest-p arg-info)))
 
 (defun arg-info-number-required (arg-info)
-  (length (arg-info-metatypes arg-info)))
+  (length (the list (arg-info-metatypes arg-info))))
 
 (defun arg-info-nkeys (arg-info)
   (count-if (lambda (x) (not (eq x t))) (arg-info-metatypes arg-info)))
@@ -219,8 +220,8 @@
           (let ((bw-nreq (arg-info-number-required arg-info))
                 (bw-nopt (arg-info-number-optional arg-info))
                 (bw-key/rest-p (arg-info-key/rest-p arg-info)))
-            (unless (and (= nreq bw-nreq)
-                         (= nopt bw-nopt)
+            (unless (and (= (the fixnum nreq) bw-nreq)
+                         (= (the fixnum nopt) (the fixnum bw-nopt))
                          (eq (or keysp restp) bw-key/rest-p))
               (error "The lambda-list ~S is incompatible with ~
                      existing messages of ~S."
@@ -273,11 +274,11 @@
 	       (error "encountered the non-standard lambda list keyword ~S"
 		      x)))
             (ecase state
-              (required  (incf nrequired))
-              (optional  (incf noptional))
+              (required  (incf (the fixnum nrequired)))
+              (optional  (incf (the fixnum noptional)))
               (key       (push (parse-key-arg x) keywords)
                          (push x keyword-parameters))
-              (rest      (incf nrest)))))
+              (rest      (incf (the fixnum nrest))))))
       (when (and restp (zerop nrest))
         (error "Error in lambda-list:~%~
                 After &REST, a DEFBUZZWORD lambda-list ~
@@ -296,6 +297,7 @@
                                      but ~?~:>"
                     :format-args (list message bw string args)))
            (comparison-description (x y)
+	     (declare (fixnum x y))
              (if (> x y) "more" "fewer")))
       (let ((bw-nreq (arg-info-number-required arg-info))
             (bw-nopt (arg-info-number-optional arg-info))

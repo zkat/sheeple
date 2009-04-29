@@ -119,7 +119,7 @@
 (defun memoize-message-dispatch (buzzword args msg-list)
   (let ((msg-cache (create-message-cache buzzword msg-list))
 	(maybe-index (mod (the fixnum (sheep-id (sheepify (car args))))
-			  (length (buzzword-memo-vector buzzword)))))
+			  (length (the vector (buzzword-memo-vector buzzword))))))
     (add-entry-to-buzzword msg-cache buzzword args maybe-index)
     msg-cache))
 
@@ -131,7 +131,7 @@
        do (progn
 	    (when (>= i (length memo-vector))
 	      (adjust-array memo-vector (+ (length memo-vector) 8)))
-	    (when (eql (elt memo-vector i) 0)
+	    (when (eql (elt (the (not string) memo-vector) i) 0)
 	      (setf (elt memo-vector index) (make-vector-entry 
 					     :args args
 					     :msg-cache cache))

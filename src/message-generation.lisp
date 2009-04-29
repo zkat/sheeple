@@ -6,7 +6,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(declaim (optimize (speed 3) (safety 0)))
+(declaim (optimize (speed 3) (safety 0) (debug 0)))
 (defstruct (message (:constructor %make-message))
   (name nil)
   (buzzword nil)
@@ -159,8 +159,6 @@
 	:function ,(make-message-lambda name ll body)
 	:body '(block ,name ,@body)))))
 
-;; KLUDGE: This is usually called during macroexpansion-time, which is very bad. Ideally, this
-;;         would instead be called during message creation...
 (defun make-message-lambda (name lambda-list body)
   (let* ((bw (find-buzzword name nil))
 	 (key/restp (when bw (arg-info-key/rest-p (buzzword-arg-info bw))))

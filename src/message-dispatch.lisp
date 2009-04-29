@@ -29,7 +29,7 @@
   (let ((messages (find-applicable-messages buzzword args)))
     (apply-messages messages args)))
 
-(defstruct cache
+(defstruct (cache (:type vector))
   name
   around
   primary
@@ -102,7 +102,7 @@
 	    nil)))))
 
 (defun desired-vector-entry-p (args vector-entry relevant-args-length)
-  (when (vector-entry-p vector-entry)
+  (when (vectorp vector-entry)
     (let ((vector-args (vector-entry-args vector-entry)))
       (loop
 	 for i upto relevant-args-length
@@ -112,7 +112,7 @@
 	      (return-from desired-vector-entry-p nil)))
       t)))
 
-(defstruct vector-entry
+(defstruct (vector-entry (:type vector))
   args
   msg-cache)
 
@@ -162,7 +162,7 @@
 			  (when (not (member curr-message
 					     discovered-messages
 					     :key #'message-container-message))
-			    (pushnew (the message-container (contain-message curr-message))
+			    (pushnew (the vector (contain-message curr-message))
 				     discovered-messages))
 			  (let ((contained-message (find curr-message
 							 discovered-messages
@@ -193,7 +193,7 @@
    :rank (make-array (length (the list (message-specialized-portion message)))
 		     :initial-element nil)))
 
-(defstruct message-container
+(defstruct (message-container (:type vector))
   message
   rank)
 

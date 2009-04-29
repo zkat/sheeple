@@ -13,15 +13,14 @@
   (lambda-list nil)
   (messages nil)
   (memo-table (make-hash-table :test #'equal))
-  (memo-vector (make-array 8 :adjustable t :initial-element nil))
+  (memo-vector (make-array 8 :adjustable t))
   ;; This contains an arg-info object that is used to maintain
   ;; lambda-list congruence.
   (arg-info (make-arg-info))
   (documentation ""))
 
 (defun clear-memo-table (buzzword)
-  (loop for i from 0 upto (1- (length (buzzword-memo-vector buzzword)))
-       do (setf (elt (buzzword-memo-vector buzzword) i) nil))
+  (setf (buzzword-memo-vector buzzword) (make-array 8 :adjustable t))
   (clrhash (buzzword-memo-table buzzword)))
 
 ;;;

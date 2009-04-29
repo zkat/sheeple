@@ -85,7 +85,6 @@
 	    (setf (property-value sheep propname) (funcall fn))))))
 
 (defun finalize-sheep (sheep)
-  (clear-all-buzzword-caches)
   (memoize-sheep-hierarchy-list sheep)
   (memoize-property-access sheep)
   (loop for child-pointer in (sheep-direct-children sheep)

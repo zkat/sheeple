@@ -7,7 +7,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(declaim (optimize (speed 3) (safety 0)))
+(declaim (optimize (speed 3) (safety 0) (debug 0)))
 ;; We currently use structs for storage, since they're more convenient atm.
 (defstruct (buzzword (:constructor %make-buzzword))
   (name nil)
@@ -200,7 +200,7 @@
       (arg-info-key/rest-p arg-info)))
 
 (defun arg-info-number-required (arg-info)
-  (length (the list (arg-info-metatypes arg-info))))
+  (length (the simple-array (arg-info-metatypes arg-info))))
 
 (defun arg-info-nkeys (arg-info)
   (count-if (lambda (x) (not (eq x t))) (arg-info-metatypes arg-info)))
@@ -230,7 +230,7 @@
               (if lambda-list-p
                   lambda-list
 		  (create-bw-lambda-list lambda-list)))
-        (setf (arg-info-metatypes arg-info) (make-list nreq))
+        (setf (arg-info-metatypes arg-info) (make-array nreq))
         (setf (arg-info-number-optional arg-info) nopt)
         (setf (arg-info-key/rest-p arg-info) (not (null (or keysp restp))))
         (setf (arg-info-keys arg-info)

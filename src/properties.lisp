@@ -43,9 +43,13 @@
     (error "Property-name must be a symbol"))
   (let ((property-table (sheep-direct-properties sheep)))
     (setf (gethash property-name property-table) new-value))
-  (memoize-property-access sheep)
+  ;; Perhaps I should use a 'lazy-update' approach to this, where changes create a 'mark'
+  ;; and children check if there have been changes, and only then do they update their
+  ;; property-access cache.
+  ;; The problem is that that would probably involve some juggling. I'll make it TODO
+  (memoize-specific-property-access sheep property-name)
   (loop for child-pointer in (sheep-direct-children sheep)
-     do (memoize-property-access (weak-pointer-value child-pointer)))
+     do (memoize-specific-property-access (weak-pointer-value child-pointer) property-name))
   new-value)
 
 (defun remove-property (sheep property-name)
@@ -76,6 +80,7 @@
 	       :format-args (list property-name sheep)))))
 
 (defun available-properties (sheep)
+  ;; TODO - According to SB-SPROF, this is a huge bottleneck when setfing properties
   (let ((obj-keys (loop for keys being the hash-keys of (sheep-direct-properties sheep)
 		     collect keys)))
     (remove-duplicates
@@ -153,9 +158,12 @@
 ;;;
 (defun memoize-property-access (sheep)
   (loop for property in (available-properties sheep)
-     do (let ((owner (%property-value-owner sheep property)))
-	  (setf (gethash property (sheep-property-owners sheep))
-		owner))))
+     do (memoize-specific-property-access sheep property)))
+
+(defun memoize-specific-property-access (sheep property)
+  (let ((owner (%property-value-owner sheep property)))
+    (setf (gethash property (sheep-property-owners sheep))
+	  owner)))
 
 (defun %property-value-owner (sheep property-name)
   (let ((hierarchy-list (sheep-hierarchy-list sheep)))

@@ -18,6 +18,8 @@
    The goal here is to have manipulator dispatch be at a maximum 2x slower than property-value. If I
    can get it as fast as direct property-access, even better, but this shit can go so much faster
    without too much magic.
+   Update: currently down to just under 10x slower for single dispatch vs direct property access
+   Update: make that 5x slower. ;)
 * DONE 0.8
 ** DONE Optimize the shit out of message dispatch
    It's pretty fast right now, but nothing compared to PCL.

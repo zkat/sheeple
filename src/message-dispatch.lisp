@@ -89,7 +89,7 @@
 (defun fetch-memo-vector-entry (args buzzword relevant-args-length)
   (let* ((memo-vector (buzzword-memo-vector buzzword))
 	 (orig-index (mod (the fixnum (sheep-id (sheepify (car args))))
-			  8)))
+			  (length memo-vector))))
     (declare (vector memo-vector))
     (declare (fixnum orig-index))
     (let ((attempt (elt (the (not simple-array) memo-vector) orig-index)))
@@ -119,7 +119,7 @@
 (defun memoize-message-dispatch (buzzword args msg-list)
   (let ((msg-cache (create-message-cache buzzword msg-list))
 	(maybe-index (mod (the fixnum (sheep-id (sheepify (car args))))
-			  8)))
+			  (length (buzzword-memo-vector buzzword)))))
     (add-entry-to-buzzword msg-cache buzzword args maybe-index)
     msg-cache))
 

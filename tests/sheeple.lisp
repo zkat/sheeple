@@ -106,7 +106,6 @@ properly signal SHEEP-HIERARCHY-ERROR."
 (test auto-generated-manipulators
   "Tests to confirm property-option functionality."
   (undefbuzzword var nil)
-  (undefbuzzword (setf var) nil)
   (undefbuzzword get-var nil)
   (undefbuzzword (setf get-var) nil)
   (undefbuzzword set-var nil)

@@ -107,7 +107,7 @@
 
 (defun undefine-message (name &key qualifiers participants)
   (remove-messages-with-name-qualifiers-and-participants name qualifiers participants)
-  (clear-memo-table (find-buzzword name)))
+  (clear-all-buzzword-caches))
 
 (defun available-messages (sheep)
   (let ((personal-role-names (mapcar (lambda (role) (role-name role))

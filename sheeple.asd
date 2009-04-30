@@ -3,7 +3,7 @@
   :description "Cheeky prototypes for Common Lisp"
   :author "Kat Marchan <zkat at sykosomatic-dot-org>"
   :licence "MIT"
-  :depends-on (:closer-mop)
+  :depends-on ()
   :serial t
   :components 
   ((:module src

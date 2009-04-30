@@ -9,7 +9,9 @@ them leveraging modern paradigms in order to proactively achieve next-gen synerg
 
 Sheeple was originally written as a persistent library for use with [Sykosomatic][9]. When that
 didn't work out, it was simply rewritten as a regular prototype object system and provided as a
-standalone library meant for general-purpose OO hackery.
+standalone library meant for general-purpose OO hackery. I was mostly motivated to split it off
+because I kept running into different problems in other apps where I wished I could express things
+the way Sheeple does things.
 
 Sheeple is inspired by a number of Object-Oriented systems, mainly:
 
@@ -41,11 +43,6 @@ Confirmed to work (pass all tests):
 * SBCL
 * Clozure CL
 * LispWorks
-
-Others:
-
-* CLISP - manually testing it seems to work. Test suite crashes clisp, although after closer
-  inspection it seems this is most likely because of 5am, not sheeple.
 
 Sheeple doesn't use any OS-specific code (or threads), so it should be fairly stable on all
 operating systems. OSX and Linux x86 have both been actually tested on the aforementioned platforms.

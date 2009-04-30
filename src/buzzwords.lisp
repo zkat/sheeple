@@ -135,9 +135,6 @@
     ,errorp))
 
 ;;; LL analysis
-;; TODO
-(defun check-bw-lambda-list-for-bw-redefinition ())
-
 (defun check-bw-lambda-list (lambda-list)
   (flet ((ensure (arg ok)
            (unless ok

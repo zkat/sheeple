@@ -11,9 +11,9 @@
 *** Buzzwords with no arglist work now (snort)
 *** Buzzword redefinition now checks for lambda-list consistency with existing messages.
 * 0.8
-**Features
+** Features
 *** Significant speedup for message dispatch, using a simple caching system.
-**Bugs
+** Bugs
 *** &allow-other-keys is no longer necessary when using &key args with buzzwords.
 
 * 0.7

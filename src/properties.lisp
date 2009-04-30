@@ -50,7 +50,7 @@
 
 (defun remove-property (sheep property-name)
   (when (remhash property-name (sheep-direct-properties sheep))
-    (memoize-specific-property-access sheep property-name)
+    (memoize-property-access sheep)
     t))
 
 (defun has-property-p (sheep property-name)

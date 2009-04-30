@@ -18,8 +18,10 @@
 ** TODO Write plenty more unit tests.
 *** TODO Write unit tests for defsheep 
 *** TODO Write unit tests for new LL stuff
-*** TODO Write more thorough tests to make sure caching schemes aren't broken
+*** DONE Write more thorough tests to make sure caching schemes aren't broken
+    Honestly? The existing tests check this well enough.
 *** TODO Write a "many many messages" test
+*** TODO Write more tests with multi-level hierarchy lists
 ** DONE More optimization
    The goal here is to have manipulator dispatch be at a maximum 2x slower than property-value. If I
    can get it as fast as direct property-access, even better, but this shit can go so much faster
@@ -32,8 +34,9 @@
    Update: Will stop optimizing after manipulators are optimized to an acceptable speed.
    Update: 5x really isn't that bad. I'm going to keep it for now.
 ** DONE Convert CHANGELOG to .org
-** TODO Redefining buzzwords
+** DONE Redefining buzzwords
    It would be really nice if buzzword-redefinition followed the same rules as CLOS
+   Update: Good enough for now. It warns about shit.
 * DONE 0.8
 ** DONE Optimize the shit out of message dispatch
    It's pretty fast right now, but nothing compared to PCL.

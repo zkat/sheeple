@@ -86,13 +86,16 @@
 (defun ensure-buzzword (name
 			&rest all-keys
 			&key lambda-list)
-  (let ((buzzword (or (find-buzzword name nil)
-		      (apply #'generate-buzzword
-			     :name name
-			     :lambda-list lambda-list
-			     all-keys))))
-    (setf (find-buzzword name) buzzword)
-    buzzword))
+  (let ((existing (find-buzzword name nil)))
+    (let ((buzzword (or (find-buzzword name nil)
+			(apply #'generate-buzzword
+			       :name name
+			       :lambda-list lambda-list
+			       all-keys))))
+      (setf (find-buzzword name) buzzword)
+      (prog1 buzzword
+	(when existing
+	  (set-arg-info buzzword :lambda-list lambda-list))))))
 
 ;; This takes care of removing a buzzword entirely, including all roles associated with it.
 ;; It also makes the function unbound (so the dispatcher is no longer called)
@@ -299,7 +302,7 @@
   (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)
       (analyze-lambda-list (message-lambda-list message))
     (flet ((lose (string &rest args)
-             (error 'simple-error
+             (error 'sheeple-error
                     :format-control "~@<attempt to add the message~2I~_~S~I~_~
                                      to the buzzword~2I~_~S;~I~_~
                                      but ~?~:>"

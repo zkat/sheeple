@@ -9,8 +9,7 @@
 
 (defvar =t=
   (let ((sheep (%make-sheep)))
-    (setf (sheep-nickname sheep) "=t=")
-    (finalize-sheep sheep)
+     (finalize-sheep sheep)
     sheep))
 
 (defun spawn-sheep (sheeple &rest all-keys)
@@ -59,70 +58,27 @@
 		    :deep-copy deep-copy
 		    :shallow-copy shallow-copy))
 
-(defsheep =dolly= (=t=)
-  () (:nickname "=dolly="))
+(defsheep =dolly= (=t=) ())
 
 ;;; Wolves and wolf-handling
-(defsheep =white-fang= (=t=)
-  () (:nickname "=white-fang="))
-
-(defsheep =symbol=  (=white-fang=)
-  () (:nickname "=symbol="))
-
-(defsheep =sequence=  (=white-fang=)
-  () (:nickname "=sequence="))
-
-(defsheep =array=  (=white-fang=)
-  () (:nickname "=array="))
-
-(defsheep =number=  (=white-fang=)
-  () (:nickname "=number="))
-
-(defsheep =character= (=white-fang=)
-  () (:nickname "=character="))
-
-(defsheep =function=  (=white-fang=)
-  () (:nickname "=function="))
-
-(defsheep =hash-table= (=white-fang=)
-  () (:nickname "=hash-table="))
-
-(defsheep =package=  (=white-fang=)
-  () (:nickname "=package="))
-
-(defsheep =pathname=  (=white-fang=)
-  () (:nickname "=pathname="))
-
-(defsheep =readtable=  (=white-fang=)
-  () (:nickname "=readtable="))
-
-(defsheep =stream=  (=white-fang=)
-  () (:nickname "=stream="))
-
-(defsheep =list=  (=sequence=)
-  () (:nickname "=list="))
-
-(defsheep =null=  (=symbol= =list=)
-  () (:nickname "=null="))
-
-(defsheep =cons=  (=list=)
-  () (:nickname "=cons="))
-
-(defsheep =vector=  (=array= =sequence=)
-  () (:nickname "=vector="))
-
-(defsheep =bit-vector=  (=vector=)
-  () (:nickname "=bit-vector="))
-
-(defsheep =string=  (=vector=)
-  () (:nickname "=string="))
-
-(defsheep =complex=  (=number=)
-  () (:nickname "=complex="))
-
-(defsheep =integer=  (=number=)
-  () (:nickname "=integer="))
-
-(defsheep =float=  (=number=)
-  () (:nickname "=float="))
-
+(defsheep =white-fang= (=t=) ())
+(defsheep =symbol=  (=white-fang=) ())
+(defsheep =sequence=  (=white-fang=) ())
+(defsheep =array=  (=white-fang=) ())
+(defsheep =number=  (=white-fang=) ())
+(defsheep =character= (=white-fang=) ())
+(defsheep =function=  (=white-fang=) ())
+(defsheep =hash-table= (=white-fang=) ())
+(defsheep =package=  (=white-fang=) ())
+(defsheep =pathname=  (=white-fang=) ())
+(defsheep =readtable=  (=white-fang=) ())
+(defsheep =stream=  (=white-fang=) ())
+(defsheep =list=  (=sequence=) ())
+(defsheep =null=  (=symbol= =list=) ())
+(defsheep =cons=  (=list=) ())
+(defsheep =vector=  (=array= =sequence=) ())
+(defsheep =bit-vector=  (=vector=) ())
+(defsheep =string=  (=vector=) ())
+(defsheep =complex=  (=number=) ())
+(defsheep =integer=  (=number=) ())
+(defsheep =float=  (=number=) ())

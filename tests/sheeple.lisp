@@ -80,8 +80,8 @@ properly signal SHEEP-HIERARCHY-ERROR."
 (in-suite sheep-properties-tests)
 (test properties-basic
   "Basic property-setting and property-access tests. Ensures they follow spec."
-  (let* ((main-sheep (clone () ()))
-	 (child-sheep (clone (main-sheep) ())))
+  (let* ((main-sheep (clone () () (:nickname "main-sheep")))
+	 (child-sheep (clone (main-sheep) () (:nickname "child-sheep"))))
     (is (eql nil (available-properties main-sheep)))
     (signals unbound-property (property-value main-sheep 'foo))
     (is (equal "bar" 

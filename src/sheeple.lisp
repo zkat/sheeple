@@ -14,7 +14,7 @@
   (direct-parents nil)
   (direct-children nil)
   (direct-properties (make-hash-table :test #'eq))
-  (property-owners (make-weak-hash-table :weakness :value :test #'eq))
+;;  (property-owners (make-weak-hash-table :weakness :value :test #'eq))
   (direct-roles nil)
   (clonefunctions (make-hash-table :test #'eq))
   (cloneforms (make-hash-table :test #'eq))
@@ -81,15 +81,12 @@
     (loop
        for fn in functions
        for propname in available-cloneforms
-       do (unless (or (eql fn *secret-unbound-value*)
+       do (unless (or (eq fn *secret-unbound-value*)
 		      (has-direct-property-p sheep propname))
 	    (setf (property-value sheep propname) (funcall fn))))))
 
 (defun finalize-sheep (sheep)
   (memoize-sheep-hierarchy-list sheep)
-  (memoize-property-access sheep)
-  (loop for child-pointer in (sheep-direct-children sheep)
-     do (memoize-property-access (weak-pointer-value child-pointer)))
   sheep)
 
 (defun deep-copy (sheep)

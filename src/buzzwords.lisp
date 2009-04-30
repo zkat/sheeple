@@ -84,17 +84,15 @@
 ;; The defbuzzword macro basically expands to a call to this function (after processing
 ;; its args, checking lamda-list, etc.)
 (defun ensure-buzzword (name
-			&rest all-keys)
-  (let* ((old-buzzword (find-buzzword name nil))
-	 (old-messages (when old-buzzword (buzzword-messages old-buzzword))))
-    (let ((buzzword (apply #'generate-buzzword
-			   :name name
-			   all-keys)))
-      (setf (find-buzzword name) buzzword)
-      (when old-messages
-	(loop for msg in old-messages
-	   do (add-message-to-buzzword msg buzzword)))
-      buzzword)))
+			&rest all-keys
+			&key lambda-list)
+  (let ((buzzword (or (find-buzzword name nil)
+		      (apply #'generate-buzzword
+			     :name name
+			     :lambda-list lambda-list
+			     all-keys))))
+    (setf (find-buzzword name) buzzword)
+    buzzword))
 
 ;; This takes care of removing a buzzword entirely, including all roles associated with it.
 ;; It also makes the function unbound (so the dispatcher is no longer called)
@@ -134,6 +132,9 @@
     ,errorp))
 
 ;;; LL analysis
+;; TODO
+(defun check-bw-lambda-list-for-bw-redefinition ())
+
 (defun check-bw-lambda-list (lambda-list)
   (flet ((ensure (arg ok)
            (unless ok

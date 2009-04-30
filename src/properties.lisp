@@ -45,8 +45,7 @@
     (setf (gethash property-name property-table) new-value))
   (prog1 new-value
     (memoize-specific-property-access sheep property-name)
-    (loop for child-pointer in (sheep-direct-children sheep)
-       do (memoize-specific-property-access (weak-pointer-value child-pointer) property-name))))
+    (memoization-update-descendants sheep property-name sheep)))
 
 (defun remove-property (sheep property-name)
   (when (remhash property-name (sheep-direct-properties sheep))
@@ -156,12 +155,25 @@
   (loop for property in (available-properties sheep)
      do (memoize-specific-property-access sheep property)))
 
-(defun memoize-specific-property-access (sheep property)
-  (let ((owner (or (when (has-direct-property-p sheep property)
-		     sheep)
-		   (%property-value-owner sheep property))))
+(defun memoize-specific-property-access (sheep property &optional owner)
+  (let ((actual-owner (or owner
+			  (when (has-direct-property-p sheep property)
+			    sheep)
+			  (%property-value-owner sheep property))))
     (setf (gethash property (sheep-property-owners sheep))
-	  owner)))
+	  actual-owner)))
+
+(defun memoization-update-descendants (sheep property &optional owner)
+  (let ((actual-owner (or owner
+			  (when (has-direct-property-p sheep property)
+			    sheep)
+			  (%property-value-owner sheep property))))
+    (loop for child-pointer in (sheep-direct-children sheep)
+       do (progn
+	    (memoize-specific-property-access (weak-pointer-value child-pointer)
+					      property actual-owner)
+	    (memoization-update-descendants (weak-pointer-value child-pointer)
+					    property actual-owner)))))
 
 (defun %property-value-owner (sheep property-name)
   (let ((hierarchy-list (sheep-hierarchy-list sheep)))

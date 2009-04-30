@@ -9,6 +9,7 @@
 *** Little stability tweaks here and there. Doesn't break as often :)
 
 *** Buzzwords with no arglist work now (snort)
+*** Buzzword redefinition now checks for lambda-list consistency with existing messages.
 * 0.8
 **Features
 *** Significant speedup for message dispatch, using a simple caching system.

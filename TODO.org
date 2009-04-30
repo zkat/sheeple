@@ -6,12 +6,9 @@
 * TODO 1.0
 ** TODO Thoroughly test sheeple, make sure everything's stable
 ** TODO Write a small sample application (maybe convert yashmup?)
-** TODO Finalize 1.0 API. Make sure everything I want/need is there
-   API should not change until 2.0, so whatever makes it into this one is staying.
 * TODO 0.95
   the "I should have done all that shit in the first place" release
 ** TODO Complete documentation with tutorial and user's guide
-** TODO Do some testing on sheeple, write some more tests
 * TODO 0.9
 ** TODO Write plenty more unit tests.
 *** TODO Write unit tests for defsheep 
@@ -24,7 +21,6 @@
    without too much magic.
    Update: currently down to just under 10x slower for single dispatch vs direct property access
    Update: make that 5x slower. ;)
-   Update: Sped up (setf property-value) a bit, but I have to make a decision about this...
 * DONE 0.8
 ** DONE Optimize the shit out of message dispatch
    It's pretty fast right now, but nothing compared to PCL.

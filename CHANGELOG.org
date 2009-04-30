@@ -1,0 +1,68 @@
+* 0.9
+** Features
+*** HUGE optimization for message dispatch.
+*** Property-access is no longer cached -- setfing was way too expensive.
+    It will stay thing way unless I figure out a good lazy-update scheme.
+*** Property-access itself is a little faster now, too
+** Bugs
+*** Shit wasn't updating properly before, so bugs could crop up with deep hierarchies.
+*** Little stability tweaks here and there. Doesn't break as often :)
+
+* 0.8
+**Features
+*** Significant speedup for message dispatch, using a simple caching system.
+**Bugs
+*** &allow-other-keys is no longer necessary when using &key args with buzzwords.
+
+* 0.7
+** Features
+*** Can now define messages on initialize-sheep and reinitialize-sheep
+*** Message lambda-list congruence now follows the same rules as CLOS:
+    http://www.lispworks.com/documentation/HyperSpec/Body/07_fd.htm
+** Bugs
+*** buzzwords with &key, &rest, etc, actually work now
+*** some mostly-inconsequential whoopsies with conditions were patched
+
+* 0.6
+** Features
+*** Nothing worth noting
+** Bugfixes
+*** defsheep wasn't actually redefining sheeple.
+*** Lots of minor bugfixes
+
+* 0.5
+** Features
+*** Cloneforms actually work more like CLOS initforms now
+    (they don't execute if a value is already provided)
+*** Major, faster reimplementation of Sheeple. The MOP stuff is gone for now, though.
+** Bugfixes
+*** Conditions work nicer now. Reorganized them and put them in their place.
+
+* 0.4
+** Features
+*** Several MOP-related symbols made available, including sheep creation and property access.
+*** More information about Sheeple in README
+** Bugfixes
+*** Fixed a bug with undefbuzzword that undefined all messages
+
+* 0.3
+** Features
+*** CLOS-style lambda-lists for buzzwords and messages implemented
+*** Updated README to reflect new defbuzzword
+*** More tests written -- all pass on SBCL/Lin32
+** Bugfixes
+*** Fixed issue with message blocks
+*** Fixed issue caused by fixing issue with message blocks
+
+* 0.2
+** Features
+*** with-properties and with-manipulators implemented
+*** small code cleanup
+*** New tools for inspecting and manipulating cloneforms
+*** Property access speedup -- all property keys must now be symbols
+** Bugfixes
+*** NIL
+
+* 0.1
+  Initial release
+

@@ -27,8 +27,10 @@
    Update: make that 5x slower. ;)
    Update: Sped up (setf property-value) a bit. I'm going to have to make a decision about what
    needs to be faster here -- perhaps I'll find out once I write some apps.
+   Update: Caching property-owners was silly, and became incredibly expensive
    UPDATE: No more significant optimization until after 1.0. At this point, I need to write actual
    apps and see where the performance bottlenecks are.
+** DONE Convert CHANGELOG to .org
 * DONE 0.8
 ** DONE Optimize the shit out of message dispatch
    It's pretty fast right now, but nothing compared to PCL.

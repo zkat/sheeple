@@ -70,14 +70,19 @@
 
 (defmacro defsheep (name sheeple properties &rest options)
   (if (boundp name)
-      `(progn
-	 (setf ,name (replace-or-reinitialize-sheep 
-		      ,name 
-		      ,(canonize-sheeple sheeple)
-		      ,(canonize-properties properties) 
-		      ,@(canonize-clone-options options)))
+      `(let ((sheep (replace-or-reinitialize-sheep 
+		     ,name 
+		     ,(canonize-sheeple sheeple)
+		     ,(canonize-properties properties) 
+		     ,@(canonize-clone-options options))))
+	 (unless (sheep-nickname sheep)
+	   (setf (sheep-nickname sheep) ',name))
+	 (setf ,name sheep)
 	 ',name)
-      `(defvar ,name (clone ,sheeple ,properties ,@options))))
+      `(let ((sheep (clone ,sheeple ,properties ,@options)))
+	 (unless (sheep-nickname sheep)
+	   (setf (sheep-nickname sheep) ',name))
+	 (defvar ,name sheep))))
 
 (defun replace-or-reinitialize-sheep (maybe-sheep parents properties &rest options)
   (if (sheep-p maybe-sheep)

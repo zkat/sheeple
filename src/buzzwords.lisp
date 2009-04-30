@@ -21,8 +21,7 @@
   (documentation ""))
 
 (defun clear-memo-table (buzzword)
-  (setf (buzzword-memo-vector buzzword) (make-array 8 :adjustable t))
-  (clrhash (buzzword-memo-table buzzword)))
+  (setf (buzzword-memo-vector buzzword) (make-array 8 :adjustable t)))
 
 ;;;
 ;;; Buzzword definition

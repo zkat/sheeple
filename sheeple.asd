@@ -3,7 +3,7 @@
   :description "Cheeky prototypes for Common Lisp"
   :author "Josh Marchan <sykopomp at sykosomatic-dot-org>"
   :licence "MIT"
-  :depends-on ()
+  :depends-on (:closer-mop)
   :serial t
   :components 
   ((:module src

@@ -34,11 +34,14 @@
 
   (defun find-buzzword (name &optional (errorp t))
     (let ((buzz (gethash name buzzword-table)))
-      (if (and (null buzz) errorp)
-	  (error 'no-such-buzzword
-		 :format-control "There is no buzzword named ~A"
-		 :format-args (list name))
-	  buzz)))
+      (cond ((and (null buzz) errorp)
+	     (error 'no-such-buzzword
+		    :format-control "There is no buzzword named ~A"
+		    :format-args (list name)))
+	    ((null buzz)
+	     nil)
+	    (t
+	     buzz))))
   
   (defun (setf find-buzzword) (new-value name)
     (setf (gethash name buzzword-table) new-value))
@@ -83,11 +86,16 @@
 ;; its args, checking lamda-list, etc.)
 (defun ensure-buzzword (name
 			&rest all-keys)
-  (let ((buzzword (apply #'generate-buzzword
-			 :name name
-			 all-keys)))
-    (setf (find-buzzword name) buzzword)
-    buzzword))
+  (let* ((old-buzzword (find-buzzword name nil))
+	 (old-messages (when old-buzzword (buzzword-messages old-buzzword))))
+    (let ((buzzword (apply #'generate-buzzword
+			   :name name
+			   all-keys)))
+      (setf (find-buzzword name) buzzword)
+      (when old-messages
+	(loop for msg in old-messages
+	   do (add-message-to-buzzword msg buzzword)))
+      buzzword)))
 
 ;; This takes care of removing a buzzword entirely, including all roles associated with it.
 ;; It also makes the function unbound (so the dispatcher is no longer called)

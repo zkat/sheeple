@@ -8,6 +8,7 @@
 *** Shit wasn't updating properly before, so bugs could crop up with deep hierarchies.
 *** Little stability tweaks here and there. Doesn't break as often :)
 
+*** Buzzwords with no arglist work now (snort)
 * 0.8
 **Features
 *** Significant speedup for message dispatch, using a simple caching system.

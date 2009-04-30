@@ -5,7 +5,7 @@
 ;; Message execution and dispatch
 ;;
 ;; TODO
-;; * memoize message dispatch
+;; * Figure out an optimization to make manipulators about as fast as calling property-value
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
@@ -76,7 +76,10 @@
 (defun find-applicable-messages (buzzword args &key (errorp t))
   (declare (list args))
   (declare (buzzword buzzword))
-  (let* ((relevant-args-length (the fixnum (arg-info-number-required (buzzword-arg-info buzzword))))
+  (let* (;; This doesn't seem to be expensive at all..
+	 (relevant-args-length (the fixnum (arg-info-number-required (buzzword-arg-info buzzword))))
+	 ;; If I can avoid calling fetch-memo-vector-entry for singly-dispatched readers, that
+	 ;; would be -lovely-. Not sure how to do that yet, though.
 	 (memo-entry (fetch-memo-vector-entry args buzzword relevant-args-length)))
     (or memo-entry
 	memo-entry
@@ -90,9 +93,10 @@
   (let* ((memo-vector (buzzword-memo-vector buzzword))
 	 (orig-index (mod (the fixnum (sheep-id (sheepify (car args))))
 			  (length memo-vector))))
+    ;; I don't know how this could be any faster. My best choice is probably to avoid calling it.
     (declare (vector memo-vector))
     (declare (fixnum orig-index))
-    (let ((attempt (elt (the (not simple-array) memo-vector) orig-index)))
+    (let ((attempt (aref (the (not simple-string) memo-vector) orig-index)))
       (if (desired-vector-entry-p args attempt relevant-args-length)
 	  (vector-entry-msg-cache attempt)
 	  (progn
@@ -102,15 +106,22 @@
 	    nil)))))
 
 (defun desired-vector-entry-p (args vector-entry relevant-args-length)
+  (declare (fixnum relevant-args-length))
+  (declare (list args))
   (when (vectorp vector-entry)
-    (let ((vector-args (vector-entry-args vector-entry)))
-      (loop
-	 for i upto relevant-args-length
-	 for v-arg in vector-args
-	 for arg in args
-	 do (when (not (eql v-arg arg))
-	      (return-from desired-vector-entry-p nil)))
-      t)))
+    (cond ((= 0 relevant-args-length)
+	   t)
+	  ((= 1 relevant-args-length)
+	   (eq (car args) (car (vector-entry-args (the vector vector-entry)))))
+	  (t 
+	   (let ((vector-args (vector-entry-args (the vector vector-entry))))
+	     (loop
+		for i upto relevant-args-length
+		for v-arg in vector-args
+		for arg in args
+		do (when (not (eql v-arg arg))
+		     (return-from desired-vector-entry-p nil)))
+	     t)))))
 
 (defstruct (vector-entry (:type vector))
   args
@@ -139,45 +150,47 @@
 
 (defun %find-applicable-messages  (buzzword args &key (errorp t))
   "Returns the most specific message using BUZZWORD and ARGS."
-  (let ((selector (buzzword-name buzzword))
-	(n (length (the list args)))
-	(discovered-messages nil)
-	(contained-applicable-messages nil))
-    (declare (list discovered-messages contained-applicable-messages))
-    (loop 
-       for arg in args
-       for index upto (1- n)
-       do (let* ((arg (if (sheep-p arg)
-			  arg
-			  (sheepify arg)))
-		 (curr-sheep-list (sheep-hierarchy-list arg)))
-	    (loop
-	       for curr-sheep in curr-sheep-list
-	       for hierarchy-position upto (1- (length curr-sheep-list))
-	       do (dolist (role (sheep-direct-roles curr-sheep))
-		    (when (and (equal selector (role-name role)) ;(eql buzzword (role-buzzword role))
-			       (= (the fixnum index) (the fixnum (role-position role))))
-		      (let ((curr-message (role-message-pointer role)))
-			(when (= n (length (the list (message-specialized-portion curr-message))))
-			  (when (not (member curr-message
-					     discovered-messages
-					     :key #'message-container-message))
-			    (pushnew (the vector (contain-message curr-message))
-				     discovered-messages))
-			  (let ((contained-message (find curr-message
-							 discovered-messages
-							 :key #'message-container-message)))
-			    (setf (elt (message-container-rank contained-message) index) 
-				  hierarchy-position)
-			    (when (fully-specified-p (message-container-rank contained-message))
-			      (pushnew contained-message contained-applicable-messages :test #'equalp))))))))))
-    (if contained-applicable-messages
-	(unbox-messages (sort-applicable-messages contained-applicable-messages))
-	(when errorp
-	  (error 'no-applicable-messages
-		 :format-control
-		 "There are no applicable messages for buzzword ~A when called with args:~%~S"
-		 :format-args (list selector args))))))
+  (if (null args)
+      (buzzword-messages buzzword)
+      (let ((selector (buzzword-name buzzword))
+	    (n (length (the list args)))
+	    (discovered-messages nil)
+	    (contained-applicable-messages nil))
+	(declare (list discovered-messages contained-applicable-messages))
+	(loop 
+	   for arg in args
+	   for index upto (1- n)
+	   do (let* ((arg (if (sheep-p arg)
+			      arg
+			      (sheepify arg)))
+		     (curr-sheep-list (sheep-hierarchy-list arg)))
+		(loop
+		   for curr-sheep in curr-sheep-list
+		   for hierarchy-position upto (1- (length curr-sheep-list))
+		   do (dolist (role (sheep-direct-roles curr-sheep))
+			(when (and (equal selector (role-name role)) ;(eql buzzword (role-buzzword role))
+				   (= (the fixnum index) (the fixnum (role-position role))))
+			  (let ((curr-message (role-message-pointer role)))
+			    (when (= n (length (the list (message-specialized-portion curr-message))))
+			      (when (not (member curr-message
+						 discovered-messages
+						 :key #'message-container-message))
+				(pushnew (the vector (contain-message curr-message))
+					 discovered-messages))
+			      (let ((contained-message (find curr-message
+							     discovered-messages
+							     :key #'message-container-message)))
+				(setf (elt (message-container-rank contained-message) index) 
+				      hierarchy-position)
+				(when (fully-specified-p (message-container-rank contained-message))
+				  (pushnew contained-message contained-applicable-messages :test #'equalp))))))))))
+	(if contained-applicable-messages
+	    (unbox-messages (sort-applicable-messages contained-applicable-messages))
+	    (when errorp
+	      (error 'no-applicable-messages
+		     :format-control
+		     "There are no applicable messages for buzzword ~A when called with args:~%~S"
+		     :format-args (list selector args)))))))
 
 (defun unbox-messages (messages)
   (mapcar #'message-container-message messages))

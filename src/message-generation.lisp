@@ -74,7 +74,7 @@
 
 (defun add-message-to-buzzword (message buzzword)
   (set-arg-info buzzword :new-message message)
-  (pushnew message (buzzword-messages buzzword)))
+  (push message (buzzword-messages buzzword)))
 
 (defun remove-messages-with-name-qualifiers-and-participants (name qualifiers participants)
   (loop for sheep in participants
@@ -107,7 +107,7 @@
 
 (defun undefine-message (name &key qualifiers participants)
   (remove-messages-with-name-qualifiers-and-participants name qualifiers participants)
-  (clear-all-buzzword-caches))
+  (clear-memo-table (find-buzzword name)))
 
 (defun available-messages (sheep)
   (let ((personal-role-names (mapcar (lambda (role) (role-name role))

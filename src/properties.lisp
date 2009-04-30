@@ -43,18 +43,14 @@
     (error "Property-name must be a symbol"))
   (let ((property-table (sheep-direct-properties sheep)))
     (setf (gethash property-name property-table) new-value))
-  ;; Perhaps I should use a 'lazy-update' approach to this, where changes create a 'mark'
-  ;; and children check if there have been changes, and only then do they update their
-  ;; property-access cache.
-  ;; The problem is that that would probably involve some juggling. I'll make it TODO
-  (memoize-specific-property-access sheep property-name)
-  (loop for child-pointer in (sheep-direct-children sheep)
-     do (memoize-specific-property-access (weak-pointer-value child-pointer) property-name))
-  new-value)
+  (prog1 new-value
+    (memoize-specific-property-access sheep property-name)
+    (loop for child-pointer in (sheep-direct-children sheep)
+       do (memoize-specific-property-access (weak-pointer-value child-pointer) property-name))))
 
 (defun remove-property (sheep property-name)
   (when (remhash property-name (sheep-direct-properties sheep))
-    (memoize-property-access sheep)
+    (memoize-specific-property-access sheep property-name)
     t))
 
 (defun has-property-p (sheep property-name)
@@ -161,7 +157,9 @@
      do (memoize-specific-property-access sheep property)))
 
 (defun memoize-specific-property-access (sheep property)
-  (let ((owner (%property-value-owner sheep property)))
+  (let ((owner (or (when (has-direct-property-p sheep property)
+		     sheep)
+		   (%property-value-owner sheep property))))
     (setf (gethash property (sheep-property-owners sheep))
 	  owner)))
 

@@ -9,55 +9,55 @@
 
 (declaim (optimize (speed 3) (safety 0) (debug 0)))
 ;; We currently use structs for storage, since they're more convenient atm.
-(defclass buzzword ()
-  ((name :initarg :name :accessor buzzword-name)
-   (lambda-list :initarg :lambda-list :initform nil :accessor buzzword-lambda-list)
-   (messages :initform nil :accessor buzzword-messages)
-   (memo-vector :initform (make-array 8 :adjustable t) :accessor buzzword-memo-vector)
-   (arg-info :initform (make-arg-info) :accessor buzzword-arg-info)
-   (documentation :initarg :documentation :initform "" :accessor buzzword-documentation))
-  (:metaclass closer-mop:funcallable-standard-class))
-
-(defun buzzword-p (maybe-buzzword)
-  (eq (type-of maybe-buzzword) 'buzzword))
-
-(defun %make-buzzword (&key name lambda-list (documentation ""))
-  (make-instance 'buzzword
-		 :name name
-		 :lambda-list lambda-list
-		 :documentation documentation))
+(defstruct (buzzword (:constructor %make-buzzword))
+  (name nil)
+  (lambda-list nil)
+  (messages nil)
+  (memo-table (make-hash-table :test #'equal))
+  (memo-vector (make-array 8 :adjustable t))
+  ;; This contains an arg-info object that is used to maintain
+  ;; lambda-list congruence.
+  (arg-info (make-arg-info))
+  (documentation ""))
 
 (defun clear-memo-table (buzzword)
-  (setf (buzzword-memo-vector buzzword) (make-array 8 :adjustable t)))
+  (setf (buzzword-memo-vector buzzword) (make-array 8 :adjustable t))
+  (clrhash (buzzword-memo-table buzzword)))
 
 ;;;
 ;;; Buzzword definition
 ;;;
 
-(defun find-buzzword (name &optional (errorp t))
-  (let ((fun (and (fboundp name) (fdefinition name))))
-    (cond ((and fun (typep fun 'buzzword)) fun)
-	  (errorp (error 'no-such-buzzword
-			 :format-control "There is no buzzword named ~A"
-			 :format-args (list name)))
-	  (t nil))))
+;;; Buzzword table
+;;; - We store all buzzwords here, making them globally accessible by using #'find-buzzword
+(let ((buzzword-table (make-hash-table :test #'equal)))
 
-(let ((buzzword-container nil))
-    
+  (defun find-buzzword (name &optional (errorp t))
+    (let ((buzz (gethash name buzzword-table)))
+      (cond ((and (null buzz) errorp)
+	     (error 'no-such-buzzword
+		    :format-control "There is no buzzword named ~A"
+		    :format-args (list name)))
+	    ((null buzz)
+	     nil)
+	    (t
+	     buzz))))
+  
+  (defun (setf find-buzzword) (new-value name)
+    (setf (gethash name buzzword-table) new-value))
+  
   (defun forget-all-buzzwords ()
-    (loop for buzzword in buzzword-container
-       do (fmakunbound (buzzword-name buzzword-container)))
-    (setf buzzword-container nil)
+    (clrhash buzzword-table)
     t)
+
+  (defun clear-all-buzzword-caches ()
+    (maphash (lambda (k v)
+	       (declare (ignore k))
+	       (clear-memo-table v))
+	     buzzword-table))
   
   (defun forget-buzzword (name)
-    (let ((bw (find-buzzword name)))
-      (setf buzzword-container (delete bw buzzword-container))
-      (fmakunbound name)))
-  
-  (defun clear-all-buzzword-caches ()
-    (mapc #'clear-memo-table buzzword-container))
-  
+    (remhash name buzzword-table))
   ) ; end buzzword table closure
 
 ;; Finalizing a buzzword sets the function definition of the buzzword to a
@@ -68,8 +68,7 @@
       (warn 'clobbering-function-definition
 	    :format-control "Clobbering regular function or generic function definition for ~A"
 	    :format-args (list name)))
-    (closer-mop:set-funcallable-instance-function buzzword (lambda (&rest args) (apply-buzzword buzzword args)))
-    (setf (fdefinition name) buzzword)))
+    (setf (fdefinition name) (lambda (&rest args) (apply-buzzword buzzword args)))))
 
 ;; This handles actual setup of the buzzword object (and finalization)
 (defun generate-buzzword (&key name
@@ -92,6 +91,7 @@
     (let ((buzzword (apply #'generate-buzzword
 			   :name name
 			   all-keys)))
+      (setf (find-buzzword name) buzzword)
       (when old-messages
 	(loop for msg in old-messages
 	   do (add-message-to-buzzword msg buzzword)))

@@ -6,21 +6,29 @@
 * TODO 1.0
 ** TODO Thoroughly test sheeple, make sure everything's stable
 ** TODO Write a small sample application (maybe convert yashmup?)
+** TODO Finalize API
+   No (significant) changes allowed to API until 2.0
 * TODO 0.95
   the "I should have done all that shit in the first place" release
 ** TODO Complete documentation with tutorial and user's guide
+** TODO Significantly stabilize API
+** TODO Fix as many bugs as (in)humanly possible
 * TODO 0.9
 ** TODO Write plenty more unit tests.
 *** TODO Write unit tests for defsheep 
 *** TODO Write unit tests for new LL stuff
 *** TODO Write more thorough tests to make sure caching schemes aren't broken
 *** TODO Write a "many many messages" test
-** TODO More optimization
+** DONE More optimization
    The goal here is to have manipulator dispatch be at a maximum 2x slower than property-value. If I
    can get it as fast as direct property-access, even better, but this shit can go so much faster
    without too much magic.
    Update: currently down to just under 10x slower for single dispatch vs direct property access
    Update: make that 5x slower. ;)
+   Update: Sped up (setf property-value) a bit. I'm going to have to make a decision about what
+   needs to be faster here -- perhaps I'll find out once I write some apps.
+   UPDATE: No more significant optimization until after 1.0. At this point, I need to write actual
+   apps and see where the performance bottlenecks are.
 * DONE 0.8
 ** DONE Optimize the shit out of message dispatch
    It's pretty fast right now, but nothing compared to PCL.

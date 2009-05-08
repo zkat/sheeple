@@ -2,29 +2,33 @@
 ** TODO Implement :message option for defbuzzword (like CLOS' :method option)
    I don't care about this feature all that much, so I might just keep bumping it until someone
    who -does- care asks for it.
-** TODO Allow individual message :documentation
-** TODO Make singly-dispatched readers almost as fast as simply calling property-value
+** TODO Allow individual message documentation
+** TODO Make singly-dispatched readers just about as fast as simply calling property-value
+** TODO Write caching scheme for property access.
+   I should've done this in the first place. A simpler version of the same system used to dispatch
+   messages would do wonders for read performance, without seriously harming writer performance.
 * TODO 1.0
-** TODO Thoroughly test sheeple, make sure everything's stable
-** TODO Write a small sample application (maybe convert yashmup?)
-** TODO Finalize API
-   No (significant) changes allowed to API until 2.0
-* TODO 0.9.5
-  the "I should have done all that shit in the first place" release
 ** TODO Complete documentation with tutorial and user's guide
-** TODO Significantly stabilize API
-** TODO Write plenty more unit tests.
+** TODO Write more unit tests.
 *** TODO Write unit tests for defsheep 
 *** TODO Write unit tests for new LL stuff
 *** DONE Write more thorough tests to make sure caching schemes aren't broken
     Honestly? The existing tests check this well enough.
 *** TODO Write a "many many messages" test
 *** TODO Write more tests with multi-level hierarchy lists
-** TODO Fix as many bugs as (in)humanly possible
-* TODO 0.9.1
-** TODO Write caching scheme for property access.
-   I should've done this in the first place. A simpler version of the same system used to dispatch
-   messages would do wonders for read performance, without seriously harming writer performance.
+** TODO Fix any bugs unit tests come up with
+** TODO Write a small sample application (maybe convert yashmup?)
+** TODO Finalize API
+   No (significant) changes allowed to API until 2.0, after this release.
+*** DONE Do I want to make CLONE work more like defclass*?
+    That might be good. It would not be incompatible with older versions of Sheeple, either.
+*** DONE Deprecate :manipulator?
+    I should deprecate :manipulator in favor of :accessor, since with-accessors will work on both
+    CLOS and Sheeple. :accessor is much nicer... I'll remain compatible for now.
+
+*** TODO Go through src/packages.lisp and figure out how much I actually need right now.
+**** TODO Should I shut off access to stuff like undefbuzzword/undefmessage?
+
 * DONE 0.9
 ** DONE More optimization
    The goal here is to have manipulator dispatch be at a maximum 2x slower than property-value. If I

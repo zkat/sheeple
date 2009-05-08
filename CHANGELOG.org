@@ -6,7 +6,8 @@
 **** CLONE works more like DEFCLASS* now. It auto-generates accessors unless told not to do so.
 *** Updated API -- no longer exporting some symbols, and exporting other new ones
 ** Bugs
-   NIL
+*** Made next-messages ignorable. Compilers should no longer warn about it.
+*** There was a bug in CCL with ensure-buzzword complaining about :documentation
 
 * 0.9
 ** Features

@@ -15,7 +15,9 @@
    :ancestor-p
    :direct-child-p
    :descendant-p
-
+   :sheeple-error ;general error
+   :sheeple-warning ;general warning
+   
    ;; Property access
    :unbound-property ;error
    :property-value
@@ -32,21 +34,29 @@
    :cloneform-owner
    :add-cloneform
    :remove-cloneform
-   :get-cloneform ; don't setf this, please
-
+   :inspect-cloneform
+   
    ;; Buzzwords
    :clobbering-function-definition
    :defbuzzword
    :defmessage
+   :available-messages
    :undefbuzzword
    :undefmessage
-   :participant-p
-   :available-messages
-   :sheepify
+   ;; :participant-p
+   :call-next-message
+   :next-message-p
+   :clobbering-function-definition ;warning
+   :buzzword-lambda-list-error ;error when something is wrong with a lambda list
+   :no-applicable-messages ;error
+   :no-most-specific-message ;error
+   :no-primary-messages ;error (signaled when the only applicable messages are combination messages)
+   :specialized-lambda-list-error ;error
 
    ;; Fleeces
    :fleece-of ;returns the appropriate sheep for a wolf. Good for getting an idea of what is what.
    :find-fleeced-wolf ;returns a fleeced version of a wolf
+   ;; :sheepify
    ;; built-in fleeces
    :=white-fang= ; parent of all built-in fleeces
    :=symbol=
@@ -73,11 +83,11 @@
    ;; MOP-related
    :initialize-sheep
    :reinitialize-sheep
-   :sheep-direct-parents
-   :sheep-direct-roles
-   :sheep-nickname
-   :sheep-hierarchy-list
    :print-sheep
+   :sheep-nickname
+   :sheep-hierarchy-list ;I leave this because it might be useful during development.
+   ;; :sheep-direct-parents
+   ;; :sheep-direct-roles
    ))
 
 (defpackage #:sheeple-user

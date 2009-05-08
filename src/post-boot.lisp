@@ -4,9 +4,6 @@
 ;;
 ;; Once sheeple is booted up, we can define buzzwords/messages normally
 ;;
-;; TODO:
-;; * Figure out why the hell this isn't always loading.
-;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 

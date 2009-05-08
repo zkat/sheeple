@@ -1,3 +1,12 @@
+* 1.0
+** Features
+*** Overhauled CLONE macro
+**** :accessor can be used now, and is preferred. :manipulator will be deprecated.
+**** with-accessors works (it did before, too), not just with-manipulators.
+**** CLONE works more like DEFCLASS* now. It auto-generates accessors unless told not to do so.
+** Bugs
+   NIL
+
 * 0.9
 ** Features
 *** HUGE optimization for message dispatch.
@@ -7,9 +16,9 @@
 ** Bugs
 *** Shit wasn't updating properly before, so bugs could crop up with deep hierarchies.
 *** Little stability tweaks here and there. Doesn't break as often :)
-
 *** Buzzwords with no arglist work now (snort)
 *** Buzzword redefinition now checks for lambda-list consistency with existing messages.
+
 * 0.8
 ** Features
 *** Significant speedup for message dispatch, using a simple caching system.

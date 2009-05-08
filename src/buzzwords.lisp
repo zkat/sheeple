@@ -85,7 +85,8 @@
 ;; its args, checking lamda-list, etc.)
 (defun ensure-buzzword (name
 			&rest all-keys
-			&key lambda-list)
+			&key lambda-list
+			&allow-other-keys)
   (let ((existing (find-buzzword name nil)))
     (let ((buzzword (or (find-buzzword name nil)
 			(apply #'generate-buzzword

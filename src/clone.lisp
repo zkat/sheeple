@@ -24,26 +24,44 @@
             (readers nil)
             (writers nil)
 	    (cloneform *secret-unbound-value*)
-            (other-options nil))
-        (do ((olist (cddr property) (cddr olist)))
+            (other-options nil)
+	    (no-reader-p nil)
+	    (no-writer-p nil))
+	(do ((olist (cddr property) (cddr olist)))
             ((null olist))
 	  (case (car olist)
-	    (:value
-	     (setf value (cadr olist)))
-	    (:val
-	     (setf value (cadr olist)))
-            (:reader 
-             (pushnew (cadr olist) readers))
-            (:writer 
-             (pushnew (cadr olist) writers))
-            (:manipulator
-             (pushnew (cadr olist) readers)
-             (pushnew `(setf ,(cadr olist)) writers))
+            (:reader
+	     (cond (no-reader-p
+		    (error "You said you didn't want a reader, but now you want one? Make up your mind."))
+		   ((null (cadr olist))
+		    (setf no-reader-p t))
+		   (t
+		    (pushnew (cadr olist) readers))))
+            (:writer
+	     (cond (no-writer-p
+		    (error "You said you didn't want a writer, but now you want one? Make up your mind."))
+		   ((null (cadr olist))
+		    (setf no-writer-p t))
+		   (t
+		    (pushnew (cadr olist) writers))))
+            ((or :manipulator :accessor)
+	     (cond ((or no-reader-p no-writer-p)
+		    (error "You said you didn't want a reader or a writer, but now you want one? Make up your mind."))
+		   ((null (cadr olist))
+		    (setf no-reader-p t)
+		    (setf no-writer-p t))
+		   (t
+		    (pushnew (cadr olist) readers)
+		    (pushnew `(setf ,(cadr olist)) writers))))
 	    (:cloneform
 	     (setf cloneform (cadr olist)))
 	    (otherwise 
              (pushnew (cadr olist) other-options)
              (pushnew (car olist) other-options))))
+	(unless (or readers no-reader-p)
+	  (pushnew name readers))
+	(unless (or writers no-writer-p)
+	  (pushnew `(setf ,name) writers))
 	(if other-options
 	    (error "Invalid property option(s)")
 	    `(list

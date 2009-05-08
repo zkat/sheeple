@@ -166,20 +166,21 @@
 		 (append lambda-list '(&allow-other-keys))
 		 lambda-list)))
     `(lambda (args next-messages)
-      (flet ((next-message-p ()
-	       (not (null next-messages)))
-	     (call-next-message (&rest cnm-args)
-	       (funcall (message-function (car next-messages))
-			(or cnm-args
-			    args)
-			(cdr next-messages))))
-	(declare (ignorable #'next-message-p #'call-next-message))
-	(block ,(if (listp name)
-		    (cadr name)
-		    name)
-	  (apply
-	   (lambda ,ll
-	     ,@body) args))))))
+       (declare (ignorable next-messages))
+       (flet ((next-message-p ()
+		(not (null next-messages)))
+	      (call-next-message (&rest cnm-args)
+		(funcall (message-function (car next-messages))
+			 (or cnm-args
+			     args)
+			 (cdr next-messages))))
+	 (declare (ignorable #'next-message-p #'call-next-message))
+	 (block ,(if (listp name)
+		     (cadr name)
+		     name)
+	   (apply
+	    (lambda ,ll
+	      ,@body) args))))))
 
 (defun parse-defmessage (args)
   (let ((name (car args))

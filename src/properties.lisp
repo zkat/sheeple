@@ -88,6 +88,14 @@
 	      (return-from get-cloneform value))))
      finally (return *secret-unbound-value*)))
 
+(defun inspect-cloneform (sheep property-name)
+  (let ((form (get-cloneform sheep property-name)))
+    (if (eq *secret-unbound-value* form)
+	(error 'sheeple-error
+	       :format-control "~A has no applicable cloneform for property ~A"
+	       :format-args (list sheep property-name))
+	form)))
+
 (defun (setf get-cloneform) (new-value sheep property-name)
   (setf (gethash property-name (sheep-cloneforms sheep)) new-value))
 
@@ -129,7 +137,11 @@
 	(gethash property-name cloneform-table)
       (declare (ignore form))
       (if (not has-p)
-	  nil
+	  (error 'sheeple-error
+		 :format-control "~A has no direct cloneform for property ~A~% ~
+                                  If there is an applicable cloneform, use CLONEFORM-OWNER~% ~
+                                  To find who sets it."
+		 :format-args (list sheep property-name))
 	  (prog1 t
 	    (remhash property-name cloneform-table)
 	    (remhash property-name clonefun-table))))))

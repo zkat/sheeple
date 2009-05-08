@@ -145,9 +145,10 @@
 ;;;
 ;;; Memoization
 ;;;
-;;; NOTE: This is no longer used. Upon closer inspection, it's pretty obvious that 
-;;; most sheep hierarchies would be pretty shallow. Furthermore, this makes setfing
-;;; WAY too expensive to be considered practical.
+;; TODO: Reimplement memoization of property-access, if I find a nice way to do it.
+;;       Nice, of course, being "thread-compatible, and lightweight on the SETF front"
+;;       Something similar to message caching might work, but I'm not sure anymore.
+
 ;; (defun property-value-with-memoized-owner (sheep property-name)
 ;;   ;; Find who the owner is...
 ;;   (multiple-value-bind (prop-owner has-p)
@@ -165,11 +166,19 @@
 ;; 	       :format-control "Property ~A is unbound for sheep ~S"
 ;; 	       :format-args (list property-name sheep)))))
 
-;; (defun memoize-property-access (sheep)
-;;   (loop for property in (available-properties sheep)
-;;      do (memoize-specific-property-access sheep property)))
+;; (defun %property-value-owner (sheep property-name)
+;;   (let ((hierarchy-list (sheep-hierarchy-list sheep)))
+;;     (loop for sheep-obj in hierarchy-list
+;;        do (multiple-value-bind (value has-p)
+;; 	      (gethash property-name (sheep-direct-properties sheep-obj))
+;; 	    (declare (ignore value))
+;; 	    (when has-p
+;; 	      (return-from %property-value-owner sheep-obj))) 
+;;        finally (error 'unbound-property
+;; 		      :format-control "Property ~A is unbound for sheep ~S"
+;; 		      :format-args (list property-name sheep)))))
 
-;; (defun memoize-specific-property-access (sheep property &optional owner)
+;; (defun memoize-property-access (sheep property &optional owner)
 ;;   (let ((actual-owner (or owner
 ;; 			  (when (has-direct-property-p sheep property)
 ;; 			    sheep)
@@ -189,14 +198,4 @@
 ;; 	    (memoization-update-descendants (weak-pointer-value child-pointer)
 ;; 					    property actual-owner)))))
 
-;; (defun %property-value-owner (sheep property-name)
-;;   (let ((hierarchy-list (sheep-hierarchy-list sheep)))
-;;     (loop for sheep-obj in hierarchy-list
-;;        do (multiple-value-bind (value has-p)
-;; 	      (gethash property-name (sheep-direct-properties sheep-obj))
-;; 	    (declare (ignore value))
-;; 	    (when has-p
-;; 	      (return-from %property-value-owner sheep-obj))) 
-;;        finally (error 'unbound-property
-;; 		      :format-control "Property ~A is unbound for sheep ~S"
-;; 		      :format-args (list property-name sheep)))))
+

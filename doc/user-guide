@@ -79,7 +79,7 @@ API
 
          (clone () ((foo 10)))
 
-         (defvar *sample-sheep* (clone () ((my-property "Wheee" :manipulator get-my-property))))
+         (defvar *sample-sheep* (clone () ((my-property "Wheee" :accessor get-my-property))))
 
 
 * Starting with 0.6, a special wrapper macro DEFSHEEP can be used to ease development. Basically,
@@ -88,7 +88,7 @@ API
   redefine the same sheep's properties while retaining identity.
 
          (defsheep =sample-sheep= ()
-           ((my-property "wheeee" :manipulator get-my-property)))
+           ((my-property "wheeee" :accessor get-my-property)))
 
 
 * An empty parent list when using CLONE will automatically clone =DOLLY=
@@ -130,9 +130,9 @@ API
         (set-me-to "new-value" *sample-sheep*) => "new-value"
         (read-prop *sample-sheep*) => "new-value"
 
-* :manipulator - Creates an manipulator, which is a reader that you can use SETF on.
+* :accessor - Creates an accessor, which is a reader that you can use SETF on.
 
-        (defparameter *sample-sheep* (clone () ((prop "value" :manipulator prop))))
+        (defparameter *sample-sheep* (clone () ((prop "value" :accessor prop))))
         (prop *sample-sheep*) => "value"
         (setf (prop *sample-sheep*) "new-value" => "new-value"
 
@@ -320,7 +320,7 @@ CLOS programming should have a fairly easy time wrapping their head around Sheep
         (synergize "Hey " "Jude") => "Hey Jude"
 
         ;; :before and :after
-        (defparameter =test-sheep= (clone () ((var "value" :manipulator var))))
+        (defparameter =test-sheep= (clone () ((var "value" :accessor var))))
         (var =test-sheep=) => "value"
          
         (defmessage var :before ((sheep =test-sheep=))

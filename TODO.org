@@ -26,9 +26,10 @@
     I should deprecate :manipulator in favor of :accessor, since with-accessors will work on both
     CLOS and Sheeple. :accessor is much nicer... I'll remain compatible for now.
 
-*** TODO Go through src/packages.lisp and figure out how much I actually need right now.
-**** TODO Should I shut off access to stuff like undefbuzzword/undefmessage?
-
+*** DONE Go through src/packages.lisp and figure out how much I actually need right now.
+*** DONE Should I shut off access to stuff like undefbuzzword/undefmessage?
+    Not for now, but I should discourage use of it until I've figured it out.
+*** TODO Finalize everything when all else is done.
 * DONE 0.9
 ** DONE More optimization
    The goal here is to have manipulator dispatch be at a maximum 2x slower than property-value. If I

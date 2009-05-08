@@ -4,6 +4,7 @@
 **** :accessor can be used now, and is preferred. :manipulator will be deprecated.
 **** with-accessors works (it did before, too), not just with-manipulators.
 **** CLONE works more like DEFCLASS* now. It auto-generates accessors unless told not to do so.
+*** Updated API -- no longer exporting some symbols, and exporting other new ones
 ** Bugs
    NIL
 

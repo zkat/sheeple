@@ -17,7 +17,7 @@
 *** TODO Write a "many many messages" test
 *** TODO Write more tests with multi-level hierarchy lists
 ** TODO Fix any bugs unit tests come up with
-*** TODO Oops -- CLONE should check that defining an accessor first, then passing it NIL is also an error
+*** DONE Oops -- CLONE should check that defining an accessor first, then passing it NIL is also an error
 ** TODO Write a small sample application (maybe convert yashmup?)
 ** TODO Finalize API
    No (significant) changes allowed to API until 2.0, after this release.

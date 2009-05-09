@@ -414,6 +414,9 @@
     the buzzword using the same name, the warning about clobbering a regular function is not
     signaled.
 
+*** Threads
+    ...are completely untested. I have no idea what kind of behavior could crop up when using
+    threads, and I recommend you don't try until I've bothered to do something about it.
 * Performance notes
 ** Property access
    As of version 1.0, property access is O(n), where n is the number of sheep that must be traversed

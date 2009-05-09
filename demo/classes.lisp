@@ -6,12 +6,8 @@
 (in-package :sheeple-user)
 
 (defsheep =person= ()
-  ((name 
-    "NoName"
-    :manipulator name)
-   (phone
-    "NoPhone"
-    :manipulator phone)))
+  ((name  "NoName")
+   (phone "NoPhone")))
 
 (defvar *charles*
   (clone (=person=)

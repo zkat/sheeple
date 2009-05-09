@@ -19,25 +19,18 @@
 ;; There is no difference between the actual objects that defsheep and clone create, or
 ;; the variables that they are held in (defsheep uses defparameter).
 (defsheep =bank-account= ()
-  ((customer-name
-    "NoName"
-    :manipulator customer-name
+  ((customer-name "NoName"
     ;; You could do :cloneform (error "Gimme a name") here,
     ;; but that would force you to provide a name for anything
     ;; that clones this -- including other prototypes.
     ;; Since we want to remain flexible, we prefer defaulting to 
     ;; a generic value ("NoName")
     )
-   (balance
-    0
-    :manipulator balance)
-   (account-number 
-    (incf *max-acc-num*)    
+   (balance 0)
+   (account-number (incf *max-acc-num*)
     :reader account-number
     :cloneform (incf *max-acc-num*))
-   (account-type            
-    :bronze                 
-    :manipulator account-type)))
+   (account-type :bronze)))
 
 ;; SHEEPLE-USER> (property-value =bank-account= 'customer-name) => "NoName"
 ;; SHEEPLE-USER> (property-value =bank-account= 'balance) => 0
@@ -45,9 +38,7 @@
 (defsheep =checking-account= (=bank-account=) ())
 
 (defsheep =savings-account= (=bank-account=)
-  ((interest-rate
-    0
-    :manipulator interest)))
+  ((interest-rate 0)))
 
 (defsheep =proxy-account= (=bank-account=) ())
 

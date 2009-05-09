@@ -2,10 +2,11 @@ About
 =====
 
 Sheeple is a Dynamic, CLOS-like, Delegative Prototype-based Object-Oriented Programming Framework
-(or "POOP Framework") that strives to maximize application flexibility, minimize cost while
-maximizing value, optimize programmer time, and empower application implementers to better assist
-them leveraging modern paradigms in order to proactively achieve next-gen synergy in tomorrow's web
-3.0 world. It is implemented in (mostly) ANSI Common Lisp. Sheeple is fully buzzword compliant.
+(or "POOP Framework") that strives to optimize application flexibility, minimize cost while
+increasing value, maximize programmer resources, and empower application implementers to better
+assist them in leveraging modern paradigms in order to proactively achieve next-generation synergy
+in tomorrow's web 3.0 world. It is implemented in (mostly) ANSI Common Lisp. Sheeple is fully
+buzzword compliant.
 
 Sheeple was originally written as a persistent library for use with [Sykosomatic][9]. When that
 didn't work out, it was simply rewritten as a regular prototype object system and provided as a
@@ -90,7 +91,7 @@ I assure you, Sheeple is Serious Business(tm) for Serious Applications(tm).
 Features
 --------
 
-* CLOS-like DEFSHEEP and CLONE macros.
+* DEFCLASS*-like DEFSHEEP and CLONE macros.
 
 * Dynamic object management tools (inspection of objects, addition/removal of properties, all
   without requiring full redefinition/object updating).
@@ -123,6 +124,8 @@ Using Sheeple
 =============
 
 Please refer to #P"doc;user-guide.org" for a quick-and-dirty intro to Sheeple and how to use it.
+
+You can also take a peek at the demo/ directory for examples.
 
 As usual, you can always contact me directly with questions. I also regularly lurk in #lisp@freenode
 (as zkat).

@@ -7,10 +7,13 @@
 
 ** Property
    In a sheep, a property is a key/value pair, with a symbol as a key. Data is stored in properties.
+
 ** Direct Property
    A property that is present directly in a particular sheep
+
 ** Indirect Property
    A property that a sheep has access to that is stored elsewhere in the hierarchy-list
+
 ** =T=
    the root object, ancestor of all sheep objects.
 

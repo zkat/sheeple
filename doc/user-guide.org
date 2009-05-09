@@ -421,7 +421,6 @@
    fast, singly-dispatched accessors have not been optimized enough. Thus, for any purposes that
    require optimal read-access, directly accessing the properties with PROPERTY-VALUE is
    recommended. Optimization of accessors is planned.
-
 ** Comparison to CLOS performance
    Sheeple is still very young. Thus, it's no surprise that a good implementation of CLOS will
    outperform it when used on the same hardware, with the same CL implementation. Nevertheless,
@@ -430,3 +429,4 @@
    performs even slower). Hopefully, as sheeple matures, it will become as fast as an implementation
    like PCL. Fortunately, because of the similarities of the APIs, many of PCL's optimizations can
    be translated to Sheeple itself.
+   

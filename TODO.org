@@ -2,13 +2,19 @@
 ** TODO Implement :message option for defbuzzword (like CLOS' :method option)
    I don't care about this feature all that much, so I might just keep bumping it until someone
    who -does- care asks for it.
+   UPDATE: I don't think I even want this. It makes the defbuzzword macro horribly bloated and
+   complex, and I don't even like the idea of stuffing everything into a buzzword definition. Things
+   need to stay flexible, and this would be just plain ugly.
 ** TODO Allow individual message documentation
 ** TODO Make singly-dispatched readers just about as fast as simply calling property-value
 ** TODO Write caching scheme for property access.
    I should've done this in the first place. A simpler version of the same system used to dispatch
    messages would do wonders for read performance, without seriously harming writer performance.
 * TODO 1.0
-** TODO Complete documentation with tutorial and user's guide
+** TODO Complete documentation
+*** DONE Write proper user guide
+*** TODO Document code
+    Note: I can use stuff from the user's guide for this, but it's important.
 ** TODO Write more unit tests.
 *** TODO Write unit tests for defsheep 
 *** TODO Write unit tests for new LL stuff
@@ -19,6 +25,8 @@
 ** TODO Fix any bugs unit tests come up with
 *** DONE Oops -- CLONE should check that defining an accessor first, then passing it NIL is also an error
 ** TODO Write a small sample application (maybe convert yashmup?)
+   This will really help me iron out any last details in the API that are important enough to have
+   there before 1.0 ships. Plus, it's silly to release shit without even trying it...
 ** TODO Finalize API
    No (significant) changes allowed to API until 2.0, after this release.
 *** DONE Do I want to make CLONE work more like defclass*?

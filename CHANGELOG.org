@@ -8,7 +8,7 @@
 ** Bugs
 *** Made next-messages ignorable. Compilers should no longer warn about it.
 *** There was a bug in CCL with ensure-buzzword complaining about :documentation
-
+*** Added another check to CLONE. Can no longer have :reader/:writer/:accessor as nil, as well as define one.
 * 0.9
 ** Features
 *** HUGE optimization for message dispatch.

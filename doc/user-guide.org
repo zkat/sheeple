@@ -193,6 +193,10 @@
    existence of a property, but the current value as well.
    Sheeple decides which property value to use by following a sheep's hierarchy list for the nearest
    available value. Thus, setting a property directly always overrides any delegation.
+*** WITH-PROPERTIES/WITH-ACCESSORS
+    The WITH-PROPERTIES macro is identical in function to the with-slots macro that CLOS uses. Also,
+    the default CLOS WITH-ACCESSORS can be used normally with sheeple. Another macro called
+    WITH-MANIPULATORS, identical to WITH-ACCESSORS is available, but it is deprecated.
 *** PROPERTY-VALUE
     The function PROPERTY-VALUE receives two arguments: a sheep object and a property-name. It
     returns the value of that property, and searches indirect properties. There is no user-level

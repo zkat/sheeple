@@ -15,7 +15,7 @@ the way Sheeple does things.
 
 Sheeple is inspired by a number of Object-Oriented systems, mainly:
 
-* [Common Lisp Object System (CLOS)][3]
+* [CLOS][3], the Common Lisp Object System.
 * [LPC][4], a common language for building [MUD][7]s
 * [MOO][5], implemented and used by [LambdaMOO][8]
 * [Slate][6], a Smalltalk-like language with Prototype Multiple Dispatch that Sheeple bases its

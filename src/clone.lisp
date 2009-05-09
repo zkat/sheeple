@@ -34,22 +34,29 @@
 	     (cond (no-reader-p
 		    (error "You said you didn't want a reader, but now you want one? Make up your mind."))
 		   ((null (cadr olist))
-		    (setf no-reader-p t))
+		    (if (null readers)
+			(setf no-reader-p t)
+			(error "You already defined a reader, but now you say you don't want one? Make up your mind.")))
 		   (t
 		    (pushnew (cadr olist) readers))))
             (:writer
 	     (cond (no-writer-p
 		    (error "You said you didn't want a writer, but now you want one? Make up your mind."))
 		   ((null (cadr olist))
-		    (setf no-writer-p t))
+		    (if (null writers)
+			(setf no-writer-p t)
+			(error "You already defined a writer, but now you say you don't want one? Make up your mind.")))
 		   (t
 		    (pushnew (cadr olist) writers))))
             ((or :manipulator :accessor)
 	     (cond ((or no-reader-p no-writer-p)
 		    (error "You said you didn't want a reader or a writer, but now you want one? Make up your mind."))
 		   ((null (cadr olist))
-		    (setf no-reader-p t)
-		    (setf no-writer-p t))
+		    (if (and (null writers) (null readers))
+			(progn
+			 (setf no-reader-p t)
+			 (setf no-writer-p t))
+			(error "You already defined a reader or writer, but now you say you don't want any of them? Make up your mind.")))
 		   (t
 		    (pushnew (cadr olist) readers)
 		    (pushnew `(setf ,(cadr olist)) writers))))

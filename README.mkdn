@@ -108,7 +108,7 @@ Features
 
 * Dynamic removal of messages, as well as entire buzzwords with undefbuzzword/undefmessage.
 
-* Auto-generated readers/writers, with :manipulator, :reader, and :writer property options.
+* Auto-generated readers/writers, with :accessor, :reader, and :writer property options.
 
 * :before, :after, and :around messages
 
@@ -122,11 +122,8 @@ Planned features:
 Using Sheeple
 =============
 
-Please refer to #P"doc;user-guide" for a quick-and-dirty intro to Sheeple and how to use it.
+Please refer to #P"doc;user-guide.org" for a quick-and-dirty intro to Sheeple and how to use it.
 
-If you're extra-patient, you can wait for me to write a full-fledged user guide (slated for
-completion by the time 1.0 gets pooped out).
-
-Again, you can always contact me directly with questions. I also regularly lurk in #lisp@freenode
+As usual, you can always contact me directly with questions. I also regularly lurk in #lisp@freenode
 (as zkat).
 

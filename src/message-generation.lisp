@@ -6,7 +6,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(declaim (optimize (speed 1) (safety 3) (debug 1)))
+(declaim (optimize (speed 3) (safety 1) (debug 1)))
 (defstruct (message (:constructor %make-message))
   (name nil)
   (qualifiers nil)
@@ -122,9 +122,11 @@
 		(sheep-direct-roles sheep)))))
 
 (defun undefine-message (name &key qualifiers participants)
-  (remove-applicable-message (find-buzzword name) qualifiers participants)
-  (clear-memo-table (find-buzzword name))
-  t)
+  (let ((bw (find-buzzword name nil)))
+    (when bw
+     (remove-applicable-message bw qualifiers participants)
+     (clear-memo-table bw)
+     t)))
 
 (defun remove-applicable-message (buzzword qualifiers participants)
   (let ((message (find-if (lambda (msg)
@@ -134,7 +136,7 @@
 			   buzzword participants :errorp nil))))
     (when message
       (loop for sheep in participants
-	   for i from 1
+	 for i upto (1- (length participants))
 	 do (loop for role in (sheep-direct-roles sheep)
 	       do (let ((role-message (role-message role)))
 		    (when (and

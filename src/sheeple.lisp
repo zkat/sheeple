@@ -89,7 +89,7 @@
        for propname in available-cloneforms
        do (unless (or (eq fn *secret-unbound-value*)
 		      (has-direct-property-p sheep propname))
-	    (setf (property-value sheep propname) (funcall fn))))))
+	    (setf (property-value sheep propname) (funcall (the function fn)))))))
 
 (defun finalize-sheep (sheep)
   (memoize-sheep-hierarchy-list sheep)
@@ -106,8 +106,8 @@
 (defun shallow-copy (sheep)
   (mapc (lambda (parent)
 	  (maphash 
-	   (lambda (key value) 
-	     (setf (property-value sheep key) value))
+	   (lambda (key obj) 
+	     (setf (property-value sheep key) (property-object-value obj)))
 	   (sheep-direct-properties parent)))
 	(sheep-direct-parents sheep)))
 

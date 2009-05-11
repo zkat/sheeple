@@ -103,11 +103,6 @@
 (defun undefine-buzzword (name &optional (errorp nil))
   (let ((buzzword (find-buzzword name errorp)))
     (when buzzword
-      (loop for message in (buzzword-messages buzzword)
-	 do (loop for participant in (message-participants message)
-	       do (loop for role in (sheep-direct-roles participant)
-		     do (when (equal (role-name role) name)
-			  (delete-role role participant)))))
       (forget-buzzword name)
       (fmakunbound name)
       buzzword)))

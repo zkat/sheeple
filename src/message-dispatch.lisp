@@ -9,7 +9,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(declaim (optimize (safety 0) (speed 3) (debug 0)))
+(declaim (optimize (safety 1) (speed 1) (debug 1)))
 (defun primary-message-p (message)
   (null (message-qualifiers message)))
 
@@ -74,7 +74,6 @@
     (funcall (the function function) args next-messages)))
 
 (defun find-applicable-messages (buzzword args &key (errorp t))
-  (declare (list args))
   (declare (buzzword buzzword))
   (let* (;; This doesn't seem to be expensive at all..
 	 (relevant-args-length (the fixnum (arg-info-number-required (buzzword-arg-info buzzword))))
@@ -83,7 +82,7 @@
 	 (memo-entry (fetch-memo-vector-entry args buzzword relevant-args-length)))
     (or memo-entry
 	memo-entry
-	(let* ((relevant-args (the list (subseq args 0 relevant-args-length)))
+	(let* ((relevant-args (subseq args 0 relevant-args-length))
 	       (new-msg-list (%find-applicable-messages buzzword 
 							relevant-args
 							:errorp errorp)))
@@ -96,7 +95,7 @@
     ;; I don't know how this could be any faster. My best choice is probably to avoid calling it.
     (declare (vector memo-vector))
     (declare (fixnum orig-index))
-    (let ((attempt (aref (the (not simple-string) memo-vector) orig-index)))
+    (let ((attempt (aref memo-vector orig-index)))
       (if (desired-vector-entry-p args attempt relevant-args-length)
 	  (vector-entry-msg-cache attempt)
 	  (progn
@@ -137,7 +136,6 @@
 (defun add-entry-to-buzzword (cache buzzword args index)
   (let ((memo-vector (buzzword-memo-vector buzzword)))
     (declare (fixnum index))
-    (declare (simple-array memo-vector))
     (loop for i from index
        do (progn
 	    (when (>= i (length memo-vector))
@@ -153,7 +151,7 @@
   (if (null args)
       (buzzword-messages buzzword)
       (let ((selector (buzzword-name buzzword))
-	    (n (length (the list args)))
+	    (n (length args))
 	    (discovered-messages nil)
 	    (contained-applicable-messages nil))
 	(declare (list discovered-messages contained-applicable-messages))
@@ -170,7 +168,7 @@
 		   do (dolist (role (sheep-direct-roles curr-sheep))
 			(when (and (equal selector (role-name role)) ;(eql buzzword (role-buzzword role))
 				   (= (the fixnum index) (the fixnum (role-position role))))
-			  (let ((curr-message (role-message-pointer role)))
+			  (let ((curr-message (role-message role)))
 			    (when (= n (length (the list (message-specialized-portion curr-message))))
 			      (when (not (member curr-message
 						 discovered-messages
@@ -203,7 +201,7 @@
 (defun contain-message (message)
   (make-message-container
    :message message
-   :rank (make-array (length (the list (message-specialized-portion message)))
+   :rank (make-array (length (message-specialized-portion message))
 		     :initial-element nil)))
 
 (defstruct (message-container (:type vector))

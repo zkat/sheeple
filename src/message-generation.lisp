@@ -26,6 +26,11 @@
 (defun role-buzzword (role)
   (find-buzzword (role-name role) nil))
 
+(defun participant-p (sheep message-name)
+  (when (member-if (lambda (role) (equal message-name (role-name role)))
+		   (sheep-direct-roles sheep))
+    t))
+
 (defun ensure-message (name &rest all-keys
 		       &key participants
 		       lambda-list
@@ -62,7 +67,7 @@
 		   :body body
 		   :documentation documentation)))
     (add-message-to-buzzword message buzzword)
-    (remove-applicable-messages buzzword qualifiers participants)
+    (remove-specific-message buzzword qualifiers participants)
     (add-message-to-sheeple buzzword message participants)
     message))
 
@@ -76,18 +81,25 @@
   (set-arg-info buzzword :new-message message)
   (push message (buzzword-messages buzzword)))
 
-(defun remove-applicable-messages (buzzword qualifiers participants)
-  (let ((applicable-messages (%find-applicable-messages buzzword participants :errorp nil)))
-    (when applicable-messages
-      (loop for message in applicable-messages
-	 do (loop for sheep in participants
-	       do (loop for role in (sheep-direct-roles sheep)
-		     do (let ((role-message (role-message role)))
-			  (when (and (equal message role-message)
-				     (equal qualifiers
-					    (message-qualifiers role-message)))
-			    (delete-role role sheep)
-			    (delete-message message)))))))))
+(defun remove-specific-message (buzzword qualifiers participants)
+  (let ((message (find-if (lambda (msg)
+			    (equal (message-qualifiers msg)
+				   qualifiers))
+			  (%find-applicable-messages
+			   buzzword participants :errorp nil))))
+    (when (and message
+	       (every (lambda (sheep)
+			(participant-p sheep (message-name message)))
+		      participants))
+      (loop for sheep in participants
+	 for i from 1
+	 do (loop for role in (sheep-direct-roles sheep)
+	       do (let ((role-message (role-message role)))
+		    (when (and
+			   (equal message role-message)
+			   (= i (role-position role)))
+		      (delete-role role sheep)))))
+      (delete-message message))))
 
 (defun delete-message (message)
   (let ((buzzword (message-buzzword message)))
@@ -110,9 +122,26 @@
 		(sheep-direct-roles sheep)))))
 
 (defun undefine-message (name &key qualifiers participants)
-  (remove-applicable-messages (find-buzzword name) qualifiers participants)
+  (remove-applicable-message (find-buzzword name) qualifiers participants)
   (clear-memo-table (find-buzzword name))
   t)
+
+(defun remove-applicable-message (buzzword qualifiers participants)
+  (let ((message (find-if (lambda (msg)
+			    (equal (message-qualifiers msg)
+				   qualifiers))
+			  (%find-applicable-messages
+			   buzzword participants :errorp nil))))
+    (when message
+      (loop for sheep in participants
+	   for i from 1
+	 do (loop for role in (sheep-direct-roles sheep)
+	       do (let ((role-message (role-message role)))
+		    (when (and
+			   (equal message role-message)
+			   (= i (role-position role)))
+		      (delete-role role sheep)))))
+      (delete-message message))))
 
 (defun available-messages (sheep)
   (let ((personal-role-names (mapcar (lambda (role) (role-name role))

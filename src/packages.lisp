@@ -43,7 +43,7 @@
    :available-messages
    :undefbuzzword
    :undefmessage
-   ;; :participant-p
+   :participant-p
    :call-next-message
    :next-message-p
    :clobbering-function-definition ;warning

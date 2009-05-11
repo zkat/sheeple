@@ -44,10 +44,14 @@
 *** DONE Go through src/packages.lisp and figure out how much I actually need right now.
 *** DONE Should I shut off access to stuff like undefbuzzword/undefmessage?
     Not for now, but I should discourage use of it until I've figured it out.
-*** DONE (Re-)implement property objects, allow them to be lockable
+*** DONE (De-)(Re-)implement property objects, allow them to be lockable
+    Actually, I think I should get rid of property-objects and make it just so an entire sheep can
+    be locked at once.
+    UPDATE: All set. Sheeple are now locked as a whole.
 *** DONE Forgot MITOSIS >_>
     lol, no I didn't -- but it needed to be fixed anyway
-*** TODO Is a :copy-on-clone option for individual properties better than :cloneform for most purposes?
+*** DONE Is a :copy-on-clone option for individual properties better than :cloneform for most purposes?
+    No.
 *** TODO Finalize everything when all else is done.
 ** TODO Fucking get rid of all these optimization declarations.
    One of these days I'll learn to heed my own fucking advice

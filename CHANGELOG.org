@@ -1,14 +1,21 @@
 * 1.0
 ** Features
-*** Overhauled CLONE macro
+*** New CLONE* macro
 **** :accessor can be used now, and is preferred. :manipulator will be deprecated.
 **** with-accessors works (it did before, too), not just with-manipulators.
-**** CLONE works more like DEFCLASS* now. It auto-generates accessors unless told not to do so.
+**** CLONE* works more like DEFCLASS*. It auto-generates accessors unless told not to do so.
+**** DEFSHEEP now uses CLONE* instead of CLONE.
 *** Updated API -- no longer exporting some symbols, and exporting other new ones
+*** Sheep locking
+    Sheep can be locked by doing lock-sheep/unlock-sheep/toggle-sheep-lock
+*** Undefinition works different
+    Message/buzzword undefinition no longer works as before. Undefbuzzword does not remove roles, it
+    simply removes the buzzword from the global table and makes the function unbound.
 ** Bugs
 *** Made next-messages ignorable. Compilers should no longer warn about it.
 *** There was a bug in CCL with ensure-buzzword complaining about :documentation
 *** Added another check to CLONE. Can no longer have :reader/:writer/:accessor as nil, as well as define one.
+
 * 0.9
 ** Features
 *** HUGE optimization for message dispatch.

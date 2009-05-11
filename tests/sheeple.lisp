@@ -23,14 +23,14 @@
 (def-suite cloneform-tests :in sheep-cloning-tests)
 
 (in-suite sheep-general)
-(test equitable-sheep
-  "Tests that sheep are correctly identified as equalp.
-WARNING: This tests blows the stack if some weird circularity pops up."
-  (let ((sheep1 (clone () ()))
-	(sheep2 (clone () ())))
-    ;; using equalp blows the heap (circular hash tables).
-    ;; (is (equalp sheep1 sheep2))
-    (is (eql sheep1 sheep1))))
+;; (test equitable-sheep
+;;   "Tests that sheep are correctly identified as equalp.
+;; WARNING: This tests blows the stack if some weird circularity pops up."
+;;   (let ((sheep1 (clone () ()))
+;; 	(sheep2 (clone () ())))
+;;     ;; using equalp blows the heap (circular hash tables).
+;;     ;; (is (equalp sheep1 sheep2))
+;;     (is (eql sheep1 sheep1))))
 
 (in-suite sheep-cloning-tests)
 (test clone-basic

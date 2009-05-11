@@ -6,13 +6,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(declaim (optimize (speed 3) (safety 0) (debug 0)))
+(declaim (optimize (speed 1) (safety 3) (debug 1)))
 (defstruct (message (:constructor %make-message))
   (name nil)
   (buzzword nil)
   (qualifiers nil)
   (lambda-list nil)
-  (participants nil)
   (body '(lambda () nil))
   (function (lambda () nil))
   (documentation ""))
@@ -20,29 +19,7 @@
 (defstruct (role (:constructor %make-role))
   (name nil)
   (position 0)
-  (message-pointer nil))
-
-(defun generate-message (&key name
-			 qualifiers
-			 lambda-list
-			 buzzword
-			 participants
-			 function
-			 body
-			 (documentation ""))
-  (let ((message (%make-message
-		   :name name
-		   :buzzword buzzword
-		   :lambda-list lambda-list
-		   :qualifiers qualifiers
-		   :participants participants
-		   :function function
-		   :body body
-		   :documentation documentation)))
-    (add-message-to-buzzword message buzzword)
-    (remove-messages-with-name-qualifiers-and-participants name qualifiers participants)
-    (add-message-to-sheeple name message participants)
-    message))
+  (message nil))
 
 (defun ensure-message (name &rest all-keys
 		       &key participants
@@ -58,12 +35,31 @@
 	 (target-sheeple (sheepify-list participants))
 	 (message (apply
 		   #'generate-message
-		   :name name
 		   :buzzword buzzword
 		   :lambda-list lambda-list
 		   :participants target-sheeple
 		   all-keys)))
     (clear-memo-table buzzword)
+    message))
+
+(defun generate-message (&key qualifiers
+			 lambda-list
+			 participants
+			 buzzword
+			 function
+			 body
+			 (documentation ""))
+  (let ((message (%make-message
+		   :name (buzzword-name buzzword)
+		   :buzzword buzzword
+		   :lambda-list lambda-list
+		   :qualifiers qualifiers
+		   :function function
+		   :body body
+		   :documentation documentation)))
+    (add-message-to-buzzword message buzzword)
+    (remove-applicable-messages buzzword qualifiers participants)
+    (add-message-to-sheeple buzzword message participants)
     message))
 
 (defun create-bw-lambda-list (lambda-list)
@@ -76,38 +72,43 @@
   (set-arg-info buzzword :new-message message)
   (push message (buzzword-messages buzzword)))
 
-(defun remove-messages-with-name-qualifiers-and-participants (name qualifiers participants)
-  (loop for sheep in participants
-       do (loop for role in (sheep-direct-roles sheep)
-	       do (when (and (equal name (role-name role))
-			     (equal participants
-				    (message-participants
-				     (role-message-pointer role)))
-			     (equal qualifiers
-				    (message-qualifiers
-				     (role-message-pointer role))))
-		    (delete-role role sheep)))))
+(defun remove-applicable-messages (buzzword qualifiers participants)
+  (let ((applicable-messages (%find-applicable-messages buzzword participants :errorp nil)))
+    (when applicable-messages
+      (loop for message in applicable-messages
+	 do (loop for sheep in participants
+	       do (loop for role in (sheep-direct-roles sheep)
+		     do (let ((role-message (role-message role)))
+			  (when (and (equal message role-message)
+				     (equal qualifiers
+					    (message-qualifiers role-message)))
+			    (delete-role role sheep)
+			    (delete-message message)))))))))
+
+(defun delete-message (message)
+  (let ((buzzword (message-buzzword message)))
+    (setf (buzzword-messages buzzword)
+	  (delete message (buzzword-messages buzzword)))))
 
 (defun delete-role (role sheep)
   (setf (sheep-direct-roles sheep)
-	(remove role (sheep-direct-roles sheep)))
-  (setf (buzzword-messages (find-buzzword (role-name role)))
-	(remove (role-message-pointer role) (buzzword-messages (find-buzzword (role-name role))))))
+	(remove role (sheep-direct-roles sheep))))
 
-(defun add-message-to-sheeple (name message sheeple)
+(defun add-message-to-sheeple (buzzword message sheeple)
   (loop 
      for sheep in sheeple
      for i upto (1- (length sheeple))
      do (let ((role (%make-role
-		     :name name
+		     :name (buzzword-name buzzword)
 		     :position i
-		     :message-pointer message)))
+		     :message message)))
 	  (push role
 		(sheep-direct-roles sheep)))))
 
 (defun undefine-message (name &key qualifiers participants)
-  (remove-messages-with-name-qualifiers-and-participants name qualifiers participants)
-  (clear-memo-table (find-buzzword name)))
+  (remove-applicable-messages (find-buzzword name) qualifiers participants)
+  (clear-memo-table (find-buzzword name))
+  t)
 
 (defun available-messages (sheep)
   (let ((personal-role-names (mapcar (lambda (role) (role-name role))
@@ -115,9 +116,6 @@
     (remove-duplicates
      (flatten
       (append personal-role-names (mapcar #'available-messages (sheep-direct-parents sheep)))))))
-
-;; TODO
-;(defun find-message (selector qualifiers participants &optional (errorp t)))
 
 (defun add-readers-to-sheep (readers prop-name sheep)
   (loop for reader in readers

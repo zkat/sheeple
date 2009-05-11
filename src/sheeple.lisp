@@ -6,7 +6,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(declaim (optimize (debug 0) (safety 0) (speed 3)))
+(declaim (optimize (debug 1) (safety 1) (speed 3)))
 
 (defvar *max-sheep-id* 0)
 (defstruct (sheep (:constructor %make-sheep))
@@ -19,7 +19,7 @@
   (clonefunctions (make-hash-table :test #'eq))
   (cloneforms (make-hash-table :test #'eq))
   (hierarchy-list nil)
-  (id (incf (the fixnum *max-sheep-id*))))
+  (id (incf *max-sheep-id*)))
 
 ;;;
 ;;; Cloning
@@ -118,26 +118,26 @@
 	(t
 	 (handler-case
 	     (progn
-	       (pushnew (the (not number) new-parent) (sheep-direct-parents child))
+	       (pushnew new-parent (sheep-direct-parents child))
 	       (let ((pointer (make-weak-pointer child)))
-		 (pushnew (the (not number) pointer) (sheep-direct-children new-parent))
+		 (pushnew pointer (sheep-direct-children new-parent))
 		 (finalize child (lambda () (setf (sheep-direct-children new-parent)
-						  (delete (the (not number) pointer) 
-							  (the list (sheep-direct-children new-parent)))))))
+						  (delete pointer 
+							  (sheep-direct-children new-parent))))))
 	       child)
 	   (sheep-hierarchy-error ()
 	     (progn
-	       (setf (sheep-direct-parents child) (delete (the (not number) new-parent)
-							  (the list (sheep-direct-parents child))))
+	       (setf (sheep-direct-parents child) (delete new-parent
+							  (sheep-direct-parents child)))
 	       (error 'sheep-hierarchy-error))))
 	 (finalize-sheep child)
 	 child)))
 
 (defun remove-parent (parent child &key (keep-properties nil))
   (setf (sheep-direct-parents child)
-	(delete (the (not number) parent) (the list (sheep-direct-parents child))))
+	(delete parent (sheep-direct-parents child)))
   (setf (sheep-direct-children parent)
-	(delete (the (not number) child) (the list (sheep-direct-children parent)) :key #'weak-pointer-value))
+	(delete child (sheep-direct-children parent) :key #'weak-pointer-value))
   (when keep-properties
     (loop for property-name being the hash-keys of (sheep-direct-properties parent)
        using (hash-value value)
@@ -189,12 +189,12 @@
 
 ;;; Inheritance predicates
 (defun direct-parent-p (maybe-parent child)
-  (when (member (the (not number) maybe-parent) (sheep-direct-parents child))
+  (when (member maybe-parent (sheep-direct-parents child))
     t))
 
 (defun ancestor-p (maybe-ancestor descendant)
-  (when (and (not (eql (the (not single-float) maybe-ancestor) descendant))
-	     (member (the (not number) maybe-ancestor) (collect-parents descendant)))
+  (when (and (not (eql maybe-ancestor descendant))
+	     (member maybe-ancestor (collect-parents descendant)))
     t))
 
 (defun direct-child-p (maybe-child parent)

@@ -19,6 +19,7 @@
   (clonefunctions (make-hash-table :test #'eq))
   (cloneforms (make-hash-table :test #'eq))
   (hierarchy-list nil)
+  (locked-p nil)
   (id (incf *max-sheep-id*)))
 
 ;;;
@@ -107,8 +108,8 @@
 (defun shallow-copy (sheep)
   (mapc (lambda (parent)
 	  (maphash 
-	   (lambda (key obj) 
-	     (setf (property-value sheep key) (property-object-value obj)))
+	   (lambda (key value)
+	     (setf (property-value sheep key) value))
 	   (sheep-direct-properties parent)))
 	(sheep-direct-parents sheep)))
 
@@ -146,6 +147,19 @@
 	    (setf (property-value child property-name) value))))
   (finalize-sheep child)
   child)
+
+;;;
+;;; Locking
+;;;
+(defun lock-sheep (sheep)
+  (setf (sheep-locked-p sheep) t))
+(defun unlock-sheep (sheep)
+  (setf (sheep-locked-p sheep) nil))
+
+(defun toggle-sheep-lock (sheep)
+  (if (sheep-locked-p sheep)
+      (unlock-sheep sheep)
+      (lock-sheep sheep)))
 
 ;;;
 ;;; Hierarchy Resolution

@@ -12,26 +12,22 @@
 ;;;
 ;;; Property Access
 ;;;
-(defstruct (property-object (:constructor %make-property))
-  (value nil)
-  (locked-p nil))
-
 (defun property-value (sheep property-name)
   (unless (symbolp property-name)
     (error "Property-name must be a symbol"))
-  (multiple-value-bind (obj has-p)
+  (multiple-value-bind (value has-p)
       (gethash property-name (sheep-direct-properties sheep))
     (if has-p
-	(property-object-value obj)
+	value
 	(property-value-with-hierarchy-list sheep property-name))))
 
 (defun property-value-with-hierarchy-list (sheep property-name)
   (let ((hl (sheep-hierarchy-list sheep)))
     (loop for ancestor in hl
-       do (multiple-value-bind (obj has-p)
+       do (multiple-value-bind (value has-p)
 	      (gethash property-name (sheep-direct-properties ancestor))
 	    (when has-p
-	      (return-from property-value-with-hierarchy-list (property-object-value obj))))
+	      (return-from property-value-with-hierarchy-list value)))
        finally (error 'unbound-property
 		      :format-control "Property ~A is unbound for sheep ~S"
 		      :format-args (list property-name sheep)))))
@@ -39,22 +35,15 @@
 (defun (setf property-value) (new-value sheep property-name)
   (unless (symbolp property-name)
     (error "Property-name must be a symbol"))
-  (let ((property-table (sheep-direct-properties sheep)))
-    (multiple-value-bind (p-obj has-p)
-	(gethash property-name property-table)
-      (cond ((and has-p (property-object-locked-p p-obj))
-	     (error 'property-locked
-		    :format-control "Cannot set ~A: Property is locked."
-		    :format-args (list property-name)))
-	    (has-p
-	     (setf (property-object-value p-obj) new-value))
-	    (t
-	     (setf (gethash property-name property-table)
-		   (%make-property :value new-value))
-	     new-value)))))
+  (if (sheep-locked-p sheep)
+      (error "Cannot set property ~A: ~A is locked." property-name sheep)
+      (let ((property-table (sheep-direct-properties sheep)))
+	(setf (gethash property-name property-table) new-value))))
 
 (defun remove-property (sheep property-name)
-  (remhash property-name (sheep-direct-properties sheep)))
+  (if (sheep-locked-p sheep)
+      (error "Cannot remove property ~A: ~A is locked." property-name sheep)
+      (remhash property-name (sheep-direct-properties sheep))))
 
 (defun has-property-p (sheep property-name)
   "Returns T if a property with PROPERTY-NAME is available to SHEEP."
@@ -90,37 +79,6 @@
     (remove-duplicates
      (flatten
       (append obj-keys (mapcar #'available-properties (sheep-direct-parents sheep)))))))
-
-;;;
-;;; Locking
-;;;
-(defun locked-p (property-name sheep)
-  (multiple-value-bind (pobj hasp) 
-      (gethash property-name (sheep-direct-properties sheep))
-    (if hasp
-	(property-object-locked-p pobj)
-	nil)))
-
-(defun lock-property (property-name sheep)
-  (if (has-direct-property-p sheep property-name)
-      (setf (property-object-locked-p
-	     (gethash property-name
-		      (sheep-direct-properties sheep)))
-	    t)
-      (error "~A does not have a direct property ~A" sheep property-name)))
-
-(defun unlock-property (property-name sheep)
-  (if (has-direct-property-p sheep property-name)
-      (setf (property-object-locked-p
-	     (gethash property-name
-		      (sheep-direct-properties sheep)))
-	    t)
-      (error "~A does not have a direct property ~A" sheep property-name)))
-
-(defun toggle-property-lock (property-name sheep)
-  (if (locked-p property-name sheep)
-      (unlock-property property-name sheep)
-      (lock-property property-name sheep)))
 
 ;;;
 ;;; Cloneforms/functions

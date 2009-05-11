@@ -25,6 +25,7 @@
 ;;; Cloning
 ;;;
 
+;;; FIXME: SHIT SON... this only copies references. I'm an idort.
 (defun mitosis (model)
   (let* ((parents (sheep-direct-parents model))
 	 (properties (sheep-direct-properties model))
@@ -180,9 +181,9 @@
 		(butlast (sheep-direct-parents sheep)))
 	  (sheep-direct-parents sheep)))
 
-(defun std-tie-breaker-rule (minimal-elements cpl-so-far)
-  (dolist (cpl-constituent (reverse cpl-so-far))
-    (let* ((supers (sheep-direct-parents cpl-constituent))
+(defun std-tie-breaker-rule (minimal-elements hl-so-far)
+  (dolist (hl-constituent (reverse hl-so-far))
+    (let* ((supers (sheep-direct-parents hl-constituent))
            (common (intersection minimal-elements supers)))
       (when (not (null common))
         (return-from std-tie-breaker-rule (car common))))))

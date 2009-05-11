@@ -7,7 +7,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(declaim (optimize (speed 3) (safety 0) (debug 0)))
+(declaim (optimize (speed 3) (safety 1) (debug 1)))
 ;; We currently use structs for storage, since they're more convenient atm.
 (defstruct (buzzword (:constructor %make-buzzword))
   (name nil)
@@ -98,14 +98,6 @@
 	(when existing
 	  (set-arg-info buzzword :lambda-list lambda-list))))))
 
-(defun undefine-buzzword (name &optional (errorp nil))
-  "This only removes the buzzword from the global buzzword table, and makes the function unbound."
-  (let ((buzzword (find-buzzword name errorp)))
-    (when buzzword
-      (forget-buzzword name)
-      (fmakunbound name)
-      buzzword)))
-
 ;; This is the actual buzzword definition macro.
 ;; It first verifies that the lambda-list provided is a valid buzzword ll,
 ;; then expands to a call to ensure-buzzword
@@ -122,12 +114,6 @@
   (mapappend #'canonize-buzzword-option options))
 (defun canonize-buzzword-option (option)
   (list `',(car option) `',(cadr option)))
-
-;; Like defbuzzword. This is just a convenient macro to undefine bws.
-(defmacro undefbuzzword (name &optional (errorp t))
-  `(undefine-buzzword
-    ',name
-    ,errorp))
 
 ;;; LL analysis
 (defun check-bw-lambda-list (lambda-list)

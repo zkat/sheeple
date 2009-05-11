@@ -14,8 +14,8 @@
 (test buzzword-definition
   "Checks basic buzzword definition, confirms that FIND-BUZZWORD 
 errors when a buzzword doesn't exist."
-  (undefbuzzword test-buzz nil)
   (undefmessage test-buzz (x))
+  (undefbuzzword test-buzz nil)
   (defbuzzword test-buzz (x) (:documentation "This is a test"))
   (is (buzzword-p (find-buzzword 'test-buzz)))
   (signals no-such-buzzword (find-buzzword 'another-buzzword))
@@ -23,28 +23,6 @@ errors when a buzzword doesn't exist."
   (defun test-buzz () (print "durr hurr"))
   (signals sheeple::clobbering-function-definition (defbuzzword test-buzz (foo)
 						     (:documentation "OHNOES"))))
-
-(test buzzword-undefinition
-  "Usage of the undefbuzzword macro, confirmation of removal of all messages and
-relevant role objects from the system."
-  (undefbuzzword test-buzz nil)
-  (undefbuzzword another-buzzer nil)
-  (defbuzzword test-buzz (x))
-  (undefbuzzword test-buzz nil)
-  (is (eql nil (find-buzzword 'test-buzz nil)))
-  (signals undefined-function (test-buzz))
-  (is (not (participant-p =dolly= 'test-buzz)))
-  (defmessage another-buzzer (foo) foo)
-  (defmessage another-buzzer ((foo =string=)) (declare (ignore foo)) "String returned!")
-  (undefmessage another-buzzer ((foo =string=)))
-  (is (equal "hei-ho!" (another-buzzer "hei-ho!")))
-  (undefmessage another-buzzer (foo))
-  (signals sheeple::no-applicable-messages (another-buzzer =dolly=)) ; this package bs pisses me off
-  (is (not (participant-p =dolly= 'test-buzz)))
-  (is (not (participant-p =string= 'test-buzz)))
-  (undefbuzzword another-buzzer nil)
-  (signals no-such-buzzword (find-buzzword 'another-buzzer))
-  (signals undefined-function (another-buzzer "WHAT ARE YOU GONNA DO, BLEED ON ME?!")))
 
 (test message-undefinition
   "Tests undefmessage macro."
@@ -99,6 +77,7 @@ to their respective participants, with correct role-indexes, etc."
 (test basic-message-dispatch
   "Checks that basic single-dispatch messages work."
   (undefbuzzword test-message nil)
+  (undefmessage test-message (x))
   (let ((test-sheep (clone () () (:nickname "testie")))
 	(another-sheep (clone () () (:nickname "rejected-failure"))))
     (defmessage test-message ((sheep test-sheep)) (sheep-nickname sheep))
@@ -119,7 +98,6 @@ to their respective participants, with correct role-indexes, etc."
     (setf (property-value test-sheep 'var) "different-value")
     (is (equal "different-value" (property-value test-sheep 'var)))
     (is (equal "new-value" (get-var test-sheep)))))
-
 
 (test after-messages
   "Checks proper dispatch of :after messages."

@@ -9,7 +9,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(declaim (optimize (safety 1) (speed 1) (debug 1)))
+(declaim (optimize (safety 1) (speed 3) (debug 1)))
 (defun primary-message-p (message)
   (null (message-qualifiers message)))
 

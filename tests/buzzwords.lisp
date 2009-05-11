@@ -162,13 +162,14 @@ to their respective participants, with correct role-indexes, etc."
 
 (test next-message-p
   "Checks that next-message-p returns T or NIL when appropriate."
+  (undefmessage get-var (something))
   (undefbuzzword get-var nil)
   (let ((test-sheep (clone () ((var "value")))))
     (defmessage get-var (something) (property-value something 'var))
     (is (equal "value" (get-var test-sheep)))
     (defmessage get-var ((sheep test-sheep)) (declare (ignore sheep)) (next-message-p))
     (is (equal t (get-var test-sheep)))
-    (undefbuzzword get-var)
+    (undefmessage get-var (something))
     (defmessage get-var ((sheep test-sheep)) (declare (ignore sheep)) (next-message-p))
     (is (equal nil (get-var test-sheep)))))
 

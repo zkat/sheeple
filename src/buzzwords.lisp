@@ -88,7 +88,7 @@
 			&key lambda-list
 			&allow-other-keys)
   (let ((existing (find-buzzword name nil)))
-    (let ((buzzword (or (find-buzzword name nil)
+    (let ((buzzword (or existing
 			(apply #'generate-buzzword
 			       :name name
 			       :lambda-list lambda-list
@@ -98,9 +98,8 @@
 	(when existing
 	  (set-arg-info buzzword :lambda-list lambda-list))))))
 
-;; This takes care of removing a buzzword entirely, including all roles associated with it.
-;; It also makes the function unbound (so the dispatcher is no longer called)
 (defun undefine-buzzword (name &optional (errorp nil))
+  "This only removes the buzzword from the global buzzword table, and makes the function unbound."
   (let ((buzzword (find-buzzword name errorp)))
     (when buzzword
       (forget-buzzword name)

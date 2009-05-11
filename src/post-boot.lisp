@@ -61,7 +61,4 @@
     (format stream "Fleeced Wolf~@[ AKA: ~a~]" (sheep-nickname sheep))))
 
 ;;; buzzwords/messages
-(defun participant-p (sheep message-name)
-  (when (member-if (lambda (role) (equal message-name (role-name role)))
-		   (sheep-direct-roles sheep))
-    t))
+

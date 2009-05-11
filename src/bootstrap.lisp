@@ -10,6 +10,12 @@
 (defvar =t=
   (let ((sheep (%make-sheep)))
      (finalize-sheep sheep)
+     sheep))
+
+(defvar =dolly=
+  (let ((sheep (%make-sheep)))
+    (setf (sheep-direct-parents sheep) (list =t=))
+    (finalize-sheep sheep)
     sheep))
 
 (defun spawn-sheep (sheeple &rest all-keys)

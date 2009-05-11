@@ -42,6 +42,7 @@
 *** DONE Go through src/packages.lisp and figure out how much I actually need right now.
 *** DONE Should I shut off access to stuff like undefbuzzword/undefmessage?
     Not for now, but I should discourage use of it until I've figured it out.
+*** TODO Implement property objects, allow them to be lockable
 *** TODO Is a :copy-on-clone option for individual properties better than :cloneform for most purposes?
 *** TODO Finalize everything when all else is done.
 * DONE 0.9

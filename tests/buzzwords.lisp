@@ -15,6 +15,7 @@
   "Checks basic buzzword definition, confirms that FIND-BUZZWORD 
 errors when a buzzword doesn't exist."
   (undefbuzzword test-buzz nil)
+  (undefmessage test-buzz (x))
   (defbuzzword test-buzz (x) (:documentation "This is a test"))
   (is (buzzword-p (find-buzzword 'test-buzz)))
   (signals no-such-buzzword (find-buzzword 'another-buzzword))

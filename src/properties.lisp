@@ -92,6 +92,37 @@
       (append obj-keys (mapcar #'available-properties (sheep-direct-parents sheep)))))))
 
 ;;;
+;;; Locking
+;;;
+(defun locked-p (property-name sheep)
+  (multiple-value-bind (pobj hasp) 
+      (gethash property-name (sheep-direct-properties sheep))
+    (if hasp
+	(property-object-locked-p pobj)
+	nil)))
+
+(defun lock-property (property-name sheep)
+  (if (has-direct-property-p sheep property-name)
+      (setf (property-object-locked-p
+	     (gethash property-name
+		      (sheep-direct-properties sheep)))
+	    t)
+      (error "~A does not have a direct property ~A" sheep property-name)))
+
+(defun unlock-property (property-name sheep)
+  (if (has-direct-property-p sheep property-name)
+      (setf (property-object-locked-p
+	     (gethash property-name
+		      (sheep-direct-properties sheep)))
+	    t)
+      (error "~A does not have a direct property ~A" sheep property-name)))
+
+(defun toggle-property-lock (property-name sheep)
+  (if (locked-p property-name sheep)
+      (unlock-property property-name sheep)
+      (lock-property property-name sheep)))
+
+;;;
 ;;; Cloneforms/functions
 ;;;
 (defun get-cloneform (sheep property-name)

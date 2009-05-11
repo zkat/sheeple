@@ -47,6 +47,8 @@
     lol, no I didn't -- but it needed to be fixed anyway
 *** TODO Is a :copy-on-clone option for individual properties better than :cloneform for most purposes?
 *** TODO Finalize everything when all else is done.
+** TODO Fucking get rid of all these optimization declarations.
+   One of these days I'll learn to heed my own fucking advice
 * DONE 0.9
 ** DONE More optimization
    The goal here is to have manipulator dispatch be at a maximum 2x slower than property-value. If I

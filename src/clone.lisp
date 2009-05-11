@@ -20,12 +20,14 @@
   `(list ,@(mapcar #'canonize-property* properties)))
 
 (defun canonize-property* (property)
+  "This version is fancier and adds readers/writers automatically"
   (if (symbolp property)
       `(list :name ',property)
       (let ((name (car property))
 	    (value (cadr property))
             (readers nil)
             (writers nil)
+	    (lockedp nil)
 	    (cloneform *secret-unbound-value*)
             (other-options nil)
 	    (no-reader-p nil)
@@ -51,7 +53,7 @@
 			(error "You already defined a writer, but now you say you don't want one? Make up your mind.")))
 		   (t
 		    (pushnew (cadr olist) writers))))
-            ((or :manipulator :accessor)
+            ((:manipulator :accessor)
 	     (cond ((or no-reader-p no-writer-p)
 		    (error "You said you didn't want a reader or a writer, but now you want one? Make up your mind."))
 		   ((null (cadr olist))
@@ -65,6 +67,8 @@
 		    (pushnew `(setf ,(cadr olist)) writers))))
 	    (:cloneform
 	     (setf cloneform (cadr olist)))
+	    ((:locked-p :lockedp)
+	     (setf lockedp (cadr olist)))
 	    (otherwise 
              (pushnew (cadr olist) other-options)
              (pushnew (car olist) other-options))))
@@ -89,6 +93,7 @@
 	    (value (cadr property))
             (readers nil)
             (writers nil)
+	    (lockedp nil)
 	    (cloneform *secret-unbound-value*)
             (other-options nil)
 	    (no-reader-p nil)
@@ -114,7 +119,7 @@
 			(error "You already defined a writer, but now you say you don't want one? Make up your mind.")))
 		   (t
 		    (pushnew (cadr olist) writers))))
-            ((or :manipulator :accessor)
+            ((:manipulator :accessor)
 	     (cond ((or no-reader-p no-writer-p)
 		    (error "You said you didn't want a reader or a writer, but now you want one? Make up your mind."))
 		   ((null (cadr olist))
@@ -128,6 +133,8 @@
 		    (pushnew `(setf ,(cadr olist)) writers))))
 	    (:cloneform
 	     (setf cloneform (cadr olist)))
+	    ((:locked-p :lockedp)
+	     (setf lockedp (cadr olist)))
 	    (otherwise 
              (pushnew (cadr olist) other-options)
              (pushnew (car olist) other-options))))

@@ -7,27 +7,31 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(declaim (optimize (speed 3) (debug 0) (safety 0)))
+(declaim (optimize (speed 3) (debug 1) (safety 1)))
 (defparameter *secret-unbound-value* (gensym))
 ;;;
 ;;; Property Access
 ;;;
+(defstruct (property-object (:constructor %make-property))
+  (value nil)
+  (locked-p nil))
+
 (defun property-value (sheep property-name)
   (unless (symbolp property-name)
     (error "Property-name must be a symbol"))
-  (multiple-value-bind (value has-p)
+  (multiple-value-bind (obj has-p)
       (gethash property-name (sheep-direct-properties sheep))
     (if has-p
-	value
+	(property-object-value obj)
 	(property-value-with-hierarchy-list sheep property-name))))
 
 (defun property-value-with-hierarchy-list (sheep property-name)
   (let ((hl (sheep-hierarchy-list sheep)))
     (loop for ancestor in hl
-       do (multiple-value-bind (value has-p)
+       do (multiple-value-bind (obj has-p)
 	      (gethash property-name (sheep-direct-properties ancestor))
 	    (when has-p
-	      (return-from property-value-with-hierarchy-list value)))
+	      (return-from property-value-with-hierarchy-list (property-object-value obj))))
        finally (error 'unbound-property
 		      :format-control "Property ~A is unbound for sheep ~S"
 		      :format-args (list property-name sheep)))))
@@ -36,7 +40,18 @@
   (unless (symbolp property-name)
     (error "Property-name must be a symbol"))
   (let ((property-table (sheep-direct-properties sheep)))
-    (setf (gethash property-name property-table) new-value)))
+    (multiple-value-bind (p-obj has-p)
+	(gethash property-name property-table)
+      (cond ((and has-p (property-object-locked-p p-obj))
+	     (error 'property-locked
+		    :format-control "Cannot set ~A: Property is locked."
+		    :format-args (list property-name)))
+	    (has-p
+	     (setf (property-object-value p-obj) new-value))
+	    (t
+	     (setf (gethash property-name property-table)
+		   (%make-property :value new-value))
+	     new-value)))))
 
 (defun remove-property (sheep property-name)
   (remhash property-name (sheep-direct-properties sheep)))

@@ -30,7 +30,7 @@
 
 ;;; properties
 (define-condition unbound-property (sheeple-error) ())
-
+(define-condition property-locked (sheeple-error) ())
 
 ;;;
 ;;; Buzzwords

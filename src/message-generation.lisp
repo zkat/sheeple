@@ -9,17 +9,22 @@
 (declaim (optimize (speed 1) (safety 3) (debug 1)))
 (defstruct (message (:constructor %make-message))
   (name nil)
-  (buzzword nil)
   (qualifiers nil)
   (lambda-list nil)
   (body '(lambda () nil))
   (function (lambda () nil))
   (documentation ""))
 
+(defun message-buzzword (message)
+  (find-buzzword (message-name message) nil))
+
 (defstruct (role (:constructor %make-role))
   (name nil)
   (position 0)
   (message nil))
+
+(defun role-buzzword (role)
+  (find-buzzword (role-name role) nil))
 
 (defun ensure-message (name &rest all-keys
 		       &key participants
@@ -51,7 +56,6 @@
 			 (documentation ""))
   (let ((message (%make-message
 		   :name (buzzword-name buzzword)
-		   :buzzword buzzword
 		   :lambda-list lambda-list
 		   :qualifiers qualifiers
 		   :function function

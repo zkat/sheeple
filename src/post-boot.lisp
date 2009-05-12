@@ -53,10 +53,10 @@
 ;;;
 (defbuzzword print-sheep (sheep stream)
   (:documentation "Defines the expression print-object uses."))
-(defmessage print-sheep (sheep stream)
+(defmessage print-sheep (sheep (stream =stream=))
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Standard Sheep~@[ AKA: ~a~]" (sheep-nickname sheep))))
-(defmessage print-sheep ((sheep =white-fang=) stream)
+(defmessage print-sheep ((sheep =white-fang=) (stream =stream=))
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Fleeced Wolf~@[ AKA: ~a~]" (sheep-nickname sheep))))
 

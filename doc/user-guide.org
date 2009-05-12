@@ -70,11 +70,11 @@
    objects. For the purposes of maintaining what would usually be a class hierarchy, one can treat
    sheeple as "prototypes" for other sheeple -- it's common to simply define an object for the sole
    purpose of cloning it.
-   Sheeple can clone/delegate to multiple objects at the same time, and the rules for dividing up
-   behavior are the same CLOS uses (first parent has greater precedence than second, ancestors are
-   ordered with a breadth-first left-to-right graph sorting algorithm.)
-   The list of parents/delegates is dynamic. Parents can be added or removed at run time.
-   New sheeple are created by using the CLONE and DEFSHEEP macros.
+   Sheeple can clone multiple objects at the same time, and the rules for dividing up behavior are
+   the same CLOS uses (first parent has greater precedence than second, ancestors are ordered with a
+   breadth-first left-to-right graph sorting algorithm.)  The list of parents/delegates is
+   dynamic. Parents can be added or removed at run time.  New sheeple are created by using the CLONE
+   and DEFSHEEP macros.
 
 *** CLONE macro
     CLONE works similar to DEFCLASS:
@@ -91,20 +91,26 @@
 
          (clone () ((foo 10)))
 
-    Note that accessors are automatically generated using the property name provided.
+*** CLONE* macro
+    This macro works mostly like CLONE, except it has some extra goodies that can make programming a
+    bit more convenient. For example, this macro automatically generates accessors using
+    property-names, while CLONE requires an explicit :accessor option.
 
          (defvar *sample-sheep* (clone () ((my-property "Wheee"))))
+	 
+	 (my-property *sample-sheep*) => "Wheee"
 
 *** DEFSHEEP macro
-    This macro is essentially a wrapper around CLONE that handles redefinition of a sheep. The
+    This macro is essentially a wrapper around CLONE* that handles redefinition of a sheep. The
     variable bound by defsheep is a regular special variable (it uses DEFVAR in its expansion).
 
          (defsheep =sample-sheep= ()
            ((my-property "wheeee")))
 
     The symbol provided to DEFSHEEP as a sheep name is also used as that sheep's :nickname.
+
 *** Clone Options
-    There are several available options for the CLONE and DEFSHEEP macros that can affect the
+    There are several available options for the CLONE(*) and DEFSHEEP macros that can affect the
     effects of cloning.
 
 **** :DEEP-COPY
@@ -128,7 +134,7 @@
 **** :READER
       Creates a specialized, non-setfable reader message for this property. Trying to SETF signals a
       NO-MOST-SPECIFIC-MESSAGE error.  
-      Setting this option to NIL prevents CLONE from auto-generating a reader. It will signal an
+      Setting this option to NIL prevents CLONE* from auto-generating a reader. It will signal an
       error if both NIL and a symbol are passed to two :reader options in the same property
       definition. 
 
@@ -139,7 +145,7 @@
 **** :WRITER
       Creates a specialized writer message, without creating a matching reader. The lambda-list for
       this message is: (new-value sheep-object).
-      Setting this option to NIL prevents CLONE from auto-generating a writer. It will signal an
+      Setting this option to NIL prevents CLONE* from auto-generating a writer. It will signal an
       error if both NIL and a symbol are passed to two :writerr options in the same property
       definition. 
 
@@ -149,13 +155,13 @@
         (read-prop *sample-sheep*) => "new-value"
 
 **** :ACCESSOR
-      Generater both a reader and a writer. CLONE automatically defines a reader/writer pair unless
-      this option is passed to it, in which case it uses that specific accessor name.
-      The same rules apply as :reader/:writer when it comes to setting this as NIL.
+      Generater both a reader and a writer. CLONE* automatically defines a reader/writer pair unless
+      this option is passed to it, in which case it uses that specific accessor name.  The same
+      rules apply as :reader/:writer when it comes to setting this as NIL.
       
         (defparameter *sample-sheep* (clone () ((prop "value" :accessor get-prop))))
         (get-prop *sample-sheep*) => "value"
-        (setf (get-prop *sample-sheep*) "new-value" => "new-value"
+        (setf (get-prop *sample-sheep*) "new-value") => "new-value"
 	
 **** :CLONEFORM
       The form is compiled and evaluated as that property's value if a value is not

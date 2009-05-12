@@ -17,8 +17,8 @@ errors when a buzzword doesn't exist."
   (defbuzzword buzzword-definition-test (x) (:documentation "This is a test"))
   (is (buzzword-p (find-buzzword 'buzzword-definition-test)))
   (signals no-such-buzzword (find-buzzword 'another-buzzword-test))
-  (defun buzzword-definition-test () (print "durr hurr"))
-  (signals sheeple::clobbering-function-definition (defbuzzword buzzword-definition-test (foo)
+  (defun clobbering-definition-test () (print "durr hurr"))
+  (signals sheeple::clobbering-function-definition (defbuzzword clobbering-definition-test (foo)
 						     (:documentation "OHNOES"))))
 
 (test message-undefinition
@@ -36,12 +36,12 @@ errors when a buzzword doesn't exist."
 (test basic-message-definition
   "Checks that messages are defined properly, and added to their respective objects.
 also, checks that a style-warning is signaled if there is no buzzword defined."
-  (signals style-warning (defmessage test-message (foo) (print foo)))
-  (defbuzzword test-message (x))
-  (defmessage test-message (foo) (print foo))
-  (is (buzzword-p (find-buzzword 'test-message)))
-  (is (member 'test-message (available-messages =dolly=)))
-  (is (message-p (car (buzzword-messages (find-buzzword 'test-message))))))
+  (signals style-warning (defmessage totally-new-test-message (foo) (print foo)))
+  (defbuzzword totally-new-test-message (x))
+  (defmessage totally-new-test-message (foo) (print foo))
+  (is (buzzword-p (find-buzzword 'totally-new-test-message)))
+  (is (member 'totally-new-test-message (available-messages =dolly=) :key (lambda (v) (elt v 0))))
+  (is (message-p (car (buzzword-messages (find-buzzword 'totally-new-test-message))))))
 
 (test multimessage-definition
   "Checks that multimessages are defined correctly, with roles added
@@ -52,8 +52,8 @@ to their respective participants, with correct role-indexes, etc."
     (defmessage multi-message-test ((foo sheep1) (bar sheep2)) foo bar)
     (is (eql t (participant-p sheep1 'multi-message-test)))
     (is (eql t (participant-p sheep2 'multi-message-test)))
-    (is (member 'multi-message-test (available-messages sheep1)))
-    (is (member 'multi-message-test (available-messages sheep2)))
+    (is (member 'multi-message-test (available-messages sheep1) :key (lambda (v) (elt v 0))))
+    (is (member 'multi-message-test (available-messages sheep2) :key (lambda (v) (elt v 0))))
     (let ((sheep1-roles (sheep-direct-roles sheep1))
 	  (sheep2-roles (sheep-direct-roles sheep2)))
       (is (= 0 (role-position (car sheep1-roles))))

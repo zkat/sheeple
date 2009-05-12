@@ -1,4 +1,4 @@
-* TODO 1.1+
+* TODO 1.1+ - "The Road to Stability"
 ** TODO Implement :message option for defbuzzword (like CLOS' :method option)
    I don't care about this feature all that much, so I might just keep bumping it until someone
    who -does- care asks for it.
@@ -20,9 +20,6 @@
    from the bottom up.
 ** TODO Document code
     Note: I can use stuff from the user's guide for this, but it's important.
-* TODO 1.0
-** DONE Complete documentation
-*** DONE Write proper user guide
 ** TODO Write more unit tests.
 *** TODO Fix unit tests now that undefinition works different...
     OHGOD THEY ALL BROKE
@@ -33,10 +30,15 @@
 *** TODO Write a "many many messages" test
 *** TODO Write more tests with multi-level hierarchy lists
 *** TODO (Re-)write unit tests for locked properties.
-** TODO Fix any bugs unit tests come up with
+* DONE 1.0
+** DONE Complete documentation
+*** DONE Write proper user guide
+*** DONE Update guide
+** DONE Fix any bugs unit tests come up with
 *** DONE Oops -- CLONE should check that defining an accessor first, then passing it NIL is also an error
-*** TODO Undefmessage really isn't doing what it's supposed to.
-** TODO Finalize API
+*** DONE Undefmessage really isn't doing what it's supposed to.
+    All tests pass, too!
+** DONE Finalize API
    No (significant) changes allowed to API until 2.0, after this release.
 *** DONE Do I want to make CLONE work more like defclass*?
     That might be good. It would not be incompatible with older versions of Sheeple, either.
@@ -56,7 +58,7 @@
     No.
 *** DONE Need a way to list all messages that a sheep can participate in
     LOLOLOLO I ALREADY DID THIS XD XD XD
-*** TODO Finalize everything when all else is done.
+*** DONE Finalize everything when all else is done.
 ** DONE Fucking get rid of all these optimization declarations.
    One of these days I'll learn to heed my own fucking advice
 * DONE 0.9

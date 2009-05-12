@@ -63,7 +63,8 @@
 ;; lambda that calls the top-level dispatch function on the bw args.
 (defun finalize-buzzword (buzzword)
   (let ((name (buzzword-name buzzword)))
-    (when (and (fboundp name))
+    (when (and (fboundp name)
+	       (not (find-buzzword name nil)))
       (warn 'clobbering-function-definition
 	    :format-control "Clobbering regular function or generic function definition for ~A"
 	    :format-args (list name)))

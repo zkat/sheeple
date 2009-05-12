@@ -146,11 +146,11 @@
       (delete-message message))))
 
 (defun available-messages (sheep)
-  (let ((personal-role-names (mapcar (lambda (role) (role-name role))
-				     (sheep-direct-roles sheep))))
+  (let ((roles (loop for role in (sheep-direct-roles sheep)
+		    collect (vector (role-name role) (role-position role)))))
     (remove-duplicates
      (flatten
-      (append personal-role-names (mapcar #'available-messages (sheep-direct-parents sheep)))))))
+      (append roles (mapcar #'available-messages (sheep-direct-parents sheep)))))))
 
 (defun add-readers-to-sheep (readers prop-name sheep)
   (loop for reader in readers

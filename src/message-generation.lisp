@@ -92,7 +92,7 @@
 			(participant-p sheep (message-name message)))
 		      participants))
       (loop for sheep in participants
-	 for i from 1
+	 for i from 0
 	 do (loop for role in (sheep-direct-roles sheep)
 	       do (let ((role-message (role-message role)))
 		    (when (and
@@ -136,7 +136,7 @@
 			   buzzword participants :errorp nil))))
     (when message
       (loop for sheep in participants
-	 for i upto (1- (length participants))
+	 for i from 0
 	 do (loop for role in (sheep-direct-roles sheep)
 	       do (let ((role-message (role-message role)))
 		    (when (and

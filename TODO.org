@@ -54,6 +54,7 @@
     lol, no I didn't -- but it needed to be fixed anyway
 *** DONE Is a :copy-on-clone option for individual properties better than :cloneform for most purposes?
     No.
+*** TODO Need a way to list all messages that a sheep can participate in
 *** TODO Finalize everything when all else is done.
 ** DONE Fucking get rid of all these optimization declarations.
    One of these days I'll learn to heed my own fucking advice

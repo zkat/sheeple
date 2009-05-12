@@ -73,7 +73,6 @@
 			  :format-args (list property-name sheep))))))
 
 (defun available-properties (sheep)
-  ;; TODO - According to SB-SPROF, this is a huge bottleneck when setfing properties
   (let ((obj-keys (loop for keys being the hash-keys of (sheep-direct-properties sheep)
 		     collect keys)))
     (remove-duplicates

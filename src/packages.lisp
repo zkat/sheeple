@@ -23,7 +23,7 @@
    :property-value
    :available-properties
    :remove-property
-   :who-sets
+   :property-owner
    :has-property-p
    :has-direct-property-p
    :with-properties

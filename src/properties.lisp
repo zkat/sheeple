@@ -58,7 +58,7 @@
     value
     has-p))
 
-(defun who-sets (sheep property-name)
+(defun property-owner (sheep property-name)
   (if (has-direct-property-p sheep property-name)
       sheep
       (let ((hl (sheep-hierarchy-list sheep)))
@@ -67,7 +67,7 @@
 		  (gethash property-name (sheep-direct-properties ancestor))
 		(declare (ignore value))
 		(when has-p
-		  (return-from who-sets ancestor)))
+		  (return-from property-owner ancestor)))
 	   finally (error 'unbound-property
 			  :format-control "Property ~A is unbound for sheep ~S"
 			  :format-args (list property-name sheep))))))

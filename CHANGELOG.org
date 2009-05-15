@@ -1,3 +1,8 @@
+* 1.0.1
+** Features
+   nil
+** Bugs
+   Renamed who-sets to property-owner (conflict with CL function)
 * 1.0
 ** Features
 *** New and improved guid available in doc/user-guide.org!

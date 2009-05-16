@@ -231,8 +231,9 @@
 	     (progn (setf lambda-list arg)
 		    (setf parse-state :docstring))))
 	(:docstring
-	 (when (stringp arg)
-	   (setf docstring arg))
+	 (if (stringp arg)
+	     (setf docstring arg)
+	     (push arg body))
 	 (setf parse-state :body))
 	(:body (push arg body))))
     (values name

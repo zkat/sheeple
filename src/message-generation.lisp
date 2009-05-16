@@ -177,7 +177,7 @@
 
 ;;; macro
 (defmacro defmessage (&rest args)
-  (multiple-value-bind (name qualifiers specialized-lambda-list body)
+  (multiple-value-bind (name qualifiers specialized-lambda-list docstring body)
       (parse-defmessage args)
     (multiple-value-bind (parameters ll participants required)
 	(parse-specialized-lambda-list specialized-lambda-list)
@@ -189,6 +189,7 @@
 	;; TODO - use the new stuff
 	:lambda-list ',ll
 	:participants (list ,@participants)
+	:documentation ,docstring
 	:function ,(make-message-lambda name ll body)
 	:body '(block ,name ,@body)))))
 
@@ -219,6 +220,7 @@
   (let ((name (car args))
 	(qualifiers nil)
 	(lambda-list nil)
+	(docstring nil)
 	(body nil)
 	(parse-state :qualifiers))
     (dolist (arg (cdr args))
@@ -227,11 +229,16 @@
 	 (if (and (atom arg) (not (null arg)))
 	     (push arg qualifiers)
 	     (progn (setf lambda-list arg)
-		    (setf parse-state :body))))
+		    (setf parse-state :docstring))))
+	(:docstring
+	 (when (stringp arg)
+	   (setf docstring arg))
+	 (setf parse-state :body))
 	(:body (push arg body))))
     (values name
 	    qualifiers
 	    lambda-list
+	    docstring
 	    (nreverse body))))
 
 (defun extract-var-name (item)

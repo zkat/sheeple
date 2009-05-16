@@ -1,6 +1,6 @@
 * 1.0.1
 ** Features
-   nil
+*** Added docstring support to messages. No way to grab them yet, but at least it doesn't complain.
 ** Bugs
    Renamed who-sets to property-owner (conflict with CL function)
 * 1.0

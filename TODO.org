@@ -1,11 +1,11 @@
-* TODO 1.1+ - "The Road to Stability"
+* TODO 1.0.1+ - "The Road to Stability"
 ** TODO Implement :message option for defbuzzword (like CLOS' :method option)
    I don't care about this feature all that much, so I might just keep bumping it until someone
    who -does- care asks for it.
    UPDATE: I don't think I even want this. It makes the defbuzzword macro horribly bloated and
    complex, and I don't even like the idea of stuffing everything into a buzzword definition. Things
    need to stay flexible, and this would be just plain ugly.
-** TODO Allow individual message documentation
+** DONE Allow individual message documentation
 ** TODO Make singly-dispatched readers just about as fast as simply calling property-value
 ** TODO Write caching scheme for property access.
    I should've done this in the first place. A simpler version of the same system used to dispatch

@@ -6,6 +6,7 @@
    :=t=
    :=dolly=
    :clone
+   :clone*
    :defsheep
    :sheep-hierarchy-error
    :sheep-p

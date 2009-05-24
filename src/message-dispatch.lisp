@@ -108,19 +108,18 @@
   (declare (fixnum relevant-args-length))
   (declare (list args))
   (when (vectorp vector-entry)
-    (cond ((= 0 relevant-args-length)
-	   t)
-	  ((= 1 relevant-args-length)
-	   (eq (car args) (car (vector-entry-args (the vector vector-entry)))))
-	  (t 
-	   (let ((vector-args (vector-entry-args (the vector vector-entry))))
-	     (loop
-		for i upto relevant-args-length
-		for v-arg in vector-args
-		for arg in args
-		do (when (not (eql v-arg arg))
-		     (return-from desired-vector-entry-p nil)))
-	     t)))))
+    (let ((vector-args (weak-pointer-value (vector-entry-args (the vector vector-entry)))))
+     (cond ((= 0 relevant-args-length)
+	    t)
+	   ((= 1 relevant-args-length)
+	    (equal (car args) (car vector-args)))
+	   (t 
+	    (loop
+	       for i upto relevant-args-length
+	       for v-arg in (weak-pointer-value vector-args)
+	       for arg in args
+	       do (when (not (equal v-arg arg))
+		    (return-from desired-vector-entry-p nil))))))))
 
 (defstruct (vector-entry (:type vector))
   args
@@ -142,7 +141,7 @@
 	      (adjust-array memo-vector (+ (length memo-vector) 8)))
 	    (when (eql (elt (the (not string) memo-vector) i) 0)
 	      (setf (elt memo-vector index) (make-vector-entry 
-					     :args args
+					     :args (make-weak-pointer args)
 					     :msg-cache cache))
 	      (loop-finish))))))
 

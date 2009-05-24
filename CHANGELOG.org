@@ -2,7 +2,8 @@
 ** Features
 *** Added docstring support to messages. No way to grab them yet, but at least it doesn't complain.
 ** Bugs
-   Renamed who-sets to property-owner (conflict with CL function)
+*** Renamed who-sets to property-owner
+*** Dispatch caching was keeping references around. Switched to weak pointers.
 * 1.0
 ** Features
 *** New and improved guid available in doc/user-guide.org!

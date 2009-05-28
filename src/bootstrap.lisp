@@ -32,6 +32,7 @@
 			      &key 
 			      properties
 			      nickname
+			      documentation
 			      deep-copy
 			      shallow-copy)
   (set-up-properties sheep properties)
@@ -42,6 +43,8 @@
     (shallow-copy sheep))
   (when deep-copy
     (deep-copy sheep))
+  (when documentation
+    (setf (sheep-documentation sheep) documentation))
   sheep)
 
 (defbuzzword reinitialize-sheep (sheep &key))

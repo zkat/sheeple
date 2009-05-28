@@ -8,6 +8,7 @@
    :clone
    :clone*
    :defsheep
+   :sheep-documentation
    :sheep-hierarchy-error
    :sheep-p
    :add-parent

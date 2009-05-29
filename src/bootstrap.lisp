@@ -52,6 +52,7 @@
 				&key new-parents
 				new-properties
 				nickname
+				documentation
 				deep-copy shallow-copy)
   ;; cleanup
   (loop for parent in (sheep-direct-parents sheep)
@@ -65,7 +66,8 @@
 		    :properties new-properties
 		    :nickname nickname
 		    :deep-copy deep-copy
-		    :shallow-copy shallow-copy))
+		    :shallow-copy shallow-copy
+		    :documentation documentation))
 
 (defsheep =dolly= (=t=) ())
 

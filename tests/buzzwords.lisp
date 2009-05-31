@@ -118,6 +118,12 @@ to their respective participants, with correct role-indexes, etc."
     (is (equal "a different-value"  (get-var test-sheep)))
     (is (equal "different-value" (property-value test-sheep 'var)))))
 
+#+nil(test general-message-combination
+  "Checks combinations of :before, :after, and :around message dispatching."
+  (let ((test-sheep (clone () ((var "value")))))
+    (defmessage get-var ((sheep test-sheep))
+      )))
+
 (test call-next-message
   "Tests proper dispatch of next-message on a call to (call-next-message)"
   (let ((test-sheep (clone () ((var "value")))))

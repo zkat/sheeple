@@ -48,7 +48,7 @@
 	       "There are no primary messages for buzzword ~A When called with args:~%~S"
 	       :format-args (list name args))))
     (if around
-	(apply-message (car around) args (remove around messages))
+	(apply-message (car around) args primaries) ; this does NOT do what it's meant to do.
     	(let ((befores (cache-before cache))
 	      (afters (cache-after cache)))
 	  (when befores

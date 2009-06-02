@@ -6,6 +6,7 @@
    complex, and I don't even like the idea of stuffing everything into a buzzword definition. Things
    need to stay flexible, and this would be just plain ugly.
 ** DONE Allow individual message documentation
+** DONE Add CLONE/CLONE*/DEFSHEEP :documentation option
 ** TODO Make singly-dispatched readers just about as fast as simply calling property-value
 ** TODO Write caching scheme for property access.
    I should've done this in the first place. A simpler version of the same system used to dispatch
@@ -30,6 +31,7 @@
 *** TODO Write a "many many messages" test
 *** TODO Write more tests with multi-level hierarchy lists
 *** TODO (Re-)write unit tests for locked properties.
+** TODO Fix the fucking :around message dispatch bullshit.
 * DONE 1.0
 ** DONE Complete documentation
 *** DONE Write proper user guide

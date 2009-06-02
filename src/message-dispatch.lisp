@@ -32,6 +32,7 @@
 
 (defstruct (cache (:type vector))
   name
+  buzzword
   around
   primary
   before
@@ -39,41 +40,55 @@
   messages)
 
 (defun apply-messages (cache args)
+  (funcall (compute-effective-message-function cache)
+	   args))
+
+(defun compute-effective-message-function (cache)
   (let ((messages (cache-messages cache))
-	(around (cache-around cache))
+	(around (car (cache-around cache)))
 	(primaries (cache-primary cache)))
     (when (null primaries)
       (let ((name (cache-name cache)))
 	(error 'no-primary-messages
 	       :format-control 
-	       "There are no primary messages for buzzword ~A When called with args:~%~S"
-	       :format-args (list name args))))
+	       "There are no primary messages for buzzword ~A."
+	       :format-args (list name))))
     (if around
-	;; this does NOT do what it's meant to do.
-	(apply-message (car around) args (remove around messages))
-    	(let ((befores (cache-before cache))
+	(let ((next-emfun
+	       (compute-effective-message-function (create-message-cache
+						    (find-buzzword (cache-name cache))
+						    (remove around messages)))))
+	  (lambda (args)
+	    (funcall (message-function around) args next-emfun)))
+	(let ((next-emfun (compute-primary-emfun (cdr primaries)))
+	      (befores (cache-before cache))
 	      (afters (cache-after cache)))
-	  (when befores
-	    (dolist (before befores)
-	      (apply-message before args nil)))
-	  (multiple-value-prog1
-	      (apply-message (car primaries) args (cdr primaries))
-	    (when afters
-	      (dolist (after (reverse afters))
-		(apply-message after args nil))))))))
+	  (lambda (args)
+	    (when befores
+	     (dolist (before befores)
+	       (funcall (message-function before) args nil)))
+	   (multiple-value-prog1
+	       (funcall (message-function (car primaries)) args next-emfun)
+	     (when afters
+	       (dolist (after afters)
+		 (funcall (message-function after) args nil)))))))))
+
+(defun compute-primary-emfun (messages)
+  (if (null messages)
+      nil
+      (let ((next-emfun (compute-primary-emfun (cdr messages))))
+	(lambda (args)
+	  (funcall (message-function (car messages)) args next-emfun)))))
 
 (defun create-message-cache (buzzword messages)
   (make-cache
    :name (buzzword-name buzzword)
+   :buzzword buzzword
    :messages messages
    :primary (remove-if-not #'primary-message-p messages)
    :around (remove-if-not #'around-message-p messages)
    :before (remove-if-not #'before-message-p messages)
-   :after (remove-if-not #'after-message-p messages)))
-
-(defun apply-message (message args next-messages)
-  (let ((function (message-function message)))
-    (funcall (the function function) args next-messages)))
+   :after (reverse (remove-if-not #'after-message-p messages))))
 
 (defun find-applicable-messages (buzzword args &key (errorp t))
   (declare (buzzword buzzword))

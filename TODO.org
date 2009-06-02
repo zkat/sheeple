@@ -31,7 +31,8 @@
 *** TODO Write a "many many messages" test
 *** TODO Write more tests with multi-level hierarchy lists
 *** TODO (Re-)write unit tests for locked properties.
-** TODO Fix the fucking :around message dispatch bullshit.
+** DONE Fix the fucking :around message dispatch bullshit.
+   THERE. DONE. FUCK.
 * DONE 1.0
 ** DONE Complete documentation
 *** DONE Write proper user guide

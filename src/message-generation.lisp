@@ -204,10 +204,9 @@
        (flet ((next-message-p ()
 		(not (null next-messages)))
 	      (call-next-message (&rest cnm-args)
-		(funcall (message-function (car next-messages))
-			 (or cnm-args
-			     args)
-			 (cdr next-messages))))
+		(apply-message (car next-messages)
+			       (or cnm-args args)
+			       (cdr next-messages))))
 	 (declare (ignorable #'next-message-p #'call-next-message))
 	 (block ,(if (listp name)
 		     (cadr name)

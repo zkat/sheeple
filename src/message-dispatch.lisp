@@ -6,6 +6,7 @@
 ;;
 ;; TODO
 ;; * Figure out an optimization to make manipulators about as fast as calling property-value
+;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
@@ -48,6 +49,7 @@
 	       "There are no primary messages for buzzword ~A When called with args:~%~S"
 	       :format-args (list name args))))
     (if around
+	;; this does NOT do what it's meant to do.
 	(apply-message (car around) args (remove around messages))
     	(let ((befores (cache-before cache))
 	      (afters (cache-after cache)))

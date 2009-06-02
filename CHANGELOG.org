@@ -1,9 +1,10 @@
 * 1.0.1
 ** Features
 *** Added docstring support to messages. No way to grab them yet, but at least it doesn't complain.
+*** CLONE/CLONE*/DEFSHEEP now support a gimpy :documentation option.
 ** Bugs
-*** Renamed who-sets to property-owner
 *** Dispatch caching was keeping references around. Switched to weak pointers.
+*** Renamed who-sets to property-owner (conflict with CL function)
 * 1.0
 ** Features
 *** New and improved guid available in doc/user-guide.org!

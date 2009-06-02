@@ -32,6 +32,7 @@
 			      &key 
 			      properties
 			      nickname
+			      documentation
 			      deep-copy
 			      shallow-copy)
   (set-up-properties sheep properties)
@@ -42,6 +43,8 @@
     (shallow-copy sheep))
   (when deep-copy
     (deep-copy sheep))
+  (when documentation
+    (setf (sheep-documentation sheep) documentation))
   sheep)
 
 (defbuzzword reinitialize-sheep (sheep &key))
@@ -49,6 +52,7 @@
 				&key new-parents
 				new-properties
 				nickname
+				documentation
 				deep-copy shallow-copy)
   ;; cleanup
   (loop for parent in (sheep-direct-parents sheep)
@@ -62,7 +66,8 @@
 		    :properties new-properties
 		    :nickname nickname
 		    :deep-copy deep-copy
-		    :shallow-copy shallow-copy))
+		    :shallow-copy shallow-copy
+		    :documentation documentation))
 
 (defsheep =dolly= (=t=) ())
 

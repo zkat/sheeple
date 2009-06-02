@@ -11,6 +11,7 @@
 (defvar *max-sheep-id* 0)
 (defstruct (sheep (:constructor %make-sheep))
   (nickname nil)
+  (documentation "")
   (direct-parents nil)
   (direct-children nil)
   (direct-properties (make-hash-table :test #'eq))

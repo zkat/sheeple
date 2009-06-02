@@ -40,8 +40,7 @@
   (defun find-fleeced-wolf (wolf)
     (if (sheep-p wolf)
 	(error "~S seems to already be a sheep." wolf)
-	(or (gethash wolf boxed-object-table)
-	    (values (wear-wool wolf) nil))))
+	(gethash wolf boxed-object-table)))
 
   (defun wear-wool (wolf)
     "Autoboxes WOLF"
@@ -60,5 +59,6 @@
 (defun sheepify (sheep)
   "Returns SHEEP or fleeces it."
    (if (not (sheep-p sheep))
-       (find-fleeced-wolf sheep)
+       (or (find-fleeced-wolf sheep)
+	   (values (wear-wool sheep) t))
        (values sheep nil)))

@@ -6,6 +6,7 @@
 *** Dispatch caching was keeping references around. Switched to weak pointers.
 *** Renamed who-sets to property-owner (conflict with CL function)
 *** :around messages were horribly broken. This has been fixed.
+*** Sheeple mass-produced wolves. This has been fixed.
 * 1.0
 ** Features
 *** New and improved guid available in doc/user-guide.org!

@@ -125,7 +125,7 @@
   (declare (fixnum relevant-args-length))
   (declare (list args))
   (when (vectorp vector-entry)
-    (let ((vector-args (weak-pointer-value (vector-entry-args (the vector vector-entry)))))
+    (let ((vector-args (weak-pointer-value (vector-entry-args vector-entry))))
      (cond ((= 0 relevant-args-length)
 	    t)
 	   ((= 1 relevant-args-length)
@@ -133,7 +133,7 @@
 	   (t 
 	    (loop
 	       for i upto relevant-args-length
-	       for v-arg in (weak-pointer-value vector-args)
+	       for v-arg in vector-args
 	       for arg in args
 	       do (when (not (equal v-arg arg))
 		    (return-from desired-vector-entry-p nil))))))))

@@ -33,6 +33,13 @@
 *** TODO (Re-)write unit tests for locked properties.
 ** DONE Fix the fucking :around message dispatch bullshit.
    THERE. DONE. FUCK.
+** TODO Dispatching messages with things like strings or numbers creates a new wolf every time.
+   This is pretty terrible. I should at least fix stuff so that fleeced wolves are created only
+   when necessary.
+   Note: Fleeced wolves only need to exist if there are messages defined on them. Thus, if a message
+   is dispatched, it first checks if there is a wolf created for that built-in type. If not, it
+   can just find its built-in 'parent'.
+   This is such a horrible source of memory leakage.
 * DONE 1.0
 ** DONE Complete documentation
 *** DONE Write proper user guide

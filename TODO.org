@@ -33,7 +33,7 @@
 *** TODO (Re-)write unit tests for locked properties.
 ** DONE Fix the fucking :around message dispatch bullshit.
    THERE. DONE. FUCK.
-** TODO Dispatching messages with things like strings or numbers creates a new wolf every time.
+** DONE Dispatching messages with things like strings or numbers creates a new wolf every time.
    This is pretty terrible. I should at least fix stuff so that fleeced wolves are created only
    when necessary.
    Note: Fleeced wolves only need to exist if there are messages defined on them. Thus, if a message

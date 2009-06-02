@@ -105,7 +105,10 @@
 
 (defun fetch-memo-vector-entry (args buzzword relevant-args-length)
   (let* ((memo-vector (buzzword-memo-vector buzzword))
-	 (orig-index (mod (the fixnum (sheep-id (sheepify (car args))))
+	 (orig-index (mod (the fixnum (sheep-id (if (sheep-p (car args))
+						    (car args)
+						    (or (find-fleeced-wolf (car args))
+							(fleece-of (car args))))))
 			  (length memo-vector))))
     ;; I don't know how this could be any faster. My best choice is probably to avoid calling it.
     (declare (vector memo-vector))
@@ -142,7 +145,10 @@
 
 (defun memoize-message-dispatch (buzzword args msg-list)
   (let ((msg-cache (create-message-cache buzzword msg-list))
-	(maybe-index (mod (the fixnum (sheep-id (sheepify (car args))))
+	(maybe-index (mod (the fixnum (sheep-id (if (sheep-p (car args))
+						    (car args)
+						    (or (find-fleeced-wolf (car args))
+							(fleece-of (car args))))))
 			  (length (the vector (buzzword-memo-vector buzzword))))))
     (add-entry-to-buzzword msg-cache buzzword args maybe-index)
     msg-cache))
@@ -174,7 +180,8 @@
 	   for index upto (1- n)
 	   do (let* ((arg (if (sheep-p arg)
 			      arg
-			      (sheepify arg)))
+			      (or (find-fleeced-wolf arg)
+				  (fleece-of arg))))
 		     (curr-sheep-list (sheep-hierarchy-list arg)))
 		(loop
 		   for curr-sheep in curr-sheep-list

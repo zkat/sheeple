@@ -31,7 +31,6 @@
     (apply-messages messages args)))
 
 (defstruct (cache (:type vector))
-  name
   buzzword
   around
   primary
@@ -48,7 +47,7 @@
 	(around (car (cache-around cache)))
 	(primaries (cache-primary cache)))
     (when (null primaries)
-      (let ((name (cache-name cache)))
+      (let ((name (buzzword-name (cache-buzzword cache))))
 	(error 'no-primary-messages
 	       :format-control 
 	       "There are no primary messages for buzzword ~A."
@@ -56,7 +55,7 @@
     (if around
 	(let ((next-emfun
 	       (compute-effective-message-function (create-message-cache
-						    (find-buzzword (cache-name cache))
+						    (cache-buzzword cache)
 						    (remove around messages)))))
 	  (lambda (args)
 	    (funcall (message-function around) args next-emfun)))
@@ -82,7 +81,6 @@
 
 (defun create-message-cache (buzzword messages)
   (make-cache
-   :name (buzzword-name buzzword)
    :buzzword buzzword
    :messages messages
    :primary (remove-if-not #'primary-message-p messages)

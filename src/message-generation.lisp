@@ -177,21 +177,22 @@
 
 ;;; macro
 (defmacro defmessage (&rest args)
-  (multiple-value-bind (name qualifiers specialized-lambda-list docstring body)
-      (parse-defmessage args)
-    (multiple-value-bind (parameters ll participants required)
-	(parse-specialized-lambda-list specialized-lambda-list)
-      (declare (ignore parameters))
-      (declare (ignore required))
-      `(ensure-message
-	',name
-	:qualifiers ',qualifiers
-	;; TODO - use the new stuff
-	:lambda-list ',ll
-	:participants (list ,@participants)
-	:documentation ,docstring
-	:function ,(make-message-lambda name ll body)
-	:body '(block ,name ,@body)))))
+  (eval-when (:compile-toplevel :load-toplevel :execute)
+   (multiple-value-bind (name qualifiers specialized-lambda-list docstring body)
+       (parse-defmessage args)
+     (multiple-value-bind (parameters ll participants required)
+	 (parse-specialized-lambda-list specialized-lambda-list)
+       (declare (ignore parameters))
+       (declare (ignore required))
+       `(ensure-message
+	 ',name
+	 :qualifiers ',qualifiers
+	 ;; TODO - use the new stuff
+	 :lambda-list ',ll
+	 :participants (list ,@participants)
+	 :documentation ,docstring
+	 :function ,(make-message-lambda name ll body)
+	 :body '(block ,name ,@body))))))
 
 (defun make-message-lambda (name lambda-list body)
   (let* ((bw (find-buzzword name nil))

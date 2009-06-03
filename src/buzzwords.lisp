@@ -104,11 +104,12 @@
 ;; then expands to a call to ensure-buzzword
 (defmacro defbuzzword (name lambda-list &rest options)
   (declare (type list lambda-list))
-  (check-bw-lambda-list lambda-list)
-  `(ensure-buzzword
-    ',name
-    :lambda-list ',lambda-list
-    ,@(canonize-buzzword-options options)))
+  (eval-when (:compile-toplevel :load-toplevel :execute)
+   (check-bw-lambda-list lambda-list)
+   `(ensure-buzzword
+     ',name
+     :lambda-list ',lambda-list
+     ,@(canonize-buzzword-options options))))
 
 ;; This pair just pretties up the options during macro expansion
 (defun canonize-buzzword-options (options)

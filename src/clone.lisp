@@ -172,20 +172,24 @@
 
 (defmacro defsheep (name sheeple properties &rest options)
   (eval-when (:compile-toplevel :load-toplevel :execute)
-   (if (boundp name)
-       `(let ((sheep (replace-or-reinitialize-sheep 
-		      ,name 
-		      ,(canonize-sheeple sheeple)
-		      ,(canonize-properties* properties) 
-		      ,@(canonize-clone-options options))))
-	  (unless (sheep-nickname sheep)
-	    (setf (sheep-nickname sheep) ',name))
-	  (setf ,name sheep)
-	  ',name)
-       `(let ((sheep (clone* ,sheeple ,properties ,@options)))
-	  (unless (sheep-nickname sheep)
-	    (setf (sheep-nickname sheep) ',name))
-	  (defvar ,name sheep)))))
+    (if (boundp name)
+	`(progn
+	   (defvar ,name)
+	   (let ((sheep (replace-or-reinitialize-sheep 
+			 ,name 
+			 ,(canonize-sheeple sheeple)
+			 ,(canonize-properties* properties) 
+			 ,@(canonize-clone-options options))))
+	     (unless (sheep-nickname sheep)
+	       (setf (sheep-nickname sheep) ',name))
+	     (setf ,name sheep)
+	     ',name))
+	`(progn
+	   (defvar ,name)
+	   (let ((sheep (clone* ,sheeple ,properties ,@options)))
+	     (unless (sheep-nickname sheep)
+	       (setf (sheep-nickname sheep) ',name))
+	     (setf ,name sheep))))))
 
 (defun replace-or-reinitialize-sheep (maybe-sheep parents properties &rest options)
   (if (sheep-p maybe-sheep)

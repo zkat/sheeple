@@ -1,26 +1,15 @@
-* TODO 1.0.1+ - "The Road to Stability"
+* TODO 1.1
 ** TODO Implement :message option for defbuzzword (like CLOS' :method option)
    I don't care about this feature all that much, so I might just keep bumping it until someone
    who -does- care asks for it.
    UPDATE: I don't think I even want this. It makes the defbuzzword macro horribly bloated and
    complex, and I don't even like the idea of stuffing everything into a buzzword definition. Things
    need to stay flexible, and this would be just plain ugly.
-** DONE Allow individual message documentation
-** DONE Add CLONE/CLONE*/DEFSHEEP :documentation option
 ** TODO Make singly-dispatched readers just about as fast as simply calling property-value
 ** TODO Write caching scheme for property access.
    I should've done this in the first place. A simpler version of the same system used to dispatch
    messages would do wonders for read performance, without seriously harming writer performance.
-** TODO Write a small sample application
-   This will really help me iron out any last details in the API that are important enough to have
-   there before 1.0 ships. Plus, it's silly to release shit without even trying it...
-   I thought it would be a good idea to convert yashmup, but the current approach of simply renaming
-   everything doesn't work, because of the behavior of prototypes, and the setup I had for classes
-   (which was pretty awful).
-   What I should do instead is start a different project, based on yashmup, but coded in sheeple
-   from the bottom up.
-** TODO Document code
-    Note: I can use stuff from the user's guide for this, but it's important.
+
 ** TODO Write more unit tests.
 *** TODO Fix unit tests now that undefinition works different...
     OHGOD THEY ALL BROKE
@@ -31,6 +20,21 @@
 *** TODO Write a "many many messages" test
 *** TODO Write more tests with multi-level hierarchy lists
 *** TODO (Re-)write unit tests for locked properties.
+* DONE 1.0.1
+** DONE Allow individual message documentation
+** DONE Add CLONE/CLONE*/DEFSHEEP :documentation option
+** DONE Write a small sample application
+   This will really help me iron out any last details in the API that are important enough to have
+   there before 1.0 ships. Plus, it's silly to release shit without even trying it...
+   I thought it would be a good idea to convert yashmup, but the current approach of simply renaming
+   everything doesn't work, because of the behavior of prototypes, and the setup I had for classes
+   (which was pretty awful).
+   What I should do instead is start a different project, based on yashmup, but coded in sheeple
+   from the bottom up.
+   UPDATE: There's been lots of progress since I started working on UID. Tagging this as done (for now)
+** DONE Document code
+    Note: I can use stuff from the user's guide for this, but it's important.
+    UPDATE: it's documented enough (for now).
 ** DONE Fix the fucking :around message dispatch bullshit.
    THERE. DONE. FUCK.
 ** DONE Dispatching messages with things like strings or numbers creates a new wolf every time.

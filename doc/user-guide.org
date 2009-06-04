@@ -69,12 +69,11 @@
    Sheeple does not have a concept of "classes". Instead, new objects are simply based on other
    objects. For the purposes of maintaining what would usually be a class hierarchy, one can treat
    sheeple as "prototypes" for other sheeple -- it's common to simply define an object for the sole
-   purpose of cloning it.
-   Sheeple can clone multiple objects at the same time, and the rules for dividing up behavior are
-   the same CLOS uses (first parent has greater precedence than second, ancestors are ordered with a
-   breadth-first left-to-right graph sorting algorithm.)  The list of parents/delegates is
-   dynamic. Parents can be added or removed at run time.  New sheeple are created by using the CLONE
-   and DEFSHEEP macros.
+   purpose of cloning it.  Sheeple can clone multiple objects at the same time, and the rules for
+   dividing up behavior are the same CLOS uses (you can read the rules here:
+   http://www.lispworks.com/documentation/HyperSpec/Body/04_ce.htm).  The list of parents/delegates
+   is dynamic. Parents can be added or removed at run time.  New sheeple are created by using the
+   CLONE and DEFSHEEP macros.
 
 *** CLONE macro
     CLONE works similar to DEFCLASS:

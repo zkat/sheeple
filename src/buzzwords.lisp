@@ -13,14 +13,14 @@
   (name nil)
   (lambda-list nil)
   (messages nil)
-  (memo-vector (make-array 450))
+  (memo-vector (make-array 40))
   ;; This contains an arg-info object that is used to maintain
   ;; lambda-list congruence.
   (arg-info (make-arg-info))
   (documentation ""))
 
 (defun clear-memo-table (buzzword)
-  (setf (buzzword-memo-vector buzzword) (make-array 450)))
+  (setf (buzzword-memo-vector buzzword) (make-array 40)))
 
 ;;;
 ;;; Buzzword definition

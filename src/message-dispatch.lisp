@@ -30,6 +30,7 @@
   (let ((messages (find-applicable-messages buzzword args)))
     (apply-messages messages args)))
 
+(defparameter *caching-active-p* t)
 (defstruct (cache (:type vector))
   buzzword
   around
@@ -103,6 +104,24 @@
 							:errorp errorp)))
 	  (memoize-message-dispatch buzzword relevant-args new-msg-list)))))
 
+(declaim (inline desired-vector-entry-p))
+(defun desired-vector-entry-p (args vector-entry relevant-args-length)
+  (declare (fixnum relevant-args-length))
+  (declare (list args))
+  (when (vectorp vector-entry)
+    (let ((vector-args (weak-pointer-value (vector-entry-args vector-entry))))
+      (cond ((= 0 relevant-args-length)
+             t)
+            ((= 1 relevant-args-length)
+             (equal (car args) (car vector-args)))
+            (t 
+             (loop
+                for i upto relevant-args-length
+                for v-arg in vector-args
+                for arg in args
+                do (when (not (equal v-arg arg))
+                     (return-from desired-vector-entry-p nil))))))))
+
 (defun fetch-memo-vector-entry (args buzzword relevant-args-length)
   (let* ((memo-vector (buzzword-memo-vector buzzword))
 	 (orig-index (mod (the fixnum (sheep-id (if (sheep-p (car args))
@@ -122,22 +141,7 @@
 		    (return-from fetch-memo-vector-entry (vector-entry-msg-cache entry))))
 	    nil)))))
 
-(defun desired-vector-entry-p (args vector-entry relevant-args-length)
-  (declare (fixnum relevant-args-length))
-  (declare (list args))
-  (when (vectorp vector-entry)
-    (let ((vector-args (weak-pointer-value (vector-entry-args vector-entry))))
-      (cond ((= 0 relevant-args-length)
-             t)
-            ((= 1 relevant-args-length)
-             (equal (car args) (car vector-args)))
-            (t 
-             (loop
-                for i upto relevant-args-length
-                for v-arg in vector-args
-                for arg in args
-                do (when (not (equal v-arg arg))
-                     (return-from desired-vector-entry-p nil))))))))
+
 
 (defstruct (vector-entry (:type vector))
   args

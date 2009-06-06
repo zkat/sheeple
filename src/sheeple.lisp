@@ -13,7 +13,7 @@
   (nickname nil)
   (documentation "")
   (direct-parents nil)
-  (direct-children (make-weak-hash-table :weakness :value :test #'eq))
+  (direct-children (make-weak-hash-table :weakness :key :test #'eq))
   (direct-properties (make-hash-table :test #'eq))
 ;;  (property-owners (make-weak-hash-table :weakness :value :test #'eq))
   (direct-roles nil)

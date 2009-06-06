@@ -13,7 +13,7 @@
   (nickname nil)
   (documentation "")
   (direct-parents nil)
-  (direct-children nil)
+  (direct-children (make-weak-hash-table :weakness :value :test #'eq))
   (direct-properties (make-hash-table :test #'eq))
 ;;  (property-owners (make-weak-hash-table :weakness :value :test #'eq))
   (direct-roles nil)
@@ -52,11 +52,8 @@
 			  (list =dolly=))))
     (setf (sheep-direct-parents sheep) real-parents)
     (loop for parent in parents
-       do (let ((pointer (make-weak-pointer sheep)))
-    	    (pushnew pointer (sheep-direct-children parent))
-    	    (finalize sheep (lambda () (setf (sheep-direct-children parent)
-    					     (delete (the (not number) pointer)
-    						     (the list (sheep-direct-children parent))))))))
+         for pointer = (make-weak-pointer sheep)
+       do (setf (gethash sheep (sheep-direct-children parent)) t))
     (memoize-sheep-hierarchy-list sheep)
     sheep))
 
@@ -122,11 +119,7 @@
 	 (handler-case
 	     (progn
 	       (pushnew new-parent (sheep-direct-parents child))
-	       (let ((pointer (make-weak-pointer child)))
-		 (pushnew pointer (sheep-direct-children new-parent))
-		 (finalize child (lambda () (setf (sheep-direct-children new-parent)
-						  (delete pointer 
-							  (sheep-direct-children new-parent))))))
+               (setf (gethash child (sheep-direct-children new-parent)) t)
 	       child)
 	   (sheep-hierarchy-error ()
 	     (progn
@@ -139,8 +132,7 @@
 (defun remove-parent (parent child &key (keep-properties nil))
   (setf (sheep-direct-parents child)
 	(delete parent (sheep-direct-parents child)))
-  (setf (sheep-direct-children parent)
-	(delete child (sheep-direct-children parent) :key #'weak-pointer-value))
+  (remhash child (sheep-direct-children parent))
   (when keep-properties
     (loop for property-name being the hash-keys of (sheep-direct-properties parent)
        using (hash-value value)
@@ -224,7 +216,8 @@
   (let ((list (compute-sheep-hierarchy-list sheep)))
     (setf (sheep-hierarchy-list sheep)
 	  list)
-    (mapc (lambda (descendant) 
-	    (memoize-sheep-hierarchy-list (weak-pointer-value descendant)))
-	  (sheep-direct-children sheep))))
+    (maphash (lambda (descendant iggy) 
+               (declare (ignore iggy))
+               (memoize-sheep-hierarchy-list descendant))
+             (sheep-direct-children sheep))))
 

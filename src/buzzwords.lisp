@@ -14,7 +14,6 @@
   (lambda-list nil)
   (messages nil)
   (memo-table (make-weak-hash-table :weakness :key-and-value :test #'equal))
-  (memo-vector (make-array 8 :adjustable t))
   ;; This contains an arg-info object that is used to maintain
   ;; lambda-list congruence.
   (arg-info (make-arg-info))

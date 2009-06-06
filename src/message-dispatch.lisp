@@ -154,17 +154,28 @@
     msg-cache))
 
 (defun add-entry-to-buzzword (cache buzzword args index)
-  (let ((memo-vector (buzzword-memo-vector buzzword)))
-    (declare (fixnum index))
-    (loop for i from index
-       do (progn
-	    (when (>= i (length memo-vector))
-	      (adjust-array memo-vector (+ (length memo-vector) 8)))
-	    (when (eql (elt (the (not string) memo-vector) i) 0)
-	      (setf (elt memo-vector index) (make-vector-entry 
-					     :args (make-weak-pointer args)
-					     :msg-cache cache))
-	      (loop-finish))))))
+  (declare (fixnum index))
+  (let ((memo-vector (buzzword-memo-vector buzzword))
+        (vector-entry (make-vector-entry 
+                       :args (make-weak-pointer args)
+                       :msg-cache cache))
+        (succeededp nil))
+    (loop for i from index upto (1- (length memo-vector))
+       do (when (eql (elt (the (not string) memo-vector) i) 0)
+            (setf (elt memo-vector i) vector-entry)
+            (setf succeededp t)
+            (loop-finish)))
+    (if succeededp
+        t
+        (progn
+          (loop for i upto (1- (length memo-vector))
+             do (when (eql (elt (the (not string) memo-vector) i) 0)
+                  (setf (elt memo-vector i) vector-entry)
+                  (setf succeededp t)
+                  (loop-finish)))
+          (if succeededp
+              t
+              (setf (elt memo-vector index) vector-entry))))))
 
 (defun %find-applicable-messages  (buzzword args &key (errorp t))
   "Returns the most specific message using BUZZWORD and ARGS."

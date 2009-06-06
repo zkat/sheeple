@@ -91,6 +91,7 @@
 
 (defun find-applicable-messages (buzzword args &key (errorp t))
   (declare (buzzword buzzword))
+  (declare (list args))
   (let* (;; This doesn't seem to be expensive at all..
 	 (relevant-args-length (the fixnum (arg-info-number-required (buzzword-arg-info buzzword))))
 	 ;; If I can avoid calling fetch-memo-vector-entry for singly-dispatched readers, that
@@ -141,11 +142,33 @@
 		    (return-from fetch-memo-vector-entry (vector-entry-msg-cache entry))))
 	    nil)))))
 
-
-
 (defstruct (vector-entry (:type vector))
   args
   msg-cache)
+
+(declaim (inline add-entry-to-buzzword))
+(defun add-entry-to-buzzword (cache buzzword args index)
+  (declare (fixnum index))
+  (let ((memo-vector (buzzword-memo-vector buzzword))
+        (vector-entry (make-vector-entry 
+                       :args (make-weak-pointer args)
+                       :msg-cache cache)))
+    (cond ((loop for i from index below (length (the simple-vector memo-vector))
+              when (eql (elt (the simple-vector memo-vector) i) 0)
+              do (progn
+                   (setf (elt memo-vector i) vector-entry)
+                   (return t))
+              finally (return nil))
+           t)
+          ((loop for i from index downto 0
+             when (eql (elt memo-vector i) 0)
+             do (progn
+                  (setf (elt memo-vector i) vector-entry)
+                  (return t))
+              finally (return nil))
+           t)
+          ((setf (elt memo-vector index) vector-entry)
+           t))))
 
 (defun memoize-message-dispatch (buzzword args msg-list)
   (let ((msg-cache (create-message-cache buzzword msg-list))
@@ -157,32 +180,9 @@
     (add-entry-to-buzzword msg-cache buzzword args maybe-index)
     msg-cache))
 
-(defun add-entry-to-buzzword (cache buzzword args index)
-  (declare (fixnum index))
-  (let ((memo-vector (buzzword-memo-vector buzzword))
-        (vector-entry (make-vector-entry 
-                       :args (make-weak-pointer args)
-                       :msg-cache cache))
-        (succeededp nil))
-    (loop for i from index upto (1- (length memo-vector))
-       do (when (eql (elt (the (not string) memo-vector) i) 0)
-            (setf (elt memo-vector i) vector-entry)
-            (setf succeededp t)
-            (loop-finish)))
-    (if succeededp
-        t
-        (progn
-          (loop for i upto (1- (length memo-vector))
-             do (when (eql (elt (the (not string) memo-vector) i) 0)
-                  (setf (elt memo-vector i) vector-entry)
-                  (setf succeededp t)
-                  (loop-finish)))
-          (if succeededp
-              t
-              (setf (elt memo-vector index) vector-entry))))))
-
 (defun %find-applicable-messages  (buzzword args &key (errorp t))
   "Returns the most specific message using BUZZWORD and ARGS."
+  (declare (list args))
   (if (null args)
       (buzzword-messages buzzword)
       (let ((selector (buzzword-name buzzword))
@@ -256,7 +256,7 @@
     (declare (fixnum total))
     (loop for item across rank
        do (when (numberp item)
-	    (incf total (the fixnum item))))
+	    (incf (the fixnum total) (the fixnum item))))
     total))
 
 (defun message-specialized-portion (msg)

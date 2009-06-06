@@ -113,7 +113,10 @@
     msg-cache))
 
 (defun add-entry-to-buzzword (cache buzzword args)
-  (setf (gethash args (buzzword-memo-table buzzword)) cache))
+  (let ((memo-table (buzzword-memo-table buzzword)))
+    (when (> (hash-table-count memo-table) 500)
+      (clrhash memo-table))
+    (setf (gethash args (buzzword-memo-table buzzword)) cache)))
 
 (defun %find-applicable-messages  (buzzword args &key (errorp t))
   "Returns the most specific message using BUZZWORD and ARGS."

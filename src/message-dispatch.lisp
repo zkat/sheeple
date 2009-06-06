@@ -94,7 +94,7 @@
 	 (relevant-args-length (the fixnum (arg-info-number-required (buzzword-arg-info buzzword))))
 	 ;; If I can avoid calling fetch-memo-vector-entry for singly-dispatched readers, that
 	 ;; would be -lovely-. Not sure how to do that yet, though.
-	 (memo-entry (fetch-memo-vector-entry args buzzword relevant-args-length)))
+	 (memo-entry (fetch-memo-entry args buzzword relevant-args-length)))
     (or memo-entry
 	memo-entry
 	(let* ((relevant-args (subseq args 0 relevant-args-length))
@@ -103,68 +103,17 @@
 							:errorp errorp)))
 	  (memoize-message-dispatch buzzword relevant-args new-msg-list)))))
 
-(defun fetch-memo-vector-entry (args buzzword relevant-args-length)
-  (let* ((memo-vector (buzzword-memo-vector buzzword))
-	 (orig-index (mod (the fixnum (sheep-id (if (sheep-p (car args))
-						    (car args)
-						    (or (find-fleeced-wolf (car args))
-							(fleece-of (car args))))))
-			  (length memo-vector))))
-    ;; I don't know how this could be any faster. My best choice is probably to avoid calling it.
-    (declare (vector memo-vector))
-    (declare (fixnum orig-index))
-    (let ((attempt (aref memo-vector orig-index)))
-      (if (desired-vector-entry-p args attempt relevant-args-length)
-	  (vector-entry-msg-cache attempt)
-	  (progn
-	    (loop for entry across memo-vector
-	       do (when (desired-vector-entry-p args entry relevant-args-length)
-		    (return-from fetch-memo-vector-entry (vector-entry-msg-cache entry))))
-	    nil)))))
-
-(defun desired-vector-entry-p (args vector-entry relevant-args-length)
-  (declare (fixnum relevant-args-length))
-  (declare (list args))
-  (when (vectorp vector-entry)
-    (let ((vector-args (weak-pointer-value (vector-entry-args vector-entry))))
-      (cond ((= 0 relevant-args-length)
-             t)
-            ((= 1 relevant-args-length)
-             (equal (car args) (car vector-args)))
-            (t 
-             (loop
-                for i upto relevant-args-length
-                for v-arg in vector-args
-                for arg in args
-                do (when (not (equal v-arg arg))
-                     (return-from desired-vector-entry-p nil))))))))
-
-(defstruct (vector-entry (:type vector))
-  args
-  msg-cache)
+(defun fetch-memo-entry (args buzzword relevant-args-length)
+  (let* ((memo-table (buzzword-memo-table buzzword)))
+    (gethash (subseq args 0 relevant-args-length) memo-table)))
 
 (defun memoize-message-dispatch (buzzword args msg-list)
-  (let ((msg-cache (create-message-cache buzzword msg-list))
-	(maybe-index (mod (the fixnum (sheep-id (if (sheep-p (car args))
-						    (car args)
-						    (or (find-fleeced-wolf (car args))
-							(fleece-of (car args))))))
-			  (length (the vector (buzzword-memo-vector buzzword))))))
-    (add-entry-to-buzzword msg-cache buzzword args maybe-index)
+  (let ((msg-cache (create-message-cache buzzword msg-list)))
+    (add-entry-to-buzzword msg-cache buzzword args)
     msg-cache))
 
-(defun add-entry-to-buzzword (cache buzzword args index)
-  (let ((memo-vector (buzzword-memo-vector buzzword)))
-    (declare (fixnum index))
-    (loop for i from index
-       do (progn
-	    (when (>= i (length memo-vector))
-	      (adjust-array memo-vector (+ (length memo-vector) 8)))
-	    (when (eql (elt (the (not string) memo-vector) i) 0)
-	      (setf (elt memo-vector index) (make-vector-entry 
-					     :args (make-weak-pointer args)
-					     :msg-cache cache))
-	      (loop-finish))))))
+(defun add-entry-to-buzzword (cache buzzword args)
+  (setf (gethash args (buzzword-memo-table buzzword)) cache))
 
 (defun %find-applicable-messages  (buzzword args &key (errorp t))
   "Returns the most specific message using BUZZWORD and ARGS."

@@ -13,7 +13,7 @@
   (name nil)
   (lambda-list nil)
   (messages nil)
-  (memo-table (make-hash-table :test #'equal))
+  (memo-table (make-weak-hash-table :weakness :key :test #'equal))
   (memo-vector (make-array 8 :adjustable t))
   ;; This contains an arg-info object that is used to maintain
   ;; lambda-list congruence.
@@ -21,7 +21,7 @@
   (documentation ""))
 
 (defun clear-memo-table (buzzword)
-  (setf (buzzword-memo-vector buzzword) (make-array 8 :adjustable t)))
+  (setf (buzzword-memo-table buzzword) (make-hash-table :test #'equal)))
 
 ;;;
 ;;; Buzzword definition

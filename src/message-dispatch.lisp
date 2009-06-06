@@ -64,13 +64,13 @@
 	      (afters (cache-after cache)))
 	  (lambda (args)
 	    (when befores
-	     (dolist (before befores)
-	       (funcall (message-function before) args nil)))
-	   (multiple-value-prog1
-	       (funcall (message-function (car primaries)) args next-emfun)
-	     (when afters
-	       (dolist (after afters)
-		 (funcall (message-function after) args nil)))))))))
+              (dolist (before befores)
+                (funcall (message-function before) args nil)))
+            (multiple-value-prog1
+                (funcall (message-function (car primaries)) args next-emfun)
+              (when afters
+                (dolist (after afters)
+                  (funcall (message-function after) args nil)))))))))
 
 (defun compute-primary-emfun (messages)
   (if (null messages)
@@ -127,17 +127,17 @@
   (declare (list args))
   (when (vectorp vector-entry)
     (let ((vector-args (weak-pointer-value (vector-entry-args vector-entry))))
-     (cond ((= 0 relevant-args-length)
-	    t)
-	   ((= 1 relevant-args-length)
-	    (equal (car args) (car vector-args)))
-	   (t 
-	    (loop
-	       for i upto relevant-args-length
-	       for v-arg in vector-args
-	       for arg in args
-	       do (when (not (equal v-arg arg))
-		    (return-from desired-vector-entry-p nil))))))))
+      (cond ((= 0 relevant-args-length)
+             t)
+            ((= 1 relevant-args-length)
+             (equal (car args) (car vector-args)))
+            (t 
+             (loop
+                for i upto relevant-args-length
+                for v-arg in vector-args
+                for arg in args
+                do (when (not (equal v-arg arg))
+                     (return-from desired-vector-entry-p nil))))))))
 
 (defstruct (vector-entry (:type vector))
   args

@@ -1,13 +1,23 @@
+* 1.0.2
+** Features
+   NIL
+** Bugfixes
+*** Caching tweaked to not lag CLONE
+    There's some horrible shit going on with the caching scheme.
+    I did some temporary tweaking that makes object creation a bit more acceptable,
+    but it's still ridiculously slow.
+
 * 1.0.1
 ** Features
 *** Added docstring support to messages. No way to grab them yet, but at least it doesn't complain.
 *** CLONE/CLONE*/DEFSHEEP now support a gimpy :documentation option.
-** Bugs
+** Bugfixes
 *** Dispatch caching was keeping references around. Switched to weak pointers.
 *** Renamed who-sets to property-owner (conflict with CL function)
 *** :around messages were horribly broken. This has been fixed.
 *** Sheeple mass-produced wolves. This has been fixed.
 *** All the undefined-variable warnings are gone now.
+
 * 1.0
 ** Features
 *** New and improved guid available in doc/user-guide.org!
@@ -26,7 +36,7 @@
     the function now helpfully returns a list of vectors. The first entry is the buzzword name, the
     second is the position the sheep can participate in.
 *** UNDEFBUZZWORD removed
-** Bugs
+** Bugfixes
 *** Made next-messages ignorable. Compilers should no longer warn about it.
 *** There was a bug in CCL with ensure-buzzword complaining about :documentation
 *** Added another check to CLONE. Can no longer have :reader/:writer/:accessor as nil, as well as define one.
@@ -39,7 +49,7 @@
 *** Property-access is no longer cached -- setfing was way too expensive.
     It will stay thing way unless I figure out a good lazy-update scheme.
 *** Property-access itself is a little faster now, too
-** Bugs
+** Bugfixes
 *** Shit wasn't updating properly before, so bugs could crop up with deep hierarchies.
 *** Little stability tweaks here and there. Doesn't break as often :)
 *** Buzzwords with no arglist work now (snort)
@@ -48,7 +58,7 @@
 * 0.8
 ** Features
 *** Significant speedup for message dispatch, using a simple caching system.
-** Bugs
+** Bugfixes
 *** &allow-other-keys is no longer necessary when using &key args with buzzwords.
 
 * 0.7
@@ -56,7 +66,7 @@
 *** Can now define messages on initialize-sheep and reinitialize-sheep
 *** Message lambda-list congruence now follows the same rules as CLOS:
     http://www.lispworks.com/documentation/HyperSpec/Body/07_fd.htm
-** Bugs
+** Bugfixes
 *** buzzwords with &key, &rest, etc, actually work now
 *** some mostly-inconsequential whoopsies with conditions were patched
 

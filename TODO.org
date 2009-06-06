@@ -20,8 +20,7 @@
 *** TODO Write a "many many messages" test
 *** TODO Write more tests with multi-level hierarchy lists
 *** TODO (Re-)write unit tests for locked properties.
-** DONE GOOD GOD CLONING IS SO FUCKING SLOW
-   Do more. Later. I'm happy for now.
+** TODO GOOD GOD CLONING IS SO FUCKING SLOW
 * DONE 1.0.1
 ** DONE Allow individual message documentation
 ** DONE Add CLONE/CLONE*/DEFSHEEP :documentation option

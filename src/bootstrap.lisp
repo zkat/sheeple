@@ -9,8 +9,8 @@
 
 (defvar =t=
   (let ((sheep (%make-sheep)))
-     (finalize-sheep sheep)
-     sheep))
+    (finalize-sheep sheep)
+    sheep))
 
 (defvar =dolly=
   (let ((sheep (%make-sheep)))
@@ -18,23 +18,24 @@
     (finalize-sheep sheep)
     sheep))
 
-(defun spawn-sheep (sheeple &rest all-keys)
-  "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
-  (let ((sheep (apply #'initialize-sheep
-		      (let ((sheep (add-parents (%make-sheep) sheeple)))
-			(finalize-sheep sheep)
-			sheep)
-		      all-keys)))
-    sheep))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun spawn-sheep (sheeple &rest all-keys)
+    "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
+    (let ((sheep (apply #'initialize-sheep
+                        (let ((sheep (add-parents (%make-sheep) sheeple)))
+                          (finalize-sheep sheep)
+                          sheep)
+                        all-keys)))
+      sheep)))
 
 (defbuzzword initialize-sheep (sheep &key))
 (defmessage initialize-sheep (sheep
-			      &key 
-			      properties
-			      nickname
-			      documentation
-			      deep-copy
-			      shallow-copy)
+                              &key 
+                              properties
+                              nickname
+                              documentation
+                              deep-copy
+                              shallow-copy)
   (set-up-properties sheep properties)
   (execute-clonefunctions sheep)
   (setf (sheep-nickname sheep) nickname)
@@ -49,25 +50,25 @@
 
 (defbuzzword reinitialize-sheep (sheep &key))
 (defmessage reinitialize-sheep (sheep
-				&key new-parents
-				new-properties
-				nickname
-				documentation
-				deep-copy shallow-copy)
+                                &key new-parents
+                                new-properties
+                                nickname
+                                documentation
+                                deep-copy shallow-copy)
   ;; cleanup
   (loop for parent in (sheep-direct-parents sheep)
-       do (remove-parent parent sheep))
+     do (remove-parent parent sheep))
   (clrhash (sheep-cloneforms sheep))
   (clrhash (sheep-clonefunctions sheep))
   (clrhash (sheep-direct-properties sheep))
   (add-parents sheep new-parents)
   ;; initialize again
   (initialize-sheep sheep 
-		    :properties new-properties
-		    :nickname nickname
-		    :deep-copy deep-copy
-		    :shallow-copy shallow-copy
-		    :documentation documentation))
+                    :properties new-properties
+                    :nickname nickname
+                    :deep-copy deep-copy
+                    :shallow-copy shallow-copy
+                    :documentation documentation))
 
 (defsheep =dolly= (=t=) ())
 

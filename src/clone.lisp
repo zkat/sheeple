@@ -156,19 +156,17 @@
 
 (defmacro clone (sheeple properties &rest options)
   "Standard sheep-generation macro"
-  (eval-when (:compile-toplevel :load-toplevel :execute)
-   `(spawn-sheep
-     ,(canonize-sheeple sheeple)
-     :properties ,(canonize-properties properties)
-     ,@(canonize-clone-options options))))
+  `(spawn-sheep
+    ,(canonize-sheeple sheeple)
+    :properties ,(canonize-properties properties)
+    ,@(canonize-clone-options options)))
 
 (defmacro clone* (sheeple properties &rest options)
   "Standard sheep-generation macro. This variant auto-generates accessors."
-  (eval-when (:compile-toplevel :load-toplevel :execute)
-   `(spawn-sheep
-     ,(canonize-sheeple sheeple)
-     :properties ,(canonize-properties* properties)
-     ,@(canonize-clone-options options))))
+  `(spawn-sheep
+    ,(canonize-sheeple sheeple)
+    :properties ,(canonize-properties* properties)
+    ,@(canonize-clone-options options)))
 
 (defmacro defsheep (name sheeple properties &rest options)
   (if (boundp name)
@@ -185,7 +183,7 @@
            ',name))
       `(progn
          (defvar ,name)
-         (let ((sheep (clone* ,sheeple ,properties ,@options)))
+         (let* ((sheep (clone* ,sheeple ,properties ,@options)))
            (unless (sheep-nickname sheep)
              (setf (sheep-nickname sheep) ',name))
            (setf ,name sheep)))))

@@ -1,3 +1,7 @@
+* 1.0.2
+** Features
+** Bugs
+*** Maybe fixed: there was a problem with how things were getting evaluated.
 * 1.0.1
 ** Features
 *** Added docstring support to messages. No way to grab them yet, but at least it doesn't complain.

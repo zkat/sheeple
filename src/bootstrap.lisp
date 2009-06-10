@@ -22,7 +22,7 @@
   (defun spawn-sheep (sheeple &rest all-keys)
     "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
     (let ((sheep (apply #'initialize-sheep
-                        (let ((sheep (add-parents (%make-sheep) sheeple)))
+                        (let ((sheep (add-parents (%make-sheep) (sheepify-list sheeple))))
                           (finalize-sheep sheep)
                           sheep)
                         all-keys)))

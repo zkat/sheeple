@@ -44,7 +44,7 @@
 
   (defun wear-wool (wolf)
     "Autoboxes WOLF"
-    (setf (gethash wolf boxed-object-table) (clone ((fleece-of wolf)) ((wolf wolf)))))
+    (setf (gethash wolf boxed-object-table) (clone ((fleece-of wolf)) ((wolf wolf)) (:nickname wolf))))
 
   (defun shoot-wolf (wolf)
     "Kills wolf dead"

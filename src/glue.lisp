@@ -6,7 +6,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(defmethod print-object ((sheep sheep) stream)
+(defmethod print-object ((sheep standard-sheep) stream)
   (print-sheep sheep stream))
 (defmethod print-object ((sheep buzzword) stream)
   (print-unreadable-object (sheep stream :identity t)

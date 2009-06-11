@@ -1,4 +1,4 @@
-* TODO 1.1
+* TODO 1.2
 ** TODO Implement :message option for defbuzzword (like CLOS' :method option)
    I don't care about this feature all that much, so I might just keep bumping it until someone
    who -does- care asks for it.
@@ -21,6 +21,9 @@
 *** TODO Write more tests with multi-level hierarchy lists
 *** TODO (Re-)write unit tests for locked properties.
 ** TODO GOOD GOD CLONING IS SO FUCKING SLOW
+
+* TODO 1.1
+** TODO Rewrite sheeple using CLOS  
 * DONE 1.0.1
 ** DONE Allow individual message documentation
 ** DONE Add CLONE/CLONE*/DEFSHEEP :documentation option

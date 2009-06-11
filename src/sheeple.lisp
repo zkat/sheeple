@@ -9,7 +9,7 @@
 (declaim (optimize (debug 1) (safety 1) (speed 3)))
 
 (defvar *max-sheep-id* 0)
-(defclass sheep ()
+(defclass standard-sheep ()
   ((nickname :accessor sheep-nickname :initform nil)
    (documentation :accessor sheep-documentation :initform "")
    (direct-parents :accessor sheep-direct-parents :initform nil)
@@ -27,13 +27,13 @@
    (id :accessor sheep-id :initform (incf *max-sheep-id*))))
 
 (defun %make-sheep ()
-  (make-instance 'sheep))
+  (make-instance 'standard-sheep))
 
 (defgeneric sheep-p (obj))
 (defmethod sheep-p (obj)
   (declare (ignore obj))
   nil)
-(defmethod sheep-p ((obj sheep))
+(defmethod sheep-p ((obj standard-sheep))
   (declare (ignore obj))
   t)
 

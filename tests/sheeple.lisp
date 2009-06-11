@@ -96,8 +96,8 @@ properly signal SHEEP-HIERARCHY-ERROR."
 	     (has-property-p child-sheep 'foo)))
     (is (equal "bar" (property-value main-sheep 'foo)))
     (is (equal '(foo) (available-properties main-sheep)))
-    (is (eql main-sheep (who-sets main-sheep 'foo)))
-    (is (eql main-sheep (who-sets child-sheep 'foo)))
+    ;;    (is (eql main-sheep (who-sets main-sheep 'foo))) ;; WHO-SETS was removed.
+    ;;    (is (eql main-sheep (who-sets child-sheep 'foo)))
     (is (eql t (remove-property main-sheep 'foo)))
     (signals unbound-property (property-value main-sheep 'foo))
     (signals unbound-property (property-value child-sheep 'foo))

@@ -8,16 +8,25 @@
 (in-package :sheeple)
 
 (declaim (optimize (speed 3) (safety 1) (debug 1)))
-;; We currently use structs for storage, since they're more convenient atm.
-(defstruct (buzzword (:constructor %make-buzzword))
-  (name nil)
-  (lambda-list nil)
-  (messages nil)
-  (memo-vector (make-array 40))
-  ;; This contains an arg-info object that is used to maintain
-  ;; lambda-list congruence.
-  (arg-info (make-arg-info))
-  (documentation ""))
+
+(defclass buzzword ()
+  ((name :accessor buzzword-name :initform nil :initarg :name)
+   (lambda-list :accessor buzzword-lambda-list :initform nil :initarg :ll)
+   (messages :accessor buzzword-messages :initform nil :initarg :msgs)
+   (memo-vector :accessor buzzword-memo-vector :initform (make-array 40))
+   (arg-info :accessor buzzword-arg-info :initform (make-arg-info))
+   (documentation :accessor buzzword-documentation :initform "" :initarg :dox)))
+
+(defun %make-buzzword (&key name lambda-list messages (documentation ""))
+  (make-instance 'buzzword :name name :ll lambda-list :msgs messages :dox documentation))
+
+(defgeneric buzzword-p (obj))
+(defmethod buzzword-p (obj)
+  (declare (ignore obj))
+  nil)
+(defmethod buzzword-p ((obj buzzword))
+  (declare (ignore obj))
+  t)
 
 (defun clear-memo-table (buzzword)
   (setf (buzzword-memo-vector buzzword) (make-array 40)))

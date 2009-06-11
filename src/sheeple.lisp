@@ -9,19 +9,33 @@
 (declaim (optimize (debug 1) (safety 1) (speed 3)))
 
 (defvar *max-sheep-id* 0)
-(defstruct (sheep (:constructor %make-sheep))
-  (nickname nil)
-  (documentation "")
-  (direct-parents nil)
-  (direct-children (make-weak-hash-table :weakness :key :test #'eq))
-  (direct-properties (make-hash-table :test #'eq))
-;;  (property-owners (make-weak-hash-table :weakness :value :test #'eq))
-  (direct-roles nil)
-  (clonefunctions (make-hash-table :test #'eq))
-  (cloneforms (make-hash-table :test #'eq))
-  (hierarchy-list nil)
-  (locked-p nil)
-  (id (incf *max-sheep-id*)))
+(defclass sheep ()
+  ((nickname :accessor sheep-nickname :initform nil)
+   (documentation :accessor sheep-documentation :initform "")
+   (direct-parents :accessor sheep-direct-parents :initform nil)
+   (direct-children :accessor sheep-direct-children 
+		    :initform  (make-weak-hash-table :weakness :key :test #'eq))
+   (direct-properties :accessor sheep-direct-properties
+		      :initform (make-hash-table :test #'eq))
+   #+nil(property-owners :accessor sheep-property-owners
+		    :initform (make-weak-hash-table :weakness :value :test #'eq))
+   (direct-roles :accessor sheep-direct-roles :initform nil)
+   (clonefunctions :accessor sheep-clonefunctions :initform (make-hash-table :test #'eq))
+   (cloneforms :accessor sheep-cloneforms :initform (make-hash-table :test #'eq))
+   (hierarchy-list :accessor sheep-hierarchy-list :initform nil)
+   (locked-p :accessor sheep-locked-p :initform nil)
+   (id :accessor sheep-id :initform (incf *max-sheep-id*))))
+
+(defun %make-sheep ()
+  (make-instance 'sheep))
+
+(defgeneric sheep-p (obj))
+(defmethod sheep-p (obj)
+  (declare (ignore obj))
+  nil)
+(defmethod sheep-p ((obj sheep))
+  (declare (ignore obj))
+  t)
 
 ;;;
 ;;; Cloning

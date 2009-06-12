@@ -12,27 +12,29 @@
 ;;;
 ;;; Property Access
 ;;;
-(defun property-value (sheep property-name)
+(defgeneric direct-property-value (sheep property-name))
+(defmethod direct-property-value ((sheep standard-sheep) property-name)
   (unless (symbolp property-name)
     (error "Property-name must be a symbol"))
-  (multiple-value-bind (value has-p)
-      (gethash property-name (sheep-direct-properties sheep))
-    (if has-p
-	value
-	(property-value-with-hierarchy-list sheep property-name))))
+  (gethash property-name (sheep-direct-properties sheep)))
+
+(defgeneric property-value (sheep property-name))
+(defmethod property-value ((sheep standard-sheep) property-name)
+  (property-value-with-hierarchy-list sheep property-name))
 
 (defun property-value-with-hierarchy-list (sheep property-name)
   (let ((hl (sheep-hierarchy-list sheep)))
-    (loop for ancestor in hl
-       do (multiple-value-bind (value has-p)
-	      (gethash property-name (sheep-direct-properties ancestor))
-	    (when has-p
-	      (return-from property-value-with-hierarchy-list value)))
-       finally (error 'unbound-property
-		      :format-control "Property ~A is unbound for sheep ~S"
-		      :format-args (list property-name sheep)))))
+    (or (loop for sheep in hl
+           do (multiple-value-bind (value hasp)
+                  (direct-property-value sheep property-name)
+                (when hasp
+                  (return value))))
+        (error 'unbound-property
+               :format-control "Property ~A is unbound for sheep ~S"
+               :format-args (list property-name sheep)))))
 
-(defun (setf property-value) (new-value sheep property-name)
+(defgeneric (setf property-value) (new-value sheep property-name))
+(defmethod (setf property-value) (new-value (sheep standard-sheep) property-name)
   (unless (symbolp property-name)
     (error "Property-name must be a symbol"))
   (if (sheep-locked-p sheep)
@@ -40,25 +42,29 @@
       (let ((property-table (sheep-direct-properties sheep)))
 	(setf (gethash property-name property-table) new-value))))
 
-(defun remove-property (sheep property-name)
+(defgeneric remove-property (sheep property-name))
+(defmethod remove-property ((sheep standard-sheep) property-name)
   (if (sheep-locked-p sheep)
       (error "Cannot remove property ~A: ~A is locked." property-name sheep)
       (remhash property-name (sheep-direct-properties sheep))))
 
-(defun has-property-p (sheep property-name)
+(defgeneric has-property-p (sheep property-name))
+(defmethod has-property-p ((sheep standard-sheep) property-name)
   "Returns T if a property with PROPERTY-NAME is available to SHEEP."
   (handler-case
       (when (property-value sheep property-name)
 	t)
     (unbound-property () nil)))
 
-(defun has-direct-property-p (sheep property-name)
+(defgeneric has-direct-property-p (sheep property-name))
+(defmethod has-direct-property-p ((sheep standard-sheep) property-name)
   (multiple-value-bind (value has-p)
       (gethash property-name (sheep-direct-properties sheep))
     value
     has-p))
 
-(defun property-owner (sheep property-name)
+(defgeneric property-owner (sheep property-owner))
+(defmethod property-owner ((sheep standard-sheep) property-name)
   (if (has-direct-property-p sheep property-name)
       sheep
       (let ((hl (sheep-hierarchy-list sheep)))
@@ -72,7 +78,8 @@
 			  :format-control "Property ~A is unbound for sheep ~S"
 			  :format-args (list property-name sheep))))))
 
-(defun available-properties (sheep)
+(defgeneric available-properties (sheep))
+(defmethod available-properties ((sheep standard-sheep))
   (let ((obj-keys (loop for keys being the hash-keys of (sheep-direct-properties sheep)
 		     collect keys)))
     (remove-duplicates
@@ -82,7 +89,8 @@
 ;;;
 ;;; Cloneforms/functions
 ;;;
-(defun get-cloneform (sheep property-name)
+(defgeneric get-cloneform (sheep property-name))
+(defmethod get-cloneform ((sheep standard-sheep) property-name)
   (loop for obj in (sheep-hierarchy-list sheep)
      do (let ((cloneform-table (sheep-cloneforms obj)))
 	  (multiple-value-bind (value has-p)
@@ -91,7 +99,8 @@
 	      (return-from get-cloneform value))))
      finally (return *secret-unbound-value*)))
 
-(defun inspect-cloneform (sheep property-name)
+(defgeneric inspect-cloneform (sheep property-name))
+(defmethod inspect-cloneform ((sheep standard-sheep) property-name)
   (let ((form (get-cloneform sheep property-name)))
     (if (eq *secret-unbound-value* form)
 	(error 'sheeple-error
@@ -99,10 +108,12 @@
 	       :format-args (list sheep property-name))
 	form)))
 
-(defun (setf get-cloneform) (new-value sheep property-name)
+(defgeneric (setf get-cloneform) (new-value sheep property-name))
+(defmethod (setf get-cloneform) (new-value (sheep standard-sheep) property-name)
   (setf (gethash property-name (sheep-cloneforms sheep)) new-value))
 
-(defun get-clonefunction (sheep property-name)
+(defgeneric get-clonefunction (sheep property-name))
+(defmethod get-clonefunction ((sheep standard-sheep) property-name)
   (loop for obj in (sheep-hierarchy-list sheep)
        do (let ((clonefunction-table (sheep-clonefunctions obj)))
 	    (multiple-value-bind (value has-p)
@@ -111,17 +122,20 @@
 		(return-from get-clonefunction value))))
        finally (return *secret-unbound-value*)))
 
-(defun (setf get-clonefunction) (new-value sheep property-name)
+(defgeneric (setf get-clonefunction) (new-value sheep property-name))
+(defmethod (setf get-clonefunction) (new-value (sheep standard-sheep) property-name)
   (setf (gethash property-name (sheep-clonefunctions sheep)) new-value))
 
-(defun available-cloneforms (sheep)
+(defgeneric available-cloneforms (sheep))
+(defmethod available-cloneforms ((sheep standard-sheep))
   (let ((obj-keys (loop for keys being the hash-keys of (sheep-cloneforms sheep)
 		     collect keys)))
     (remove-duplicates
      (flatten
       (append obj-keys (mapcar #'available-cloneforms (sheep-direct-parents sheep)))))))
 
-(defun cloneform-owner (sheep property-name)
+(defgeneric cloneform-owner (sheep property-name))
+(defmethod cloneform-owner ((sheep standard-sheep) property-name)
   (unless (symbolp property-name)
     (error "Property-name must be a symbol"))
   (find-if (lambda (sheep-obj)
@@ -131,7 +145,8 @@
 	       has-p))
 	   (sheep-hierarchy-list sheep)))
 
-(defun remove-cloneform (sheep property-name)
+(defgeneric remove-cloneform (sheep property-name))
+(defmethod remove-cloneform ((sheep standard-sheep) property-name)
   (unless (symbolp property-name)
     (error "Property-name must be a symbol"))
   (let ((cloneform-table (sheep-cloneforms sheep))

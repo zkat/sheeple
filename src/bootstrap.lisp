@@ -19,10 +19,10 @@
     sheep))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (defun spawn-sheep (sheeple &rest all-keys)
+  (defun spawn-sheep (sheeple &rest all-keys &key (metaclass 'standard-sheep) &allow-other-keys)
     "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
     (let ((sheep (apply #'initialize-sheep
-                        (let ((sheep (add-parents (%make-sheep) (sheepify-list sheeple))))
+                        (let ((sheep (add-parents (%make-sheep metaclass) (sheepify-list sheeple))))
                           (finalize-sheep sheep)
                           sheep)
                         all-keys)))
@@ -70,6 +70,7 @@
                     :shallow-copy shallow-copy
                     :documentation documentation))
 
+(setf (sheep-nickname =t=) "=T=")
 (defsheep =dolly= (=t=) ())
 
 ;;; Wolves and wolf-handling

@@ -23,6 +23,8 @@
 ;;;
 ;;; Sheeple
 ;;;
+(define-condition unbound-direct-property (sheeple-error)
+  ())
 
 (define-condition sheep-hierarchy-error (sheeple-error) 
   ((format-control :initform "A circular precedence graph was generated."))

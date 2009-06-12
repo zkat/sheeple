@@ -26,8 +26,8 @@
    (locked-p :accessor sheep-locked-p :initform nil)
    (id :accessor sheep-id :initform (incf *max-sheep-id*))))
 
-(defun %make-sheep ()
-  (make-instance 'standard-sheep))
+(defun %make-sheep (&optional (class 'standard-sheep))
+  (make-instance class))
 
 (defgeneric sheep-p (obj))
 (defmethod sheep-p (obj)
@@ -105,7 +105,8 @@
 		      (has-direct-property-p sheep propname))
 	    (setf (property-value sheep propname) (funcall (the function fn)))))))
 
-(defun finalize-sheep (sheep)
+(defgeneric finalize-sheep (sheep))
+(defmethod finalize-sheep ((sheep standard-sheep))
   (memoize-sheep-hierarchy-list sheep)
   sheep)
 
@@ -118,6 +119,8 @@
 	  all-property-names)))
 
 (defun shallow-copy (sheep)
+  (loop for propname in (available-properties sheep)
+       )
   (mapc (lambda (parent)
 	  (maphash 
 	   (lambda (key value)

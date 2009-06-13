@@ -5,13 +5,7 @@
 (in-package :sheeple)
 
 (defun canonize-sheeple (sheeple)
-  `(list ,@(mapcar #'canonize-sheep sheeple)))
-
-(defun canonize-sheep (sheep)
-  `(confirm-sheep ,sheep))
-
-(defun confirm-sheep (sheep)
-  sheep)
+  `(list ,@sheeple))
 
 (defun canonize-properties (properties)
   `(list ,@(mapcar #'canonize-property properties)))

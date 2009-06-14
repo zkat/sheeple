@@ -141,7 +141,7 @@
                                     (setf (sheep-direct-parents child) (delete new-parent
                                                                                (sheep-direct-parents child)))
                                     (error 'sheep-hierarchy-error))))
-         (finalize-sheep child)
+         (reinitialize-sheep child)
          child)))
 
 (defun remove-parent (parent child &key (keep-properties nil))
@@ -153,7 +153,7 @@
           using (hash-value value)
           do (unless (has-direct-property-p child property-name)
                (setf (property-value child property-name) value))))
-  (finalize-sheep child)
+  (reinitialize-sheep child)
   child)
 
 ;;;

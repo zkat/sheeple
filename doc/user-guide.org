@@ -162,19 +162,6 @@
         (get-prop *sample-sheep*) => "value"
         (setf (get-prop *sample-sheep*) "new-value") => "new-value"
 	
-**** :CLONEFORM
-      The form is compiled and evaluated as that property's value if a value is not
-      provided by something cloning this sheep.
-
-        (defvar *sample-sheep* 
-           (clone () 
-                  ((account-number 
-                    (incf *max-acc-nums*)
-                    :reader account-number
-                    :cloneform (incf *max-acc-nums*)))))
-        (account-number *sample-sheep*) => 1
-        (account-number (clone (*sample-sheep*) ())) => 2
-	
 ** Sheep manipulation
 *** Sheep Inspection
     The functions DIRECT-PARENT-P, ANCESTOR-P, DIRECT-CHILD-P, and DESCENDANT-P return T for their

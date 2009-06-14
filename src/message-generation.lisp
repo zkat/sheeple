@@ -86,8 +86,8 @@
 		   :function function
 		   :body body
 		   :documentation documentation)))
-    (add-message-to-buzzword message buzzword)
     (remove-specific-message buzzword qualifiers participants)
+    (add-message-to-buzzword message buzzword)
     (add-message-to-sheeple buzzword message participants)
     message))
 

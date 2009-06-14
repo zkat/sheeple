@@ -5,6 +5,7 @@
 *** Cloneforms deprecated.
 ** Bugs
 *** Maybe fixed: there was a problem with how things were getting evaluated.
+*** nil lambda-list buzzwords weren't dispatching.
 * 1.0.1
 ** Features
 *** Added docstring support to messages. No way to grab them yet, but at least it doesn't complain.

@@ -14,11 +14,13 @@
    (documentation :accessor sheep-documentation :initform "")
    (direct-parents :accessor sheep-direct-parents :initform nil)
    (%direct-children :accessor %direct-children 
-		    :initform  (make-weak-hash-table :weakness :key :test #'eq))
+                     :initform  (make-weak-hash-table :weakness :key :test #'eq))
    (property-value-table :accessor sheep-property-value-table
-		      :initform (make-hash-table :test #'eq))
+                         :initform (make-hash-table :test #'eq))
    #+nil(property-owners :accessor sheep-property-owners
 		    :initform (make-weak-hash-table :weakness :value :test #'eq))
+   (readers :accessor %property-readers :initform (make-hash-table :test #'eq))
+   (writers :accessor %property-writers :initform (make-hash-table :test #'eq))
    (direct-roles :accessor sheep-direct-roles :initform nil)
    (clonefunctions :accessor sheep-clonefunctions :initform (make-hash-table :test #'eq))
    (cloneforms :accessor sheep-cloneforms :initform (make-hash-table :test #'eq))
@@ -43,43 +45,43 @@
 ;;; FIXME: SHIT SON... this only copies references. I'm an idort.
 (defun mitosis (model)
   (let* ((parents (sheep-direct-parents model))
-	 (properties (sheep-property-value-table model))
-	 (roles (sheep-direct-roles model))
-	 (clonefuns (sheep-clonefunctions model))
-	 (cloneforms (sheep-cloneforms model))
-	 (new-sheep (clone () ())))
+         (properties (sheep-property-value-table model))
+         (roles (sheep-direct-roles model))
+         (clonefuns (sheep-clonefunctions model))
+         (cloneforms (sheep-cloneforms model))
+         (new-sheep (clone () ())))
     (setf (sheep-direct-parents new-sheep)
-	  parents)
+          parents)
     (setf (sheep-property-value-table new-sheep)
-	  properties)
+          properties)
     (setf (sheep-direct-roles new-sheep)
-	  roles)
+          roles)
     (setf (sheep-clonefunctions new-sheep)
-	  clonefuns)
+          clonefuns)
     (setf (sheep-cloneforms new-sheep)
-	  cloneforms)
+          cloneforms)
     new-sheep))
 
 (defun add-parents (sheep parents)
   (let ((real-parents (or parents
-			  (list =dolly=))))
+                          (list =dolly=))))
     (setf (sheep-direct-parents sheep) real-parents)
     (loop for parent in parents
-       do (setf (gethash sheep (%direct-children parent)) t))
+          do (setf (gethash sheep (%direct-children parent)) t))
     (memoize-sheep-hierarchy-list sheep)
     sheep))
 
 (defun set-up-properties (sheep properties)
   (loop for property-list in properties
-     do (set-up-property sheep property-list)))
+        do (set-up-property sheep property-list)))
 (defun set-up-property (sheep property-list)
   (let ((name (getf property-list :name))
-	(value (getf property-list :value))
-	(readers (getf property-list :readers))
-	(writers (getf property-list :writers))
-	(cloneform-present-p (member :cloneform property-list))
-	(cloneform (getf property-list :cloneform))
-	(clonefunction (getf property-list :clonefunction)))
+        (value (getf property-list :value))
+        (readers (getf property-list :readers))
+        (writers (getf property-list :writers))
+        (cloneform-present-p (member :cloneform property-list))
+        (cloneform (getf property-list :cloneform))
+        (clonefunction (getf property-list :clonefunction)))
     (when (not (symbolp name))
       (error "Property names must be symbols"))
     (when cloneform-present-p
@@ -111,48 +113,46 @@
 (defun deep-copy (sheep)
   (let ((all-property-names (available-properties sheep)))
     (mapc (lambda (pname)
-	    (let ((value (property-value sheep pname)))
-	      (setf (property-value sheep pname)
-		    value)))
-	  all-property-names)))
+            (let ((value (property-value sheep pname)))
+              (setf (property-value sheep pname)
+                    value)))
+          all-property-names)))
 
 (defun shallow-copy (sheep)
-  (loop for propname in (available-properties sheep)
-       )
   (mapc (lambda (parent)
-	  (maphash 
-	   (lambda (key value)
-	     (setf (property-value sheep key) value))
-	   (sheep-property-value-table parent)))
-	(sheep-direct-parents sheep)))
+          (maphash 
+           (lambda (key value)
+             (setf (property-value sheep key) value))
+           (sheep-property-value-table parent)))
+        (sheep-direct-parents sheep)))
 
 ;;; Inheritance setup
 (defun add-parent (new-parent child)
   (cond ((equal new-parent child)
-	 (error "Can't inherit from self."))
-	(t
-	 (handler-case
-	     (progn
-	       (pushnew new-parent (sheep-direct-parents child))
-               (setf (gethash child (%direct-children new-parent)) t)
-	       child)
-	   (sheep-hierarchy-error ()
-	     (progn
-	       (setf (sheep-direct-parents child) (delete new-parent
-							  (sheep-direct-parents child)))
-	       (error 'sheep-hierarchy-error))))
-	 (finalize-sheep child)
-	 child)))
+         (error "Can't inherit from self."))
+        (t
+         (handler-case
+           (progn
+             (pushnew new-parent (sheep-direct-parents child))
+             (setf (gethash child (%direct-children new-parent)) t)
+             child)
+           (sheep-hierarchy-error ()
+                                  (progn
+                                    (setf (sheep-direct-parents child) (delete new-parent
+                                                                               (sheep-direct-parents child)))
+                                    (error 'sheep-hierarchy-error))))
+         (finalize-sheep child)
+         child)))
 
 (defun remove-parent (parent child &key (keep-properties nil))
   (setf (sheep-direct-parents child)
-	(delete parent (sheep-direct-parents child)))
+        (delete parent (sheep-direct-parents child)))
   (remhash child (%direct-children parent))
   (when keep-properties
     (loop for property-name being the hash-keys of (sheep-property-value-table parent)
-       using (hash-value value)
-       do (unless (has-direct-property-p child property-name)
-	    (setf (property-value child property-name) value))))
+          using (hash-value value)
+          do (unless (has-direct-property-p child property-name)
+               (setf (property-value child property-name) value))))
   (finalize-sheep child)
   child)
 
@@ -161,34 +161,34 @@
 ;;;
 (defun collect-parents (sheep)
   (labels ((all-parents-loop (seen parents)
-	     (let ((to-be-processed
-		    (set-difference parents seen)))
-	       (if (null to-be-processed)
-		   parents
-		   (let ((sheep-to-process
-			  (car to-be-processed)))
-		     (all-parents-loop
-		      (cons sheep-to-process seen)
-		      (union (sheep-direct-parents sheep-to-process)
-			     parents)))))))
+              (let ((to-be-processed
+                     (set-difference parents seen)))
+                (if (null to-be-processed)
+                    parents
+                    (let ((sheep-to-process
+                           (car to-be-processed)))
+                      (all-parents-loop
+                       (cons sheep-to-process seen)
+                       (union (sheep-direct-parents sheep-to-process)
+                              parents)))))))
     (all-parents-loop () (list sheep))))
 
 (defun compute-sheep-hierarchy-list (sheep)
   (handler-case 
-      (let ((sheeple-to-order (collect-parents sheep)))
-  	(topological-sort sheeple-to-order
-			  (remove-duplicates
-			   (mapappend #'local-precedence-ordering
-				      sheeple-to-order))
-			  #'std-tie-breaker-rule))
+    (let ((sheeple-to-order (collect-parents sheep)))
+      (topological-sort sheeple-to-order
+                        (remove-duplicates
+                         (mapappend #'local-precedence-ordering
+                                    sheeple-to-order))
+                        #'std-tie-breaker-rule))
     (simple-error ()
-      (error 'sheep-hierarchy-error))))
+                  (error 'sheep-hierarchy-error))))
 
 (defun local-precedence-ordering (sheep)
   (mapcar #'list
-	  (cons sheep
-		(butlast (sheep-direct-parents sheep)))
-	  (sheep-direct-parents sheep)))
+          (cons sheep
+                (butlast (sheep-direct-parents sheep)))
+          (sheep-direct-parents sheep)))
 
 (defun std-tie-breaker-rule (minimal-elements hl-so-far)
   (dolist (hl-constituent (reverse hl-so-far))
@@ -204,7 +204,7 @@
 
 (defun ancestor-p (maybe-ancestor descendant)
   (when (and (not (eql maybe-ancestor descendant))
-	     (member maybe-ancestor (collect-parents descendant)))
+             (member maybe-ancestor (collect-parents descendant)))
     t))
 
 (defun direct-child-p (maybe-child parent)
@@ -217,12 +217,32 @@
 (defun memoize-sheep-hierarchy-list (sheep)
   (let ((list (compute-sheep-hierarchy-list sheep)))
     (setf (sheep-hierarchy-list sheep)
-	  list)
+          list)
     (maphash (lambda (descendant iggy) 
                (declare (ignore iggy))
                (memoize-sheep-hierarchy-list descendant))
              (%direct-children sheep))))
 
 ;; MOP
+(defclass property ()
+  ((name :initarg :name :accessor name)
+   (value :initarg :value :accessor value)
+   (readers :initform nil :initarg :readers :accessor readers)
+   (writers :initform nil :initarg :writers :accessor writers)))
+
+(defmethod print-object ((property property) stream)
+  (print-unreadable-object (property stream :identity t)
+    (format stream "Property Definition ~~ Name: ~A" (name property))))
 (defun sheep-direct-properties (sheep)
-  )
+  "Returns a set of direct property definition metaobjects."
+  (loop for pname being the hash-keys of (sheep-property-value-table sheep)
+     using (hash-value pvalue)
+     collect (make-instance 'property
+                            :name pname
+                            :value pvalue
+                            :readers 
+                            (loop for reader-name in (gethash pname (%property-readers sheep))
+                                 collect reader-name)
+                            :writers 
+                            (loop for writer-name in (gethash pname (%property-writers sheep))
+                               collect writer-name))))

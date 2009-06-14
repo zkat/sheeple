@@ -82,16 +82,16 @@
    :=integer=
    :=float=
 
-   ;; MOP-related
+   ;; MOP
    :standard-sheep
    :initialize-sheep
    :reinitialize-sheep
    :print-sheep
    :sheep-nickname
-   :sheep-hierarchy-list ;I leave this because it might be useful during development.
+   :sheep-hierarchy-list
    :sheep-direct-parents
    :sheep-direct-roles
-;;   :sheep-direct-properties
+   :sheep-direct-properties
    :sheep-documentation
    ))
 

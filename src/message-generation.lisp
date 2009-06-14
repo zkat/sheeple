@@ -174,8 +174,10 @@
 
 (defun add-readers-to-sheep (readers prop-name sheep)
   (loop for reader in readers
-     do (ensure-buzzword reader :lambda-list '(sheep))
-     do (ensure-message reader
+     do
+       (pushnew reader (gethash prop-name (%property-readers sheep)))
+       (ensure-buzzword reader :lambda-list '(sheep))
+       (ensure-message reader
 			:lambda-list '(sheep)
 			:participants (list sheep)
 			:body `(property-value sheep ',prop-name)
@@ -185,8 +187,10 @@
 
 (defun add-writers-to-sheep (writers prop-name sheep)
   (loop for writer in writers
-     do (ensure-buzzword writer :lambda-list '(new-value sheep))
-     do (ensure-message writer
+     do
+       (pushnew writer (gethash prop-name (%property-writers sheep)))
+       (ensure-buzzword writer :lambda-list '(new-value sheep))
+       (ensure-message writer
 			:lambda-list '(new-value sheep)
 			:participants (list =t= sheep)
 			:body `(setf (property-value sheep ',prop-name) new-value)

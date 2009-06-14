@@ -23,6 +23,7 @@
    ;; Property access
    :unbound-property ;error
    :property-value
+   :direct-property-value
    :available-properties
    :remove-property
    :property-owner

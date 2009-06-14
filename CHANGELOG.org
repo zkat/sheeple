@@ -3,9 +3,11 @@
 *** Sheeple rewritten using CLOS instead of structs/funs
 *** The beginnings of a MOP has been exposed in the API.
 *** Cloneforms deprecated.
+*** Documentation updated
 ** Bugs
 *** Maybe fixed: there was a problem with how things were getting evaluated.
 *** nil lambda-list buzzwords weren't dispatching.
+*** small bugfixes and optimizations here and there
 * 1.0.1
 ** Features
 *** Added docstring support to messages. No way to grab them yet, but at least it doesn't complain.

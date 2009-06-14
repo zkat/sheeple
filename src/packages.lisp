@@ -83,13 +83,16 @@
    :=float=
 
    ;; MOP-related
+   :standard-sheep
    :initialize-sheep
    :reinitialize-sheep
    :print-sheep
    :sheep-nickname
    :sheep-hierarchy-list ;I leave this because it might be useful during development.
-   ;; :sheep-direct-parents
-   ;; :sheep-direct-roles
+   :sheep-direct-parents
+   :sheep-direct-roles
+;;   :sheep-direct-properties
+   :sheep-documentation
    ))
 
 (defpackage #:sheeple-user

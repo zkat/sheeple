@@ -10,13 +10,23 @@
 (declaim (optimize (speed 3) (debug 1) (safety 1)))
 (defparameter *secret-unbound-value* (gensym))
 ;;;
-;;; Property Access
+;;; Properties
 ;;;
+(defgeneric add-property (sheep property-name value &key readers writers))
+(defmethod add-property (sheep property-name value &key readers writers)
+  (setf (property-value sheep property-name) value)
+  (add-readers-to-sheep readers property-name sheep)
+  (add-writers-to-sheep readers property-name sheep))
+
+(defgeneric remove-property (sheep property-name))
+(defmethod remove-property ((sheep standard-sheep) property-name)
+  (remhash property-name (sheep-property-value-table sheep)))
+
 (defgeneric direct-property-value (sheep property-name))
 (defmethod direct-property-value ((sheep standard-sheep) property-name)
   (unless (symbolp property-name)
     (error "Property-name must be a symbol"))
-  (gethash property-name (sheep-direct-properties sheep)))
+  (gethash property-name (sheep-property-value-table sheep)))
 
 (defgeneric property-value (sheep property-name))
 (defmethod property-value ((sheep standard-sheep) property-name)
@@ -37,16 +47,8 @@
 (defmethod (setf property-value) (new-value (sheep standard-sheep) property-name)
   (unless (symbolp property-name)
     (error "Property-name must be a symbol"))
-  (if (sheep-locked-p sheep)
-      (error "Cannot set property ~A: ~A is locked." property-name sheep)
-      (let ((property-table (sheep-direct-properties sheep)))
-	(setf (gethash property-name property-table) new-value))))
-
-(defgeneric remove-property (sheep property-name))
-(defmethod remove-property ((sheep standard-sheep) property-name)
-  (if (sheep-locked-p sheep)
-      (error "Cannot remove property ~A: ~A is locked." property-name sheep)
-      (remhash property-name (sheep-direct-properties sheep))))
+  (let ((property-table (sheep-property-value-table sheep)))
+    (setf (gethash property-name property-table) new-value)))
 
 (defgeneric has-property-p (sheep property-name))
 (defmethod has-property-p ((sheep standard-sheep) property-name)
@@ -59,7 +61,7 @@
 (defgeneric has-direct-property-p (sheep property-name))
 (defmethod has-direct-property-p ((sheep standard-sheep) property-name)
   (multiple-value-bind (value has-p)
-      (gethash property-name (sheep-direct-properties sheep))
+      (gethash property-name (sheep-property-value-table sheep))
     value
     has-p))
 
@@ -70,7 +72,7 @@
       (let ((hl (sheep-hierarchy-list sheep)))
 	(loop for ancestor in hl
 	   do (multiple-value-bind (value has-p)
-		  (gethash property-name (sheep-direct-properties ancestor))
+		  (gethash property-name (sheep-property-value-table ancestor))
 		(declare (ignore value))
 		(when has-p
 		  (return-from property-owner ancestor)))
@@ -80,7 +82,7 @@
 
 (defgeneric available-properties (sheep))
 (defmethod available-properties ((sheep standard-sheep))
-  (let ((obj-keys (loop for keys being the hash-keys of (sheep-direct-properties sheep)
+  (let ((obj-keys (loop for keys being the hash-keys of (sheep-property-value-table sheep)
 		     collect keys)))
     (remove-duplicates
      (flatten
@@ -186,7 +188,7 @@
 ;;     (if has-p
 ;; 	;; Get the actual value from that owner..
 ;; 	(multiple-value-bind (value has-p)
-;; 	    (gethash property-name (sheep-direct-properties prop-owner))
+;; 	    (gethash property-name (sheep-property-value-table prop-owner))
 ;; 	  (if has-p
 ;; 	      value
 ;; 	      (error 'unbound-property
@@ -200,7 +202,7 @@
 ;;   (let ((hierarchy-list (sheep-hierarchy-list sheep)))
 ;;     (loop for sheep-obj in hierarchy-list
 ;;        do (multiple-value-bind (value has-p)
-;; 	      (gethash property-name (sheep-direct-properties sheep-obj))
+;; 	      (gethash property-name (sheep-property-value-table sheep-obj))
 ;; 	    (declare (ignore value))
 ;; 	    (when has-p
 ;; 	      (return-from %property-value-owner sheep-obj))) 

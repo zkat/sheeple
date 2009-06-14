@@ -92,18 +92,24 @@
 (defun find-applicable-messages (buzzword args &key (errorp t))
   (declare (buzzword buzzword))
   (declare (list args))
-  (let* (;; This doesn't seem to be expensive at all..
+  (let (;; This doesn't seem to be expensive at all..
 	 (relevant-args-length (the fixnum (arg-info-number-required (buzzword-arg-info buzzword))))
 	 ;; If I can avoid calling fetch-memo-vector-entry for singly-dispatched readers, that
 	 ;; would be -lovely-. Not sure how to do that yet, though.
-	 (memo-entry (fetch-memo-vector-entry args buzzword relevant-args-length)))
-    (or memo-entry
-	memo-entry
-	(let* ((relevant-args (subseq args 0 relevant-args-length))
-	       (new-msg-list (%find-applicable-messages buzzword 
-							relevant-args
-							:errorp errorp)))
-	  (memoize-message-dispatch buzzword relevant-args new-msg-list)))))
+	)
+    (if (= 0 relevant-args-length)
+        (let ((relevant-args (subseq args 0 relevant-args-length)))
+          (create-message-cache buzzword (%find-applicable-messages 
+                                          buzzword relevant-args
+                                          :errorp errorp)))
+        (let ((memo-entry (fetch-memo-vector-entry args buzzword relevant-args-length)))
+          (or memo-entry
+              memo-entry
+              (let* ((relevant-args (subseq args 0 relevant-args-length))
+                     (new-msg-list (%find-applicable-messages buzzword 
+                                                              relevant-args
+                                                              :errorp errorp)))
+                (memoize-message-dispatch buzzword relevant-args new-msg-list)))))))
 
 (declaim (inline desired-vector-entry-p))
 (defun desired-vector-entry-p (args vector-entry relevant-args-length)

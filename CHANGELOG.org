@@ -1,5 +1,8 @@
-* 1.0.2
+* 1.1
 ** Features
+*** Sheeple rewritten using CLOS instead of structs/funs
+*** The beginnings of a MOP has been exposed in the API.
+*** Cloneforms deprecated.
 ** Bugs
 *** Maybe fixed: there was a problem with how things were getting evaluated.
 * 1.0.1

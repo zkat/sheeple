@@ -13,17 +13,16 @@
   ((nickname :accessor sheep-nickname :initform nil)
    (documentation :accessor sheep-documentation :initform "")
    (direct-parents :accessor sheep-direct-parents :initform nil)
-   (direct-children :accessor sheep-direct-children 
+   (%direct-children :accessor %direct-children 
 		    :initform  (make-weak-hash-table :weakness :key :test #'eq))
-   (direct-properties :accessor sheep-direct-properties
+   (property-value-table :accessor sheep-property-value-table
 		      :initform (make-hash-table :test #'eq))
    #+nil(property-owners :accessor sheep-property-owners
 		    :initform (make-weak-hash-table :weakness :value :test #'eq))
    (direct-roles :accessor sheep-direct-roles :initform nil)
    (clonefunctions :accessor sheep-clonefunctions :initform (make-hash-table :test #'eq))
    (cloneforms :accessor sheep-cloneforms :initform (make-hash-table :test #'eq))
-   (hierarchy-list :accessor sheep-hierarchy-list :initform nil)
-   (locked-p :accessor sheep-locked-p :initform nil)
+   (hierarchy-list :accessor sheep-hierarchy-list)
    (id :accessor sheep-id :initform (incf *max-sheep-id*))))
 
 (defun %make-sheep (&optional (class 'standard-sheep))
@@ -44,14 +43,14 @@
 ;;; FIXME: SHIT SON... this only copies references. I'm an idort.
 (defun mitosis (model)
   (let* ((parents (sheep-direct-parents model))
-	 (properties (sheep-direct-properties model))
+	 (properties (sheep-property-value-table model))
 	 (roles (sheep-direct-roles model))
 	 (clonefuns (sheep-clonefunctions model))
 	 (cloneforms (sheep-cloneforms model))
 	 (new-sheep (clone () ())))
     (setf (sheep-direct-parents new-sheep)
 	  parents)
-    (setf (sheep-direct-properties new-sheep)
+    (setf (sheep-property-value-table new-sheep)
 	  properties)
     (setf (sheep-direct-roles new-sheep)
 	  roles)
@@ -66,8 +65,7 @@
 			  (list =dolly=))))
     (setf (sheep-direct-parents sheep) real-parents)
     (loop for parent in parents
-         for pointer = (make-weak-pointer sheep)
-       do (setf (gethash sheep (sheep-direct-children parent)) t))
+       do (setf (gethash sheep (%direct-children parent)) t))
     (memoize-sheep-hierarchy-list sheep)
     sheep))
 
@@ -125,7 +123,7 @@
 	  (maphash 
 	   (lambda (key value)
 	     (setf (property-value sheep key) value))
-	   (sheep-direct-properties parent)))
+	   (sheep-property-value-table parent)))
 	(sheep-direct-parents sheep)))
 
 ;;; Inheritance setup
@@ -136,7 +134,7 @@
 	 (handler-case
 	     (progn
 	       (pushnew new-parent (sheep-direct-parents child))
-               (setf (gethash child (sheep-direct-children new-parent)) t)
+               (setf (gethash child (%direct-children new-parent)) t)
 	       child)
 	   (sheep-hierarchy-error ()
 	     (progn
@@ -149,27 +147,14 @@
 (defun remove-parent (parent child &key (keep-properties nil))
   (setf (sheep-direct-parents child)
 	(delete parent (sheep-direct-parents child)))
-  (remhash child (sheep-direct-children parent))
+  (remhash child (%direct-children parent))
   (when keep-properties
-    (loop for property-name being the hash-keys of (sheep-direct-properties parent)
+    (loop for property-name being the hash-keys of (sheep-property-value-table parent)
        using (hash-value value)
        do (unless (has-direct-property-p child property-name)
 	    (setf (property-value child property-name) value))))
   (finalize-sheep child)
   child)
-
-;;;
-;;; Locking
-;;;
-(defun lock-sheep (sheep)
-  (setf (sheep-locked-p sheep) t))
-(defun unlock-sheep (sheep)
-  (setf (sheep-locked-p sheep) nil))
-
-(defun toggle-sheep-lock (sheep)
-  (if (sheep-locked-p sheep)
-      (unlock-sheep sheep)
-      (lock-sheep sheep)))
 
 ;;;
 ;;; Hierarchy Resolution
@@ -236,5 +221,8 @@
     (maphash (lambda (descendant iggy) 
                (declare (ignore iggy))
                (memoize-sheep-hierarchy-list descendant))
-             (sheep-direct-children sheep))))
+             (%direct-children sheep))))
 
+;; MOP
+(defun sheep-direct-properties (sheep)
+  )

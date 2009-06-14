@@ -23,7 +23,10 @@
 ** TODO GOOD GOD CLONING IS SO FUCKING SLOW
 
 * TODO 1.1
-** TODO Rewrite sheeple using CLOS  
+** DONE Rewrite sheeple using CLOS  
+** TODO Make sure I expose enough of an API for the MOP
+** TODO No-arg buzzwords don't work. Fix it.
+** TODO Document new MOP features
 * DONE 1.0.1
 ** DONE Allow individual message documentation
 ** DONE Add CLONE/CLONE*/DEFSHEEP :documentation option

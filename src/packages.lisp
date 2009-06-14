@@ -8,8 +8,6 @@
    :clone
    :clone*
    :defsheep
-   :spawn-sheep
-   :sheep-documentation
    :sheep-hierarchy-error
    :sheep-p
    :add-parent
@@ -88,6 +86,7 @@
    :standard-sheep
    :initialize-sheep
    :reinitialize-sheep
+   :spawn-sheep
    :print-sheep
    :sheep-nickname
    :sheep-hierarchy-list

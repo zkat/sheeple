@@ -198,7 +198,13 @@
     function for only getting the direct property value of a sheep. Signals a condition of type
     UNBOUND-PROPERTY if there is no binding, direct or indirect, for that property-name.
 
-        (property-value *sample-sheep* 'foo)
+        (property-value *sample-sheep* 'foo) => /property value/
+
+*** DIRECT-PROPERTY-VALUE
+    This function works like PROPERTY-VALUE, but signals an UNBOUND-PROPERTY error if the sheep
+    object does not hold the value locally.
+
+        (direct-property-value *sample-sheep* 'foo) => /direct value or ERROR/
 
 *** (SETF PROPERTY-VALUE)
     The function (SETF PROPERTY-VALUE) sets a direct property on a sheep. If the property did not
@@ -366,37 +372,6 @@
         (var =test-sheep=) => "new-value"
         (property-value =test-sheep= 'var) => "after-value"
 
-*** Special buzzwords
-**** PRINT-SHEEP
-     You can define messages on PRINT-SHEEP in order to change a particular sheep's printout.
-
-        (defmessage print-sheep ((sheep my-special-sheep) stream)
-          (format stream "~a is the most specialest sheep ever!" sheep))
-
-**** INITIALIZE-SHEEP
-     You may define messages for the buzzword INITIALIZE-SHEEP. This message handles all set-up of
-     sheeple after its direct-parents are added.  This is most useful for defining 'complex'
-     constructors that need access to a sheep. These constructors usually take the form of :before,
-     :after, or :around messages, since defining a primary message would override standard sheep 
-     setup.
-
-**** REINITIALIZE-SHEEP
-     This is called whenever a DEFSHEEP form is evaluated for an existing sheep.
-
-*** Undefinition 
-    WARNING: The next two two might cause serious problems/instability. Avoid using
-    them, they might be deprecated soon. I haven't made up my mind.
-**** UNDEFBUZZWORD completely undefines a buzzword, removing all messages and making the function
-     unbound.
-
-         (undefbuzzword synergize) => all definitions of synergize are removed, #'synergize is unbound
-
-**** UNDEFMESSAGE accepts the same kind of arguments as defmessage, but reverses the process for a
-     matching message.
-
-         (undefmessage var :before ((x =test-sheep=)))
-         (var =test-sheep=) => "value"
-	 
 ** Potential gotchas:
 *** CLOS (semi-)compatibility
     For the time being, CLOS objects and CLOS-defined types are boxed as =white-fang=, not as
@@ -432,3 +407,105 @@
    like PCL. Fortunately, because of the similarities of the APIs, many of PCL's optimizations can
    be translated to Sheeple itself.
    
+* MOP Documentation
+  Sheeple exposes a (currently) small metaobject protocol for inspecting and changing behavior of
+  sheep objects. The protocol uses CLOS as a backend, so users may extend Sheeple behavior as
+  desired using an API familiar to those who have used the CLOS MOP before.
+
+** Metaobject classes
+
+*** STANDARD-SHEEP
+    This class defines default behavior for all SHEEP objects. Certain CLOS methods can be
+    specialized on it in order to change behavior, and certain methods can be defined to get access
+    to meta-information about the sheep object.
+
+** Metaobject generic functions
+   Sheeple exposes the following generic functions for various purposes.
+
+*** Inspection
+    These functions can be used to get information about the sheep object. While the information
+    they provide can be used to rebuild new sheeple objects, the effects of trying to alter them
+    directly or indirectly are undefined unless otherwise stated. (don't do it)
+
+**** SHEEP-NICKNAME
+     This function returns the nickname assigned to this sheep object. This place can be SETFd in
+     order to change the sheep's nickname.
+     
+           (sheep-nickname sheep) => string-nickname
+           (setf (sheep-nickname sheep) new-nickname) => new-nickname
+           (sheep-nickname sheep) => new-nickname
+
+**** SHEEP-DOCUMENTATION
+     Like SHEEP-NICKNAME, but returns the documentation string for the sheep object. This value can
+     be SETFd to alter the sheep's documentation string.
+
+           (sheep-documentation sheep) => "This sheep is documented! I write good code!"
+     
+**** SHEEP-HIERARCHY-LIST
+     Returns an ordered list representing the precedence order used by Sheeple when either a
+     method is called, or a property-value is requested.
+
+           (sheep-hierarchy-list sheep) => (SHEEP's hierarchy list)
+
+**** SHEEP-DIRECT-PARENTS
+     Returns an ordered list of SHEEP's direct parent objects, in the order they were provided to
+     CLONE/CLONE*/DEFSHEEP.
+
+           (sheep-direct-parents sheep) => (sheep's-direct-parents-list)
+
+**** SHEEP-DIRECT-ROLES
+     Returns an unordered set of ROLE metaobjects that represent what messages SHEEP is a
+     participant in.
+
+           (sheep-direct-roles sheep) => (sheep's direct roles list)
+
+**** SHEEP-DIRECT-PROPERTIES
+     Returns an unordered set of PROPERTY-SPEC metaobjects that represent property definitions as
+     provided to (or built by) CLONE/CLONE*/DEFSHEEP
+
+           (sheep-direct-properties sheep) => (list of property-spec objects)
+
+**** PROPERTY-SPEC-NAME
+     Called on a PROPERTY-SPEC metaobject, this returns the symbol name for this property.
+
+           (property-spec-name sheep-property-spec-object) => SYMBOL
+
+**** PROPERTY-SPEC-VALUE
+     Called on a PROPERTY-SPEC metaobject, this returns this property's current direct value.
+
+           (property-spec-value sheep-property-spec-object) => VALUE
+
+**** PROPERTY-SPEC-READERS
+     Called on a PROPERTY-SPEC metaobject, this returns a list of names used to define reader
+     messages that read this property's value, specialized on the sheep object.
+
+           (property-spec-readers sheep-property-spec-object) => (list-of-message-names)
+
+**** PROPERTY-SPEC-WRITERS
+     Called on a PROPERTY-SPEC metaobject, this returns a list of names used to define writer
+     messages that write this property's value, specialized on the sheep object.
+
+           (property-spec-writers sheep-property-spec-object) => (list-of-message-names)
+
+** Special buzzwords
+   Additionally, some buzzword (not generic functions) can be specialized on sheep objects to alter behavior of
+   sheep in various situations..
+
+*** PRINT-SHEEP
+     You can define messages on PRINT-SHEEP in order to change a particular sheep's printout.
+
+        (defmessage print-sheep ((sheep my-special-sheep) stream)
+          (format stream "~a is the most specialest sheep ever!" sheep))
+
+*** INITIALIZE-SHEEP
+     You may define messages for the buzzword INITIALIZE-SHEEP. This message handles all set-up of
+     sheeple after its direct-parents are added.  This is most useful for defining 'complex'
+     constructors that need access to a sheep. These constructors usually take the form of :before,
+     :after, or :around messages, since defining a primary message would override standard sheep 
+     setup.
+
+*** REINITIALIZE-SHEEP
+     This is called whenever a DEFSHEEP form is evaluated for an existing sheep.
+
+
+

@@ -8,6 +8,7 @@
    :clone
    :clone*
    :defsheep
+   :spawn-sheep
    :sheep-documentation
    :sheep-hierarchy-error
    :sheep-p
@@ -94,6 +95,10 @@
    :sheep-direct-roles
    :sheep-direct-properties
    :sheep-documentation
+   :property-spec-name
+   :property-spec-value
+   :property-spec-readers
+   :property-spec-writers
    ))
 
 (defpackage #:sheeple-user

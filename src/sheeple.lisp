@@ -224,20 +224,20 @@
              (%direct-children sheep))))
 
 ;; MOP
-(defclass property ()
-  ((name :initarg :name :accessor name)
-   (value :initarg :value :accessor value)
-   (readers :initform nil :initarg :readers :accessor readers)
-   (writers :initform nil :initarg :writers :accessor writers)))
+(defclass property-spec ()
+  ((name :initarg :name :accessor property-spec-name)
+   (value :initarg :value :accessor property-spec-value)
+   (readers :initform nil :initarg :readers :accessor property-spec-readers)
+   (writers :initform nil :initarg :writers :accessor property-spec-writers)))
 
-(defmethod print-object ((property property) stream)
-  (print-unreadable-object (property stream :identity t)
-    (format stream "Property Definition ~~ Name: ~A" (name property))))
+(defmethod print-object ((property-spec property-spec) stream)
+  (print-unreadable-object (property-spec stream :identity t)
+    (format stream "Property-Spec ~~ Name: ~A" (property-spec-name property-spec))))
 (defun sheep-direct-properties (sheep)
-  "Returns a set of direct property definition metaobjects."
+  "Returns a set of direct property-spec definition metaobjects."
   (loop for pname being the hash-keys of (sheep-property-value-table sheep)
      using (hash-value pvalue)
-     collect (make-instance 'property
+     collect (make-instance 'property-spec
                             :name pname
                             :value pvalue
                             :readers 

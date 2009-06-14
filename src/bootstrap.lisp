@@ -60,7 +60,7 @@
      do (remove-parent parent sheep))
   (clrhash (sheep-cloneforms sheep))
   (clrhash (sheep-clonefunctions sheep))
-  (clrhash (property-value-table sheep))
+  (clrhash (sheep-property-value-table sheep))
   (add-parents sheep new-parents)
   ;; initialize again
   (initialize-sheep sheep 

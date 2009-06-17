@@ -246,3 +246,4 @@
                             :writers 
                             (loop for writer-name in (gethash pname (%property-writers sheep))
                                collect writer-name))))
+

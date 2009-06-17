@@ -8,12 +8,12 @@
 (in-package :sheeple)
 
 (defvar =t=
-  (let ((sheep (%make-sheep)))
+  (let ((sheep (allocate-sheep 'standard-sheep)))
     (finalize-sheep sheep)
     sheep))
 
 (defvar =dolly=
-  (let ((sheep (%make-sheep)))
+  (let ((sheep (allocate-sheep 'standard-sheep)))
     (setf (sheep-direct-parents sheep) (list =t=))
     (finalize-sheep sheep)
     sheep))
@@ -22,7 +22,7 @@
   (defun spawn-sheep (sheeple &rest all-keys &key (metaclass 'standard-sheep) &allow-other-keys)
     "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
     (let ((sheep (apply #'initialize-sheep
-                        (let ((sheep (add-parents (%make-sheep metaclass) (sheepify-list sheeple))))
+                        (let ((sheep (add-parents (apply #'allocate-sheep metaclass all-keys) (sheepify-list sheeple))))
                           (finalize-sheep sheep)
                           sheep)
                         all-keys)))
@@ -35,7 +35,8 @@
                               nickname
                               documentation
                               deep-copy
-                              shallow-copy)
+                              shallow-copy
+			      &allow-other-keys)
   (set-up-properties sheep properties)
   (execute-clonefunctions sheep)
   (setf (sheep-nickname sheep) nickname)
@@ -54,7 +55,8 @@
                                 new-properties
                                 nickname
                                 documentation
-                                deep-copy shallow-copy)
+                                deep-copy shallow-copy
+				&allow-other-keys)
   ;; cleanup
   (loop for parent in (sheep-direct-parents sheep)
      do (remove-parent parent sheep))

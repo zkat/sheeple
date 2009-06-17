@@ -45,28 +45,28 @@
         (remaining-elements elements)
         (result ())) 
     (loop
-     (let ((minimal-elements
-            (remove-if
-             (lambda (sheep)
-	       (member sheep remaining-constraints
-		       :key #'cadr))
-             remaining-elements)))
-       (when (null minimal-elements)
-             (if (null remaining-elements)
-                 (return-from topological-sort result)
-		 (error "Inconsistent precedence graph.")))
-       (let ((choice (if (null (cdr minimal-elements))
-                         (car minimal-elements)
-                       (funcall tie-breaker
-                                minimal-elements
-                                result))))
-         (setf result (append result (list choice)))
-         (setf remaining-elements
-               (remove choice remaining-elements))
-         (setf remaining-constraints
-               (remove choice
-                       remaining-constraints
-                       :test #'member)))))))
+       (let ((minimal-elements
+              (remove-if
+               (lambda (sheep)
+                 (member sheep remaining-constraints
+                         :key #'cadr))
+               remaining-elements)))
+         (when (null minimal-elements)
+           (if (null remaining-elements)
+               (return-from topological-sort result)
+               (error "Inconsistent precedence graph.")))
+         (let ((choice (if (null (cdr minimal-elements))
+                           (car minimal-elements)
+                           (funcall tie-breaker
+                                    minimal-elements
+                                    result))))
+           (setf result (append result (list choice)))
+           (setf remaining-elements
+                 (remove choice remaining-elements))
+           (setf remaining-constraints
+                 (remove choice
+                         remaining-constraints
+                         :test #'member)))))))
 
 (defun memq (item list)
   "Return tail of LIST beginning with first element EQ to ITEM."

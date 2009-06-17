@@ -35,8 +35,7 @@
                               nickname
                               documentation
                               deep-copy
-                              shallow-copy
-			      &allow-other-keys)
+                              shallow-copy)
   (set-up-properties sheep properties)
   (execute-clonefunctions sheep)
   (setf (sheep-nickname sheep) nickname)
@@ -55,8 +54,7 @@
                                 new-properties
                                 nickname
                                 documentation
-                                deep-copy shallow-copy
-				&allow-other-keys)
+                                deep-copy shallow-copy)
   ;; cleanup
   (loop for parent in (sheep-direct-parents sheep)
      do (remove-parent parent sheep))

@@ -27,6 +27,7 @@
    (hierarchy-list :accessor sheep-hierarchy-list)
    (id :accessor sheep-id :initform (incf *max-sheep-id*))))
 
+(defmethod initialize-instance :after ((sheep standard-sheep) &key &allow-other-keys))
 (defun allocate-sheep (class &rest all-keys)
   (apply #'make-instance class all-keys))
 

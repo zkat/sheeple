@@ -87,6 +87,7 @@
    :initialize-sheep
    :reinitialize-sheep
    :spawn-sheep
+   :finalize-sheep
    :print-sheep
    :sheep-nickname
    :sheep-hierarchy-list

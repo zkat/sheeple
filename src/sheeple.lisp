@@ -29,9 +29,8 @@
 
 (defmethod initialize-instance :after ((sheep standard-sheep) &key &allow-other-keys))
 
-(defun allocate-sheep (class &rest all-keys &key parents &allow-other-keys)
-  (let ((sheep (apply #'make-instance class all-keys)))
-    (add-parents sheep parents)))
+(defun allocate-sheep (class &rest all-keys)
+  (apply #'make-instance class all-keys))
 
 (defgeneric sheep-p (obj))
 (defmethod sheep-p (obj)
@@ -64,15 +63,6 @@
     (setf (sheep-cloneforms new-sheep)
           cloneforms)
     new-sheep))
-
-(defun add-parents (sheep parents)
-  (let ((real-parents (or parents
-                          (list =dolly=))))
-    (setf (sheep-direct-parents sheep) real-parents)
-    (loop for parent in parents
-          do (setf (gethash sheep (%direct-children parent)) t))
-    (memoize-sheep-hierarchy-list sheep)
-    sheep))
 
 (defun set-up-properties (sheep properties)
   (loop for property-list in properties
@@ -110,6 +100,8 @@
 
 (defgeneric finalize-sheep (sheep))
 (defmethod finalize-sheep ((sheep standard-sheep))
+  (loop for parent in (sheep-direct-parents sheep)
+     do (setf (gethash sheep (%direct-children parent)) t))
   (memoize-sheep-hierarchy-list sheep)
   sheep)
 

@@ -8,12 +8,12 @@
 (in-package :sheeple)
 
 (defvar =t=
-  (let ((sheep (allocate-sheep 'standard-sheep)))
+  (let ((sheep (make-instance 'standard-sheep)))
     (finalize-sheep sheep)
     sheep))
 
 (defvar =dolly=
-  (let ((sheep (allocate-sheep 'standard-sheep)))
+  (let ((sheep (make-instance 'standard-sheep)))
     (setf (sheep-direct-parents sheep) (list =t=))
     (finalize-sheep sheep)
     sheep))
@@ -21,8 +21,11 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun spawn-sheep (sheeple &rest all-keys &key (metaclass 'standard-sheep) &allow-other-keys)
     "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
+    ;; I need to figure out how to have the parents already accessible?...
     (let ((sheep (apply #'initialize-sheep
-                        (let ((sheep (add-parents (apply #'allocate-sheep metaclass all-keys) (sheepify-list sheeple))))
+                        (let ((sheep (apply #'allocate-sheep metaclass
+                                            :parents (sheepify-list sheeple)
+                                            all-keys)))
                           (finalize-sheep sheep)
                           sheep)
                         all-keys)))

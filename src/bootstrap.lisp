@@ -24,7 +24,9 @@
     ;; I need to figure out how to have the parents already accessible?...
     (let ((sheep (apply #'initialize-sheep
                         (let ((sheep (apply #'allocate-sheep metaclass
-                                            :parents (sheepify-list sheeple)
+                                            :direct-parents (if sheeple
+                                                                (sheepify-list sheeple)
+                                                                (list =dolly=))
                                             all-keys)))
                           (finalize-sheep sheep)
                           sheep)
@@ -64,7 +66,9 @@
   (clrhash (sheep-cloneforms sheep))
   (clrhash (sheep-clonefunctions sheep))
   (clrhash (sheep-property-value-table sheep))
-  (add-parents sheep new-parents)
+  (if new-parents
+      (sheepify-list new-parents)
+      (list =dolly=))
   ;; initialize again
   (initialize-sheep sheep 
                     :properties new-properties

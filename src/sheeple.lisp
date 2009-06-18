@@ -12,7 +12,7 @@
 (defclass standard-sheep ()
   ((nickname :accessor sheep-nickname :initform nil)
    (documentation :accessor sheep-documentation :initform "")
-   (direct-parents :accessor sheep-direct-parents :initform nil)
+   (direct-parents :accessor sheep-direct-parents :initform nil :initarg :direct-parents)
    (%direct-children :accessor %direct-children 
                      :initform  (make-weak-hash-table :weakness :key :test #'eq))
    (property-value-table :accessor sheep-property-value-table

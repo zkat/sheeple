@@ -28,8 +28,10 @@
    (id :accessor sheep-id :initform (incf *max-sheep-id*))))
 
 (defmethod initialize-instance :after ((sheep standard-sheep) &key &allow-other-keys))
-(defun allocate-sheep (class &rest all-keys)
-  (apply #'make-instance class all-keys))
+
+(defun allocate-sheep (class &rest all-keys &key parents &allow-other-keys)
+  (let ((sheep (apply #'make-instance class all-keys)))
+    (add-parents sheep parents)))
 
 (defgeneric sheep-p (obj))
 (defmethod sheep-p (obj)

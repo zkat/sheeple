@@ -1,4 +1,4 @@
-* TODO 1.2
+* TODO Undecided
 ** TODO Implement :message option for defbuzzword (like CLOS' :method option)
    I don't care about this feature all that much, so I might just keep bumping it until someone
    who -does- care asks for it.
@@ -19,6 +19,33 @@
 *** TODO Write a "many many messages" test
 *** TODO Write more tests with multi-level hierarchy lists
 *** TODO (Re-)write unit tests for locked properties.
+* TODO 2.0
+  Sheeple gets serious -- and more useful.
+** TODO New interface
+*** TODO CLONE -> function
+    CLONE should be turned into a very simple function: (clone &rest sheep)
+*** TODO DEFCLONE
+    What is currently CLONE should be renamed to DEFCLONE. More involved cloning capabilities
+    are still nice.
+*** TODO DEFSHEEP->DEFPROTO
+    Time to get a bit more serious. DEFPROTO is a much clearer name.
+*** TODO Get rid of add-on-write. Require add-property.
+    Add-on-write seems like a quick interface, but it's a bit obnoxious to deal with.
+    Not only does it create a risk for some serious hard-to-track bugs, but it makes
+    it trickier to allocate space for properties when using the MOP.
+*** TODO Shallow-copy/deep-copy should not be options.
+    These are stupid, and they clutter up the interface. Never used them, never had to.
+    Deep-copy could be its own function, under a different name, but it's easy enough
+    to implement externally -- I'll see if it's ever used by anyone.
+*** TODO Mitosis->copy-sheep
+    Also, get it working properly.
+*** TODO defbuzzword -> defmultifun
+    Rename this thing. It really doesn't have to be silly.
+*** TODO Fleeced Wolf -> Boxed built-in
+*** TODO =white-fang= -> =boxed-object=
+*** TODO Fleecing -> autoboxing
+** TODO Make psheep easier to implement
+*** TODO The order in which a sheep is built needs to be planned out more carefully.
 * DONE 1.1
 ** DONE Rewrite sheeple using CLOS  
 ** DONE Expose enough of a MOP for psheep to be able to do its thing.

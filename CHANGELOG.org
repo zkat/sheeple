@@ -1,3 +1,8 @@
+* 1.1.1
+** Features
+*** Minor tweaks. This version is mostly a checkpoint pre-2.0
+** Bugs
+   NIL
 * 1.1
 ** Features
 *** Sheeple rewritten using CLOS instead of structs/funs

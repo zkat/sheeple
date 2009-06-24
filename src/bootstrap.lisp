@@ -9,12 +9,14 @@
 
 (defvar =t=
   (let ((sheep (make-instance 'standard-sheep)))
+    (setf (sheep-nickname sheep) '=t=)
     (finalize-sheep sheep)
     sheep))
 
 (defvar =dolly=
   (let ((sheep (make-instance 'standard-sheep)))
     (setf (sheep-direct-parents sheep) (list =t=))
+    (setf (sheep-nickname sheep) '=dolly=)
     (finalize-sheep sheep)
     sheep))
 

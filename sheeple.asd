@@ -25,5 +25,8 @@
 	     (:file "post-boot")
 	     (:file "glue")))))
 
-
-
+#+nil(defmethod asdf:perform ((o asdf:test-op) (c (eql (asdf:find-system :sheeple))))
+  (format t "~&Loading sheeple-tests...~%")
+  (asdf:oos 'asdf:load-op 'sheeple-tests)
+  (format t "~&Starting test...~%")
+  (asdf:oos 'asdf:test-op 'sheeple-tests))

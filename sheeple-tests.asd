@@ -13,3 +13,6 @@
 	     (:file "sheeple")
 	     (:file "compatibility")
 	     (:file "buzzwords")))))
+
+(defmethod asdf:perform ((o asdf:test-op) (c (eql (asdf:find-system :sheeple-tests))))
+  (sheeple-tests:sheeple-tests))

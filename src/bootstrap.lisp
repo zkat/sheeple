@@ -21,9 +21,6 @@
     sheep))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (defun clone (&rest sheeple)
-    (spawn-sheep sheeple))
-  
   (defun spawn-sheep (sheeple &rest all-keys &key (metaclass 'standard-sheep) &allow-other-keys)
     "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
     (let ((sheep (apply #'initialize-sheep
@@ -33,7 +30,10 @@
                                                    (list =dolly=))
                                all-keys)
                         all-keys)))
-      sheep)))
+      sheep))
+
+    (defun clone (&rest sheeple)
+      (spawn-sheep sheeple)))
 
 (defbuzzword initialize-sheep (sheep &key))
 (defmessage initialize-sheep (sheep

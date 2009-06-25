@@ -148,21 +148,14 @@
 (defun canonize-clone-option (option)
   (list `',(car option) (cadr option)))
 
-(defmacro clone (sheeple properties &rest options)
-  "Standard sheep-generation macro"
-  `(spawn-sheep
-    ,(canonize-sheeple sheeple)
-    :properties ,(canonize-properties properties)
-    ,@(canonize-clone-options options)))
-
-(defmacro clone* (sheeple properties &rest options)
+(defmacro defclone (sheeple properties &rest options)
   "Standard sheep-generation macro. This variant auto-generates accessors."
   `(spawn-sheep
     ,(canonize-sheeple sheeple)
     :properties ,(canonize-properties* properties)
     ,@(canonize-clone-options options)))
 
-(defmacro defsheep (name sheeple properties &rest options)
+(defmacro defproto (name sheeple properties &rest options)
   (if (boundp name)
       `(progn
          (defvar ,name)

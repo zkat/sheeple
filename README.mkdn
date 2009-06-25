@@ -8,14 +8,12 @@ assist them in leveraging modern paradigms in order to proactively achieve next-
 in tomorrow's web 3.0 world. It is implemented in (mostly) ANSI Common Lisp. Sheeple is fully
 buzzword compliant.
 
-Sheeple was originally written as a persistent library for use with [Sykosomatic][9]. When that
-didn't work out, it was simply rewritten as a regular prototype object system and provided as a
-standalone library meant for general-purpose OO hackery. I was mostly motivated to split it off
-because I kept running into different problems in other apps where I wished I could express things
-the way Sheeple does things.
+Sheeple was originally written as a persistent library for use with [Sykosomatic][9]. Because of a
+desire to use it in other applications, it was rewritten as a regular prototype object system and
+provided as a standalone library meant for general-purpose OO hackery.
 
 Persistent Sheeple has not been abandoned, instead, it's been implemented as a [separate library][7]
-using Sheeple's Metaobject Protocol.
+using Sheeple's reflective features.
 
 Sheeple is inspired by a number of Object-Oriented systems, mainly:
 
@@ -25,7 +23,7 @@ Sheeple is inspired by a number of Object-Oriented systems, mainly:
   message dispatch system on.
 * [Self][10], another Smalltalk-like language with lots of papers written about it, and the concept
   of prototype OO.
-* [Io][4], a pure prototype-based language. Sheeple, like Io, does delegation-by-default
+* [Io][4], a pure prototype-based language. Sheeple, like Io, does differential inheritance.
 
 [3]: http://en.wikipedia.org/wiki/CLOS
 [4]: http://en.wikipedia.org/wiki/Io_(programming_language)
@@ -64,14 +62,8 @@ For information on how to do this, check out [Cliki][1], or the [ASDF Homepage][
 [1]: http://www.cliki.net/asdf
 [2]: http://common-lisp.net/project/asdf/
 
-Sheeple should work on most Lisp implementations, although it's mainly written and tested in SBCL on
-Linux x86.
-
-FiveAM is required if you wish to run the test suite. To run it:
-        
-        (asdf:oos 'asdf:load-op 'sheeple-tests)
-        (sheeple-tests:sheeple-tests)
-
+Sheeple should work on most Lisp implementations that support weak pointers and hash tables with key
+weakness, although it's mainly written and tested in SBCL and Clozure CL on Linux x86.
 
 Notes
 -----
@@ -80,27 +72,15 @@ the domain of sykosomatic, tld org. I'll help as much as I can (or even do the w
 and all comments are also greatly appreciated.
 
 
-Disclaimer
-----------
-Because of a combination of the necessity to avoid name collisions in a system very similar to CLOS
-and a desire to amuse myself (and others), Sheeple has been designed from the beginning to be
-maximally groan-worthy with its naming scheme. I apologize in advance, and I am not responsible for
-any issues the naming scheme might cause, such as Chronic Smug Weenie Nose-Tilting Syndrome.
-
-I assure you, Sheeple is Serious Business(tm) for Serious Applications(tm).
-
-
 Features
 --------
-
-* DEFCLASS*-like DEFSHEEP and CLONE macros.
 
 * Dynamic object management tools (inspection of objects, addition/removal of properties, all
   without requiring full redefinition/object updating).
 
-* Delegative property value access.
+* Differential inheritance of property values
 
-* Full integration with built-in Lisp types (wolves) through autoboxing (called fleecing).
+* Full integration with built-in Lisp types through autoboxing.
 
 * Multiple inheritance through cloning with dynamic inspection and management (adding/removing) of
   parents.
@@ -109,17 +89,11 @@ Features
   inheritance hierarchy. Multimessage definition is almost identical to the core of CLOS methods,
   and shares similar semantics.
 
-* Dynamic removal of messages, as well as entire buzzwords with undefbuzzword/undefmessage.
-
-* Auto-generated readers/writers, with :accessor, :reader, and :writer property options.
-
 * :before, :after, and :around messages
 
 * (call-next-message) and (next-message-p)
 
-Planned features:
-
-* A metaobject protocol
+* A metaobject protocol for inspecting sheeple and altering their behavior through metaclasses.
 
 
 Using Sheeple
@@ -131,4 +105,3 @@ You can also take a peek at the demo/ directory for examples.
 
 As usual, you can always contact me directly with questions. I also regularly lurk in #lisp@freenode
 (as sykopomp).
-

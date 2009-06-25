@@ -17,13 +17,9 @@
                      :initform  (make-weak-hash-table :weakness :key :test #'eq))
    (property-value-table :accessor sheep-property-value-table
                          :initform (make-hash-table :test #'eq))
-   #+nil(property-owners :accessor sheep-property-owners
-		    :initform (make-weak-hash-table :weakness :value :test #'eq))
    (readers :accessor %property-readers :initform (make-hash-table :test #'eq))
    (writers :accessor %property-writers :initform (make-hash-table :test #'eq))
    (direct-roles :accessor sheep-direct-roles :initform nil)
-   (clonefunctions :accessor sheep-clonefunctions :initform (make-hash-table :test #'eq))
-   (cloneforms :accessor sheep-cloneforms :initform (make-hash-table :test #'eq))
    (hierarchy-list :accessor sheep-hierarchy-list)
    (id :accessor sheep-id :initform (incf *max-sheep-id*))))
 
@@ -49,8 +45,6 @@
   (let* ((parents (sheep-direct-parents model))
          (properties (sheep-property-value-table model))
          (roles (sheep-direct-roles model))
-         (clonefuns (sheep-clonefunctions model))
-         (cloneforms (sheep-cloneforms model))
          (new-sheep (clone () ())))
     (setf (sheep-direct-parents new-sheep)
           parents)
@@ -58,10 +52,6 @@
           properties)
     (setf (sheep-direct-roles new-sheep)
           roles)
-    (setf (sheep-clonefunctions new-sheep)
-          clonefuns)
-    (setf (sheep-cloneforms new-sheep)
-          cloneforms)
     new-sheep))
 
 (defun set-up-properties (sheep properties)
@@ -217,28 +207,4 @@
                (declare (ignore iggy))
                (memoize-sheep-hierarchy-list descendant))
              (%direct-children sheep))))
-
-;; MOP
-(defclass property-spec ()
-  ((name :initarg :name :accessor property-spec-name)
-   (value :initarg :value :accessor property-spec-value)
-   (readers :initform nil :initarg :readers :accessor property-spec-readers)
-   (writers :initform nil :initarg :writers :accessor property-spec-writers)))
-
-(defmethod print-object ((property-spec property-spec) stream)
-  (print-unreadable-object (property-spec stream :identity t)
-    (format stream "Property-Spec ~~ Name: ~A" (property-spec-name property-spec))))
-(defun sheep-direct-properties (sheep)
-  "Returns a set of direct property-spec definition metaobjects."
-  (loop for pname being the hash-keys of (sheep-property-value-table sheep)
-     using (hash-value pvalue)
-     collect (make-instance 'property-spec
-                            :name pname
-                            :value pvalue
-                            :readers 
-                            (loop for reader-name in (gethash pname (%property-readers sheep))
-                                 collect reader-name)
-                            :writers 
-                            (loop for writer-name in (gethash pname (%property-writers sheep))
-                               collect writer-name))))
 

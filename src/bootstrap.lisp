@@ -79,7 +79,6 @@
                     :shallow-copy shallow-copy
                     :documentation documentation))
 
-(setf (sheep-nickname =t=) "=T=")
 (defsheep =dolly= (=t=) ())
 
 ;;; Wolves and wolf-handling

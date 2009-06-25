@@ -1,9 +1,9 @@
-* TODO Undecided
-** TODO Implement :message option for defbuzzword (like CLOS' :method option)
+* TODO Later
+** TODO Implement :message option for defmessage (like CLOS' :method option)
    I don't care about this feature all that much, so I might just keep bumping it until someone
    who -does- care asks for it.
-   UPDATE: I don't think I even want this. It makes the defbuzzword macro horribly bloated and
-   complex, and I don't even like the idea of stuffing everything into a buzzword definition. Things
+   UPDATE: I don't think I even want this. It makes the defmessage macro horribly bloated and
+   complex, and I don't even like the idea of stuffing everything into a message definition. Things
    need to stay flexible, and this would be just plain ugly.
 ** TODO Make singly-dispatched readers just about as fast as simply calling property-value
 ** TODO Write caching scheme for property access.
@@ -25,7 +25,7 @@
 ** TODO New interface
 *** TODO CLONE -> function
     CLONE should be turned into a very simple function: (clone &rest sheep)
-*** TODO DEFCLONE
+*** TODO CLONE* -> DEFCLONE
     What is currently CLONE should be renamed to DEFCLONE. More involved cloning capabilities
     are still nice.
 *** TODO DEFSHEEP->DEFPROTO
@@ -38,11 +38,13 @@
     I think I could get used to this naming scheme instead.
 *** TODO Fleeced Wolf -> Boxed built-in
 *** TODO =white-fang= -> boxed-object
-*** TODO Fleecing -> autoboxing
+*** TODO Fleecing -> Autoboxing
+*** TODO Parents -> Protos
+*** TODO Children -> Clones
 ** TODO Make psheep easier to implement
 *** TODO The order in which a sheep is built needs to be planned out more carefully.
 ** TODO More cleanup and convenience
-*** TODO Get rid of add-on-write. Require add-property.
+*** DONE Get rid of add-on-write. Require add-property.
     Add-on-write seems like a quick interface, but it's a bit obnoxious to deal with.
     Not only does it create a risk for some serious hard-to-track bugs, but it makes
     it trickier to allocate space for properties when using the MOP.
@@ -63,6 +65,9 @@
 *** TODO Fix reinitialize-sheep
     This should be modeled more after reinitialize-instance. i.e. it should be specified
     that its function is to update the parents and direct property values of its sheep argument.
+*** DONE Implement something like Io's slotSummary
+    This is really important! :-o
+    UPDATE: direct-property-summary and property-summary should do the trick for now :)
 ** TODO Tests
    All these changes should have a completely new set of unit tests written for them.
    While I'm at it, this could be an opportunity to improve the structure of the tests,

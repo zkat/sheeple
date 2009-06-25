@@ -3,6 +3,8 @@
 ;; wolves.lisp
 ;;
 ;; Fleecing and sheepification
+;;
+;; TODO: This is such a mess...
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
@@ -13,26 +15,26 @@
 	(warn "This is already a sheep!")
 	x)
       (typecase x
-	(null                                          =null=)
-	((and symbol (not null))                       =symbol=)
-	((complex *)                                   =complex=)
-	((integer * *)                                 =integer=)
-	((float * *)                                   =float=)
-	(cons                                          =cons=)
-	(character                                     =character=)
-	(hash-table                                    =hash-table=)
-	(package                                       =package=)
-	(pathname                                      =pathname=)
-	(readtable                                     =readtable=)
-	(stream                                        =stream=)
-	((and number (not (or integer complex float))) =number=)
-	((string *)                                    =string=)
-	((bit-vector *)                                =bit-vector=)
-	((and vector (not string))                     =vector=)
-	((and array (not vector))                      =array=)
-	((and sequence (not (or vector list)))         =sequence=)
-	(function                                      =function=)
-	(t                                             =white-fang=))))
+	(null                                          (find-sheep 'null))
+	((and symbol (not null))                       (find-sheep 'symbol))
+	((complex *)                                   (find-sheep 'complex))
+	((integer * *)                                 (find-sheep 'integer))
+	((float * *)                                   (find-sheep 'float))
+	(cons                                          (find-sheep 'cons))
+	(character                                     (find-sheep 'character))
+	(hash-table                                    (find-sheep 'hash-table))
+	(package                                       (find-sheep 'package))
+	(pathname                                      (find-sheep 'pathname))
+	(readtable                                     (find-sheep 'readtable))
+	(stream                                        (find-sheep 'stream))
+	((and number (not (or integer complex float))) (find-sheep 'number))
+	((string *)                                    (find-sheep 'string))
+	((bit-vector *)                                (find-sheep 'bit-vector))
+	((and vector (not string))                     (find-sheep 'vector))
+	((and array (not vector))                      (find-sheep 'array))
+	((and sequence (not (or vector list)))         (find-sheep 'sequence))
+	(function                                      (find-sheep 'function))
+	(t                                             (find-sheep 'boxed-object)))))
 
 ;; Boxed object table
 (let ((boxed-object-table (make-hash-table :test #'equal)))

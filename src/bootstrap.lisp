@@ -7,31 +7,31 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(defvar =t=
+(defvar proto-t
   (let ((sheep (make-instance 'standard-sheep)))
-    (setf (sheep-nickname sheep) '=t=)
+    (setf (sheep-nickname sheep) 'proto-t)
     (finalize-sheep sheep)
     sheep))
 
-(defvar =dolly=
+(defvar dolly
   (let ((sheep (make-instance 'standard-sheep)))
-    (setf (sheep-direct-parents sheep) (list =t=))
-    (setf (sheep-nickname sheep) '=dolly=)
+    (setf (sheep-direct-parents sheep) (list (find-sheep 'proto-t)))
+    (setf (sheep-nickname sheep) 'dolly)
     (finalize-sheep sheep)
     sheep))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun clone (&rest sheeple)
+    (spawn-sheep sheeple))
+  
   (defun spawn-sheep (sheeple &rest all-keys &key (metaclass 'standard-sheep) &allow-other-keys)
     "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
-    ;; I need to figure out how to have the parents already accessible?...
     (let ((sheep (apply #'initialize-sheep
-                        (let ((sheep (apply #'allocate-sheep metaclass
-                                            :direct-parents (if sheeple
-                                                                (sheepify-list sheeple)
-                                                                (list =dolly=))
-                                            all-keys)))
-                          (finalize-sheep sheep)
-                          sheep)
+                        (apply #'allocate-sheep metaclass
+                               :direct-parents (if sheeple
+                                                   (sheepify-list sheeple)
+                                                   (list =dolly=))
+                               all-keys)
                         all-keys)))
       sheep)))
 
@@ -40,17 +40,9 @@
                               &key 
                               properties
                               nickname
-                              documentation
-                              deep-copy
-                              shallow-copy)
+                              documentation)
   (set-up-properties sheep properties)
-  (execute-clonefunctions sheep)
   (setf (sheep-nickname sheep) nickname)
-  (finalize-sheep sheep)
-  (when shallow-copy
-    (shallow-copy sheep))
-  (when deep-copy
-    (deep-copy sheep))
   (when documentation
     (setf (sheep-documentation sheep) documentation))
   sheep)
@@ -65,8 +57,6 @@
   ;; cleanup
   (loop for parent in (sheep-direct-parents sheep)
      do (remove-parent parent sheep))
-  (clrhash (sheep-cloneforms sheep))
-  (clrhash (sheep-clonefunctions sheep))
   (clrhash (sheep-property-value-table sheep))
   (if new-parents
       (sheepify-list new-parents)
@@ -79,27 +69,27 @@
                     :shallow-copy shallow-copy
                     :documentation documentation))
 
-(defsheep =dolly= (=t=) ())
+(defproto dolly (proto-t) ())
 
 ;;; Wolves and wolf-handling
-(defsheep =white-fang= (=t=) ())
-(defsheep =symbol=  (=white-fang=) ())
-(defsheep =sequence=  (=white-fang=) ())
-(defsheep =array=  (=white-fang=) ())
-(defsheep =number=  (=white-fang=) ())
-(defsheep =character= (=white-fang=) ())
-(defsheep =function=  (=white-fang=) ())
-(defsheep =hash-table= (=white-fang=) ())
-(defsheep =package=  (=white-fang=) ())
-(defsheep =pathname=  (=white-fang=) ())
-(defsheep =readtable=  (=white-fang=) ())
-(defsheep =stream=  (=white-fang=) ())
-(defsheep =list=  (=sequence=) ())
-(defsheep =null=  (=symbol= =list=) ())
-(defsheep =cons=  (=list=) ())
-(defsheep =vector=  (=array= =sequence=) ())
-(defsheep =bit-vector=  (=vector=) ())
-(defsheep =string=  (=vector=) ())
-(defsheep =complex=  (=number=) ())
-(defsheep =integer=  (=number=) ())
-(defsheep =float=  (=number=) ())
+(defproto boxed-object (proto-t) ())
+(defproto symbol  (boxed-object) ())
+(defproto sequence  (boxed-object) ())
+(defproto array  (boxed-object) ())
+(defproto number  (boxed-object) ())
+(defproto character (boxed-object) ())
+(defproto function  (boxed-object) ())
+(defproto hash-table (boxed-object) ())
+(defproto package  (boxed-object) ())
+(defproto pathname  (boxed-object) ())
+(defproto readtable  (boxed-object) ())
+(defproto stream  (boxed-object) ())
+(defproto list  (sequence) ())
+(defproto null  (symbol list) ())
+(defproto cons  (list) ())
+(defproto vector  (array sequence) ())
+(defproto bit-vector  (vector) ())
+(defproto string  (vector) ())
+(defproto complex  (number) ())
+(defproto integer  (number) ())
+(defproto float  (number) ())

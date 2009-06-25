@@ -21,8 +21,6 @@
 	    (value (cadr property))
             (readers nil)
             (writers nil)
-	    (lockedp nil)
-	    (cloneform *secret-unbound-value*)
             (other-options nil)
 	    (no-reader-p nil)
 	    (no-writer-p nil))
@@ -59,10 +57,6 @@
 		   (t
 		    (pushnew (cadr olist) readers)
 		    (pushnew `(setf ,(cadr olist)) writers))))
-	    (:cloneform
-	     (setf cloneform (cadr olist)))
-	    ((:locked-p :lockedp)
-	     (setf lockedp (cadr olist)))
 	    (otherwise 
              (pushnew (cadr olist) other-options)
              (pushnew (car olist) other-options))))
@@ -75,8 +69,6 @@
 	    `(list
 	      :name ',name
 	      :value ,value
-	      ,@(when (not (eql cloneform *secret-unbound-value*))
-		      `(:cloneform ',cloneform :clonefunction (lambda () ,cloneform)))
 	      ,@(when readers `(:readers ',readers))
 	      ,@(when writers `(:writers ',writers)))))))
 
@@ -87,8 +79,6 @@
 	    (value (cadr property))
             (readers nil)
             (writers nil)
-	    (lockedp nil)
-	    (cloneform *secret-unbound-value*)
             (other-options nil)
 	    (no-reader-p nil)
 	    (no-writer-p nil))
@@ -125,10 +115,6 @@
 		   (t
 		    (pushnew (cadr olist) readers)
 		    (pushnew `(setf ,(cadr olist)) writers))))
-	    (:cloneform
-	     (setf cloneform (cadr olist)))
-	    ((:locked-p :lockedp)
-	     (setf lockedp (cadr olist)))
 	    (otherwise 
              (pushnew (cadr olist) other-options)
              (pushnew (car olist) other-options))))
@@ -137,8 +123,6 @@
 	    `(list
 	      :name ',name
 	      :value ,value
-	      ,@(when (not (eql cloneform *secret-unbound-value*))
-		      `(:cloneform ',cloneform :clonefunction (lambda () ,cloneform)))
 	      ,@(when readers `(:readers ',readers))
 	      ,@(when writers `(:writers ',writers)))))))
 

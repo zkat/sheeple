@@ -26,7 +26,9 @@
 (defmethod initialize-instance :after ((sheep standard-sheep) &key &allow-other-keys))
 
 (defun allocate-sheep (class &rest all-keys)
-  (apply #'make-instance class all-keys))
+  (let ((sheep (apply #'make-instance class all-keys)))
+    (finalize-sheep sheep)
+    sheep))
 
 (defgeneric sheep-p (obj))
 (defmethod sheep-p (obj)
@@ -39,15 +41,11 @@
 ;;;
 ;;; Cloning
 ;;;
-
-;;; FIXME: SHIT SON... this only copies references. I'm an idort.
-(defun mitosis (model)
+(defun copy-sheep (model)
   (let* ((parents (sheep-direct-parents model))
          (properties (sheep-property-value-table model))
          (roles (sheep-direct-roles model))
-         (new-sheep (clone () ())))
-    (setf (sheep-direct-parents new-sheep)
-          parents)
+         (new-sheep (clone parents)))
     (setf (sheep-property-value-table new-sheep)
           properties)
     (setf (sheep-direct-roles new-sheep)
@@ -61,32 +59,8 @@
   (let ((name (getf property-list :name))
         (value (getf property-list :value))
         (readers (getf property-list :readers))
-        (writers (getf property-list :writers))
-        (cloneform-present-p (member :cloneform property-list))
-        (cloneform (getf property-list :cloneform))
-        (clonefunction (getf property-list :clonefunction)))
-    (when (not (symbolp name))
-      (error "Property names must be symbols"))
-    (when cloneform-present-p
-      (set-up-cloneform sheep name cloneform clonefunction))
-    (setf (property-value sheep name) value)
-    (add-readers-to-sheep readers name sheep)
-    (add-writers-to-sheep writers name sheep)))
-
-(defun set-up-cloneform (sheep pname form function)
-  (setf (get-cloneform sheep pname) form)
-  (setf (get-clonefunction sheep pname) function))
-
-(defun execute-clonefunctions (sheep)
-  (let* ((available-cloneforms (available-cloneforms sheep))
-	 (functions (loop for property in available-cloneforms
-		       collect (get-clonefunction sheep property))))
-    (loop
-       for fn in functions
-       for propname in available-cloneforms
-       do (unless (or (eq fn *secret-unbound-value*)
-		      (has-direct-property-p sheep propname))
-	    (setf (property-value sheep propname) (funcall (the function fn)))))))
+        (writers (getf property-list :writers)))
+    (add-property sheep name value :readers readers :writers writers)))
 
 (defgeneric finalize-sheep (sheep))
 (defmethod finalize-sheep ((sheep standard-sheep))
@@ -114,32 +88,44 @@
 ;;; Inheritance setup
 (defun add-parent (new-parent child)
   (cond ((equal new-parent child)
-         (error "Can't inherit from self."))
+         (error "Sheeple cannot be parents of themselves."))
         (t
          (handler-case
-           (progn
-             (pushnew new-parent (sheep-direct-parents child))
-             (setf (gethash child (%direct-children new-parent)) t)
-             child)
+             (progn
+               (pushnew new-parent (sheep-direct-parents child))
+               (setf (gethash child (%direct-children new-parent)) t)
+               child)
            (sheep-hierarchy-error ()
-                                  (progn
-                                    (setf (sheep-direct-parents child) (delete new-parent
-                                                                               (sheep-direct-parents child)))
-                                    (error 'sheep-hierarchy-error))))
+             (progn
+               (setf (sheep-direct-parents child) 
+                     (delete new-parent
+                             (sheep-direct-parents child)))
+               (error 'sheep-hierarchy-error))))
          (finalize-sheep child)
          child)))
 
-(defun remove-parent (parent child &key (keep-properties nil))
+(defun remove-parent (parent child)
   (setf (sheep-direct-parents child)
         (delete parent (sheep-direct-parents child)))
   (remhash child (%direct-children parent))
-  (when keep-properties
-    (loop for property-name being the hash-keys of (sheep-property-value-table parent)
-          using (hash-value value)
-          do (unless (has-direct-property-p child property-name)
-               (setf (property-value child property-name) value))))
   (finalize-sheep child)
   child)
+
+;;; Inheritance predicates
+(defun direct-parent-p (maybe-parent child)
+  (when (member maybe-parent (sheep-direct-parents child))
+    t))
+
+(defun ancestor-p (maybe-ancestor descendant)
+  (when (and (not (eql maybe-ancestor descendant))
+             (member maybe-ancestor (collect-parents descendant)))
+    t))
+
+(defun direct-child-p (maybe-child parent)
+  (direct-parent-p parent maybe-child))
+
+(defun descendant-p (maybe-descendant ancestor)
+  (ancestor-p ancestor maybe-descendant))
 
 ;;;
 ;;; Hierarchy Resolution
@@ -181,22 +167,6 @@
            (common (intersection minimal-elements supers)))
       (when (not (null common))
         (return-from std-tie-breaker-rule (car common))))))
-
-;;; Inheritance predicates
-(defun direct-parent-p (maybe-parent child)
-  (when (member maybe-parent (sheep-direct-parents child))
-    t))
-
-(defun ancestor-p (maybe-ancestor descendant)
-  (when (and (not (eql maybe-ancestor descendant))
-             (member maybe-ancestor (collect-parents descendant)))
-    t))
-
-(defun direct-child-p (maybe-child parent)
-  (direct-parent-p parent maybe-child))
-
-(defun descendant-p (maybe-descendant ancestor)
-  (ancestor-p ancestor maybe-descendant))
 
 ;; Memoization
 (defun memoize-sheep-hierarchy-list (sheep)

@@ -28,9 +28,9 @@
 *** TODO CLONE* -> DEFCLONE
     What is currently CLONE should be renamed to DEFCLONE. More involved cloning capabilities
     are still nice.
-*** TODO DEFSHEEP->DEFPROTO
+*** DONE DEFSHEEP->DEFPROTO
     Time to get a bit more serious. DEFPROTO is a much clearer name.
-*** TODO Mitosis->copy-sheep
+*** DONE Mitosis->copy-sheep
     Also, get it working properly.
 *** TODO defbuzzword -> defmessage
     Rename this thing. It really doesn't have to be silly.

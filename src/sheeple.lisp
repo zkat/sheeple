@@ -23,6 +23,13 @@
    (hierarchy-list :accessor sheep-hierarchy-list)
    (id :accessor sheep-id :initform (incf *max-sheep-id*))))
 
+;;; How to build a full sheep object:
+;;; 1. Allocate an instance of its metaclass
+;;; 2. Add its direct parents
+;;; --- Can now define and run replies on this object, since it has a hierarchy list.
+;;; 3. Add any properties we want to it.
+;;; 4. Define any replies, including accessors.
+;;; 5. Free to go
 (defmethod initialize-instance :after ((sheep standard-sheep) &key &allow-other-keys))
 
 (defun allocate-sheep (class &rest all-keys)
@@ -53,14 +60,9 @@
     new-sheep))
 
 (defun set-up-properties (sheep properties)
-  (loop for property-list in properties
-        do (set-up-property sheep property-list)))
-(defun set-up-property (sheep property-list)
-  (let ((name (getf property-list :name))
-        (value (getf property-list :value))
-        (readers (getf property-list :readers))
-        (writers (getf property-list :writers)))
-    (add-property sheep name value :readers readers :writers writers)))
+  (mapc (lambda (plist)
+          (apply #'add-property sheep plist))
+        properties))
 
 (defgeneric finalize-sheep (sheep))
 (defmethod finalize-sheep ((sheep standard-sheep))

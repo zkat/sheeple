@@ -46,7 +46,8 @@
 
   (defun wear-wool (wolf)
     "Autoboxes WOLF"
-    (setf (gethash wolf boxed-object-table) (clone ((fleece-of wolf)) ((wolf wolf)) (:nickname wolf))))
+    (setf (gethash wolf boxed-object-table) (defclone ((fleece-of wolf))
+                                                ((wolf wolf)) (:nickname wolf))))
 
   (defun shoot-wolf (wolf)
     "Kills wolf dead"
@@ -60,7 +61,10 @@
 
 (defun sheepify (sheep)
   "Returns SHEEP or fleeces it."
-   (if (not (sheep-p sheep))
-       (or (find-fleeced-wolf sheep)
-	   (values (wear-wool sheep) t))
-       (values sheep nil)))
+   (cond ((eq sheep t)
+          (find-proto 't))
+         ((not (sheep-p sheep))
+          (or (find-fleeced-wolf sheep)
+              (values (wear-wool sheep) t)))
+         (t
+          (values sheep nil))))

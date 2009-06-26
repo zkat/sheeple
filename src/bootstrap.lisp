@@ -7,33 +7,18 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(defvar proto-t
-  (let ((sheep (make-instance 'standard-sheep)))
-    (setf (sheep-nickname sheep) 'proto-t)
-    (finalize-sheep sheep)
-    sheep))
+(setf (find-proto 't)
+      (let ((sheep (make-instance 'standard-sheep)))
+        (setf (sheep-nickname sheep) 'proto-t)
+        (finalize-sheep sheep)
+        sheep))
 
-(defvar dolly
+(setf (find-proto 'dolly)
   (let ((sheep (make-instance 'standard-sheep)))
     (setf (sheep-direct-parents sheep) (list (find-sheep 'proto-t)))
     (setf (sheep-nickname sheep) 'dolly)
     (finalize-sheep sheep)
     sheep))
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defun spawn-sheep (sheeple &rest all-keys &key (metaclass 'standard-sheep) &allow-other-keys)
-    "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
-    (let ((sheep (apply #'initialize-sheep
-                        (apply #'allocate-sheep metaclass
-                               :direct-parents (if sheeple
-                                                   (sheepify-list sheeple)
-                                                   (list =dolly=))
-                               all-keys)
-                        all-keys)))
-      sheep))
-
-    (defun clone (&rest sheeple)
-      (spawn-sheep sheeple)))
 
 (defbuzzword initialize-sheep (sheep &key))
 (defmessage initialize-sheep (sheep
@@ -69,7 +54,7 @@
                     :shallow-copy shallow-copy
                     :documentation documentation))
 
-(defproto dolly (proto-t) ())
+(defproto dolly (t) ())
 
 ;;; Wolves and wolf-handling
 (defproto boxed-object (proto-t) ())

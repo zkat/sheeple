@@ -2,7 +2,7 @@
 
 ;; post-boot.lisp
 ;;
-;; Once sheeple is booted up, we can define buzzwords/messages normally
+;; Once sheeple is booted up, we can define messages/replies normally
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
@@ -37,28 +37,28 @@
 
 ;;; Sheep creation
 
-;; (defbuzzword initialize-sheep (metasheep-prototype 
+;; (defmessage initialize-sheep (metasheep-prototype 
 ;; 			       &rest all-keys))
-;; (defmessage initialize-sheep ((metaproto =standard-sheep-metasheep=)
+;; (defreply initialize-sheep ((metaproto =standard-sheep-metasheep=)
 ;; 			      &rest all-keys)
 ;;   (apply #'std-initialize-sheep metaproto all-keys))
 
-;; (defbuzzword finalize-sheep-using-metasheep (metasheep sheep))
-;; (defmessage finalize-sheep-using-metasheep ((metasheep =standard-sheep-metasheep=)
+;; (defmessage finalize-sheep-using-metasheep (metasheep sheep))
+;; (defreply finalize-sheep-using-metasheep ((metasheep =standard-sheep-metasheep=)
 ;; 					    sheep)
 ;;   (std-finalize-sheep sheep))
 
 ;;;
 ;;; Printing sheep!
 ;;;
-(defbuzzword print-sheep (sheep stream)
+(defmessage print-sheep (sheep stream)
   (:documentation "Defines the expression print-object uses."))
-(defmessage print-sheep (sheep (stream =stream=))
+(defreply print-sheep (sheep (stream =stream=))
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Standard Sheep~@[ AKA: ~a~]" (sheep-nickname sheep))))
-(defmessage print-sheep ((sheep =white-fang=) (stream =stream=))
+(defreply print-sheep ((sheep =white-fang=) (stream =stream=))
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Fleeced Wolf~@[ AKA: ~a~]" (sheep-nickname sheep))))
 
-;;; buzzwords/messages
+;;; messages/replies
 

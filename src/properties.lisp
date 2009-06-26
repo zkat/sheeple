@@ -49,6 +49,11 @@ hierarchy list, an error is signaled. This function returns SHEEP after property
              sheep)
       (error "Cannot remove property: ~A is not a direct property of ~A" property-name sheep)))
 
+(defgeneric remove-all-direct-properties (sheep))
+(defmethod remove-all-direct-properties ((sheep standard-sheep))
+  (clrhash (sheep-property-value-table sheep))
+  sheep)
+
 (defgeneric direct-property-value (sheep property-name)
   (:documentation "Returns the property-value set locally in SHEEP for PROPERTY-NAME. If the value
 is non-local (is delegated or does not exist in the hierarchy list), an UNBOUND-PROPERTY is signaled."))

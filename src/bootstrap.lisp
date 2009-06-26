@@ -8,73 +8,59 @@
 (in-package :sheeple)
 
 (setf (find-proto 't)
-      (let ((sheep (make-instance 'standard-sheep)))
+      (let ((sheep (allocate-sheep)))
         (setf (sheep-nickname sheep) 'proto-t)
-        (finalize-sheep sheep)
         sheep))
 
 (setf (find-proto 'dolly)
-  (let ((sheep (make-instance 'standard-sheep)))
-    (setf (sheep-direct-parents sheep) (list (find-sheep 'proto-t)))
+  (let ((sheep (allocate-sheep)))
     (setf (sheep-nickname sheep) 'dolly)
-    (finalize-sheep sheep)
+    (add-parent t sheep)
     sheep))
 
-(defbuzzword initialize-sheep (sheep &key))
-(defmessage initialize-sheep (sheep
-                              &key 
-                              properties
-                              nickname
-                              documentation)
-  (set-up-properties sheep properties)
+(defmessage initialize-sheep (sheep &key))
+(defreply initialize-sheep (sheep
+                            &key 
+                            nickname
+                            documentation)
   (setf (sheep-nickname sheep) nickname)
   (when documentation
     (setf (sheep-documentation sheep) documentation))
   sheep)
 
-(defbuzzword reinitialize-sheep (sheep &key))
-(defmessage reinitialize-sheep (sheep
-                                &key new-parents
-                                new-properties
-                                nickname
-                                documentation
-                                deep-copy shallow-copy)
-  ;; cleanup
+(defmessage reinitialize-sheep (sheep &key))
+(defreply reinitialize-sheep (sheep
+                              &key new-parents
+                              documentation)
   (loop for parent in (sheep-direct-parents sheep)
      do (remove-parent parent sheep))
-  (clrhash (sheep-property-value-table sheep))
-  (if new-parents
-      (sheepify-list new-parents)
-      (list =dolly=))
-  ;; initialize again
-  (initialize-sheep sheep 
-                    :properties new-properties
-                    :nickname nickname
-                    :deep-copy deep-copy
-                    :shallow-copy shallow-copy
-                    :documentation documentation))
+  (remove-all-direct-properties sheep)
+  (loop for parent in (if new-parents (sheepify-list new-parents) (list #@dolly))
+     do (add-parent parent sheep))
+  (when documentation
+    (setf (sheep-documentation sheep) documentation)))
 
 (defproto dolly (t) ())
 
-;;; Wolves and wolf-handling
-(defproto boxed-object (proto-t) ())
-(defproto symbol  (boxed-object) ())
-(defproto sequence  (boxed-object) ())
-(defproto array  (boxed-object) ())
-(defproto number  (boxed-object) ())
-(defproto character (boxed-object) ())
-(defproto function  (boxed-object) ())
-(defproto hash-table (boxed-object) ())
-(defproto package  (boxed-object) ())
-(defproto pathname  (boxed-object) ())
-(defproto readtable  (boxed-object) ())
-(defproto stream  (boxed-object) ())
-(defproto list  (sequence) ())
-(defproto null  (symbol list) ())
-(defproto cons  (list) ())
-(defproto vector  (array sequence) ())
-(defproto bit-vector  (vector) ())
-(defproto string  (vector) ())
-(defproto complex  (number) ())
-(defproto integer  (number) ())
-(defproto float  (number) ())
+;;; Boxed built-ins
+(defproto boxed-object (t) ())
+(defproto symbol (#@boxed-object) ())
+(defproto sequence (#@boxed-object) ())
+(defproto array (#@boxed-object) ())
+(defproto number (#@boxed-object) ())
+(defproto character (#@boxed-object) ())
+(defproto function (#@boxed-object) ())
+(defproto hash-table (#@boxed-object) ())
+(defproto package (#@boxed-object) ())
+(defproto pathname (#@boxed-object) ())
+(defproto readtable (#@boxed-object) ())
+(defproto stream (#@boxed-object) ())
+(defproto list (#@sequence) ())
+(defproto null (#@symbol #@list) ())
+(defproto cons (#@list) ())
+(defproto vector (#@array #@sequence) ())
+(defproto bit-vector (#@vector) ())
+(defproto string (#@vector) ())
+(defproto complex (#@number) ())
+(defproto integer (#@number) ())
+(defproto float (#@number) ())

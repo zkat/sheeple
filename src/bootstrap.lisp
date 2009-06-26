@@ -9,7 +9,7 @@
 
 (setf (find-proto 't)
       (let ((sheep (allocate-sheep)))
-        (setf (sheep-nickname sheep) 'proto-t)
+        (setf (sheep-nickname sheep) 't)
         sheep))
 
 (setf (find-proto 'dolly)

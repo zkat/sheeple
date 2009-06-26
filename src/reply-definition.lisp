@@ -192,7 +192,7 @@
        (ensure-message writer :lambda-list '(new-value sheep))
        (ensure-reply writer
 			:lambda-list '(new-value sheep)
-			:participants (list =t= sheep)
+			:participants (list #@t sheep)
 			:body `(setf (property-value sheep ',prop-name) new-value)
 			:function (eval (make-reply-lambda writer
 							     '(new-value sheep) 

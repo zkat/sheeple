@@ -35,30 +35,16 @@
 				 properties)
 	 ,@body))))
 
-;;; Sheep creation
-
-;; (defmessage initialize-sheep (metasheep-prototype 
-;; 			       &rest all-keys))
-;; (defreply initialize-sheep ((metaproto =standard-sheep-metasheep=)
-;; 			      &rest all-keys)
-;;   (apply #'std-initialize-sheep metaproto all-keys))
-
-;; (defmessage finalize-sheep-using-metasheep (metasheep sheep))
-;; (defreply finalize-sheep-using-metasheep ((metasheep =standard-sheep-metasheep=)
-;; 					    sheep)
-;;   (std-finalize-sheep sheep))
 
 ;;;
 ;;; Printing sheep!
 ;;;
 (defmessage print-sheep (sheep stream)
   (:documentation "Defines the expression print-object uses."))
-(defreply print-sheep (sheep (stream =stream=))
+(defreply print-sheep (sheep (stream #@stream))
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Standard Sheep~@[ AKA: ~a~]" (sheep-nickname sheep))))
-(defreply print-sheep ((sheep =white-fang=) (stream =stream=))
+(defreply print-sheep ((sheep #@boxed-object) (stream #@stream))
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Fleeced Wolf~@[ AKA: ~a~]" (sheep-nickname sheep))))
-
-;;; messages/replies
 

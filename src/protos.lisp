@@ -1,3 +1,7 @@
+;;;; protos.lisp
+;;;;
+;;;; Contains facilities to define proto sheep
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
 (let ((proto-table (make-hash-table :test #'eq)))
@@ -26,8 +30,9 @@
                  (find-proto ,name nil) 
                  ,(canonize-sheeple sheeple)
                  ,@(canonize-clone-options options))))
-     (mapcar (lambda (prop-spec)
-               (apply #'add-property sheep prop-spec)) ,(canonize-properties* properties))
+     (mapc (lambda (prop-spec)
+             (apply #'add-property sheep prop-spec))
+           ,(canonize-properties* properties))
      (unless (sheep-nickname sheep)
        (setf (sheep-nickname sheep) ',name))
      (setf (find-proto ,name) sheep)))
@@ -36,3 +41,10 @@
   (if maybe-sheep
       (apply #'reinitialize-sheep maybe-sheep :new-parents parents :new-properties properties options)
       (apply #'spawn-sheep parents properties options)))
+
+;; This reader macro lets us do #@foo instead of having to do (find-proto 'foo).
+;; It's needed enough that it's useful to have this around.
+(defun find-sheep-transformer (stream subchar arg)
+  `(find-proto ',(car (read stream t))))
+
+(set-dispatch-macro-character #\# #\@ #'find-sheep-transformer) 

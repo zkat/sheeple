@@ -8,7 +8,6 @@
 
 (declaim (optimize (debug 1) (safety 1) (speed 3)))
 
-(defvar *max-sheep-id* 0)
 (defclass standard-sheep ()
   ((nickname :accessor sheep-nickname :initform nil)
    (documentation :accessor sheep-documentation :initform "")
@@ -20,8 +19,7 @@
    (readers :accessor %property-readers :initform (make-hash-table :test #'eq))
    (writers :accessor %property-writers :initform (make-hash-table :test #'eq))
    (direct-roles :accessor sheep-direct-roles :initform nil)
-   (hierarchy-list :accessor sheep-hierarchy-list)
-   (id :accessor sheep-id :initform (incf *max-sheep-id*))))
+   (hierarchy-list :accessor sheep-hierarchy-list)))
 
 ;;; How to build a full sheep object:
 ;;; 1. Allocate an instance of its metaclass
@@ -32,7 +30,7 @@
 ;;; 5. Free to go
 (defmethod initialize-instance :after ((sheep standard-sheep) &key &allow-other-keys))
 
-(defun allocate-sheep (class)
+(defun allocate-sheep (&optional (class 'standard-sheep))
   (make-instance class))
 
 (defgeneric sheep-p (obj))
@@ -55,6 +53,7 @@
     (apply #'initialize-sheep sheep all-keys)))
 
 (defun clone (&rest sheeple)
+  "Creates a new standard-sheep object with SHEEPLE as its parents."
   (spawn-sheep sheeple))
 
 (defun copy-sheep (model)
@@ -68,11 +67,6 @@
           roles)
     new-sheep))
 
-(defun set-up-properties (sheep properties)
-  (mapc (lambda (plist)
-          (apply #'add-property sheep plist))
-        properties))
-
 (defgeneric finalize-sheep (sheep))
 (defmethod finalize-sheep ((sheep standard-sheep))
   (loop for parent in (sheep-direct-parents sheep)
@@ -80,24 +74,10 @@
   (memoize-sheep-hierarchy-list sheep)
   sheep)
 
-(defun deep-copy (sheep)
-  (let ((all-property-names (available-properties sheep)))
-    (mapc (lambda (pname)
-            (let ((value (property-value sheep pname)))
-              (setf (property-value sheep pname)
-                    value)))
-          all-property-names)))
-
-(defun shallow-copy (sheep)
-  (mapc (lambda (parent)
-          (maphash 
-           (lambda (key value)
-             (setf (property-value sheep key) value))
-           (sheep-property-value-table parent)))
-        (sheep-direct-parents sheep)))
-
 ;;; Inheritance setup
 (defgeneric add-parent (new-parent sheep))
+(defmethod add-parent (unsheepish-parent (child standard-sheep))
+  (add-parent (sheepify unsheepish-parent) child))
 (defmethod add-parent ((new-parent standard-sheep) (child standard-sheep))
   (cond ((equal new-parent child)
          (error "Sheeple cannot be parents of themselves."))
@@ -117,6 +97,8 @@
          child)))
 
 (defgeneric remove-parent (parent sheep))
+(defmethod remove-parent (unsheepish-parent (child standard-sheep))
+  (remove-parent (sheepify unsheepish-parent) child))
 (defmethod remove-parent ((parent standard-sheep) (child standard-sheep))
   (setf (sheep-direct-parents child)
         (delete parent (sheep-direct-parents child)))
@@ -143,6 +125,7 @@
 ;;;
 ;;; Hierarchy Resolution
 ;;;
+;;; Most of this is taken almost verbatim from closette
 (defun collect-parents (sheep)
   (labels ((all-parents-loop (seen parents)
               (let ((to-be-processed
@@ -181,7 +164,9 @@
       (when (not (null common))
         (return-from std-tie-breaker-rule (car common))))))
 
-;; Memoization
+;;;
+;;; Memoization
+;;;
 (defun memoize-sheep-hierarchy-list (sheep)
   (let ((list (compute-sheep-hierarchy-list sheep)))
     (setf (sheep-hierarchy-list sheep)

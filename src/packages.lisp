@@ -3,11 +3,9 @@
   (:export
 
    ;; Cloning and management
-   :=t=
-   :=dolly=
    :clone
-   :clone*
-   :defsheep
+   :defclone
+   :defproto
    :sheep-hierarchy-error
    :sheep-p
    :add-parent
@@ -21,23 +19,17 @@
    
    ;; Property access
    :unbound-property ;error
+   :add-property
    :property-value
    :direct-property-value
    :available-properties
    :remove-property
+   :remove-all-direct-properties
    :property-owner
    :has-property-p
    :has-direct-property-p
    :with-properties
-   :with-manipulators
 
-   ;; Cloneforms
-   :available-cloneforms
-   :cloneform-owner
-   :add-cloneform
-   :remove-cloneform
-   :inspect-cloneform
-   
    ;; Messages
    :clobbering-function-definition
    :defmessage
@@ -55,32 +47,10 @@
    :no-primary-replies ;error (signaled when the only applicable replies are combination replies)
    :specialized-lambda-list-error ;error
 
-   ;; Fleeces
-   :fleece-of ;returns the appropriate sheep for a wolf. Good for getting an idea of what is what.
-   :find-fleeced-wolf ;returns a fleeced version of a wolf
-   ;; :sheepify
-   ;; built-in fleeces
-   :=white-fang= ; parent of all built-in fleeces
-   :=symbol=
-   :=sequence=
-   :=array=
-   :=number=
-   :=character=
-   :=function=
-   :=hash-table=
-   :=package=
-   :=pathname=
-   :=readtable=
-   :=stream=
-   :=list=
-   :=null=
-   :=cons=
-   :=vector=
-   :=bit-vector=
-   :=string=
-   :=complex=
-   :=integer=
-   :=float=
+   ;; built-ins
+   :box-type-of ;returns the appropriate sheep for a wolf. Good for getting an idea of what is what.
+   :find-boxed-object ;returns a fleeced version of a wolf
+   :sheepify
 
    ;; MOP
    :standard-sheep
@@ -95,10 +65,13 @@
    :sheep-direct-roles
    :sheep-direct-properties
    :sheep-documentation
+   :direct-property-spec
    :property-spec-name
    :property-spec-value
    :property-spec-readers
    :property-spec-writers
+   :property-summary
+   :direct-property-summary
    ))
 
 (defpackage #:sheeple-user

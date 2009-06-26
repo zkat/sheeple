@@ -124,7 +124,7 @@ available to SHEEP somewhere in the hierarchy list. If createp is T, add-propert
 
 (defmethod print-object ((property-spec property-spec) stream)
   (print-unreadable-object (property-spec stream :identity t)
-    (format stream "Property-Spec Name: ~A" (property-spec-name property-spec))))
+    (format stream "Property-Spec ~A" (property-spec-name property-spec))))
 (defun sheep-direct-properties (sheep)
   "Returns a set of direct property-spec definition metaobjects."
   (loop for pname being the hash-keys of (sheep-property-value-table sheep)

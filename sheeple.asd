@@ -1,5 +1,5 @@
 (asdf:defsystem sheeple
-  :version "0.1"
+  :version "2.0"
   :description "Cheeky prototypes for Common Lisp"
   :author "Josh Marchan <sykopomp at sykosomatic-dot-org>"
   :licence "MIT"
@@ -15,7 +15,6 @@
 	     (:file "utils")
 	     (:file "sheeple")
 	     (:file "properties")
-	     (:file "clone")
              (:file "protos")
 	     (:file "builtins")
 	     (:file "parse-lambda-list")

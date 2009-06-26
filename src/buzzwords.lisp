@@ -1,137 +1,137 @@
 ;; This file is part of Sheeple
 
-;; buzzwords.lisp
+;; messages.lisp
 ;;
-;; Buzzword metasheep, buzzword definition and management
+;; Message metasheep, message definition and management
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
 (declaim (optimize (speed 3) (safety 1) (debug 1)))
 
-(defclass buzzword ()
-  ((name :accessor buzzword-name :initform nil :initarg :name)
-   (lambda-list :accessor buzzword-lambda-list :initform nil :initarg :ll)
-   (messages :accessor buzzword-messages :initform nil :initarg :msgs)
-   (memo-vector :accessor buzzword-memo-vector :initform (make-array 40))
-   (arg-info :accessor buzzword-arg-info :initform (make-arg-info))
-   (documentation :accessor buzzword-documentation :initform "" :initarg :dox)))
+(defclass message ()
+  ((name :accessor message-name :initform nil :initarg :name)
+   (lambda-list :accessor message-lambda-list :initform nil :initarg :ll)
+   (messages :accessor message-messages :initform nil :initarg :msgs)
+   (memo-vector :accessor message-memo-vector :initform (make-array 40))
+   (arg-info :accessor message-arg-info :initform (make-arg-info))
+   (documentation :accessor message-documentation :initform "" :initarg :dox)))
 
-(defun %make-buzzword (&key name lambda-list messages (documentation ""))
-  (make-instance 'buzzword :name name :ll lambda-list :msgs messages :dox documentation))
+(defun %make-message (&key name lambda-list messages (documentation ""))
+  (make-instance 'message :name name :ll lambda-list :msgs messages :dox documentation))
 
-(defgeneric buzzword-p (obj))
-(defmethod buzzword-p (obj)
+(defgeneric message-p (obj))
+(defmethod message-p (obj)
   (declare (ignore obj))
   nil)
-(defmethod buzzword-p ((obj buzzword))
+(defmethod message-p ((obj message))
   (declare (ignore obj))
   t)
 
-(defun clear-memo-table (buzzword)
-  (setf (buzzword-memo-vector buzzword) (make-array 40)))
+(defun clear-memo-table (message)
+  (setf (message-memo-vector message) (make-array 40)))
 
 ;;;
-;;; Buzzword definition
+;;; Message definition
 ;;;
 
-;;; Buzzword table
-;;; - We store all buzzwords here, making them globally accessible by using #'find-buzzword
-(let ((buzzword-table (make-hash-table :test #'equal)))
+;;; Message table
+;;; - We store all messages here, making them globally accessible by using #'find-message
+(let ((message-table (make-hash-table :test #'equal)))
 
-  (defun find-buzzword (name &optional (errorp t))
-    (let ((buzz (gethash name buzzword-table)))
+  (defun find-message (name &optional (errorp t))
+    (let ((buzz (gethash name message-table)))
       (cond ((and (null buzz) errorp)
-	     (error 'no-such-buzzword
-		    :format-control "There is no buzzword named ~A"
+	     (error 'no-such-message
+		    :format-control "There is no message named ~A"
 		    :format-args (list name)))
 	    ((null buzz)
 	     nil)
 	    (t
 	     buzz))))
   
-  (defun (setf find-buzzword) (new-value name)
-    (setf (gethash name buzzword-table) new-value))
+  (defun (setf find-message) (new-value name)
+    (setf (gethash name message-table) new-value))
   
-  (defun forget-all-buzzwords ()
-    (clrhash buzzword-table)
+  (defun forget-all-messages ()
+    (clrhash message-table)
     t)
 
-  (defun clear-all-buzzword-caches ()
+  (defun clear-all-message-caches ()
     (maphash (lambda (k v)
 	       (declare (ignore k))
 	       (clear-memo-table v))
-	     buzzword-table))
+	     message-table))
   
-  (defun forget-buzzword (name)
-    (remhash name buzzword-table))
-  ) ; end buzzword table closure
+  (defun forget-message (name)
+    (remhash name message-table))
+  ) ; end message table closure
 
-;; Finalizing a buzzword sets the function definition of the buzzword to a
+;; Finalizing a message sets the function definition of the message to a
 ;; lambda that calls the top-level dispatch function on the bw args.
-(defun finalize-buzzword (buzzword)
-  (let ((name (buzzword-name buzzword)))
+(defun finalize-message (message)
+  (let ((name (message-name message)))
     (when (and (fboundp name)
-	       (not (find-buzzword name nil)))
+	       (not (find-message name nil)))
       (warn 'clobbering-function-definition
 	    :format-control "Clobbering regular function or generic function definition for ~A"
 	    :format-args (list name)))
-    (setf (fdefinition name) (lambda (&rest args) (apply-buzzword buzzword args)))))
+    (setf (fdefinition name) (lambda (&rest args) (apply-message message args)))))
 
-;; This handles actual setup of the buzzword object (and finalization)
-(defun generate-buzzword (&key name
+;; This handles actual setup of the message object (and finalization)
+(defun generate-message (&key name
 			  lambda-list
 			  (documentation ""))
-  (let ((buzzword (%make-buzzword 
+  (let ((message (%make-message 
 		   :name name
 		   :lambda-list lambda-list
 		   :documentation documentation)))
-    (set-arg-info buzzword :lambda-list lambda-list)
-    (finalize-buzzword buzzword)
-    buzzword))
+    (set-arg-info message :lambda-list lambda-list)
+    (finalize-message message)
+    message))
 
-;; The defbuzzword macro basically expands to a call to this function (after processing
+;; The defmessage macro basically expands to a call to this function (after processing
 ;; its args, checking lamda-list, etc.)
-(defun ensure-buzzword (name
+(defun ensure-message (name
 			&rest all-keys
 			&key lambda-list
 			&allow-other-keys)
-  (let ((existing (find-buzzword name nil)))
-    (let ((buzzword (or existing
-			(apply #'generate-buzzword
+  (let ((existing (find-message name nil)))
+    (let ((message (or existing
+			(apply #'generate-message
 			       :name name
 			       :lambda-list lambda-list
 			       all-keys))))
-      (setf (find-buzzword name) buzzword)
-      (prog1 buzzword
+      (setf (find-message name) message)
+      (prog1 message
 	(when existing
-	  (set-arg-info buzzword :lambda-list lambda-list))))))
+	  (set-arg-info message :lambda-list lambda-list))))))
 
-;; This is the actual buzzword definition macro.
-;; It first verifies that the lambda-list provided is a valid buzzword ll,
-;; then expands to a call to ensure-buzzword
-(defmacro defbuzzword (name lambda-list &rest options)
+;; This is the actual message definition macro.
+;; It first verifies that the lambda-list provided is a valid message ll,
+;; then expands to a call to ensure-message
+(defmacro defmessage (name lambda-list &rest options)
   `(progn
      (check-bw-lambda-list ',lambda-list)
      (eval-when (:compile-toplevel :load-toplevel :execute)
-       (ensure-buzzword
+       (ensure-message
         ',name
         :lambda-list ',lambda-list
-        ,@(canonize-buzzword-options options)))))
+        ,@(canonize-message-options options)))))
 
 ;; This pair just pretties up the options during macro expansion
-(defun canonize-buzzword-options (options)
-  (mapappend #'canonize-buzzword-option options))
-(defun canonize-buzzword-option (option)
+(defun canonize-message-options (options)
+  (mapappend #'canonize-message-option options))
+(defun canonize-message-option (option)
   (list `',(car option) `',(cadr option)))
 
 ;;; LL analysis
 (defun check-bw-lambda-list (lambda-list)
   (flet ((ensure (arg ok)
            (unless ok
-             (error 'buzzword-lambda-list-error
+             (error 'message-lambda-list-error
                     :format-control
-                    "~@<invalid ~S ~_in the buzzword lambda list ~S~:>"
+                    "~@<invalid ~S ~_in the message lambda list ~S~:>"
                     :format-args (list arg lambda-list)))))
     (multiple-value-bind (required optional restp rest keyp keys allowp
 				   auxp aux morep more-context more-count)
@@ -158,7 +158,7 @@
                              (null (cdr i)))))))
       ;; no &AUX allowed
       (when auxp
-        (error "&AUX is not allowed in a buzzword lambda list: ~S"
+        (error "&AUX is not allowed in a message lambda list: ~S"
                lambda-list))
       ;; Oh, *puhlease*... not specifically as per section 3.4.2 of
       ;; the ANSI spec, but the CMU CL &MORE extension does not
@@ -169,7 +169,7 @@
 ;;; Arg info
 ;;; - The stuff in here contains the arg-info object, plus code to handle it.
 ;;;   Present is also the function that confirms validity of message lambda-lists,
-;;;   and the code that updates the valid arg info for a buzzword whenever a message
+;;;   and the code that updates the valid arg info for a message whenever a message
 ;;;   is added. The add-message function, though, is in message-generation.lisp
 (defstruct (arg-info
 	     (:conc-name nil)
@@ -205,11 +205,11 @@
   (count-if (lambda (x) (not (eq x t))) (arg-info-metatypes arg-info)))
 
 (defun set-arg-info (bw &key new-message (lambda-list nil lambda-list-p))
-  (let* ((arg-info (buzzword-arg-info bw))
-         (messages (buzzword-messages bw))
+  (let* ((arg-info (message-arg-info bw))
+         (messages (message-messages bw))
          (first-p (and new-message (null (cdr messages)))))
     (when (and (not lambda-list-p) messages)
-      (setq lambda-list (buzzword-lambda-list bw)))
+      (setq lambda-list (message-lambda-list bw)))
     (when (or lambda-list-p
               (and first-p
                    (eq (arg-info-lambda-list arg-info) :no-lambda-list)))
@@ -280,7 +280,7 @@
               (rest      (incf (the fixnum nrest))))))
       (when (and restp (zerop nrest))
         (error "Error in lambda-list:~%~
-                After &REST, a DEFBUZZWORD lambda-list ~
+                After &REST, a DEFMESSAGE lambda-list ~
                 must be followed by at least one variable."))
       (values nrequired noptional keysp restp allow-other-keys-p
               (reverse keywords)
@@ -292,7 +292,7 @@
     (flet ((lose (string &rest args)
              (error 'sheeple-error
                     :format-control "~@<attempt to add the message~2I~_~S~I~_~
-                                     to the buzzword~2I~_~S;~I~_~
+                                     to the message~2I~_~S;~I~_~
                                      but ~?~:>"
                     :format-args (list message bw string args)))
            (comparison-description (x y)
@@ -304,15 +304,15 @@
             (bw-keywords (arg-info-keys arg-info)))
         (unless (= nreq bw-nreq)
           (lose
-           "the message has ~A required arguments than the buzzword."
+           "the message has ~A required arguments than the message."
            (comparison-description nreq bw-nreq)))
         (unless (= nopt bw-nopt)
           (lose
-           "the message has ~A optional arguments than the buzzword."
+           "the message has ~A optional arguments than the message."
            (comparison-description nopt bw-nopt)))
         (unless (eq (or keysp restp) bw-key/rest-p)
           (lose
-           "the message and buzzword differ in whether they accept~_~
+           "the message and message differ in whether they accept~_~
             &REST or &KEY arguments."))
         (when (consp bw-keywords)
           (unless (or (and restp (not keysp))

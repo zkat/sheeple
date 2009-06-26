@@ -133,8 +133,8 @@
   (let* ((memo-vector (message-memo-vector message))
 	 (orig-index (mod (the fixnum (sheep-id (if (sheep-p (car args))
 						    (car args)
-						    (or (find-fleeced-wolf (car args))
-							(fleece-of (car args))))))
+						    (or (find-boxed-object (car args))
+							(box-type-of (car args))))))
 			  (length memo-vector))))
     ;; I don't know how this could be any faster. My best choice is probably to avoid calling it.
     (declare (vector memo-vector))
@@ -180,8 +180,8 @@
   (let ((msg-cache (create-reply-cache message msg-list))
 	(maybe-index (mod (the fixnum (sheep-id (if (sheep-p (car args))
 						    (car args)
-						    (or (find-fleeced-wolf (car args))
-							(fleece-of (car args))))))
+						    (or (find-boxed-object (car args))
+							(box-type-of (car args))))))
 			  (length (the vector (message-memo-vector message))))))
     (add-entry-to-message msg-cache message args maybe-index)
     msg-cache))
@@ -201,8 +201,8 @@
 	   for index upto (1- n)
 	   do (let* ((arg (if (sheep-p arg)
 			      arg
-			      (or (find-fleeced-wolf arg)
-				  (fleece-of arg))))
+			      (or (find-boxed-object arg)
+				  (box-type-of arg))))
 		     (curr-sheep-list (sheep-hierarchy-list arg)))
 		(loop
 		   for curr-sheep in curr-sheep-list

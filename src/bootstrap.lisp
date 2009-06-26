@@ -35,8 +35,8 @@
   (loop for parent in (sheep-direct-parents sheep)
      do (remove-parent parent sheep))
   (remove-all-direct-properties sheep)
-  (loop for parent in (if new-parents (sheepify-list new-parents) (list #@dolly))
-     do (add-parent parent sheep))
+  (add-parents (if new-parents (sheepify-list new-parents) (list #@dolly))
+               sheep)
   (when documentation
     (setf (sheep-documentation sheep) documentation)))
 

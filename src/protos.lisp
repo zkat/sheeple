@@ -39,7 +39,7 @@
 
 (defun spawn-or-reinitialize-sheep (maybe-sheep parents properties &rest options)
   (if maybe-sheep
-      (apply #'reinitialize-sheep maybe-sheep :new-parents parents :new-properties properties options)
+      (apply #'reinitialize-sheep maybe-sheep :new-parents parents)
       (apply #'spawn-sheep parents properties options)))
 
 ;; This reader macro lets us do #@foo instead of having to do (find-proto 'foo).

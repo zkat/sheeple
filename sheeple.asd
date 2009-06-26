@@ -17,7 +17,7 @@
 	     (:file "properties")
 	     (:file "clone")
              (:file "protos")
-	     (:file "wolves")
+	     (:file "builtins")
 	     (:file "parse-lambda-list")
 	     (:file "buzzwords")
 	     (:file "message-generation")

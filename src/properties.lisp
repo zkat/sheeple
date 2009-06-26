@@ -12,12 +12,13 @@
 ;;;
 ;;; Properties
 ;;;
-(defgeneric add-property (sheep property-name value &key readers writers make-accessors-p)
-  (:documentation "Adds a property to SHEEP. Optional Readers and Writers must be a list of
+(defgeneric add-property (sheep property-name value &key)
+  (:documentation "Adds a property named PROPERTY-NAME to SHEEP, initalized with VALUE."))
+(defmethod add-property (sheep property-name value &key readers writers (make-accessors-p t))
+  "Adds a property to SHEEP. Optional Readers and Writers must be a list of
 valid function names (in symbol or cons form) that will be used to create responses specialized
 on SHEEP. If make-accessors-p is T, the symbol in PROPERTY-NAME will be used to generate accessors
-with the format Reader=PROPERTY-NAME, Writer=(SETF PROPERTY-NAME)"))
-(defmethod add-property (sheep property-name value &key readers writers (make-accessors-p t))
+with the format Reader=PROPERTY-NAME, Writer=(SETF PROPERTY-NAME)"
   (let ((property-table (sheep-property-value-table sheep)))
     (when (has-property-p sheep property-name)
       (warn "~A already has an available property named ~A. Overwriting." sheep property-name))

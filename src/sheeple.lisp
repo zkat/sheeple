@@ -32,10 +32,8 @@
 ;;; 5. Free to go
 (defmethod initialize-instance :after ((sheep standard-sheep) &key &allow-other-keys))
 
-(defun allocate-sheep (class &rest all-keys)
-  (let ((sheep (apply #'make-instance class all-keys)))
-    (finalize-sheep sheep)
-    sheep))
+(defun allocate-sheep (class)
+  (make-instance class))
 
 (defgeneric sheep-p (obj))
 (defmethod sheep-p (obj)
@@ -48,6 +46,17 @@
 ;;;
 ;;; Cloning
 ;;;
+(defun spawn-sheep (sheeple &rest all-keys &key (metaclass 'standard-sheep) &allow-other-keys)
+  "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
+  (let ((sheep (allocate-sheep metaclass)))
+    (if sheeple
+        (loop for parent in sheeple do (add-parent parent sheep))
+        (add-parent (find-sheep 'dolly) sheep))
+    (apply #'initialize-sheep sheep all-keys)))
+
+(defun clone (&rest sheeple)
+  (spawn-sheep sheeple))
+
 (defun copy-sheep (model)
   (let* ((parents (sheep-direct-parents model))
          (properties (sheep-property-value-table model))
@@ -88,7 +97,8 @@
         (sheep-direct-parents sheep)))
 
 ;;; Inheritance setup
-(defun add-parent (new-parent child)
+(defgeneric add-parent (new-parent sheep))
+(defmethod add-parent ((new-parent standard-sheep) (child standard-sheep))
   (cond ((equal new-parent child)
          (error "Sheeple cannot be parents of themselves."))
         (t
@@ -106,7 +116,8 @@
          (finalize-sheep child)
          child)))
 
-(defun remove-parent (parent child)
+(defgeneric remove-parent (parent sheep))
+(defmethod remove-parent ((parent standard-sheep) (child standard-sheep))
   (setf (sheep-direct-parents child)
         (delete parent (sheep-direct-parents child)))
   (remhash child (%direct-children parent))

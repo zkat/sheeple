@@ -17,7 +17,7 @@
 
   (defun (setf find-proto) (new-value name)
     (unless (sheep-p new-value)
-      (error "~A is now a sheep object." new-value))
+      (error "~A is not a sheep object." new-value))
     (setf (gethash name proto-table) new-value))
   
   (defun remove-proto (name)
@@ -39,13 +39,13 @@
 
 (defun spawn-or-reinitialize-sheep (maybe-sheep parents &rest options)
   (if maybe-sheep
-      (apply #'reinitialize-sheep maybe-sheep :new-parents parents)
+      (reinitialize-sheep maybe-sheep :new-parents parents)
       (apply #'spawn-sheep parents options)))
 
 ;; This reader macro lets us do #@foo instead of having to do (find-proto 'foo).
 ;; It's needed enough that it's useful to have this around.
-(defun find-sheep-transformer (stream subchar arg)
+(defun find-proto-transformer (stream subchar arg)
   (declare (ignore subchar arg))
   `(find-proto ',(read stream t)))
 
-(set-dispatch-macro-character #\# #\@ #'find-sheep-transformer) 
+(set-dispatch-macro-character #\# #\@ #'find-proto-transformer) 

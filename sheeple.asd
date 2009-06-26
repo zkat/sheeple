@@ -16,6 +16,7 @@
 	     (:file "sheeple")
 	     (:file "properties")
 	     (:file "clone")
+             (:file "protos")
 	     (:file "wolves")
 	     (:file "parse-lambda-list")
 	     (:file "buzzwords")

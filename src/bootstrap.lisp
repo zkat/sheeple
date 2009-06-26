@@ -32,11 +32,14 @@
 (defreply reinitialize-sheep (sheep
                               &key new-parents
                               documentation)
+  ;; CLOBBER TIME
   (loop for parent in (sheep-direct-parents sheep)
      do (remove-parent parent sheep))
   (remove-all-direct-properties sheep)
+  ;; MOAR PARENTS
   (add-parents (if new-parents (sheepify-list new-parents) (list #@dolly))
                sheep)
+  ;; DOX PLOX
   (when documentation
     (setf (sheep-documentation sheep) documentation)))
 

@@ -35,16 +35,16 @@
 (define-condition property-locked (sheeple-error) ())
 
 ;;;
-;;; Buzzwords
+;;; Messages
 ;;;
-(define-condition no-such-buzzword (sheeple-error) ())
+(define-condition no-such-message (sheeple-error) ())
 (define-condition clobbering-function-definition (sheeple-warning) ())
-(define-condition buzzword-lambda-list-error (sheeple-error) ())
+(define-condition message-lambda-list-error (sheeple-error) ())
 
 ;;;
 ;;; Messages
 ;;;
-(define-condition no-applicable-messages (sheeple-error) ())
-(define-condition no-most-specific-message (sheeple-error) ())
-(define-condition no-primary-messages (sheeple-error) ())
+(define-condition no-applicable-replies (sheeple-error) ())
+(define-condition no-most-specific-reply (sheeple-error) ())
+(define-condition no-primary-replies (sheeple-error) ())
 (define-condition specialized-lambda-list-error (sheeple-error) ())

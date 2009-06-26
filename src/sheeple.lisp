@@ -6,8 +6,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(declaim (optimize (debug 1) (safety 1) (speed 3)))
-
+;(declaim (optimize (debug 1) (safety 1) (speed 3)))
+(defvar *max-sheep-id* 0)
 (defclass standard-sheep ()
   ((nickname :accessor sheep-nickname :initform nil)
    (documentation :accessor sheep-documentation :initform "")
@@ -19,7 +19,8 @@
    (readers :accessor %property-readers :initform (make-hash-table :test #'eq))
    (writers :accessor %property-writers :initform (make-hash-table :test #'eq))
    (direct-roles :accessor sheep-direct-roles :initform nil)
-   (hierarchy-list :accessor sheep-hierarchy-list)))
+   (hierarchy-list :accessor sheep-hierarchy-list :initform nil)
+   (id :accessor sheep-id :initform (incf *max-sheep-id*))))
 
 ;;; How to build a full sheep object:
 ;;; 1. Allocate an instance of its metaclass
@@ -50,7 +51,7 @@ the new sheep object. ALL-KEYS is passed on to INITIALIZE-SHEEP."
   (let ((sheep (allocate-sheep metaclass)))
     (if sheeple
         (add-parents sheeple sheep)
-        (add-parent (find-sheep 'dolly) sheep))
+        (add-parent (find-proto 'dolly) sheep))
     (apply #'initialize-sheep sheep all-keys)))
 
 (defun clone (&rest sheeple)
@@ -101,7 +102,7 @@ the new sheep object. ALL-KEYS is passed on to INITIALIZE-SHEEP."
          child)))
 
 (defun add-parents (parents sheep)
-  (loop for parent in sheeple do (add-parent parent sheep)))
+  (loop for parent in parents do (add-parent parent sheep)))
 
 (defgeneric remove-parent (parent sheep))
 (defmethod remove-parent (unsheepish-parent (child standard-sheep))
@@ -192,7 +193,7 @@ the new sheep object. ALL-KEYS is passed on to INITIALIZE-SHEEP."
 (defun canonize-sheeple (sheeple)
   `(list ,@sheeple))
 
-(defun canonize-properties (properties (accessors-by-default nil))
+(defun canonize-properties (properties &optional (accessors-by-default nil))
   `(list ,@(mapcar (lambda (p)
                      (canonize-property p accessors-by-default))
                    properties)))

@@ -27,7 +27,7 @@
 
 (defmacro defproto (name sheeple properties &rest options)
   `(let ((sheep (spawn-or-reinitialize-sheep 
-                 (find-proto ,name nil) 
+                 (find-proto ',name nil) 
                  ,(canonize-sheeple sheeple)
                  ,@(canonize-clone-options options))))
      (mapc (lambda (prop-spec)
@@ -35,16 +35,17 @@
            ,(canonize-properties properties t))
      (unless (sheep-nickname sheep)
        (setf (sheep-nickname sheep) ',name))
-     (setf (find-proto ,name) sheep)))
+     (setf (find-proto ',name) sheep)))
 
-(defun spawn-or-reinitialize-sheep (maybe-sheep parents properties &rest options)
+(defun spawn-or-reinitialize-sheep (maybe-sheep parents &rest options)
   (if maybe-sheep
       (apply #'reinitialize-sheep maybe-sheep :new-parents parents)
-      (apply #'spawn-sheep parents properties options)))
+      (apply #'spawn-sheep parents options)))
 
 ;; This reader macro lets us do #@foo instead of having to do (find-proto 'foo).
 ;; It's needed enough that it's useful to have this around.
 (defun find-sheep-transformer (stream subchar arg)
-  `(find-proto ',(car (read stream t))))
+  (declare (ignore subchar arg))
+  `(find-proto ',(read stream t)))
 
 (set-dispatch-macro-character #\# #\@ #'find-sheep-transformer) 

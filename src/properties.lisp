@@ -205,7 +205,7 @@ SHEEP, including inherited ones."))
 ;;;
 ;; TODO: Reimplement memoization of property-access, if I find a nice way to do it.
 ;;       Nice, of course, being "thread-compatible, and lightweight on the SETF front"
-;;       Something similar to message caching might work, but I'm not sure anymore.
+;;       Something similar to reply caching might work, but I'm not sure anymore.
 
 ;; (defun property-value-with-memoized-owner (sheep property-name)
 ;;   ;; Find who the owner is...

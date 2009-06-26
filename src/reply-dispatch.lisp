@@ -1,8 +1,8 @@
 ;; This file is part of Sheeple
 
-;; message-dispatch.lisp
+;; reply-dispatch.lisp
 ;;
-;; Message execution and dispatch
+;; Reply execution and dispatch
 ;;
 ;; TODO
 ;; * Figure out an optimization to make manipulators about as fast as calling property-value
@@ -11,105 +11,105 @@
 (in-package :sheeple)
 
 (declaim (optimize (safety 1) (speed 3) (debug 1)))
-(defun primary-message-p (message)
-  (null (message-qualifiers message)))
+(defun primary-reply-p (reply)
+  (null (reply-qualifiers reply)))
 
-(defun before-message-p (message)
-  (when (member :before (message-qualifiers message))
+(defun before-reply-p (reply)
+  (when (member :before (reply-qualifiers reply))
     t))
 
-(defun after-message-p (message)
-  (when (member :after (message-qualifiers message))
+(defun after-reply-p (reply)
+  (when (member :after (reply-qualifiers reply))
     t))
 
-(defun around-message-p (message)
-  (when (member :around (message-qualifiers message))
+(defun around-reply-p (reply)
+  (when (member :around (reply-qualifiers reply))
     t))
 
-(defun apply-buzzword (buzzword args)
-  (let ((messages (find-applicable-messages buzzword args)))
-    (apply-messages messages args)))
+(defun apply-message (message args)
+  (let ((replies (find-applicable-replies message args)))
+    (apply-replies replies args)))
 
 (defparameter *caching-active-p* t)
 (defstruct (cache (:type vector))
-  buzzword
+  message
   around
   primary
   before
   after
-  messages)
+  replies)
 
-(defun apply-messages (cache args)
-  (funcall (compute-effective-message-function cache)
+(defun apply-replies (cache args)
+  (funcall (compute-effective-reply-function cache)
 	   args))
 
-(defun compute-effective-message-function (cache)
-  (let ((messages (cache-messages cache))
+(defun compute-effective-reply-function (cache)
+  (let ((replies (cache-replies cache))
 	(around (car (cache-around cache)))
 	(primaries (cache-primary cache)))
     (when (null primaries)
-      (let ((name (buzzword-name (cache-buzzword cache))))
-	(error 'no-primary-messages
+      (let ((name (message-name (cache-message cache))))
+	(error 'no-primary-replies
 	       :format-control 
-	       "There are no primary messages for buzzword ~A."
+	       "There are no primary replies for message ~A."
 	       :format-args (list name))))
     (if around
 	(let ((next-emfun
-	       (compute-effective-message-function (create-message-cache
-						    (cache-buzzword cache)
-						    (remove around messages)))))
+	       (compute-effective-reply-function (create-reply-cache
+						    (cache-message cache)
+						    (remove around replies)))))
 	  (lambda (args)
-	    (funcall (message-function around) args next-emfun)))
+	    (funcall (reply-function around) args next-emfun)))
 	(let ((next-emfun (compute-primary-emfun (cdr primaries)))
 	      (befores (cache-before cache))
 	      (afters (cache-after cache)))
 	  (lambda (args)
 	    (when befores
               (dolist (before befores)
-                (funcall (message-function before) args nil)))
+                (funcall (reply-function before) args nil)))
             (multiple-value-prog1
-                (funcall (message-function (car primaries)) args next-emfun)
+                (funcall (reply-function (car primaries)) args next-emfun)
               (when afters
                 (dolist (after afters)
-                  (funcall (message-function after) args nil)))))))))
+                  (funcall (reply-function after) args nil)))))))))
 
-(defun compute-primary-emfun (messages)
-  (if (null messages)
+(defun compute-primary-emfun (replies)
+  (if (null replies)
       nil
-      (let ((next-emfun (compute-primary-emfun (cdr messages))))
+      (let ((next-emfun (compute-primary-emfun (cdr replies))))
 	(lambda (args)
-	  (funcall (message-function (car messages)) args next-emfun)))))
+	  (funcall (reply-function (car replies)) args next-emfun)))))
 
-(defun create-message-cache (buzzword messages)
+(defun create-reply-cache (message replies)
   (make-cache
-   :buzzword buzzword
-   :messages messages
-   :primary (remove-if-not #'primary-message-p messages)
-   :around (remove-if-not #'around-message-p messages)
-   :before (remove-if-not #'before-message-p messages)
-   :after (reverse (remove-if-not #'after-message-p messages))))
+   :message message
+   :replies replies
+   :primary (remove-if-not #'primary-reply-p replies)
+   :around (remove-if-not #'around-reply-p replies)
+   :before (remove-if-not #'before-reply-p replies)
+   :after (reverse (remove-if-not #'after-reply-p replies))))
 
-(defun find-applicable-messages (buzzword args &key (errorp t))
-  (declare (buzzword buzzword))
+(defun find-applicable-replies (message args &key (errorp t))
+  (declare (message message))
   (declare (list args))
   (let (;; This doesn't seem to be expensive at all..
-	 (relevant-args-length (the fixnum (arg-info-number-required (buzzword-arg-info buzzword))))
+	 (relevant-args-length (the fixnum (arg-info-number-required (message-arg-info message))))
 	 ;; If I can avoid calling fetch-memo-vector-entry for singly-dispatched readers, that
 	 ;; would be -lovely-. Not sure how to do that yet, though.
 	)
     (if (= 0 relevant-args-length)
         (let ((relevant-args (subseq args 0 relevant-args-length)))
-          (create-message-cache buzzword (%find-applicable-messages 
-                                          buzzword relevant-args
+          (create-reply-cache message (%find-applicable-replies 
+                                          message relevant-args
                                           :errorp errorp)))
-        (let ((memo-entry (fetch-memo-vector-entry args buzzword relevant-args-length)))
+        (let ((memo-entry (fetch-memo-vector-entry args message relevant-args-length)))
           (or memo-entry
               memo-entry
               (let* ((relevant-args (subseq args 0 relevant-args-length))
-                     (new-msg-list (%find-applicable-messages buzzword 
+                     (new-msg-list (%find-applicable-replies message 
                                                               relevant-args
                                                               :errorp errorp)))
-                (memoize-message-dispatch buzzword relevant-args new-msg-list)))))))
+                (memoize-reply-dispatch message relevant-args new-msg-list)))))))
 
 (declaim (inline desired-vector-entry-p))
 (defun desired-vector-entry-p (args vector-entry relevant-args-length)
@@ -129,8 +129,8 @@
                 do (when (not (equal v-arg arg))
                      (return-from desired-vector-entry-p nil))))))))
 
-(defun fetch-memo-vector-entry (args buzzword relevant-args-length)
-  (let* ((memo-vector (buzzword-memo-vector buzzword))
+(defun fetch-memo-vector-entry (args message relevant-args-length)
+  (let* ((memo-vector (message-memo-vector message))
 	 (orig-index (mod (the fixnum (sheep-id (if (sheep-p (car args))
 						    (car args)
 						    (or (find-fleeced-wolf (car args))
@@ -152,10 +152,10 @@
   args
   msg-cache)
 
-(declaim (inline add-entry-to-buzzword))
-(defun add-entry-to-buzzword (cache buzzword args index)
+(declaim (inline add-entry-to-message))
+(defun add-entry-to-message (cache message args index)
   (declare (fixnum index))
-  (let ((memo-vector (buzzword-memo-vector buzzword))
+  (let ((memo-vector (message-memo-vector message))
         (vector-entry (make-vector-entry 
                        :args (make-weak-pointer args)
                        :msg-cache cache)))
@@ -176,26 +176,26 @@
           ((setf (elt memo-vector index) vector-entry)
            t))))
 
-(defun memoize-message-dispatch (buzzword args msg-list)
-  (let ((msg-cache (create-message-cache buzzword msg-list))
+(defun memoize-reply-dispatch (message args msg-list)
+  (let ((msg-cache (create-reply-cache message msg-list))
 	(maybe-index (mod (the fixnum (sheep-id (if (sheep-p (car args))
 						    (car args)
 						    (or (find-fleeced-wolf (car args))
 							(fleece-of (car args))))))
-			  (length (the vector (buzzword-memo-vector buzzword))))))
-    (add-entry-to-buzzword msg-cache buzzword args maybe-index)
+			  (length (the vector (message-memo-vector message))))))
+    (add-entry-to-message msg-cache message args maybe-index)
     msg-cache))
 
-(defun %find-applicable-messages  (buzzword args &key (errorp t))
-  "Returns the most specific message using BUZZWORD and ARGS."
+(defun %find-applicable-replies  (message args &key (errorp t))
+  "Returns the most specific reply using MESSAGE and ARGS."
   (declare (list args))
   (if (null args)
-      (buzzword-messages buzzword)
-      (let ((selector (buzzword-name buzzword))
+      (message-replies message)
+      (let ((selector (message-name message))
 	    (n (length args))
-	    (discovered-messages nil)
-	    (contained-applicable-messages nil))
-	(declare (list discovered-messages contained-applicable-messages))
+	    (discovered-replies nil)
+	    (contained-applicable-replies nil))
+	(declare (list discovered-replies contained-applicable-replies))
 	(loop 
 	   for arg in args
 	   for index upto (1- n)
@@ -208,46 +208,46 @@
 		   for curr-sheep in curr-sheep-list
 		   for hierarchy-position upto (1- (length curr-sheep-list))
 		   do (dolist (role (sheep-direct-roles curr-sheep))
-			(when (and (equal selector (role-name role)) ;(eql buzzword (role-buzzword role))
+			(when (and (equal selector (role-name role)) ;(eql message (role-message role))
 				   (= (the fixnum index) (the fixnum (role-position role))))
-			  (let ((curr-message (role-message role)))
-			    (when (= n (length (the list (message-specialized-portion curr-message))))
-			      (when (not (member curr-message
-						 discovered-messages
-						 :key #'message-container-message))
-				(pushnew (the vector (contain-message curr-message))
-					 discovered-messages))
-			      (let ((contained-message (find curr-message
-							     discovered-messages
-							     :key #'message-container-message)))
-				(setf (elt (message-container-rank contained-message) index) 
+			  (let ((curr-reply (role-reply role)))
+			    (when (= n (length (the list (reply-specialized-portion curr-reply))))
+			      (when (not (member curr-reply
+						 discovered-replies
+						 :key #'reply-container-reply))
+				(pushnew (the vector (contain-reply curr-reply))
+					 discovered-replies))
+			      (let ((contained-reply (find curr-reply
+							     discovered-replies
+							     :key #'reply-container-reply)))
+				(setf (elt (reply-container-rank contained-reply) index) 
 				      hierarchy-position)
-				(when (fully-specified-p (message-container-rank contained-message))
-				  (pushnew contained-message contained-applicable-messages :test #'equalp))))))))))
-	(if contained-applicable-messages
-	    (unbox-messages (sort-applicable-messages contained-applicable-messages))
+				(when (fully-specified-p (reply-container-rank contained-reply))
+				  (pushnew contained-reply contained-applicable-replies :test #'equalp))))))))))
+	(if contained-applicable-replies
+	    (unbox-replies (sort-applicable-replies contained-applicable-replies))
 	    (when errorp
-	      (error 'no-applicable-messages
+	      (error 'no-applicable-replies
 		     :format-control
-		     "There are no applicable messages for buzzword ~A when called with args:~%~S"
+		     "There are no applicable replies for message ~A when called with args:~%~S"
 		     :format-args (list selector args)))))))
 
-(defun unbox-messages (messages)
-  (mapcar #'message-container-message messages))
+(defun unbox-replies (replies)
+  (mapcar #'reply-container-reply replies))
 
-(defun sort-applicable-messages (message-list &key (rank-key #'<))
-  (sort message-list rank-key
-	:key (lambda (contained-message)
-	       (calculate-rank-score (message-container-rank contained-message)))))
+(defun sort-applicable-replies (reply-list &key (rank-key #'<))
+  (sort reply-list rank-key
+	:key (lambda (contained-reply)
+	       (calculate-rank-score (reply-container-rank contained-reply)))))
 
-(defun contain-message (message)
-  (make-message-container
-   :message message
-   :rank (make-array (length (message-specialized-portion message))
+(defun contain-reply (reply)
+  (make-reply-container
+   :reply reply
+   :rank (make-array (length (reply-specialized-portion reply))
 		     :initial-element nil)))
 
-(defstruct (message-container (:type vector))
-  message
+(defstruct (reply-container (:type vector))
+  reply
   rank)
 
 (defun fully-specified-p (rank)
@@ -265,5 +265,5 @@
 	    (incf (the fixnum total) (the fixnum item))))
     total))
 
-(defun message-specialized-portion (msg)
-  (parse-lambda-list (message-lambda-list msg)))
+(defun reply-specialized-portion (msg)
+  (parse-lambda-list (reply-lambda-list msg)))

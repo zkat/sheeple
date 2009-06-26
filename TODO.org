@@ -23,26 +23,28 @@
   Sheeple gets serious -- and more useful. The version jumps because this will completely
   break backwards compatibility with all previous sheeple code.
 ** TODO New interface
-*** TODO CLONE -> function
+*** DONE CLONE -> function
     CLONE should be turned into a very simple function: (clone &rest sheep)
-*** TODO CLONE* -> DEFCLONE
+*** DONE CLONE* -> DEFCLONE
     What is currently CLONE should be renamed to DEFCLONE. More involved cloning capabilities
     are still nice.
 *** DONE DEFSHEEP->DEFPROTO
     Time to get a bit more serious. DEFPROTO is a much clearer name.
 *** DONE Mitosis->copy-sheep
     Also, get it working properly.
-*** TODO defbuzzword -> defmessage
+*** DONE defbuzzword -> defmessage
     Rename this thing. It really doesn't have to be silly.
-*** TODO defmessage -> defreply
+*** DONE defmessage -> defreply
     I think I could get used to this naming scheme instead.
-*** TODO Fleeced Wolf -> Boxed built-in
-*** TODO =white-fang= -> boxed-object
-*** TODO Fleecing -> Autoboxing
-*** TODO Parents -> Protos
-*** TODO Children -> Clones
+*** DONE Fleeced Wolf -> Boxed built-in
+*** DONE =white-fang= -> boxed-object
+*** DONE Fleecing -> Autoboxing
+*** TODO Make sure the new interface works correctly.
+    There's probably lots of holes left here and there by this
 ** TODO Make psheep easier to implement
 *** TODO The order in which a sheep is built needs to be planned out more carefully.
+    UPDATE: I think this is just about ready. Should probably think about this for a while first,
+    and then it'll be done.
 ** TODO More cleanup and convenience
 *** DONE Get rid of add-on-write. Require add-property.
     Add-on-write seems like a quick interface, but it's a bit obnoxious to deal with.
@@ -52,7 +54,7 @@
     These are stupid, and they clutter up the interface. Never used them, never had to.
     Deep-copy could be its own function, under a different name, but it's easy enough
     to implement externally -- I'll see if it's ever used by anyone.
-*** TODO Completely remove cloneforms
+*** DONE Completely remove cloneforms
 *** TODO Make nicknames generic properties?
     Or something similar. Would be nice to have some pointer as to what type an object is.
 *** TODO Put prototypes into their own namespace
@@ -62,7 +64,8 @@
     naming scheme should be dropped as a convention.
     Implementing this is simply a matter of having a hash-table of symbol->object mappings
     (the same way find-class works). The Sheeple counterpart of find-class would be find-proto.
-*** TODO Fix reinitialize-sheep
+    UPDATE: This is mostly done. Just gotta make sure everything works properly.
+*** DONE Fix reinitialize-sheep
     This should be modeled more after reinitialize-instance. i.e. it should be specified
     that its function is to update the parents and direct property values of its sheep argument.
 *** DONE Implement something like Io's slotSummary

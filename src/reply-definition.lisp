@@ -1,40 +1,40 @@
 ;; This file is part of Sheeple
 
-;; message-generation.lisp
+;; reply-definition.lisp
 ;;
-;; Message and role metasheeple, message definition and undefinition, role management.
+;; Reply and role metasheeple, reply definition and undefinition, role management.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
 (declaim (optimize (speed 3) (safety 1) (debug 1)))
-(defclass message ()
-  ((name :accessor message-name :initform nil :initarg :name)
-   (qualifiers :accessor message-qualifiers :initform nil :initarg :ql)
-   (lambda-list :accessor message-lambda-list :initform nil :initarg :ll)
-   (body :accessor message-body :initform '(lambda () nil) :initarg :body)
-   (function :accessor message-function :initform (lambda () nil) :initarg :fn)
-   (documentation :accessor message-documentation :initform "" :initarg :dox)))
+(defclass reply ()
+  ((name :accessor reply-name :initform nil :initarg :name)
+   (qualifiers :accessor reply-qualifiers :initform nil :initarg :ql)
+   (lambda-list :accessor reply-lambda-list :initform nil :initarg :ll)
+   (body :accessor reply-body :initform '(lambda () nil) :initarg :body)
+   (function :accessor reply-function :initform (lambda () nil) :initarg :fn)
+   (documentation :accessor reply-documentation :initform "" :initarg :dox)))
 
-(defun %make-message (&key name qualifiers lambda-list body function (documentation ""))
-  (make-instance 'message :name name :ql qualifiers :ll lambda-list
+(defun %make-reply (&key name qualifiers lambda-list body function (documentation ""))
+  (make-instance 'reply :name name :ql qualifiers :ll lambda-list
 		 :body body :fn function :dox documentation))
-(defgeneric message-p (obj))
-(defmethod message-p (obj)
+(defgeneric reply-p (obj))
+(defmethod reply-p (obj)
   (declare (ignore obj))
   nil)
-(defmethod message-p ((obj message))
+(defmethod reply-p ((obj reply))
   (declare (ignore obj))
   t)
 
-(defun message-buzzword (message)
-  (find-buzzword (message-name message) nil))
+(defun reply-message (reply)
+  (find-message (reply-name reply) nil))
 
 (defclass role ()
   ((name :accessor role-name :initform nil :initarg :name)
    (position :accessor role-position :initform 0 :initarg :pos)
-   (message :accessor role-message :initform nil :initarg :msg)))
-(defun %make-role (&key name (position 0) message)
-  (make-instance 'role :name name :pos position :msg message))
+   (reply :accessor role-reply :initform nil :initarg :msg)))
+(defun %make-role (&key name (position 0) reply)
+  (make-instance 'role :name name :pos position :msg reply))
 (defgeneric role-p (obj))
 (defmethod role-p (obj)
   (declare (ignore obj))
@@ -43,145 +43,145 @@
   (declare (ignore obj))
   t)
 
-(defun role-buzzword (role)
-  (find-buzzword (role-name role) nil))
+(defun role-message (role)
+  (find-message (role-name role) nil))
 
-(defun participant-p (sheep message-name)
-  (when (member-if (lambda (role) (equal message-name (role-name role)))
+(defun participant-p (sheep reply-name)
+  (when (member-if (lambda (role) (equal reply-name (role-name role)))
 		   (sheep-direct-roles sheep))
     t))
 
-(defun ensure-message (name &rest all-keys
+(defun ensure-reply (name &rest all-keys
 		       &key participants
 		       lambda-list
 		       &allow-other-keys)
-  (when (not (find-buzzword name nil))
+  (when (not (find-message name nil))
     (progn
       (warn 'style-warning)
-      ;; FIXME: can't just give the lambda-list over. Should prepare it for buzzwords
-      (ensure-buzzword
-       name :lambda-list (create-bw-lambda-list lambda-list))))
-  (let* ((buzzword (find-buzzword name))
+      ;; FIXME: can't just give the lambda-list over. Should prepare it for messages
+      (ensure-message
+       name :lambda-list (create-msg-lambda-list lambda-list))))
+  (let* ((message (find-message name))
 	 (target-sheeple (sheepify-list participants))
-	 (message (apply
-		   #'generate-message
-		   :buzzword buzzword
+	 (reply (apply
+		   #'generate-reply
+		   :message message
 		   :lambda-list lambda-list
 		   :participants target-sheeple
 		   all-keys)))
-    (clear-memo-table buzzword)
-    message))
+    (clear-memo-table message)
+    reply))
 
-(defun generate-message (&key qualifiers
+(defun generate-reply (&key qualifiers
 			 lambda-list
 			 participants
-			 buzzword
+			 message
 			 function
 			 body
 			 (documentation ""))
-  (let ((message (%make-message
-		   :name (buzzword-name buzzword)
+  (let ((reply (%make-reply
+		   :name (message-name message)
 		   :lambda-list lambda-list
 		   :qualifiers qualifiers
 		   :function function
 		   :body body
 		   :documentation documentation)))
-    (remove-specific-message buzzword qualifiers participants)
-    (add-message-to-buzzword message buzzword)
-    (add-message-to-sheeple buzzword message participants)
-    message))
+    (remove-specific-reply message qualifiers participants)
+    (add-reply-to-message reply message)
+    (add-reply-to-sheeple message reply participants)
+    reply))
 
-(defun create-bw-lambda-list (lambda-list)
-  ;;; Create a buzzword lambda list from a message lambda list
+(defun create-msg-lambda-list (lambda-list)
+  ;;; Create a message lambda list from a reply lambda list
   (loop for x in lambda-list
      collect (if (consp x) (list (car x)) x)
      if (eq x '&key) do (loop-finish)))
 
-(defun add-message-to-buzzword (message buzzword)
-  (set-arg-info buzzword :new-message message)
-  (push message (buzzword-messages buzzword)))
+(defun add-reply-to-message (reply message)
+  (set-arg-info message :new-reply reply)
+  (push reply (message-replies message)))
 
-(defun remove-specific-message (buzzword qualifiers participants)
-  (let ((message (find-if (lambda (msg)
-			    (equal (message-qualifiers msg)
+(defun remove-specific-reply (message qualifiers participants)
+  (let ((reply (find-if (lambda (msg)
+			    (equal (reply-qualifiers msg)
 				   qualifiers))
-			  (%find-applicable-messages
-			   buzzword participants :errorp nil))))
-    (when (and message
+			  (%find-applicable-replies
+			   message participants :errorp nil))))
+    (when (and reply
 	       (every (lambda (sheep)
-			(participant-p sheep (message-name message)))
+			(participant-p sheep (reply-name reply)))
 		      participants))
       (loop for sheep in participants
 	 for i from 0
 	 do (loop for role in (sheep-direct-roles sheep)
-	       do (let ((role-message (role-message role)))
+	       do (let ((role-reply (role-reply role)))
 		    (when (and
-			   (equal message role-message)
+			   (equal reply role-reply)
 			   (= i (role-position role)))
 		      (delete-role role sheep)))))
-      (delete-message message))))
+      (delete-reply reply))))
 
-(defun delete-message (message)
-  (let ((buzzword (message-buzzword message)))
-    (setf (buzzword-messages buzzword)
-	  (delete message (buzzword-messages buzzword)))))
+(defun delete-reply (reply)
+  (let ((message (reply-message reply)))
+    (setf (message-replies message)
+	  (delete reply (message-replies message)))))
 
 (defun delete-role (role sheep)
   (setf (sheep-direct-roles sheep)
 	(remove role (sheep-direct-roles sheep))))
 
-(defun add-message-to-sheeple (buzzword message sheeple)
+(defun add-reply-to-sheeple (message reply sheeple)
   (loop 
      for sheep in sheeple
      for i upto (1- (length sheeple))
      do (let ((role (%make-role
-		     :name (buzzword-name buzzword)
+		     :name (message-name message)
 		     :position i
-		     :message message)))
+		     :reply reply)))
 	  (push role
 		(sheep-direct-roles sheep)))))
 
-(defun undefine-message (name &key qualifiers participants)
-  (let ((bw (find-buzzword name nil)))
-    (when bw
-     (remove-applicable-message bw qualifiers participants)
-     (clear-memo-table bw)
+(defun undefine-reply (name &key qualifiers participants)
+  (let ((msg (find-message name nil)))
+    (when msg
+     (remove-applicable-reply msg qualifiers participants)
+     (clear-memo-table msg)
      t)))
 
-(defun remove-applicable-message (buzzword qualifiers participants)
-  (let ((message (find-if (lambda (msg)
-			    (equal (message-qualifiers msg)
+(defun remove-applicable-reply (message qualifiers participants)
+  (let ((reply (find-if (lambda (msg)
+			    (equal (reply-qualifiers msg)
 				   qualifiers))
-			  (%find-applicable-messages
-			   buzzword participants :errorp nil))))
-    (when message
+			  (%find-applicable-replies
+			   message participants :errorp nil))))
+    (when reply
       (loop for sheep in participants
 	 for i from 0
 	 do (loop for role in (sheep-direct-roles sheep)
-	       do (let ((role-message (role-message role)))
+	       do (let ((role-reply (role-reply role)))
 		    (when (and
-			   (equal message role-message)
+			   (equal reply role-reply)
 			   (= i (role-position role)))
 		      (delete-role role sheep)))))
-      (delete-message message))))
+      (delete-reply reply))))
 
-(defun available-messages (sheep)
+(defun available-replies (sheep)
   (let ((roles (loop for role in (sheep-direct-roles sheep)
 		    collect (vector (role-name role) (role-position role)))))
     (remove-duplicates
      (flatten
-      (append roles (mapcar #'available-messages (sheep-direct-parents sheep)))))))
+      (append roles (mapcar #'available-replies (sheep-direct-parents sheep)))))))
 
 (defun add-readers-to-sheep (readers prop-name sheep)
   (loop for reader in readers
      do
        (pushnew reader (gethash prop-name (%property-readers sheep)))
-       (ensure-buzzword reader :lambda-list '(sheep))
-       (ensure-message reader
+       (ensure-message reader :lambda-list '(sheep))
+       (ensure-reply reader
 			:lambda-list '(sheep)
 			:participants (list sheep)
 			:body `(property-value sheep ',prop-name)
-			:function (eval (make-message-lambda reader
+			:function (eval (make-reply-lambda reader
 							     '(sheep) 
 							     `((property-value sheep ',prop-name)))))))
 
@@ -189,52 +189,52 @@
   (loop for writer in writers
      do
        (pushnew writer (gethash prop-name (%property-writers sheep)))
-       (ensure-buzzword writer :lambda-list '(new-value sheep))
-       (ensure-message writer
+       (ensure-message writer :lambda-list '(new-value sheep))
+       (ensure-reply writer
 			:lambda-list '(new-value sheep)
 			:participants (list =t= sheep)
 			:body `(setf (property-value sheep ',prop-name) new-value)
-			:function (eval (make-message-lambda writer
+			:function (eval (make-reply-lambda writer
 							     '(new-value sheep) 
 							     `((setf (property-value sheep ',prop-name)
 								     new-value)))))))
 
 ;;; macro
-(defmacro defmessage (&rest args)
+(defmacro defreply (&rest args)
   (multiple-value-bind (name qualifiers specialized-lambda-list docstring body)
-      (parse-defmessage args)
+      (parse-defreply args)
     `(eval-when (:load-toplevel :execute)
-       (%defmessage-expander ,name ,qualifiers ,specialized-lambda-list ,docstring ,body))))
+       (%defreply-expander ,name ,qualifiers ,specialized-lambda-list ,docstring ,body))))
 
-(defmacro %defmessage-expander (name qualifiers specialized-lambda-list docstring body)
+(defmacro %defreply-expander (name qualifiers specialized-lambda-list docstring body)
   (multiple-value-bind (parameters ll participants required)
       (parse-specialized-lambda-list specialized-lambda-list)
     (declare (ignore parameters required))
-    `(ensure-message
+    `(ensure-reply
       ',name
       :qualifiers ',qualifiers
       ;; TODO - use the new stuff
       :lambda-list ',ll
       :participants (list ,@participants)
       :documentation ,docstring
-      :function ,(make-message-lambda name ll body)
+      :function ,(make-reply-lambda name ll body)
       :body '(block ,name ,@body))))
 
-(defun make-message-lambda (name lambda-list body)
-  (let* ((bw (find-buzzword name nil))
-	 (key/restp (when bw (arg-info-key/rest-p (buzzword-arg-info bw))))
+(defun make-reply-lambda (name lambda-list body)
+  (let* ((msg (find-message name nil))
+	 (key/restp (when msg (arg-info-key/rest-p (message-arg-info msg))))
 	 (ll (if key/restp
 		 (append lambda-list '(&allow-other-keys))
 		 lambda-list)))
     `(lambda (args next-emfun)
        (declare (ignorable next-emfun))
-       (flet ((next-message-p ()
+       (flet ((next-reply-p ()
 		(not (null next-emfun)))
-	      (call-next-message (&rest cnm-args)
+	      (call-next-reply (&rest cnm-args)
 		(if (null next-emfun)
-		    (error "No next message")
+		    (error "No next reply")
 		    (funcall next-emfun (or cnm-args args)))))
-	 (declare (ignorable #'next-message-p #'call-next-message))
+	 (declare (ignorable #'next-reply-p #'call-next-reply))
 	 (block ,(if (listp name)
 		     (cadr name)
 		     name)
@@ -242,7 +242,7 @@
 	    (lambda ,ll
 	      ,@body) args))))))
 
-(defun parse-defmessage (args)
+(defun parse-defreply (args)
   (let ((name (car args))
 	(qualifiers nil)
 	(lambda-list nil)
@@ -278,18 +278,18 @@
       var-name
       (error "Invalid var name.")))
 
-(defmacro undefmessage (&rest args)
+(defmacro undefreply (&rest args)
   (multiple-value-bind (name qualifiers lambda-list)
-      (parse-undefmessage args)
+      (parse-undefreply args)
     (multiple-value-bind (iggy1 iggy2 participants iggy3)
 	(parse-specialized-lambda-list lambda-list)
       (declare (ignore iggy1 iggy2 iggy3))
-      `(undefine-message
+      `(undefine-reply
 	',name
 	:qualifiers ',qualifiers
 	:participants (list ,@participants)))))
 
-(defun parse-undefmessage (args)
+(defun parse-undefreply (args)
   (let ((name (car args))
 	(qualifiers nil)
 	(lambda-list nil))

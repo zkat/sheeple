@@ -38,21 +38,21 @@
    :remove-cloneform
    :inspect-cloneform
    
-   ;; Buzzwords
+   ;; Messages
    :clobbering-function-definition
-   :defbuzzword
    :defmessage
-   :available-messages
-   :undefbuzzword
+   :defreply
+   :available-replies
    :undefmessage
+   :undefreply
    :participant-p
-   :call-next-message
-   :next-message-p
+   :call-next-reply
+   :next-reply-p
    :clobbering-function-definition ;warning
-   :buzzword-lambda-list-error ;error when something is wrong with a lambda list
-   :no-applicable-messages ;error
-   :no-most-specific-message ;error
-   :no-primary-messages ;error (signaled when the only applicable messages are combination messages)
+   :message-lambda-list-error ;error when something is wrong with a lambda list
+   :no-applicable-replies ;error
+   :no-most-specific-reply ;error
+   :no-primary-replies ;error (signaled when the only applicable replies are combination replies)
    :specialized-lambda-list-error ;error
 
    ;; Fleeces

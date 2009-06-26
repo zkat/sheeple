@@ -12,13 +12,13 @@
 (defclass message ()
   ((name :accessor message-name :initform nil :initarg :name)
    (lambda-list :accessor message-lambda-list :initform nil :initarg :ll)
-   (messages :accessor message-messages :initform nil :initarg :msgs)
+   (replies :accessor message-replies :initform nil :initarg :msgs)
    (memo-vector :accessor message-memo-vector :initform (make-array 40))
    (arg-info :accessor message-arg-info :initform (make-arg-info))
    (documentation :accessor message-documentation :initform "" :initarg :dox)))
 
-(defun %make-message (&key name lambda-list messages (documentation ""))
-  (make-instance 'message :name name :ll lambda-list :msgs messages :dox documentation))
+(defun %make-message (&key name lambda-list replies (documentation ""))
+  (make-instance 'message :name name :ll lambda-list :msgs replies :dox documentation))
 
 (defgeneric message-p (obj))
 (defmethod message-p (obj)
@@ -40,15 +40,15 @@
 (let ((message-table (make-hash-table :test #'equal)))
 
   (defun find-message (name &optional (errorp t))
-    (let ((buzz (gethash name message-table)))
-      (cond ((and (null buzz) errorp)
+    (let ((msg (gethash name message-table)))
+      (cond ((and (null msg) errorp)
 	     (error 'no-such-message
 		    :format-control "There is no message named ~A"
 		    :format-args (list name)))
-	    ((null buzz)
+	    ((null msg)
 	     nil)
 	    (t
-	     buzz))))
+	     msg))))
   
   (defun (setf find-message) (new-value name)
     (setf (gethash name message-table) new-value))
@@ -68,7 +68,7 @@
   ) ; end message table closure
 
 ;; Finalizing a message sets the function definition of the message to a
-;; lambda that calls the top-level dispatch function on the bw args.
+;; lambda that calls the top-level dispatch function on the msg args.
 (defun finalize-message (message)
   (let ((name (message-name message)))
     (when (and (fboundp name)
@@ -112,7 +112,7 @@
 ;; then expands to a call to ensure-message
 (defmacro defmessage (name lambda-list &rest options)
   `(progn
-     (check-bw-lambda-list ',lambda-list)
+     (check-msg-lambda-list ',lambda-list)
      (eval-when (:compile-toplevel :load-toplevel :execute)
        (ensure-message
         ',name
@@ -126,7 +126,7 @@
   (list `',(car option) `',(cadr option)))
 
 ;;; LL analysis
-(defun check-bw-lambda-list (lambda-list)
+(defun check-msg-lambda-list (lambda-list)
   (flet ((ensure (arg ok)
            (unless ok
              (error 'message-lambda-list-error
@@ -136,8 +136,8 @@
     (multiple-value-bind (required optional restp rest keyp keys allowp
 				   auxp aux morep more-context more-count)
         (parse-lambda-list lambda-list)
-      (declare (ignore required)) ; since they're no different in a bw ll
-      (declare (ignore restp rest)) ; since they're no different in a bw ll
+      (declare (ignore required)) ; since they're no different in a msg ll
+      (declare (ignore restp rest)) ; since they're no different in a msg ll
       (declare (ignore allowp)) ; since &ALLOW-OTHER-KEYS is fine either way
       (declare (ignore aux)) ; since we require AUXP=NIL
       (declare (ignore more-context more-count)) ; safely ignored unless MOREP
@@ -168,9 +168,9 @@
 ;;;
 ;;; Arg info
 ;;; - The stuff in here contains the arg-info object, plus code to handle it.
-;;;   Present is also the function that confirms validity of message lambda-lists,
-;;;   and the code that updates the valid arg info for a message whenever a message
-;;;   is added. The add-message function, though, is in message-generation.lisp
+;;;   Present is also the function that confirms validity of reply lambda-lists,
+;;;   and the code that updates the valid arg info for a message whenever a reply
+;;;   is added. The add-reply function, though, is in reply-generation.lisp
 (defstruct (arg-info
 	     (:conc-name nil)
 	     (:constructor make-arg-info ())
@@ -181,15 +181,15 @@
   arg-info-number-optional
   arg-info-key/rest-p
   arg-info-keys   ;nil        no &KEY or &REST allowed
-					;(k1 k2 ..) Each message must accept these &KEY arguments.
+					;(k1 k2 ..) Each reply must accept these &KEY arguments.
 					;T          must have &KEY or &REST
 
-  bw-info-simple-accessor-type ; nil, reader, writer, boundp
-  (bw-precompute-dfun-and-emf-p nil) ; set by set-arg-info
+  msg-info-simple-accessor-type ; nil, reader, writer, boundp
+  (msg-precompute-dfun-and-emf-p nil) ; set by set-arg-info
 
-  bw-info-static-c-a-m-emf
-  (bw-info-c-a-m-emf-std-p t)
-  bw-info-fast-mf-p)
+  msg-info-static-c-a-m-emf
+  (msg-info-c-a-m-emf-std-p t)
+  msg-info-fast-mf-p)
 
 (defun arg-info-valid-p (arg-info)
   (not (null (arg-info-number-optional arg-info))))
@@ -204,31 +204,31 @@
 (defun arg-info-nkeys (arg-info)
   (count-if (lambda (x) (not (eq x t))) (arg-info-metatypes arg-info)))
 
-(defun set-arg-info (bw &key new-message (lambda-list nil lambda-list-p))
-  (let* ((arg-info (message-arg-info bw))
-         (messages (message-messages bw))
-         (first-p (and new-message (null (cdr messages)))))
-    (when (and (not lambda-list-p) messages)
-      (setq lambda-list (message-lambda-list bw)))
+(defun set-arg-info (msg &key new-reply (lambda-list nil lambda-list-p))
+  (let* ((arg-info (message-arg-info msg))
+         (replies (message-replies msg))
+         (first-p (and new-reply (null (cdr replies)))))
+    (when (and (not lambda-list-p) replies)
+      (setq lambda-list (message-lambda-list msg)))
     (when (or lambda-list-p
               (and first-p
                    (eq (arg-info-lambda-list arg-info) :no-lambda-list)))
       (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)
           (analyze-lambda-list lambda-list)
-        (when (and messages (not first-p))
-          (let ((bw-nreq (arg-info-number-required arg-info))
-                (bw-nopt (arg-info-number-optional arg-info))
-                (bw-key/rest-p (arg-info-key/rest-p arg-info)))
-            (unless (and (= (the fixnum nreq) bw-nreq)
-                         (= (the fixnum nopt) (the fixnum bw-nopt))
-                         (eq (or keysp restp) bw-key/rest-p))
+        (when (and replies (not first-p))
+          (let ((msg-nreq (arg-info-number-required arg-info))
+                (msg-nopt (arg-info-number-optional arg-info))
+                (msg-key/rest-p (arg-info-key/rest-p arg-info)))
+            (unless (and (= (the fixnum nreq) msg-nreq)
+                         (= (the fixnum nopt) (the fixnum msg-nopt))
+                         (eq (or keysp restp) msg-key/rest-p))
               (error "The lambda-list ~S is incompatible with ~
-                     existing messages of ~S."
-                     lambda-list bw))))
+                     existing replies of ~S."
+                     lambda-list msg))))
         (setf (arg-info-lambda-list arg-info)
               (if lambda-list-p
                   lambda-list
-		  (create-bw-lambda-list lambda-list)))
+		  (create-msg-lambda-list lambda-list)))
         (setf (arg-info-metatypes arg-info) (make-array nreq))
         (setf (arg-info-number-optional arg-info) nopt)
         (setf (arg-info-key/rest-p arg-info) (not (null (or keysp restp))))
@@ -236,8 +236,8 @@
               (if lambda-list-p
                   (if allow-other-keys-p t keywords)
                   (arg-info-key/rest-p arg-info)))))
-    (when new-message
-      (check-message-arg-info bw arg-info new-message))
+    (when new-reply
+      (check-reply-arg-info msg arg-info new-reply))
     arg-info))
 
 (defun analyze-lambda-list (lambda-list)
@@ -286,39 +286,39 @@
               (reverse keywords)
               (reverse keyword-parameters)))))
 
-(defun check-message-arg-info (bw arg-info message)
+(defun check-reply-arg-info (msg arg-info reply)
   (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)
-      (analyze-lambda-list (message-lambda-list message))
+      (analyze-lambda-list (reply-lambda-list reply))
     (flet ((lose (string &rest args)
              (error 'sheeple-error
-                    :format-control "~@<attempt to add the message~2I~_~S~I~_~
+                    :format-control "~@<attempt to add the reply~2I~_~S~I~_~
                                      to the message~2I~_~S;~I~_~
                                      but ~?~:>"
-                    :format-args (list message bw string args)))
+                    :format-args (list reply msg string args)))
            (comparison-description (x y)
 	     (declare (fixnum x y))
              (if (> x y) "more" "fewer")))
-      (let ((bw-nreq (arg-info-number-required arg-info))
-            (bw-nopt (arg-info-number-optional arg-info))
-            (bw-key/rest-p (arg-info-key/rest-p arg-info))
-            (bw-keywords (arg-info-keys arg-info)))
-        (unless (= nreq bw-nreq)
+      (let ((msg-nreq (arg-info-number-required arg-info))
+            (msg-nopt (arg-info-number-optional arg-info))
+            (msg-key/rest-p (arg-info-key/rest-p arg-info))
+            (msg-keywords (arg-info-keys arg-info)))
+        (unless (= nreq msg-nreq)
           (lose
-           "the message has ~A required arguments than the message."
-           (comparison-description nreq bw-nreq)))
-        (unless (= nopt bw-nopt)
+           "the reply has ~A required arguments than the message."
+           (comparison-description nreq msg-nreq)))
+        (unless (= nopt msg-nopt)
           (lose
-           "the message has ~A optional arguments than the message."
-           (comparison-description nopt bw-nopt)))
-        (unless (eq (or keysp restp) bw-key/rest-p)
+           "the reply has ~A optional arguments than the message."
+           (comparison-description nopt msg-nopt)))
+        (unless (eq (or keysp restp) msg-key/rest-p)
           (lose
-           "the message and message differ in whether they accept~_~
+           "the reply and message differ in whether they accept~_~
             &REST or &KEY arguments."))
-        (when (consp bw-keywords)
+        (when (consp msg-keywords)
           (unless (or (and restp (not keysp))
                       allow-other-keys-p
-                      (every (lambda (k) (memq k keywords)) bw-keywords))
-            (lose "the message does not accept each of the &KEY arguments~2I~_~
+                      (every (lambda (k) (memq k keywords)) msg-keywords))
+            (lose "the reply does not accept each of the &KEY arguments~2I~_~
                    ~S."
-                  bw-keywords)))))))
+                  msg-keywords)))))))
 

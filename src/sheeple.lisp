@@ -45,10 +45,11 @@
 ;;; Cloning
 ;;;
 (defun spawn-sheep (sheeple &rest all-keys &key (metaclass 'standard-sheep) &allow-other-keys)
-  "Creates a new sheep with SHEEPLE as its parents, and PROPERTIES as its properties"
+  "Creates a new sheep with SHEEPLE as its parents. METACLASS is used as the class when instantiating
+the new sheep object. ALL-KEYS is passed on to INITIALIZE-SHEEP."
   (let ((sheep (allocate-sheep metaclass)))
     (if sheeple
-        (loop for parent in sheeple do (add-parent parent sheep))
+        (add-parents sheeple sheep)
         (add-parent (find-sheep 'dolly) sheep))
     (apply #'initialize-sheep sheep all-keys)))
 
@@ -56,7 +57,8 @@
   "Creates a new standard-sheep object with SHEEPLE as its parents."
   (spawn-sheep sheeple))
 
-(defun copy-sheep (model)
+(defgeneric copy-sheep (model))
+(defmethod copy-sheep ((model standard-sheep))
   (let* ((parents (sheep-direct-parents model))
          (properties (sheep-property-value-table model))
          (roles (sheep-direct-roles model))
@@ -81,10 +83,12 @@
 (defmethod add-parent ((new-parent standard-sheep) (child standard-sheep))
   (cond ((equal new-parent child)
          (error "Sheeple cannot be parents of themselves."))
+        ((member new-parent (sheep-direct-parents child))
+         (error "~A is already a parent of ~A." new-parent child))
         (t
          (handler-case
              (progn
-               (pushnew new-parent (sheep-direct-parents child))
+               (push new-parent (sheep-direct-parents child))
                (setf (gethash child (%direct-children new-parent)) t)
                child)
            (sheep-hierarchy-error ()
@@ -96,15 +100,21 @@
          (finalize-sheep child)
          child)))
 
+(defun add-parents (parents sheep)
+  (loop for parent in sheeple do (add-parent parent sheep)))
+
 (defgeneric remove-parent (parent sheep))
 (defmethod remove-parent (unsheepish-parent (child standard-sheep))
   (remove-parent (sheepify unsheepish-parent) child))
 (defmethod remove-parent ((parent standard-sheep) (child standard-sheep))
-  (setf (sheep-direct-parents child)
-        (delete parent (sheep-direct-parents child)))
-  (remhash child (%direct-children parent))
-  (finalize-sheep child)
-  child)
+  (if (member parent (sheep-direct-parents child))
+      (progn
+        (setf (sheep-direct-parents child)
+              (delete parent (sheep-direct-parents child)))
+        (remhash child (%direct-children parent))
+        (finalize-sheep child)
+        child)
+      (error "~A is not a parent of ~A" parent child)))
 
 ;;; Inheritance predicates
 (defun direct-parent-p (maybe-parent child)

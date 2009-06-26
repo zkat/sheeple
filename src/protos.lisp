@@ -32,7 +32,7 @@
                  ,@(canonize-clone-options options))))
      (mapc (lambda (prop-spec)
              (apply #'add-property sheep prop-spec))
-           ,(canonize-properties* properties))
+           ,(canonize-properties properties t))
      (unless (sheep-nickname sheep)
        (setf (sheep-nickname sheep) ',name))
      (setf (find-proto ,name) sheep)))

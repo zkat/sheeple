@@ -41,7 +41,8 @@
                sheep)
   ;; DOX PLOX
   (when documentation
-    (setf (sheep-documentation sheep) documentation)))
+    (setf (sheep-documentation sheep) documentation))
+  sheep)
 
 (defproto dolly (t) ())
 

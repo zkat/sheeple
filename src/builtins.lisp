@@ -1,15 +1,13 @@
-;; This file is part of Sheeple
+;;;; This file is part of Sheeple
 
-;; wolves.lisp
-;;
-;; Fleecing and sheepification
-;;
-;; TODO: This is such a mess...
+;;;; builtins.lisp
+;;;;
+;;;; Boxing of built-in lisp types
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
 (declaim (optimize (speed 3) (safety 1)))
-(defun fleece-of (x)
+(defun box-type-of (x)
   (if (sheep-p x)
       (progn
 	(warn "This is already a sheep!")
@@ -39,19 +37,20 @@
 ;; Boxed object table
 (let ((boxed-object-table (make-hash-table :test #'equal)))
 
-  (defun find-fleeced-wolf (wolf)
-    (if (sheep-p wolf)
-	(error "~S seems to already be a sheep." wolf)
-	(gethash wolf boxed-object-table)))
+  (defun find-boxed-object (object)
+    (if (sheep-p object)
+	(error "~S seems to already be a sheep." object)
+	(gethash object boxed-object-table)))
 
-  (defun wear-wool (wolf)
-    "Autoboxes WOLF"
-    (setf (gethash wolf boxed-object-table) (defclone ((fleece-of wolf))
-                                                ((wolf wolf)) (:nickname wolf))))
+  (defun box-object (object)
+    "Wraps OBJECT with a sheep."
+    (setf (gethash object boxed-object-table) 
+          (defclone ((box-type-of object))
+              ((wrapped-object object)) (:nickname object))))
 
-  (defun shoot-wolf (wolf)
-    "Kills wolf dead"
-    (remhash wolf boxed-object-table))
+  (defun remove-boxed-object (object)
+    "Kills object dead"
+    (remhash object boxed-object-table))
     
   ) ; end boxed object table
 
@@ -59,12 +58,12 @@
   "Converts OBJ-LIST to a list where each item is either a sheep or a fleeced wolf."
   (mapcar #'sheepify obj-list))
 
-(defun sheepify (sheep)
-  "Returns SHEEP or fleeces it."
-   (cond ((eq sheep t)
+(defun sheepify (object)
+  "Returns OBJECT or fleeces it."
+   (cond ((eq object t)
           (find-proto 't))
-         ((not (sheep-p sheep))
-          (or (find-fleeced-wolf sheep)
-              (values (wear-wool sheep) t)))
+         ((not (sheep-p object))
+          (or (find-boxed-object object)
+              (values (box-object object) t)))
          (t
-          (values sheep nil))))
+          (values object nil))))

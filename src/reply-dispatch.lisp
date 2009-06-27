@@ -1,12 +1,11 @@
-;; This file is part of Sheeple
+;;;; This file is part of Sheeple
 
-;; reply-dispatch.lisp
-;;
-;; Reply execution and dispatch
-;;
-;; TODO
-;; * Figure out an optimization to make manipulators about as fast as calling property-value
-;;
+;;;; reply-dispatch.lisp
+;;;;
+;;;; Reply execution and dispatch
+;;;;
+;;;; TODO
+;;;; * Figure out an optimization to make accessors about as fast as calling property-value
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 

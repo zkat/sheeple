@@ -46,5 +46,5 @@
     (format stream "Standard Sheep~@[ AKA: ~a~]" (sheep-nickname sheep))))
 (defreply print-sheep ((sheep #@boxed-object) (stream #@stream))
   (print-unreadable-object (sheep stream :identity t)
-    (format stream "Fleeced Wolf~@[ AKA: ~a~]" (sheep-nickname sheep))))
+    (format stream "Boxed object~@[ AKA: ~a~]" (sheep-nickname sheep))))
 

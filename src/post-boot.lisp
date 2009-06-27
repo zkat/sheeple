@@ -43,7 +43,7 @@
   (:documentation "Defines the expression print-object uses."))
 (defreply print-sheep (sheep (stream #@stream))
   (print-unreadable-object (sheep stream :identity t)
-    (format stream "Standard Sheep~@[ AKA: ~a~]" (sheep-nickname sheep))))
+    (format stream "Sheep~@[ AKA: ~a~]" (sheep-nickname sheep))))
 (defreply print-sheep ((sheep #@boxed-object) (stream #@stream))
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Boxed object~@[ AKA: ~a~]" (sheep-nickname sheep))))

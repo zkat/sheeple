@@ -128,7 +128,7 @@
 
 (defun delete-role (role sheep)
   (setf (sheep-direct-roles sheep)
-	(remove role (sheep-direct-roles sheep))))
+	(delete role (sheep-direct-roles sheep))))
 
 (defun add-reply-to-sheeple (message reply sheeple)
   (loop 
@@ -170,7 +170,7 @@
 		    collect (vector (role-name role) (role-position role)))))
     (remove-duplicates
      (flatten
-      (append roles (mapcar #'available-replies (sheep-direct-parents sheep)))))))
+      (append roles (mapcar #'available-replies (sheep-parents sheep)))))))
 
 (defun add-readers-to-sheep (readers prop-name sheep)
   (loop for reader in readers

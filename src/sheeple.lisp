@@ -11,7 +11,7 @@
 (defclass standard-sheep ()
   ((nickname :accessor sheep-nickname :initform nil)
    (documentation :accessor sheep-documentation :initform "")
-   (direct-parents :accessor sheep-direct-parents :initform nil :initarg :direct-parents)
+   (direct-parents :accessor sheep-parents :initform nil :initarg :direct-parents)
    (%direct-children :accessor %direct-children 
                      :initform  (make-weak-hash-table :weakness :key :test #'eq))
    (property-value-table :accessor sheep-property-value-table
@@ -58,7 +58,7 @@ the new sheep object. ALL-KEYS is passed on to INITIALIZE-SHEEP."
 
 (defgeneric copy-sheep (model))
 (defmethod copy-sheep ((model standard-sheep))
-  (let* ((parents (sheep-direct-parents model))
+  (let* ((parents (sheep-parents model))
          (properties (sheep-property-value-table model))
          (roles (sheep-direct-roles model))
          (new-sheep (clone parents)))
@@ -70,7 +70,7 @@ the new sheep object. ALL-KEYS is passed on to INITIALIZE-SHEEP."
 
 (defgeneric finalize-sheep (sheep))
 (defmethod finalize-sheep ((sheep standard-sheep))
-  (loop for parent in (sheep-direct-parents sheep)
+  (loop for parent in (sheep-parents sheep)
      do (setf (gethash sheep (%direct-children parent)) t))
   (memoize-sheep-hierarchy-list sheep)
   sheep)
@@ -82,19 +82,19 @@ the new sheep object. ALL-KEYS is passed on to INITIALIZE-SHEEP."
 (defmethod add-parent ((new-parent standard-sheep) (child standard-sheep))
   (cond ((equal new-parent child)
          (error "Sheeple cannot be parents of themselves."))
-        ((member new-parent (sheep-direct-parents child))
+        ((member new-parent (sheep-parents child))
          (error "~A is already a parent of ~A." new-parent child))
         (t
          (handler-case
              (progn
-               (push new-parent (sheep-direct-parents child))
+               (push new-parent (sheep-parents child))
                (setf (gethash child (%direct-children new-parent)) t)
                child)
            (sheep-hierarchy-error ()
              (progn
-               (setf (sheep-direct-parents child) 
+               (setf (sheep-parents child) 
                      (delete new-parent
-                             (sheep-direct-parents child)))
+                             (sheep-parents child)))
                (error 'sheep-hierarchy-error))))
          (finalize-sheep child)
          child)))
@@ -106,30 +106,30 @@ the new sheep object. ALL-KEYS is passed on to INITIALIZE-SHEEP."
 (defmethod remove-parent (unsheepish-parent (child standard-sheep))
   (remove-parent (sheepify unsheepish-parent) child))
 (defmethod remove-parent ((parent standard-sheep) (child standard-sheep))
-  (if (member parent (sheep-direct-parents child))
+  (if (member parent (sheep-parents child))
       (progn
-        (setf (sheep-direct-parents child)
-              (delete parent (sheep-direct-parents child)))
+        (setf (sheep-parents child)
+              (delete parent (sheep-parents child)))
         (remhash child (%direct-children parent))
         (finalize-sheep child)
         child)
       (error "~A is not a parent of ~A" parent child)))
 
 ;;; Inheritance predicates
-(defun direct-parent-p (maybe-parent child)
-  (when (member maybe-parent (sheep-direct-parents child))
+(defun parentp (maybe-parent child)
+  (when (member maybe-parent (sheep-parents child))
     t))
 
-(defun ancestor-p (maybe-ancestor descendant)
+(defun ancestorp (maybe-ancestor descendant)
   (when (and (not (eql maybe-ancestor descendant))
              (member maybe-ancestor (collect-parents descendant)))
     t))
 
-(defun direct-child-p (maybe-child parent)
-  (direct-parent-p parent maybe-child))
+(defun childp (maybe-child parent)
+  (parentp parent maybe-child))
 
-(defun descendant-p (maybe-descendant ancestor)
-  (ancestor-p ancestor maybe-descendant))
+(defun descendantp (maybe-descendant ancestor)
+  (ancestorp ancestor maybe-descendant))
 
 ;;;
 ;;; Hierarchy Resolution
@@ -145,7 +145,7 @@ the new sheep object. ALL-KEYS is passed on to INITIALIZE-SHEEP."
                            (car to-be-processed)))
                       (all-parents-loop
                        (cons sheep-to-process seen)
-                       (union (sheep-direct-parents sheep-to-process)
+                       (union (sheep-parents sheep-to-process)
                               parents)))))))
     (all-parents-loop () (list sheep))))
 
@@ -163,12 +163,12 @@ the new sheep object. ALL-KEYS is passed on to INITIALIZE-SHEEP."
 (defun local-precedence-ordering (sheep)
   (mapcar #'list
           (cons sheep
-                (butlast (sheep-direct-parents sheep)))
-          (sheep-direct-parents sheep)))
+                (butlast (sheep-parents sheep)))
+          (sheep-parents sheep)))
 
 (defun std-tie-breaker-rule (minimal-elements hl-so-far)
   (dolist (hl-constituent (reverse hl-so-far))
-    (let* ((supers (sheep-direct-parents hl-constituent))
+    (let* ((supers (sheep-parents hl-constituent))
            (common (intersection minimal-elements supers)))
       (when (not (null common))
         (return-from std-tie-breaker-rule (car common))))))

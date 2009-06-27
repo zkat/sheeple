@@ -74,17 +74,19 @@
     This is really important! :-o
     UPDATE: direct-property-summary and property-summary should do the trick for now :)
     UPDATE: It actually works now. And it's fucking sexy.
-** TODO Sheeple is horribly broken -- fix it
+** DONE Sheeple is horribly broken -- fix it
    At this point, it's probably a better idea to go over all of sheeple again, bit by bit,
    and reimplement things as necessary. Try to clean up the interface and all that.
    Dispatch is completely broken, but it's probably due to reply definition. It might also
    have been caused by all the damn renaming I did all over the place. I really never learn
    my lesson.
    Ah well, there goes the rest of my week.
+   UPDATE: Woo, it seems to work now!
 ** TODO Tests
    All these changes should have a completely new set of unit tests written for them.
    While I'm at it, this could be an opportunity to improve the structure of the tests,
    and improve overall test coverage. They're broken right now, anyways. Ah well :\
+   Do not tag and release 2.0 until all tests are written, and pass.
 ** TODO Rewrite documentation
 ** TODO Rewrite examples
 * DONE 1.1

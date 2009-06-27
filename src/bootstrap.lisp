@@ -10,6 +10,7 @@
 (setf (find-proto 't)
       (let ((sheep (allocate-sheep)))
         (setf (sheep-nickname sheep) 't)
+        (finalize-sheep sheep)
         sheep))
 
 (setf (find-proto 'dolly)
@@ -33,7 +34,7 @@
                               &key new-parents
                               documentation)
   ;; CLOBBER TIME
-  (loop for parent in (sheep-direct-parents sheep)
+  (loop for parent in (sheep-parents sheep)
      do (remove-parent parent sheep))
   (remove-all-direct-properties sheep)
   ;; MOAR PARENTS

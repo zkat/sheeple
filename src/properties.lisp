@@ -128,19 +128,7 @@ available to SHEEP somewhere in the hierarchy list. If createp is T, add-propert
 (defun sheep-direct-properties (sheep)
   "Returns a set of direct property-spec definition metaobjects."
   (loop for pname being the hash-keys of (sheep-property-value-table sheep)
-     using (hash-value pvalue)
-     collect (make-instance 'property-spec
-                            :name pname :value pvalue
-                            :readers
-                            (remove-duplicates
-                             (loop for reader-name in (gethash pname (%property-readers sheep))
-                                collect reader-name)
-                             :test #'equal)
-                            :writers 
-                            (remove-duplicates
-                             (loop for writer-name in (gethash pname (%property-writers sheep))
-                                collect writer-name)
-                             :test #'equal))))
+     collect (direct-property-spec sheep pname)))
 
 (defun direct-property-spec (sheep property-name)
   (let ((value (direct-property-value sheep property-name))
@@ -176,7 +164,7 @@ SHEEP, including inherited ones."))
   (let ((direct-properties (sheep-direct-properties sheep )))
     (remove-duplicates
      (flatten
-      (append direct-properties (mapcar #'available-properties (sheep-direct-parents sheep))))
+      (append direct-properties (mapcar #'available-properties (sheep-parents sheep))))
      :test #'property-spec-equal-p)))
 
 (defgeneric property-summary (sheep &optional stream)

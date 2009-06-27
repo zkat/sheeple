@@ -29,8 +29,6 @@
 ;;; 3. Add any properties we want to it.
 ;;; 4. Define any replies, including accessors.
 ;;; 5. Free to go
-(defmethod initialize-instance :after ((sheep standard-sheep) &key &allow-other-keys))
-
 (defun allocate-sheep (&optional (class 'standard-sheep))
   (make-instance class))
 

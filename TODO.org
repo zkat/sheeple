@@ -41,10 +41,12 @@
 *** DONE Fleecing -> Autoboxing
 *** TODO Make sure the new interface works correctly.
     There's probably lots of holes left here and there by this
+    UPDATE: HORRIBLE DEATH BROKEN NO WORK OH GOD WHAT WHY HOW DO NOT WANT
 ** TODO Make psheep easier to implement
-*** TODO The order in which a sheep is built needs to be planned out more carefully.
+*** DONE The order in which a sheep is built needs to be planned out more carefully.
     UPDATE: I think this is just about ready. Should probably think about this for a while first,
     and then it'll be done.
+    UPDATE: I think this is good enough. It's straightforward.
 ** TODO More cleanup and convenience
 *** DONE Get rid of add-on-write. Require add-property.
     Add-on-write seems like a quick interface, but it's a bit obnoxious to deal with.
@@ -74,6 +76,7 @@
 *** DONE Implement something like Io's slotSummary
     This is really important! :-o
     UPDATE: direct-property-summary and property-summary should do the trick for now :)
+    UPDATE: It actually works now. And it's fucking sexy.
 ** TODO Tests
    All these changes should have a completely new set of unit tests written for them.
    While I'm at it, this could be an opportunity to improve the structure of the tests,

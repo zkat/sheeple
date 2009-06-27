@@ -26,7 +26,7 @@ with the format Reader=PROPERTY-NAME, Writer=(SETF PROPERTY-NAME)"
   (when readers
     (add-readers-to-sheep readers property-name sheep))
   (when writers
-    (add-writers-to-sheep readers property-name sheep))
+    (add-writers-to-sheep writers property-name sheep))
   (when make-accessors-p
     (add-readers-to-sheep `(,property-name) property-name sheep)
     (add-writers-to-sheep `((setf ,property-name)) property-name sheep)))
@@ -115,8 +115,8 @@ available to SHEEP somewhere in the hierarchy list. If createp is T, add-propert
    (writers :initform nil :initarg :writers :accessor property-spec-writers)))
 
 (defun property-spec-equal-p (spec1 spec2)
-  (with-slots (name1 value1 readers1 writers1) spec1
-    (with-slots (name2 value2 readers2 writers2) spec2
+  (with-slots ((name1 name) (value1 value) (readers1 readers) (writers1 writers)) spec1
+    (with-slots ((name2 name) (value2 value) (readers2 readers) (writers2 writers)) spec2
       (and (equal name1 name2)
            (equal value1 value2)
            (equal readers1 readers2)
@@ -131,19 +131,25 @@ available to SHEEP somewhere in the hierarchy list. If createp is T, add-propert
      using (hash-value pvalue)
      collect (make-instance 'property-spec
                             :name pname :value pvalue
-                            :readers 
-                            (loop for reader-name in (gethash pname (%property-readers sheep))
-                                 collect reader-name)
+                            :readers
+                            (remove-duplicates
+                             (loop for reader-name in (gethash pname (%property-readers sheep))
+                                collect reader-name)
+                             :test #'equal)
                             :writers 
-                            (loop for writer-name in (gethash pname (%property-writers sheep))
-                               collect writer-name))))
+                            (remove-duplicates
+                             (loop for writer-name in (gethash pname (%property-writers sheep))
+                                collect writer-name)
+                             :test #'equal))))
 
 (defun direct-property-spec (sheep property-name)
   (let ((value (direct-property-value sheep property-name))
-        (readers (loop for reader-name in (gethash pname (%property-readers sheep)) 
-                    collect reader-name))
-        (writers (loop for writer-name in (gethash pname (%property-writers sheep)) 
-                    collect writer-name)))
+        (readers (remove-duplicates (loop for reader-name in (gethash property-name
+                                                                      (%property-readers sheep)) 
+                                       collect reader-name) :test #'equal))
+        (writers (remove-duplicates (loop for writer-name in (gethash property-name
+                                                                      (%property-writers sheep)) 
+                                       collect writer-name) :test #'equal)))
     (make-instance 'property-spec :name property-name :value value :readers readers :writers writers)))
 
 (defgeneric property-owner (sheep property-name &optional errorp)
@@ -178,22 +184,23 @@ SHEEP, including inherited ones."))
 (defmethod property-summary ((sheep standard-sheep) &optional (stream *standard-output*))
   (let ((all-properties (available-properties sheep)))
     (format stream
-            "~&Sheep: ~A~%Properties: ~{~&~3TName: ~A~%~3TValue: ~S~%~
-             ~3TReaders: ~A~%~3TWriters: ~A~%~}"
+            "~&Sheep: ~A~%Properties:~% ~{~{~&~3TName: ~13T~A~%~3TValue: ~13T~S~%~
+             ~3TReaders: ~13T~A~%~3TWriters: ~13T~A~%~3TOwner: ~13T~A~%~%~}~}"
             sheep (loop for property in all-properties
                      collect (list (property-spec-name property)
                                    (property-spec-value property)
                                    (property-spec-readers property)
-                                   (property-spec-writers property))))))
+                                   (property-spec-writers property)
+                                   (property-owner sheep (property-spec-name property)))))))
 
 (defgeneric direct-property-summary (sheep &optional stream)
   (:documentation "Provides a pretty-printed representation of SHEEP's direct properties."))
 (defmethod direct-property-summary ((sheep standard-sheep) &optional (stream *standard-output*))
   (format stream
           "~&Sheep: ~A~%~
-           Properties: ~
-           ~{~&~3TName: ~A~%~3TValue: ~S~%~
-           ~3TReaders: ~A~%~3TWriters: ~A~%~}"
+           Direct Properties: ~%~%~
+           ~{~{~&~3TName: ~A~%~3TValue: ~S~%~
+           ~3TReaders: ~A~%~3TWriters: ~A~%~%~}~}"
           sheep (loop for property in (sheep-direct-properties sheep)
                    collect (list (property-spec-name property)
                                  (property-spec-value property)

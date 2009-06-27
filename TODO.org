@@ -81,6 +81,7 @@
    All these changes should have a completely new set of unit tests written for them.
    While I'm at it, this could be an opportunity to improve the structure of the tests,
    and improve overall test coverage. They're broken right now, anyways. Ah well :\
+** TODO Rewrite documentation
 * DONE 1.1
 ** DONE Rewrite sheeple using CLOS  
 ** DONE Expose enough of a MOP for psheep to be able to do its thing.

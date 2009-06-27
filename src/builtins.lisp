@@ -30,7 +30,7 @@
 	((bit-vector *)                                (find-proto 'bit-vector))
 	((and vector (not string))                     (find-proto 'vector))
 	((and array (not vector))                      (find-proto 'array))
-	((and sequence (not (or vector list)))         (find-proto 'sequence))
+;	((and sequence (not (or vector list)))         (find-proto 'sequence))
 	(function                                      (find-proto 'function))
 	(t                                             (find-proto 'boxed-object)))))
 

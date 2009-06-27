@@ -11,9 +11,9 @@
    :add-parent
    :remove-parent
    :direct-parent-p
-   :ancestor-p
+   :ancestorp
    :direct-child-p
-   :descendant-p
+   :descendantp
    :sheeple-error ;general error
    :sheeple-warning ;general warning
    
@@ -61,7 +61,7 @@
    :print-sheep
    :sheep-nickname
    :sheep-hierarchy-list
-   :sheep-direct-parents
+   :sheep-parents
    :sheep-direct-roles
    :sheep-direct-properties
    :sheep-documentation

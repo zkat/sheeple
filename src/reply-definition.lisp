@@ -149,8 +149,8 @@
      t)))
 
 (defun remove-applicable-reply (message qualifiers participants)
-  (let ((reply (find-if (lambda (msg)
-			    (equal (reply-qualifiers msg)
+  (let ((reply (find-if (lambda (reply)
+			    (equal (reply-qualifiers reply)
 				   qualifiers))
 			  (%find-applicable-replies
 			   message participants :errorp nil))))

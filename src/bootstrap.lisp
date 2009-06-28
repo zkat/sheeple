@@ -24,7 +24,8 @@
                             &key 
                             nickname
                             documentation)
-  (setf (sheep-nickname sheep) nickname)
+  (when nickname
+    (setf (sheep-nickname sheep) nickname))
   (when documentation
     (setf (sheep-documentation sheep) documentation))
   sheep)

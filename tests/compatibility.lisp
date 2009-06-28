@@ -23,7 +23,7 @@
   (is (equal (find-proto 'hash-table) (box-type-of (make-hash-table))))
   (is (equal (find-proto 'package) (box-type-of (find-package :sheeple))))
   (is (equal (find-proto 'pathname) (box-type-of #P"compatibility.lisp")))
-  ;;  (is (equal (find-proto 'readtable) (box-type-of ???))) ; uhhh??
+  (is (equal (find-proto 'readtable) (box-type-of *readtable*)))
   (is (equal (find-proto 'stream) (box-type-of *standard-output*)))
   (is (equal (find-proto 'number) (box-type-of 1/2)))
   (is (equal (find-proto 'string) (box-type-of "foo")))
@@ -32,7 +32,12 @@
   (is (equal (find-proto 'array) (box-type-of (make-array '(1 2)))))
   (is (equal (find-proto 'function) (box-type-of (lambda () 1)))))
 
-;; (test clos-fleecing
-;; TODO!
-;;   (defclass foo () ())
-;;   (is (not (equal =white-fang= (fleece-of (make-instance 'foo))))))
+;; (test clos-boxing)
+;; TODO - implement CLOS autoboxing
+
+;; TODO - Finish this compat stuff.
+(test find-boxed-object)
+(test box-object)
+(test remove-boxed-object)
+(test sheepify)
+(test sheepify-list)

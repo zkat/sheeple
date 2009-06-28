@@ -26,7 +26,7 @@
   ) ; end prototype table
 
 (defmacro defproto (name sheeple properties &rest options)
-  `(let ((sheep (spawn-or-reinitialize-sheep 
+  `(let ((sheep (spawn-or-reinitialize-sheep
                  (find-proto ',name nil) 
                  ,(canonize-sheeple sheeple)
                  ,@(canonize-clone-options options))))

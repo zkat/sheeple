@@ -87,6 +87,8 @@
    While I'm at it, this could be an opportunity to improve the structure of the tests,
    and improve overall test coverage. They're broken right now, anyways. Ah well :\
    Do not tag and release 2.0 until all tests are written, and pass.
+** TODO Fix bugs
+   The tests should oust a bunch of bugs. Fix them.
 ** TODO Rewrite documentation
 ** TODO Rewrite examples
 * DONE 1.1

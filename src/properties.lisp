@@ -29,7 +29,8 @@ with the format Reader=PROPERTY-NAME, Writer=(SETF PROPERTY-NAME)"
     (add-writers-to-sheep writers property-name sheep))
   (when make-accessors-p
     (add-readers-to-sheep `(,property-name) property-name sheep)
-    (add-writers-to-sheep `((setf ,property-name)) property-name sheep)))
+    (add-writers-to-sheep `((setf ,property-name)) property-name sheep))
+  sheep)
 
 (defgeneric has-direct-property-p (sheep property-name)
   (:documentation "Returns T if SHEEP has a direct property with name PROPERTY-NAME, NIL otherwise."))

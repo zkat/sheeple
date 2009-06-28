@@ -7,12 +7,16 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(use-package 'fiveam 'sheeple)
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (use-package 'fiveam 'sheeple))
+
 (export 'sheeple-tests)
 
 (def-suite sheeple)
 (defun run-all-tests ()
   (run! 'sheeple))
+(defmethod asdf:perform ((o asdf:test-op) (c (eql (asdf:find-system :sheeple-tests))))
+  (run-all-tests))
 
 (def-suite cloning :in sheeple)
 

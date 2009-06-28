@@ -50,25 +50,25 @@
     (is (eql standard-sheep (car (sheep-parents (spawn-sheep (list standard-sheep))))))
     (is (eql (find-class 'test-sheep-class) (class-of test-metaclass-sheep)))))
 
-(test initialize-sheep
-  (is (sheep-p (initialize-sheep (clone))))
+(test init-sheep
+  (is (sheep-p (init-sheep (clone))))
   ;; TODO - there could more stuff here. Maybe?
-  ;; TODO - Check that whatever new behavior is added to initialize-sheep in the next
+  ;; TODO - Check that whatever new behavior is added to init-sheep in the next
   ;;        few days works as intended.
   )
 
-(test reinitialize-sheep
+(test reinit-sheep
   (let ((test-sheep (clone))
         (another (clone)))
     (is (eql test-sheep (add-property test-sheep 'var "value" :make-accessors-p nil)))
     (is (has-direct-property-p test-sheep 'var))
     (is (eql test-sheep (add-parent another test-sheep)))
     (is (parentp another test-sheep))
-    (is (eql test-sheep (reinitialize-sheep test-sheep)))
+    (is (eql test-sheep (reinit-sheep test-sheep)))
     (is (parentp #@dolly test-sheep))
     (is (not (has-direct-property-p test-sheep 'var)))
     (is (not (parentp another test-sheep)))
-    (is (eql test-sheep (reinitialize-sheep test-sheep :new-parents (list another))))
+    (is (eql test-sheep (reinit-sheep test-sheep :new-parents (list another))))
     (is (parentp another test-sheep))))
 
 (test clone

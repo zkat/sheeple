@@ -26,7 +26,7 @@
   ) ; end prototype table
 
 (defmacro defproto (name sheeple properties &rest options)
-  `(let ((sheep (spawn-or-reinitialize-sheep
+  `(let ((sheep (spawn-or-reinit-sheep
                  (find-proto ',name nil) 
                  ,(canonize-sheeple sheeple)
                  ,@(canonize-clone-options options))))
@@ -37,9 +37,9 @@
        (setf (sheep-nickname sheep) ',name))
      (setf (find-proto ',name) sheep)))
 
-(defun spawn-or-reinitialize-sheep (maybe-sheep parents &rest options)
+(defun spawn-or-reinit-sheep (maybe-sheep parents &rest options)
   (if maybe-sheep
-      (reinitialize-sheep maybe-sheep :new-parents parents)
+      (reinit-sheep maybe-sheep :new-parents parents)
       (apply #'spawn-sheep parents options)))
 
 ;; This reader macro lets us do #@foo instead of having to do (find-proto 'foo).

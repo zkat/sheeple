@@ -91,7 +91,7 @@
    The tests should oust a bunch of bugs. Fix them.
 ** TODO Rewrite documentation
 ** DONE Rewrite examples
-** TODO Figure out initialize-sheep
+** TODO Figure out init-sheep
    Where should it go? What should it do?
    It would be nice if it was called -after- properties were
    added when using defclone/defproto. Or maybe the standard

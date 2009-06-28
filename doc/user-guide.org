@@ -14,11 +14,14 @@
 ** Indirect Property
    A property that a sheep has access to that is stored elsewhere in the hierarchy-list
 
-** =T=
+** #@
+   This reader macro expands to (find-proto <name>). In this guide,
+   we refer to objects that have been defined as prototypes with the #@ convention.
+** #@T
    the root object, ancestor of all sheep objects.
 
-** =Dolly=
-   Ancestor of all actual sheep (the ones that aren't wolves, of course).
+** #@Dolly
+   Ancestor of all actual sheep (the ones that aren't built-ins).
 
 ** Hierarchy List
    An ordered set containing the order of delegation for a particular sheep. The set
@@ -33,36 +36,35 @@
 
 ** Parent
    A direct parent of a sheep, e.g. a sheep object present directly in a sheep's
-   sheep-direct-parents list.
+   sheep-parents list.
 
 ** Child
-   A direct child of a sheep.
+   An object that directly clones another sheep.
 
 ** Sibling
    Two sheeple that share the same hierarchy list are siblings
 
-** Buzzword
-   A Generic function. Holds pointers to all existing messages (methods)
-
 ** Message
-   The message a particular buzzword gets across when given a set of arguments. Messages
-   are defines for a specific set of args, and can be specialized on particular sheeple. Built-in
-   types are supported, with the naming scheme =type-name=.
+   A Generic function. Holds pointers to all existing replies (methods).
+   
+** Reply
+   A message defines the prototype for how it is supposed to look, a reply defines the actual
+   code to run, and when to run it.
 
-** Wolf
+** Built-in
    A built-in lisp type.
-   Most lisp types have fleeces assigned to them, and they follow the =string= naming scheme.
+   Most lisp types have boxed-object prototypes assigned to them, so they can
+   be fetched using e.g. #@string.
+   These prototypes can have replies defined on them.
+** Boxed object
+   An object (probably) autoboxed by Sheeple when appropriate (cloning and reply definition).
+   These objects wrap any non-sheep Lisp object and allows definition of replies, addition of
+   properties, etc (they're just sheeple).
 
-** Fleece
-   A wrapper for wolves that allows Sheeple to treat them as any other sheep -- specializing
-   methods, cloning, etc.
-
-** Fleeced wolf
-   A wolf wrapped in a fleece. e.g. an autoboxed built-in type. All wolves are
-   automatically fleeced by relevant functions. 
-
-** =white-fang=
-   All fleeced wolves are descendants of =white-fang=, which is a clone of =dolly=.
+** #@boxed-object
+   All boxed objects are descendants of #@boxed-object, which is a 
+   clone of #@T (this is important -- messages defined on #@dolly won't 
+   affect built-ins!!)
 
 * API Documentation
 ** Sheep cloning
@@ -447,11 +449,11 @@
 
            (sheep-hierarchy-list sheep) => (SHEEP's hierarchy list)
 
-**** SHEEP-DIRECT-PARENTS
+**** SHEEP-PARENTS
      Returns an ordered list of SHEEP's direct parent objects, in the order they were provided to
      CLONE/CLONE*/DEFSHEEP.
 
-           (sheep-direct-parents sheep) => (sheep's-direct-parents-list)
+           (sheep-parents sheep) => (sheep's-parents-list)
 
 **** SHEEP-DIRECT-ROLES
      Returns an unordered set of ROLE metaobjects that represent what messages SHEEP is a
@@ -503,6 +505,9 @@
      constructors that need access to a sheep. These constructors usually take the form of :before,
      :after, or :around messages, since defining a primary message would override standard sheep 
      setup.
+
+        (defmessage initialize-sheep ((sheep my-super-specialest-sheep!) &key)
+          (setf (some-other-property sheep) "woooo"))
 
 *** REINITIALIZE-SHEEP
      This is called whenever a DEFSHEEP form is evaluated for an existing sheep.

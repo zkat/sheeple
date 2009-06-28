@@ -22,6 +22,11 @@
    (hierarchy-list :accessor sheep-hierarchy-list :initform nil)
    (id :accessor sheep-id :initform (incf *max-sheep-id*))))
 
+;;; TODO - Where should INITIALIZE-SHEEP actually go, after all this?
+;;;        It would be nice if it was called -after- properties were
+;;;        added when using defclone/defproto. Or maybe the standard
+;;;        reply should add property-definitions handed to spawn-sheep
+;;;        by defclone/defproto?
 ;;; How to build a full sheep object:
 ;;; 1. Allocate an instance of its metaclass
 ;;; 2. Add its direct parents

@@ -53,6 +53,8 @@
 (test initialize-sheep
   (is (sheep-p (initialize-sheep (clone))))
   ;; TODO - there could more stuff here. Maybe?
+  ;; TODO - Check that whatever new behavior is added to initialize-sheep in the next
+  ;;        few days works as intended.
   )
 
 (test reinitialize-sheep

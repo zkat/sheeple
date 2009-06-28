@@ -90,7 +90,7 @@
 ** TODO Fix bugs
    The tests should oust a bunch of bugs. Fix them.
 ** TODO Rewrite documentation
-** TODO Rewrite examples
+** DONE Rewrite examples
 * DONE 1.1
 ** DONE Rewrite sheeple using CLOS  
 ** DONE Expose enough of a MOP for psheep to be able to do its thing.

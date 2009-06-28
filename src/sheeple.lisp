@@ -22,7 +22,7 @@
    (hierarchy-list :accessor sheep-hierarchy-list :initform nil)
    (id :accessor sheep-id :initform (incf *max-sheep-id*))))
 
-;;; TODO - Where should INITIALIZE-SHEEP actually go, after all this?
+;;; TODO - Where should INIT-SHEEP actually go, after all this?
 ;;;        It would be nice if it was called -after- properties were
 ;;;        added when using defclone/defproto. Or maybe the standard
 ;;;        reply should add property-definitions handed to spawn-sheep
@@ -50,12 +50,12 @@
 ;;;
 (defun spawn-sheep (sheeple &rest all-keys &key (metaclass 'standard-sheep) &allow-other-keys)
   "Creates a new sheep with SHEEPLE as its parents. METACLASS is used as the class when instantiating
-the new sheep object. ALL-KEYS is passed on to INITIALIZE-SHEEP."
+the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
   (let ((sheep (allocate-sheep metaclass)))
     (if sheeple
         (add-parents sheeple sheep)
         (add-parent (find-proto 'dolly) sheep))
-    (apply #'initialize-sheep sheep all-keys)))
+    (apply #'init-sheep sheep all-keys)))
 
 (defun clone (&rest sheeple)
   "Creates a new standard-sheep object with SHEEPLE as its parents."

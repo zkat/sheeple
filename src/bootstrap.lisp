@@ -19,8 +19,8 @@
     (add-parent (find-proto 't) sheep)
     sheep))
 
-(defmessage initialize-sheep (sheep &key))
-(defreply initialize-sheep (sheep
+(defmessage init-sheep (sheep &key))
+(defreply init-sheep (sheep
                             &key 
                             nickname
                             documentation)
@@ -30,9 +30,9 @@
     (setf (sheep-documentation sheep) documentation))
   sheep)
 
-(defmessage reinitialize-sheep (sheep &key)
+(defmessage reinit-sheep (sheep &key)
   (:documentation "Resets the sheep's parents and properties."))
-(defreply reinitialize-sheep (sheep
+(defreply reinit-sheep (sheep
                               &key new-parents
                               documentation)
   "If :NEW-PARENTS is  provided, those parents are used when reinitializing,

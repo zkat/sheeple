@@ -65,6 +65,13 @@ For information on how to do this, check out [Cliki][1], or the [ASDF Homepage][
 Sheeple should work on most Lisp implementations that support weak pointers and hash tables with key
 weakness, although it's mainly written and tested in SBCL and Clozure CL on Linux x86.
 
+Sheeple also includes a suite of tests you can run on whatever platform you're trying to get it
+to work on. The test suite depends on [Fiveam][11]. To run it:
+
+         (asdf:oos 'asdf:test-op 'sheeple)
+
+And watch the tests scroll by. All tests should pass as long as you're using a tagged release.
+
 Notes
 -----
 If you want to get Sheeple to run on your favorite platform, feel free to e-mail me: zkat, in

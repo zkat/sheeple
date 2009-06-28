@@ -11,7 +11,7 @@
 
 (in-suite compat-tests)
 
-(test box-type-of-basic
+(test box-type-of
   "Tests that the box-type-of function returns the right fleeced-wolf for each lisp type"
   (is (equal (find-proto 'null) (box-type-of nil)))
   (is (equal (find-proto 'symbol) (box-type-of 'foo)))

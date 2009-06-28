@@ -6,7 +6,7 @@
 
 (let ((proto-table (make-hash-table :test #'eq)))
   
-  (defun find-proto (name &optional errorp)
+  (defun find-proto (name &optional (errorp t))
     (multiple-value-bind (proto hasp)
         (gethash name proto-table)
       (if hasp
@@ -21,7 +21,7 @@
     (setf (gethash name proto-table) new-value))
   
   (defun remove-proto (name)
-    (values (remhash name proto-table)))
+    (remhash name proto-table))
 
   ) ; end prototype table
 

@@ -37,10 +37,17 @@
 ;; Boxed object table
 (let ((boxed-object-table (make-hash-table :test #'equal)))
 
-  (defun find-boxed-object (object)
+  (defun find-boxed-object (object &optional (errorp nil))
+    "Finds a previously-boxed object in the boxed object table.
+If ERRORP is T, this signals an error if OBJECT is a sheep, or if OBJECT
+has not already been boxed."
     (if (sheep-p object)
-	(error "~S seems to already be a sheep." object)
-	(gethash object boxed-object-table)))
+        (if errorp (error "~S seems to already be a sheep." object) nil)
+        (multiple-value-bind (sheep hasp)
+            (gethash object boxed-object-table)
+          (if hasp
+              sheep
+              (if errorp (error "~S has not been boxed." object) nil)))))
 
   (defun box-object (object)
     "Wraps OBJECT with a sheep."

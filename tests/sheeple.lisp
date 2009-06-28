@@ -10,7 +10,7 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (use-package 'fiveam 'sheeple))
 
-(export 'sheeple-tests)
+(export 'run-all-tests)
 
 (def-suite sheeple)
 (defun run-all-tests ()
@@ -30,13 +30,15 @@
                ** github.com/sykopomp/sheeple/issues  **~%~
                *****************************************~%"))
 
+;;;
+;;; Cloning
+;;;
 (def-suite cloning :in sheeple)
 
 (def-suite clone-general :in cloning)
 (in-suite clone-general)
+
 (test equitable-sheep
-  "Tests that sheep are correctly identified as equalp.
-WARNING: This tests blows the stack if some weird circularity pops up."
   (let ((sheep1 (clone)))
     (is (eql sheep1 sheep1))))
 
@@ -50,13 +52,10 @@ WARNING: This tests blows the stack if some weird circularity pops up."
 
 (test initialize-sheep
   (is (sheep-p (initialize-sheep (clone))))
-  ;; todo - could be more stuff here. Maybe.
+  ;; TODO - there could more stuff here. Maybe?
   )
 
 (test reinitialize-sheep
-  ;; reinitialize-sheep resets the sheep's parents and properties. If :new-parents is
-  ;; provided, those parents are used when reinitializing (so #@dolly doesn't end up on the list
-  ;; by default)
   (let ((test-sheep (clone))
         (another (clone)))
     (is (eql test-sheep (add-property test-sheep 'var "value" :make-accessors-p nil)))
@@ -71,7 +70,6 @@ WARNING: This tests blows the stack if some weird circularity pops up."
     (is (parentp another test-sheep))))
 
 (test clone
-  "Basic cloning"
   (is (eql #@dolly (car (sheep-parents (clone)))))
   (let ((obj1 (clone)))
     (is (eql obj1
@@ -126,8 +124,9 @@ WARNING: This tests blows the stack if some weird circularity pops up."
     (is (not (sheep-p "foo")))
     (is (not (sheep-p 5)))))
 
-(test copy-sheep ;; this isn't even written properly yet
+(test copy-sheep ;; TODO - this isn't even written properly yet
   ) 
+
 (test add-parent
   (let ((obj1 (clone))
         (obj2 (clone)))
@@ -160,6 +159,9 @@ WARNING: This tests blows the stack if some weird circularity pops up."
   (is (sheep-p (allocate-sheep)))
   (is (sheep-p (allocate-sheep 'test-sheep-class))))
 
+;;;
+;;; Inheritance
+;;;
 (def-suite inheritance :in cloning)
 (in-suite inheritance)
 (test parentp
@@ -246,5 +248,48 @@ WARNING: This tests blows the stack if some weird circularity pops up."
     (is (sheep-p test-sheep))
     (is (parentp parent test-sheep))
     (is (has-direct-property-p test-sheep 'var))
-    ;; todo - this should also check that reader/writer/accessor combinations are properly added
+    ;; TODO - this should also check that reader/writer/accessor combinations are properly added
     ))
+
+;;;
+;;; Protos
+;;;
+(def-suite protos :in cloning)
+(in-suite protos)
+
+(test find-proto ;; (setf find-proto) goes here, too.
+  (is (sheep-p (find-proto 't)))
+  (let ((find-proto-test (defproto find-proto-test () ())))
+    (is (eql find-proto-test (find-proto 'find-proto-test))))
+  ;; TODO - (setf find-proto)
+  )
+
+(test remove-proto
+  (defproto test-proto () ())
+  (is (remove-proto 'test-proto))
+  (signals error (find-proto 'test-proto))
+  (is (not (remove-proto 'test-proto)))
+  (remove-proto 'test-proto))
+
+(test defproto
+  (let ((test-proto (defproto test-proto () ((var "value")))))
+    (is (sheep-p test-proto))
+    (is (eql test-proto (find-proto 'test-proto)))
+    (is (eql #@dolly (car (sheep-parents test-proto))))
+    (is (sheep-p (find-proto 'test-proto)))
+    (is (equal "value" (var (find-proto 'test-proto))))
+    (defproto test-proto () ((something-else "another-one")))
+    (is (eql test-proto (find-proto 'test-proto)))
+    (is (eql #@dolly (car (sheep-parents test-proto))))
+    (signals unbound-property (direct-property-value test-proto 'var))
+    (is (equal "another-one" (something-else (find-proto 'test-proto))))
+    (is (equal "another-one" (something-else test-proto))))
+  ;; TODO - check that options work properly (:metaclass, :documentation, :nickname, etc)
+  ;;        remember that :nickname should override defproto's own nickname-setting.
+  (remove-proto 'test-proto))
+
+(test find-proto-reader-macro
+  (is (eql (find-proto 'dolly) #@dolly))
+  (defproto test-proto () ())
+  (is (eql (find-proto 'test-proto) #@test-proto)))
+

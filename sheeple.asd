@@ -38,7 +38,6 @@
 	    :components
 	    ((:file "sheeple")
              (:file "properties")
-             (:file "protos")
 	     (:file "compatibility")
              ;; (:file "messages")
              ))))

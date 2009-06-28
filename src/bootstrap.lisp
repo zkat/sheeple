@@ -30,10 +30,13 @@
     (setf (sheep-documentation sheep) documentation))
   sheep)
 
-(defmessage reinitialize-sheep (sheep &key))
+(defmessage reinitialize-sheep (sheep &key)
+  (:documentation "Resets the sheep's parents and properties."))
 (defreply reinitialize-sheep (sheep
                               &key new-parents
                               documentation)
+  "If :NEW-PARENTS is  provided, those parents are used when reinitializing,
+so #@DOLLY doesn't end up on the list by default"
   ;; CLOBBER TIME
   (loop for parent in (sheep-parents sheep)
      do (remove-parent parent sheep))

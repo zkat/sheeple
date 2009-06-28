@@ -44,12 +44,20 @@
              ))))
 
 (defmethod asdf:perform ((o asdf:test-op) (c (eql (asdf:find-system :sheeple))))
-  (format t "~&~%******************************~%~
-                 ** Loading sheeple-tests... **~%~
-                 ******************************~%")
+  (format t "~&~%*******************~%~
+                 ** Loading tests **~%~
+                 *******************~%")
   (asdf:oos 'asdf:load-op 'sheeple-tests)
-  (format t "~&~%**********************~%~
-                 ** Starting test... **~%~
-                 **********************~%")
-  (asdf:oos 'asdf:test-op 'sheeple-tests))
-
+  (format t "~&~%*******************~%~
+                 ** Starting test **~%~
+                 *******************~%")
+  (asdf:oos 'asdf:test-op 'sheeple-tests)
+  (format t "~&*****************************************~%~
+               **            Tests finished           **~%~
+               *****************************************~%~
+               ** If there were any failures on your  **~%~
+               ** platform, please report them to me: **~%~
+               **  (sykopomp at sykosomatic dot org)  **~%~
+               ** or just file a bugreport on github: **~%~
+               ** github.com/sykopomp/sheeple/issues  **~%~
+               *****************************************~%"))

@@ -20,8 +20,8 @@ valid function names (in symbol or cons form) that will be used to create respon
 on SHEEP. If make-accessors-p is T, the symbol in PROPERTY-NAME will be used to generate accessors
 with the format Reader=PROPERTY-NAME, Writer=(SETF PROPERTY-NAME)"
   (let ((property-table (sheep-property-value-table sheep)))
-    (when (has-property-p sheep property-name)
-      (warn "~A already has an available property named ~A. Overwriting." sheep property-name))
+    (when (has-direct-property-p sheep property-name)
+      (warn "~A already has a direct property named ~A. Overwriting." sheep property-name))
     (setf (gethash property-name property-table) value))
   (when readers
     (add-readers-to-sheep readers property-name sheep))
@@ -162,11 +162,18 @@ NIL is returned."))
   (:documentation "Returns a list of property-spec objects describing all properties available to
 SHEEP, including inherited ones."))
 (defmethod available-properties ((sheep standard-sheep))
-  (let ((direct-properties (sheep-direct-properties sheep )))
-    (remove-duplicates
-     (flatten
-      (append direct-properties (mapcar #'available-properties (sheep-parents sheep))))
-     :test #'property-spec-equal-p)))
+  (let* ((direct-properties (sheep-direct-properties sheep))
+         (avail-property-names (mapcar (lambda (p)
+                                         (property-spec-name p))
+                                       (remove-duplicates
+                                        (flatten
+                                         (append direct-properties
+                                                 (mapcar #'available-properties
+                                                         (sheep-parents sheep))))
+                                        :key #'property-spec-name))))
+    (mapcar (lambda (pname)
+              (direct-property-spec (property-owner sheep pname nil) pname))
+            avail-property-names)))
 
 (defgeneric property-summary (sheep &optional stream)
   (:documentation "Provides a pretty-printed representation of SHEEP's available properties."))

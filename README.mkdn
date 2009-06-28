@@ -23,7 +23,7 @@ Sheeple is inspired by a number of Object-Oriented systems, mainly:
   message dispatch system on.
 * [Self][10], another Smalltalk-like language with lots of papers written about it, and the concept
   of prototype OO.
-* [Io][4], a pure prototype-based language. Sheeple, like Io, does differential inheritance.
+* [Io][4], a pure prototype-based language. Sheeple, like Io, implements differential inheritance.
 
 [3]: http://en.wikipedia.org/wiki/CLOS
 [4]: http://en.wikipedia.org/wiki/Io_(programming_language)
@@ -43,7 +43,8 @@ Confirmed to work (pass all tests):
 
 * SBCL
 * Clozure CL
-* LispWorks
+* GNU CLISP
+* LispWorks (was tested a while ago -- will probably pass again)
 
 Sheeple doesn't use any OS-specific code (or threads), so it should be fairly stable on all
 operating systems. OSX and Linux x86 have both been actually tested on the aforementioned platforms.
@@ -71,6 +72,8 @@ to work on. The test suite depends on [Fiveam][11]. To run it:
          (asdf:oos 'asdf:test-op 'sheeple)
 
 And watch the tests scroll by. All tests should pass as long as you're using a tagged release.
+
+[11]: http://www.cliki.net/FiveAM
 
 Notes
 -----

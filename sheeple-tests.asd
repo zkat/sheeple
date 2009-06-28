@@ -9,10 +9,11 @@
   ((:module tests
 	    :serial t
 	    :components
-	    ((:file "packages")
-	     (:file "sheeple")
+	    ((:file "sheeple")
+             (:file "properties")
+             (:file "protos")
 	     (:file "compatibility")
-	     (:file "buzzwords")))))
+	     (:file "messages")))))
 
 (defmethod asdf:perform ((o asdf:test-op) (c (eql (asdf:find-system :sheeple-tests))))
-  (sheeple-tests:sheeple-tests))
+  (run! 'sheeple))

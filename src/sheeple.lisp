@@ -58,6 +58,7 @@ the new sheep object. ALL-KEYS is passed on to INITIALIZE-SHEEP."
 
 (defgeneric copy-sheep (model))
 (defmethod copy-sheep ((model standard-sheep))
+  ;; TODO - this is bad.
   (let* ((parents (sheep-parents model))
          (properties (sheep-property-value-table model))
          (roles (sheep-direct-roles model))
@@ -89,18 +90,22 @@ the new sheep object. ALL-KEYS is passed on to INITIALIZE-SHEEP."
              (progn
                (push new-parent (sheep-parents child))
                (setf (gethash child (%direct-children new-parent)) t)
+               (finalize-sheep child)
                child)
            (sheep-hierarchy-error ()
              (progn
                (setf (sheep-parents child) 
                      (delete new-parent
                              (sheep-parents child)))
-               (error 'sheep-hierarchy-error))))
-         (finalize-sheep child)
+               (finalize-sheep child)
+               (error 'sheep-hierarchy-error
+                         :format-control "A circular precedence graph was generated for ~A"
+                         :format-args (list child)))))
          child)))
 
 (defun add-parents (parents sheep)
-  (loop for parent in parents do (add-parent parent sheep)))
+  (loop for parent in (reverse parents) do (add-parent parent sheep))
+  sheep)
 
 (defgeneric remove-parent (parent sheep))
 (defmethod remove-parent (unsheepish-parent (child standard-sheep))
@@ -158,7 +163,9 @@ the new sheep object. ALL-KEYS is passed on to INITIALIZE-SHEEP."
                                     sheeple-to-order))
                         #'std-tie-breaker-rule))
     (simple-error ()
-                  (error 'sheep-hierarchy-error))))
+                  (error 'sheep-hierarchy-error
+                         :format-control "A circular precedence graph was generated for ~A"
+                         :format-args (list sheep)))))
 
 (defun local-precedence-ordering (sheep)
   (mapcar #'list
@@ -245,7 +252,7 @@ the new sheep object. ALL-KEYS is passed on to INITIALIZE-SHEEP."
   (mapappend #'canonize-clone-option options))
 
 (defun canonize-clone-option (option)
-  (list `',(car option) (cadr option)))
+  (list `,(car option) (cadr option)))
 
 (defmacro defclone (sheeple properties &rest options)
   "Standard sheep-generation macro. This variant auto-generates accessors."

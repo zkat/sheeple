@@ -54,8 +54,8 @@
 
    ;; MOP
    :standard-sheep
-   :initialize-sheep
-   :reinitialize-sheep
+   :init-sheep
+   :reinit-sheep
    :spawn-sheep
    :finalize-sheep
    :print-sheep

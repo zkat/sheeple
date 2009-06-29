@@ -5,20 +5,16 @@
    UPDATE: I don't think I even want this. It makes the defmessage macro horribly bloated and
    complex, and I don't even like the idea of stuffing everything into a message definition. Things
    need to stay flexible, and this would be just plain ugly.
-** TODO Make singly-dispatched readers just about as fast as simply calling property-value
-** TODO Write caching scheme for property access.
+** TODO Speed up accessors
+   Accessors need to be fast. Really fast. Find ways to cheat that won't break everything.
+** TODO Consider caching scheme for property access
    I should've done this in the first place. A simpler version of the same system used to dispatch
-   messages would do wonders for read performance, without seriously harming writer performance.
+   replies would do wonders for read performance, without seriously harming writer performance.
 ** TODO Write more unit tests.
-*** TODO Fix unit tests now that undefinition works different...
-    OHGOD THEY ALL BROKE
-*** TODO Write unit tests for defsheep 
-*** TODO Write unit tests for new LL stuff
-*** DONE Write more thorough tests to make sure caching schemes aren't broken
-    Honestly? The existing tests check this well enough.
-*** TODO Write a "many many messages" test
-*** TODO Write more tests with multi-level hierarchy lists
-*** TODO (Re-)write unit tests for locked properties.
+*** TODO messages.lisp
+*** TODO reply-definition.lisp
+*** TODO reply-dispatch.lisp
+
 * TODO 2.0
   Sheeple gets serious -- and more useful. The version jumps because this will completely
   break backwards compatibility with all previous sheeple code.
@@ -44,7 +40,7 @@
     UPDATE: I think this is just about ready. Should probably think about this for a while first,
     and then it'll be done.
     UPDATE: I think this is good enough. It's straightforward.
-** TODO More cleanup and convenience
+** DONE More cleanup and convenience
 *** DONE Get rid of add-on-write. Require add-property.
     Add-on-write seems like a quick interface, but it's a bit obnoxious to deal with.
     Not only does it create a risk for some serious hard-to-track bugs, but it makes
@@ -74,12 +70,12 @@
     This is really important! :-o
     UPDATE: direct-property-summary and property-summary should do the trick for now :)
     UPDATE: It actually works now. And it's fucking sexy.
-*** TODO Seriously fucking clean up the message/reply thing
+*** DONE Seriously fucking clean up the message/reply thing
     Holy shit this whole thing is a huge mess. Maybe with
     some moving around, organizing, and renaming it'll look
     a little cleaner, but holy shit no wonder it breaks all
     the fucking time
-    
+    Update: I guess it's okay for now...
 ** DONE Sheeple is horribly broken -- fix it
    At this point, it's probably a better idea to go over all of sheeple again, bit by bit,
    and reimplement things as necessary. Try to clean up the interface and all that.
@@ -88,29 +84,28 @@
    my lesson.
    Ah well, there goes the rest of my week.
    UPDATE: Woo, it seems to work now!
-** TODO Tests
+** DONE Tests
    All these changes should have a completely new set of unit tests written for them.
    While I'm at it, this could be an opportunity to improve the structure of the tests,
    and improve overall test coverage. They're broken right now, anyways. Ah well :\
    Do not tag and release 2.0 until all tests are written, and pass.
+   Update: screw it. I'll write message-related tests later.
 *** DONE Sheeple.lisp
 *** DONE properties.lisp
 *** DONE protos.lisp
 *** DONE builtins.lisp
-*** TODO messages.lisp
-*** TODO reply-definition.lisp
-*** TODO reply-dispatch.lisp
-** TODO Fix bugs
+** DONE Fix bugs
    The tests should oust a bunch of bugs. Fix them.
 ** TODO Rewrite documentation
 ** DONE Rewrite examples
-** TODO Figure out init-sheep
+** DONE Figure out init-sheep
    Where should it go? What should it do?
    It would be nice if it was called -after- properties were
    added when using defclone/defproto. Or maybe the standard
    reply should add property-definitions handed to spawn-sheep
    by defclone/defproto?
-
+   Init-sheep is fine. It should be noted that init-sheep runs after parents
+   are added, but before any direct properties are set.
 * DONE 1.1
 ** DONE Rewrite sheeple using CLOS  
 ** DONE Expose enough of a MOP for psheep to be able to do its thing.

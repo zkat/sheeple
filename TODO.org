@@ -15,6 +15,9 @@
 *** TODO reply-definition.lisp
 *** TODO reply-dispatch.lisp
 
+** TODO Improve documentation
+*** TODO Go through the whole thing and make it more CLHS-like (only partially done)
+*** TODO Put together html and pdf versions of user-guide.org
 * TODO 2.0
   Sheeple gets serious -- and more useful. The version jumps because this will completely
   break backwards compatibility with all previous sheeple code.
@@ -96,7 +99,7 @@
 *** DONE builtins.lisp
 ** DONE Fix bugs
    The tests should oust a bunch of bugs. Fix them.
-** TODO Rewrite documentation
+** DONE Rewrite documentation
 ** DONE Rewrite examples
 ** DONE Figure out init-sheep
    Where should it go? What should it do?

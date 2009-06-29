@@ -12,8 +12,8 @@ Sheeple was originally written as a persistent library for use with [Sykosomatic
 desire to use it in other applications, it was rewritten as a regular prototype object system and
 provided as a standalone library meant for general-purpose OO hackery.
 
-Persistent Sheeple has not been abandoned, instead, it's been implemented as a [separate library][7]
-using Sheeple's reflective features.
+Persistent Sheeple has not been abandoned, instead, it's being implemented as a [separate
+library][7] using Sheeple's reflection features.
 
 Sheeple is inspired by a number of Object-Oriented systems, mainly:
 
@@ -92,15 +92,16 @@ Features
 * Multiple inheritance through cloning with dynamic inspection and management (adding/removing) of
   parents.
 
-* Multiple dispatch on messages (methods) -- messages specialize on specific instances, and follow
-  inheritance hierarchy. Multimessage definition is almost identical to the core of CLOS methods,
+* Multiple dispatch on replies (methods) -- replies specialize on specific objects, and follow their
+  inheritance hierarchies. Multireply definition is almost identical to the core of CLOS methods,
   and shares similar semantics.
 
-* :before, :after, and :around messages
+* :before, :after, and :around replies
 
-* (call-next-message) and (next-message-p)
+* (call-next-reply) and (next-reply-p)
 
-* A metaobject protocol for inspecting sheeple and altering their behavior through metaclasses.
+* A metaobject protocol (in CLOS) for inspecting sheeple and altering their behavior through
+  metaclasses.
 
 
 Using Sheeple

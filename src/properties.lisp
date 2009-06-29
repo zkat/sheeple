@@ -97,8 +97,7 @@ is non-local (is delegated or does not exist in the hierarchy list), an UNBOUND-
   (:documentation "Sets NEW-VALUE as the value of a direct-property belonging to SHEEP, named
 PROPERTY-NAME. If the property does not already exist anywhere in the hierarchy list, an error
 is signaled."))
-(defmethod (setf property-value) (new-value (sheep standard-sheep) property-name
-                                  &optional (createp nil))
+(defmethod (setf property-value) (new-value (sheep standard-sheep) property-name)
   (unless (symbolp property-name)
     (error "Property-name must be a symbol"))
   (if (has-property-p sheep property-name)

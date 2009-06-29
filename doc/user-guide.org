@@ -79,10 +79,11 @@
 
 *** CLONE function
     Syntax:
-    clone &rest sheeple => new-sheep
+    clone &rest sheeple => new sheep
 
     Args and values:
     sheeple -- a list of lisp objects
+    new sheep -- a new sheep object with sheeple is its parents
 
     Description:
     CLONE creates a new STANDARD-SHEEP instance with SHEEPLE as its parents.
@@ -101,90 +102,219 @@
     
 *** DEFCLONE macro
     Syntax:
+    defclone ({parent-object}*) ({property-spec}*) option-spec* => new sheep
 
-*** DEFSHEEP macro
-    This macro is essentially a wrapper around CLONE* that handles redefinition of a sheep. The
-    variable bound by defsheep is a regular special variable (it uses DEFVAR in its expansion).
+    parent-object ::= a lisp object to be cloned.
+    property-spec ::= (property-name property-value property-option*)
+    property-name ::= symbol
+    property-value ::= object
+    property-option ::= {:reader {reader-message-name | nil}}* |
+                        {:writer {writer-message-name | nil}}* |
+                        {:accessor {reader-message-name | nil}}*
+    message-name ::= {symbol | (setf symbol)}
+    property-option ::= (:metaclass {symbol | class}) |
+                        (:nickname lisp-object) |
+                        (:documentation docstring)                        
 
-         (defsheep =sample-sheep= ()
-           ((my-property "wheeee")))
+    Args and values:
+    property-name -- a non-keyword symbol
+    property-value -- any lisp object, used as the local value for this property
+    reader/writer/accessor -- can be supplied more than once for each property.
+                              if NIL is given for any of these, signals an error
+                              if there is another matching definition.
+                              :accessor creates both a reader and a writer with
+                              format (accessor-name sheep-object)
+                              (setf (accessor-name sheep-object) new-value)
+    metaclass -- Either a symbol or a class object, this class is used as the new sheep's
+                 metaobject class.
+    nickname -- Set as the nickname for the new sheep during initialization
+    documentation -- set as the docstring for the new sheep during initialization
 
-    The symbol provided to DEFSHEEP as a sheep name is also used as that sheep's :nickname.
+    Description:
+    DEFCLONE creates a new sheep object based on PARENT-OBJECT*. After the new object has
+    been initialized, direct-properties and readers/writers/accessors are added to the new
+    object based on each property-spec.
 
-*** Clone Options
-    There are several available options for the CLONE(*) and DEFSHEEP macros that can affect the
-    effects of cloning.
+    Examples:
 
-**** :DEEP-COPY
-     The :deep-copy CLONE option copies over all values available to the new sheep into the sheep
-     itself. This is useful for ensuring that other objects do not change an available property
-     value. Using the :deep-copy option yields identical results.
-**** :SHALLOW-COPY
-     :shallow-copy works like :deep-copy, except it only copies the new sheep's parents'
-     direct-values locally, still relying on the hierarchy-list for other properties.
-**** :NICKNAME
-     The :nickname CLONE option sets a nickname for the sheep metaobject, which is used when
-     printing the object at the REPL. The nickname can be retrieved and changed at any time with
-     the sheep-nickname manipulator function.
+    (defclone () ((var "value"))) => #<Sheep #x1503119E>
+    (defclone (*) ()) => #<Sheep #x14FB626E>
+    (sheep-parents *) => (#<Sheep #x1503119E>)
+    (available-properties **) => (#<Property-Spec VAR #x1505A95E>)
 
-         SHEEPLE> (clone () () (:nickname "Johnny Bravo"))
-         #<Standard Sheep AKA: Johnny Bravo {B777401}>
+    Side-effects:
+    Add-property and add-parent are both called repeatedly for peach property-spec and
+    parent-object. Add-property destructively adds the new properties to the new sheep.
 
-*** Property Options
-    These options affect the definition of properties in the CLONE and DEFSHEEP macros.
+*** DEFPROTO macro
+    Syntax:
+    defproto proto-name ({parent-object}*) ({property-spec}*) option-spec* => new sheep
 
-**** :READER
-      Creates a specialized, non-setfable reader message for this property. Trying to SETF signals a
-      NO-MOST-SPECIFIC-MESSAGE error.  
-      Setting this option to NIL prevents CLONE* from auto-generating a reader. It will signal an
-      error if both NIL and a symbol are passed to two :reader options in the same property
-      definition. 
+    proto-name ::= symbol
+    parent-object ::= a lisp object to be cloned.
+    property-spec ::= (property-name property-value property-option*)
+    property-name ::= symbol
+    property-value ::= object
+    property-option ::= {:reader {reader-message-name | nil}}* |
+                        {:writer {writer-message-name | nil}}* |
+                        {:accessor {reader-message-name | nil}}*
+    message-name ::= {symbol | (setf symbol)}
+    property-option ::= (:metaclass {symbol | class}) |
+                        (:nickname lisp-object) |
+                        (:documentation docstring)                        
 
-        (defparameter *sample-sheep* (clone () ((prop "value" :reader read-prop))))
-	(read-prop *sample-sheep*) => "value"
-	(setf (read-prop *sample-sheep*) "new-value" => NO-MOST-SPECIFIC-MESSAGE for (SETF READ-PROP)
+    Args and values:
+    proto-name -- a non-keyword symbol
+    property-name -- a non-keyword symbol
+    property-value -- any lisp object, used as the local value for this property
+    reader/writer/accessor -- can be supplied more than once for each property.
+                              if NIL is given for any of these, signals an error
+                              if there is another matching definition.
+                              :accessor creates both a reader and a writer with
+                              format (accessor-name sheep-object)
+                              (setf (accessor-name sheep-object) new-value)
+    metaclass -- Either a symbol or a class object, this class is used as the new sheep's
+                 metaobject class.
+    nickname -- Set as the nickname for the new sheep during initialization
+    documentation -- set as the docstring for the new sheep during initialization
 
-**** :WRITER
-      Creates a specialized writer message, without creating a matching reader. The lambda-list for
-      this message is: (new-value sheep-object).
-      Setting this option to NIL prevents CLONE* from auto-generating a writer. It will signal an
-      error if both NIL and a symbol are passed to two :writerr options in the same property
-      definition. 
+    Description:
+    DEFPROTO defines a new proto sheep based on PARENT-OBJECT*. The sheep is placed into a global
+    table where it can be accessed by using (find-proto 'name). After the new object has been
+    initialized, direct-properties and readers/writers/accessors are added to the new object
+    based on each property-spec.
+    Unlike DEFCLONE, DEFPROTO automatically defines accessors for each property-spec using
+    its property-name, unless :reader, :writer, and/or :accessor are given (in which case only
+    the provided option is used).
+    Unless explicitly given a :nickname option, DEFPROTO uses PROTO-NAME as the new sheep's
+    nickname.
+    If a DEFPROTO form with a PROTO-NAME that points to an existing prototype is evaluated,
+    REINIT-SHEEP is first called on the existing proto sheep, using parent-object* as its
+    :new-parents argument. REINIT-SHEEP clears out all existing properties. After REINIT-SHEEP
+    is called, new properties are added to the proto sheep according to the property-specs given
+    in the new DEFPROTO form.
 
+    Examples:
+    
+    (defproto test-proto () ()) => #<Sheep AKA: TEST-PROTO #x150712B6>
 
-        (defparameter *sample-sheep* (clone () ((prop "value" :reader read-prop :writer set-prop-to))))
-        (set-me-to "new-value" *sample-sheep*) => "new-value"
-        (read-prop *sample-sheep*) => "new-value"
-
-**** :ACCESSOR
-      Generater both a reader and a writer. CLONE* automatically defines a reader/writer pair unless
-      this option is passed to it, in which case it uses that specific accessor name.  The same
-      rules apply as :reader/:writer when it comes to setting this as NIL.
-      
-        (defparameter *sample-sheep* (clone () ((prop "value" :accessor get-prop))))
-        (get-prop *sample-sheep*) => "value"
-        (setf (get-prop *sample-sheep*) "new-value") => "new-value"
-	
 ** Sheep manipulation
 *** Sheep Inspection
-    The functions DIRECT-PARENT-P, ANCESTOR-P, DIRECT-CHILD-P, and DESCENDANT-P return T for their
-    corresponding checks. (refer to VOCABULARY for the definition of the predicates' namesakes.)
+**** PARENT-P
+     Syntax:
+     parent-p maybe-parent child => generalized-boolean
 
+     Arguments and values:
+     maybe-parent -- a sheep that may or may not be a parent
+     child -- a sheep whose parent list is checked
+
+     Description:
+     Returns true if MAYBE-PARENT is a parent of CHILD; otherwise, returns false
+
+     Examples:
+
+     (let* ((parent (clone))
+            (child (clone parent)))
+       (parent-p parent child)  => T
+       (parent-p child parent)) => NIL
+
+**** ANCESTOR-P
+     Syntax:
+     ancestor-p maybe-ancestor descendant => generalized-boolean
+
+     Arguments and values:
+     maybe-ancestor -- a sheep that may or may not be a ancestor
+     descendant -- a sheep whose ancestor list is checked
+
+     Description:
+     Returns true if MAYBE-ANCESTOR is a ancestor of DESCENDANT; otherwise, returns false
+
+     Examples:
+
+     (let* ((ancestor (clone))
+            (descendant1 (clone ancestor))
+            (descendant2 (clone descendant1)))
+       (ancestor-p ancestor descendant1)  => T
+       (ancestor-p descendant1 ancestor)  => NIL
+       (ancestor-p ancestor descendant2)) => T
+
+**** CHILD-P
+     Syntax:
+     child-p maybe-child parent => generalized-boolean
+
+     Arguments and values:
+     maybe-child -- a sheep that may or may not be a child
+     parent -- a sheep whose child list is checked
+
+     Description:
+     Returns true if MAYBE-CHILD is a child of PARENT; otherwise, returns false
+
+     Examples:
+
+     (let* ((parent (clone))
+            (child (clone parent)))
+       (child-p child parent)  => T
+       (child-p parent child)) => NIL
+
+**** DESCENDANT-P
+     Syntax:
+     descendant-p maybe-descendant ancestor => generalized-boolean
+
+     Arguments and values:
+     maybe-descendant -- a sheep that may or may not be a descendant
+     ancestor -- a sheep whose descendant list is checked
+
+     Description:
+     Returns true if MAYBE-DESCENDANT is a descendant of ANCESTOR; otherwise, returns false
+
+     Examples:
+
+     (let* ((ancestor (clone))
+            (descendant1 (clone ancestor))
+            (descendant2 (clone descendant1)))
+       (descendant-p descendant1 ancestor)  => T
+       (descendant-p ancestor descendant1)  => NIL
+       (descendant-p descendant2 ancestor)) => T
+     
 *** ADD-PARENT
-    The function ADD-PARENT receives a NEW-PARENT sheep, and a CHILD sheep. It pushes NEW-PARENT
-    into CHILD's direct-parents if NEW-PARENT is not already there. If using ADD-PARENT would result
-    in a cyclic hierarchy list, a SHEEP-HIERARCHY-ERROR condition is signaled, and the CHILD is
-    unaffected. The new-parent is added to the front of the direct-parents list, like a stack
-    push. Returns the CHILD object.
+    Syntax:
+    add-parent new-parent sheep => modified sheep
 
-        (add-parent *mommy* *kiddo*) => <SHEEP {numbers}> (*kiddo*)
+    Arguments and values:
+    new-parent -- a lisp object to be added as a parent to sheep
+    sheep -- the sheep who gets a new mommy
+
+    Description:
+    The function ADD-PARENT receives a NEW-PARENT sheep, and a SHEEP. It pushes NEW-PARENT
+    into the beginning SHEEP's parents list if NEW-PARENT is not already there. If using ADD-PARENT
+    would result in a cyclic hierarchy list, a SHEEP-HIERARCHY-ERROR condition is signaled, and the
+    SHEEP is unaffected. The new-parent is added to the front of the direct-parents list, like a
+    stack push. Returns the SHEEP object.
+
+        (add-parent *mommy* *kiddo*) => modified *kiddo* with *mommy* as parent.
         (add-parent *kiddo's-descendant* *kiddo*) => ERROR: SHEEP-HIERARHY-ERROR
 
+    Side effects:
+    SHEEP's parents list is replaced with a list where NEW-PARENT is in the first position.
+
 *** REMOVE-PARENT
-    The function REMOVE-PARENT receives a PARENT sheep and a CHILD sheep.
+    Syntax:
+    remove-parent parent sheep => modified sheep
+
+    Arguments and values:
+    parent -- a lisp object to remove from SHEEP's parents list. If it is not
+              a sheep object, it is autoboxed before the comparison is made.
+    sheep -- The sheep being abandoned by its bum drunk father
+
+    Description:
+    If PARENT exists in SHEEP's parents list, it is removed. Otherwise, an error is signaled.
         
         (remove-parent *daddy* *kiddo*) 
-        => KIDDO object, without *daddy*'s direct-property values.
+        => KIDDO object, without *daddy* as its parent.
+        (remove-parent *daddy* *kiddo*) => ERROR
+
+    Side effects:
+    PARENT is no longer part of SHEEP's life. Alcoholism and chronic depression are common.
        
 ** Properties
    The most important part about properties in Sheeple is that a sheep delegates not just the
@@ -249,113 +379,113 @@
         (setf (property-value *sample-sheep* 'baz) 'quux)
         (available-properties *sample-sheep*) ==> (BAZ)
 
-** Buzzwords/Messages
-   Buzzwords and Messages are very similar to CLOS' generic functions/methods. Anyone familiar with
+** Messages/Replies
+   Messages and Replies are very similar to CLOS' generic functions/methods. Anyone familiar with
    CLOS programming should have a fairly easy time wrapping their head around Sheeple's system.
-*** DEFBUZZWORD
-    The DEFBUZZWORD macro is used to define a buzzword that will hold different messages. It accepts
-    an optional documentation option. Buzzwords are automatically defined by defmessage, but the
-    preferred and recommended style is to define buzzwords first. Not doing so signals
-    STYLE-WARNING.  Note: buzzword and message lambda-lists follow the rules described in
+*** DEFMESSAGE
+    The DEFMESSAGE macro is used to define a message that will hold different replies. It accepts
+    an optional documentation option. Messages are automatically defined by defreply, but the
+    preferred and recommended style is to define messages first. Not doing so signals
+    STYLE-WARNING.  Note: message and reply lambda-lists follow the rules described in
     http://www.lispworks.com/documentation/HyperSpec/Body/07_fd.htm
 
-        (defbuzzword synergize (foo bar)
+        (defmessage synergize (foo bar)
           (:documentation "Synergizes FOO and BAR, preparing them for the Next Generation"))
 
-*** DEFMESSAGE
-    The DEFMESSAGE macro defines a message based on its arguments. Sheeple messages are
-    left-weighted multimessages (by default) which can dispatch on multiple different arguments. The
+*** DEFREPLY
+    The DEFREPLY macro defines a reply based on its arguments. Sheeple replies are
+    left-weighted multireplies (by default) which can dispatch on multiple different arguments. The
     syntax follows closely with defmethod's specialized lambda-list syntax, except the specializers
     are actual objects instead of class names. An unspecialized item in the lambda list will default
     to dispatching on =dolly= for that lambda-list property. The basic format is:
 
-        (defmessage message-name (plain-variable* (specialized-variable object)*) @body)
+        (defreply reply-name (plain-variable* (specialized-variable object)*) @body)
 
-**** Specialized messages
-     Messages are specialized by replacing the variable with (specialized-variable object).
+**** Specialized replies
+     Replies are specialized by replacing the variable with (specialized-variable object).
 
-        (defmessage message-name (foo (bar =my-sheep=))
-          (print "This is a specialized message"))
+        (defreply reply-name (foo (bar =my-sheep=))
+          (print "This is a specialized reply"))
 
-     Messages with unspecialized lambda lists are considered unspecialized, since they dispatch on
+     Replies with unspecialized lambda lists are considered unspecialized, since they dispatch on
      the built-in sheep =T=, which is at the top of the hierarchy list for all sheep and wolves.
 
-**** Message combination
-     Message definitions can also accept qualifiers. The standard message combination supports three
+**** Reply combination
+     Reply definitions can also accept qualifiers. The standard reply combination supports three
      qualifiers: :before, :after, and :around.
 
-        (defmessage message-name :qualifier (...) body)
+        (defreply reply-name :qualifier (...) body)
 
-***** Primary messages
-      Messages without qualifiers are considered "primary" messages. It is required that a primary
-      message be available for any message combination to happen.
-***** CALL-NEXT-MESSAGE
-      This function can be called within the body of any message. It will execute the next available
-      applicable message for the current call. You may pass new arguments to C-N-M, but it will not
-      change the dispatch of the message. (the next message will be executed as if it had dispatched
+***** Primary replies
+      Replies without qualifiers are considered "primary" replies. It is required that a primary
+      reply be available for any reply combination to happen.
+***** CALL-NEXT-REPLY
+      This function can be called within the body of any reply. It will execute the next available
+      applicable reply for the current call. You may pass new arguments to C-N-M, but it will not
+      change the dispatch of the reply. (the next reply will be executed as if it had dispatched
       on the original arguments).
-***** NEXT-MESSAGE-P
-      Within the body of a message, you may use NEXT-MESSAGE-P to check for the presence of a next
-      message. 
+***** NEXT-REPLY-P
+      Within the body of a reply, you may use NEXT-REPLY-P to check for the presence of a next
+      reply. 
 ***** :BEFORE
-      Any available :before messages are executed before the execution of the primary message(s).
-      When used inside the body of a :before message, CALL-NEXT-MESSAGE calls the next
-      applicable :before message, not the next primary one.
+      Any available :before replies are executed before the execution of the primary reply(s).
+      When used inside the body of a :before reply, CALL-NEXT-REPLY calls the next
+      applicable :before reply, not the next primary one.
 ***** :AFTER
-      Any available :after messages are executed after the execution of the primary message(s).
-      When used inside the body of an :after message, CALL-NEXT-MESSAGE calls the next most
-      specific :after message, not the next primary message.
+      Any available :after replies are executed after the execution of the primary reply(s).
+      When used inside the body of an :after reply, CALL-NEXT-REPLY calls the next most
+      specific :after reply, not the next primary reply.
 ***** :AROUND
-      :around messages "wrap" around the current primary message. CALL-NEXT-MESSAGE *must* be called
-      in the body of an :around message. C-N-M calls the most applicable primary message, not the
-      next most specific :around message.
+      :around replies "wrap" around the current primary reply. CALL-NEXT-REPLY *must* be called
+      in the body of an :around reply. C-N-M calls the most applicable primary reply, not the
+      next most specific :around reply.
 
 **** Huge example
-     This example illustrates usage of sheeple and messages:
+     This example illustrates usage of sheeple and replies:
 
-        (defsheep =sheep1= (clone () ())) ;note: the =foo= are purely stylistic, but recommended.
-        (defsheep =sheep2= (clone () ()))
+        (defproto =sheep1= (clone () ())) ;note: the =foo= are purely stylistic, but recommended.
+        (defproto =sheep2= (clone () ()))
 
-        (defmessage do-it (foo)
+        (defreply do-it (foo)
           (print foo)) ;defaults to =dolly=
-        (do-it "hey!") => hey! ;the message facility autoboxes regular lisp objects
+        (do-it "hey!") => hey! ;the reply facility autoboxes regular lisp objects
 
-        (defmessage do-it ((something =sheep1=)) 
+        (defreply do-it ((something =sheep1=)) 
           (format t "~a is =sheep1=. FYI" something))
-        ;; lambda-list variables do not have to be the same across messages, 
+        ;; lambda-list variables do not have to be the same across replies, 
         ;; I only do it here for convenience.
         (do-it =sheep1=) => #<Standard Sheep {BA28B89}> is the first sheep. FYI
 
         (let ((x 5))
-	   (defmessage do-it ((foo =number=)) 
+	   (defreply do-it ((foo =number=)) 
 	     (* x foo))) ;It captures the lexical environment, too.
         (do-it 5) => 10
 
-        (defmessage do-it ((foo 5)) ;any object can be dispatched on. Non-sheep are autoboxed.
+        (defreply do-it ((foo 5)) ;any object can be dispatched on. Non-sheep are autoboxed.
 	  (declare (ignore foo)) ;declarations work
 	  (print "FIVE!! THIS IS VERY EXCITING!!1"))
         (do-it 5) => "FIVE!! THIS IS VERY EXCITING!!1"
 
-        (defmessage do-it ((foo =float=))
+        (defreply do-it ((foo =float=))
           (floatp float))
 
         (do-it 5.0) => T                                ; Sheeple has a CLOS-like hierarchy for
         (do-it 5) => "FIVE!! THIS IS VERY EXCITING!!1"  ; fleeced wolves.
         (do-it 6) => 12
 	
-        (defmessage synergize ((foo =sheep1=) (bar =sheep2=))
+        (defreply synergize ((foo =sheep1=) (bar =sheep2=))
           (print "I got =sheep1= first, then =sheep2="))
 
-        (defmessage synergize ((foo =sheep2=) (bar =sheep1=)) 
+        (defreply synergize ((foo =sheep2=) (bar =sheep1=)) 
           (declare (ignore foo bar))
           (print "I got =sheep2= first, then the first sheep."))
 
-        (defmessage synergize ((foo =number=) (bar =number=)) 
+        (defreply synergize ((foo =number=) (bar =number=)) 
           (+ foo bar))
         (synergize 3 5) => 8
-        (synergize 4 "hey hey hey!") => ERROR: NO-MOST-SPECIFIC-MESSAGE
+        (synergize 4 "hey hey hey!") => ERROR: NO-MOST-SPECIFIC-REPLY
         
-        (defmessage synergize ((foo =string=) (bar =string=))
+        (defreply synergize ((foo =string=) (bar =string=))
           (concatenate 'string foo bar))
         (synergize "Hey " "Jude") => "Hey Jude"
 
@@ -363,14 +493,14 @@
         (defparameter =test-sheep= (clone () ((var "value" :accessor var))))
         (var =test-sheep=) => "value"
          
-        (defmessage var :before ((sheep =test-sheep=))
+        (defreply var :before ((sheep =test-sheep=))
           (setf (property-value sheep 'var) "new-value"))
         (var =test-sheep=) => "new-value"
         (setf (var =test-sheep=) "old-value")
         (property-value =test-sheep= 'var) => "old-value"
         (var =test-sheep=) => "new-value"
 
-        (defmessage var :after ((sheep =test-sheep=))
+        (defreply var :after ((sheep =test-sheep=))
           (setf (property-value sheep 'var) "after-value"))
         (var =test-sheep=) => "new-value"
         (property-value =test-sheep= 'var) => "after-value"
@@ -379,9 +509,9 @@
 *** CLOS (semi-)compatibility
     For the time being, CLOS objects and CLOS-defined types are boxed as =white-fang=, not as
     fleeced versions of the classes/objects.
-*** Buzzword definition
-    If you define a buzzword, then clobber that buzzword with a defun or defgeneric, and redefine
-    the buzzword using the same name, the warning about clobbering a regular function is not
+*** Message definition
+    If you define a message, then clobber that message with a defun or defgeneric, and redefine
+    the message using the same name, the warning about clobbering a regular function is not
     signaled.
 
 *** Threads
@@ -395,9 +525,9 @@
    fast at reading, and fast at writing are being evaluated.
    Realistically, sheep hierarchies are rarely very deep, so this should not become an issue for
    most cases. Once caching is implemented, this will become O(1).
-** Message dispatch
-   Message dispatches are cached on first execution and changed when appropriate. This makes
-   dispatch essentially O(1), even for multimessages. Even though multimessage dispatch is very
+** Reply dispatch
+   Reply dispatches are cached on first execution and changed when appropriate. This makes
+   dispatch essentially O(1), even for multireplies. Even though multireply dispatch is very
    fast, singly-dispatched accessors have not been optimized enough. Thus, for any purposes that
    require optimal read-access, directly accessing the properties with PROPERTY-VALUE is
    recommended. Optimization of accessors is planned.
@@ -405,7 +535,7 @@
    Sheeple is still very young. Thus, it's no surprise that a good implementation of CLOS will
    outperform it when used on the same hardware, with the same CL implementation. Nevertheless,
    tests run on SBCL and Clozure CL show that the performance difference is on the order of 5-10x for
-   property access, and about 10-15x for message vs method dispatch (although sheeple sometimes
+   property access, and about 10-15x for reply vs method dispatch (although sheeple sometimes
    performs even slower). Hopefully, as sheeple matures, it will become as fast as an implementation
    like PCL. Fortunately, because of the similarities of the APIs, many of PCL's optimizations can
    be translated to Sheeple itself.
@@ -452,19 +582,19 @@
 
 **** SHEEP-PARENTS
      Returns an ordered list of SHEEP's direct parent objects, in the order they were provided to
-     CLONE/CLONE*/DEFSHEEP.
+     CLONE/CLONE*/DEFPROTO.
 
            (sheep-parents sheep) => (sheep's-parents-list)
 
 **** SHEEP-DIRECT-ROLES
-     Returns an unordered set of ROLE metaobjects that represent what messages SHEEP is a
+     Returns an unordered set of ROLE metaobjects that represent what replies SHEEP is a
      participant in.
 
            (sheep-direct-roles sheep) => (sheep's direct roles list)
 
 **** SHEEP-DIRECT-PROPERTIES
      Returns an unordered set of PROPERTY-SPEC metaobjects that represent property definitions as
-     provided to (or built by) CLONE/CLONE*/DEFSHEEP
+     provided to (or built by) CLONE/CLONE*/DEFPROTO
 
            (sheep-direct-properties sheep) => (list of property-spec objects)
 
@@ -480,38 +610,38 @@
 
 **** PROPERTY-SPEC-READERS
      Called on a PROPERTY-SPEC metaobject, this returns a list of names used to define reader
-     messages that read this property's value, specialized on the sheep object.
+     replies that read this property's value, specialized on the sheep object.
 
-           (property-spec-readers sheep-property-spec-object) => (list-of-message-names)
+           (property-spec-readers sheep-property-spec-object) => (list-of-reply-names)
 
 **** PROPERTY-SPEC-WRITERS
      Called on a PROPERTY-SPEC metaobject, this returns a list of names used to define writer
-     messages that write this property's value, specialized on the sheep object.
+     replies that write this property's value, specialized on the sheep object.
 
-           (property-spec-writers sheep-property-spec-object) => (list-of-message-names)
+           (property-spec-writers sheep-property-spec-object) => (list-of-reply-names)
 
-** Special buzzwords
-   Additionally, some buzzword (not generic functions) can be specialized on sheep objects to alter behavior of
+** Special messages
+   Additionally, some message (not generic functions) can be specialized on sheep objects to alter behavior of
    sheep in various situations..
 
 *** PRINT-SHEEP
-     You can define messages on PRINT-SHEEP in order to change a particular sheep's printout.
+     You can define replies on PRINT-SHEEP in order to change a particular sheep's printout.
 
-        (defmessage print-sheep ((sheep my-special-sheep) stream)
+        (defreply print-sheep ((sheep my-special-sheep) stream)
           (format stream "~a is the most specialest sheep ever!" sheep))
 
-*** INITIALIZE-SHEEP
-     You may define messages for the buzzword INITIALIZE-SHEEP. This message handles all set-up of
+*** INIT-SHEEP
+     You may define replies for the message INIT-SHEEP. This reply handles all set-up of
      sheeple after its direct-parents are added.  This is most useful for defining 'complex'
      constructors that need access to a sheep. These constructors usually take the form of :before,
-     :after, or :around messages, since defining a primary message would override standard sheep 
+     :after, or :around replies, since defining a primary reply would override standard sheep 
      setup.
 
-        (defmessage initialize-sheep ((sheep my-super-specialest-sheep!) &key)
+        (defreply init-sheep ((sheep my-super-specialest-sheep!) &key)
           (setf (some-other-property sheep) "woooo"))
 
-*** REINITIALIZE-SHEEP
-     This is called whenever a DEFSHEEP form is evaluated for an existing sheep.
+*** REINIT-SHEEP
+     This is called whenever a DEFPROTO form is evaluated for an existing sheep.
 
 
 

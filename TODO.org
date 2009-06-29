@@ -18,7 +18,7 @@
 ** TODO Improve documentation
 *** TODO Go through the whole thing and make it more CLHS-like (only partially done)
 *** TODO Put together html and pdf versions of user-guide.org
-* TODO 2.0
+* DONE 2.0
   Sheeple gets serious -- and more useful. The version jumps because this will completely
   break backwards compatibility with all previous sheeple code.
 ** DONE New interface

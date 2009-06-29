@@ -1,3 +1,8 @@
+* 2.0
+** Features
+   Completely new interface, more MOP stuff. Lots of new tests.
+** Bugs
+   Probably created more bugs than I fixed.
 * 1.1.1
 ** Features
 *** Minor tweaks. This version is mostly a checkpoint pre-2.0

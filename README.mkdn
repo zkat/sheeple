@@ -18,7 +18,6 @@ using Sheeple's reflective features.
 Sheeple is inspired by a number of Object-Oriented systems, mainly:
 
 * [CLOS][3], the Common Lisp Object System.
-* [MOO][5], implemented and used by [LambdaMOO][8]
 * [Slate][6], a Smalltalk-like language with Prototype Multiple Dispatch that Sheeple bases its
   message dispatch system on.
 * [Self][10], another Smalltalk-like language with lots of papers written about it, and the concept
@@ -27,9 +26,7 @@ Sheeple is inspired by a number of Object-Oriented systems, mainly:
 
 [3]: http://en.wikipedia.org/wiki/CLOS
 [4]: http://en.wikipedia.org/wiki/Io_(programming_language)
-[5]: http://en.wikipedia.org/wiki/MOO_programming_language
 [6]: http://slatelanguage.org/
-[8]: http://en.wikipedia.org/wiki/Lambdamoo
 [9]: http://github.com/sykopomp/sykosomatic/
 [10]: http://research.sun.com/self/
 

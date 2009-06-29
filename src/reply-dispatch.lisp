@@ -53,13 +53,13 @@
 	       "There are no primary replies for message ~A."
 	       :format-args (list name))))
     (if around
-	(let ((next-emfun
+	(let ((next-erfun
 	       (compute-effective-reply-function (create-reply-cache
 						    (cache-message cache)
 						    (remove around replies)))))
 	  (lambda (args)
-	    (funcall (reply-function around) args next-emfun)))
-	(let ((next-emfun (compute-primary-emfun (cdr primaries)))
+	    (funcall (reply-function around) args next-erfun)))
+	(let ((next-erfun (compute-primary-erfun (cdr primaries)))
 	      (befores (cache-before cache))
 	      (afters (cache-after cache)))
 	  (lambda (args)
@@ -67,17 +67,17 @@
               (dolist (before befores)
                 (funcall (reply-function before) args nil)))
             (multiple-value-prog1
-                (funcall (reply-function (car primaries)) args next-emfun)
+                (funcall (reply-function (car primaries)) args next-erfun)
               (when afters
                 (dolist (after afters)
                   (funcall (reply-function after) args nil)))))))))
 
-(defun compute-primary-emfun (replies)
+(defun compute-primary-erfun (replies)
   (if (null replies)
       nil
-      (let ((next-emfun (compute-primary-emfun (cdr replies))))
+      (let ((next-erfun (compute-primary-erfun (cdr replies))))
 	(lambda (args)
-	  (funcall (reply-function (car replies)) args next-emfun)))))
+	  (funcall (reply-function (car replies)) args next-erfun)))))
 
 (defun create-reply-cache (message replies)
   (make-cache

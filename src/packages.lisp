@@ -10,10 +10,10 @@
    :sheep-p
    :add-parent
    :remove-parent
-   :direct-parent-p
-   :ancestorp
-   :direct-child-p
-   :descendantp
+   :ancestor-p
+   :parent-p
+   :descendant-p
+   :child-p
    :sheeple-error ;general error
    :sheeple-warning ;general warning
    

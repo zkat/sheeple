@@ -39,8 +39,7 @@
 	    ((:file "sheeple")
              (:file "properties")
 	     (:file "compatibility")
-             ;; (:file "messages")
-             ))))
+             (:file "messages")))))
 
 (defmethod asdf:perform ((o asdf:test-op) (c (eql (asdf:find-system :sheeple))))
   (format t "~&~%*******************~%~

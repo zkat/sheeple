@@ -63,13 +63,13 @@
     (is (eql test-sheep (add-property test-sheep 'var "value" :make-accessors-p nil)))
     (is (has-direct-property-p test-sheep 'var))
     (is (eql test-sheep (add-parent another test-sheep)))
-    (is (parentp another test-sheep))
+    (is (parent-p another test-sheep))
     (is (eql test-sheep (reinit-sheep test-sheep)))
-    (is (parentp #@dolly test-sheep))
+    (is (parent-p #@dolly test-sheep))
     (is (not (has-direct-property-p test-sheep 'var)))
-    (is (not (parentp another test-sheep)))
+    (is (not (parent-p another test-sheep)))
     (is (eql test-sheep (reinit-sheep test-sheep :new-parents (list another))))
-    (is (parentp another test-sheep))))
+    (is (parent-p another test-sheep))))
 
 (test clone
   (is (eql #@dolly (car (sheep-parents (clone)))))
@@ -166,45 +166,45 @@
 ;;;
 (def-suite inheritance :in cloning)
 (in-suite inheritance)
-(test parentp
+(test parent-p
   (let* ((grandpa (clone))
          (father (clone grandpa))
          (child (clone father)))
-    (is (parentp grandpa father))
-    (is (parentp father child))
-    (is (not (parentp child father)))
-    (is (not (parentp grandpa child)))))
+    (is (parent-p grandpa father))
+    (is (parent-p father child))
+    (is (not (parent-p child father)))
+    (is (not (parent-p grandpa child)))))
 
-(test childp
+(test child-p
   (let* ((grandpa (clone))
          (father (clone grandpa))
          (child (clone father)))
-    (is (childp child father))
-    (is (childp father grandpa))
-    (is (not (childp grandpa father)))
-    (is (not (childp father child)))))
+    (is (child-p child father))
+    (is (child-p father grandpa))
+    (is (not (child-p grandpa father)))
+    (is (not (child-p father child)))))
 
-(test ancestorp
+(test ancestor-p
   (let* ((grandpa (clone))
          (father (clone grandpa))
          (child (clone father)))
-    (is (ancestorp grandpa father))
-    (is (ancestorp grandpa child))
-    (is (ancestorp father child))
-    (is (not (ancestorp child grandpa)))
-    (is (not (ancestorp child father)))
-    (is (not (ancestorp father grandpa)))))
+    (is (ancestor-p grandpa father))
+    (is (ancestor-p grandpa child))
+    (is (ancestor-p father child))
+    (is (not (ancestor-p child grandpa)))
+    (is (not (ancestor-p child father)))
+    (is (not (ancestor-p father grandpa)))))
 
-(test descendantp
+(test descendant-p
   (let* ((grandpa (clone))
          (father (clone grandpa))
          (child (clone father)))
-    (is (descendantp father grandpa))
-    (is (descendantp child grandpa))
-    (is (descendantp child father))
-    (is (not (descendantp grandpa child)))
-    (is (not (descendantp father child)))
-    (is (not (descendantp grandpa father)))))
+    (is (descendant-p father grandpa))
+    (is (descendant-p child grandpa))
+    (is (descendant-p child father))
+    (is (not (descendant-p grandpa child)))
+    (is (not (descendant-p father child)))
+    (is (not (descendant-p grandpa father)))))
 
 (test collect-parents
   (let ((sheep (clone)))
@@ -248,7 +248,7 @@
   (let* ((parent (clone))
          (test-sheep (defclone (parent) ((var "value")))))
     (is (sheep-p test-sheep))
-    (is (parentp parent test-sheep))
+    (is (parent-p parent test-sheep))
     (is (has-direct-property-p test-sheep 'var))
     ;; TODO - this should also check that reader/writer/accessor combinations are properly added
     ))

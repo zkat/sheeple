@@ -44,7 +44,7 @@
     UPDATE: I think this is just about ready. Should probably think about this for a while first,
     and then it'll be done.
     UPDATE: I think this is good enough. It's straightforward.
-** DONE More cleanup and convenience
+** TODO More cleanup and convenience
 *** DONE Get rid of add-on-write. Require add-property.
     Add-on-write seems like a quick interface, but it's a bit obnoxious to deal with.
     Not only does it create a risk for some serious hard-to-track bugs, but it makes
@@ -74,6 +74,12 @@
     This is really important! :-o
     UPDATE: direct-property-summary and property-summary should do the trick for now :)
     UPDATE: It actually works now. And it's fucking sexy.
+*** TODO Seriously fucking clean up the message/reply thing
+    Holy shit this whole thing is a huge mess. Maybe with
+    some moving around, organizing, and renaming it'll look
+    a little cleaner, but holy shit no wonder it breaks all
+    the fucking time
+    
 ** DONE Sheeple is horribly broken -- fix it
    At this point, it's probably a better idea to go over all of sheeple again, bit by bit,
    and reimplement things as necessary. Try to clean up the interface and all that.
@@ -87,6 +93,13 @@
    While I'm at it, this could be an opportunity to improve the structure of the tests,
    and improve overall test coverage. They're broken right now, anyways. Ah well :\
    Do not tag and release 2.0 until all tests are written, and pass.
+*** DONE Sheeple.lisp
+*** DONE properties.lisp
+*** DONE protos.lisp
+*** DONE builtins.lisp
+*** TODO messages.lisp
+*** TODO reply-definition.lisp
+*** TODO reply-dispatch.lisp
 ** TODO Fix bugs
    The tests should oust a bunch of bugs. Fix them.
 ** TODO Rewrite documentation

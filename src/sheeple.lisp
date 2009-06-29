@@ -126,20 +126,20 @@ the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
       (error "~A is not a parent of ~A" parent child)))
 
 ;;; Inheritance predicates
-(defun parentp (maybe-parent child)
+(defun parent-p (maybe-parent child)
   (when (member maybe-parent (sheep-parents child))
     t))
 
-(defun ancestorp (maybe-ancestor descendant)
+(defun ancestor-p (maybe-ancestor descendant)
   (when (and (not (eql maybe-ancestor descendant))
              (member maybe-ancestor (collect-parents descendant)))
     t))
 
-(defun childp (maybe-child parent)
-  (parentp parent maybe-child))
+(defun child-p (maybe-child parent)
+  (parent-p parent maybe-child))
 
-(defun descendantp (maybe-descendant ancestor)
-  (ancestorp ancestor maybe-descendant))
+(defun descendant-p (maybe-descendant ancestor)
+  (ancestor-p ancestor maybe-descendant))
 
 ;;;
 ;;; Hierarchy Resolution

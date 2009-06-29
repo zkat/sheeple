@@ -6,6 +6,7 @@
    :clone
    :defclone
    :defproto
+   :spawn-sheep
    :sheep-hierarchy-error
    :sheep-p
    :add-parent

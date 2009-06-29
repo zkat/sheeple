@@ -93,10 +93,10 @@ is non-local (is delegated or does not exist in the hierarchy list), an UNBOUND-
 	t)
     (unbound-property () nil)))
 
-(defgeneric (setf property-value) (new-value sheep property-name &optional createp)
+(defgeneric (setf property-value) (new-value sheep property-name)
   (:documentation "Sets NEW-VALUE as the value of a direct-property belonging to SHEEP, named
-PROPERTY-NAME. If createp is NIL (the default), an error is signaled if the property is not already
-available to SHEEP somewhere in the hierarchy list. If createp is T, add-property is used."))
+PROPERTY-NAME. If the property does not already exist anywhere in the hierarchy list, an error
+is signaled."))
 (defmethod (setf property-value) (new-value (sheep standard-sheep) property-name
                                   &optional (createp nil))
   (unless (symbolp property-name)
@@ -104,9 +104,7 @@ available to SHEEP somewhere in the hierarchy list. If createp is T, add-propert
   (if (has-property-p sheep property-name)
       (let ((property-table (sheep-property-value-table sheep)))
         (setf (gethash property-name property-table) new-value))
-      (if createp
-          (add-property sheep property-name new-value)
-          (error "Property ~A does not exist for sheep ~A." property-name sheep))))
+      (error "Property ~A does not exist for sheep ~A." property-name sheep)))
 
 ;; Reflection
 (defclass property-spec ()

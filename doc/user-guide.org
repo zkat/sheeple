@@ -198,6 +198,36 @@
     
     (defproto test-proto () ()) => #<Sheep AKA: TEST-PROTO #x150712B6>
 
+*** FIND-PROTO
+    Syntax:
+    find-proto name &optional (errorp t) => sheep
+
+    Args and values:
+    name -- a non-keyword symbol denoting the name of a proto.
+    sheep -- a proto
+    errorp -- whether an error should be signaled if there is no such proto.
+
+    Description:
+    Looks up a proto sheep with name NAME in the global protos table. If errorp is T,
+    an ERROR is signaled if the lookup fails, otherwise, NIL is returned.
+
+    Examples:
+    
+      (defproto test-proto () ()) => #<Sheep AKA: TEST-PROTO #x14F31536>
+      (find-proto 'test-proto) => #<Sheep AKA: TEST-PROTO #x14F31536>
+
+*** #@
+    Syntax:
+    #@name
+
+    Description:
+    #@ is a reader macro that expands into find-proto.
+
+    Examples:
+    
+       (defproto test-proto () ()) => #<Sheep AKA: TEST-PROTO #x14F31536>
+       #@test-proto => #<Sheep AKA: TEST-PROTO #x14F31536>
+
 ** Sheep manipulation
 *** Sheep Inspection
 **** PARENT-P
@@ -325,6 +355,14 @@
     The WITH-PROPERTIES macro is identical in function to the with-slots macro that CLOS uses. Also,
     the default CLOS WITH-ACCESSORS can be used normally with sheeple. Another macro called
     WITH-MANIPULATORS, identical to WITH-ACCESSORS is available, but it is deprecated.
+*** ADD-PROPERTY
+    Adds a direct property to SHEEP. Optional Readers and Writers must be a list of valid function
+    names (in symbol or cons form) that will be used to create responses specialized on SHEEP. If
+    make-accessors-p is T, the symbol in PROPERTY-NAME will be used to generate accessors with the
+    format Reader=PROPERTY-NAME, Writer=(SETF PROPERTY-NAME). Returns the modified sheep.
+
+        (add-property *sample-sheep* 'prop-name "value") => modified *sample-sheep*
+
 *** PROPERTY-VALUE
     The function PROPERTY-VALUE receives two arguments: a sheep object and a property-name. It
     returns the value of that property, and searches indirect properties. There is no user-level
@@ -341,7 +379,7 @@
 
 *** (SETF PROPERTY-VALUE)
     The function (SETF PROPERTY-VALUE) sets a direct property on a sheep. If the property did not
-    exist, it adds it, and it changes it if it did. Returns the new value.
+    exist in the sheep's hierarchy list, UNBOUND-PROPERTY is signaled. Returns the new value.
 
         (setf (property-value *sample-sheep* 'foo) 'bar)
 
@@ -364,20 +402,21 @@
 
         (remove-property *sample-sheep* 'foo) => T
 
-*** WHO-SETS
-    The function WHO-SETS receives a SHEEP and a PROPERTY-NAME, and returns the sheep that sets a
+*** PROPERTY-OWNER
+    The function PROPERTY-OWNER receives a SHEEP and a PROPERTY-NAME, and returns the sheep that sets a
     particular property visible to SHEEP, whether it be a direct-property or an indirect-property.
-    If the property is unbound, it simply returns NIL.
+    If the property is unbound, it returns NIL by default. If a third argument is provided as T,
+    UNBOUND-PROPERTY is signaled.
 
-        (who-sets *sample-sheep* 'foo) => NIL
+        (property-owner *sample-sheep* 'foo) => #<sheep that sets a direct-value for 'foo>
 
 *** AVAILABLE-PROPERTIES
     The function AVAILABLE-PROPERTIES receives a SHEEP, and returns a list of available bound
-    property keys (symbols) for SHEEP. An empty list is returned if SHEEP has no available bound
+    property specs for SHEEP. An empty list is returned if SHEEP has no available bound
     properties.
 
-        (setf (property-value *sample-sheep* 'baz) 'quux)
-        (available-properties *sample-sheep*) ==> (BAZ)
+        (add-property *sample-sheep* 'baz 'quux)
+        (available-properties *sample-sheep*) ==> (<property spec: BAZ>)
 
 ** Messages/Replies
    Messages and Replies are very similar to CLOS' generic functions/methods. Anyone familiar with
@@ -397,18 +436,18 @@
     left-weighted multireplies (by default) which can dispatch on multiple different arguments. The
     syntax follows closely with defmethod's specialized lambda-list syntax, except the specializers
     are actual objects instead of class names. An unspecialized item in the lambda list will default
-    to dispatching on =dolly= for that lambda-list property. The basic format is:
+    to dispatching on #@dolly for that lambda-list property. The basic format is:
 
         (defreply reply-name (plain-variable* (specialized-variable object)*) @body)
 
 **** Specialized replies
      Replies are specialized by replacing the variable with (specialized-variable object).
 
-        (defreply reply-name (foo (bar =my-sheep=))
+        (defreply reply-name (foo (bar #@my-sheep))
           (print "This is a specialized reply"))
 
      Replies with unspecialized lambda lists are considered unspecialized, since they dispatch on
-     the built-in sheep =T=, which is at the top of the hierarchy list for all sheep and wolves.
+     the built-in sheep #@T, which is at the top of the hierarchy list for all sheep and builtins.
 
 **** Reply combination
      Reply definitions can also accept qualifiers. The standard reply combination supports three
@@ -443,21 +482,21 @@
 **** Huge example
      This example illustrates usage of sheeple and replies:
 
-        (defproto =sheep1= (clone () ())) ;note: the =foo= are purely stylistic, but recommended.
-        (defproto =sheep2= (clone () ()))
+        (defproto sheep1 () ())
+        (defproto sheep2 () ())
 
-        (defreply do-it (foo)
-          (print foo)) ;defaults to =dolly=
+        (defreply do-it (foo) ;defines this reply on #@T
+          (print foo))
         (do-it "hey!") => hey! ;the reply facility autoboxes regular lisp objects
 
-        (defreply do-it ((something =sheep1=)) 
-          (format t "~a is =sheep1=. FYI" something))
+        (defreply do-it ((something #@sheep1)) ;a convenient way of saying (find-proto 'sheep1)
+          (format t "~a is #@sheep1. FYI" something))
         ;; lambda-list variables do not have to be the same across replies, 
         ;; I only do it here for convenience.
-        (do-it =sheep1=) => #<Standard Sheep {BA28B89}> is the first sheep. FYI
+        (do-it #@sheep1) => #<Sheep AKA: SHEEP1 {BA28B89}> is the first sheep. FYI
 
         (let ((x 5))
-	   (defreply do-it ((foo =number=)) 
+	   (defreply do-it ((foo #@number)) ;if dispatching on builtins, use builtin prototype.
 	     (* x foo))) ;It captures the lexical environment, too.
         (do-it 5) => 10
 
@@ -466,58 +505,56 @@
 	  (print "FIVE!! THIS IS VERY EXCITING!!1"))
         (do-it 5) => "FIVE!! THIS IS VERY EXCITING!!1"
 
-        (defreply do-it ((foo =float=))
+        (defreply do-it ((foo #@float))
           (floatp float))
 
         (do-it 5.0) => T                                ; Sheeple has a CLOS-like hierarchy for
-        (do-it 5) => "FIVE!! THIS IS VERY EXCITING!!1"  ; fleeced wolves.
+        (do-it 5) => "FIVE!! THIS IS VERY EXCITING!!1"  ; autoboxed built-ins.
         (do-it 6) => 12
 	
-        (defreply synergize ((foo =sheep1=) (bar =sheep2=))
-          (print "I got =sheep1= first, then =sheep2="))
+        (defreply synergize ((foo #@sheep1=) (bar #@sheep2))
+          (print "I got #@sheep1 first, then #@sheep2"))
 
-        (defreply synergize ((foo =sheep2=) (bar =sheep1=)) 
+        (defreply synergize ((foo #@sheep2) (bar #@sheep1)) 
           (declare (ignore foo bar))
-          (print "I got =sheep2= first, then the first sheep."))
+          (print "I got #@sheep2 first, then the first sheep."))
 
-        (defreply synergize ((foo =number=) (bar =number=)) 
+        (defreply synergize ((foo #@number) (bar #@number)) 
           (+ foo bar))
         (synergize 3 5) => 8
         (synergize 4 "hey hey hey!") => ERROR: NO-MOST-SPECIFIC-REPLY
         
-        (defreply synergize ((foo =string=) (bar =string=))
+        (defreply synergize ((foo #@string) (bar #@string))
           (concatenate 'string foo bar))
         (synergize "Hey " "Jude") => "Hey Jude"
 
         ;; :before and :after
-        (defparameter =test-sheep= (clone () ((var "value" :accessor var))))
-        (var =test-sheep=) => "value"
+        (defparameter *test-sheep* (defclone () ((var "value" :accessor var))))
+        (var *test-sheep*) => "value"
          
-        (defreply var :before ((sheep =test-sheep=))
+        (defreply var :before ((sheep *test-sheep*))
           (setf (property-value sheep 'var) "new-value"))
-        (var =test-sheep=) => "new-value"
-        (setf (var =test-sheep=) "old-value")
-        (property-value =test-sheep= 'var) => "old-value"
-        (var =test-sheep=) => "new-value"
+        (var *test-sheep*) => "new-value"
+        (setf (var *test-sheep*) "old-value")
+        (property-value *test-sheep* 'var) => "old-value"
+        (var *test-sheep*) => "new-value"
 
-        (defreply var :after ((sheep =test-sheep=))
+        (defreply var :after ((sheep *test-sheep*))
           (setf (property-value sheep 'var) "after-value"))
-        (var =test-sheep=) => "new-value"
-        (property-value =test-sheep= 'var) => "after-value"
+        (var *test-sheep*) => "new-value"
+        (property-value *test-sheep* 'var) => "after-value"
 
 ** Potential gotchas:
 *** CLOS (semi-)compatibility
-    For the time being, CLOS objects and CLOS-defined types are boxed as =white-fang=, not as
-    fleeced versions of the classes/objects.
+    For the time being, CLOS objects and CLOS-defined types are boxed as #@builtin, not as
+    autoboxed versions of the classes/objects.
 *** Message definition
-    If you define a message, then clobber that message with a defun or defgeneric, and redefine
-    the message using the same name, the warning about clobbering a regular function is not
-    signaled.
+    The behavior for clobbering regular functions or generic functions with messages and vice-versa
+    is undefined.
 
 *** Threads
-    ...are completely untested. I have no idea what kind of behavior could crop up when using
-    threads, and I recommend you don't try until I've bothered to do something about it.
-* Performance notes
+    Give it a shot, tell me how it goes! :)
+* Implementation performance notes
 ** Property access
    As of version 1.0, property access is O(n), where n is the number of sheep that must be traversed
    in order to find a property value. Worst case happens when the property is completely unbound for
@@ -582,7 +619,7 @@
 
 **** SHEEP-PARENTS
      Returns an ordered list of SHEEP's direct parent objects, in the order they were provided to
-     CLONE/CLONE*/DEFPROTO.
+     CLONE/DEFCLONE/DEFPROTO.
 
            (sheep-parents sheep) => (sheep's-parents-list)
 
@@ -590,11 +627,11 @@
      Returns an unordered set of ROLE metaobjects that represent what replies SHEEP is a
      participant in.
 
-           (sheep-direct-roles sheep) => (sheep's direct roles list)
+           (sheep-direct-roles sheep) => (sheep's direct role metaobjects)
 
 **** SHEEP-DIRECT-PROPERTIES
      Returns an unordered set of PROPERTY-SPEC metaobjects that represent property definitions as
-     provided to (or built by) CLONE/CLONE*/DEFPROTO
+     provided to (or built by) CLONE/DEFCLONE/DEFPROTO
 
            (sheep-direct-properties sheep) => (list of property-spec objects)
 
@@ -631,17 +668,17 @@
           (format stream "~a is the most specialest sheep ever!" sheep))
 
 *** INIT-SHEEP
-     You may define replies for the message INIT-SHEEP. This reply handles all set-up of
-     sheeple after its direct-parents are added.  This is most useful for defining 'complex'
-     constructors that need access to a sheep. These constructors usually take the form of :before,
-     :after, or :around replies, since defining a primary reply would override standard sheep 
-     setup.
+    This message is called by all sheep-creation functions (clone, defclone, defproto) after parents
+    have been added to the new object. In the case of DEFCLONE and DEFPROTO, this is called before
+    the properties specified in their property-specs are added.  No primary replies should be
+    defined on this message, and :around replies MUST call-next-reply.
 
-        (defreply init-sheep ((sheep my-super-specialest-sheep!) &key)
-          (setf (some-other-property sheep) "woooo"))
+        (defreply init-sheep :after ((sheep my-super-specialest-sheep!) &key)
+          (add-property sheep 'some-property "woooo"))
 
 *** REINIT-SHEEP
-     This is called whenever a DEFPROTO form is evaluated for an existing sheep.
+    This is called whenever a DEFPROTO form is evaluated for an existing sheep.  No primary replies
+    may be defined on this message, and :around replies MUST call-next-reply.
 
 
 

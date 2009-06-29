@@ -75,31 +75,32 @@
    dividing up behavior are the same CLOS uses (you can read the rules here:
    http://www.lispworks.com/documentation/HyperSpec/Body/04_ce.htm).  The list of parents/delegates
    is dynamic. Parents can be added or removed at run time.  New sheeple are created by using the
-   CLONE and DEFSHEEP macros.
+   the CLONE function, and the DEFCLONE and DEFPROTO macros.
 
-*** CLONE macro
-    CLONE works similar to DEFCLASS:
+*** CLONE function
+    Syntax:
+    clone &rest sheeple => new-sheep
 
-         (clone (parent1 parent2)
-           ((property1 value1)
-            (property2 value2 :property-option value))
-           (:clone-option value)
-           (:another-option value))
+    Args and values:
+    sheeple -- a list of lisp objects
 
-    An empty parent list when using CLONE will automatically clone =DOLLY=
+    Description:
+    CLONE creates a new STANDARD-SHEEP instance with SHEEPLE as its parents.
+    Any non-sheep objects in SHEEPLE will be autoboxed and -those- objects will be added
+    as parents.
+    The new sheep's parents list will be ordered the same as they are given.
+    An empty parent list when using CLONE will automatically clone #@DOLLY
 
-         (clone () ()) ;; also valid. Options are optional!
+    Examples:
 
-         (clone () ((foo 10)))
+      (clone) => #<Sheep #x15007E06>
+      (sheep-parents *) => (#<Sheep AKA: DOLLY #x14C8947E>)
+      (clone (clone) (clone) (clone)) => #<Sheep #x15007E06>
 
-*** CLONE* macro
-    This macro works mostly like CLONE, except it has some extra goodies that can make programming a
-    bit more convenient. For example, this macro automatically generates accessors using
-    property-names, while CLONE requires an explicit :accessor option.
-
-         (defvar *sample-sheep* (clone () ((my-property "Wheee"))))
-	 
-	 (my-property *sample-sheep*) => "Wheee"
+    Side effects: Parents are added using ADD-PARENT, which may have side-effects.
+    
+*** DEFCLONE macro
+    Syntax:
 
 *** DEFSHEEP macro
     This macro is essentially a wrapper around CLONE* that handles redefinition of a sheep. The

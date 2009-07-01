@@ -32,8 +32,7 @@
 
 (defmessage reinit-sheep (sheep &key)
   (:documentation "Resets the sheep's parents and properties."))
-(defreply reinit-sheep (sheep
-                              &key new-parents
+(defreply reinit-sheep (sheep &key new-parents
                               documentation)
   "If :NEW-PARENTS is  provided, those parents are used when reinitializing,
 so #@DOLLY doesn't end up on the list by default"
@@ -42,7 +41,7 @@ so #@DOLLY doesn't end up on the list by default"
      do (remove-parent parent sheep))
   (remove-all-direct-properties sheep)
   ;; MOAR PARENTS
-  (add-parents (if new-parents (sheepify-list new-parents) (proto 'dolly))
+  (add-parents (if new-parents (sheepify-list new-parents) (list (proto 'dolly)))
                sheep)
   ;; DOX PLOX
   (when documentation

@@ -88,10 +88,8 @@ is non-local (is delegated or does not exist in the hierarchy list), an UNBOUND-
 (defgeneric has-property-p (sheep property-name))
 (defmethod has-property-p ((sheep standard-sheep) property-name)
   "Returns T if a property with PROPERTY-NAME is available to SHEEP."
-  (handler-case
-      (when (property-value sheep property-name)
-	t)
-    (unbound-property () nil)))
+  (when (property-owner sheep property-name)
+    t))
 
 (defgeneric (setf property-value) (new-value sheep property-name)
   (:documentation "Sets NEW-VALUE as the value of a direct-property belonging to SHEEP, named

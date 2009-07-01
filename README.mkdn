@@ -1,6 +1,9 @@
 About
 =====
 
+Vision
+------
+
 Sheeple is a Dynamic, CLOS-like, Delegative Prototype-based Object-Oriented Programming Framework
 (or "POOP Framework") that strives to optimize application flexibility, minimize cost while
 increasing value, maximize programmer resources, and empower application implementers to better

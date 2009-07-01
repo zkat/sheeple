@@ -49,6 +49,7 @@
    :specialized-lambda-list-error ;error
 
    ;; Protos
+   :proto
    :dolly
    :t
    :null

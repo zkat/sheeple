@@ -6,7 +6,7 @@
 
 (let ((proto-table (make-hash-table :test #'eq)))
   
-  (defun find-proto (name &optional (errorp t))
+  (defun proto (name &optional (errorp t))
     (multiple-value-bind (proto hasp)
         (gethash name proto-table)
       (if hasp
@@ -15,7 +15,7 @@
               (error "No such prototype: ~A" name)
               nil))))
 
-  (defun (setf find-proto) (new-value name)
+  (defun (setf proto) (new-value name)
     (unless (sheep-p new-value)
       (error "~A is not a sheep object." new-value))
     (setf (gethash name proto-table) new-value))
@@ -27,7 +27,7 @@
 
 (defmacro defproto (name sheeple properties &rest options)
   `(let ((sheep (spawn-or-reinit-sheep
-                 (find-proto ',name nil) 
+                 (proto ',name nil) 
                  ,(canonize-sheeple sheeple)
                  ,@(canonize-clone-options options))))
      (mapc (lambda (prop-spec)
@@ -35,17 +35,17 @@
            ,(canonize-properties properties t))
      (unless (sheep-nickname sheep)
        (setf (sheep-nickname sheep) ',name))
-     (setf (find-proto ',name) sheep)))
+     (setf (proto ',name) sheep)))
 
 (defun spawn-or-reinit-sheep (maybe-sheep parents &rest options)
   (if maybe-sheep
       (reinit-sheep maybe-sheep :new-parents parents)
       (apply #'spawn-sheep parents options)))
 
-;; This reader macro lets us do #@foo instead of having to do (find-proto 'foo).
-;; It's needed enough that it's useful to have this around.
-(defun find-proto-transformer (stream subchar arg)
-  (declare (ignore subchar arg))
-  `(find-proto ',(read stream t)))
+;; ;; This reader macro lets us do #@foo instead of having to do (proto 'foo).
+;; ;; It's needed enough that it's useful to have this around.
+;; (defun proto-transformer (stream subchar arg)
+;;   (declare (ignore subchar arg))
+;;   `(proto ',(read stream t)))
 
-(set-dispatch-macro-character #\# #\@ #'find-proto-transformer) 
+;; (set-dispatch-macro-character #\# #\@ #'proto-transformer) 

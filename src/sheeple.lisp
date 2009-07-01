@@ -54,7 +54,7 @@ the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
   (let ((sheep (allocate-sheep metaclass)))
     (if sheeple
         (add-parents sheeple sheep)
-        (add-parent (find-proto 'dolly) sheep))
+        (add-parent (proto 'dolly) sheep))
     (apply #'init-sheep sheep all-keys)))
 
 (defun clone (&rest sheeple)

@@ -96,6 +96,8 @@
 	 ;; If I can avoid calling fetch-memo-vector-entry for singly-dispatched readers, that
 	 ;; would be -lovely-. Not sure how to do that yet, though.
 	)
+    (when (< (length args) relevant-args-length)
+      (error "Not enough args for message ~A" message))
     (if (= 0 relevant-args-length)
         (let ((relevant-args (subseq args 0 relevant-args-length)))
           (create-reply-cache message (%find-applicable-replies 

@@ -18,6 +18,20 @@
 ** TODO Improve documentation
 *** TODO Go through the whole thing and make it more CLHS-like (only partially done)
 *** TODO Put together html and pdf versions of user-guide.org
+* TODO 2.0.2
+** TODO Replace find-proto with proto
+   Let's try and shorten this and see if it helps.
+** TODO Keep a close eye on #@ -- do I really need it?
+   Reader macros are nasty. Maybe I should've thought more before tossing it in there.
+** TODO Inconsistent lambda lists
+   Adlai pointed out how CLOS offers a restart when lambda-lists are inconsistent,
+   offering to remove inconsistent methods. It's useful for interactively working.
+   Could I support something like this in sheeple?
+** TODO More helpful errors
+   Try and catch errors a little earlier, report more useful stuff. Is there a way
+   for reply-dispatch errors to be more informative?
+** TODO Start writing unit tests for messages/replies
+   Please.
 * DONE 2.0
   Sheeple gets serious -- and more useful. The version jumps because this will completely
   break backwards compatibility with all previous sheeple code.

@@ -124,22 +124,44 @@ As usual, you can always contact me directly with questions. I also regularly lu
 Quick Example
 -------------
 
+This creates a standard sheep with only DOLLY as its parent
+
         SHEEPLE-USER> (defparameter *my-sheep* (clone))
         *MY-SHEEP*
+
+We can add properties to a sheep object at any time. This particular call also auto-generates
+an accessor based on the property name given.
+
         SHEEPLE-USER> (add-property *my-sheep* 'var "value")
         #<Sheep #x1579A04E>
         SHEEPLE-USER> (var *my-sheep*)
         "value"
+
+Cloning a sheep is as simple as... well... cloning it.
+
         SHEEPLE-USER> (defparameter *child* (clone *my-sheep*))
         *CHILD*
+
+Sheeple does differential inheritance by default. This means that value lookup fetches
+the first available value found in the sheep's hierarchy list, unless a value is
+set directly in a sheep.
+
         SHEEPLE-USER> (var *child*)
         "value"
         SHEEPLE-USER> (setf (var *my-sheep*) "new-value")
         "new-value"
+
+We've changed *my-sheep*'s VAR value, so *child*'s VAR value will also change.
+
         SHEEPLE-USER> (var *my-sheep*)
         "new-value"
         SHEEPLE-USER> (var *child*)
         "new-value"
+
+Replies are to Messages as Methods are to Generic Functions, and the semantics are very similar.
+Note that Sheeple handles built-in Lisp objects, and can dispatch on them. The function PROTO
+fetches a prototype object from a global registry (read the user guide for more on this)
+
         SHEEPLE-USER> (defmessage synergize (a b))
         #<Message: SYNERGIZE #x157AAC36>
         SHEEPLE-USER> (defreply synergize ((a (proto 'string)) (b (proto 'string))) (concatenate 'string a b))
@@ -150,6 +172,10 @@ Quick Example
         "foo bar"
         SHEEPLE-USER> (synergize 5 5)
         10
+
+Replies are defined on sheep objects themselves. No need for eql-specialization, everything is an
+'instance' in Sheeple.
+
         SHEEPLE-USER> (defreply synergize ((a *my-sheep*) (b *my-sheep*)) (clone a b))
         #<Reply: SYNERGIZE #x157C5596>
         SHEEPLE-USER> (synergize *my-sheep* *child*)

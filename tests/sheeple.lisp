@@ -262,7 +262,8 @@
 (test proto ;; (setf proto) goes here, too.
   (is (sheep-p (proto 't)))
   (let ((proto-test (defproto proto-test () ())))
-    (is (eql proto-test (proto 'proto-test))))
+    (is (eql proto-test (proto 'proto-test)))
+    (is (eql (proto 'proto-test) (proto 'proto-test))))
   ;; TODO - (setf proto)
   )
 

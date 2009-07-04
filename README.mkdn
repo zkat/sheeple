@@ -120,3 +120,41 @@ For a quicker introduction, you can also take a peek at the examples/ directory.
 
 As usual, you can always contact me directly with questions. I also regularly lurk in #lisp@freenode
 (as zkat).
+
+Quick Example
+-------------
+SHEEPLE-USER> (defparameter *my-sheep* (clone))
+*MY-SHEEP*
+SHEEPLE-USER> (add-property *my-sheep* 'var "value")
+#<Sheep #x1579A04E>
+SHEEPLE-USER> (var *my-sheep*)
+"value"
+SHEEPLE-USER> (defparameter *child* (clone *my-sheep*))
+*CHILD*
+SHEEPLE-USER> (var *child*)
+"value"
+SHEEPLE-USER> (setf (var *my-sheep*) "new-value")
+"new-value"
+SHEEPLE-USER> (var *my-sheep*)
+"new-value"
+SHEEPLE-USER> (var *child*)
+"new-value"
+SHEEPLE-USER> (defmessage synergize (a b))
+#<Message: SYNERGIZE #x157AAC36>
+SHEEPLE-USER> (defreply synergize ((a (proto 'string)) (b (proto 'string))) (concatenate 'string a b))
+#<Reply: SYNERGIZE #x157D90FE>
+SHEEPLE-USER> (defreply synergize ((a (proto 'number)) (b (proto 'number))) (+ a b))
+#<Reply: SYNERGIZE #x15815B76>
+SHEEPLE-USER> (synergize "foo " "bar")
+"foo bar"
+SHEEPLE-USER> (synergize 5 5)
+10
+SHEEPLE-USER> (defreply synergize ((a *my-sheep*) (b *my-sheep*)) (clone a b))
+#<Reply: SYNERGIZE #x157C5596>
+SHEEPLE-USER> (synergize *my-sheep* *child*)
+; ERROR - circular precedence graph 
+; Evaluation aborted. 
+SHEEPLE-USER> (synergize *child* *my-sheep*)
+#<Sheep #x15787456>
+SHEEPLE-USER> (var (synergize *child* *my-sheep*))
+"new-value"

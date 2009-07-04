@@ -14,13 +14,10 @@
 ** Indirect Property
    A property that a sheep has access to that is stored elsewhere in the hierarchy-list
 
-** #@
-   This reader macro expands to (find-proto <name>). In this guide,
-   we refer to objects that have been defined as prototypes with the #@ convention.
-** #@T
+** T
    the root object, ancestor of all sheep objects.
 
-** #@Dolly
+** Dolly
    Ancestor of all actual sheep (the ones that aren't built-ins).
 
 ** Hierarchy List
@@ -54,17 +51,17 @@
 ** Built-in
    A built-in lisp type.
    Most lisp types have boxed-object prototypes assigned to them, so they can
-   be fetched using e.g. #@string.
+   be fetched using e.g. (proto 'string).
    These prototypes can have replies defined on them.
+
 ** Boxed object
    An object (probably) autoboxed by Sheeple when appropriate (cloning and reply definition).
    These objects wrap any non-sheep Lisp object and allows definition of replies, addition of
    properties, etc (they're just sheeple).
 
-** #@boxed-object
-   All boxed objects are descendants of #@boxed-object, which is a 
-   clone of #@T (this is important -- messages defined on #@dolly won't 
-   affect built-ins!!)
+** boxed-object
+   All boxed objects are descendants of the prototype 'boxed-object, which is a clone of T (this is
+   important -- messages defined on dolly won't affect built-ins!!)
 
 * API Documentation
 ** Sheep cloning
@@ -90,7 +87,7 @@
     Any non-sheep objects in SHEEPLE will be autoboxed and -those- objects will be added
     as parents.
     The new sheep's parents list will be ordered the same as they are given.
-    An empty parent list when using CLONE will automatically clone #@DOLLY
+    An empty parent list when using CLONE will automatically clone DOLLY
 
     Examples:
 
@@ -180,7 +177,7 @@
 
     Description:
     DEFPROTO defines a new proto sheep based on PARENT-OBJECT*. The sheep is placed into a global
-    table where it can be accessed by using (find-proto 'name). After the new object has been
+    table where it can be accessed by using (proto 'name). After the new object has been
     initialized, direct-properties and readers/writers/accessors are added to the new object
     based on each property-spec.
     Unlike DEFCLONE, DEFPROTO automatically defines accessors for each property-spec using
@@ -198,9 +195,9 @@
     
     (defproto test-proto () ()) => #<Sheep AKA: TEST-PROTO #x150712B6>
 
-*** FIND-PROTO
+*** PROTO
     Syntax:
-    find-proto name &optional (errorp t) => sheep
+    proto name &optional (errorp t) => sheep
 
     Args and values:
     name -- a non-keyword symbol denoting the name of a proto.
@@ -214,19 +211,7 @@
     Examples:
     
       (defproto test-proto () ()) => #<Sheep AKA: TEST-PROTO #x14F31536>
-      (find-proto 'test-proto) => #<Sheep AKA: TEST-PROTO #x14F31536>
-
-*** #@
-    Syntax:
-    #@name
-
-    Description:
-    #@ is a reader macro that expands into find-proto.
-
-    Examples:
-    
-       (defproto test-proto () ()) => #<Sheep AKA: TEST-PROTO #x14F31536>
-       #@test-proto => #<Sheep AKA: TEST-PROTO #x14F31536>
+      (proto 'test-proto) => #<Sheep AKA: TEST-PROTO #x14F31536>
 
 ** Sheep manipulation
 *** Sheep Inspection
@@ -436,18 +421,18 @@
     left-weighted multireplies (by default) which can dispatch on multiple different arguments. The
     syntax follows closely with defmethod's specialized lambda-list syntax, except the specializers
     are actual objects instead of class names. An unspecialized item in the lambda list will default
-    to dispatching on #@dolly for that lambda-list property. The basic format is:
+    to dispatching on DOLLY for that lambda-list property. The basic format is:
 
         (defreply reply-name (plain-variable* (specialized-variable object)*) @body)
 
 **** Specialized replies
      Replies are specialized by replacing the variable with (specialized-variable object).
 
-        (defreply reply-name (foo (bar #@my-sheep))
+        (defreply reply-name (foo (bar (proto 'my-sheep)))
           (print "This is a specialized reply"))
 
      Replies with unspecialized lambda lists are considered unspecialized, since they dispatch on
-     the built-in sheep #@T, which is at the top of the hierarchy list for all sheep and builtins.
+     the built-in sheep T, which is at the top of the hierarchy list for all sheep and builtins.
 
 **** Reply combination
      Reply definitions can also accept qualifiers. The standard reply combination supports three
@@ -485,18 +470,18 @@
         (defproto sheep1 () ())
         (defproto sheep2 () ())
 
-        (defreply do-it (foo) ;defines this reply on #@T
+        (defreply do-it (foo) ;defines this reply on (proto 'T)
           (print foo))
         (do-it "hey!") => hey! ;the reply facility autoboxes regular lisp objects
 
-        (defreply do-it ((something #@sheep1)) ;a convenient way of saying (find-proto 'sheep1)
-          (format t "~a is #@sheep1. FYI" something))
+        (defreply do-it ((something (proto 'sheep1))) ;a convenient way of saying (find-proto 'sheep1)
+          (format t "~a is sheep1. FYI" something))
         ;; lambda-list variables do not have to be the same across replies, 
         ;; I only do it here for convenience.
-        (do-it #@sheep1) => #<Sheep AKA: SHEEP1 {BA28B89}> is the first sheep. FYI
+        (do-it (proto 'sheep1)) => #<Sheep AKA: SHEEP1 {BA28B89}> is the first sheep. FYI
 
         (let ((x 5))
-	   (defreply do-it ((foo #@number)) ;if dispatching on builtins, use builtin prototype.
+	   (defreply do-it ((foo (proto 'number))) ;if dispatching on builtins, use builtin prototype.
 	     (* x foo))) ;It captures the lexical environment, too.
         (do-it 5) => 10
 
@@ -505,26 +490,26 @@
 	  (print "FIVE!! THIS IS VERY EXCITING!!1"))
         (do-it 5) => "FIVE!! THIS IS VERY EXCITING!!1"
 
-        (defreply do-it ((foo #@float))
+        (defreply do-it ((foo (proto 'float)))
           (floatp float))
 
         (do-it 5.0) => T                                ; Sheeple has a CLOS-like hierarchy for
         (do-it 5) => "FIVE!! THIS IS VERY EXCITING!!1"  ; autoboxed built-ins.
         (do-it 6) => 12
 	
-        (defreply synergize ((foo #@sheep1=) (bar #@sheep2))
-          (print "I got #@sheep1 first, then #@sheep2"))
+        (defreply synergize ((foo (proto 'sheep1)) (bar (proto 'sheep2)))
+          (print "I got sheep1 first, then sheep2"))
 
-        (defreply synergize ((foo #@sheep2) (bar #@sheep1)) 
+        (defreply synergize ((foo (proto 'sheep2)) (bar (proto 'sheep1)))
           (declare (ignore foo bar))
-          (print "I got #@sheep2 first, then the first sheep."))
+          (print "I got sheep2 first, then the first sheep."))
 
-        (defreply synergize ((foo #@number) (bar #@number)) 
+        (defreply synergize ((foo (proto 'number)) (bar (proto 'number)))
           (+ foo bar))
         (synergize 3 5) => 8
         (synergize 4 "hey hey hey!") => ERROR: NO-MOST-SPECIFIC-REPLY
         
-        (defreply synergize ((foo #@string) (bar #@string))
+        (defreply synergize ((foo (proto 'string)) (bar (proto 'string)))
           (concatenate 'string foo bar))
         (synergize "Hey " "Jude") => "Hey Jude"
 
@@ -546,14 +531,16 @@
 
 ** Potential gotchas:
 *** CLOS (semi-)compatibility
-    For the time being, CLOS objects and CLOS-defined types are boxed as #@builtin, not as
-    autoboxed versions of the classes/objects.
+    For the time being, CLOS objects and CLOS-defined types are boxed as a clone of 
+    (proto 'builtin), not as autoboxed versions of the classes/objects.
+
 *** Message definition
     The behavior for clobbering regular functions or generic functions with messages and vice-versa
     is undefined.
 
 *** Threads
     Give it a shot, tell me how it goes! :)
+
 * Implementation performance notes
 ** Property access
    As of version 1.0, property access is O(n), where n is the number of sheep that must be traversed

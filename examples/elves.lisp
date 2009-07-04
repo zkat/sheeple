@@ -8,17 +8,17 @@
    (ears "Ordinary")))
 
 ;; It's good to note that accessors are being automatically defined for each property.
-(defproto human (#@entity)
+(defproto human ((proto 'entity))
   ((eyes "Blue")))
 
-(defproto elf (#@entity)
+(defproto elf ((proto 'entity))
   ((height "Tall")
    (ears "Pointy")))
 
 ;; Now let's say we want to make these entities mate, and vary the results.
 (defmessage mate (a b)
   (:documentation "Mates A and B, and returns their baby :)"))
-(defreply mate ((a #@entity) (b #@entity))
+(defreply mate ((a (proto 'entity)) (b (proto 'entity)))
   ;; this reply will only dispatch if the item in position 'a' is an #@entity, AND 'b'
   ;; is also an #@entity. Otherwise, it will signal a condition.
   (when (eql a b)
@@ -35,11 +35,11 @@
 ;; When CLONE isn't enough, there's DEFCLONE, which works just like DEFPROTO except the sheep
 ;; it creates is 'anonymous'. It also does not automatically create new accessors. You must
 ;; explicitly pass it the :accessor option in order to do that.
-(defvar *edmond* (defclone (#@human)
+(defvar *edmond* (defclone ((proto 'human))
                      ((name "Edmond"))
                    (:nickname "Eddy"))) ; Nicknames are displayed when the sheep object is printed.
 
-(defvar *princess-rena* (defclone (#@elf)
+(defvar *princess-rena* (defclone ((proto 'elf))
                             ((name "Rena")
                              (title "Princess"))
                           (:nickname "Reni")))
@@ -58,8 +58,8 @@
 
 ;; Princess Rena actually has a title. Maybe we want to be able to access the full name of an entity.
 (defmessage full-name (entity))
-(defreply full-name ((entity #@entity))
-  (name #@entity))
+(defreply full-name ((entity (proto 'entity)))
+  (name entity))
 (defreply full-name ((royalty *princess-rena*))
   (format nil "~a ~a" (title royalty) (name royalty)))
 

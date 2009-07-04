@@ -30,6 +30,7 @@ Sheeple is inspired by a number of Object-Oriented systems, mainly:
 [3]: http://en.wikipedia.org/wiki/CLOS
 [4]: http://en.wikipedia.org/wiki/Io_(programming_language)
 [6]: http://slatelanguage.org/
+[7]: http://github.com/sykopomp/sheeple/
 [9]: http://github.com/sykopomp/sykosomatic/
 [10]: http://research.sun.com/self/
 

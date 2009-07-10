@@ -1,5 +1,5 @@
-About
-=====
+About Sheeple
+=============
 
 Vision
 ------
@@ -27,16 +27,9 @@ Sheeple is inspired by a number of Object-Oriented systems, mainly:
   of prototype OO.
 * [Io][4], a pure prototype-based language. Sheeple, like Io, implements differential inheritance.
 
-[3]: http://en.wikipedia.org/wiki/CLOS
-[4]: http://en.wikipedia.org/wiki/Io_(programming_language)
-[6]: http://slatelanguage.org/
-[7]: http://github.com/sykopomp/sheeple/
-[9]: http://github.com/sykopomp/sykosomatic/
-[10]: http://research.sun.com/self/
-
 It was written with the purpose of providing a lot of the goodies of CLOS programming in a
 completely prototype-based environment. As such, it shares a lot of features and syntax with
-CLOS. The most notable features are multiple inheritance and multimethods.
+CLOS. The most notable of these are multiple inheritance and multiple dispatch of methods.
 
 Supported Platforms
 -------------------
@@ -50,7 +43,7 @@ Confirmed to work (pass all tests):
 Sheeple doesn't use any OS-specific code (or threads), so it should be fairly stable on all
 operating systems. OSX and Linux x86 have both been actually tested on the aforementioned platforms.
 In theory, it should work on any implementation that supports weak hash tables with key weakness
-through trivial-garbage.
+through [trivial-garbage][12].
 If you run the test suite on a platform not listed above, and all tests pass, please e-mail me
 and I'll add it to the list of supported platforms.
 
@@ -65,9 +58,6 @@ And mess around from there. Be aware that if your implementation does not includ
 have to acquire it and load it yourself. Clisp, for example, will require this.
 For information on how to do this, check out [Cliki][1], or the [ASDF Homepage][2].
 
-[1]: http://www.cliki.net/asdf
-[2]: http://common-lisp.net/project/asdf/
-
 Sheeple should work on most Lisp implementations that support weak pointers and hash tables with key
 weakness, although it's mainly written and tested in SBCL and Clozure CL on Linux x86.
 
@@ -77,8 +67,6 @@ to work on. The test suite depends on [Fiveam][11]. To run it:
          (asdf:oos 'asdf:test-op 'sheeple)
 
 And watch the tests scroll by. All tests should pass as long as you're using a tagged release.
-
-[11]: http://www.cliki.net/FiveAM
 
 Notes
 -----
@@ -110,7 +98,6 @@ Features
 
 * A metaobject protocol (in CLOS) for inspecting sheeple and altering their behavior through
   metaclasses.
-
 
 Using Sheeple
 =============
@@ -186,3 +173,14 @@ Replies are defined on sheep objects themselves. No need for eql-specialization,
         #<Sheep #x15787456>
         SHEEPLE-USER> (var (synergize *child* *my-sheep*))
         "new-value"
+
+[1]: http://www.cliki.net/asdf
+[2]: http://common-lisp.net/project/asdf/
+[3]: http://en.wikipedia.org/wiki/CLOS
+[4]: http://en.wikipedia.org/wiki/Io_(programming_language)
+[6]: http://slatelanguage.org/
+[7]: http://github.com/sykopomp/sheeple/
+[9]: http://github.com/sykopomp/sykosomatic/
+[10]: http://research.sun.com/self/
+[11]: http://www.cliki.net/FiveAM
+[12]: http://www.cliki.net/trivial-garbage

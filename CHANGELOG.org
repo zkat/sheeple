@@ -1,3 +1,9 @@
+* 2.1
+** Features
+*** No more #@ for accessing prototypes
+*** PROTO replaced FIND-PROTO
+** Bugs
+*** dispatch failures weren't being very helpful.
 * 2.0.1
 ** Features
    NIL

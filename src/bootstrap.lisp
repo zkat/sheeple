@@ -19,18 +19,18 @@
     (add-parent (proto 't) sheep)
     sheep))
 
-(defmessage init-sheep (sheep &key))
+(defmessage init-sheep (sheep &key &allow-other-keys))
 (defreply init-sheep (sheep
-                            &key 
-                            nickname
-                            documentation)
+		      &key 
+		      nickname
+		      documentation)
   (when nickname
     (setf (sheep-nickname sheep) nickname))
   (when documentation
     (setf (sheep-documentation sheep) documentation))
   sheep)
 
-(defmessage reinit-sheep (sheep &key)
+(defmessage reinit-sheep (sheep &key &allow-other-keys)
   (:documentation "Resets the sheep's parents and properties."))
 (defreply reinit-sheep (sheep &key new-parents
                               documentation)

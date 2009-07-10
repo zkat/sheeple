@@ -1,7 +1,8 @@
-This software is composed mostly of code taken at times with only small modifications from SBCL's
-version of PCL, and Closette as presented in AMOP. It also contains a little tiny bit of original
-code (apart from the renaming of a bunch of stuff). Copying and distribution of this software must
-retain the copyright notice for Xerox, as well as Kat Marchan's (see LICENSE).
+This software is composed partly of code taken at times with only small modifications from SBCL's
+version of PCL, and Closette as presented in Art of the Metaobject Protocol. It also contains a
+little tiny bit of original code (apart from the renaming of a bunch of stuff). Copying and
+distribution of this software must retain the copyright notice for Xerox, as well as Kat Marchan's
+(see LICENSE).
 
 Xerox's copyright:
 

@@ -223,7 +223,7 @@
 (defun make-reply-lambda (name lambda-list body)
   (let* ((msg (find-message name nil))
 	 (key/restp (when msg (arg-info-key/rest-p (message-arg-info msg))))
-	 (ll (if key/restp
+	 (ll (if (and key/restp (arg-info-keys (message-arg-info msg)))
 		 (append lambda-list '(&allow-other-keys))
 		 lambda-list)))
     `(lambda (args next-erfun)

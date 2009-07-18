@@ -7,7 +7,10 @@
 (in-package :sheeple)
 
 (defmethod print-object ((sheep standard-sheep) stream)
-  (print-sheep sheep stream))
+  (if (null (sheep-parents sheep))
+      (print-unreadable-object (sheep stream :type t :identity t)
+        (format stream "Orphaned Sheep!"))
+      (print-sheep sheep stream)))
 (defmethod print-object ((sheep message) stream)
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Message: ~a" (message-name sheep))))

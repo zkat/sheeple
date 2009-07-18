@@ -23,7 +23,12 @@
 (defreply init-sheep (sheep
 		      &key 
 		      nickname
-		      documentation)
+		      documentation
+		      properties)
+  (when properties
+    (mapcar (lambda (prop-spec)
+	      (apply #'add-property sheep prop-spec))
+	    properties))
   (when nickname
     (setf (sheep-nickname sheep) nickname))
   (when documentation

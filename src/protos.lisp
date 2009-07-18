@@ -29,10 +29,8 @@
   `(let ((sheep (spawn-or-reinit-sheep
                  (proto ',name nil) 
                  ,(canonize-sheeple sheeple)
+		 :properties ,(canonize-properties properties t)
                  ,@(canonize-clone-options options))))
-     (mapc (lambda (prop-spec)
-             (apply #'add-property sheep prop-spec))
-           ,(canonize-properties properties t))
      (unless (sheep-nickname sheep)
        (setf (sheep-nickname sheep) ',name))
      (setf (proto ',name) sheep)))

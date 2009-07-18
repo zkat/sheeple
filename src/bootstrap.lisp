@@ -35,7 +35,7 @@
     (setf (sheep-documentation sheep) documentation))
   sheep)
 
-(defmessage reinit-sheep (sheep &key  &allow-other-keys)
+(defmessage reinit-sheep (sheep &key &allow-other-keys)
   (:documentation "Resets the sheep's parents and properties."))
 (defreply reinit-sheep (sheep &key new-parents
                               documentation

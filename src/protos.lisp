@@ -37,9 +37,9 @@
        (setf (sheep-nickname sheep) ',name))
      (setf (proto ',name) sheep)))
 
-(defun spawn-or-reinit-sheep (maybe-sheep parents &rest options)
+(defun spawn-or-reinit-sheep (maybe-sheep parents &rest options &key properties &allow-other-keys)
   (if maybe-sheep
-      (reinit-sheep maybe-sheep :new-parents parents)
+      (apply #'reinit-sheep maybe-sheep :new-parents parents options)
       (apply #'spawn-sheep parents options)))
 
 ;; ;; This reader macro lets us do #@foo instead of having to do (proto 'foo).

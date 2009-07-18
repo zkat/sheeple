@@ -51,11 +51,33 @@
     (is (eql (find-class 'test-sheep-class) (class-of test-metaclass-sheep)))))
 
 (test init-sheep
-  (is (sheep-p (init-sheep (clone))))
-  ;; TODO - there could more stuff here. Maybe?
-  ;; TODO - Check that whatever new behavior is added to init-sheep in the next
-  ;;        few days works as intended.
-  )
+  (let ((parent-sheep (init-sheep (clone)
+                                  :properties '((test-property nil
+                                                 :readers (test-property)))))
+        (prop-val-before nil)
+        (prop-val-after nil)
+        (prop-val-around-a nil)
+        (prop-val-around-b nil))
+    (defreply init-sheep :before ((sheep parent-sheep) &key)
+      (is (has-property-p sheep 'test-property))
+      (is (not (has-property-p sheep 'test-property-2)))
+      (setf prop-val-before (test-property sheep)))
+    (defreply init-sheep :after ((sheep parent-sheep) &key)
+      (is (has-property-p sheep 'test-property))
+      (is (has-property-p sheep 'test-property-2))
+      (setf prop-val-after (test-property sheep)))
+    (defreply init-sheep :around ((sheep parent-sheep) &key)
+      (setf prop-val-around-a (test-property sheep))
+      (prog1 (call-next-reply)
+        (setf prop-val-around-b (test-property sheep))))
+    (let ((test-sheep (init-sheep (clone parent-sheep)
+                                  :properties '((test-property prop-val)
+                                                (test-property-2 prop-val)))))
+      (is (eq 'prop-val (test-property test-sheep)))
+      (is (eq prop-val-before nil))
+      (is (eq prop-val-around-a nil))
+      (is (eq prop-val-after 'prop-val))
+      (is (eq prop-val-around-b 'prop-val)))))
 
 (test reinit-sheep
   (let ((test-sheep (clone))

@@ -1,3 +1,9 @@
+* 2.1.2
+** Features
+*** More unit tests
+** Bugfixes
+*** INIT-SHEEP and REINIT-SHEEP work more as expected now.
+*** Orphaned sheep are printable now.
 * 2.1.1
 ** Features
 ** Bugs

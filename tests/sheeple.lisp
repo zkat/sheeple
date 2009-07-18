@@ -51,9 +51,9 @@
     (is (eql (find-class 'test-sheep-class) (class-of test-metaclass-sheep)))))
 
 (test init-sheep
-  (let ((parent-sheep (init-sheep (clone)
-                                  :properties '((test-property nil
-                                                 :readers (test-property)))))
+  (let ((parent-sheep (spawn-sheep ()
+                                   :properties '((test-property nil
+                                                  :readers (test-property)))))
         (prop-val-before nil)
         (prop-val-after nil)
         (prop-val-around-a nil)
@@ -70,9 +70,10 @@
       (setf prop-val-around-a (test-property sheep))
       (prog1 (call-next-reply)
         (setf prop-val-around-b (test-property sheep))))
-    (let ((test-sheep (init-sheep (clone parent-sheep)
-                                  :properties '((test-property prop-val)
-                                                (test-property-2 prop-val)))))
+    (let ((test-sheep (spawn-sheep (list parent-sheep)
+                                   :properties '((test-property prop-val)
+                                                 (test-property-2 prop-val))
+                                   :nickname 'test-sheep)))
       (is (eq 'prop-val (test-property test-sheep)))
       (is (eq prop-val-before nil))
       (is (eq prop-val-around-a nil))

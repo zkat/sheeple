@@ -30,12 +30,13 @@
     (setf (sheep-documentation sheep) documentation))
   sheep)
 
-(defmessage reinit-sheep (sheep &key &allow-other-keys)
+(defmessage reinit-sheep (sheep &key  &allow-other-keys)
   (:documentation "Resets the sheep's parents and properties."))
 (defreply reinit-sheep (sheep &key new-parents
-                              documentation)
+                              documentation
+			      properties)
   "If :NEW-PARENTS is  provided, those parents are used when reinitializing,
-so #@DOLLY doesn't end up on the list by default"
+so DOLLY doesn't end up on the list by default."
   ;; CLOBBER TIME
   (loop for parent in (sheep-parents sheep)
      do (remove-parent parent sheep))
@@ -43,6 +44,10 @@ so #@DOLLY doesn't end up on the list by default"
   ;; MOAR PARENTS
   (add-parents (if new-parents (sheepify-list new-parents) (list (proto 'dolly)))
                sheep)
+  ;; set up some new properties.
+  (mapc (lambda (prop-spec)
+	  (apply #'add-property sheep prop-spec))
+	properties)
   ;; DOX PLOX
   (when documentation
     (setf (sheep-documentation sheep) documentation))

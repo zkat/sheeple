@@ -27,15 +27,15 @@
 
 (defmacro defproto (name sheeple properties &rest options)
   `(let ((sheep (spawn-or-reinit-sheep
-                 (proto ',name nil) 
-                 ,(canonize-sheeple sheeple)
+		 (proto ',name nil) 
+		 ,(canonize-sheeple sheeple)
 		 :properties ,(canonize-properties properties t)
-                 ,@(canonize-clone-options options))))
+		 ,@(canonize-clone-options options))))
      (unless (sheep-nickname sheep)
        (setf (sheep-nickname sheep) ',name))
      (setf (proto ',name) sheep)))
 
-(defun spawn-or-reinit-sheep (maybe-sheep parents &rest options &key properties &allow-other-keys)
+(defun spawn-or-reinit-sheep (maybe-sheep parents &rest options)
   (if maybe-sheep
       (apply #'reinit-sheep maybe-sheep :new-parents parents options)
       (apply #'spawn-sheep parents options)))

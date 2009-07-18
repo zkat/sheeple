@@ -265,7 +265,6 @@ the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
   "Standard sheep-generation macro. This variant auto-generates accessors."
   `(let ((sheep (spawn-sheep
                  ,(canonize-sheeple sheeple)
-		 :property-specs ,(canonize-properties properties)
+		 :properties ,(canonize-properties properties)
                  ,@(canonize-clone-options options))))
-
      sheep))

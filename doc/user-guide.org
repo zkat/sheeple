@@ -92,8 +92,8 @@
     Examples:
 
       (clone) => #<Sheep #x15007E06>
-      (sheep-parents *) => (#<Sheep AKA: DOLLY #x14C8947E>)
-      (clone (clone) (clone) (clone)) => #<Sheep #x15007E06>
+      (sheep-parents (clone)) => (#<Sheep AKA: DOLLY #x14C8947E>)
+      (clone (clone)) => #<Sheep #x15007E06>
 
     Side effects: Parents are added using ADD-PARENT, which may have side-effects.
     
@@ -605,10 +605,29 @@
            (sheep-hierarchy-list sheep) => (SHEEP's hierarchy list)
 
 **** SHEEP-PARENTS
-     Returns an ordered list of SHEEP's direct parent objects, in the order they were provided to
-     CLONE/DEFCLONE/DEFPROTO.
+     Syntax:
+     sheep-parents sheep => direct-parents-list
 
-           (sheep-parents sheep) => (sheep's-parents-list)
+     Arguments and values:
+     sheep -- any non-orphaned sheep
+     direct-parents-list -- a list of the direct parents of the sheep
+
+     Description:
+     Returns an ordered list of the sheep's direct parent objects, in the order that they were
+     provided to clone/defclone/defproto. In a sense, this is the inverse function of CLONE.
+
+     Examples:
+
+     (setf parent (clone)
+           child1 (clone parent)
+           child2 (clone parent (proto 'dolly)))
+
+     parent => #<Sheep #x30004135F9BD>
+
+     (sheep-parents child1) => (#<Sheep #x30004135F9BD>)
+
+     (sheep-parents child2)
+       => (#<Sheep #x30004135F9BD> #<Sheep AKA: DOLLY #x30004129148D>)
 
 **** SHEEP-DIRECT-ROLES
      Returns an unordered set of ROLE metaobjects that represent what replies SHEEP is a

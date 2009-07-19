@@ -12,24 +12,49 @@
 ;;;
 ;;; Properties
 ;;;
+(defclass property-spec ()
+  ((name :initarg :name :accessor property-spec-name)
+   (allocation :initarg :allocation :accessor property-spec-allocation)
+   (readers :initform nil :initarg :readers :accessor property-spec-readers)
+   (writers :initform nil :initarg :writers :accessor property-spec-writers)))
+
+(defun property-spec-equal-p (spec1 spec2)
+  (with-slots ((name1 name) (allocation1 allocation) (readers1 readers) (writers1 writers)) spec1
+    (with-slots ((name2 name) (allocation2 allocation) (readers2 readers) (writers2 writers)) spec2
+      (and (equal name1 name2)
+           (equal allocation1 allocation2)
+           (equal readers1 readers2)
+           (equal writers1 writers2)))))
+
 (defgeneric add-property (sheep property-name value &key)
   (:documentation "Adds a property named PROPERTY-NAME to SHEEP, initalized with VALUE."))
-(defmethod add-property (sheep property-name value &key readers writers (make-accessors-p t))
+(defmethod add-property ((sheep standard-sheep) property-name value 
+                         &key readers writers 
+                         (make-accessors-p t)
+                         (allocation :sheep))
   "Adds a property to SHEEP. Optional Readers and Writers must be a list of
 valid function names (in symbol or cons form) that will be used to create responses specialized
 on SHEEP. If make-accessors-p is T, the symbol in PROPERTY-NAME will be used to generate accessors
 with the format Reader=PROPERTY-NAME, Writer=(SETF PROPERTY-NAME)"
-  (let ((property-table (sheep-property-value-table sheep)))
-    (when (has-direct-property-p sheep property-name)
-      (warn "~A already has a direct property named ~A. Overwriting." sheep property-name))
-    (setf (gethash property-name property-table) value))
-  (when readers
-    (add-readers-to-sheep readers property-name sheep))
-  (when writers
-    (add-writers-to-sheep writers property-name sheep))
-  (when make-accessors-p
-    (add-readers-to-sheep `(,property-name) property-name sheep)
-    (add-writers-to-sheep `((setf ,property-name)) property-name sheep))
+  (if (eq allocation :sheep)
+      (let ((property-table (sheep-property-value-table sheep)))
+        (when (has-direct-property-p sheep property-name)
+          (warn "~A already has a direct property named ~A. Overwriting." sheep property-name))
+        (setf (gethash property-name property-table) value))
+      (error "Standard sheep can only have :sheep allocation."))
+  (let ((property-spec (or (gethash property-name (property-spec-table sheep))
+                           (make-instance 'property-spec :name property-name))))
+   (when readers
+     (add-readers-to-sheep readers property-name sheep)
+     (pushnew readers (property-spec-readers sheep)))
+   (when writers
+     (add-writers-to-sheep writers property-name sheep))
+     (pushnew writers (property-spec-writers sheep))
+   (when make-accessors-p
+     (add-readers-to-sheep `(,property-name) property-name sheep)
+     (pushnew readers `((setf ,property-name)) :test #'equal)
+     (add-writers-to-sheep `((setf ,property-name)) property-name sheep)
+     (pushnew writers `(,property-name) :test #'equal)))
   sheep)
 
 (defgeneric has-direct-property-p (sheep property-name)
@@ -106,20 +131,6 @@ is signaled."))
       (error "Property ~A does not exist for sheep ~A." property-name sheep)))
 
 ;; Reflection
-(defclass property-spec ()
-  ((name :initarg :name :accessor property-spec-name)
-   (value :initarg :value :accessor property-spec-value)
-   (readers :initform nil :initarg :readers :accessor property-spec-readers)
-   (writers :initform nil :initarg :writers :accessor property-spec-writers)))
-
-(defun property-spec-equal-p (spec1 spec2)
-  (with-slots ((name1 name) (value1 value) (readers1 readers) (writers1 writers)) spec1
-    (with-slots ((name2 name) (value2 value) (readers2 readers) (writers2 writers)) spec2
-      (and (equal name1 name2)
-           (equal value1 value2)
-           (equal readers1 readers2)
-           (equal writers1 writers2)))))
-
 (defmethod print-object ((property-spec property-spec) stream)
   (print-unreadable-object (property-spec stream :identity t)
     (format stream "Property-Spec ~A" (property-spec-name property-spec))))
@@ -129,14 +140,9 @@ is signaled."))
      collect (direct-property-spec sheep pname)))
 
 (defun direct-property-spec (sheep property-name)
-  (let ((value (direct-property-value sheep property-name))
-        (readers (remove-duplicates (loop for reader-name in (gethash property-name
-                                                                      (%property-readers sheep)) 
-                                       collect reader-name) :test #'equal))
-        (writers (remove-duplicates (loop for writer-name in (gethash property-name
-                                                                      (%property-writers sheep)) 
-                                       collect writer-name) :test #'equal)))
-    (make-instance 'property-spec :name property-name :value value :readers readers :writers writers)))
+  (unless (has-direct-property-p sheep property-name)
+    (error "No such property"))
+  (gethash property-name (property-spec-table sheep)))
 
 (defgeneric property-owner (sheep property-name &optional errorp)
   (:documentation "Returns the sheep object with a direct-property called PROPERTY-NAME from which
@@ -178,10 +184,12 @@ SHEEP, including inherited ones."))
   (let ((all-properties (available-properties sheep)))
     (format stream
             "~&Sheep: ~A~%Properties:~% ~{~{~&~3TName: ~13T~A~%~3TValue: ~13T~S~%~
-             ~3TReaders: ~13T~A~%~3TWriters: ~13T~A~%~3TOwner: ~13T~A~%~%~}~}"
+             ~3TAllocation: ~13T~A~%~3TReaders: ~13T~A~%~3TWriters: ~13T~A~%~
+             ~3TOwner: ~13T~A~%~%~}~}"
             sheep (loop for property in all-properties
                      collect (list (property-spec-name property)
-                                   (property-spec-value property)
+                                   (direct-property-value shee property)
+                                   (property-spec-allocation property)
                                    (property-spec-readers property)
                                    (property-spec-writers property)
                                    (property-owner sheep (property-spec-name property)))))))
@@ -193,10 +201,11 @@ SHEEP, including inherited ones."))
           "~&Sheep: ~A~%~
            Direct Properties: ~%~%~
            ~{~{~&~3TName: ~A~%~3TValue: ~S~%~
-           ~3TReaders: ~A~%~3TWriters: ~A~%~%~}~}"
+           ~3TAllocation: ~A~%~3TReaders: ~A~%~3TWriters: ~A~%~%~}~}"
           sheep (loop for property in (sheep-direct-properties sheep)
                    collect (list (property-spec-name property)
-                                 (property-spec-value property)
+                                 (property-value sheep property)
+                                 (property-spec-allocation property)
                                  (property-spec-readers property)
                                  (property-spec-writers property)))))
 

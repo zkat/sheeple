@@ -5,8 +5,8 @@
 ;; Sheep creation, cloning, inspection
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
+(declaim (optimize (debug 1) (safety 1) (speed 3)))
 
-;(declaim (optimize (debug 1) (safety 1) (speed 3)))
 (defvar *max-sheep-id* 0)
 (defclass standard-sheep ()
   ((nickname :accessor sheep-nickname :initform nil)
@@ -16,8 +16,8 @@
                      :initform  (make-weak-hash-table :weakness :key :test #'eq))
    (property-value-table :accessor sheep-property-value-table
                          :initform (make-hash-table :test #'eq))
-   (readers :accessor %property-readers :initform (make-hash-table :test #'eq))
-   (writers :accessor %property-writers :initform (make-hash-table :test #'eq))
+   (property-spec-table :accessor sheep-property-spec-table
+                        :initform (make-hash-table :test #'eq))
    (direct-roles :accessor sheep-direct-roles :initform nil)
    (hierarchy-list :accessor sheep-hierarchy-list :initform nil)
    (id :accessor sheep-id :initform (incf *max-sheep-id*))))

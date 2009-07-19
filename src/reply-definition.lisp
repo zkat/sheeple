@@ -175,7 +175,6 @@
 (defun add-readers-to-sheep (readers prop-name sheep)
   (loop for reader in readers
      do
-       (pushnew reader (gethash prop-name (%property-readers sheep)))
        (ensure-message reader :lambda-list '(sheep))
        (ensure-reply reader
 			:lambda-list '(sheep)
@@ -188,7 +187,6 @@
 (defun add-writers-to-sheep (writers prop-name sheep)
   (loop for writer in writers
      do
-       (pushnew writer (gethash prop-name (%property-writers sheep)))
        (ensure-message writer :lambda-list '(new-value sheep))
        (ensure-reply writer
 			:lambda-list '(new-value sheep)

@@ -22,18 +22,6 @@
    (hierarchy-list :accessor sheep-hierarchy-list :initform nil)
    (id :accessor sheep-id :initform (incf *max-sheep-id*))))
 
-;;; TODO - Where should INIT-SHEEP actually go, after all this?
-;;;        It would be nice if it was called -after- properties were
-;;;        added when using defclone/defproto. Or maybe the standard
-;;;        reply should add property-definitions handed to spawn-sheep
-;;;        by defclone/defproto?
-;;; How to build a full sheep object:
-;;; 1. Allocate an instance of its metaclass
-;;; 2. Add its direct parents
-;;; --- Can now define and run replies on this object, since it has a hierarchy list.
-;;; 3. Add any properties we want to it.
-;;; 4. Define any replies, including accessors.
-;;; 5. Free to go
 (defun allocate-sheep (&optional (class 'standard-sheep))
   (make-instance class))
 

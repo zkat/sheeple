@@ -3,9 +3,10 @@
    I should go over the entirety of sheeple and start filling the thing with restarts.
    If this is going to be usably dynamic, it needs to have proper reporting of crummy conditions,
    and a nice way of recovering from them.
-** TODO Property Metaobject
-   PROPERTY-VALUE should call a message that dispatches based on the metaobject
-   of the property being looked up. Important for PSheep!
+*** TODO Inconsistent lambda lists
+   Adlai pointed out how CLOS offers a restart when lambda-lists are inconsistent,
+   offering to remove inconsistent methods. It's useful for interactively working.
+   Could I support something like this in sheeple?   
 ** TODO Dynamic reply handling
    Under CLOS, it's possible to dynamically mess with replies. Sheeple is currently
    not as flexible in this regard. Let's get fixing.
@@ -63,10 +64,18 @@
 ** TODO Improve documentation
 *** TODO Go through the whole thing and make it more CLHS-like (only partially done)
 *** TODO Put together html and pdf versions of user-guide.org
-** TODO Inconsistent lambda lists
-   Adlai pointed out how CLOS offers a restart when lambda-lists are inconsistent,
-   offering to remove inconsistent methods. It's useful for interactively working.
-   Could I support something like this in sheeple?
+** TODO Integration
+*** TODO With Lisp
+    The backtraces are awful. Good god.
+*** TODO With SLIME
+    It would be nice if SLIME had better support for highlighting and indentation
+    of Sheeple forms, and if it had facilities for inspecting sheeple objects.
+    Being able to do M-. and stuff would also be a HUGE plus.
+* TODO 2.2
+** TODO Property Metaobject
+   PROPERTY-VALUE should call a message that dispatches based on the metaobject
+   of the property being looked up. Important for PSheep!
+** TODO Start writing unit-tests for Message/reply stuff
 * DONE 2.1
 ** DONE Replace find-proto with proto
    Let's try and shorten this and see if it helps.

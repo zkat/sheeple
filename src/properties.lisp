@@ -28,42 +28,43 @@
 
 (defgeneric add-property (sheep property-name value &key)
   (:documentation "Adds a property named PROPERTY-NAME to SHEEP, initalized with VALUE."))
+(defmethod add-property :after ((sheep standard-sheep) property-name value
+                                &key readers writers (make-accessors-p t))
+  "Once the property is allocated, this method takes care of creating the property-spec object
+and adding readers/writers/accessors."
+  (declare (ignore value))
+  (let ((property-spec (or (gethash property-name (sheep-property-spec-table sheep))
+                           (make-instance 'property-spec :name property-name))))
+    (when readers
+      (add-readers-to-sheep readers property-name sheep)
+      (pushnew readers (property-spec-readers property-spec)))
+    (when writers
+      (add-writers-to-sheep writers property-name sheep))
+    (pushnew writers (property-spec-writers property-spec))
+    (when make-accessors-p
+      (add-readers-to-sheep `(,property-name) property-name sheep)
+      (pushnew `((setf ,property-name)) (property-spec-readers property-spec) :test #'equal)
+      (add-writers-to-sheep `((setf ,property-name)) property-name sheep)
+      (pushnew `(,property-name) (property-spec-writers property-spec) :test #'equal))
+    (setf (gethash property-name (sheep-property-spec-table sheep))
+          property-spec)))
+
 (defmethod add-property ((sheep standard-sheep) property-name value 
-                         &key readers writers 
-                         (make-accessors-p t)
-                         (allocation :sheep))
-  "Adds a property to SHEEP. Optional Readers and Writers must be a list of
-valid function names (in symbol or cons form) that will be used to create responses specialized
-on SHEEP. If make-accessors-p is T, the symbol in PROPERTY-NAME will be used to generate accessors
-with the format Reader=PROPERTY-NAME, Writer=(SETF PROPERTY-NAME)"
+                         &key (allocation :sheep))
+  "Allocates VALUE as one of SHEEP's direct-properties. :allocation determines where the value
+is actually allocated. For the standard method, anything other than :sheep signals an error."
   (if (eq allocation :sheep)
       (let ((property-table (sheep-property-value-table sheep)))
         (when (has-direct-property-p sheep property-name)
           (warn "~A already has a direct property named ~A. Overwriting." sheep property-name))
-        (setf (gethash property-name property-table) value))
-      (error "Standard sheep can only have :sheep allocation."))
-  (let ((property-spec (or (gethash property-name (property-spec-table sheep))
-                           (make-instance 'property-spec :name property-name))))
-   (when readers
-     (add-readers-to-sheep readers property-name sheep)
-     (pushnew readers (property-spec-readers sheep)))
-   (when writers
-     (add-writers-to-sheep writers property-name sheep))
-     (pushnew writers (property-spec-writers sheep))
-   (when make-accessors-p
-     (add-readers-to-sheep `(,property-name) property-name sheep)
-     (pushnew readers `((setf ,property-name)) :test #'equal)
-     (add-writers-to-sheep `((setf ,property-name)) property-name sheep)
-     (pushnew writers `(,property-name) :test #'equal)))
-  sheep)
+        (setf (gethash property-name property-table) value)
+        sheep)
+      (error "Standard sheep can only have :sheep allocation.")))
 
 (defgeneric has-direct-property-p (sheep property-name)
   (:documentation "Returns T if SHEEP has a direct property with name PROPERTY-NAME, NIL otherwise."))
 (defmethod has-direct-property-p ((sheep standard-sheep) property-name)
-  (multiple-value-bind (value has-p)
-      (gethash property-name (sheep-property-value-table sheep))
-    value
-    has-p))
+  (nth-value 1 (gethash property-name (sheep-property-value-table sheep))))
 
 (defgeneric remove-property (sheep property-name)
   (:documentation "If PROPERTY-NAME is a direct property of SHEEP, this function removes it. If
@@ -72,12 +73,14 @@ hierarchy list, an error is signaled. This function returns SHEEP after property
 (defmethod remove-property ((sheep standard-sheep) property-name)
   (if (has-direct-property-p sheep property-name)
       (progn (remhash property-name (sheep-property-value-table sheep))
+             (remhash property-name (sheep-property-spec-table sheep))
              sheep)
       (error "Cannot remove property: ~A is not a direct property of ~A" property-name sheep)))
 
 (defgeneric remove-all-direct-properties (sheep))
 (defmethod remove-all-direct-properties ((sheep standard-sheep))
   (clrhash (sheep-property-value-table sheep))
+  (clrhash (sheep-property-spec-table sheep))
   sheep)
 
 (defgeneric direct-property-value (sheep property-name)
@@ -141,8 +144,8 @@ is signaled."))
 
 (defun direct-property-spec (sheep property-name)
   (unless (has-direct-property-p sheep property-name)
-    (error "No such property"))
-  (gethash property-name (property-spec-table sheep)))
+    (signal 'unbound-property))
+  (nth-value 0 (gethash property-name (sheep-property-spec-table sheep))))
 
 (defgeneric property-owner (sheep property-name &optional errorp)
   (:documentation "Returns the sheep object with a direct-property called PROPERTY-NAME from which
@@ -188,7 +191,7 @@ SHEEP, including inherited ones."))
              ~3TOwner: ~13T~A~%~%~}~}"
             sheep (loop for property in all-properties
                      collect (list (property-spec-name property)
-                                   (direct-property-value shee property)
+                                   (direct-property-value sheep property)
                                    (property-spec-allocation property)
                                    (property-spec-readers property)
                                    (property-spec-writers property)

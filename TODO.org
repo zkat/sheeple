@@ -74,8 +74,10 @@
 ** TODO Standard Reply Combination
 *** TODO Remove CALL-NEXT-REPLY from :before and :after replies
 ** TODO Property Metaobject
-   PROPERTY-VALUE should call a message that dispatches based on the metaobject
-   of the property being looked up. Important for PSheep!
+*** DONE Implement property-spec-based dispatch for property-related stuff.
+    PROPERTY-VALUE should call a message that dispatches based on the metaobject
+    of the property being looked up. Important for PSheep!
+*** TODO Write full unit tests to make sure it all works as expected.
 ** TODO Start writing unit-tests for Message/reply stuff
 * DONE 2.1
 ** DONE Replace find-proto with proto

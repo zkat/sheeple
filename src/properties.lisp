@@ -46,8 +46,9 @@ hierarchy list, an error is signaled. This function returns SHEEP after property
 (defgeneric remove-all-direct-properties (sheep)
   (:documentation "Wipes out all direct properties and their values from SHEEP."))
 
-(defgeneric has-direct-property-p (sheep property)
-  (:documentation "Returns T if SHEEP has PROPERTY as a direct property. NIL otherwise."))
+(defgeneric has-direct-property-p (sheep property-name)
+  (:documentation "Returns T if SHEEP has a property called PROPERTY-NAME as a direct property. 
+NIL otherwise."))
 
 (defgeneric has-property-p (sheep property-name)
   (:documentation "Returns T if calling PROPERTY-VALUE on SHEEP using the same property-name
@@ -76,6 +77,9 @@ NIL is returned."))
 (defgeneric available-properties (sheep)
   (:documentation "Returns a list of property-spec objects describing all properties available to
 SHEEP, including inherited ones."))
+
+(defgeneric direct-property-spec (sheep property-name)
+  (:documentation "Returns the direct local spec for a property named PROPERTY-NAME."))
 
 (defgeneric property-summary (sheep &optional stream)
   (:documentation "Provides a pretty-printed representation of SHEEP's available properties."))
@@ -194,7 +198,7 @@ and adding readers/writers/accessors."
   (loop for pname being the hash-keys of (sheep-property-value-table sheep)
      collect (direct-property-spec sheep pname)))
 
-(defun direct-property-spec (sheep property-name)
+(defmethod direct-property-spec ((sheep standard-sheep) property-name)
   (unless (has-direct-property-p sheep property-name)
     (signal 'unbound-property))
   (nth-value 0 (gethash property-name (sheep-property-spec-table sheep))))
@@ -204,8 +208,7 @@ and adding readers/writers/accessors."
          (loop for obj in (sheep-hierarchy-list sheep)
             when (has-direct-property-p obj property-name)
             return obj)))
-    (if owner
-        owner
+    (or owner
         (if errorp
             (error 'unbound-property
                    :format-control "Property ~A is unbound for sheep ~S"

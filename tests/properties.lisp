@@ -11,7 +11,9 @@
 ;;; Properties
 ;;;
 (def-suite properties :in sheeple)
-(in-suite properties)
+
+(def-suite properties-basic :in properties)
+(in-suite properties-basic)
 
 (test add-property
   (let ((sheep (clone)))
@@ -21,7 +23,7 @@
     (is (participant-p sheep 'var))
     (is (participant-p sheep '(setf var)))
     (is (equal "value" (var sheep)))
-    (setf (var sheep) "new-value")
+    (is (equal "new-value" (setf (var sheep) "new-value")))
     (is (equal "new-value" (var sheep)))
     (is (eql sheep (add-property sheep 'new-var "new-value" :make-accessors-p nil)))
     (is (equal "new-value" (direct-property-value sheep 'new-var)))
@@ -72,9 +74,31 @@
     (is (has-property-p child 'parent-var))
     (is (not (has-property-p parent 'something-else)))))
 
-(def-suite property-reflection :in properties)
-(in-suite property-reflection)
+(def-suite property-mop :in properties)
+(in-suite property-mop)
 
+;; MOP behavior
+(test add-property
+  ;; TODO - check that property metaobjects are being created properly
+  ;; TODO - check that different property metaobject class instances are created
+  ;;        depending on the class of the sheep.
+  )
+(test remove-property
+  ;; TODO - check that property metaobjects are being disposed of properly
+  )
+(test remove-all-direct-properties
+  ;; TODO - simple test to make sure basic behavior overriding works.
+  )
+;; These two are only supposed to be dispatchable on SHEEP for now.
+(test has-direct-property-p)
+(test has-property-p)
+
+;; Check that property-spec and standard-sheep can both be subclassed, and behavior
+;; extended for both of these.
+(test direct-property-value)
+(test property-value) ; includes (setf property-value)
+
+;; Reflection stuff
 (test property-owner
   (let* ((parent (defclone () ((var "value"))))
          (child (defclone (parent) ((child-var "child-value")))))
@@ -94,12 +118,14 @@
     (is (eql 2 (length (available-properties sheep))))))
 
 (test direct-property-spec
+  ;; TODO - this should check that the standard property-spec's capabilities work properly.
   (let ((sheep (defclone () ((var "value" :accessor var)))))
     (is (eql (find-class 'property-spec)
              (class-of (direct-property-spec sheep 'var))))
     (signals unbound-property (direct-property-spec sheep 'some-other-property))))
 
 (test sheep-direct-properties
+  ;; TODO - This one just needs to check that all the direct property spec metaobjects are returned.
   (let ((sheep (defclone () ((var "value" :accessor var) (another-var "another-value")))))
     (is (eql 2 (length (sheep-direct-properties sheep))))
     (is (eql (find-class 'property-spec)

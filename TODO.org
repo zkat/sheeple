@@ -1,4 +1,8 @@
 * TODO Later
+** TODO Better error handling
+   I should go over the entirety of sheeple and start filling the thing with restarts.
+   If this is going to be usably dynamic, it needs to have proper reporting of crummy conditions,
+   and a nice way of recovering from them.
 ** TODO Property Metaobject
    PROPERTY-VALUE should call a message that dispatches based on the metaobject
    of the property being looked up. Important for PSheep!

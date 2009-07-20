@@ -18,7 +18,6 @@
    The Standard Method Combination of CLOS is the one with :around, :after, :before,
    and "primary" replies. It would be good to get Sheeple's standard reply combination
    to behave in the same way as this.
-*** TODO Remove CALL-NEXT-REPLY from :before and :after replies
 *** TODO Enable nesting of :around replies
 *** TODO Ensure proper order of replies:
     Most specific :around
@@ -72,6 +71,8 @@
     of Sheeple forms, and if it had facilities for inspecting sheeple objects.
     Being able to do M-. and stuff would also be a HUGE plus.
 * TODO 2.2
+** TODO Standard Reply Combination
+*** TODO Remove CALL-NEXT-REPLY from :before and :after replies
 ** TODO Property Metaobject
    PROPERTY-VALUE should call a message that dispatches based on the metaobject
    of the property being looked up. Important for PSheep!

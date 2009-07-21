@@ -101,6 +101,11 @@ is actually allocated. For the standard method, anything other than :sheep signa
         (when (has-direct-property-p sheep property-name)
           (warn "~A already has a direct property named ~A. Overwriting." sheep property-name))
         (setf (gethash property-name property-table) value)
+        (setf (gethash property-name 
+                       (sheep-property-spec-table sheep)
+                       (make-instance 'property-spec
+                                      :name property-name
+                                      :allocation allocation)))
         sheep)
       (error "Standard sheep can only have :sheep allocation.")))
 
@@ -109,8 +114,7 @@ is actually allocated. For the standard method, anything other than :sheep signa
   "Once the property is allocated, this method takes care of creating the property-spec object
 and adding readers/writers/accessors."
   (declare (ignore value))
-  (let ((property-spec (or (gethash property-name (sheep-property-spec-table sheep))
-                           (make-instance 'property-spec :name property-name))))
+  (let ((property-spec (gethash property-name (sheep-property-spec-table sheep))))
     (when readers
       (add-readers-to-sheep readers property-name sheep)
       (pushnew readers (property-spec-readers property-spec)))

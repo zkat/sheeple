@@ -78,10 +78,20 @@
 (in-suite property-mop)
 
 ;; MOP behavior
+(defclass fancy-property-sheep (standard-sheep)
+  ((fancy-property-table :initform (make-hash-table :test #'eq))))
+(defclass fancy-property (property-spec))
+
+(defmethod add-property ((sheep fancy-property-sheep)
+                         property-name &key (allocation :fancy))
+  (if (eq allocation :fancy)
+      ()))
 (test add-property
   ;; TODO - check that property metaobjects are being created properly
   ;; TODO - check that different property metaobject class instances are created
   ;;        depending on the class of the sheep.
+  (let ((fancy-clone (defclone () (())
+                         ))))
   )
 (test remove-property
   ;; TODO - check that property metaobjects are being disposed of properly

@@ -110,36 +110,32 @@ SHEEP, including inherited ones."))
 
 ;;; Existential
 (defmethod add-property ((sheep standard-sheep) property-name value 
-                         &key readers writers (make-accessor-p t)
-                         (allocation :sheep))
-  "Allocates VALUE as one of SHEEP's direct-properties. :allocation determines where the value
-is actually allocated. For the standard method, anything other than :sheep signals an error."
+                         &key readers writers (make-accessor-p t))
+  "Allocates VALUE as one of SHEEP's direct-properties."
   ;; What does this actually have to do, overall?
-  ;; 1. Create and register a property-spec instance with the sheep.
+  ;; 1. Create and register a property-spec instance with the sheep. The property new exists.
   ;; 2. Set the value.
   ;; 3. Add readers/writers/etc.
-  (if (eq allocation :sheep)
-      (let ((property-table (sheep-property-value-table sheep)))
-        (when (has-direct-property-p sheep property-name)
-          (warn "~A already has a direct property named ~A. Overwriting." sheep property-name))
-        (add-property-spec-to-sheep sheep (make-instance (property-spec-class sheep)
-                                                         :name property-name
-                                                         :allocation allocation))
-        (setf (property-value sheep property-name) value)
-        (let ((property-spec (gethash property-name (sheep-property-spec-table sheep))))
-          (when readers
-            (add-readers-to-sheep readers property-name sheep)
-            (pushnew readers (property-spec-readers property-spec)))
-          (when writers
-            (add-writers-to-sheep writers property-name sheep))
-          (pushnew writers (property-spec-writers property-spec))
-          (when make-accessor-p
-            (add-readers-to-sheep `(,property-name) property-name sheep)
-            (pushnew `((setf ,property-name)) (property-spec-readers property-spec) :test #'equal)
-            (add-writers-to-sheep `((setf ,property-name)) property-name sheep)
-            (pushnew `(,property-name) (property-spec-writers property-spec) :test #'equal)))
-        sheep)
-      (error "Standard sheep can only have :sheep allocation.")))
+  (let ((property-table (sheep-property-value-table sheep)))
+    (when (has-direct-property-p sheep property-name)
+      (warn "~A already has a direct property named ~A. Overwriting." sheep property-name))
+    (add-property-spec-to-sheep sheep (make-instance (property-spec-class sheep)
+                                                     :name property-name
+                                                     :allocation allocation))
+    (setf (property-value sheep property-name) value)
+    (let ((property-spec (gethash property-name (sheep-property-spec-table sheep))))
+      (when readers
+        (add-readers-to-sheep readers property-name sheep)
+        (pushnew readers (property-spec-readers property-spec)))
+      (when writers
+        (add-writers-to-sheep writers property-name sheep))
+      (pushnew writers (property-spec-writers property-spec))
+      (when make-accessor-p
+        (add-readers-to-sheep `(,property-name) property-name sheep)
+        (pushnew `((setf ,property-name)) (property-spec-readers property-spec) :test #'equal)
+        (add-writers-to-sheep `((setf ,property-name)) property-name sheep)
+        (pushnew `(,property-name) (property-spec-writers property-spec) :test #'equal)))
+    sheep))
 
 (defmethod remove-property ((sheep standard-sheep) (property-name symbol))
   (if property-name

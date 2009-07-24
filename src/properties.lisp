@@ -110,7 +110,8 @@ SHEEP, including inherited ones."))
 
 ;;; Existential
 (defmethod add-property ((sheep standard-sheep) property-name value 
-                         &key readers writers (make-accessor-p t))
+                         &key readers writers (make-accessor-p t)
+                         (property-spec-class 'property-spec))
   "Allocates VALUE as one of SHEEP's direct-properties."
   ;; What does this actually have to do, overall?
   ;; 1. Create and register a property-spec instance with the sheep. The property new exists.
@@ -119,9 +120,8 @@ SHEEP, including inherited ones."))
   (let ((property-table (sheep-property-value-table sheep)))
     (when (has-direct-property-p sheep property-name)
       (warn "~A already has a direct property named ~A. Overwriting." sheep property-name))
-    (add-property-spec-to-sheep sheep (make-instance (property-spec-class sheep)
-                                                     :name property-name
-                                                     :allocation allocation))
+    (add-property-spec-to-sheep sheep (make-instance property-spec-class
+                                                     :name property-name))
     (setf (property-value sheep property-name) value)
     (let ((property-spec (gethash property-name (sheep-property-spec-table sheep))))
       (when readers

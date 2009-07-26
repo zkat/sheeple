@@ -105,8 +105,8 @@
   (let ((reply (find-if (lambda (msg)
 			    (equal (reply-qualifiers msg)
 				   qualifiers))
-			  (%find-applicable-replies
-			   message participants :errorp nil))))
+                        (%find-applicable-replies
+                         message participants :errorp nil))))
     (when (and reply
 	       (every (lambda (sheep)
 			(participant-p sheep (reply-name reply)))

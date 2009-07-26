@@ -2,10 +2,8 @@
 
 ;;;; tests/messages.lisp
 ;;;;
-;;;; Unit tests for message-related stuff
+;;;; Unit tests for messages and replies
 ;;;;
-;;;; Note: Holy bejesus this entire thing blows fucking balls and needs to be
-;;;;       seriously fucking cleaned up holy fuck.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
@@ -15,7 +13,26 @@
 
 (in-suite message-definition)
 
-(test message-p)
+(test message-class
+  (let ((test-message (%make-message :name 'name
+                                     :lambda-list 'lambda-list
+                                     :replies 'replies
+                                     :documentation "dox")))
+    (is (message-p test-message))
+    (with-accessors ((name          message-name)
+                     (lambda-list   message-lambda-list)
+                     (replies       message-replies)
+                     (memo-vector   message-memo-vector)
+                     (arg-info      message-arg-info)
+                     (documentation message-documentation))
+        test-message
+      (is (eq 'name        (message-name test-message)))
+      (is (eq 'lambda-list (message-lambda-list test-message)))
+      (is (eq 'replies     (message-replies test-message)))
+      (is (typep memo-vector '(vector t 40)))
+      (is (typep arg-info 'arg-info))
+      (is (string= documentation "dox")))))
+
 (test find-message)
 (test forget-all-messages)
 (test forget-message)

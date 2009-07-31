@@ -36,15 +36,11 @@
                                      :lambda-list 'lambda-list
                                      :replies 'replies
                                      :documentation "dox")))
-    (setf (find-message 'name) test-message
-          (find-message :1) (%make-message :documentation "1"))
+    (setf (find-message 'name) test-message)
     (is (eq test-message (find-message 'name)))
-    (is (equal "1" (message-documentation (find-message :1))))
     (forget-message 'name)
-    (is (eq nil (find-message 'name nil)))
-    (signals error (find-message 'name))
-    (forget-all-messages)
-    (signals error (find-message :1))))
+    (is-false (find-message 'name nil))
+    (signals error (find-message 'name))))
 
 (test finalize-message)
 (test ensure-message)

@@ -38,7 +38,9 @@
 ;;; Message table
 ;;; - We store all messages here, making them globally accessible by using #'find-message
 ;;; Maybe this should just be (defvar *message-table*)? I think that's better. - Adlai
-(let ((message-table (make-hash-table :test #'eq)))
+;;; Why is it throwing an error when the hash table is :test #'eq? That would be a better
+;;; test, imo, since message are sorted by their symbol, no? - Adlai
+(let ((message-table (make-hash-table :test #'equal)))
 
   (defun find-message (name &optional (errorp t))
     (let ((msg (gethash name message-table)))

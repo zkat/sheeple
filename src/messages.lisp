@@ -37,7 +37,8 @@
 
 ;;; Message table
 ;;; - We store all messages here, making them globally accessible by using #'find-message
-(let ((message-table (make-hash-table :test #'equal)))
+;;; Maybe this should just be (defvar *message-table*)? I think that's better. - Adlai
+(let ((message-table (make-hash-table :test #'eq)))
 
   (defun find-message (name &optional (errorp t))
     (let ((msg (gethash name message-table)))
@@ -45,24 +46,23 @@
 	     (error 'no-such-message
 		    :format-control "There is no message named ~A"
 		    :format-args (list name)))
-	    ((null msg)
-	     nil)
-	    (t
-	     msg))))
-  
+	    ((null msg) nil)
+	    (t msg))))
+
   (defun (setf find-message) (new-value name)
     (setf (gethash name message-table) new-value))
-  
+
   (defun forget-all-messages ()
     (clrhash message-table)
     t)
 
+  ;; Why do we need this? - Adlai
   (defun clear-all-message-caches ()
     (maphash (lambda (k v)
 	       (declare (ignore k))
 	       (clear-memo-table v))
 	     message-table))
-  
+
   (defun forget-message (name)
     (remhash name message-table))
   ) ; end message table closure

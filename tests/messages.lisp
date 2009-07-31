@@ -8,9 +8,7 @@
 (in-package :sheeple)
 
 (def-suite messages :in sheeple)
-
 (def-suite message-definition :in messages)
-
 (in-suite message-definition)
 
 (test message-class
@@ -33,9 +31,21 @@
       (is (typep arg-info 'arg-info))
       (is (string= documentation "dox")))))
 
-(test find-message)
-(test forget-all-messages)
-(test forget-message)
+(test message-table
+  (let ((test-message (%make-message :name 'name
+                                     :lambda-list 'lambda-list
+                                     :replies 'replies
+                                     :documentation "dox")))
+    (setf (find-message 'name) test-message
+          (find-message :1) (%make-message :documentation "1"))
+    (is (eq test-message (find-message 'name)))
+    (is (equal "1" (message-documentation (find-message :1))))
+    (forget-message 'name)
+    (is (eq nil (find-message 'name nil)))
+    (signals error (find-message 'name))
+    (forget-all-messages)
+    (signals error (find-message :1))))
+
 (test finalize-message)
 (test ensure-message)
 (test defmessage)

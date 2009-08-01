@@ -53,7 +53,7 @@
          (child (defclone (parent) ((child-var "bar")))))
     (is (equal "foo" (direct-property-value parent 'parent-var)))
     (is (equal "bar" (direct-property-value child 'child-var)))
-    (signals unbound-property (direct-property-value child 'something-else))))
+    (signals unbound-direct-property (direct-property-value child 'something-else))))
 
 (test property-value ;; this should have (setf property-value) in it, too.
   (let* ((parent (defclone () ((parent-var "foo"))))
@@ -134,7 +134,7 @@
   (let ((sheep (defclone () ((var "value" :accessor var)))))
     (is (eql (find-class 'standard-property)
              (class-of (direct-property-metaobject sheep 'var))))
-    (signals unbound-property (direct-property-metaobject sheep 'some-other-property))))
+    (signals unbound-direct-property (direct-property-spec sheep 'some-other-property))))
 
 (test sheep-direct-properties
   ;; TODO - This one just needs to check that all the direct property spec metaobjects are returned.

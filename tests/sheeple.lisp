@@ -325,4 +325,4 @@
     (is (equal "another-one" (something-else test-proto))))
   ;; TODO - check that options work properly (:metaclass, :documentation, :nickname, etc)
   ;;        remember that :nickname should override defproto's own nickname-setting.
-  )
+  (makunbound '=test-proto=))

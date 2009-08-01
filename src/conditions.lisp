@@ -22,30 +22,28 @@
                     (sheeple-error-format-control condition)
                     (sheeple-error-format-args condition)))))
 
-;;;
 ;;; Sheeple
-;;;
-(define-condition unbound-direct-property (sheeple-error)
-  ())
-
-(define-condition sheep-hierarchy-error (sheeple-error)
-  ((format-control :initform "A circular precedence graph was generated."))
+(define-condition sheep-hierarchy-error (sheeple-error) ()
+  (:default-initargs :format-control "A circular precedence graph was generated.")
   (:documentation "Signaled whenever there is a problem computing the hierarchy list."))
 
-;;; properties
-(define-condition unbound-property (sheeple-error) ())
+;;; Properties
+(define-condition unbound-direct-property (sheeple-error) ()
+  (:default-initargs :format-control "Sheep ~A has no direct property named ~A"))
+
+(define-condition unbound-property (sheeple-error) ()
+  (:default-initargs :format-control "Property ~A is unbound for sheep ~A"))
+
 (define-condition property-locked (sheeple-error) ())
 
-;;;
 ;;; Messages
-;;;
-(define-condition no-such-message (sheeple-error) ())
+(define-condition no-such-message (sheeple-error) ()
+  (:default-initargs :format-control "There is no message named ~A"))
+
 (define-condition clobbering-function-definition (sheeple-warning) ())
 (define-condition message-lambda-list-error (sheeple-error) ())
 
-;;;
-;;; Messages
-;;;
+;;; Replies
 (define-condition no-applicable-replies (sheeple-error) ())
 (define-condition no-most-specific-reply (sheeple-error) ())
 (define-condition no-primary-replies (sheeple-error) ())

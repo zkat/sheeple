@@ -72,10 +72,8 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 (defun finalize-message (message)
   (let ((name (message-name message)))
     (when (and (fboundp name)
-               (not (find-message name nil)))
-      (warn 'clobbering-function-definition
-            :format-control "Clobbering regular function or generic function definition for ~A"
-            :format-args (list name)))
+	       (not (find-message name nil)))
+      (warn 'clobbering-function-definition :format-args (list name)))
     (setf (fdefinition name) (lambda (&rest args) (apply-message message args)))))
 
 ;; This handles actual setup of the message object (and finalization)
@@ -129,10 +127,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 (defun check-msg-lambda-list (lambda-list)
   (flet ((ensure (arg ok)
            (unless ok
-             (error 'message-lambda-list-error
-                    :format-control
-                    "~@<invalid ~S ~_in the message lambda list ~S~:>"
-                    :format-args (list arg lambda-list)))))
+             (error 'message-lambda-list-error :format-args (list arg lambda-list)))))
     (multiple-value-bind (required optional restp rest keyp keys allowp
                                    auxp aux morep more-context more-count)
         (parse-lambda-list lambda-list)
@@ -158,8 +153,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
                              (null (cdr i)))))))
       ;; no &AUX allowed
       (when auxp
-        (error "&AUX is not allowed in a message lambda list: ~S"
-               lambda-list))
+        (error "&AUX is not allowed in a message lambda list: ~S" lambda-list))
       ;; Oh, *puhlease*... not specifically as per section 3.4.2 of
       ;; the ANSI spec, but the CMU CL &MORE extension does not
       ;; belong here!

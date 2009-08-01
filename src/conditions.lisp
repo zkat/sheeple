@@ -34,17 +34,30 @@
 (define-condition unbound-property (sheeple-error) ()
   (:default-initargs :format-control "Property ~A is unbound for sheep ~A"))
 
-(define-condition property-locked (sheeple-error) ())
+;;; Looks like somebody's a long way from home. - Adlai
+;;; (define-condition property-locked (sheeple-error) ())
 
 ;;; Messages
 (define-condition no-such-message (sheeple-error) ()
   (:default-initargs :format-control "There is no message named ~A"))
 
-(define-condition clobbering-function-definition (sheeple-warning) ())
-(define-condition message-lambda-list-error (sheeple-error) ())
+(define-condition clobbering-function-definition (sheeple-warning) ()
+  (:default-initargs :format-control
+      "Clobbering regular function or generit function definition for ~A"))
+
+(define-condition message-lambda-list-error (sheeple-error) ()
+  (:default-initargs
+   :format-control "~@<invalid ~S ~_in the message lambda list ~S~:>"))
 
 ;;; Replies
-(define-condition no-applicable-replies (sheeple-error) ())
-(define-condition no-most-specific-reply (sheeple-error) ())
-(define-condition no-primary-replies (sheeple-error) ())
+(define-condition no-applicable-replies (sheeple-error) ()
+  (:default-initargs :format-control
+      "There are no applicable replies for message ~A when called with args:~%~S"))
+
+;;; Another lonely soul
+;;; (define-condition no-most-specific-reply (sheeple-error) ())
+
+(define-condition no-primary-replies (sheeple-error) ()
+  (:default-initargs :format-control "There are no primary replies for message ~A."))
+
 (define-condition specialized-lambda-list-error (sheeple-error) ())

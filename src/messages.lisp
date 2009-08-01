@@ -36,38 +36,34 @@
 ;;;
 
 ;;; Message table
-;;; - We store all messages here, making them globally accessible by using #'find-message
-;;; Maybe this should just be (defvar *message-table*)? I think that's better. - Adlai
-;;; Why is it throwing an error when the hash table is :test #'eq? That would be a better
-;;; test, imo, since message are sorted by their symbol, no? - Adlai
-(let ((message-table (make-hash-table :test #'equal)))
+(defvar *message-table* (make-hash-table :test #'equal)
+  "Hashtable for storing message objects. Needs to :test #'equal because
+of setf methods, whose names are lists.")
 
-  (defun find-message (name &optional (errorp t))
-    (let ((msg (gethash name message-table)))
-      (cond ((and (null msg) errorp)
-	     (error 'no-such-message
-		    :format-control "There is no message named ~A"
-		    :format-args (list name)))
-	    ((null msg) nil)
-	    (t msg))))
+(defun find-message (name &optional (errorp t))
+  "Finds a message object in `*message-table*', given its `name'.
+Raises an error if no message is found, unless `errorp' is set to NIL."
+  (multiple-value-bind (message foundp) (gethash name *message-table*)
+    (cond (foundp message)
+          (errorp (error 'no-such-message
+                         :format-control "There is no message named ~A"
+                         :format-args (list name))))))
 
-  (defun (setf find-message) (new-value name)
-    (setf (gethash name message-table) new-value))
+(defun (setf find-message) (new-value name)
+  (setf (gethash name *message-table*) new-value))
 
-  (defun forget-all-messages ()
-    (clrhash message-table)
-    t)
+(defun forget-message (name)
+  (remhash name *message-table*))
 
-  ;; Why do we need this? - Adlai
-  (defun clear-all-message-caches ()
-    (maphash (lambda (k v)
-	       (declare (ignore k))
-	       (clear-memo-table v))
-	     message-table))
+(defun forget-all-messages ()
+  (clrhash *message-table*)
+  t)
 
-  (defun forget-message (name)
-    (remhash name message-table))
-  ) ; end message table closure
+(defun clear-all-message-caches ()
+  (maphash (lambda (k v)
+             (declare (ignore k))
+             (clear-memo-table v))
+           *message-table*))
 
 ;; Finalizing a message sets the function definition of the message to a
 ;; lambda that calls the top-level dispatch function on the msg args.

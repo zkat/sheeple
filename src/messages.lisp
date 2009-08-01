@@ -47,9 +47,7 @@ of setf methods, whose names are lists.")
 Raises an error if no message is found, unless `errorp' is set to NIL."
   (multiple-value-bind (message foundp) (gethash name *message-table*)
     (cond (foundp message)
-          (errorp (error 'no-such-message
-                         :format-control "There is no message named ~A"
-                         :format-args (list name))))))
+          (errorp (error 'no-such-message :message-name name)))))
 
 (defun (setf find-message) (new-value name)
   (setf (gethash name *message-table*) new-value))

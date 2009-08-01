@@ -42,7 +42,7 @@
     (is (eq test-message (find-message 'name)))
     (forget-message 'name)
     (is (eq nil (find-message 'name nil)))
-    (signals error (find-message 'name))))
+    (signals no-such-message (find-message 'name))))
 
 (test finalize-message)
 (test ensure-message)

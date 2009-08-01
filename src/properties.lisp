@@ -174,7 +174,7 @@ SHEEP, including inherited ones."))
       (gethash (property-name property) (sheep-property-value-table sheep))
     (if hasp
         value
-        (error 'unbound-direct-property :format-args (list sheep property-name)))))
+        (error 'unbound-direct-property :sheep sheep :property-name property-name))))
 
 (defmethod property-value ((sheep standard-sheep) property-name)
   (property-value-with-hierarchy-list sheep property-name))
@@ -185,7 +185,7 @@ SHEEP, including inherited ones."))
                 (when hasp
                   (return-from property-value-with-hierarchy-list
                     (direct-property-value sheep property-name)))))
-        (error 'unbound-property :format-args (list property-name sheep)))))
+        (error 'unbound-property :sheep sheep :property-name property-name))))
 
 ;; What the following code SHOULD do:
 ;; 1. If there is no ancestor with a property added with that name, error.
@@ -236,9 +236,7 @@ SHEEP, including inherited ones."))
             return obj)))
     (or owner
         (if errorp
-            (error 'unbound-property
-                   :format-control "Property ~A is unbound for sheep ~S"
-                   :format-args (list property-name sheep))
+            (error 'unbound-property :property-name property-name :sheep sheep)
             nil))))
 
 (defmethod available-properties ((sheep standard-sheep))

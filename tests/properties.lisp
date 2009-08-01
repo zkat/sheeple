@@ -119,7 +119,7 @@
     (is (eql child (property-owner child 'child-var)))
     ;; todo - make sure to check that error is signaled (or not signaled) as appropriate
     (is (not (property-owner parent 'some-other-property nil)))
-    (signals error (property-owner parent 'some-other-property))))
+    (signals unbound-property (property-owner parent 'some-other-property))))
 
 (test available-properties
   (let ((sheep (defclone () ((var "value" :accessor var)))))

@@ -50,10 +50,7 @@
         (primaries (cache-primary cache)))
     (when (null primaries)
       (let ((name (message-name (cache-message cache))))
-        (error 'no-primary-replies
-               :format-control
-               "There are no primary replies for message ~A."
-               :format-args (list name))))
+	(error 'no-primary-replies :format-args (list name))))
     (if around
         (let ((next-erfun
                (compute-effective-reply-function (create-reply-cache
@@ -230,10 +227,7 @@
         (if contained-applicable-replies
             (unbox-replies (sort-applicable-replies contained-applicable-replies))
             (when errorp
-              (error 'no-applicable-replies
-                     :format-control
-                     "There are no applicable replies for message ~A when called with args:~%~S"
-                     :format-args (list selector args)))))))
+              (error 'no-applicable-replies :format-args (list selector args)))))))
 
 (defun unbox-replies (replies)
   (mapcar #'reply-container-reply replies))

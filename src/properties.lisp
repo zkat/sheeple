@@ -100,8 +100,7 @@ SHEEP, including inherited ones."))
           property)))
 
 ;;; Existential
-(defmethod add-property-using-property-metaobject ((sheep standard-sheep)
-                                                   value
+(defmethod add-property-using-property-metaobject ((sheep standard-sheep) value
                                                    (property property-spec)
                                                    &key readers writers)
   (let ((pname (property-spec-name property)))
@@ -190,10 +189,10 @@ SHEEP, including inherited ones."))
                :format-control "Property ~A is unbound for sheep ~S"
                :format-args (list property-name sheep)))))
 
-
 (defmethod (setf property-value) (new-value (sheep standard-sheep) (property-name symbol))
   (if (has-property-p sheep property-name)
-      (let ((property (gethash property-name (sheep-property-spec-table sheep))))
+      (let ((property (direct-property-spec (property-owner sheep property-name)
+                                            property-name)))
         (setf (property-value sheep property) new-value))
       (error "Property ~A does not exist for sheep ~A." property-name sheep)))
 (defmethod (setf property-value) (new-value (sheep standard-sheep) (property property-spec))

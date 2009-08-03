@@ -47,6 +47,15 @@ the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
         (add-parent (proto 'dolly) sheep))
     (apply #'init-sheep sheep all-keys)))
 
+#+nil(defun clone* (sheep-or-sheeple &rest initargs)
+  (spawn-sheep (if (listp sheep-or-sheeple)
+                   sheep-or-sheeple
+                   (list sheep-or-sheeple))
+               :properties (initargs->canonized-props initargs)))
+#+nil(defun initargs->canonized-props (initargs)
+  ;; todo
+  (loop for pname))
+
 (defun clone (&rest sheeple)
   "Creates a new standard-sheep object with SHEEPLE as its parents."
   (spawn-sheep sheeple))

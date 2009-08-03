@@ -25,7 +25,7 @@
     (is (equal "value" (var sheep)))
     (is (equal "new-value" (setf (var sheep) "new-value")))
     (is (equal "new-value" (var sheep)))
-    (is (eql sheep (add-property sheep 'new-var "new-value" :make-accessors-p nil)))
+    (is (eql sheep (add-property sheep 'new-var "new-value" :make-accessor-p nil)))
     (is (equal "new-value" (direct-property-value sheep 'new-var)))
     (is (not (participant-p sheep 'new-var)))
     (is (not (participant-p sheep '(setf new-var))))
@@ -80,13 +80,9 @@
 ;; MOP behavior
 (defclass fancy-property-sheep (standard-sheep)
   ((fancy-property-table :initform (make-hash-table :test #'eq))))
-(defclass fancy-property (property-spec))
+(defclass fancy-property (property-spec) ())
 
-(defmethod add-property ((sheep fancy-property-sheep)
-                         property-name &key (allocation :fancy))
-  (if (eq allocation :fancy)
-      ()))
-(test add-property
+#+nil(test add-property
   ;; TODO - check that property metaobjects are being created properly
   ;; TODO - check that different property metaobject class instances are created
   ;;        depending on the class of the sheep.

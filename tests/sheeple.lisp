@@ -6,9 +6,10 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
-
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (use-package 'fiveam 'sheeple))
+  (import '(5am:def-suite 5am:run! 5am:is 5am:in-suite))
+  (defmacro test (name &body body)
+    `(5am:test ,name ,@body)))
 
 (export 'run-all-tests)
 

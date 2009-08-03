@@ -38,12 +38,9 @@
 (defgeneric add-property (sheep property-name value &key)
   (:documentation "Adds a property named PROPERTY-NAME to SHEEP, initalized with VALUE."))
 
-(defgeneric add-property-metaobject-to-sheep (sheep property)
+(defgeneric add-property-using-property-metaobject (sheep value property &key)
   (:documentation "Adds PROPERTY as a registered property to SHEEP. Clients must -not-
 override the primary method for this generic function."))
-
-(defgeneric property-spec-class (sheep &key)
-  (:documentation "Determine the class of the property-spec to be added."))
 
 (defgeneric remove-property (sheep property)
   (:documentation "If PROPERTY-NAME is a direct property of SHEEP, this function removes it. If
@@ -97,46 +94,45 @@ SHEEP, including inherited ones."))
 ;;;
 ;;; Methods
 ;;;
-
-(defmethod property-spec-class ((sheep standard-sheep) &key)
-  (declare (ignore allocation value readers writers))
-  (find-class 'property-spec))
-
-
-(defmethod add-property-spec-to-sheep ((sheep standard-sheep) (property property-spec))
+(defun add-property-spec-to-sheep (sheep property)
   (let ((pname (property-spec-name property)))
     (setf (gethash pname (sheep-property-spec-table sheep))
           property)))
 
 ;;; Existential
+(defmethod add-property-using-property-metaobject ((sheep standard-sheep)
+                                                   value
+                                                   (property property-spec)
+                                                   &key readers writers)
+  (let ((pname (property-spec-name property)))
+    (add-property-spec-to-sheep sheep property)
+    (when readers
+      (add-readers-to-sheep readers pname sheep)
+      (pushnew readers (property-spec-readers property)))
+    (when writers
+      (add-writers-to-sheep writers pname sheep)
+      (pushnew writers (property-spec-writers property)))
+    (setf (property-value sheep pname) value))
+  sheep)
+
 (defmethod add-property ((sheep standard-sheep) property-name value 
                          &key readers writers (make-accessor-p t)
-                         (property-spec-class 'property-spec))
+                         (property-metaclass 'property-spec))
   "Allocates VALUE as one of SHEEP's direct-properties."
-  ;; What does this actually have to do, overall?
-  ;; 1. Create and register a property-spec instance with the sheep. The property new exists.
-  ;; 2. Set the value.
-  ;; 3. Add readers/writers/etc.
-  (let ((property-table (sheep-property-value-table sheep)))
-    (when (has-direct-property-p sheep property-name)
-      (warn "~A already has a direct property named ~A. Overwriting." sheep property-name))
-    (add-property-spec-to-sheep sheep (make-instance property-spec-class
-                                                     :name property-name))
-    (setf (property-value sheep property-name) value)
-    (let ((property-spec (gethash property-name (sheep-property-spec-table sheep))))
-      (when readers
-        (add-readers-to-sheep readers property-name sheep)
-        (pushnew readers (property-spec-readers property-spec)))
-      (when writers
-        (add-writers-to-sheep writers property-name sheep))
-      (pushnew writers (property-spec-writers property-spec))
-      (when make-accessor-p
-        (add-readers-to-sheep `(,property-name) property-name sheep)
-        (pushnew `((setf ,property-name)) (property-spec-readers property-spec) :test #'equal)
-        (add-writers-to-sheep `((setf ,property-name)) property-name sheep)
-        (pushnew `(,property-name) (property-spec-writers property-spec) :test #'equal)))
-    sheep))
+  (when (has-direct-property-p sheep property-name)
+    (warn "~A already has a direct property named ~A. Overwriting." sheep property-name))
+  (when make-accessor-p
+    (pushnew property-name readers)
+    (pushnew `(setf ,property-name) writers))
+  (add-property-using-property-metaobject sheep value
+                                          (make-instance property-metaclass
+                                                         :name property-name)
+                                          :readers readers :writers writers)
+  sheep)
 
+;; TODO - remove-property should look at the property metaobject and remove any replies for
+;;        accessors that it points to. This will have to wait until reply-undefinition works
+;;        again, though. -syko
 (defmethod remove-property ((sheep standard-sheep) (property-name symbol))
   (if property-name
       (remove-property sheep (gethash property-name (sheep-property-spec-table sheep)))
@@ -159,10 +155,10 @@ SHEEP, including inherited ones."))
 
 (defmethod has-property-p ((sheep standard-sheep) property-name)
   "Returns T if a property with PROPERTY-NAME is available to SHEEP."
-  (handler-case
-      (when (property-owner sheep property-name)
-        t)
-    (unbound-property () nil)))
+  (if (member-if (lambda (x)
+                   (has-direct-property-p x property-name))
+                 (sheep-hierarchy-list sheep))
+      t nil))
 
 ;;; values
 (defmethod direct-property-value ((sheep standard-sheep) (property-name symbol))

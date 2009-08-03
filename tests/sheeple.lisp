@@ -7,7 +7,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (import '(5am:def-suite 5am:run! 5am:is 5am:in-suite))
+  (import '(5am:def-suite 5am:run! 5am:is 5am:in-suite 5am:signals))
   (defmacro test (name &body body)
     `(5am:test ,name ,@body)))
 
@@ -74,7 +74,7 @@
 (test reinit-sheep
   (let ((test-sheep (clone))
         (another (clone)))
-    (is (eql test-sheep (add-property test-sheep 'var "value" :make-accessors-p nil)))
+    (is (eql test-sheep (add-property test-sheep 'var "value" :make-accessor-p nil)))
     (is (has-direct-property-p test-sheep 'var))
     (is (eql test-sheep (add-parent another test-sheep)))
     (is (parent-p another test-sheep))

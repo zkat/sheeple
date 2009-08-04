@@ -8,6 +8,8 @@
 (declaim (optimize (debug 1) (safety 1) (speed 3)))
 
 (defvar *max-sheep-id* 0)
+(defvar =t=)
+(defvar =dolly=)
 (defclass standard-sheep ()
   ((nickname :accessor sheep-nickname :initform nil)
    (documentation :accessor sheep-documentation :initform "")
@@ -44,7 +46,7 @@ the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
   (let ((sheep (allocate-sheep metaclass)))
     (if sheeple
         (add-parents sheeple sheep)
-        (add-parent (proto 'dolly) sheep))
+        (add-parent =dolly= sheep))
     (apply #'init-sheep sheep all-keys)))
 
 #+nil(defun clone* (sheep-or-sheeple &rest initargs)

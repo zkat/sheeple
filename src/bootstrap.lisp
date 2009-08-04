@@ -7,17 +7,17 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(defvar =t=
+(setf =t=
       (let ((sheep (allocate-sheep)))
         (setf (sheep-nickname sheep) '=t=)
         (finalize-sheep sheep)
         sheep))
 
-(defvar =dolly=
-  (let ((sheep (allocate-sheep)))
-    (setf (sheep-nickname sheep) '=dolly=)
-    (add-parent =t= sheep)
-    sheep))
+(setf =dolly=
+      (let ((sheep (allocate-sheep)))
+        (setf (sheep-nickname sheep) '=dolly=)
+        (add-parent =t= sheep)
+        sheep))
 
 (defmessage init-sheep (sheep &key &allow-other-keys))
 (defreply init-sheep (sheep

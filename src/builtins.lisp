@@ -5,9 +5,32 @@
 ;;;; Boxing of built-in lisp types
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
-
 (declaim (optimize (speed 3) (safety 1)))
+
+(defvar =boxed-object=)
+(defvar =symbol=)
+(defvar =sequence=)
+(defvar =array=)
+(defvar =number=)
+(defvar =character=)
+(defvar =function=)
+(defvar =hash-table=)
+(defvar =package=)
+(defvar =pathname=)
+(defvar =readtable=)
+(defvar =stream=)
+(defvar =list=)
+(defvar =null=)
+(defvar =cons=)
+(defvar =vector=)
+(defvar =bit-vector=)
+(defvar =string=)
+(defvar =complex=)
+(defvar =integer=)
+(defvar =float=)
+
 (defun box-type-of (x)
+  ;; Note: I should really find a way to make this simply use CLOS...
   (if (sheep-p x)
       (progn
 	(warn "This is already a sheep!")
@@ -30,7 +53,7 @@
 	((bit-vector *)                                =bit-vector=)
 	((and vector (not string))                     =vector=)
 	((and array (not vector))                      =array=)
-                                        ;	((and sequence (not (or vector list)))         =sequence=])
+        ;;	((and sequence (not (or vector list)))         =sequence=])
 	(function                                      =function=)
 	(t                                             =boxed-object=))))
 

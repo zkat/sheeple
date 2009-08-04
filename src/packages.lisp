@@ -89,11 +89,14 @@
    :sheep-direct-roles
    :sheep-direct-properties
    :sheep-documentation
-   :direct-property-spec
-   :property-spec-name
-   :property-spec-value
-   :property-spec-readers
-   :property-spec-writers
+   ;; properties
+   :property
+   :add-property-using-property-metaobject
+   :direct-property-metaobject
+   :property-name
+   :property-value
+   :property-readers
+   :property-writers
    :property-summary
    :direct-property-summary
    ))

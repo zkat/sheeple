@@ -14,10 +14,10 @@
 ** Indirect Property
    A property that a sheep has access to that is stored elsewhere in the hierarchy-list
 
-** T
+** =T=
    the root object, ancestor of all sheep objects.
 
-** Dolly
+** =DOLLY=
    Ancestor of all actual sheep (the ones that aren't built-ins).
 
 ** Hierarchy List
@@ -51,7 +51,7 @@
 ** Built-in
    A built-in lisp type.
    Most lisp types have boxed-object prototypes assigned to them, so they can
-   be fetched using e.g. (proto 'string).
+   be fetched using their assigned names (such as =string=, =list=, etc)
    These prototypes can have replies defined on them.
 
 ** Boxed object
@@ -176,8 +176,8 @@
     documentation -- set as the docstring for the new sheep during initialization
 
     Description:
-    DEFPROTO defines a new proto sheep based on PARENT-OBJECT*. The sheep is placed into a global
-    table where it can be accessed by using (proto 'name). After the new object has been
+    DEFPROTO defines a new proto sheep based on PARENT-OBJECT*. The sheep object is bound to a
+    special variable called PROTO-NAME. After the new object has been
     initialized, direct-properties and readers/writers/accessors are added to the new object
     based on each property-spec.
     Unlike DEFCLONE, DEFPROTO automatically defines accessors for each property-spec using
@@ -193,26 +193,12 @@
 
     Examples:
     
-    (defproto test-proto () ()) => #<Sheep AKA: TEST-PROTO #x150712B6>
+    (defproto =test-proto= () ()) => #<Sheep AKA: =TEST-PROTO= #x150712B6>
 
-*** PROTO
-    Syntax:
-    proto name &optional (errorp t) => sheep
-
-    Args and values:
-    name -- a non-keyword symbol denoting the name of a proto.
-    sheep -- a proto
-    errorp -- whether an error should be signaled if there is no such proto.
-
-    Description:
-    Looks up a proto sheep with name NAME in the global protos table. If errorp is T,
-    an ERROR is signaled if the lookup fails, otherwise, NIL is returned.
-
-    Examples:
+    Notes:
+    While there is nothing to programmatically enforce it, prototypes declared with DEFPROTO
+    use the =foo= naming convention to tag the prototype as such.
     
-      (defproto test-proto () ()) => #<Sheep AKA: TEST-PROTO #x14F31536>
-      (proto 'test-proto) => #<Sheep AKA: TEST-PROTO #x14F31536>
-
 ** Sheep manipulation
 *** Sheep Inspection
 **** PARENT-P
@@ -428,7 +414,7 @@
 **** Specialized replies
      Replies are specialized by replacing the variable with (specialized-variable object).
 
-        (defreply reply-name (foo (bar (proto 'my-sheep)))
+        (defreply reply-name (foo (bar =my-sheep=))
           (print "This is a specialized reply"))
 
      Replies with unspecialized lambda lists are considered unspecialized, since they dispatch on
@@ -467,21 +453,21 @@
 **** Huge example
      This example illustrates usage of sheeple and replies:
 
-        (defproto sheep1 () ())
-        (defproto sheep2 () ())
+        (defproto =sheep1= () ())
+        (defproto =sheep2= () ())
 
-        (defreply do-it (foo) ;defines this reply on (proto 'T)
+        (defreply do-it (foo) ;defines this reply on =T=
           (print foo))
         (do-it "hey!") => hey! ;the reply facility autoboxes regular lisp objects
 
-        (defreply do-it ((something (proto 'sheep1))) ;a convenient way of saying (find-proto 'sheep1)
+        (defreply do-it ((something =sheep1=))
           (format t "~a is sheep1. FYI" something))
         ;; lambda-list variables do not have to be the same across replies, 
         ;; I only do it here for convenience.
-        (do-it (proto 'sheep1)) => #<Sheep AKA: SHEEP1 {BA28B89}> is the first sheep. FYI
+        (do-it =sheep1=) => #<Sheep AKA: SHEEP1 {BA28B89}> is the first sheep. FYI
 
         (let ((x 5))
-	   (defreply do-it ((foo (proto 'number))) ;if dispatching on builtins, use builtin prototype.
+	   (defreply do-it ((foo =number=)) ;if dispatching on builtins, use builtin prototype.
 	     (* x foo))) ;It captures the lexical environment, too.
         (do-it 5) => 10
 
@@ -490,26 +476,26 @@
 	  (print "FIVE!! THIS IS VERY EXCITING!!1"))
         (do-it 5) => "FIVE!! THIS IS VERY EXCITING!!1"
 
-        (defreply do-it ((foo (proto 'float)))
+        (defreply do-it ((foo =float=))
           (floatp float))
 
         (do-it 5.0) => T                                ; Sheeple has a CLOS-like hierarchy for
         (do-it 5) => "FIVE!! THIS IS VERY EXCITING!!1"  ; autoboxed built-ins.
         (do-it 6) => 12
 	
-        (defreply synergize ((foo (proto 'sheep1)) (bar (proto 'sheep2)))
+        (defreply synergize ((foo =sheep1=) (bar =sheep2=))
           (print "I got sheep1 first, then sheep2"))
 
-        (defreply synergize ((foo (proto 'sheep2)) (bar (proto 'sheep1)))
+        (defreply synergize ((foo =sheep2=) (bar sheep1=))
           (declare (ignore foo bar))
           (print "I got sheep2 first, then the first sheep."))
 
-        (defreply synergize ((foo (proto 'number)) (bar (proto 'number)))
+        (defreply synergize ((foo =number=) (bar =number=))
           (+ foo bar))
         (synergize 3 5) => 8
         (synergize 4 "hey hey hey!") => ERROR: NO-MOST-SPECIFIC-REPLY
         
-        (defreply synergize ((foo (proto 'string)) (bar (proto 'string)))
+        (defreply synergize ((foo =string=) (bar =string=))
           (concatenate 'string foo bar))
         (synergize "Hey " "Jude") => "Hey Jude"
 
@@ -532,7 +518,7 @@
 ** Potential gotchas:
 *** CLOS (semi-)compatibility
     For the time being, CLOS objects and CLOS-defined types are boxed as a clone of 
-    (proto 'builtin), not as autoboxed versions of the classes/objects.
+    =boxed-object=, not as autoboxed versions of the classes/objects.
 
 *** Message definition
     The behavior for clobbering regular functions or generic functions with messages and vice-versa
@@ -540,26 +526,26 @@
 
 *** Threads
     Give it a shot, tell me how it goes! :)
-
+    
 * Implementation performance notes
 ** Property access
    As of version 1.0, property access is O(n), where n is the number of sheep that must be traversed
    in order to find a property value. Worst case happens when the property is completely unbound for
    a given sheep hierarchy. No caching is done right now, as possible caching schemes that are both
-   fast at reading, and fast at writing are being evaluated.
-   Realistically, sheep hierarchies are rarely very deep, so this should not become an issue for
-   most cases. Once caching is implemented, this will become O(1).
+   fast at reading, and fast at writing are being evaluated.  Realistically, sheep hierarchies are
+   rarely very deep, so this should not become an issue for most cases. Once caching is implemented,
+   this will become O(1).
 ** Reply dispatch
-   Reply dispatches are cached on first execution and changed when appropriate. This makes
-   dispatch essentially O(1), even for multireplies. Even though multireply dispatch is very
-   fast, singly-dispatched accessors have not been optimized enough. Thus, for any purposes that
-   require optimal read-access, directly accessing the properties with PROPERTY-VALUE is
+   Reply dispatches are cached on first execution and changed when appropriate. This makes dispatch
+   essentially O(1), even for multireplies. Even though multireply dispatch is very fast,
+   singly-dispatched accessors have not been optimized enough. Thus, for any purposes that require
+   optimal read-access, directly accessing the properties with PROPERTY-VALUE is
    recommended. Optimization of accessors is planned.
 ** Comparison to CLOS performance
    Sheeple is still very young. Thus, it's no surprise that a good implementation of CLOS will
    outperform it when used on the same hardware, with the same CL implementation. Nevertheless,
-   tests run on SBCL and Clozure CL show that the performance difference is on the order of 5-10x for
-   property access, and about 10-15x for reply vs method dispatch (although sheeple sometimes
+   tests run on SBCL and Clozure CL show that the performance difference is on the order of 5-10x
+   for property access, and about 10-15x for reply vs method dispatch (although sheeple sometimes
    performs even slower). Hopefully, as sheeple matures, it will become as fast as an implementation
    like PCL. Fortunately, because of the similarities of the APIs, many of PCL's optimizations can
    be translated to Sheeple itself.
@@ -620,7 +606,7 @@
 
      (setf parent (clone)
            child1 (clone parent)
-           child2 (clone parent (proto 'dolly)))
+           child2 (clone parent =dolly=))
 
      parent => #<Sheep #x30004135F9BD>
 

@@ -39,7 +39,7 @@
     (setf (find-message 'name) test-message)
     (is (eq test-message (find-message 'name)))
     (forget-message 'name)
-    (is-false (find-message 'name nil))
+    (is (eq nil (find-message 'name nil)))
     (signals error (find-message 'name))))
 
 (test finalize-message)

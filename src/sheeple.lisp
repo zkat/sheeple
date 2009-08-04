@@ -265,3 +265,22 @@ the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
 		 :properties ,(canonize-properties properties)
                  ,@(canonize-clone-options options))))
      sheep))
+
+(defmacro defproto (name sheeple properties &rest options)
+  `(progn
+     (declaim (special ,name))
+     (let ((sheep (spawn-or-reinit-sheep
+                   (if (boundp ',name)
+                       ,name nil)
+                   ,(canonize-sheeple sheeple)
+                   :properties ,(canonize-properties properties t)
+                   ,@(canonize-clone-options options))))
+       (unless (sheep-nickname sheep)
+         (setf (sheep-nickname sheep) ',name))
+       (setf ,name sheep)
+       ',name)))
+
+(defun spawn-or-reinit-sheep (maybe-sheep parents &rest options)
+  (if maybe-sheep
+      (apply #'reinit-sheep maybe-sheep :new-parents parents options)
+      (apply #'spawn-sheep parents options)))

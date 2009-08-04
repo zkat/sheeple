@@ -12,13 +12,13 @@
 ;;;
 ;;; Property spec object
 ;;;
-(defclass property-spec ()
-  ((name :initarg :name :accessor property-spec-name)
-   (allocation :initarg :allocation :accessor property-spec-allocation)
-   (readers :initform nil :initarg :readers :accessor property-spec-readers)
-   (writers :initform nil :initarg :writers :accessor property-spec-writers)))
+(defclass property ()
+  ((name :initarg :name :accessor property-name)
+   (allocation :initarg :allocation :accessor property-allocation)
+   (readers :initform nil :initarg :readers :accessor property-readers)
+   (writers :initform nil :initarg :writers :accessor property-writers)))
 
-(defun property-spec-equal-p (spec1 spec2)
+(defun property-equal-p (spec1 spec2)
   (with-slots ((name1 name) (allocation1 allocation) (readers1 readers) (writers1 writers)) spec1
     (with-slots ((name2 name) (allocation2 allocation) (readers2 readers) (writers2 writers)) spec2
       (and (equal name1 name2)
@@ -26,9 +26,9 @@
            (equal readers1 readers2)
            (equal writers1 writers2)))))
 
-(defmethod print-object ((property-spec property-spec) stream)
-  (print-unreadable-object (property-spec stream :identity t)
-    (format stream "Property-Spec ~A" (property-spec-name property-spec))))
+(defmethod print-object ((property property) stream)
+  (print-unreadable-object (property stream :identity t)
+    (format stream "Property ~A" (property-name property))))
 ;;;
 ;;; API
 ;;;
@@ -79,11 +79,11 @@ SHEEP inherits its value. If ERRORP is T, an error is signaled if the property i
 NIL is returned."))
 
 (defgeneric available-properties (sheep)
-  (:documentation "Returns a list of property-spec objects describing all properties available to
+  (:documentation "Returns a list of property objects describing all properties available to
 SHEEP, including inherited ones."))
 
-(defgeneric direct-property-spec (sheep property-name)
-  (:documentation "Returns the direct local spec for a property named PROPERTY-NAME."))
+(defgeneric direct-property-metaobject (sheep property-name)
+  (:documentation "Returns the direct local metaobject for a property named PROPERTY-NAME."))
 
 (defgeneric property-summary (sheep &optional stream)
   (:documentation "Provides a pretty-printed representation of SHEEP's available properties."))
@@ -94,29 +94,29 @@ SHEEP, including inherited ones."))
 ;;;
 ;;; Methods
 ;;;
-(defun add-property-spec-to-sheep (sheep property)
-  (let ((pname (property-spec-name property)))
-    (setf (gethash pname (sheep-property-spec-table sheep))
+(defun add-property-metaobject-to-sheep (sheep property)
+  (let ((pname (property-name property)))
+    (setf (gethash pname (sheep-property-metaobject-table sheep))
           property)))
 
 ;;; Existential
 (defmethod add-property-using-property-metaobject ((sheep standard-sheep) value
-                                                   (property property-spec)
+                                                   (property property)
                                                    &key readers writers)
-  (let ((pname (property-spec-name property)))
-    (add-property-spec-to-sheep sheep property)
+  (let ((pname (property-name property)))
+    (add-property-metaobject-to-sheep sheep property)
     (when readers
       (add-readers-to-sheep readers pname sheep)
-      (pushnew readers (property-spec-readers property)))
+      (pushnew readers (property-readers property)))
     (when writers
       (add-writers-to-sheep writers pname sheep)
-      (pushnew writers (property-spec-writers property)))
+      (pushnew writers (property-writers property)))
     (setf (property-value sheep pname) value))
   sheep)
 
 (defmethod add-property ((sheep standard-sheep) property-name value 
                          &key readers writers (make-accessor-p t)
-                         (property-metaclass 'property-spec))
+                         (property-metaclass 'property))
   "Allocates VALUE as one of SHEEP's direct-properties."
   (when (has-direct-property-p sheep property-name)
     (warn "~A already has a direct property named ~A. Overwriting." sheep property-name))
@@ -134,23 +134,23 @@ SHEEP, including inherited ones."))
 ;;        again, though. -syko
 (defmethod remove-property ((sheep standard-sheep) (property-name symbol))
   (if property-name
-      (remove-property sheep (gethash property-name (sheep-property-spec-table sheep)))
+      (remove-property sheep (gethash property-name (sheep-property-metaobject-table sheep)))
       (error "Cannot remove property: ~A is not a direct property of ~A" property-name sheep)))
-(defmethod remove-property ((sheep standard-sheep) (property property-spec))
-  (let ((name (property-spec-name property)))
+(defmethod remove-property ((sheep standard-sheep) (property property))
+  (let ((name (property-name property)))
     (if (has-direct-property-p sheep name)
         (progn (remhash name (sheep-property-value-table sheep))
-               (remhash name (sheep-property-spec-table sheep))
+               (remhash name (sheep-property-metaobject-table sheep))
                sheep)
         (error "Cannot remove property: ~A is not a direct property of ~A" name sheep))))
 
 (defmethod remove-all-direct-properties ((sheep standard-sheep))
   (clrhash (sheep-property-value-table sheep))
-  (clrhash (sheep-property-spec-table sheep))
+  (clrhash (sheep-property-metaobject-table sheep))
   sheep)
 
 (defmethod has-direct-property-p ((sheep standard-sheep) property-name)
-  (nth-value 1 (gethash property-name (sheep-property-spec-table sheep))))
+  (nth-value 1 (gethash property-name (sheep-property-metaobject-table sheep))))
 
 (defmethod has-property-p ((sheep standard-sheep) property-name)
   "Returns T if a property with PROPERTY-NAME is available to SHEEP."
@@ -161,20 +161,20 @@ SHEEP, including inherited ones."))
 
 ;;; values
 (defmethod direct-property-value ((sheep standard-sheep) (property-name symbol))
-  (let ((property (gethash property-name (sheep-property-spec-table sheep))))
+  (let ((property (gethash property-name (sheep-property-metaobject-table sheep))))
     (if property
         (direct-property-value sheep property)
         (error 'unbound-property
                :format-control "~A has no direct property with name ~A"
                :format-args (list sheep property-name)))))
-(defmethod direct-property-value ((sheep standard-sheep) (property property-spec))
+(defmethod direct-property-value ((sheep standard-sheep) (property property))
   (multiple-value-bind (value hasp)
-      (gethash (property-spec-name property) (sheep-property-value-table sheep))
+      (gethash (property-name property) (sheep-property-value-table sheep))
     (if hasp
         value
         (error 'unbound-property
                :format-control "~A has no direct property with name ~A"
-               :format-args (list sheep (property-spec-name property))))))
+               :format-args (list sheep (property-name property))))))
 
 (defmethod property-value ((sheep standard-sheep) property-name)
   (property-value-with-hierarchy-list sheep property-name))
@@ -191,24 +191,24 @@ SHEEP, including inherited ones."))
 
 (defmethod (setf property-value) (new-value (sheep standard-sheep) (property-name symbol))
   (if (has-property-p sheep property-name)
-      (let ((property (direct-property-spec (property-owner sheep property-name)
+      (let ((property (direct-property-metaobject (property-owner sheep property-name)
                                             property-name)))
         (setf (property-value sheep property) new-value))
       (error "Property ~A does not exist for sheep ~A." property-name sheep)))
-(defmethod (setf property-value) (new-value (sheep standard-sheep) (property property-spec))
+(defmethod (setf property-value) (new-value (sheep standard-sheep) (property property))
   (let ((property-table (sheep-property-value-table sheep)))
-    (setf (gethash (property-spec-name property) property-table) new-value)))
+    (setf (gethash (property-name property) property-table) new-value)))
 
 ;; Reflection
 (defun sheep-direct-properties (sheep)
-  "Returns a set of direct property-spec definition metaobjects."
+  "Returns a set of direct property definition metaobjects."
   (loop for pname being the hash-keys of (sheep-property-value-table sheep)
-     collect (direct-property-spec sheep pname)))
+     collect (direct-property-metaobject sheep pname)))
 
-(defmethod direct-property-spec ((sheep standard-sheep) property-name)
+(defmethod direct-property-metaobject ((sheep standard-sheep) property-name)
   (unless (has-direct-property-p sheep property-name)
     (signal 'unbound-property))
-  (nth-value 0 (gethash property-name (sheep-property-spec-table sheep))))
+  (nth-value 0 (gethash property-name (sheep-property-metaobject-table sheep))))
 
 (defmethod property-owner ((sheep standard-sheep) property-name &optional (errorp t))
   (let ((owner
@@ -225,15 +225,15 @@ SHEEP, including inherited ones."))
 (defmethod available-properties ((sheep standard-sheep))
   (let* ((direct-properties (sheep-direct-properties sheep))
          (avail-property-names (mapcar (lambda (p)
-                                         (property-spec-name p))
+                                         (property-name p))
                                        (remove-duplicates
                                         (flatten
                                          (append direct-properties
                                                  (mapcar #'available-properties
                                                          (sheep-parents sheep))))
-                                        :key #'property-spec-name))))
+                                        :key #'property-name))))
     (mapcar (lambda (pname)
-              (direct-property-spec (property-owner sheep pname nil) pname))
+              (direct-property-metaobject (property-owner sheep pname nil) pname))
             avail-property-names)))
 
 (defmethod property-summary ((sheep standard-sheep) &optional (stream *standard-output*))
@@ -243,12 +243,12 @@ SHEEP, including inherited ones."))
              ~3TAllocation: ~13T~A~%~3TReaders: ~13T~A~%~3TWriters: ~13T~A~%~
              ~3TOwner: ~13T~A~%~%~}~}"
             sheep (loop for property in all-properties
-                     collect (list (property-spec-name property)
-                                   (direct-property-value sheep property)
-                                   (property-spec-allocation property)
-                                   (property-spec-readers property)
-                                   (property-spec-writers property)
-                                   (property-owner sheep (property-spec-name property)))))))
+                     collect (list (property-name property)
+                                   (property-value sheep property)
+                                   (property-allocation property)
+                                   (property-readers property)
+                                   (property-writers property)
+                                   (property-owner sheep (property-name property)))))))
 
 (defmethod direct-property-summary ((sheep standard-sheep) &optional (stream *standard-output*))
   (format stream
@@ -257,8 +257,8 @@ SHEEP, including inherited ones."))
            ~{~{~&~3TName: ~A~%~3TValue: ~S~%~
            ~3TAllocation: ~A~%~3TReaders: ~A~%~3TWriters: ~A~%~%~}~}"
           sheep (loop for property in (sheep-direct-properties sheep)
-                   collect (list (property-spec-name property)
-                                 (property-value sheep property)
-                                 (property-spec-allocation property)
-                                 (property-spec-readers property)
-                                 (property-spec-writers property)))))
+                   collect (list (property-name property)
+                                 (direct-property-value sheep property)
+                                 (property-allocation property)
+                                 (property-readers property)
+                                 (property-writers property)))))

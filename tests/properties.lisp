@@ -118,25 +118,25 @@
 (test available-properties
   (let ((sheep (defclone () ((var "value" :accessor var)))))
     (is (eql 1 (length (available-properties sheep))))
-    (is (eql (find-class 'property-spec)
+    (is (eql (find-class 'property)
              (class-of (car (available-properties sheep)))))
     (is (eql sheep (add-property sheep 'new-var "new-value")))
     (is (eql 2 (length (available-properties sheep))))))
 
-(test direct-property-spec
+(test direct-property-metaobject
   ;; TODO - this should check that the standard property-spec's capabilities work properly.
   (let ((sheep (defclone () ((var "value" :accessor var)))))
-    (is (eql (find-class 'property-spec)
-             (class-of (direct-property-spec sheep 'var))))
-    (signals unbound-property (direct-property-spec sheep 'some-other-property))))
+    (is (eql (find-class 'property)
+             (class-of (direct-property-metaobject sheep 'var))))
+    (signals unbound-property (direct-property-metaobject sheep 'some-other-property))))
 
 (test sheep-direct-properties
   ;; TODO - This one just needs to check that all the direct property spec metaobjects are returned.
   (let ((sheep (defclone () ((var "value" :accessor var) (another-var "another-value")))))
     (is (eql 2 (length (sheep-direct-properties sheep))))
-    (is (eql (find-class 'property-spec)
+    (is (eql (find-class 'property)
              (class-of (car (sheep-direct-properties sheep)))))
-    (is (eql (find-class 'property-spec)
+    (is (eql (find-class 'property)
              (class-of (cadr (sheep-direct-properties sheep)))))))
 
 ;; ugh. I don't want to write tests for these right now. I probably need cl-ppcre :\

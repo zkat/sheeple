@@ -18,7 +18,7 @@
                      :initform  (make-weak-hash-table :weakness :key :test #'eq))
    (property-value-table :accessor sheep-property-value-table
                          :initform (make-hash-table :test #'eq))
-   (property-spec-table :accessor sheep-property-spec-table
+   (property-metaobject-table :accessor sheep-property-metaobject-table
                         :initform (make-hash-table :test #'eq))
    (direct-roles :accessor sheep-direct-roles :initform nil)
    (hierarchy-list :accessor sheep-hierarchy-list :initform nil)

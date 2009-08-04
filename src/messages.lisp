@@ -46,8 +46,9 @@ of setf methods, whose names are lists.")
   "Finds a message object in `*message-table*', given its `name'.
 Raises an error if no message is found, unless `errorp' is set to NIL."
   (multiple-value-bind (message foundp) (gethash name *message-table*)
-    (cond (foundp message)
-          (errorp (error 'no-such-message :message-name name)))))
+    (if foundp message
+        (when errorp
+          (error 'no-such-message :message-name name)))))
 
 (defun (setf find-message) (new-value name)
   (setf (gethash name *message-table*) new-value))

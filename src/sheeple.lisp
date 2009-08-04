@@ -44,7 +44,7 @@
   "Creates a new sheep with SHEEPLE as its parents. METACLASS is used as the class when instantiating
 the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
   (let ((sheep (allocate-sheep metaclass)))
-    (if sheeple
+    (if sheep-or-sheeple
         (add-parents (if (listp sheep-or-sheeple) 
                          sheep-or-sheeple
                          (list sheep-or-sheeple))

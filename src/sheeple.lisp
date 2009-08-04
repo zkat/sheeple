@@ -270,8 +270,7 @@ the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
                    ,@(canonize-clone-options options))))
        (unless (sheep-nickname sheep)
          (setf (sheep-nickname sheep) ',name))
-       (setf ,name sheep)
-       ',name)))
+       (setf ,name sheep))))
 
 (defun spawn-or-reinit-sheep (maybe-sheep parents &rest options)
   (if maybe-sheep

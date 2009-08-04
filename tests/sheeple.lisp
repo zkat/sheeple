@@ -47,7 +47,7 @@
 (test spawn-sheep
   (let ((standard-sheep (clone))
         (test-metaclass-sheep (spawn-sheep nil :metaclass 'test-sheep-class)))
-    (is (eql (proto 'dolly) (car (sheep-parents (spawn-sheep nil)))))
+    (is (eql =dolly= (car (sheep-parents (spawn-sheep nil)))))
     (is (eql standard-sheep (car (sheep-parents (spawn-sheep (list standard-sheep))))))
     (is (eql (find-class 'test-sheep-class) (class-of test-metaclass-sheep)))))
 
@@ -79,14 +79,14 @@
     (is (eql test-sheep (add-parent another test-sheep)))
     (is (parent-p another test-sheep))
     (is (eql test-sheep (reinit-sheep test-sheep)))
-    (is (parent-p (proto 'dolly) test-sheep))
+    (is (parent-p =dolly= test-sheep))
     (is (not (has-direct-property-p test-sheep 'var)))
     (is (not (parent-p another test-sheep)))
     (is (eql test-sheep (reinit-sheep test-sheep :new-parents (list another))))
     (is (parent-p another test-sheep))))
 
 (test clone
-  (is (eql (proto 'dolly) (car (sheep-parents (clone)))))
+  (is (eql =dolly= (car (sheep-parents (clone)))))
   (let ((obj1 (clone)))
     (is (eql obj1
 	     (car (sheep-parents (clone obj1))))))
@@ -112,7 +112,7 @@
     (is (= 1 (length (sheep-parents father))))
     (is (eql grandpa (car (sheep-parents father))))
     (is (not (member grandpa (sheep-parents child))))
-    (is (eql (proto 'dolly) (car (sheep-parents grandpa))))))
+    (is (eql =dolly= (car (sheep-parents grandpa))))))
 
 (test sheep-direct-roles)
 (test sheep-hierarchy-list
@@ -120,8 +120,8 @@
          (child (clone parent)))
     (is (member child (sheep-hierarchy-list child)))
     (is (member parent (sheep-hierarchy-list child)))
-    (is (member (proto 'dolly) (sheep-hierarchy-list child)))
-    (is (member (proto 't) (sheep-hierarchy-list child)))))
+    (is (member =dolly= (sheep-hierarchy-list child)))
+    (is (member =t= (sheep-hierarchy-list child)))))
 
 (test sheep-id
   (let* ((a (clone))
@@ -146,8 +146,8 @@
 (test add-parent
   (let ((obj1 (clone))
         (obj2 (clone)))
-    (is (eql (proto 'dolly) (car (sheep-parents obj1))))
-    (is (eql (proto 'dolly) (car (sheep-parents obj2))))
+    (is (eql =dolly= (car (sheep-parents obj1))))
+    (is (eql =dolly= (car (sheep-parents obj2))))
     (is (eql obj1 (add-parent obj2 obj1)))
     (is (eql obj2 (car (sheep-parents obj1))))))
 
@@ -160,7 +160,7 @@
     (setf (sheep-nickname parent2) 'parent2)
     (setf (sheep-nickname parent3) 'parent3)
     (is (eql child (add-parents (list parent1 parent2 parent3) child)))
-    (is (equal (list parent1 parent2 parent3 (proto 'dolly))
+    (is (equal (list parent1 parent2 parent3 =dolly=)
                (sheep-parents child)))))
 
 (test remove-parent
@@ -222,12 +222,12 @@
 
 (test collect-parents
   (let ((sheep (clone)))
-   (is (equal (list (proto 't) (proto 'dolly) sheep) (collect-parents sheep)))))
+    (is (equal (list =t= =dolly= sheep) (collect-parents sheep)))))
 
 (test compute-sheep-hierarchy-list
   (let* ((parent (clone))
          (child (clone parent)))
-    (is (equal (list child parent (proto 'dolly) (proto 't))
+    (is (equal (list child parent =dolly= =t=)
                (compute-sheep-hierarchy-list child)))))
 
 ;;;
@@ -273,35 +273,20 @@
 (def-suite protos :in cloning)
 (in-suite protos)
 
-(test proto ;; (setf proto) goes here, too.
-  (is (sheep-p (proto 't)))
-  (let ((proto-test (defproto proto-test () ())))
-    (is (eql proto-test (proto 'proto-test)))
-    (is (eql (proto 'proto-test) (proto 'proto-test))))
-  ;; TODO - (setf proto)
-  )
-
-(test remove-proto
-  (defproto test-proto () ())
-  (is (remove-proto 'test-proto))
-  (signals error (proto 'test-proto))
-  (is (not (remove-proto 'test-proto)))
-  (remove-proto 'test-proto))
-
 (test defproto
-  (let ((test-proto (defproto test-proto () ((var "value")))))
+  (let ((test-proto (defproto =test-proto= () ((var "value")))))
     (is (sheep-p test-proto))
-    (is (eql test-proto (proto 'test-proto)))
-    (is (eql (proto 'dolly) (car (sheep-parents test-proto))))
-    (is (sheep-p (proto 'test-proto)))
-    (is (equal "value" (var (proto 'test-proto))))
-    (defproto test-proto () ((something-else "another-one")))
-    (is (eql test-proto (proto 'test-proto)))
-    (is (eql (proto 'dolly) (car (sheep-parents test-proto))))
+    (is (eql test-proto =test-proto=))
+    (is (eql =dolly= (car (sheep-parents test-proto))))
+    (is (sheep-p =test-proto=))
+    (is (equal "value" (var =test-proto=)))
+    (defproto =test-proto= () ((something-else "another-one")))
+    (is (eql test-proto =test-proto=))
+    (is (eql =dolly= (car (sheep-parents test-proto))))
     (signals unbound-property (direct-property-value test-proto 'var))
-    (is (equal "another-one" (something-else (proto 'test-proto))))
+    (is (equal "another-one" (something-else =test-proto=)))
     (is (equal "another-one" (something-else test-proto))))
   ;; TODO - check that options work properly (:metaclass, :documentation, :nickname, etc)
   ;;        remember that :nickname should override defproto's own nickname-setting.
-  (remove-proto 'test-proto))
+  )
 

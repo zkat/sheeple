@@ -38,14 +38,17 @@
 ;;;
 ;;; Cloning
 ;;;
-(defun spawn-sheep (sheeple &rest all-keys
+(defun spawn-sheep (sheep-or-sheeple &rest all-keys
 		    &key (metaclass 'standard-sheep)
 		    &allow-other-keys)
   "Creates a new sheep with SHEEPLE as its parents. METACLASS is used as the class when instantiating
 the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
   (let ((sheep (allocate-sheep metaclass)))
     (if sheeple
-        (add-parents sheeple sheep)
+        (add-parents (if (listp sheep-or-sheeple) 
+                         sheep-or-sheeple
+                         (list sheep-or-sheeple))
+                     sheep)
         (add-parent =dolly= sheep))
     (apply #'init-sheep sheep all-keys)))
 

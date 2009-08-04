@@ -24,7 +24,7 @@
              That way, we know whether the property is even supposed to exist.~%")
   (if transientp
       (call-next-method)
-      (call-next-method sheep pname value :metaclass 'persistent-property)))
+      (call-next-method sheep pname value :property-metaclass 'persistent-property)))
 
 (defmethod add-property-using-property-metaobject ((sheep persistent-sheep) value
                                                    (property persistent-property) &key)

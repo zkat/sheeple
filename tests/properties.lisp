@@ -59,7 +59,11 @@
     (is (equal "foo" (property-value parent 'parent-var)))
     (is (equal "bar" (property-value child 'child-var)))
     (is (equal "foo" (property-value child 'parent-var)))
-    (signals unbound-property (property-value parent 'something-else))))
+    (signals unbound-property (property-value parent 'something-else))
+    ;; Test for re-allocation of parent properties in the child sheep
+    (setf (property-value child 'parent-var) "zap")
+    (is (equal "zap" (property-value child 'parent-var)))
+    (is (equal "foo" (property-value parent 'parent-var)))))
 
 (test has-direct-property-p
   (let ((sheep (defclone () ((var "value")))))

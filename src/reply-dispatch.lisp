@@ -132,7 +132,7 @@
 
 (defun fetch-memo-vector-entry (args message relevant-args-length)
   (let* ((memo-vector (message-memo-vector message))
-	 (orig-index (mod (the fixnum (sheep-id (if (sheep-p (car args))
+	 (orig-index (mod (the fixnum (sxhash (if (sheep-p (car args))
 						    (car args)
 						    (or (find-boxed-object (car args))
 							(box-type-of (car args))))))
@@ -179,7 +179,7 @@
 
 (defun memoize-reply-dispatch (message args msg-list)
   (let ((msg-cache (create-reply-cache message msg-list))
-	(maybe-index (mod (the fixnum (sheep-id (if (sheep-p (car args))
+	(maybe-index (mod (the fixnum (sxhash (if (sheep-p (car args))
 						    (car args)
 						    (or (find-boxed-object (car args))
 							(box-type-of (car args))))))

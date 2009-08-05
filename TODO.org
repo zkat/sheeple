@@ -71,6 +71,18 @@
     of Sheeple forms, and if it had facilities for inspecting sheeple objects.
     Being able to do M-. and stuff would also be a HUGE plus.
 * TODO 2.2
+** TODO [#A] Fix #'(setf property-value) Bug
+   When a call to #'(setf property-value) requires a new direct property object
+   to be allocated, it doesn't get initialized properly.
+   Sample code that invokes this bug:
+   CL-USER> (defproto =foo= ()
+              ((var "foobar")))
+      #<Sheep AKA: =FOO= #x30004145841D>
+   CL-USER> (defproto =bar= (=foo=)
+              ())
+      #<Sheep AKA: =BAR= #x30004146B76D>
+   CL-USER> (setf (var =bar=) "barfoo")
+      "barfoo"
 ** TODO Standard Reply Combination
 *** TODO Remove CALL-NEXT-REPLY from :before and :after replies
 ** DONE Property Metaobject

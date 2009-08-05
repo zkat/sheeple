@@ -90,7 +90,7 @@
    :sheep-direct-properties
    :sheep-documentation
    ;; properties
-   :property
+   :standard-property
    :add-property-using-property-metaobject
    :direct-property-metaobject
    :property-name

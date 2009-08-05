@@ -12,7 +12,7 @@
 ;;;
 ;;; Property spec object
 ;;;
-(defclass property ()
+(defclass standard-property ()
   ((name :initarg :name :accessor property-name)
    (allocation :initarg :allocation :accessor property-allocation)
    (readers :initform nil :initarg :readers :accessor property-readers)
@@ -26,9 +26,9 @@
            (equal readers1 readers2)
            (equal writers1 writers2)))))
 
-(defmethod print-object ((property property) stream)
+(defmethod print-object ((property standard-property) stream)
   (print-unreadable-object (property stream :identity t)
-    (format stream "Property ~A" (property-name property))))
+    (format stream "STANDARD-PROPERTY ~A" (property-name property))))
 ;;;
 ;;; API
 ;;;
@@ -101,7 +101,7 @@ SHEEP, including inherited ones."))
 
 ;;; Existential
 (defmethod add-property-using-property-metaobject ((sheep standard-sheep) value
-                                                   (property property)
+                                                   (property standard-property)
                                                    &key readers writers)
   (let ((pname (property-name property)))
     (add-property-metaobject-to-sheep sheep property)
@@ -116,7 +116,7 @@ SHEEP, including inherited ones."))
 
 (defmethod add-property ((sheep standard-sheep) property-name value 
                          &key readers writers (make-accessor-p t)
-                         (property-metaclass 'property))
+                         (property-metaclass 'standard-property))
   "Allocates VALUE as one of SHEEP's direct-properties."
   (when (has-direct-property-p sheep property-name)
     (warn "~A already has a direct property named ~A. Overwriting." sheep property-name))
@@ -136,7 +136,7 @@ SHEEP, including inherited ones."))
   (if property-name
       (remove-property sheep (gethash property-name (sheep-property-metaobject-table sheep)))
       (error "Cannot remove property: ~A is not a direct property of ~A" property-name sheep)))
-(defmethod remove-property ((sheep standard-sheep) (property property))
+(defmethod remove-property ((sheep standard-sheep) (property standard-property))
   (let ((name (property-name property)))
     (if (has-direct-property-p sheep name)
         (progn (remhash name (sheep-property-value-table sheep))
@@ -167,7 +167,7 @@ SHEEP, including inherited ones."))
         (error 'unbound-property
                :format-control "~A has no direct property with name ~A"
                :format-args (list sheep property-name)))))
-(defmethod direct-property-value ((sheep standard-sheep) (property property))
+(defmethod direct-property-value ((sheep standard-sheep) (property standard-property))
   (multiple-value-bind (value hasp)
       (gethash (property-name property) (sheep-property-value-table sheep))
     (if hasp
@@ -195,7 +195,7 @@ SHEEP, including inherited ones."))
                                             property-name)))
         (setf (property-value sheep property) new-value))
       (error "Property ~A does not exist for sheep ~A." property-name sheep)))
-(defmethod (setf property-value) (new-value (sheep standard-sheep) (property property))
+(defmethod (setf property-value) (new-value (sheep standard-sheep) (property standard-property))
   (unless (direct-property-metaobject sheep (property-name property))
     (setf (gethash (property-name property)
                    (sheep-property-metaobject-table sheep))

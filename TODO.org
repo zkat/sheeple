@@ -1,23 +1,78 @@
 * TODO Later
-** TODO Better error handling
-   I should go over the entirety of sheeple and start filling the thing with restarts.
-   If this is going to be usably dynamic, it needs to have proper reporting of crummy conditions,
-   and a nice way of recovering from them.
+** TODO Dynamicity
 *** TODO Inconsistent lambda lists
-   Adlai pointed out how CLOS offers a restart when lambda-lists are inconsistent,
-   offering to remove inconsistent methods. It's useful for interactively working.
-   Could I support something like this in sheeple?   
-** TODO Dynamic reply handling
+    Adlai pointed out how CLOS offers a restart when lambda-lists are inconsistent,
+    offering to remove inconsistent methods. It's useful for interactively working.
+    Could I support something like this in sheeple?   
+*** TODO Dynamic reply handling
    Under CLOS, it's possible to dynamically mess with replies. Sheeple is currently
    not as flexible in this regard. Let's get fixing.
 *** TODO Removing replies dynamically
     Given a message and a lambda-list of specifiers, remove the corresponding reply.
 *** TODO Inspecting replies dynamically
     Check whether certain replies exist, inspect their qualifiers and specializers, etc.
-** TODO Standard Reply Combination
+*** TODO Allow message/reply undefinition again
+** TODO Convenience
+*** TODO Implement :message option for defmessage (like CLOS' :method option)
+   I don't care about this feature all that much, so I might just keep bumping it until someone
+   who -does- care asks for it.
+   UPDATE: I don't think I even want this. It makes the defmessage macro horribly bloated and
+   complex, and I don't even like the idea of stuffing everything into a message definition. Things
+   need to stay flexible, and this would be just plain ugly.
+** TODO Stability
+*** TODO Better error handling
+   I should go over the entirety of sheeple and start filling the thing with restarts.
+   If this is going to be usably dynamic, it needs to have proper reporting of crummy conditions,
+   and a nice way of recovering from them.
+*** TODO messages.lisp
+*** TODO reply-definition.lisp
+*** TODO reply-dispatch.lisp
+** TODO Integration
+*** TODO With Lisp
+    The backtraces are awful. Good god.
+*** TODO With SLIME
+    It would be nice if SLIME had better support for highlighting and indentation
+    of Sheeple forms, and if it had facilities for inspecting sheeple objects.
+    Being able to do M-. and stuff would also be a HUGE plus.
+** TODO Other features
+*** TODO Messages/replies
+**** TODO Flexible Reply Combinations
+**** TODO CLOS Built-In Method Combinations
+    Each of these method combinations accepts 2 types of methods: "primary" methods
+    and :around methods. The :around methods are called like the standard combination.
+    "Primary" methods are qualified with the name of the combination, and are called
+    in most-specific-first order. Their return values are collected and passed to the
+    function named in the method combination.
+**** TODO PROGN, OR, AND
+**** TODO LIST, APPEND, NCONC
+**** TODO MAX, MIN, +
+**** TODO DEFINE-REPLY-COMBINATION
+    Under CLOS, it's possible to define a completely customized method combination. Even
+    though this is not frequently used, Sheeple should provide a similar feature.
+*** TODO Properties
+**** TODO There should be an exposed MOP interface for how (setf property-value) creates props.
+** TODO Optimization
+*** TODO Speed up accessors
+   Accessors need to be fast. Really fast. Find ways to cheat that won't break everything.
+*** TODO Speed up instantiation
+    Takes forever to make a sheep object. It may not be possible to speed things up too much
+    until Sheeple has a native MOP, though...
+*** TODO Consider caching scheme for property access
+    I should've done this in the first place. A simpler version of the same system used to dispatch
+    replies would do wonders for read performance, without seriously harming writer performance.
+* TODO 2.3
+** TODO Documentation
+*** TODO Go through the whole thing and make it more CLHS-like (only partially done)
+    The entire basic API for Sheeple should be correctly documented.
+*** TODO Put together html and pdf versions of user-guide.org
+** TODO Stability
+*** TODO Write unit tests for messages and replies.
+** TODO Messages/Replies
+*** TODO Standard Reply Combination
    The Standard Method Combination of CLOS is the one with :around, :after, :before,
    and "primary" replies. It would be good to get Sheeple's standard reply combination
    to behave in the same way as this.
+**** TODO Remove CALL-NEXT-REPLY from :before and :after replies
 *** TODO Enable nesting of :around replies
 *** TODO Ensure proper order of replies:
     Most specific :around
@@ -32,47 +87,7 @@
        Least specific :after
        ...                      ; Return values ignored
        Most specific :after
-** TODO Flexible Reply Combinations
-*** TODO CLOS Built-In Method Combinations
-    Each of these method combinations accepts 2 types of methods: "primary" methods
-    and :around methods. The :around methods are called like the standard combination.
-    "Primary" methods are qualified with the name of the combination, and are called
-    in most-specific-first order. Their return values are collected and passed to the
-    function named in the method combination.
-**** TODO PROGN, OR, AND
-**** TODO LIST, APPEND, NCONC
-**** TODO MAX, MIN, +
-*** TODO DEFINE-REPLY-COMBINATION
-    Under CLOS, it's possible to define a completely customized method combination. Even
-    though this is not frequently used, Sheeple should provide a similar feature.
-** TODO Implement :message option for defmessage (like CLOS' :method option)
-   I don't care about this feature all that much, so I might just keep bumping it until someone
-   who -does- care asks for it.
-   UPDATE: I don't think I even want this. It makes the defmessage macro horribly bloated and
-   complex, and I don't even like the idea of stuffing everything into a message definition. Things
-   need to stay flexible, and this would be just plain ugly.
-** TODO Speed up accessors
-   Accessors need to be fast. Really fast. Find ways to cheat that won't break everything.
-** TODO Consider caching scheme for property access
-   I should've done this in the first place. A simpler version of the same system used to dispatch
-   replies would do wonders for read performance, without seriously harming writer performance.
-** TODO Write more unit tests.
-*** TODO messages.lisp
-*** TODO reply-definition.lisp
-*** TODO reply-dispatch.lisp
-** TODO Improve documentation
-*** TODO Go through the whole thing and make it more CLHS-like (only partially done)
-*** TODO Put together html and pdf versions of user-guide.org
-** TODO Integration
-*** TODO With Lisp
-    The backtraces are awful. Good god.
-*** TODO With SLIME
-    It would be nice if SLIME had better support for highlighting and indentation
-    of Sheeple forms, and if it had facilities for inspecting sheeple objects.
-    Being able to do M-. and stuff would also be a HUGE plus.
-** TODO Allow message/reply undefinition again
-** TODO Standard Reply Combination
-*** TODO Remove CALL-NEXT-REPLY from :before and :after replies
+
 * DONE 2.2
 ** DONE [#A] Fix #'(setf property-value) Bug
    When a call to #'(setf property-value) requires a new direct property object

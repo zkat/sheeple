@@ -97,7 +97,7 @@ Features
 * (call-next-reply) and (next-reply-p)
 
 * A metaobject protocol (in CLOS) for inspecting sheeple and altering their behavior through
-  metaclasses.
+  metaclasses. So far, instantiation, inheritance, and property protocols have been implemented.
 
 Using Sheeple
 =============
@@ -147,14 +147,14 @@ We've changed *my-sheep*'s VAR value, so *child*'s VAR value will also change.
         "new-value"
 
 Replies are to Messages as Methods are to Generic Functions, and the semantics are very similar.
-Note that Sheeple handles built-in Lisp objects, and can dispatch on them. The function PROTO
-fetches a prototype object from a global registry (read the user guide for more on this)
+Note that Sheeple handles built-in Lisp objects, and can dispatch on them. They are named just
+like the lisp types they refer to, with the =foo= naming scheme for prototypes.
 
         SHEEPLE-USER> (defmessage synergize (a b))
         #<Message: SYNERGIZE #x157AAC36>
-        SHEEPLE-USER> (defreply synergize ((a (proto 'string)) (b (proto 'string))) (concatenate 'string a b))
+        SHEEPLE-USER> (defreply synergize ((a =string=)) (b =string=))) (concatenate 'string a b))
         #<Reply: SYNERGIZE #x157D90FE>
-        SHEEPLE-USER> (defreply synergize ((a (proto 'number)) (b (proto 'number))) (+ a b))
+        SHEEPLE-USER> (defreply synergize ((a =number=) (b =number=)) (+ a b))
         #<Reply: SYNERGIZE #x15815B76>
         SHEEPLE-USER> (synergize "foo " "bar")
         "foo bar"

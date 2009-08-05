@@ -7,7 +7,6 @@
 (in-package :sheeple)
 (declaim (optimize (debug 1) (safety 1) (speed 3)))
 
-(defvar *max-sheep-id* 0)
 (defvar =t=)
 (defvar =dolly=)
 (defclass standard-sheep ()
@@ -21,8 +20,7 @@
    (property-metaobject-table :accessor sheep-property-metaobject-table
                         :initform (make-hash-table :test #'eq))
    (direct-roles :accessor sheep-direct-roles :initform nil)
-   (hierarchy-list :accessor sheep-hierarchy-list :initform nil)
-   (id :accessor sheep-id :initform (incf *max-sheep-id*))))
+   (hierarchy-list :accessor sheep-hierarchy-list :initform nil)))
 
 (defun allocate-sheep (&optional (class 'standard-sheep))
   (make-instance class))

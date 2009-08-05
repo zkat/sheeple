@@ -198,7 +198,7 @@ SHEEP, including inherited ones."))
 ;;
 ;; The general idea is that all children of a certain object will inherit the property's
 ;; class when creating it locally, although they can always override the property type
-;; by using add-property.
+;; by using add-property. There should be a way to override this in the MOP, though.
 (defmethod (setf property-value) (new-value (sheep standard-sheep) (property-name symbol))
   (if (has-property-p sheep property-name)
       (let ((property (direct-property-metaobject (property-owner sheep property-name)
@@ -208,6 +208,9 @@ SHEEP, including inherited ones."))
 (defmethod (setf property-value) :before (new-value (sheep standard-sheep)
                                                     (property standard-property))
   (unless (direct-property-metaobject sheep (property-name property))
+    ;; TODO - Something like add-property here instead of this crap. It
+    ;;        should be possible to override the exact behavior exhibited here.. 
+    ;;        Maybe..
     (setf (gethash (property-name property)
                    (sheep-property-metaobject-table sheep))
           (make-instance (class-of property)

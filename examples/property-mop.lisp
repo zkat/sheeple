@@ -7,19 +7,19 @@
 
 (defvar *max-oid* 0)
 (defclass persistent-sheep (standard-sheep) ((oid :initform (incf *max-oid*) :reader oid)))
-(defclass persistent-property (property) ())
+(defclass persistent-property (standard-property) ())
 
 (defmethod initialize-instance :after ((sheep persistent-sheep) &key)
   (format t "Allocating space for ~A in an external database. Its OID is: ~A.~%" sheep (oid sheep)))
 
-(defmethod add-parent ((sheep standard-sheep) (sheep persistent-sheep))
+(defmethod add-parent :around ((sheep standard-sheep) (sheep persistent-sheep))
   (if (or (eql sheep =dolly=)
           (eql (find-class 'persistent-sheep)
                (class-of sheep)))
       (call-next-method)
       (error "We don't support adding non-persistent sheep as parents!")))
 
-(defmethod add-property ((sheep persistent-sheep) pname value &key transientp)
+(defmethod add-property :around ((sheep persistent-sheep) pname value &key transientp)
   (format t "Allocating existence of property in database, even if it's transient.~
              That way, we know whether the property is even supposed to exist.~%")
   (if transientp
@@ -37,6 +37,7 @@
 (defmethod (setf property-value) (new-value (sheep persistent-sheep)
                                   (property persistent-property))
   (format t "Setting property value for ~A in database.~%" (property-name property)))
+
 
 (defproto =persistent-obj= ()
   ((foo "bar")

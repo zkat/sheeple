@@ -189,18 +189,30 @@ SHEEP, including inherited ones."))
                :format-control "Property ~A is unbound for sheep ~S"
                :format-args (list property-name sheep)))))
 
+;; What the following code SHOULD do:
+;; 1. If there is no ancestor with a property added with that name, error.
+;; 2. If there is no property set locally, but an ancestor has one,
+;;    use the ancestor's property's class to make a new instance of the 
+;;    property-spec locally.
+;; 3. set the actual property-value locally
+;;
+;; The general idea is that all children of a certain object will inherit the property's
+;; class when creating it locally, although they can always override the property type
+;; by using add-property.
 (defmethod (setf property-value) (new-value (sheep standard-sheep) (property-name symbol))
   (if (has-property-p sheep property-name)
       (let ((property (direct-property-metaobject (property-owner sheep property-name)
                                             property-name)))
         (setf (property-value sheep property) new-value))
       (error "Property ~A does not exist for sheep ~A." property-name sheep)))
-(defmethod (setf property-value) (new-value (sheep standard-sheep) (property standard-property))
+(defmethod (setf property-value) :before (new-value (sheep standard-sheep)
+                                                    (property standard-property))
   (unless (direct-property-metaobject sheep (property-name property))
     (setf (gethash (property-name property)
                    (sheep-property-metaobject-table sheep))
           (make-instance (class-of property)
-                         :name (property-name property))))
+                         :name (property-name property)))))
+(defmethod (setf property-value) (new-value (sheep standard-sheep) (property standard-property))
   (let ((property-table (sheep-property-value-table sheep)))
     (setf (gethash (property-name property) property-table) new-value)))
 

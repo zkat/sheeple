@@ -1,7 +1,12 @@
 * 2.2
 ** Features
 *** PROPERTY-SPEC works more like the CLOS MOP's slotd-based stuff now.
+*** PROPERTY-SPEC -> STANDARD-PROPERTY
+*** An initial (sort of-)working implementation of a property MOP done
+*** Beginnings of unit tests
+*** DEFPROTO works like DEFSHEEP now -- all protos are kept in the value namespace
 ** Bugs
+*** Mostly bugs involving new property metaobject code...
 * 2.1.2
 ** Features
 *** More unit tests

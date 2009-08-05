@@ -123,13 +123,6 @@
     (is (member =dolly= (sheep-hierarchy-list child)))
     (is (member =t= (sheep-hierarchy-list child)))))
 
-(test sheep-id
-  (let* ((a (clone))
-         (b (clone)))
-    (is (numberp (sheep-id a)))
-    (is (numberp (sheep-id b)))
-    (is (= (1+ (sheep-id a)) (sheep-id b)))))
-
 (defclass foo () ())
 (test sheep-p
   (let ((sheep (clone))

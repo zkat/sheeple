@@ -167,8 +167,8 @@ Replies are defined on sheep objects themselves. No need for eql-specialization,
         SHEEPLE-USER> (defreply synergize ((a *my-sheep*) (b *my-sheep*)) (clone a b))
         #<Reply: SYNERGIZE #x157C5596>
         SHEEPLE-USER> (synergize *my-sheep* *child*)
-        ; ERROR - circular precedence graph 
-        ; Evaluation aborted. 
+        ; ERROR - circular precedence graph
+        ; Evaluation aborted.
         SHEEPLE-USER> (synergize *child* *my-sheep*)
         #<Sheep #x15787456>
         SHEEPLE-USER> (var (synergize *child* *my-sheep*))

@@ -9,7 +9,7 @@
   ((name  "NoName")
    (phone "NoPhone#")))
 
-(defvar *charles* 
+(defvar *charles*
   (defclone (#@person)
       ((name "Charles"))))
 

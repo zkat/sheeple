@@ -17,7 +17,7 @@
    :child-p
    :sheeple-error ;general error
    :sheeple-warning ;general warning
-   
+
    ;; Property access
    :unbound-property ;error
    :add-property

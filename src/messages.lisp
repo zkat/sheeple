@@ -80,7 +80,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 (defun generate-message (&key name
 			  lambda-list
 			  (documentation ""))
-  (let ((message (%make-message 
+  (let ((message (%make-message
 		   :name name
 		   :lambda-list lambda-list
 		   :documentation documentation)))
@@ -319,4 +319,3 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
             (lose "the reply does not accept each of the &KEY arguments~2I~_~
                    ~S."
                   msg-keywords)))))))
-

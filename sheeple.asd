@@ -5,7 +5,7 @@
   :licence "MIT"
   :depends-on ()
   :serial t
-  :components 
+  :components
   ((:module src
 	    :serial t
 	    :components
@@ -31,7 +31,7 @@
   :licence "MIT"
   :depends-on (:sheeple :fiveam)
   :serial t
-  :components 
+  :components
   ((:module tests
 	    :serial t
 	    :components

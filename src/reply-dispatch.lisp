@@ -49,7 +49,7 @@
     (when (null primaries)
       (let ((name (message-name (cache-message cache))))
 	(error 'no-primary-replies
-	       :format-control 
+	       :format-control
 	       "There are no primary replies for message ~A."
 	       :format-args (list name))))
     (if around
@@ -100,14 +100,14 @@
       (error "Not enough args for message ~A" message))
     (if (= 0 relevant-args-length)
         (let ((relevant-args (subseq args 0 relevant-args-length)))
-          (create-reply-cache message (%find-applicable-replies 
+          (create-reply-cache message (%find-applicable-replies
                                           message relevant-args
                                           :errorp errorp)))
         (let ((memo-entry (fetch-memo-vector-entry args message relevant-args-length)))
           (or memo-entry
               memo-entry
               (let* ((relevant-args (subseq args 0 relevant-args-length))
-                     (new-msg-list (%find-applicable-replies message 
+                     (new-msg-list (%find-applicable-replies message
                                                               relevant-args
                                                               :errorp errorp)))
                 (memoize-reply-dispatch message relevant-args new-msg-list)))))))
@@ -122,7 +122,7 @@
              t)
             ((= 1 relevant-args-length)
              (equal (car args) (car vector-args)))
-            (t 
+            (t
              (loop
                 for i upto relevant-args-length
                 for v-arg in vector-args
@@ -157,7 +157,7 @@
 (defun add-entry-to-message (cache message args index)
   (declare (fixnum index))
   (let ((memo-vector (message-memo-vector message))
-        (vector-entry (make-vector-entry 
+        (vector-entry (make-vector-entry
                        :args (make-weak-pointer args)
                        :msg-cache cache)))
     (cond ((loop for i from index below (length (the simple-vector memo-vector))
@@ -197,7 +197,7 @@
 	    (discovered-replies nil)
 	    (contained-applicable-replies nil))
 	(declare (list discovered-replies contained-applicable-replies))
-	(loop 
+	(loop
 	   for arg in args
 	   for index upto (1- n)
 	   do (let* ((arg (if (sheep-p arg)
@@ -221,7 +221,7 @@
 			      (let ((contained-reply (find curr-reply
 							     discovered-replies
 							     :key #'reply-container-reply)))
-				(setf (elt (reply-container-rank contained-reply) index) 
+				(setf (elt (reply-container-rank contained-reply) index)
 				      hierarchy-position)
 				(when (fully-specified-p (reply-container-rank contained-reply))
 				  (pushnew contained-reply contained-applicable-replies :test #'equalp))))))))))

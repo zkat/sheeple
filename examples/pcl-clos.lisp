@@ -73,7 +73,7 @@
 ;; SHEEPLE-USER> (property-summary *janes-account*)
 ;; Sheep: #<Sheep #x1506134E>
 ;; Properties:
- 
+
 ;;    Name:     CUSTOMER-NAME
 ;;    Value:    "Jane Doe"
 ;;    Readers:  (CUSTOMER-NAME)
@@ -111,7 +111,7 @@
 ;;    Owner:    #<Sheep #x1506134E>
 
 ;; NIL
-;; SHEEPLE-USER> 
+;; SHEEPLE-USER>
 
 (defmessage withdraw (account amount)
   (:documentation "Withdraw the specified amount from the account.

@@ -43,4 +43,3 @@
   ((foo "bar")
    (baz "quux" :transientp t))
   (:metaclass 'persistent-sheep))
-

@@ -51,7 +51,7 @@ hierarchy list, an error is signaled. This function returns SHEEP after property
   (:documentation "Wipes out all direct properties and their values from SHEEP."))
 
 (defgeneric has-direct-property-p (sheep property-name)
-  (:documentation "Returns T if SHEEP has a property called PROPERTY-NAME as a direct property. 
+  (:documentation "Returns T if SHEEP has a property called PROPERTY-NAME as a direct property.
 NIL otherwise."))
 
 (defgeneric has-property-p (sheep property-name)
@@ -60,7 +60,7 @@ would yield a value (i.e. not signal an unbound-property condition)."))
 
 ;;; Value
 (defgeneric direct-property-value (sheep property)
-  (:documentation "Returns the property-value set locally in SHEEP for PROPERTY. 
+  (:documentation "Returns the property-value set locally in SHEEP for PROPERTY.
 If the value is non-local (is delegated or does not exist in the hierarchy list), an
 UNBOUND-PROPERTY condition is signaled."))
 
@@ -114,7 +114,7 @@ SHEEP, including inherited ones."))
     (setf (property-value sheep pname) value))
   sheep)
 
-(defmethod add-property ((sheep standard-sheep) property-name value 
+(defmethod add-property ((sheep standard-sheep) property-name value
                          &key readers writers (make-accessor-p t)
                          (property-metaclass 'standard-property))
   "Allocates VALUE as one of SHEEP's direct-properties."
@@ -192,7 +192,7 @@ SHEEP, including inherited ones."))
 ;; What the following code SHOULD do:
 ;; 1. If there is no ancestor with a property added with that name, error.
 ;; 2. If there is no property set locally, but an ancestor has one,
-;;    use the ancestor's property's class to make a new instance of the 
+;;    use the ancestor's property's class to make a new instance of the
 ;;    property-spec locally.
 ;; 3. set the actual property-value locally
 ;;
@@ -209,7 +209,7 @@ SHEEP, including inherited ones."))
                                                     (property standard-property))
   (unless (direct-property-metaobject sheep (property-name property))
     ;; TODO - Something like add-property here instead of this crap. It
-    ;;        should be possible to override the exact behavior exhibited here.. 
+    ;;        should be possible to override the exact behavior exhibited here..
     ;;        Maybe..
     (setf (gethash (property-name property)
                    (sheep-property-metaobject-table sheep))

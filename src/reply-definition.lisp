@@ -131,7 +131,7 @@
 	(delete role (sheep-direct-roles sheep))))
 
 (defun add-reply-to-sheeple (message reply sheeple)
-  (loop 
+  (loop
      for sheep in sheeple
      for i upto (1- (length sheeple))
      do (let ((role (%make-role
@@ -181,7 +181,7 @@
 			:participants (list sheep)
 			:body `(property-value sheep ',prop-name)
 			:function (eval (make-reply-lambda reader
-							     '(sheep) 
+							     '(sheep)
 							     `((property-value sheep ',prop-name)))))))
 
 (defun add-writers-to-sheep (writers prop-name sheep)
@@ -193,7 +193,7 @@
 			:participants (list =t= sheep)
 			:body `(setf (property-value sheep ',prop-name) new-value)
 			:function (eval (make-reply-lambda writer
-							     '(new-value sheep) 
+							     '(new-value sheep)
 							     `((setf (property-value sheep ',prop-name)
 								     new-value)))))))
 

@@ -467,13 +467,13 @@
         (do-it =sheep1=) => #<Sheep AKA: SHEEP1 {BA28B89}> is the first sheep. FYI
 
         (let ((x 5))
-	   (defreply do-it ((foo =number=)) ;if dispatching on builtins, use builtin prototype.
-	     (* x foo))) ;It captures the lexical environment, too.
+           (defreply do-it ((foo =number=)) ;if dispatching on builtins, use builtin prototype.
+             (* x foo))) ;It captures the lexical environment, too.
         (do-it 5) => 10
 
         (defreply do-it ((foo 5)) ;any object can be dispatched on. Non-sheep are autoboxed.
-	  (declare (ignore foo)) ;declarations work
-	  (print "FIVE!! THIS IS VERY EXCITING!!1"))
+          (declare (ignore foo)) ;declarations work
+          (print "FIVE!! THIS IS VERY EXCITING!!1"))
         (do-it 5) => "FIVE!! THIS IS VERY EXCITING!!1"
 
         (defreply do-it ((foo =float=))

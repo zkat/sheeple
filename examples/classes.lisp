@@ -1,3 +1,5 @@
+;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
+
 ;; This is a demonstration of Sheeple usage.
 
 ;; Sheeple can be used, when necessary, in a style identical to class-based OOP.

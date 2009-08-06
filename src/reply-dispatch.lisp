@@ -1,3 +1,5 @@
+;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
+
 ;;;; This file is part of Sheeple
 
 ;;;; reply-dispatch.lisp
@@ -40,30 +42,30 @@
 
 (defun apply-replies (cache args)
   (funcall (compute-effective-reply-function cache)
-	   args))
+           args))
 
 (defun compute-effective-reply-function (cache)
   (let ((replies (cache-replies cache))
-	(around (car (cache-around cache)))
-	(primaries (cache-primary cache)))
+        (around (car (cache-around cache)))
+        (primaries (cache-primary cache)))
     (when (null primaries)
       (let ((name (message-name (cache-message cache))))
-	(error 'no-primary-replies
-	       :format-control
-	       "There are no primary replies for message ~A."
-	       :format-args (list name))))
+        (error 'no-primary-replies
+               :format-control
+               "There are no primary replies for message ~A."
+               :format-args (list name))))
     (if around
-	(let ((next-erfun
-	       (compute-effective-reply-function (create-reply-cache
-						    (cache-message cache)
-						    (remove around replies)))))
-	  (lambda (args)
-	    (funcall (reply-function around) args next-erfun)))
-	(let ((next-erfun (compute-primary-erfun (cdr primaries)))
-	      (befores (cache-before cache))
-	      (afters (cache-after cache)))
-	  (lambda (args)
-	    (when befores
+        (let ((next-erfun
+               (compute-effective-reply-function (create-reply-cache
+                                                    (cache-message cache)
+                                                    (remove around replies)))))
+          (lambda (args)
+            (funcall (reply-function around) args next-erfun)))
+        (let ((next-erfun (compute-primary-erfun (cdr primaries)))
+              (befores (cache-before cache))
+              (afters (cache-after cache)))
+          (lambda (args)
+            (when befores
               (dolist (before befores)
                 (funcall (reply-function before) args nil)))
             (multiple-value-prog1
@@ -76,8 +78,8 @@
   (if (null replies)
       nil
       (let ((next-erfun (compute-primary-erfun (cdr replies))))
-	(lambda (args)
-	  (funcall (reply-function (car replies)) args next-erfun)))))
+        (lambda (args)
+          (funcall (reply-function (car replies)) args next-erfun)))))
 
 (defun create-reply-cache (message replies)
   (make-cache
@@ -92,10 +94,10 @@
   (declare (message message))
   (declare (list args))
   (let (;; This doesn't seem to be expensive at all..
-	 (relevant-args-length (the fixnum (arg-info-number-required (message-arg-info message))))
-	 ;; If I can avoid calling fetch-memo-vector-entry for singly-dispatched readers, that
-	 ;; would be -lovely-. Not sure how to do that yet, though.
-	)
+         (relevant-args-length (the fixnum (arg-info-number-required (message-arg-info message))))
+         ;; If I can avoid calling fetch-memo-vector-entry for singly-dispatched readers, that
+         ;; would be -lovely-. Not sure how to do that yet, though.
+        )
     (when (< (length args) relevant-args-length)
       (error "Not enough args for message ~A" message))
     (if (= 0 relevant-args-length)
@@ -132,22 +134,22 @@
 
 (defun fetch-memo-vector-entry (args message relevant-args-length)
   (let* ((memo-vector (message-memo-vector message))
-	 (orig-index (mod (the fixnum (sxhash (if (sheep-p (car args))
-						    (car args)
-						    (or (find-boxed-object (car args))
-							(box-type-of (car args))))))
-			  (length memo-vector))))
+         (orig-index (mod (the fixnum (sxhash (if (sheep-p (car args))
+                                                    (car args)
+                                                    (or (find-boxed-object (car args))
+                                                        (box-type-of (car args))))))
+                          (length memo-vector))))
     ;; I don't know how this could be any faster. My best choice is probably to avoid calling it.
     (declare (vector memo-vector))
     (declare (fixnum orig-index))
     (let ((attempt (aref memo-vector orig-index)))
       (if (desired-vector-entry-p args attempt relevant-args-length)
-	  (vector-entry-msg-cache attempt)
-	  (progn
-	    (loop for entry across memo-vector
-	       do (when (desired-vector-entry-p args entry relevant-args-length)
-		    (return-from fetch-memo-vector-entry (vector-entry-msg-cache entry))))
-	    nil)))))
+          (vector-entry-msg-cache attempt)
+          (progn
+            (loop for entry across memo-vector
+               do (when (desired-vector-entry-p args entry relevant-args-length)
+                    (return-from fetch-memo-vector-entry (vector-entry-msg-cache entry))))
+            nil)))))
 
 (defstruct (vector-entry (:type vector))
   args
@@ -179,11 +181,11 @@
 
 (defun memoize-reply-dispatch (message args msg-list)
   (let ((msg-cache (create-reply-cache message msg-list))
-	(maybe-index (mod (the fixnum (sxhash (if (sheep-p (car args))
-						    (car args)
-						    (or (find-boxed-object (car args))
-							(box-type-of (car args))))))
-			  (length (the vector (message-memo-vector message))))))
+        (maybe-index (mod (the fixnum (sxhash (if (sheep-p (car args))
+                                                    (car args)
+                                                    (or (find-boxed-object (car args))
+                                                        (box-type-of (car args))))))
+                          (length (the vector (message-memo-vector message))))))
     (add-entry-to-message msg-cache message args maybe-index)
     msg-cache))
 
@@ -193,59 +195,59 @@
   (if (null args)
       (message-replies message)
       (let ((selector (message-name message))
-	    (n (length args))
-	    (discovered-replies nil)
-	    (contained-applicable-replies nil))
-	(declare (list discovered-replies contained-applicable-replies))
-	(loop
-	   for arg in args
-	   for index upto (1- n)
-	   do (let* ((arg (if (sheep-p arg)
-			      arg
-			      (or (find-boxed-object arg)
-				  (box-type-of arg))))
-		     (curr-sheep-list (sheep-hierarchy-list arg)))
-		(loop
-		   for curr-sheep in curr-sheep-list
-		   for hierarchy-position upto (1- (length curr-sheep-list))
-		   do (dolist (role (sheep-direct-roles curr-sheep))
-			(when (and (equal selector (role-name role)) ;(eql message (role-message role))
-				   (= (the fixnum index) (the fixnum (role-position role))))
-			  (let ((curr-reply (role-reply role)))
-			    (when (= n (length (the list (reply-specialized-portion curr-reply))))
-			      (when (not (member curr-reply
-						 discovered-replies
-						 :key #'reply-container-reply))
-				(pushnew (the vector (contain-reply curr-reply))
-					 discovered-replies))
-			      (let ((contained-reply (find curr-reply
-							     discovered-replies
-							     :key #'reply-container-reply)))
-				(setf (elt (reply-container-rank contained-reply) index)
-				      hierarchy-position)
-				(when (fully-specified-p (reply-container-rank contained-reply))
-				  (pushnew contained-reply contained-applicable-replies :test #'equalp))))))))))
-	(if contained-applicable-replies
-	    (unbox-replies (sort-applicable-replies contained-applicable-replies))
-	    (when errorp
-	      (error 'no-applicable-replies
-		     :format-control
-		     "There are no applicable replies for message ~A when called with args:~%~S"
-		     :format-args (list selector args)))))))
+            (n (length args))
+            (discovered-replies nil)
+            (contained-applicable-replies nil))
+        (declare (list discovered-replies contained-applicable-replies))
+        (loop
+           for arg in args
+           for index upto (1- n)
+           do (let* ((arg (if (sheep-p arg)
+                              arg
+                              (or (find-boxed-object arg)
+                                  (box-type-of arg))))
+                     (curr-sheep-list (sheep-hierarchy-list arg)))
+                (loop
+                   for curr-sheep in curr-sheep-list
+                   for hierarchy-position upto (1- (length curr-sheep-list))
+                   do (dolist (role (sheep-direct-roles curr-sheep))
+                        (when (and (equal selector (role-name role)) ;(eql message (role-message role))
+                                   (= (the fixnum index) (the fixnum (role-position role))))
+                          (let ((curr-reply (role-reply role)))
+                            (when (= n (length (the list (reply-specialized-portion curr-reply))))
+                              (when (not (member curr-reply
+                                                 discovered-replies
+                                                 :key #'reply-container-reply))
+                                (pushnew (the vector (contain-reply curr-reply))
+                                         discovered-replies))
+                              (let ((contained-reply (find curr-reply
+                                                             discovered-replies
+                                                             :key #'reply-container-reply)))
+                                (setf (elt (reply-container-rank contained-reply) index)
+                                      hierarchy-position)
+                                (when (fully-specified-p (reply-container-rank contained-reply))
+                                  (pushnew contained-reply contained-applicable-replies :test #'equalp))))))))))
+        (if contained-applicable-replies
+            (unbox-replies (sort-applicable-replies contained-applicable-replies))
+            (when errorp
+              (error 'no-applicable-replies
+                     :format-control
+                     "There are no applicable replies for message ~A when called with args:~%~S"
+                     :format-args (list selector args)))))))
 
 (defun unbox-replies (replies)
   (mapcar #'reply-container-reply replies))
 
 (defun sort-applicable-replies (reply-list &key (rank-key #'<))
   (sort reply-list rank-key
-	:key (lambda (contained-reply)
-	       (calculate-rank-score (reply-container-rank contained-reply)))))
+        :key (lambda (contained-reply)
+               (calculate-rank-score (reply-container-rank contained-reply)))))
 
 (defun contain-reply (reply)
   (make-reply-container
    :reply reply
    :rank (make-array (length (reply-specialized-portion reply))
-		     :initial-element nil)))
+                     :initial-element nil)))
 
 (defstruct (reply-container (:type vector))
   reply
@@ -254,7 +256,7 @@
 (defun fully-specified-p (rank)
   (loop for item across rank
      do (when (eql item nil)
-	  (return-from fully-specified-p nil)))
+          (return-from fully-specified-p nil)))
   t)
 
 (defun calculate-rank-score (rank)
@@ -263,7 +265,7 @@
     (declare (fixnum total))
     (loop for item across rank
        do (when (numberp item)
-	    (incf (the fixnum total) (the fixnum item))))
+            (incf (the fixnum total) (the fixnum item))))
     total))
 
 (defun reply-specialized-portion (msg)

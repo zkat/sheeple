@@ -1,3 +1,5 @@
+;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
+
 ;; This file is part of Sheeple
 
 ;; post-boot.lisp
@@ -12,28 +14,28 @@
   (let ((sh (gensym)))
     `(let ((,sh ,sheep))
        (symbol-macrolet ,(mapcar (lambda (property-entry)
-				   (let ((var-name
-					  (if (symbolp property-entry)
-					      property-entry
-					      (car property-entry)))
-					 (property-name
-					  (if (symbolp property-entry)
-					      property-entry
-					      (cadr property-entry))))
-				     `(,var-name
-				       (property-value ,sh ',property-name))))
-				 properties)
-	 ,@body))))
+                                   (let ((var-name
+                                          (if (symbolp property-entry)
+                                              property-entry
+                                              (car property-entry)))
+                                         (property-name
+                                          (if (symbolp property-entry)
+                                              property-entry
+                                              (cadr property-entry))))
+                                     `(,var-name
+                                       (property-value ,sh ',property-name))))
+                                 properties)
+         ,@body))))
 
 (defmacro with-manipulators (properties sheep &body body)
   (let ((sh (gensym)))
     `(let ((,sh ,sheep))
        (symbol-macrolet ,(mapcar (lambda (property-entry)
-				   (let ((var-name (car property-entry))
-					 (manipulator-name (cadr property-entry)))
-				     `(,var-name (,manipulator-name ,sh))))
-				 properties)
-	 ,@body))))
+                                   (let ((var-name (car property-entry))
+                                         (manipulator-name (cadr property-entry)))
+                                     `(,var-name (,manipulator-name ,sh))))
+                                 properties)
+         ,@body))))
 
 
 ;;;

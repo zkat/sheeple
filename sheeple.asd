@@ -1,3 +1,5 @@
+;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
+
 (asdf:defsystem sheeple
   :version "2.0"
   :description "Cheeky prototypes for Common Lisp"
@@ -7,22 +9,22 @@
   :serial t
   :components
   ((:module src
-	    :serial t
-	    :components
-	    ((:file "trivial-garbage")
-	     (:file "packages")
-	     (:file "conditions")
-	     (:file "utils")
-	     (:file "sheeple")
-	     (:file "properties")
-	     (:file "builtins")
-	     (:file "parse-lambda-list")
-	     (:file "messages")
-	     (:file "reply-definition")
-	     (:file "reply-dispatch")
-	     (:file "bootstrap")
-	     (:file "post-boot")
-	     (:file "glue")))))
+            :serial t
+            :components
+            ((:file "trivial-garbage")
+             (:file "packages")
+             (:file "conditions")
+             (:file "utils")
+             (:file "sheeple")
+             (:file "properties")
+             (:file "builtins")
+             (:file "parse-lambda-list")
+             (:file "messages")
+             (:file "reply-definition")
+             (:file "reply-dispatch")
+             (:file "bootstrap")
+             (:file "post-boot")
+             (:file "glue")))))
 
 (asdf:defsystem sheeple-tests
   :version "Baahh"
@@ -33,11 +35,11 @@
   :serial t
   :components
   ((:module tests
-	    :serial t
-	    :components
-	    ((:file "sheeple")
+            :serial t
+            :components
+            ((:file "sheeple")
              (:file "properties")
-	     (:file "compatibility")
+             (:file "compatibility")
              (:file "messages")))))
 
 (defmethod asdf:perform ((o asdf:test-op) (c (eql (asdf:find-system :sheeple))))

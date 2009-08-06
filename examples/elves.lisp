@@ -1,3 +1,5 @@
+;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
+
 (in-package :sheeple-user)
 
 ;; Let's set up a basic 'class' hierarchy first.
@@ -51,9 +53,9 @@
   (declare (ignore a b))
   (let ((the-child (call-next-message)))
     (setf (name the-child)
-	  "Eddie")
+          "Eddie")
     (setf (title the-child)
-	  "Little")
+          "Little")
     the-child))
 
 ;; Princess Rena actually has a title. Maybe we want to be able to access the full name of an entity.

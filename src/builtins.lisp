@@ -1,3 +1,5 @@
+;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
+
 ;;;; This file is part of Sheeple
 
 ;;;; builtins.lisp
@@ -33,29 +35,29 @@
   ;; Note: I should really find a way to make this simply use CLOS...
   (if (sheep-p x)
       (progn
-	(warn "This is already a sheep!")
-	x)
+        (warn "This is already a sheep!")
+        x)
       (typecase x
-	(null                                          =null=)
-	((and symbol (not null))                       =symbol=)
-	((complex *)                                   =complex=)
-	((integer * *)                                 =integer=)
-	((float * *)                                   =float=)
-	(cons                                          =cons=)
-	(character                                     =character=)
-	(hash-table                                    =hash-table=)
-	(package                                       =package=)
-	(pathname                                      =pathname=)
-	(readtable                                     =readtable=)
-	(stream                                        =stream=)
-	((and number (not (or integer complex float))) =number=)
-	((string *)                                    =string=)
-	((bit-vector *)                                =bit-vector=)
-	((and vector (not string))                     =vector=)
-	((and array (not vector))                      =array=)
-        ;;	((and sequence (not (or vector list)))         =sequence=])
-	(function                                      =function=)
-	(t                                             =boxed-object=))))
+        (null                                          =null=)
+        ((and symbol (not null))                       =symbol=)
+        ((complex *)                                   =complex=)
+        ((integer * *)                                 =integer=)
+        ((float * *)                                   =float=)
+        (cons                                          =cons=)
+        (character                                     =character=)
+        (hash-table                                    =hash-table=)
+        (package                                       =package=)
+        (pathname                                      =pathname=)
+        (readtable                                     =readtable=)
+        (stream                                        =stream=)
+        ((and number (not (or integer complex float))) =number=)
+        ((string *)                                    =string=)
+        ((bit-vector *)                                =bit-vector=)
+        ((and vector (not string))                     =vector=)
+        ((and array (not vector))                      =array=)
+        ;;      ((and sequence (not (or vector list)))         =sequence=])
+        (function                                      =function=)
+        (t                                             =boxed-object=))))
 
 (defvar *boxed-object-table* (make-hash-table :test #'equal))
 

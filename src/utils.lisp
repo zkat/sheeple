@@ -1,3 +1,5 @@
+;;;; -*- Mode: lisp; indent-tabs-mode: nil -*-
+;;;
 ;; This file is part of Sheeple
 
 ;; utils.lisp
@@ -23,9 +25,9 @@
 (defun flatten (x)
   "Flattens a list."
   (labels ((rec (x acc)
-	     (cond ((null x) acc)
-		   ((atom x) (cons x acc))
-		   (t (rec (car x) (rec (cdr x) acc))))))
+             (cond ((null x) acc)
+                   ((atom x) (cons x acc))
+                   (t (rec (car x) (rec (cdr x) acc))))))
     (rec x nil)))
 
 (defun proper-list-of-length-p (x min &optional (max min))

@@ -1,3 +1,5 @@
+;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
+
 ;; conditions.lisp
 ;;
 ;; Holds all special conditions used by Sheeple
@@ -8,17 +10,17 @@
   ((format-control :initarg :format-control :reader sheeple-error-format-control)
    (format-args :initarg :format-args :reader sheeple-error-format-args))
   (:report (lambda (condition stream)
-	     (apply #'format stream
-		    (sheeple-error-format-control condition)
-		    (sheeple-error-format-args condition)))))
+             (apply #'format stream
+                    (sheeple-error-format-control condition)
+                    (sheeple-error-format-args condition)))))
 
 (define-condition sheeple-warning (warning)
   ((format-control :initarg :format-control :reader sheeple-error-format-control)
    (format-args :initarg :format-args :reader sheeple-error-format-args))
   (:report (lambda (condition stream)
-	     (apply #'format stream
-		    (sheeple-error-format-control condition)
-		    (sheeple-error-format-args condition)))))
+             (apply #'format stream
+                    (sheeple-error-format-control condition)
+                    (sheeple-error-format-args condition)))))
 
 ;;;
 ;;; Sheeple

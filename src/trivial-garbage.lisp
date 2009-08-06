@@ -1,5 +1,5 @@
-;;;; -*- Mode: lisp; indent-tabs-mode: nil -*-
-;;;
+;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
+
 ;;; trivial-garbage.lisp --- Trivial Garbage!
 ;;;
 ;;; This software is placed in the public domain by Luis Oliveira

@@ -1,3 +1,5 @@
+;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
+
 ;;;; This file is part of Sheeple
 ;;;;
 ;;;; This software is derived from the SBCL system. See COPYING for more information
@@ -56,18 +58,18 @@
                                            "-N-VALUE-"))))
         (push `(,n-value ,default) binds)
         (if (eq kind 'collect)
-	    (let ((n-tail (gensym (concatenate 'string
-					       (symbol-name name)
-					       "-N-TAIL-"))))
-	      (if default
-		  (push `(,n-tail (last ,n-value)) binds)
-		  (push n-tail binds))
-	      (push `(,name (&rest args)
-			    (collect-list-expander ',n-value ',n-tail args))
-		    macros))
-	    (push `(,name (&rest args)
-			  (collect-normal-expander ',n-value ',kind args))
-		  macros))))
+            (let ((n-tail (gensym (concatenate 'string
+                                               (symbol-name name)
+                                               "-N-TAIL-"))))
+              (if default
+                  (push `(,n-tail (last ,n-value)) binds)
+                  (push n-tail binds))
+              (push `(,name (&rest args)
+                            (collect-list-expander ',n-value ',n-tail args))
+                    macros))
+            (push `(,name (&rest args)
+                          (collect-normal-expander ',n-value ',kind args))
+                  macros))))
     `(macrolet ,macros (let* ,(nreverse binds) ,@body))))
 
 (defun parse-lambda-list-like-thing (list &key silent)
@@ -75,113 +77,113 @@
             (optional)
             (keys)
             (aux))
-	   (let ((restp nil)
-		 (rest nil)
-		 (morep nil)
-		 (more-context nil)
-		 (more-count nil)
-		 (keyp nil)
-		 (auxp nil)
-		 (allowp nil)
-		 (state :required))
-	     (declare (type (member :allow-other-keys :aux
-				    :key
-				    :more-context :more-count
-				    :optional
-				    :post-more :post-rest
-				    :required :rest)
-			    state))
-	     (dolist (arg list)
-	       (if (member arg lambda-list-keywords)
-		   (case arg
-		     (&optional
-		      (unless (eq state :required)
-			(error "misplaced &OPTIONAL in lambda list: ~S"
-			       list))
-		      (setq state :optional))
-		     (&rest
-		      (unless (member state '(:required :optional))
-			(error "misplaced &REST in lambda list: ~S" list))
-		      (setq state :rest))
-		     (&more
-		      (unless (member state '(:required :optional))
-			(error "misplaced &MORE in lambda list: ~S" list))
-		      (setq morep t
-			    state :more-context))
-		     (&key
-		      (unless (member state
-				      '(:required :optional :post-rest :post-more))
-			(error "misplaced &KEY in lambda list: ~S" list))
-		      (when (optional)
-			(unless silent
-			  (warn
-			   "&OPTIONAL and &KEY found in the same lambda list: ~S" list)))
-		      (setq keyp t
-			    state :key))
-		     (&allow-other-keys
-		      (unless (eq state ':key)
-			(error "misplaced &ALLOW-OTHER-KEYS in ~
+           (let ((restp nil)
+                 (rest nil)
+                 (morep nil)
+                 (more-context nil)
+                 (more-count nil)
+                 (keyp nil)
+                 (auxp nil)
+                 (allowp nil)
+                 (state :required))
+             (declare (type (member :allow-other-keys :aux
+                                    :key
+                                    :more-context :more-count
+                                    :optional
+                                    :post-more :post-rest
+                                    :required :rest)
+                            state))
+             (dolist (arg list)
+               (if (member arg lambda-list-keywords)
+                   (case arg
+                     (&optional
+                      (unless (eq state :required)
+                        (error "misplaced &OPTIONAL in lambda list: ~S"
+                               list))
+                      (setq state :optional))
+                     (&rest
+                      (unless (member state '(:required :optional))
+                        (error "misplaced &REST in lambda list: ~S" list))
+                      (setq state :rest))
+                     (&more
+                      (unless (member state '(:required :optional))
+                        (error "misplaced &MORE in lambda list: ~S" list))
+                      (setq morep t
+                            state :more-context))
+                     (&key
+                      (unless (member state
+                                      '(:required :optional :post-rest :post-more))
+                        (error "misplaced &KEY in lambda list: ~S" list))
+                      (when (optional)
+                        (unless silent
+                          (warn
+                           "&OPTIONAL and &KEY found in the same lambda list: ~S" list)))
+                      (setq keyp t
+                            state :key))
+                     (&allow-other-keys
+                      (unless (eq state ':key)
+                        (error "misplaced &ALLOW-OTHER-KEYS in ~
                                   lambda list: ~S"
-			       list))
-		      (setq allowp t
-			    state :allow-other-keys))
-		     (&aux
-		      (when (member state '(:rest :more-context :more-count))
-			(error "misplaced &AUX in lambda list: ~S" list))
-		      (when auxp
-			(error "multiple &AUX in lambda list: ~S" list))
-		      (setq auxp t
-			    state :aux))
-		     (t
-		      ;; It could be argued that &WHOLE and friends would be
-		      ;; just ordinary variables in an ordinary lambda-list,
-		      ;; but since (1) that seem exceedingly to have been the
-		      ;; programmers intent and (2) the spec can be
-		      ;; interpreted as giving as licence to signal an
-		      ;; error[*] that is what we do.
-		      ;;
-		      ;; [* All lambda list keywords used in the
-		      ;; implementation appear in LAMBDA-LIST-KEYWORDS. Each
-		      ;; member of a lambda list is either a parameter
-		      ;; specifier ot a lambda list keyword. Ergo, symbols
-		      ;; appearing in LAMBDA-LIST-KEYWORDS cannot be
-		      ;; parameter specifiers.]
-		      (error 'simple-error
-			     :format-control "Bad lambda list keyword ~S in: ~S"
-			     :format-args (list arg list))))
-		   (progn
-		     (when (symbolp arg)
-		       (let ((name (symbol-name arg)))
-			 (when (and (plusp (length name))
-				    (char= (char name 0) #\&))
-			   (unless silent
-			     (warn
-			      "suspicious variable in lambda list: ~S." arg)))))
-		     (case state
-		       (:required (required arg))
-		       (:optional (optional arg))
-		       (:rest
-			(setq restp t
-			      rest arg
-			      state :post-rest))
-		       (:more-context
-			(setq more-context arg
-			      state :more-count))
-		       (:more-count
-			(setq more-count arg
-			      state :post-more))
-		       (:key (keys arg))
-		       (:aux (aux arg))
-		       (t
-			(error "found garbage in lambda list when expecting ~
+                               list))
+                      (setq allowp t
+                            state :allow-other-keys))
+                     (&aux
+                      (when (member state '(:rest :more-context :more-count))
+                        (error "misplaced &AUX in lambda list: ~S" list))
+                      (when auxp
+                        (error "multiple &AUX in lambda list: ~S" list))
+                      (setq auxp t
+                            state :aux))
+                     (t
+                      ;; It could be argued that &WHOLE and friends would be
+                      ;; just ordinary variables in an ordinary lambda-list,
+                      ;; but since (1) that seem exceedingly to have been the
+                      ;; programmers intent and (2) the spec can be
+                      ;; interpreted as giving as licence to signal an
+                      ;; error[*] that is what we do.
+                      ;;
+                      ;; [* All lambda list keywords used in the
+                      ;; implementation appear in LAMBDA-LIST-KEYWORDS. Each
+                      ;; member of a lambda list is either a parameter
+                      ;; specifier ot a lambda list keyword. Ergo, symbols
+                      ;; appearing in LAMBDA-LIST-KEYWORDS cannot be
+                      ;; parameter specifiers.]
+                      (error 'simple-error
+                             :format-control "Bad lambda list keyword ~S in: ~S"
+                             :format-args (list arg list))))
+                   (progn
+                     (when (symbolp arg)
+                       (let ((name (symbol-name arg)))
+                         (when (and (plusp (length name))
+                                    (char= (char name 0) #\&))
+                           (unless silent
+                             (warn
+                              "suspicious variable in lambda list: ~S." arg)))))
+                     (case state
+                       (:required (required arg))
+                       (:optional (optional arg))
+                       (:rest
+                        (setq restp t
+                              rest arg
+                              state :post-rest))
+                       (:more-context
+                        (setq more-context arg
+                              state :more-count))
+                       (:more-count
+                        (setq more-count arg
+                              state :post-more))
+                       (:key (keys arg))
+                       (:aux (aux arg))
+                       (t
+                        (error "found garbage in lambda list when expecting ~
                                   a keyword: ~S"
-			       arg))))))
-	     (when (eq state :rest)
-	       (error "&REST without rest variable"))
+                               arg))))))
+             (when (eq state :rest)
+               (error "&REST without rest variable"))
 
-	     (values (required) (optional) restp rest keyp (keys) allowp auxp (aux)
-		     morep more-context more-count
-		     (not (eq state :required))))))
+             (values (required) (optional) restp rest keyp (keys) allowp auxp (aux)
+                     morep more-context more-count
+                     (not (eq state :required))))))
 
 ;;; like PARSE-LAMBDA-LIST-LIKE-THING, except our LAMBDA-LIST argument
 ;;; really *is* a lambda list, not just a "lambda-list-like thing", so
@@ -191,7 +193,7 @@
 (defun parse-lambda-list (lambda-list)
   ;; Classify parameters without checking their validity individually.
   (multiple-value-bind (required optional restp rest keyp keys allowp auxp aux
-				 morep more-context more-count)
+                                 morep more-context more-count)
       (parse-lambda-list-like-thing lambda-list)
 
     ;; Check validity of parameters.
@@ -209,7 +211,7 @@
              (need-symbol var "&OPTIONAL parameter name")))
           (t
            (error "&OPTIONAL parameter is not a symbol or cons: ~S"
-		  i))))
+                  i))))
       (when restp
         (need-symbol rest "&REST argument"))
       (when keyp
@@ -226,7 +228,7 @@
                    (need-symbol var-or-kv "&KEY parameter name"))))
             (t
              (error "&KEY parameter is not a symbol or cons: ~S"
-		    i))))))
+                    i))))))
 
     ;; Voila.
     (values required optional restp rest keyp keys allowp auxp aux
@@ -271,7 +273,7 @@
                                               (if (eq arg '&key)
                                                   (cons '&allow-other-keys
                                                         (cdr (member arg allowed-keywords)))
-						  (cdr (member arg allowed-keywords))))
+                                                  (cdr (member arg allowed-keywords))))
              (when (and (eq arg '&rest)
                         (or (null lambda-list)
                             (memq (car lambda-list)

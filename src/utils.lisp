@@ -43,7 +43,7 @@
 (defun topological-sort (elements constraints tie-breaker)
   (let ((remaining-constraints constraints)
         (remaining-elements elements)
-        (result ())) 
+        (result ()))
     (loop
        (let ((minimal-elements
               (remove-if
@@ -91,4 +91,3 @@
                                (setq ,n-tail ,n-res  ,n-value ,n-res)))))
                    forms)
          ,n-value)))
-

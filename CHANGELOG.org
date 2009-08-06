@@ -28,7 +28,7 @@
    NIL
 ** Bugs
 *** Fixed has-property-p
-*** More useful error when a does not receive enough args   
+*** More useful error when a does not receive enough args
 * 2.0
 ** Features
    Completely new interface, more MOP stuff. Lots of new tests.
@@ -153,4 +153,3 @@
 
 * 0.1
   Initial release
-

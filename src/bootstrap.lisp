@@ -21,7 +21,7 @@
 
 (defmessage init-sheep (sheep &key &allow-other-keys))
 (defreply init-sheep (sheep
-		      &key 
+		      &key
 		      nickname
 		      documentation
 		      properties)

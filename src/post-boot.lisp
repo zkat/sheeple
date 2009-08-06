@@ -47,4 +47,3 @@
 (defreply print-sheep ((sheep =boxed-object=) (stream =stream=))
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Boxed object~@[ AKA: ~a~]" (sheep-nickname sheep))))
-

@@ -4,19 +4,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(define-condition sheeple-error (error) 
+(define-condition sheeple-error (error)
   ((format-control :initarg :format-control :reader sheeple-error-format-control)
    (format-args :initarg :format-args :reader sheeple-error-format-args))
   (:report (lambda (condition stream)
-	     (apply #'format stream 
+	     (apply #'format stream
 		    (sheeple-error-format-control condition)
 		    (sheeple-error-format-args condition)))))
 
-(define-condition sheeple-warning (warning) 
+(define-condition sheeple-warning (warning)
   ((format-control :initarg :format-control :reader sheeple-error-format-control)
    (format-args :initarg :format-args :reader sheeple-error-format-args))
   (:report (lambda (condition stream)
-	     (apply #'format stream 
+	     (apply #'format stream
 		    (sheeple-error-format-control condition)
 		    (sheeple-error-format-args condition)))))
 
@@ -26,7 +26,7 @@
 (define-condition unbound-direct-property (sheeple-error)
   ())
 
-(define-condition sheep-hierarchy-error (sheeple-error) 
+(define-condition sheep-hierarchy-error (sheeple-error)
   ((format-control :initform "A circular precedence graph was generated."))
   (:documentation "Signaled whenever there is a problem computing the hierarchy list."))
 

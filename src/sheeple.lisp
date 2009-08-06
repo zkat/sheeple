@@ -13,7 +13,7 @@
   ((nickname :accessor sheep-nickname :initform nil)
    (documentation :accessor sheep-documentation :initform "")
    (direct-parents :accessor sheep-parents :initform nil :initarg :direct-parents)
-   (%direct-children :accessor %direct-children 
+   (%direct-children :accessor %direct-children
                      :initform  (make-weak-hash-table :weakness :key :test #'eq))
    (property-value-table :accessor sheep-property-value-table
                          :initform (make-hash-table :test #'eq))
@@ -43,7 +43,7 @@
 the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
   (let ((sheep (allocate-sheep metaclass)))
     (if sheep-or-sheeple
-        (add-parents (if (listp sheep-or-sheeple) 
+        (add-parents (if (listp sheep-or-sheeple)
                          sheep-or-sheeple
                          (list sheep-or-sheeple))
                      sheep)
@@ -92,7 +92,7 @@ the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
                child)
            (sheep-hierarchy-error ()
              (progn
-               (setf (sheep-parents child) 
+               (setf (sheep-parents child)
                      (delete new-parent
                              (sheep-parents child)))
                (finalize-sheep child)
@@ -153,7 +153,7 @@ the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
     (all-parents-loop () (list sheep))))
 
 (defun compute-sheep-hierarchy-list (sheep)
-  (handler-case 
+  (handler-case
     (let ((sheeple-to-order (collect-parents sheep)))
       (topological-sort sheeple-to-order
                         (remove-duplicates
@@ -185,7 +185,7 @@ the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
   (let ((list (compute-sheep-hierarchy-list sheep)))
     (setf (sheep-hierarchy-list sheep)
           list)
-    (maphash (lambda (descendant iggy) 
+    (maphash (lambda (descendant iggy)
                (declare (ignore iggy))
                (memoize-sheep-hierarchy-list descendant))
              (%direct-children sheep))))
@@ -233,7 +233,7 @@ the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
                (t
                 (pushnew (cadr olist) readers)
                 (pushnew `(setf ,(cadr olist)) writers))))
-        (otherwise 
+        (otherwise
          (pushnew (cadr olist) other-options)
          (pushnew (car olist) other-options))))
     (when accessors-by-default

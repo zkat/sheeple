@@ -134,7 +134,7 @@
     (is (not (sheep-p 5)))))
 
 (test copy-sheep ;; TODO - this isn't even written properly yet
-  ) 
+  )
 
 (test add-parent
   (let ((obj1 (clone))
@@ -282,4 +282,3 @@
   ;; TODO - check that options work properly (:metaclass, :documentation, :nickname, etc)
   ;;        remember that :nickname should override defproto's own nickname-setting.
   )
-

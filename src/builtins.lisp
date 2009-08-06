@@ -75,7 +75,7 @@ has not already been boxed."
   "Wraps OBJECT with a sheep."
   (if (sheep-p object)
       (error "~S seems to already be a sheep." object)
-      (setf (gethash object *boxed-object-table*) 
+      (setf (gethash object *boxed-object-table*)
             (defclone ((box-type-of object))
                 ((wrapped-object object)) (:nickname object)))))
 

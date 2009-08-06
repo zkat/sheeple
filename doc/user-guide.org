@@ -1,7 +1,7 @@
 * Vocabulary
 ** Sheep
    singular used to refer to a single Sheeple object.
-   
+
 ** Sheeple
    plural used to refer to more than one sheep. Also used to refer to the project.
 
@@ -43,7 +43,7 @@
 
 ** Message
    A Generic function. Holds pointers to all existing replies (methods).
-   
+
 ** Reply
    A message defines the prototype for how it is supposed to look, a reply defines the actual
    code to run, and when to run it.
@@ -96,7 +96,7 @@
       (clone (clone)) => #<Sheep #x15007E06>
 
     Side effects: Parents are added using ADD-PARENT, which may have side-effects.
-    
+
 *** DEFCLONE macro
     Syntax:
     defclone ({parent-object}*) ({property-spec}*) option-spec* => new sheep
@@ -111,7 +111,7 @@
     message-name ::= {symbol | (setf symbol)}
     property-option ::= (:metaclass {symbol | class}) |
                         (:nickname lisp-object) |
-                        (:documentation docstring)                        
+                        (:documentation docstring)
 
     Args and values:
     property-name -- a non-keyword symbol
@@ -158,7 +158,7 @@
     message-name ::= {symbol | (setf symbol)}
     property-option ::= (:metaclass {symbol | class}) |
                         (:nickname lisp-object) |
-                        (:documentation docstring)                        
+                        (:documentation docstring)
 
     Args and values:
     proto-name -- a non-keyword symbol
@@ -192,13 +192,13 @@
     in the new DEFPROTO form.
 
     Examples:
-    
+
     (defproto =test-proto= () ()) => #<Sheep AKA: =TEST-PROTO= #x150712B6>
 
     Notes:
     While there is nothing to programmatically enforce it, prototypes declared with DEFPROTO
     use the =foo= naming convention to tag the prototype as such.
-    
+
 ** Sheep manipulation
 *** Sheep Inspection
 **** PARENT-P
@@ -276,7 +276,7 @@
        (descendant-p descendant1 ancestor)  => T
        (descendant-p ancestor descendant1)  => NIL
        (descendant-p descendant2 ancestor)) => T
-     
+
 *** ADD-PARENT
     Syntax:
     add-parent new-parent sheep => modified sheep
@@ -309,14 +309,14 @@
 
     Description:
     If PARENT exists in SHEEP's parents list, it is removed. Otherwise, an error is signaled.
-        
-        (remove-parent *daddy* *kiddo*) 
+
+        (remove-parent *daddy* *kiddo*)
         => KIDDO object, without *daddy* as its parent.
         (remove-parent *daddy* *kiddo*) => ERROR
 
     Side effects:
     PARENT is no longer part of SHEEP's life. Alcoholism and chronic depression are common.
-       
+
 ** Properties
    The most important part about properties in Sheeple is that a sheep delegates not just the
    existence of a property, but the current value as well.
@@ -436,7 +436,7 @@
       on the original arguments).
 ***** NEXT-REPLY-P
       Within the body of a reply, you may use NEXT-REPLY-P to check for the presence of a next
-      reply. 
+      reply.
 ***** :BEFORE
       Any available :before replies are executed before the execution of the primary reply(s).
       When used inside the body of a :before reply, CALL-NEXT-REPLY calls the next
@@ -462,7 +462,7 @@
 
         (defreply do-it ((something =sheep1=))
           (format t "~a is sheep1. FYI" something))
-        ;; lambda-list variables do not have to be the same across replies, 
+        ;; lambda-list variables do not have to be the same across replies,
         ;; I only do it here for convenience.
         (do-it =sheep1=) => #<Sheep AKA: SHEEP1 {BA28B89}> is the first sheep. FYI
 
@@ -482,7 +482,7 @@
         (do-it 5.0) => T                                ; Sheeple has a CLOS-like hierarchy for
         (do-it 5) => "FIVE!! THIS IS VERY EXCITING!!1"  ; autoboxed built-ins.
         (do-it 6) => 12
-	
+
         (defreply synergize ((foo =sheep1=) (bar =sheep2=))
           (print "I got sheep1 first, then sheep2"))
 
@@ -494,7 +494,7 @@
           (+ foo bar))
         (synergize 3 5) => 8
         (synergize 4 "hey hey hey!") => ERROR: NO-MOST-SPECIFIC-REPLY
-        
+
         (defreply synergize ((foo =string=) (bar =string=))
           (concatenate 'string foo bar))
         (synergize "Hey " "Jude") => "Hey Jude"
@@ -502,7 +502,7 @@
         ;; :before and :after
         (defparameter *test-sheep* (defclone () ((var "value" :accessor var))))
         (var *test-sheep*) => "value"
-         
+
         (defreply var :before ((sheep *test-sheep*))
           (setf (property-value sheep 'var) "new-value"))
         (var *test-sheep*) => "new-value"
@@ -517,7 +517,7 @@
 
 ** Potential gotchas:
 *** CLOS (semi-)compatibility
-    For the time being, CLOS objects and CLOS-defined types are boxed as a clone of 
+    For the time being, CLOS objects and CLOS-defined types are boxed as a clone of
     =boxed-object=, not as autoboxed versions of the classes/objects.
 
 *** Message definition
@@ -526,7 +526,7 @@
 
 *** Threads
     Give it a shot, tell me how it goes! :)
-    
+
 * Implementation performance notes
 ** Property access
    As of version 1.0, property access is O(n), where n is the number of sheep that must be traversed
@@ -549,7 +549,7 @@
    performs even slower). Hopefully, as sheeple matures, it will become as fast as an implementation
    like PCL. Fortunately, because of the similarities of the APIs, many of PCL's optimizations can
    be translated to Sheeple itself.
-   
+
 * MOP Documentation
   Sheeple exposes a (currently) small metaobject protocol for inspecting and changing behavior of
   sheep objects. The protocol uses CLOS as a backend, so users may extend Sheeple behavior as
@@ -573,7 +573,7 @@
 **** SHEEP-NICKNAME
      This function returns the nickname assigned to this sheep object. This place can be SETFd in
      order to change the sheep's nickname.
-     
+
            (sheep-nickname sheep) => string-nickname
            (setf (sheep-nickname sheep) new-nickname) => new-nickname
            (sheep-nickname sheep) => new-nickname
@@ -583,7 +583,7 @@
      be SETFd to alter the sheep's documentation string.
 
            (sheep-documentation sheep) => "This sheep is documented! I write good code!"
-     
+
 **** SHEEP-HIERARCHY-LIST
      Returns an ordered list representing the precedence order used by Sheeple when either a
      method is called, or a property-value is requested.
@@ -671,6 +671,3 @@
 *** REINIT-SHEEP
     This is called whenever a DEFPROTO form is evaluated for an existing sheep.  No primary replies
     may be defined on this message, and :around replies MUST call-next-reply.
-
-
-

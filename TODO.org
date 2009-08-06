@@ -3,7 +3,7 @@
 *** TODO Inconsistent lambda lists
     Adlai pointed out how CLOS offers a restart when lambda-lists are inconsistent,
     offering to remove inconsistent methods. It's useful for interactively working.
-    Could I support something like this in sheeple?   
+    Could I support something like this in sheeple?
 *** TODO Dynamic reply handling
    Under CLOS, it's possible to dynamically mess with replies. Sheeple is currently
    not as flexible in this regard. Let's get fixing.
@@ -210,7 +210,7 @@
    Init-sheep is fine. It should be noted that init-sheep runs after parents
    are added, but before any direct properties are set.
 * DONE 1.1
-** DONE Rewrite sheeple using CLOS  
+** DONE Rewrite sheeple using CLOS
 ** DONE Expose enough of a MOP for psheep to be able to do its thing.
 ** DONE No-arg buzzwords don't work. Fix it.
 ** DONE Document new MOP features
@@ -320,7 +320,7 @@
 ** DONE Wrap replace-sheep with a DEFSHEEP macro.
 ** DONE Optimize the shit out of property-access
   Done for now -- it's only slightly slower than PCL right now
-** DONE Work out the whole conditions thing, and what they print out. 
+** DONE Work out the whole conditions thing, and what they print out.
    Put them all in conditions.lisp?
 * DONE 0.5
 ** DONE Get all pre-0.6 done by 0.5

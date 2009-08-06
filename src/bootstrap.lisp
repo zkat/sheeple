@@ -1,3 +1,5 @@
+;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
+
 ;; This file is part of Sheeple
 
 ;; bootstrap.lisp
@@ -21,14 +23,14 @@
 
 (defmessage init-sheep (sheep &key &allow-other-keys))
 (defreply init-sheep (sheep
-		      &key
-		      nickname
-		      documentation
-		      properties)
+                      &key
+                      nickname
+                      documentation
+                      properties)
   (when properties
     (mapcar (lambda (prop-spec)
-	      (apply #'add-property sheep prop-spec))
-	    properties))
+              (apply #'add-property sheep prop-spec))
+            properties))
   (when nickname
     (setf (sheep-nickname sheep) nickname))
   (when documentation
@@ -39,7 +41,7 @@
   (:documentation "Resets the sheep's parents and properties."))
 (defreply reinit-sheep (sheep &key new-parents
                               documentation
-			      properties)
+                              properties)
   "If :NEW-PARENTS is  provided, those parents are used when reinitializing,
 so DOLLY doesn't end up on the list by default."
   ;; CLOBBER TIME
@@ -51,8 +53,8 @@ so DOLLY doesn't end up on the list by default."
                sheep)
   ;; set up some new properties.
   (mapc (lambda (prop-spec)
-	  (apply #'add-property sheep prop-spec))
-	properties)
+          (apply #'add-property sheep prop-spec))
+        properties)
   ;; DOX PLOX
   (when documentation
     (setf (sheep-documentation sheep) documentation))

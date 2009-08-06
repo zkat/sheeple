@@ -1,3 +1,5 @@
+;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
+
 ;;;;
 ;;;; This is a quick hack to show the general idea of how writing a bit of mop code that allows
 ;;;; external storage of property-values would work.

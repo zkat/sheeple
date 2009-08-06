@@ -1,3 +1,5 @@
+;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
+
 ;; This file is part of Sheeple
 
 ;; sheep-creation.lisp
@@ -37,8 +39,8 @@
 ;;; Cloning
 ;;;
 (defun spawn-sheep (sheep-or-sheeple &rest all-keys
-		    &key (metaclass 'standard-sheep)
-		    &allow-other-keys)
+                    &key (metaclass 'standard-sheep)
+                    &allow-other-keys)
   "Creates a new sheep with SHEEPLE as its parents. METACLASS is used as the class when instantiating
 the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
   (let ((sheep (allocate-sheep metaclass)))
@@ -256,7 +258,7 @@ the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
   "Standard sheep-generation macro. This variant auto-generates accessors."
   `(let ((sheep (spawn-sheep
                  ,(canonize-sheeple sheeple)
-		 :properties ,(canonize-properties properties)
+                 :properties ,(canonize-properties properties)
                  ,@(canonize-clone-options options))))
      sheep))
 

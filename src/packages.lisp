@@ -1,3 +1,5 @@
+;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
+
 (defpackage #:sheeple
   (:use :cl :trivial-garbage)
   (:export

@@ -1,3 +1,5 @@
+;;;; -*- Mode: lisp; indent-tabs-mode: nil -*-
+;;;
 ;; This file is part of Sheeple.
 
 ;; tests/sheeple.lisp
@@ -89,11 +91,11 @@
   (is (eql =dolly= (car (sheep-parents (clone)))))
   (let ((obj1 (clone)))
     (is (eql obj1
-	     (car (sheep-parents (clone obj1))))))
+             (car (sheep-parents (clone obj1))))))
   (let* ((obj1 (clone))
          (obj2 (clone obj1)))
     (is (eql obj1
-	     (car (sheep-parents obj2))))))
+             (car (sheep-parents obj2))))))
 
 (test sheep-nickname
   (let ((sheep (clone)))

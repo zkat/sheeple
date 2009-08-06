@@ -1,3 +1,5 @@
+;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
+
 ;; Here's a translation of the bank account code from PCL, into Sheeple
 ;;
 ;; Things to note:

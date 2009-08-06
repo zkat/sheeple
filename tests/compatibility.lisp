@@ -1,3 +1,5 @@
+;;;; -*- Mode: lisp; indent-tabs-mode: nil -*-
+;;;
 ;; This file is part of Sheeple.
 
 ;; tests/compatibility.lisp

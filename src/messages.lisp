@@ -1,3 +1,5 @@
+;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
+
 ;; This file is part of Sheeple
 
 ;; messages.lisp
@@ -70,20 +72,20 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 (defun finalize-message (message)
   (let ((name (message-name message)))
     (when (and (fboundp name)
-	       (not (find-message name nil)))
+               (not (find-message name nil)))
       (warn 'clobbering-function-definition
-	    :format-control "Clobbering regular function or generic function definition for ~A"
-	    :format-args (list name)))
+            :format-control "Clobbering regular function or generic function definition for ~A"
+            :format-args (list name)))
     (setf (fdefinition name) (lambda (&rest args) (apply-message message args)))))
 
 ;; This handles actual setup of the message object (and finalization)
 (defun generate-message (&key name
-			  lambda-list
-			  (documentation ""))
+                          lambda-list
+                          (documentation ""))
   (let ((message (%make-message
-		   :name name
-		   :lambda-list lambda-list
-		   :documentation documentation)))
+                   :name name
+                   :lambda-list lambda-list
+                   :documentation documentation)))
     (set-arg-info message :lambda-list lambda-list)
     (finalize-message message)
     message))
@@ -91,19 +93,19 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 ;; The defmessage macro basically expands to a call to this function (after processing
 ;; its args, checking lamda-list, etc.)
 (defun ensure-message (name
-			&rest all-keys
-			&key lambda-list
-			&allow-other-keys)
+                        &rest all-keys
+                        &key lambda-list
+                        &allow-other-keys)
   (let ((existing (find-message name nil)))
     (let ((message (or existing
-			(apply #'generate-message
-			       :name name
-			       :lambda-list lambda-list
-			       all-keys))))
+                        (apply #'generate-message
+                               :name name
+                               :lambda-list lambda-list
+                               all-keys))))
       (setf (find-message name) message)
       (prog1 message
-	(when existing
-	  (set-arg-info message :lambda-list lambda-list))))))
+        (when existing
+          (set-arg-info message :lambda-list lambda-list))))))
 
 ;; This is the actual message definition macro.
 ;; It first verifies that the lambda-list provided is a valid message ll,
@@ -132,7 +134,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
                     "~@<invalid ~S ~_in the message lambda list ~S~:>"
                     :format-args (list arg lambda-list)))))
     (multiple-value-bind (required optional restp rest keyp keys allowp
-				   auxp aux morep more-context more-count)
+                                   auxp aux morep more-context more-count)
         (parse-lambda-list lambda-list)
       (declare (ignore required)) ; since they're no different in a msg ll
       (declare (ignore restp rest)) ; since they're no different in a msg ll
@@ -170,17 +172,17 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 ;;;   and the code that updates the valid arg info for a message whenever a reply
 ;;;   is added. The add-reply function, though, is in reply-generation.lisp
 (defstruct (arg-info
-	     (:conc-name nil)
-	     (:constructor make-arg-info ())
-	     (:copier nil))
+             (:conc-name nil)
+             (:constructor make-arg-info ())
+             (:copier nil))
   (arg-info-lambda-list :no-lambda-list)
   arg-info-precedence
   arg-info-metatypes
   arg-info-number-optional
   arg-info-key/rest-p
   arg-info-keys   ;nil        no &KEY or &REST allowed
-					;(k1 k2 ..) Each reply must accept these &KEY arguments.
-					;T          must have &KEY or &REST
+                                        ;(k1 k2 ..) Each reply must accept these &KEY arguments.
+                                        ;T          must have &KEY or &REST
 
   msg-info-simple-accessor-type ; nil, reader, writer, boundp
   (msg-precompute-dfun-and-emf-p nil) ; set by set-arg-info
@@ -226,7 +228,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
         (setf (arg-info-lambda-list arg-info)
               (if lambda-list-p
                   lambda-list
-		  (create-msg-lambda-list lambda-list)))
+                  (create-msg-lambda-list lambda-list)))
         (setf (arg-info-metatypes arg-info) (make-array nreq))
         (setf (arg-info-number-optional arg-info) nopt)
         (setf (arg-info-key/rest-p arg-info) (not (null (or keysp restp))))
@@ -240,14 +242,14 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 
 (defun analyze-lambda-list (lambda-list)
   (labels ((make-keyword (symbol)
-	     (intern (symbol-name symbol)
-		     (find-package 'keyword)))
-	   (parse-key-arg (arg)
-	     (if (listp arg)
-		 (if (listp (car arg))
-		     (caar arg)
-		     (make-keyword (car arg)))
-		 (make-keyword arg))))
+             (intern (symbol-name symbol)
+                     (find-package 'keyword)))
+           (parse-key-arg (arg)
+             (if (listp arg)
+                 (if (listp (car arg))
+                     (caar arg)
+                     (make-keyword (car arg)))
+                 (make-keyword arg))))
     (let ((nrequired 0)
           (noptional 0)
           (keysp nil)
@@ -268,8 +270,8 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
                                        state 'rest))
               (&aux           (return t))
               (otherwise
-	       (error "encountered the non-standard lambda list keyword ~S"
-		      x)))
+               (error "encountered the non-standard lambda list keyword ~S"
+                      x)))
             (ecase state
               (required  (incf (the fixnum nrequired)))
               (optional  (incf (the fixnum noptional)))
@@ -294,7 +296,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
                                      but ~?~:>"
                     :format-args (list reply msg string args)))
            (comparison-description (x y)
-	     (declare (fixnum x y))
+             (declare (fixnum x y))
              (if (> x y) "more" "fewer")))
       (let ((msg-nreq (arg-info-number-required arg-info))
             (msg-nopt (arg-info-number-optional arg-info))

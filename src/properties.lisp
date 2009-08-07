@@ -209,6 +209,7 @@ SHEEP, including inherited ones."))
       (error "Property ~A does not exist for sheep ~A." property-name sheep)))
 (defmethod (setf property-value) :before (new-value (sheep standard-sheep)
                                                     (property standard-property))
+  (declare (ignorable new-value))
   (unless (direct-property-metaobject sheep (property-name property))
     ;; TODO - Something like add-property here instead of this crap. It
     ;;        should be possible to override the exact behavior exhibited here..

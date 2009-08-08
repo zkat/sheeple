@@ -260,12 +260,11 @@ SHEEP, including inherited ones."))
   (let ((all-properties (available-properties sheep)))
     (format stream
             "~&Sheep: ~A~%Properties:~% ~{~{~&~3TName: ~13T~A~%~3TValue: ~13T~S~%~
-             ~3TAllocation: ~13T~A~%~3TReaders: ~13T~A~%~3TWriters: ~13T~A~%~
+             ~3TReaders: ~13T~A~%~3TWriters: ~13T~A~%~
              ~3TOwner: ~13T~A~%~%~}~}"
             sheep (loop for property in all-properties
                      collect (list (property-name property)
-                                   (property-value sheep property)
-                                   (property-allocation property)
+                                   (property-value sheep (property-name property))
                                    (property-readers property)
                                    (property-writers property)
                                    (property-owner sheep (property-name property)))))))
@@ -275,10 +274,9 @@ SHEEP, including inherited ones."))
           "~&Sheep: ~A~%~
            Direct Properties: ~%~%~
            ~{~{~&~3TName: ~A~%~3TValue: ~S~%~
-           ~3TAllocation: ~A~%~3TReaders: ~A~%~3TWriters: ~A~%~%~}~}"
+           ~3TReaders: ~A~%~3TWriters: ~A~%~%~}~}"
           sheep (loop for property in (sheep-direct-properties sheep)
                    collect (list (property-name property)
                                  (direct-property-value sheep property)
-                                 (property-allocation property)
                                  (property-readers property)
                                  (property-writers property)))))

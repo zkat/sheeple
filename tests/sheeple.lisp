@@ -261,7 +261,10 @@
   (let* ((parent (clone))
          (child (clone parent)))
     (is (equal (list child parent =dolly= =t=)
-               (compute-sheep-hierarchy-list child)))))
+               (compute-sheep-hierarchy-list child))))
+  (let* ((a (clone)) (b (clone)) (c (clone a)) (d (clone a))
+         (e (clone b c)) (f (clone d)) (g (clone c f)) (h (clone g e)))
+    (is (equal (list h g e b c f d a =dolly= =t=) (compute-sheep-hierarchy-list h)))))
 
 ;;;
 ;;; DEFCLONE

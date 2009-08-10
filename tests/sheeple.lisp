@@ -245,6 +245,11 @@
       (check-constraints () (1 2) (2 3) (3 4) (4 5) (5 6)
                          (6 7) (7 8) (8 9) (9 10) (10 1)))))
 
+(test local-precedence-ordering
+  (let* ((a (clone)) (b (clone)) (c (clone)) (d (clone a b c)))
+    (is (equal (list (list d a) (list a b) (list b c))
+               (local-precedence-ordering d)))))
+
 (test compute-sheep-hierarchy-list
   (let* ((parent (clone))
          (child (clone parent)))

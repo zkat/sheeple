@@ -250,6 +250,13 @@
     (is (equal (list (list d a) (list a b) (list b c))
                (local-precedence-ordering d)))))
 
+(test std-tie-breaker-rule
+  (let* ((a (clone)) (b (clone)) (c (clone))
+         (e (clone a)) (f (clone b)) (g (clone c)))
+    (is (eq c (std-tie-breaker-rule (list a b c) (list e f g))))
+    (is (eq b (std-tie-breaker-rule (list a b c) (list e g f))))
+    (is (eq a (std-tie-breaker-rule (list a b c) (list g f e))))))
+
 (test compute-sheep-hierarchy-list
   (let* ((parent (clone))
          (child (clone parent)))

@@ -41,7 +41,33 @@
                                            0)
                                        (1- max))))
         (t nil)))
+#+ (and)
+(defun topological-sort (elements constraints tie-breaker)
+  (loop
+     :with remaining-constraints := constraints
+     :and remaining-elements := elements and result
+     :for minimal-elements :=
+       (remove-if (lambda (sheep)
+                    (member sheep remaining-constraints
+                            :key #'cadr))
+                  remaining-elements)
+     :when (null minimal-elements) :do
+       (if (null remaining-elements)
+           (return-from topological-sort result)
+           (error "Inconsistent precedence graph."))
+     :do
+       (let ((choice (if (null (cdr minimal-elements))
+                         (car minimal-elements)
+                         (funcall tie-breaker minimal-elements result))))
+         (setf result (append result (list choice)))
+         (setf remaining-elements
+               (remove choice remaining-elements))
+         (setf remaining-constraints
+               (remove choice
+                       remaining-constraints
+                       :test #'member)))))
 
+#+ (or)
 (defun topological-sort (elements constraints tie-breaker)
   (let ((remaining-constraints constraints)
         (remaining-elements elements)

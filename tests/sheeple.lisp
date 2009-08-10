@@ -218,7 +218,10 @@
 
 (test collect-parents
   (let ((sheep (clone)))
-    (is (equal (list =t= =dolly= sheep) (collect-parents sheep)))))
+    (is (equal (list =t= =dolly= sheep) (collect-parents sheep))))
+  (let* ((a (clone)) (b (clone)) (c (clone a)) (d (clone a))
+         (e (clone b c)) (f (clone d)) (g (clone c f)) (h (clone g e)))
+    (is (equal (list =t= =dolly= d a b f c e g h) (collect-parents h)))))
 
 (test topological-sort
   (5am:finishes (topological-sort () () #'(lambda () (error "foo"))))

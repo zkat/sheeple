@@ -126,7 +126,7 @@ the real add-parent."
   "Mostly a utility function for easily adding multiple parents. They will be added to
 the front of the sheep's parent list in reverse order (so they will basically be appended
 to the front of the list)"
-  (mapc (lambda (parent) 
+  (mapc (lambda (parent)
           (add-parent parent sheep))
         (reverse parents))
   sheep)
@@ -190,16 +190,16 @@ to the front of the list)"
 
 (defun compute-sheep-hierarchy-list (sheep)
   (handler-case
-    (let ((sheeple-to-order (collect-parents sheep)))
-      (topological-sort sheeple-to-order
-                        (remove-duplicates
-                         (mapappend #'local-precedence-ordering
-                                    sheeple-to-order))
-                        #'std-tie-breaker-rule))
+      (let ((sheeple-to-order (collect-parents sheep)))
+        (topological-sort sheeple-to-order
+                          (remove-duplicates
+                           (mapappend #'local-precedence-ordering
+                                      sheeple-to-order))
+                          #'std-tie-breaker-rule))
     (simple-error ()
-                  (error 'sheep-hierarchy-error
-                         :format-control "A circular precedence graph was generated for ~A"
-                         :format-args (list sheep)))))
+      (error 'sheep-hierarchy-error
+             :format-control "A circular precedence graph was generated for ~A"
+             :format-args (list sheep)))))
 
 (defun local-precedence-ordering (sheep)
   (mapcar #'list

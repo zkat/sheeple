@@ -175,6 +175,29 @@
 ;;;
 (def-suite inheritance :in cloning)
 (in-suite inheritance)
+
+(test topological-sort
+  (5am:finishes (topological-sort () () #'(lambda () (error "foo"))))
+  (macrolet ((check-constraints (result &rest constraints)
+               `(is (equal ',result
+                           (topological-sort '(1 2 3 4 5 6 7 8 9 10)
+                                             ',constraints
+                                             #'(lambda (tied seen)
+                                                 (declare (ignore seen))
+                                                 (apply #'max tied)))))))
+    (check-constraints (10 9 8 7 6 5 4 3 2 1))
+    (check-constraints (9 10 8 7 6 5 4 3 2 1) (9 10))
+    (check-constraints (8 10 7 9 6 5 4 3 2 1) (8 10) (7 9))
+    (check-constraints (10 8 7 6 9 3 5 1 2 4)
+                       (3 5) (2 4) (1 2) (6 9) (1 4))
+    (check-constraints (8 6 5 9 4 3 2 1 10 7)
+                       (2 7) (6 1) (6 3) (1 7)
+                       (9 4) (6 5) (1 10) (6 10)
+                       (2 1) (4 1) (1 7) (5 9))
+    (signals simple-error
+      (check-constraints () (1 2) (2 3) (3 4) (4 5) (5 6)
+                         (6 7) (7 8) (8 9) (9 10) (10 1)))))
+
 (test parent-p
   (let* ((grandpa (clone))
          (father (clone grandpa))

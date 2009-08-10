@@ -11,7 +11,7 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (import '(5am:def-suite 5am:run! 5am:is 5am:in-suite 5am:signals))
   (defmacro test (name &body body)
-    `(5am:test ,name ,@body)))
+    `(5am:test (,name :profile t) ,@body)))
 
 (export 'run-all-tests)
 
@@ -223,6 +223,23 @@
          (e (clone b c)) (f (clone d)) (g (clone c f)) (h (clone g e)))
     (is (null (set-difference (list =t= =dolly= d a b f c e g h)
                               (collect-parents h) :test #'eq)))))
+
+(defun has-cycle-p (constraints)
+  (loop :while constraints
+     :for prev := constraints
+     :do (setf constraints
+              (remove-if (lambda (cdr) (not (find cdr constraints :key #'car)))
+                         constraints :key #'cadr))
+     :when (equal prev constraints) :return constraints))
+
+(defun gen-constraints (&key (num-elements 20) (max-constraints num-elements)
+                        (max-tries (* 1.5 max-constraints)))
+  (lambda ()
+    (loop :repeat max-tries :finally (return constraints)
+       :for constraint = (list (random num-elements) (random num-elements))
+       :unless (has-cycle-p (cons constraint constraints))
+       :collect constraint :into constraints
+       :until (= (length constraints) max-constraints))))
 
 (test topological-sort
   (5am:finishes (topological-sort () () #'(lambda () (error "foo"))))

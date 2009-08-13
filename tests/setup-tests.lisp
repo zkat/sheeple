@@ -9,9 +9,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(import '(5am:def-suite 5am:run! 5am:is 5am:in-suite 5am:signals))
-(defmacro test (name &body body)
-  `(5am:test ,name ,@body))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (import '(5am:def-suite 5am:run! 5am:is 5am:in-suite 5am:signals))
+  (defmacro test (name &body body)
+    `(5am:test ,name ,@body)))
 
 (export 'run-all-tests)
 

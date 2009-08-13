@@ -117,9 +117,7 @@ the real add-parent."
                      (delete new-parent
                              (sheep-parents child)))
                (finalize-sheep child)
-               (error 'sheep-hierarchy-error
-                      :format-control "A circular precedence graph was generated for ~A"
-                      :format-args (list child)))))
+               (error 'sheeple-hierarchy-error :sheep child))))
          child)))
 
 (defun add-parents (parents sheep)

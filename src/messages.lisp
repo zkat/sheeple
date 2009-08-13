@@ -126,7 +126,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 (defun check-msg-lambda-list (lambda-list)
   (flet ((ensure (arg ok)
            (unless ok
-             (error 'message-lambda-list-error :format-args (list arg lambda-list)))))
+             (error 'message-lambda-list-error :arg arg :lambda-list lambda-list))))
     (multiple-value-bind (required optional restp rest keyp keys allowp
                                    auxp aux morep more-context more-count)
         (parse-lambda-list lambda-list)
@@ -215,9 +215,8 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
             (unless (and (= (the fixnum nreq) msg-nreq)
                          (= (the fixnum nopt) (the fixnum msg-nopt))
                          (eq (or keysp restp) msg-key/rest-p))
-              (error "The lambda-list ~S is incompatible with ~
-                     existing replies of ~S."
-                     lambda-list msg))))
+              (error 'reply-lambda-list-conflict
+                     :lambda-list lambda-list :message msg))))
         (setf (arg-info-lambda-list arg-info)
               (if lambda-list-p
                   lambda-list

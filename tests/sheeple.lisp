@@ -12,7 +12,9 @@
 ;;;
 ;;; Allocation
 ;;;
-(def-suite allocation :in sheeple)
+(def-suite sheep-objects :in sheeple)
+(def-suite creation :in sheep-objects)
+(def-suite allocation :in creation)
 
 (def-suite allocate-std-sheep :in allocation)
 (in-suite allocate-std-sheep)
@@ -75,7 +77,7 @@
 (test (sheepp :fixture (allocate-sheep =standard-sheep=))
   (is (sheepp sheep)))
 
-(def-suite low-level-accessors :in sheeple)
+(def-suite low-level-accessors :in sheep-objects)
 (in-suite low-level-accessors)
 
 (test (sheep-metasheep :fixture allocate-std-sheep)
@@ -123,8 +125,9 @@
   (is (equal '(bar foo) (push 'bar (%sheep-children sheep))))
   (is (equal '(bar foo) (%sheep-children sheep))))
 
-(def-suite inheritance :in sheeple)
-(in-suite inheritance)
+(def-suite inheritance :in sheep-objects)
+(def-suite inheritance-basic :in inheritance)
+(in-suite inheritance-basic)
 
 (test collect-ancestors
   (let ((sheep1 (allocate-std-sheep))
@@ -217,6 +220,9 @@
   ;; todo - write tests for this once bootstrapping is set...
 )
 
+(def-suite add/remove-parents :in inheritance)
+(in-suite add/remove-parents)
+
 (test remove-parent
   (let ((sheep1 (allocate-std-sheep))
         (sheep2 (allocate-std-sheep)))
@@ -276,6 +282,9 @@
     (is (eql a (add-parent b a)))
     (is (eql b (add-parent c b)))
     (is (equal (list a b c) (sheep-hierarchy-list a)))))
+
+(def-suite inheritance-predicates :in inheritance)
+(in-suite inheritance-predicates)
 
 (test parentp
   (let ((a (allocate-std-sheep))

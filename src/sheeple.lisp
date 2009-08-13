@@ -193,7 +193,7 @@ to the front of the list)"
       (let ((sheeple-to-order (collect-parents sheep)))
         (topological-sort sheeple-to-order
                           (remove-duplicates
-                           (mapappend #'local-precedence-ordering
+                           (mapcan #'local-precedence-ordering
                                       sheeple-to-order))
                           #'std-tie-breaker-rule))
     (simple-error ()
@@ -283,7 +283,7 @@ to the front of the list)"
            ,@other-options)))
 
 (defun canonize-clone-options (options)
-  (mapappend #'canonize-clone-option options))
+  (mapcan #'canonize-clone-option options))
 
 (defun canonize-clone-option (option)
   (list `,(car option) (cadr option)))

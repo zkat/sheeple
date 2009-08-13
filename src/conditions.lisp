@@ -33,7 +33,7 @@
 
 ;;; Sheeple
 (define-sheeple-condition sheeple-hierarchy-error sheeple-error
-    ("A circular precedence graph was generated.")
+    ("A circular precedence graph was generated for ~A." sheep)
   (:documentation "Signaled whenever there is a problem computing the hierarchy list."))
 
 ;;; Properties
@@ -58,8 +58,11 @@
 (define-sheeple-condition sheeple-message-error sheeple-error ()
   (:documentation "Encompasses all that can go wrong with messages."))
 
+(define-sheeple-condition insufficient-message-args sheeple-message-error
+  ("Too few arguments were passed to message ~A" message))
+
 (define-sheeple-condition no-such-message sheeple-message-error
-    ("There is no message named ~A" message-name))
+  ("There is no message named ~A" message-name))
 
 (define-sheeple-condition message-lambda-list-error sheeple-message-error
   ("~@<invalid ~S ~_in the message lambda list ~S~:>" arg lambda-list))
@@ -69,8 +72,11 @@
 (define-sheeple-condition sheeple-reply-error sheeple-message-error ()
   (:documentation "Encompasses all that can go wrong with replies."))
 
+(define-sheeple-condition reply-lambda-list-conflict sheeple-reply-error
+  ("The lambda list ~S conflicts with that of ~S" lambda-list message))
+
 (define-sheeple-condition no-applicable-replies sheeple-reply-error
-  ("No applicable replies for message ~A when called with args:~%~S" message arg))
+  ("No applicable replies for message ~A when called with args:~%~S" message args))
 
 ;;; Another lonely leftover. - Adlai
 ;;; (define-condition no-most-specific-reply (sheeple-error) ())

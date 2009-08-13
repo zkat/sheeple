@@ -137,19 +137,22 @@ everything is initialized to nil."
     (%adjust-child-cache sheep))
   (unless (find child (%sheep-children sheep) :key #'weak-pointer-value)
     (let ((entry (make-weak-pointer child)))
-      (loop for i across (%sheep-children sheep)
-         when (null i)
-         do (setf i entry)
-         (return)))))
+      (loop for i below (length (%sheep-children sheep))
+         when (null (aref (%sheep-children sheep) i))
+         do (setf (aref (%sheep-children sheep) i) entry)
+         (return))))
+  sheep)
 
 (defun %remove-child (child sheep)
   (when (find child (%sheep-children sheep) :key #'weak-pointer-value)
     (setf (%sheep-children sheep)
-          (delete child (%sheep-children sheep) :key #'weak-pointer-value))))
+          (delete child (%sheep-children sheep) :key #'weak-pointer-value)))
+  sheep)
 
 (defun %map-children (function sheep)
   (map 'vector (lambda (pointer)
-                 (funcall function (weak-pointer-value pointer)))
+                 (when (weak-pointer-p pointer)
+                  (funcall function (weak-pointer-value pointer))))
        (%sheep-children sheep)))
 
 ;;;

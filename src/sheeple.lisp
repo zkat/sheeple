@@ -94,7 +94,7 @@ everything is initialized to nil."
   (setf (svref (cdr sheep) 4) new-value))
 
 ;; The current caching scheme also requires us to keep track of any children a sheep has,
-;; so changes in the hierarchy can be propagated. This could be probably done in a 
+;; so changes in the hierarchy can be propagated. This could be probably done in a
 ;; much better way...
 (defun %sheep-children (sheep)
   (svref (cdr sheep) 5))
@@ -122,7 +122,7 @@ by 100 each time."
          (let ((old-vector (%sheep-children sheep)))
            (setf (%sheep-children sheep)
                  (make-array 100 :adjustable t :initial-element nil))
-           (loop 
+           (loop
               for old-entry across old-vector
               for i below (length (%sheep-children sheep))
               do (setf (aref (%sheep-children sheep) i)  old-entry))))
@@ -204,7 +204,7 @@ of the weak pointer)."
 
 (defun compute-sheep-hierarchy-list (sheep)
   (handler-case
-      ;; since collect-ancestors only collects the _ancestors_, we cons the sheep in front..
+      ;; since collect-ancestors only collects the _ancestors_, we cons the sheep in front.
       (let ((sheeple-to-order (cons sheep (collect-ancestors sheep))))
         (topological-sort sheeple-to-order
                           (remove-duplicates
@@ -292,7 +292,7 @@ of the weak pointer)."
   "Mostly a utility function for easily adding multiple parents. They will be added to
 the front of the sheep's parent list in reverse order (so they will basically be appended
 to the front of the list)"
-  (mapc (lambda (parent) 
+  (mapc (lambda (parent)
           (add-parent parent sheep))
         (reverse parents))
   sheep)

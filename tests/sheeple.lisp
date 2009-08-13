@@ -36,6 +36,8 @@
     (signals simple-error (svref sheep 6))
     
     ))
+
+#+ (or) (
 ;;;
 ;;; Cloning
 ;;;
@@ -287,3 +289,4 @@
   ;; TODO - check that options work properly (:metaclass, :documentation, :nickname, etc)
   ;;        remember that :nickname should override defproto's own nickname-setting.
   )
+) ;;; end massive commented-out block

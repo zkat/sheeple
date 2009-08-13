@@ -66,7 +66,7 @@
     (setf (sheep-parents sheep) '(foo))
     (is (std-sheep-p sheep))))
 
-(test (allocate-sheep :depends-on allocate-std-sheep)
+(test (allocate-sheep)
   (let ((sheep (allocate-sheep =standard-sheep=)))
     (is (std-sheep-p sheep))))
 

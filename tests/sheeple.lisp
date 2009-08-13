@@ -77,6 +77,14 @@
 (test (sheepp :fixture (allocate-sheep =standard-sheep=))
   (is (sheepp sheep)))
 
+(test equality-basic
+  (let ((sheep1 (allocate-std-sheep)))
+    (is (eq sheep1 sheep1))
+    (is (eql sheep1 sheep1))
+    ;; These two are run so I know the heap isn't blowing up.
+    (is (equal sheep1 sheep1))
+    (is (equalp sheep1 sheep1))))
+
 (def-suite low-level-accessors :in sheep-objects)
 (in-suite low-level-accessors)
 
@@ -346,9 +354,6 @@
 ;; (def-suite clone-general :in cloning)
 ;; (in-suite clone-general)
 
-;; (test equitable-sheep
-;;   (let ((sheep1 (clone)))
-;;     (is (eql sheep1 sheep1))))
 
 ;; (defclass test-sheep-class (standard-sheep) ())
 ;; (test spawn-sheep

@@ -80,6 +80,8 @@ everything is initialized to nil."
   (svref (cdr sheep) 4))
 (defun (setf %sheep-hierarchy-cache) (new-value sheep)
   (setf (svref (cdr sheep) 4) new-value))
+(defun sheep-hierarchy-list (sheep)
+  (%sheep-hierarchy-cache sheep))
 
 (defun %sheep-children (sheep)
   (svref (cdr sheep) 5))
@@ -221,24 +223,24 @@ to the front of the list)"
         (reverse parents))
   sheep)
 
-;; ;;; Inheritance predicates
-;; (defun parent-p (maybe-parent child)
-;;   "A parent is a sheep directly in CHILD's parent list."
-;;   (when (member maybe-parent (sheep-parents child))
-;;     t))
+;;; Inheritance predicates
+(defun parentp (maybe-parent child)
+  "A parent is a sheep directly in CHILD's parent list."
+  (when (member maybe-parent (sheep-parents child))
+    t))
 
-;; (defun ancestor-p (maybe-ancestor descendant)
-;;   "A parent is a sheep somewhere in CHILD's hierarchy list."
-;;   (when (member maybe-ancestor (cdr (sheep-hierarchy-list descendant)))
-;;     t))
+(defun ancestorp (maybe-ancestor descendant)
+  "A parent is a sheep somewhere in CHILD's hierarchy list."
+  (when (member maybe-ancestor (cdr (sheep-hierarchy-list descendant)))
+    t))
 
-;; (defun child-p (maybe-child parent)
-;;   "A child is a sheep that has PARENT in its parent list."
-;;   (parent-p parent maybe-child))
+(defun childp (maybe-child parent)
+  "A child is a sheep that has PARENT in its parent list."
+  (parentp parent maybe-child))
 
-;; (defun descendant-p (maybe-descendant ancestor)
-;;   "A descendant is a sheep that has ANCESTOR in its hierarchy-list."
-;;   (ancestor-p ancestor maybe-descendant))
+(defun descendantp (maybe-descendant ancestor)
+  "A descendant is a sheep that has ANCESTOR in its hierarchy-list."
+  (ancestorp ancestor maybe-descendant))
 
 ;; ;;;
 ;; ;;; Cloning

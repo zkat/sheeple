@@ -215,7 +215,17 @@
 
 (test finalize-sheep-inheritance
   ;; todo - write tests for this once bootstrapping is set...
-  )
+)
+
+(test (sheep-hierarchy-list :fixture allocate-std-sheep)
+  ;; TODO - these tests suck balls. It should be tested after add/remove parent,
+  ;;        and should be defined in terms of actual sheeple, not this symbol dinkyness.
+  (is (eql nil (sheep-hierarchy-list sheep)))
+  (is (equal '(foo) (setf (%sheep-hierarchy-cache sheep) '(foo))))
+  (is (equal '(foo) (sheep-hierarchy-list sheep)))
+  (is (equal '(bar foo) (push 'bar (%sheep-hierarchy-cache sheep))))
+  (is (equal '(bar foo) (sheep-hierarchy-list sheep))))
+
 (test remove-parent
   (let ((sheep1 (allocate-std-sheep))
         (sheep2 (allocate-std-sheep)))
@@ -266,29 +276,57 @@
     (is (eql c (add-parents (list a b) c)))
     (is (equal (list a b) (sheep-parents c)))))
 
-;; (def-suite cloning :in sheeple)
-;; (in-suite cloning)
+(test parentp
+  (let ((a (allocate-std-sheep))
+        (b (allocate-std-sheep))
+        (c (allocate-std-sheep)))
+    (add-parent a b)
+    (add-parent b c)
+    (is (parentp a b))
+    (is (parentp b c))
+    (is (not (parentp a c)))
+    (is (not (parentp c a)))
+    (is (not (parentp b a)))
+    (is (not (parentp c b)))))
 
-;; (test add-parent
-;;   (let ((obj1 (allocate-std-sheep))
-;;         (obj2 (allocate-std-sheep)))
-;;     (setf (sheep-parents obj1) (list =dolly=))
-;;     (setf (sheep-parents obj2) (list =dolly=))
-;;     (is (eql obj1 (add-parent obj2 obj1)))
-;;     (is (eql obj2 (car (sheep-parents obj1))))))
+(test childp
+  (let ((a (allocate-std-sheep))
+        (b (allocate-std-sheep))
+        (c (allocate-std-sheep)))
+    (add-parent a b)
+    (add-parent b c)
+    (is (childp b a))
+    (is (childp c b))
+    (is (not (childp c a)))
+    (is (not (childp a c)))
+    (is (not (childp a b)))
+    (is (not (childp b c)))))
 
-;; (test add-parents
-;;   (let ((parent1 (allocate-std-sheep))
-;;         (parent2 (allocate-std-sheep))
-;;         (parent3 (allocate-std-sheep))
-;;         (child (allocate-std-sheep)))
-;;     (setf (sheep-parents parent1) (list =dolly=))
-;;     (setf (sheep-parents parent2) (list =dolly=))
-;;     (setf (sheep-parents parent3) (list =dolly=))
-;;     (setf (sheep-parents child) (list =dolly=))
-;;     (is (eql child (add-parents (list parent1 parent2 parent3) child)))
-;;     (is (equal (list parent1 parent2 parent3 =dolly=)
-;;                (sheep-parents child)))))
+(test ancestorp
+  (let ((a (allocate-std-sheep))
+        (b (allocate-std-sheep))
+        (c (allocate-std-sheep)))
+    (add-parent a b)
+    (add-parent b c)
+    (is (ancestorp a b))
+    (is (ancestorp b c))
+    (is (ancestorp a c))
+    (is (not (ancestorp c a)))
+    (is (not (ancestorp b a)))
+    (is (not (ancestorp c b)))))
+
+(test descendantp
+  (let ((a (allocate-std-sheep))
+        (b (allocate-std-sheep))
+        (c (allocate-std-sheep)))
+    (add-parent a b)
+    (add-parent b c)
+    (is (descendantp b a))
+    (is (descendantp c b))
+    (is (descendantp c a))
+    (is (not (descendantp a c)))
+    (is (not (descendantp a b)))
+    (is (not (descendantp b c)))))
 
 ;; ;;;
 ;; ;;; Cloning
@@ -364,15 +402,6 @@
 ;;     (setf (sheep-documentation sheep) 'test)
 ;;     (is (eq 'test (sheep-documentation sheep)))))
 
-;; (test sheep-parents
-;;   (let* ((grandpa (clone))
-;;          (father (clone grandpa))
-;;          (child (clone father)))
-;;     (is (= 1 (length (sheep-parents father))))
-;;     (is (eql grandpa (car (sheep-parents father))))
-;;     (is (not (member grandpa (sheep-parents child))))
-;;     (is (eql =dolly= (car (sheep-parents grandpa))))))
-
 ;; (test sheep-direct-roles)
 ;; (test sheep-hierarchy-list
 ;;   (let* ((parent (clone))
@@ -382,105 +411,8 @@
 ;;     (is (member =dolly= (sheep-hierarchy-list child)))
 ;;     (is (member =t= (sheep-hierarchy-list child)))))
 
-;; (defclass foo () ())
-;; (test sheep-p
-;;   (let ((sheep (clone))
-;;         (special-sheep (spawn-sheep nil :metaclass 'test-sheep-class)))
-;;     (is (sheep-p sheep))
-;;     (is (sheep-p special-sheep))
-;;     (is (not (sheep-p (make-instance 'foo))))
-;;     (is (not (sheep-p "foo")))
-;;     (is (not (sheep-p 5)))))
-
 ;; (test copy-sheep ;; TODO - this isn't even written properly yet
 ;;   )
-
-;; (test add-parent
-;;   (let ((obj1 (clone))
-;;         (obj2 (clone)))
-;;     (is (eql =dolly= (car (sheep-parents obj1))))
-;;     (is (eql =dolly= (car (sheep-parents obj2))))
-;;     (is (eql obj1 (add-parent obj2 obj1)))
-;;     (is (eql obj2 (car (sheep-parents obj1))))))
-
-;; (test add-parents
-;;   (let ((parent1 (clone))
-;;         (parent2 (clone))
-;;         (parent3 (clone))
-;;         (child (clone)))
-;;     (setf (sheep-nickname parent1) 'parent1)
-;;     (setf (sheep-nickname parent2) 'parent2)
-;;     (setf (sheep-nickname parent3) 'parent3)
-;;     (is (eql child (add-parents (list parent1 parent2 parent3) child)))
-;;     (is (equal (list parent1 parent2 parent3 =dolly=)
-;;                (sheep-parents child)))))
-
-;; (test remove-parent
-;;   (let* ((p1 (clone))
-;;          (p2 (clone))
-;;          (child (clone p1 p2)))
-;;     (is (equal (list p1 p2) (sheep-parents child)))
-;;     (is (eql child (remove-parent p1 child)))
-;;     (is (equal (list p2) (sheep-parents child)))))
-
-;; (test allocate-sheep
-;;   (is (sheep-p (allocate-sheep)))
-;;   (is (sheep-p (allocate-sheep 'test-sheep-class))))
-
-;; ;;;
-;; ;;; Inheritance
-;; ;;;
-;; (def-suite inheritance :in cloning)
-;; (in-suite inheritance)
-;; (test parent-p
-;;   (let* ((grandpa (clone))
-;;          (father (clone grandpa))
-;;          (child (clone father)))
-;;     (is (parent-p grandpa father))
-;;     (is (parent-p father child))
-;;     (is (not (parent-p child father)))
-;;     (is (not (parent-p grandpa child)))))
-
-;; (test child-p
-;;   (let* ((grandpa (clone))
-;;          (father (clone grandpa))
-;;          (child (clone father)))
-;;     (is (child-p child father))
-;;     (is (child-p father grandpa))
-;;     (is (not (child-p grandpa father)))
-;;     (is (not (child-p father child)))))
-
-;; (test ancestor-p
-;;   (let* ((grandpa (clone))
-;;          (father (clone grandpa))
-;;          (child (clone father)))
-;;     (is (ancestor-p grandpa father))
-;;     (is (ancestor-p grandpa child))
-;;     (is (ancestor-p father child))
-;;     (is (not (ancestor-p child grandpa)))
-;;     (is (not (ancestor-p child father)))
-;;     (is (not (ancestor-p father grandpa)))))
-
-;; (test descendant-p
-;;   (let* ((grandpa (clone))
-;;          (father (clone grandpa))
-;;          (child (clone father)))
-;;     (is (descendant-p father grandpa))
-;;     (is (descendant-p child grandpa))
-;;     (is (descendant-p child father))
-;;     (is (not (descendant-p grandpa child)))
-;;     (is (not (descendant-p father child)))
-;;     (is (not (descendant-p grandpa father)))))
-
-;; (test collect-parents
-;;   (let ((sheep (clone)))
-;;     (is (equal (list =t= =dolly= sheep) (collect-parents sheep)))))
-
-;; (test compute-sheep-hierarchy-list
-;;   (let* ((parent (clone))
-;;          (child (clone parent)))
-;;     (is (equal (list child parent =dolly= =t=)
-;;                (compute-sheep-hierarchy-list child)))))
 
 ;; ;;;
 ;; ;;; DEFCLONE

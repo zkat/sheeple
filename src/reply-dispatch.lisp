@@ -49,8 +49,7 @@
         (around (car (cache-around cache)))
         (primaries (cache-primary cache)))
     (when (null primaries)
-      (let ((name (message-name (cache-message cache))))
-	(error 'no-primary-replies :format-args (list name))))
+      (error 'no-primary-replies :message (message-name (cache-message cache))))
     (if around
         (let ((next-erfun
                (compute-effective-reply-function (create-reply-cache
@@ -96,7 +95,7 @@
          ;; would be -lovely-. Not sure how to do that yet, though.
         )
     (when (< (length args) relevant-args-length)
-      (error "Not enough args for message ~A" message))
+      (error 'insufficient-message-args :message message))
     (if (= 0 relevant-args-length)
         (let ((relevant-args (subseq args 0 relevant-args-length)))
           (create-reply-cache message (%find-applicable-replies
@@ -227,7 +226,7 @@
         (if contained-applicable-replies
             (unbox-replies (sort-applicable-replies contained-applicable-replies))
             (when errorp
-              (error 'no-applicable-replies :format-args (list selector args)))))))
+              (error 'no-applicable-replies :message selector :args args))))))
 
 (defun unbox-replies (replies)
   (mapcar #'reply-container-reply replies))

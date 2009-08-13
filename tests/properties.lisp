@@ -134,7 +134,7 @@
   (let ((sheep (defclone () ((var "value" :accessor var)))))
     (is (eql (find-class 'standard-property)
              (class-of (direct-property-metaobject sheep 'var))))
-    (signals unbound-direct-property (direct-property-spec sheep 'some-other-property))))
+    (signals unbound-direct-property (direct-property-metaobject sheep 'whoops))))
 
 (test sheep-direct-properties
   ;; TODO - This one just needs to check that all the direct property spec metaobjects are returned.

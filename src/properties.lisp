@@ -166,15 +166,14 @@ SHEEP, including inherited ones."))
   (let ((property (gethash property-name (sheep-property-metaobject-table sheep))))
     (if property
         (direct-property-value sheep property)
-        (error 'unbound-property
-               :format-control "~A has no direct property with name ~A"
-               :format-args (list sheep property-name)))))
+        (error 'unbound-property :sheep sheep :property-name property-name))))
 (defmethod direct-property-value ((sheep standard-sheep) (property standard-property))
   (multiple-value-bind (value hasp)
       (gethash (property-name property) (sheep-property-value-table sheep))
     (if hasp
         value
-        (error 'unbound-direct-property :sheep sheep :property-name property-name))))
+        (error 'unbound-direct-property :sheep sheep
+               :property-name (property-name property)))))
 
 (defmethod property-value ((sheep standard-sheep) property-name)
   (property-value-with-hierarchy-list sheep property-name))
@@ -226,7 +225,7 @@ SHEEP, including inherited ones."))
 
 (defmethod direct-property-metaobject ((sheep standard-sheep) property-name)
   (unless (has-direct-property-p sheep property-name)
-    (signal 'unbound-property))
+    (error 'unbound-direct-property :sheep sheep :property-name property-name))
   (nth-value 0 (gethash property-name (sheep-property-metaobject-table sheep))))
 
 (defmethod property-owner ((sheep standard-sheep) property-name &optional (errorp t))
@@ -236,7 +235,7 @@ SHEEP, including inherited ones."))
             return obj)))
     (or owner
         (if errorp
-            (error 'unbound-property :property-name property-name :sheep sheep)
+            (error 'unbound-property :sheep sheep :property-name property-name)
             nil))))
 
 (defmethod available-properties ((sheep standard-sheep))

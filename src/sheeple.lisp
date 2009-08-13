@@ -221,118 +221,6 @@ to the front of the list)"
         (reverse parents))
   sheep)
 
-;; (defclass standard-sheep ()
-;;   (;;; Core slots
-;;    (nickname :accessor sheep-nickname :initform nil
-;;              :documentation "Displayed nickname")
-;;    (documentation :accessor sheep-documentation :initform ""
-;;                   :documentation "Docstring for this sheep.")
-;;    (parents :accessor sheep-parents :initform nil :initarg :direct-parents
-;;             :documentation "Parents of this sheep object.")
-;;    (property-value-table :accessor sheep-property-value-table
-;;                          :initform (make-hash-table :test #'eq))
-;;    (property-metaobject-table :accessor sheep-property-metaobject-table
-;;                         :initform (make-hash-table :test #'eq))
-;;    (direct-roles :accessor sheep-direct-roles :initform nil)
-;;    ;;; Extra slots for backstage tricks.
-;;    ;; The reason we keep these references is to alert children recursively whenever the
-;;    ;; hierarchy-list changes for a sheep, which means we can memoize the thing.
-;;    (%children :accessor %children :initform  (make-weak-hash-table :weakness :key :test #'eq)
-;;               :documentation "This is a special slot kept around mostly to make memoization
-;;                               easy (possible?) by keeping references to children.")
-;;    ;; I think the following would be unnecessary if there was a generator that spit out the
-;;    ;; sheep's parents one by one that the implementation could use, instead of either
-;;    ;; recalculating the whole thing each time, or saving the whole thing.
-;;    (hierarchy-list :accessor sheep-hierarchy-list :initform nil
-;;                    :documentation "A pre-calculated hierarchy list, so we don't have to run all
-;;                                    of sheep-direct-parents every time.")))
-
-;; (defun allocate-sheep (&optional (class 'standard-sheep))
-;;   (make-instance class))
-
-;; (defgeneric sheep-p (obj)
-;;   (:method (obj) (declare (ignore obj)) nil)
-;;   (:method ((obj standard-sheep)) (declare (ignore obj)) t))
-
-;; ;;;
-;; ;;; Cloning
-;; ;;;
-;; (defgeneric copy-sheep (model)
-;;   ;; todo
-;;   (:documentation "Makes a direct copy of MODEL."))
-
-;; (defgeneric finalize-sheep-inheritance (sheep)
-;;   (:documentation "Performs any needed finalization on SHEEP."))
-
-;; (defun spawn-sheep (sheep-or-sheeple &rest all-keys
-;;                     &key (metaclass 'standard-sheep)
-;;                     &allow-other-keys)
-;;   "Creates a new sheep with SHEEPLE as its parents. METACLASS is used as the class when instantiating
-;; the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
-;;   (let ((sheep (allocate-sheep metaclass)))
-;;     (if sheep-or-sheeple
-;;         (add-parents (if (listp sheep-or-sheeple)
-;;                          sheep-or-sheeple
-;;                          (list sheep-or-sheeple))
-;;                      sheep)
-;;         (add-parent =dolly= sheep))
-;;     (apply #'init-sheep sheep all-keys)))
-
-;; (defun clone (&rest sheeple)
-;;   "Creates a new standard-sheep object with SHEEPLE as its parents."
-;;   (spawn-sheep sheeple))
-
-;; (defmethod finalize-sheep-inheritance ((sheep standard-sheep))
-;;   "we memoize the hierarchy list here."
-;;   (loop for parent in (sheep-parents sheep)
-;;      do (setf (gethash sheep (%children parent)) t))
-;;   (memoize-sheep-hierarchy-list sheep)
-;;   sheep)
-
-;; ;;; Inheritance setup
-;; (defgeneric add-parent (new-parent sheep)
-;;   (:documentation "Adds NEW-PARENT as a parent to SHEEP."))
-
-;; (defmethod add-parent (unsheepish-parent (child standard-sheep))
-;;   "If the given parent isn't already a sheep object, we box it before handing it down to
-;; the real add-parent."
-;;   (add-parent (sheepify unsheepish-parent) child))
-
-;; (defmethod add-parent ((new-parent standard-sheep) (child standard-sheep))
-;;   "Some basic checking here, and then the parent is actually added to the sheep's list."
-;;   (cond ((equal new-parent child)
-;;          (error "Sheeple cannot be parents of themselves."))
-;;         ((member new-parent (sheep-parents child))
-;;          (error "~A is already a parent of ~A." new-parent child))
-;;         (t
-;;          (handler-case
-;;              (progn
-;;                (push new-parent (sheep-parents child))
-;;                (setf (gethash child (%children new-parent)) t)
-;;                (finalize-sheep-inheritance child)
-;;                child)
-;;            ;; This error is signaled by compute-sheep-hierarchy-list, which right now
-;;            ;; is called from inside finalize-sheep-inheritance (this is probably a bad idea, move
-;;            ;; c-s-h-l in here just to do the check?)
-;;            (sheeple-hierarchy-error ()
-;;              (progn
-;;                (setf (sheep-parents child)
-;;                      (delete new-parent
-;;                              (sheep-parents child)))
-;;                (finalize-sheep-inheritance child)
-;;                (error 'sheeple-hierarchy-error :sheep child))))
-;;          child)))
-
-;; (defun add-parents (parents sheep)
-;;   "Mostly a utility function for easily adding multiple parents. They will be added to
-;; the front of the sheep's parent list in reverse order (so they will basically be appended
-;; to the front of the list)"
-;;   (mapc (lambda (parent) 
-;;           (add-parent parent sheep))
-;;         (reverse parents))
-;;   sheep)
-
-
 ;; ;;; Inheritance predicates
 ;; (defun parent-p (maybe-parent child)
 ;;   "A parent is a sheep directly in CHILD's parent list."
@@ -351,6 +239,27 @@ to the front of the list)"
 ;; (defun descendant-p (maybe-descendant ancestor)
 ;;   "A descendant is a sheep that has ANCESTOR in its hierarchy-list."
 ;;   (ancestor-p ancestor maybe-descendant))
+
+;; ;;;
+;; ;;; Cloning
+;; ;;;
+;; (defun spawn-sheep (sheep-or-sheeple &rest all-keys
+;;                     &key (metaclass 'standard-sheep)
+;;                     &allow-other-keys)
+;;   "Creates a new sheep with SHEEPLE as its parents. METACLASS is used as the class when instantiating
+;; the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
+;;   (let ((sheep (allocate-sheep metaclass)))
+;;     (if sheep-or-sheeple
+;;         (add-parents (if (listp sheep-or-sheeple)
+;;                          sheep-or-sheeple
+;;                          (list sheep-or-sheeple))
+;;                      sheep)
+;;         (add-parent =dolly= sheep))
+;;     (apply #'init-sheep sheep all-keys)))
+
+;; (defun clone (&rest sheeple)
+;;   "Creates a new standard-sheep object with SHEEPLE as its parents."
+;;   (spawn-sheep sheeple))
 
 
 ;; ;;;

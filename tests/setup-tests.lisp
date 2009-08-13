@@ -10,7 +10,7 @@
 (in-package :sheeple)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (import '(5am:def-suite 5am:run! 5am:is 5am:in-suite 5am:signals))
+  (import '(5am:def-suite 5am:run! 5am:is 5am:in-suite 5am:signals 5am:def-fixture))
   (defmacro test (name &body body)
     `(5am:test ,name ,@body)))
 

@@ -13,32 +13,43 @@
 ;;; Allocation
 ;;;
 (def-suite allocation :in sheeple)
-(in-suite allocation)
 
-(test allocate-std-sheep
+(def-suite allocate-std-sheep :in allocation)
+(in-suite allocate-std-sheep)
+
+(def-fixture allocate-std-sheep ()
   (let ((sheep (allocate-std-sheep)))
-    ;; Test for basic structure of the new std-sheep
-    (is (consp sheep))
-    (is (vectorp (cdr sheep)))
-    (is (= 6 (length (cdr sheep))))
-    ;; Test for equivalence of =standard-sheep='s slots
-    (is (eq (car sheep) (sheep-metasheep sheep)))
-    (is (eq (svref (cdr sheep) 0) (sheep-parents sheep)))
-    (is (eq (svref (cdr sheep) 1) (sheep-property-values sheep)))
-    (is (eq (svref (cdr sheep) 2) (sheep-property-metaobjects sheep)))
-    (is (eq (svref (cdr sheep) 3) (sheep-roles sheep)))
-    (is (eq (svref (cdr sheep) 4) (sheep-hierarchy-list sheep)))
-    (is (eq (svref (cdr sheep) 5) (%sheep-children sheep)))
-    ;; Tests for proper initial values
-    (is (eql =standard-sheep= (sheep-metasheep sheep)))
-    (is (null (sheep-parents sheep)))
-    (is (null (sheep-property-values sheep)))
-    (is (null (sheep-property-metaobjects sheep)))
-    (is (null (sheep-roles sheep)))
-    (is (null (sheep-hierarchy-list sheep)))
-    (is (null (%sheep-children sheep)))
-    ;; Room for improvement...
-    ))
+    (&body)))
+
+(test (std-sheep-basic-structure
+       :fixture allocate-std-sheep)
+  (is (consp sheep))
+  (is (vectorp (cdr sheep)))
+  (is (= 6 (length (cdr sheep)))))
+
+(test (std-sheep-initial-values
+       :depends-on std-sheep-basic-structure
+       :fixture allocate-std-sheep)
+  (is (eql =standard-sheep= (car sheep)))
+  (is (null (svref (cdr sheep) 0)))
+  (is (null (svref (cdr sheep) 1)))
+  (is (null (svref (cdr sheep) 2)))
+  (is (null (svref (cdr sheep) 3)))
+  (is (null (svref (cdr sheep) 4)))
+  (is (null (svref (cdr sheep) 5))))
+
+(test (std-sheep-accessors
+       :depends-on std-sheep-basic-structure
+       :fixture allocate-std-sheep)
+  (is (eq (setf (car sheep) (gensym)) (sheep-metasheep sheep)))
+  (is (eq (setf (svref (cdr sheep) 0) (gensym)) (sheep-parents sheep)))
+  (is (eq (setf (svref (cdr sheep) 1) (gensym)) (sheep-properties sheep)))
+  (is (eq (setf (svref (cdr sheep) 2) (gensym)) (sheep-property-metaobjects sheep)))
+  (is (eq (setf (svref (cdr sheep) 3) (gensym)) (sheep-roles sheep)))
+  (is (eq (setf (svref (cdr sheep) 4) (gensym)) (sheep-hierarchy-list sheep)))
+  (is (eq (setf (svref (cdr sheep) 5) (gensym)) (%sheep-children sheep))))
+
+(in-suite allocation)
 
 (test (allocate-sheep :depends-on allocate-std-sheep))
 

@@ -188,13 +188,13 @@ to the front of the list)"
                               parents)))))))
     (all-parents-loop () (list sheep))))
 
-;;; This is here for comparison only...
+;;; <<<<<<< BEGIN OUTDATED CODE BLOCK >>>>>>>
 (defun compute-sheep-hierarchy-list-old (sheep)
   (handler-case
       (let ((sheeple-to-order (collect-parents sheep)))
         (topological-sort-old sheeple-to-order
                               (remove-duplicates
-                               (mapappend #'local-precedence-ordering
+                               (mapappend #'local-precedence-ordering-old
                                           sheeple-to-order))
                               #'std-tie-breaker-rule))
     (simple-error ()
@@ -202,7 +202,16 @@ to the front of the list)"
              :format-control "A circular precedence graph was generated for ~A"
              :format-args (list sheep)))))
 
+(defun local-precedence-ordering-old (sheep)
+  (mapcar #'list
+          (cons sheep
+                (butlast (sheep-parents sheep)))
+          (sheep-parents sheep)))
+;;; <<<<<<< END OUTDATED CODE BLOCK >>>>>>>
+
 (defun compute-sheep-hierarchy-list (sheep)
+  "Because #'local-precedence-ordering returns a fresh list each time, we can
+afford to use the destructive #'mapcan and cons less."
   (handler-case
       (let ((sheeple-to-order (collect-parents sheep)))
         (topological-sort sheeple-to-order
@@ -216,10 +225,10 @@ to the front of the list)"
              :format-args (list sheep)))))
 
 (defun local-precedence-ordering (sheep)
-  (mapcar #'list
-          (cons sheep
-                (butlast (sheep-parents sheep)))
-          (sheep-parents sheep)))
+  "Calculates the local precedence ordering. Relies on the fact that mapcar will
+return when any list is NIL to avoid traversing the entire parent list."
+  (let ((parents (sheep-parents sheep)))
+    (mapcar #'list (cons sheep parents) parents)))
 
 (defun std-tie-breaker-rule (minimal-elements hl-so-far)
   (dolist (hl-constituent (reverse hl-so-far))

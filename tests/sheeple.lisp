@@ -224,8 +224,18 @@
   ;; todo - write tests for this once bootstrapping is set...
   )
 (test remove-parent
-  ;; todo - write after bootstrapping works
+  (let ((sheep1 (allocate-std-sheep))
+        (sheep2 (allocate-std-sheep)))
+    (add-parent sheep2 sheep1)
+    (is (eql sheep2 (car (sheep-parents sheep1))))
+    (signals error (remove-parent sheep1 sheep1))
+    (is (eql sheep1 (remove-parent sheep2 sheep1)))
+    (is (null (sheep-parents sheep1)))
+    (signals error (remove-parent sheep2 sheep1))
+    (signals error (remove-parent sheep1 sheep1)))
+  ;; todo - more thorough tests, post-bootstrap
   )
+
 (test std-remove-parent
   (let ((sheep1 (allocate-std-sheep))
         (sheep2 (allocate-std-sheep)))
@@ -247,12 +257,18 @@
     (signals sheeple-hierarchy-error (std-add-parent sheep1 sheep2))))
 
 (test add-parent
-  ;; todo - write after bootstrapping works
+  (let ((sheep1 (allocate-std-sheep))
+        (sheep2 (allocate-std-sheep)))
+    (is (eql sheep1 (add-parent sheep2 sheep1)))
+    (is (eql sheep2 (car (sheep-parents sheep1))))
+    (signals error (add-parent sheep1 sheep1))
+    (signals error (add-parent sheep2 sheep1))
+    (signals sheeple-hierarchy-error (add-parent sheep1 sheep2)))
+  ;; todo - more thorough tests post-bootstrap
   )
 (test add-parents
-  ;; todo - write after bootstrapping works  
-  )
-
+  ;; todo
+)
 
 ;; (def-suite cloning :in sheeple)
 ;; (in-suite cloning)

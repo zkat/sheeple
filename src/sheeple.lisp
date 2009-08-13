@@ -150,10 +150,11 @@ everything is initialized to nil."
   sheep)
 
 (defun %map-children (function sheep)
-  (map 'vector (lambda (pointer)
-                 (when (weak-pointer-p pointer)
-                  (funcall function (weak-pointer-value pointer))))
-       (%sheep-children sheep)))
+  (when (%sheep-children sheep)
+    (map 'vector (lambda (pointer)
+                   (when (weak-pointer-p pointer)
+                     (funcall function (weak-pointer-value pointer))))
+         (%sheep-children sheep))))
 
 ;;;
 ;;; Inheritance
@@ -198,20 +199,13 @@ everything is initialized to nil."
     (simple-error ()
       (error 'sheeple-hierarchy-error :sheep sheep))))
 
-(defun initialize-children-cache (sheep)
-  (setf (%sheep-children sheep)
-        (make-weak-hash-table :weakness :key :test #'eq))
-  sheep)
-
 (defun memoize-sheep-hierarchy-list (sheep)
   (let ((list (compute-sheep-hierarchy-list sheep)))
     (setf (%sheep-hierarchy-cache sheep)
           list)
-    (when (%sheep-children sheep)
-      (maphash (lambda (descendant iggy)
-                 (declare (ignore iggy))
-                 (memoize-sheep-hierarchy-list descendant))
-               (%sheep-children sheep)))))
+    (%map-children (lambda (child)
+                     (memoize-sheep-hierarchy-list child))
+                   sheep)))
 
 (defun finalize-sheep-inheritance (sheep)
   (if (std-sheep-p sheep)
@@ -222,9 +216,7 @@ everything is initialized to nil."
 (defun std-finalize-sheep-inheritance (sheep)
   "we memoize the hierarchy list here."
   (loop for parent in (sheep-parents sheep)
-     do (unless (%sheep-children parent)
-          (initialize-children-cache parent))
-       (setf (gethash sheep (%sheep-children parent)) t))
+     do (%add-child sheep parent))
   (memoize-sheep-hierarchy-list sheep)
   sheep)
 
@@ -245,7 +237,7 @@ everything is initialized to nil."
       (progn
         (setf (sheep-parents child)
               (delete parent (sheep-parents child)))
-        (remhash child (%sheep-children parent))
+        (%remove-child child parent)
         (finalize-sheep-inheritance child)
         child)
       (error "~A is not a parent of ~A" parent child)))

@@ -285,11 +285,6 @@
     (is (null (cdr child2)))
     (is (null (cdr child3)))))
 
-(test (initialize-children-cache :fixture allocate-std-sheep)
-  (is (null (%sheep-children sheep)))
-  (initialize-children-cache sheep)
-  (is (hash-table-p (%sheep-children sheep))))
-
 (test memoize-sheep-hierarchy-list
   (let ((sheep1 (allocate-std-sheep))
         (sheep2 (allocate-std-sheep)))
@@ -304,8 +299,6 @@
         (sheep2 (allocate-std-sheep)))
     (is (equal (list sheep2) (setf (sheep-parents sheep1) (list sheep2))))
     (is (eql sheep1 (std-finalize-sheep-inheritance sheep1)))
-    (is (hash-table-p (%sheep-children sheep2)))
-    (is (gethash sheep1 (%sheep-children sheep2)))
     (is (find sheep2 (sheep-parents sheep1)))
     (is (find sheep2 (%sheep-hierarchy-cache sheep1)))))
 

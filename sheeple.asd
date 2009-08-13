@@ -38,7 +38,8 @@
   ((:module tests
             :serial t
             :components
-            ((:file "sheeple")
+            ((:file "setup-tests")
+             (:file "sheeple")
              ;; (:file "properties")
              ;; (:file "compatibility")
              ;; (:file "messages")

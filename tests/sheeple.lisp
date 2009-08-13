@@ -15,25 +15,32 @@
 (def-suite allocation :in sheeple)
 (in-suite allocation)
 
-(test allocate-sheep)
 (test allocate-std-sheep
   (let ((sheep (allocate-std-sheep)))
-    (is (vectorp sheep))
-    (is (eql =standard-sheep= (svref sheep 0)))
+    ;; Test for basic structure of the new std-sheep
+    (is (consp sheep))
+    (is (vectorp (cdr sheep)))
+    (is (= 6 (length (cdr sheep))))
+    ;; Test for equivalence of =standard-sheep='s slots
+    (is (eq (car sheep) (sheep-metasheep sheep)))
+    (is (eq (svref (cdr sheep) 0) (sheep-parents sheep)))
+    (is (eq (svref (cdr sheep) 1) (sheep-property-values sheep)))
+    (is (eq (svref (cdr sheep) 2) (sheep-property-metaobjects sheep)))
+    (is (eq (svref (cdr sheep) 3) (sheep-roles sheep)))
+    (is (eq (svref (cdr sheep) 4) (sheep-hierarchy-list sheep)))
+    (is (eq (svref (cdr sheep) 5) (%sheep-children sheep)))
+    ;; Tests for proper initial values
     (is (eql =standard-sheep= (sheep-metasheep sheep)))
-    (is (null (svref sheep 1)))
     (is (null (sheep-parents sheep)))
-    (is (null (svref sheep 2)))
-    (is (null (sheep-properties sheep)))
-    (is (null (svref sheep 3)))
+    (is (null (sheep-property-values sheep)))
+    (is (null (sheep-property-metaobjects sheep)))
     (is (null (sheep-roles sheep)))
-    (is (null (svref sheep 4)))
     (is (null (sheep-hierarchy-list sheep)))
-    (is (null (svref sheep 5)))
     (is (null (%sheep-children sheep)))
-    (signals simple-error (svref sheep 6))
-    
+    ;; Room for improvement...
     ))
+
+(test (allocate-sheep :depends-on allocate-std-sheep))
 
 ;; ;;;
 ;; ;;; Cloning

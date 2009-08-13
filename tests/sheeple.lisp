@@ -1,38 +1,39 @@
 ;;;; -*- Mode: lisp; indent-tabs-mode: nil -*-
-;;;
-;; This file is part of Sheeple.
+;;;;
+;;;; This file is part of Sheeple.
 
-;; tests/sheeple.lisp
-;;
-;; Unit tests for src/sheeple.lisp
-;;
+;;;; tests/sheeple.lisp
+;;;;
+;;;; Unit tests for src/sheeple.lisp
+;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (import '(5am:def-suite 5am:run! 5am:is 5am:in-suite 5am:signals))
-  (defmacro test (name &body body)
-    `(5am:test ,name ,@body)))
 
-(export 'run-all-tests)
+;;;
+;;; Allocation
+;;;
+(def-suite allocation :in sheeple)
+(in-suite allocation)
 
-(def-suite sheeple)
-(defun run-all-tests ()
-  (run! 'sheeple))
-(defmethod asdf:perform ((o asdf:test-op) (c (eql (asdf:find-system :sheeple-tests))))
-  (format t "~&~%*******************~%~
-                 ** Starting test **~%~
-                 *******************~%")
-  (run-all-tests)
-  (format t "~&*****************************************~%~
-               **            Tests finished           **~%~
-               *****************************************~%~
-               ** If there were any failures on your  **~%~
-               ** platform, please report them to me: **~%~
-               **  (zkat at sykosomatic dot org)  **~%~
-               ** or just file a bugreport on github: **~%~
-               ** github.com/zkat/sheeple/issues  **~%~
-               *****************************************~%"))
-
+(test allocate-sheep)
+(test allocate-std-sheep
+  (let ((sheep (allocate-std-sheep)))
+    (is (vectorp sheep))
+    (is (eql =standard-sheep= (svref sheep 0)))
+    (is (eql =standard-sheep= (sheep-metasheep sheep)))
+    (is (null (svref sheep 1)))
+    (is (null (sheep-parents sheep)))
+    (is (null (svref sheep 2)))
+    (is (null (sheep-properties sheep)))
+    (is (null (svref sheep 3)))
+    (is (null (sheep-roles sheep)))
+    (is (null (svref sheep 4)))
+    (is (null (sheep-hierarchy-list sheep)))
+    (is (null (svref sheep 5)))
+    (is (null (%sheep-children sheep)))
+    (signals simple-error (svref sheep 6))
+    
+    ))
 ;;;
 ;;; Cloning
 ;;;

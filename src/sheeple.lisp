@@ -188,6 +188,20 @@ to the front of the list)"
                               parents)))))))
     (all-parents-loop () (list sheep))))
 
+;;; This is here for comparison only...
+(defun compute-sheep-hierarchy-list-old (sheep)
+  (handler-case
+      (let ((sheeple-to-order (collect-parents sheep)))
+        (topological-sort-old sheeple-to-order
+                              (remove-duplicates
+                               (mapappend #'local-precedence-ordering
+                                          sheeple-to-order))
+                              #'std-tie-breaker-rule))
+    (simple-error ()
+      (error 'sheep-hierarchy-error
+             :format-control "A circular precedence graph was generated for ~A"
+             :format-args (list sheep)))))
+
 (defun compute-sheep-hierarchy-list (sheep)
   (handler-case
       (let ((sheeple-to-order (collect-parents sheep)))

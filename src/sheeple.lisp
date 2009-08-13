@@ -11,9 +11,11 @@
 (in-package :sheeple)
 
 ;; We declare these base vars here so that bootstrapping won't complain.
-(defvar =standard-sheep= nil)
-(defvar =t= nil)
-(defvar =dolly= nil)
+;; They're also initialized to (gensym) so that pre-bootstrap tests have
+;; something to check against that isn't all NIL.
+(defvar =standard-sheep= (gensym))
+(defvar =t= (gensym))
+(defvar =dolly= (gensym))
 
 ;;;
 ;;; Sheeple object
@@ -41,11 +43,13 @@ everything is initialized to nil."
     t))
 
 (defun allocate-sheep (metasheep)
+  "Allocates the basic skeleton for a sheep object in memory and returns it."
   (if (eql =standard-sheep= metasheep)
       (allocate-std-sheep)
       (allocate-sheep-using-metasheep metasheep)))
 
 (defun sheepp (sheep)
+  "Predicate for sheepdom."
   (if (std-sheep-p sheep)
       t
       (and (consp sheep)
@@ -53,6 +57,7 @@ everything is initialized to nil."
 
 ;;; Some useful accessors...
 (defun sheep-metasheep (sheep)
+  "Returns SHEEP's metasheep. For now, there is no support for changing a sheep's metasheep."
   (car sheep))
 ;; no (setf sheep-metasheep) for now.
 
@@ -61,6 +66,11 @@ everything is initialized to nil."
 (defun (setf sheep-parents) (new-value sheep)
   (setf (svref (cdr sheep) 0) new-value))
 
+;; Sheep properties are split into two separate data structures:
+;; The first is a vector of values, where each entry is (cons 'property-name value)
+;; The second is a vector of property metaobjects.
+;; Having a local property metaobject means the sheep MUST have a value for that property,
+;; but the inverse is not necessarily true.
 (defun sheep-pvalue-vector (sheep)
   (svref (cdr sheep) 1))
 (defun (setf sheep-pvalue-vector) (new-value sheep)
@@ -76,16 +86,71 @@ everything is initialized to nil."
 (defun (setf sheep-roles) (new-value sheep)
   (setf (svref (cdr sheep) 3) new-value))
 
+;; Although it makes the sheep objects much heavier, we cache the sheep's hierarchy list,
+;; so we don't have to run through the fairly heavy sorting algorithm each time.
 (defun %sheep-hierarchy-cache (sheep)
   (svref (cdr sheep) 4))
 (defun (setf %sheep-hierarchy-cache) (new-value sheep)
   (setf (svref (cdr sheep) 4) new-value))
 
-
+;; The current caching scheme also requires us to keep track of any children a sheep has,
+;; so changes in the hierarchy can be propagated. This could be probably done in a 
+;; much better way...
 (defun %sheep-children (sheep)
   (svref (cdr sheep) 5))
 (defun (setf %sheep-children) (new-value sheep)
   (setf (svref (cdr sheep) 5) new-value))
+
+;;; children cache
+(defun %child-cache-full-p (sheep)
+  (when (and (%sheep-children sheep)
+             (every (lambda (x) x)
+                    (%sheep-children sheep)))
+    t))
+
+(defun %adjust-child-cache (sheep)
+  (cond ((and (= 5 (length (%sheep-children sheep)))
+              (not (adjustable-array-p (%sheep-children sheep))))
+         (let ((old-vector (%sheep-children sheep)))
+           (setf (%sheep-children sheep)
+                 (make-array 100 :adjustable t :initial-element nil))
+           (loop 
+              for old-entry across old-vector
+              for i below (length (%sheep-children sheep))
+              do (setf (aref (%sheep-children sheep) i)  old-entry))))
+        ((and (<= 100 (length (%sheep-children sheep)))
+              (adjustable-array-p (%sheep-children sheep)))
+         (adjust-array (%sheep-children sheep)
+                       (+ 100 (length (%sheep-children sheep)))
+                       :initial-element nil))
+        (t (error "Something went wrong with adjusting the array. Weird.")))
+  sheep)
+
+(defun %create-child-cache (sheep)
+  (setf (%sheep-children sheep)
+        (make-array 5 :initial-element nil)))
+
+(defun %add-child (child sheep)
+  (unless (%sheep-children sheep)
+    (%create-child-cache sheep))
+  (when (%child-cache-full-p sheep)
+    (%adjust-child-cache sheep))
+  (unless (find child (%sheep-children sheep) :key #'weak-pointer-value)
+    (let ((entry (make-weak-pointer child)))
+      (loop for i across (%sheep-children sheep)
+         when (null i)
+         do (setf i entry)
+         (return)))))
+
+(defun %remove-child (child sheep)
+  (when (find child (%sheep-children sheep) :key #'weak-pointer-value)
+    (setf (%sheep-children sheep)
+          (delete child (%sheep-children sheep) :key #'weak-pointer-value))))
+
+(defun %map-children (function sheep)
+  (map 'vector (lambda (pointer)
+                 (funcall function (weak-pointer-value pointer)))
+       (%sheep-children sheep)))
 
 ;;;
 ;;; Inheritance

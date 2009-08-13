@@ -19,7 +19,38 @@
 ;;; Sheeple object
 ;;;
 
+;; Sketch of a freshly-consed sheep:
+;; (cons =standard-metasheep=)
+;;       (vector parents properties property-metaobjects roles hierarchy-list children))
+;;
+;; By default, everything in the cdr of the sheep is initialized to nil.
+(defun allocate-std-sheep ()
+  "Creates a standard sheep object."
+  (cons =standard-sheep=
+        (make-array 6 :initial-element nil)))
 
+(defun std-sheep-p (obj)
+  "A standard sheep object is a simple cons that points to the vector where the actual
+'metaproperties' live. For a standard sheep object, this vector is 6 elements long, and
+everything is initialized to nil."
+  (when (and (consp obj)
+             (eql =standard-sheep=
+                  (car obj))
+             (vectorp (cdr obj))
+             (= 6 (length (cdr obj)))
+             (every #'null (cdr obj)))
+    t))
+
+(defun allocate-sheep (metasheep)
+  (if (eql =standard-sheep= metasheep)
+      (allocate-std-sheep)
+      (allocate-sheep-using-metasheep metasheep)))
+
+(defun sheepp (sheep)
+  (if (std-sheep-p sheep)
+      t
+      (and (consp sheep)
+           (std-sheep-p (car sheep)))))
 
 ;; (defclass standard-sheep ()
 ;;   (;;; Core slots

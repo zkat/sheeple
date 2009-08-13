@@ -127,9 +127,7 @@ everything is initialized to nil."
                                       sheeple-to-order))
                           #'std-tie-breaker-rule))
     (simple-error ()
-      (error 'sheep-hierarchy-error
-             :format-control "A circular precedence graph was generated for ~A"
-             :format-args (list sheep)))))
+      (error 'sheep-hierarchy-error :sheep sheep))))
 
 (defun initialize-children-cache (sheep)
   (setf (%sheep-children sheep)
@@ -306,9 +304,7 @@ everything is initialized to nil."
 ;;                      (delete new-parent
 ;;                              (sheep-parents child)))
 ;;                (finalize-sheep-inheritance child)
-;;                (error 'sheep-hierarchy-error
-;;                       :format-control "A circular precedence graph was generated for ~A"
-;;                       :format-args (list child)))))
+;;                (error 'sheep-hierarchy-error :sheep child))))
 ;;          child)))
 
 ;; (defun add-parents (parents sheep)

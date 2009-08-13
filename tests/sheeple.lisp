@@ -39,9 +39,9 @@
     (is (not (std-sheep-p (cons =standard-sheep=
                                 (make-array 5 :initial-element nil)))))
     (is (not (std-sheep-p (cons =standard-sheep=
-                                (make-array 6 :initial-element 0)))))
-    (is (not (std-sheep-p (cons =standard-sheep=
-                                (make-array 7 :initial-element nil)))))))
+                                (make-array 7 :initial-element nil)))))
+    (setf (sheep-parents sheep) '(foo))
+    (is (std-sheep-p sheep))))
 
 (test allocate-sheep
   (let ((sheep (allocate-sheep =standard-sheep=)))
@@ -53,13 +53,167 @@
 
 (def-suite low-level-accessors :in sheeple)
 (in-suite low-level-accessors)
-(test sheep-metasheep)
-(test std-sheep-parents)
-(test std-sheep-pvalue-vector)
-(test std-sheep-property-metaobjects)
-(test std-sheep-roles)
-(test %std-sheep-hierarchy-cache)
-(test %std-sheep-children)
+(test sheep-metasheep
+  (let ((sheep (allocate-std-sheep)))
+    (is (eql =standard-sheep= (sheep-metasheep sheep)))))
+(test sheep-parents
+  (let ((sheep (allocate-std-sheep)))
+    (is (eql nil (sheep-parents sheep)))
+    (is (equal '(foo) (setf (sheep-parents sheep) '(foo))))
+    (is (equal '(foo) (sheep-parents sheep)))
+    (is (equal '(bar foo) (push 'bar (sheep-parents sheep))))
+    (is (equal '(bar foo) (sheep-parents sheep)))))
+(test sheep-pvalue-vector
+  (let ((sheep (allocate-std-sheep)))
+    (is (eql nil (sheep-pvalue-vector sheep)))
+    (is (equal '(foo) (setf (sheep-pvalue-vector sheep) '(foo))))
+    (is (equal '(foo) (sheep-pvalue-vector sheep)))
+    (is (equal '(bar foo) (push 'bar (sheep-pvalue-vector sheep))))
+    (is (equal '(bar foo) (sheep-pvalue-vector sheep)))))
+(test sheep-property-metaobjects
+  (let ((sheep (allocate-std-sheep)))
+    (is (eql nil (sheep-property-metaobjects sheep)))
+    (is (equal '(foo) (setf (sheep-property-metaobjects sheep) '(foo))))
+    (is (equal '(foo) (sheep-property-metaobjects sheep)))
+    (is (equal '(bar foo) (push 'bar (sheep-property-metaobjects sheep))))
+    (is (equal '(bar foo) (sheep-property-metaobjects sheep)))))
+(test sheep-roles
+  (let ((sheep (allocate-std-sheep)))
+    (is (eql nil (sheep-roles sheep)))
+    (is (equal '(foo) (setf (sheep-roles sheep) '(foo))))
+    (is (equal '(foo) (sheep-roles sheep)))
+    (is (equal '(bar foo) (push 'bar (sheep-roles sheep))))
+    (is (equal '(bar foo) (sheep-roles sheep)))))
+(test %sheep-hierarchy-cache
+  (let ((sheep (allocate-std-sheep)))
+    (is (eql nil (%sheep-hierarchy-cache sheep)))
+    (is (equal '(foo) (setf (%sheep-hierarchy-cache sheep) '(foo))))
+    (is (equal '(foo) (%sheep-hierarchy-cache sheep)))
+    (is (equal '(bar foo) (push 'bar (%sheep-hierarchy-cache sheep))))
+    (is (equal '(bar foo) (%sheep-hierarchy-cache sheep)))))
+(test %sheep-children
+  (let ((sheep (allocate-std-sheep)))
+    (is (eql nil (%sheep-children sheep)))
+    (is (equal '(foo) (setf (%sheep-children sheep) '(foo))))
+    (is (equal '(foo) (%sheep-children sheep)))
+    (is (equal '(bar foo) (push 'bar (%sheep-children sheep))))
+    (is (equal '(bar foo) (%sheep-children sheep)))))
+
+(def-suite hierarchy-list :in sheeple)
+(in-suite hierarchy-list)
+
+(test collect-ancestors
+  (let ((sheep1 (allocate-std-sheep))
+        (sheep2 (allocate-std-sheep))
+        (sheep3 (allocate-std-sheep)))
+    (setf (sheep-parents sheep1) (list sheep2))
+    (setf (sheep-parents sheep2) (list sheep3))
+    (is (find sheep2 (collect-ancestors sheep1)))
+    (is (find sheep3 (collect-ancestors sheep2)))
+    (is (find sheep3 (collect-ancestors sheep1)))
+    (is (not (find sheep1 (collect-ancestors sheep1))))
+    (is (not (find sheep1 (collect-ancestors sheep2))))))
+
+(test local-precedence-ordering
+  (let* ((a (allocate-std-sheep))
+         (b (allocate-std-sheep))
+         (c (allocate-std-sheep))
+         (d (allocate-std-sheep)))
+    (setf (sheep-parents a) (list =dolly=))
+    (setf (sheep-parents b) (list =dolly=))
+    (setf (sheep-parents c) (list =dolly=))
+    (setf (sheep-parents d) (list a b c))
+    (is (equal (list (list d a) (list a b) (list b c))
+               (local-precedence-ordering d)))))
+
+(test std-tie-breaker-rule
+  (let* ((a (allocate-std-sheep))
+         (b (allocate-std-sheep))
+         (c (allocate-std-sheep))
+         (e (allocate-std-sheep))
+         (f (allocate-std-sheep)) 
+         (g (allocate-std-sheep)))
+    (setf (sheep-parents a) (list =dolly=))
+    (setf (sheep-parents b) (list =dolly=))
+    (setf (sheep-parents c) (list =dolly=))
+    (setf (sheep-parents e) (list a))
+    (setf (sheep-parents f) (list b))
+    (setf (sheep-parents g) (list c))
+    (is (eq c (std-tie-breaker-rule (list a b c) (list e f g))))
+    (is (eq b (std-tie-breaker-rule (list a b c) (list e g f))))
+    (is (eq a (std-tie-breaker-rule (list a b c) (list g f e))))))
+
+(test compute-sheep-hierarchy-list
+  (let* ((parent (allocate-std-sheep))
+         (child (allocate-std-sheep)))
+    (setf (sheep-parents child) (list parent))
+    (is (equal (list child parent)
+               (compute-sheep-hierarchy-list child))))
+  (let* ((a (allocate-std-sheep))
+         (b (allocate-std-sheep))
+         (c (allocate-std-sheep)) 
+         (d (allocate-std-sheep))
+         (e (allocate-std-sheep))
+         (f (allocate-std-sheep)) 
+         (g (allocate-std-sheep))
+         (h (allocate-std-sheep)))
+    (setf (sheep-parents c) (list a))
+    (setf (sheep-parents d) (list a))
+    (setf (sheep-parents e) (list b c))
+    (setf (sheep-parents f) (list d))
+    (setf (sheep-parents g) (list c f))
+    (setf (sheep-parents h) (list g e))
+    (is (equal (list h g e b c f d a) (compute-sheep-hierarchy-list h)))))
+
+(test initialize-children-cache
+  (let ((sheep (allocate-std-sheep)))
+    (is (null (%sheep-children sheep)))
+    (initialize-children-cache sheep)
+    (is (hash-table-p (%sheep-children sheep)))))
+
+(test memoize-sheep-hierarchy-list
+  (let ((sheep1 (allocate-std-sheep))
+        (sheep2 (allocate-std-sheep)))
+    (setf (sheep-parents sheep1) (list sheep2))
+    (is (null (%sheep-hierarchy-cache sheep1)))
+    (is (null (%sheep-hierarchy-cache sheep2)))
+    (memoize-sheep-hierarchy-list sheep1)
+    (is (equal (list sheep1 sheep2) (%sheep-hierarchy-cache sheep1)))))
+
+(test finalize-sheep-inheritance)
+(test std-finalize-sheep-inheritance
+  (let ((sheep1 (allocate-std-sheep))
+        (sheep2 (allocate-std-sheep)))
+    (setf (sheep-parents sheep1) (list sheep2))
+    (std-finalize-sheep-inheritance sheep1)
+    (is (hash-table-p (%sheep-children sheep2)))
+    (is (gethash sheep1 (%sheep-children sheep2)))
+    (is (find sheep2 (sheep-parents sheep1)))
+    (is (find sheep2 (%sheep-hierarchy-cache sheep1)))))
+
+;; (def-suite cloning :in sheeple)
+;; (in-suite cloning)
+
+;; (test add-parent
+;;   (let ((obj1 (allocate-std-sheep))
+;;         (obj2 (allocate-std-sheep)))
+;;     (setf (sheep-parents obj1) (list =dolly=))
+;;     (setf (sheep-parents obj2) (list =dolly=))
+;;     (is (eql obj1 (add-parent obj2 obj1)))
+;;     (is (eql obj2 (car (sheep-parents obj1))))))
+
+;; (test add-parents
+;;   (let ((parent1 (allocate-std-sheep))
+;;         (parent2 (allocate-std-sheep))
+;;         (parent3 (allocate-std-sheep))
+;;         (child (allocate-std-sheep)))
+;;     (setf (sheep-parents parent1) (list =dolly=))
+;;     (setf (sheep-parents parent2) (list =dolly=))
+;;     (setf (sheep-parents parent3) (list =dolly=))
+;;     (setf (sheep-parents child) (list =dolly=))
+;;     (is (eql child (add-parents (list parent1 parent2 parent3) child)))
+;;     (is (equal (list parent1 parent2 parent3 =dolly=)
+;;                (sheep-parents child)))))
 
 ;; ;;;
 ;; ;;; Cloning

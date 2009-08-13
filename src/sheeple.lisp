@@ -37,8 +37,7 @@ everything is initialized to nil."
              (eql =standard-sheep=
                   (car obj))
              (vectorp (cdr obj))
-             (= 6 (length (cdr obj)))
-             (every #'null (cdr obj)))
+             (= 6 (length (cdr obj))))
     t))
 
 (defun allocate-sheep (metasheep)
@@ -54,47 +53,115 @@ everything is initialized to nil."
 
 ;;; Some useful accessors...
 (defun sheep-metasheep (sheep)
-  (assert (sheepp sheep))
   (car sheep))
 ;; no (setf sheep-metasheep) for now.
 
-(defun std-sheep-parents (sheep)
-  (assert (sheepp sheep))
+(defun sheep-parents (sheep)
   (svref (cdr sheep) 0))
-(defun (setf std-sheep-parents) (new-value sheep)
-  (setf (svref (cdr sheep) new-value)))
+(defun (setf sheep-parents) (new-value sheep)
+  (setf (svref (cdr sheep) 0) new-value))
 
-(defun std-sheep-pvalue-vector (sheep)
-  (assert (sheepp sheep))
+(defun sheep-pvalue-vector (sheep)
   (svref (cdr sheep) 1))
-(defun (setf std-sheep-pvalue-vector) (new-value sheep)
+(defun (setf sheep-pvalue-vector) (new-value sheep)
   (setf (svref (cdr sheep) 1) new-value))
 
-(defun std-sheep-property-metaobjects (sheep)
-  (assert (sheepp sheep))
+(defun sheep-property-metaobjects (sheep)
   (svref (cdr sheep) 2))
-(defun (setf std-sheep-property-metaobjects) (new-value sheep)
+(defun (setf sheep-property-metaobjects) (new-value sheep)
   (setf (svref (cdr sheep) 2) new-value))
 
-(defun std-sheep-roles (sheep)
-  (assert (sheepp sheep))
+(defun sheep-roles (sheep)
   (svref (cdr sheep) 3))
-(defun (setf std-sheep-roles) (new-value sheep)
+(defun (setf sheep-roles) (new-value sheep)
   (setf (svref (cdr sheep) 3) new-value))
 
-(defun %std-sheep-hierarchy-cache (sheep)
-  (assert (sheepp sheep))
+(defun %sheep-hierarchy-cache (sheep)
   (svref (cdr sheep) 4))
-(defun (setf %std-sheep-hierarchy-cache) (new-value sheep)
+(defun (setf %sheep-hierarchy-cache) (new-value sheep)
   (setf (svref (cdr sheep) 4) new-value))
 
-(defun %std-sheep-children (sheep)
-  (assert (sheepp sheep))
+(defun %sheep-children (sheep)
   (svref (cdr sheep) 5))
-(defun (setf %std-sheep-children) (new-value children)
+(defun (setf %sheep-children) (new-value sheep)
   (setf (svref (cdr sheep) 5) new-value))
 
-;;; Inheritance setup
+;;;
+;;; Inheritance
+;;;
+(defun collect-ancestors (sheep)
+  "Recursively collects all of SHEEP's ancestors."
+  (labels ((all-parents-loop (seen parents)
+              (let ((to-be-processed
+                     (set-difference parents seen)))
+                (if (null to-be-processed)
+                    parents
+                    (let ((sheep-to-process
+                           (car to-be-processed)))
+                      (all-parents-loop
+                       (cons sheep-to-process seen)
+                       (union (sheep-parents sheep-to-process)
+                              parents)))))))
+    (all-parents-loop () (sheep-parents sheep))))
+
+(defun local-precedence-ordering (sheep)
+  (mapcar #'list
+          (cons sheep
+                (butlast (sheep-parents sheep)))
+          (sheep-parents sheep)))
+
+(defun std-tie-breaker-rule (minimal-elements hl-so-far)
+  (dolist (hl-constituent (reverse hl-so-far))
+    (let* ((supers (sheep-parents hl-constituent))
+           (common (intersection minimal-elements supers)))
+      (when (not (null common))
+        (return-from std-tie-breaker-rule (car common))))))
+
+(defun compute-sheep-hierarchy-list (sheep)
+  (handler-case
+      ;; since collect-ancestors only collects the _ancestors_, we cons the sheep in front..
+      (let ((sheeple-to-order (cons sheep (collect-ancestors sheep))))
+        (topological-sort sheeple-to-order
+                          (remove-duplicates
+                           (mapappend #'local-precedence-ordering
+                                      sheeple-to-order))
+                          #'std-tie-breaker-rule))
+    (simple-error ()
+      (error 'sheep-hierarchy-error
+             :format-control "A circular precedence graph was generated for ~A"
+             :format-args (list sheep)))))
+
+(defun initialize-children-cache (sheep)
+  (setf (%sheep-children sheep)
+        (make-weak-hash-table :weakness :key :test #'eq))
+  sheep)
+
+(defun memoize-sheep-hierarchy-list (sheep)
+  (let ((list (compute-sheep-hierarchy-list sheep)))
+    (setf (%sheep-hierarchy-cache sheep)
+          list)
+    (when (%sheep-children sheep)
+      (maphash (lambda (descendant iggy)
+                 (declare (ignore iggy))
+                 (memoize-sheep-hierarchy-list descendant))
+               (%sheep-children sheep)))))
+
+(defun finalize-sheep-inheritance (sheep)
+  (if (std-sheep-p sheep)
+      (std-finalize-sheep-inheritance sheep)
+      (finalize-sheep-inheritance-using-metasheep
+       (sheep-metasheep sheep) sheep)))
+
+(defun std-finalize-sheep-inheritance (sheep)
+  "we memoize the hierarchy list here."
+  (loop for parent in (sheep-parents sheep)
+     do (unless (%sheep-children parent)
+          (initialize-children-cache parent))
+       (setf (gethash sheep (%sheep-children parent)) t))
+  (memoize-sheep-hierarchy-list sheep)
+  sheep)
+
+;; ;;; Add/remove parents
 ;; (defun add-parent (new-parent sheep)
 ;;   "Adds NEW-PARENT as a parent to SHEEP."
 ;;   (if (and (std-sheep-p new-parent)
@@ -115,17 +182,17 @@ everything is initialized to nil."
 ;;              (progn
 ;;                (push new-parent (std-sheep-parents child))
 ;;                (setf (gethash child (%sheep-children new-parent)) t)
-;;                (finalize-sheep child)
+;;                (finalize-sheep-inheritance child)
 ;;                child)
 ;;            ;; This error is signaled by compute-sheep-hierarchy-list, which right now
-;;            ;; is called from inside finalize-sheep (this is probably a bad idea, move
+;;            ;; is called from inside finalize-sheep-inheritance (this is probably a bad idea, move
 ;;            ;; c-s-h-l in here just to do the check?)
 ;;            (sheep-hierarchy-error ()
 ;;              (progn
 ;;                (setf (std-sheep-parents child)
 ;;                      (delete new-parent
 ;;                              (std-sheep-parents child)))
-;;                (finalize-sheep child)
+;;                (finalize-sheep-inheritance child)
 ;;                (error 'sheep-hierarchy-error
 ;;                       :format-control "A circular precedence graph was generated for ~A"
 ;;                       :format-args (list child)))))
@@ -180,7 +247,7 @@ everything is initialized to nil."
 ;;   ;; todo
 ;;   (:documentation "Makes a direct copy of MODEL."))
 
-;; (defgeneric finalize-sheep (sheep)
+;; (defgeneric finalize-sheep-inheritance (sheep)
 ;;   (:documentation "Performs any needed finalization on SHEEP."))
 
 ;; (defun spawn-sheep (sheep-or-sheeple &rest all-keys
@@ -201,7 +268,7 @@ everything is initialized to nil."
 ;;   "Creates a new standard-sheep object with SHEEPLE as its parents."
 ;;   (spawn-sheep sheeple))
 
-;; (defmethod finalize-sheep ((sheep standard-sheep))
+;; (defmethod finalize-sheep-inheritance ((sheep standard-sheep))
 ;;   "we memoize the hierarchy list here."
 ;;   (loop for parent in (sheep-parents sheep)
 ;;      do (setf (gethash sheep (%children parent)) t))
@@ -228,17 +295,17 @@ everything is initialized to nil."
 ;;              (progn
 ;;                (push new-parent (sheep-parents child))
 ;;                (setf (gethash child (%children new-parent)) t)
-;;                (finalize-sheep child)
+;;                (finalize-sheep-inheritance child)
 ;;                child)
 ;;            ;; This error is signaled by compute-sheep-hierarchy-list, which right now
-;;            ;; is called from inside finalize-sheep (this is probably a bad idea, move
+;;            ;; is called from inside finalize-sheep-inheritance (this is probably a bad idea, move
 ;;            ;; c-s-h-l in here just to do the check?)
 ;;            (sheep-hierarchy-error ()
 ;;              (progn
 ;;                (setf (sheep-parents child)
 ;;                      (delete new-parent
 ;;                              (sheep-parents child)))
-;;                (finalize-sheep child)
+;;                (finalize-sheep-inheritance child)
 ;;                (error 'sheep-hierarchy-error
 ;;                       :format-control "A circular precedence graph was generated for ~A"
 ;;                       :format-args (list child)))))
@@ -268,7 +335,7 @@ everything is initialized to nil."
 ;;         (setf (sheep-parents child)
 ;;               (delete parent (sheep-parents child)))
 ;;         (remhash child (%children parent))
-;;         (finalize-sheep child)
+;;         (finalize-sheep-inheritance child)
 ;;         child)
 ;;       (error "~A is not a parent of ~A" parent child)))
 
@@ -291,62 +358,6 @@ everything is initialized to nil."
 ;;   "A descendant is a sheep that has ANCESTOR in its hierarchy-list."
 ;;   (ancestor-p ancestor maybe-descendant))
 
-;; ;;;
-;; ;;; Hierarchy Resolution
-;; ;;;
-;; ;;; Most of this is taken almost verbatim from closette
-;; ;;;
-;; (defun collect-parents (sheep)
-;;   (labels ((all-parents-loop (seen parents)
-;;               (let ((to-be-processed
-;;                      (set-difference parents seen)))
-;;                 (if (null to-be-processed)
-;;                     parents
-;;                     (let ((sheep-to-process
-;;                            (car to-be-processed)))
-;;                       (all-parents-loop
-;;                        (cons sheep-to-process seen)
-;;                        (union (sheep-parents sheep-to-process)
-;;                               parents)))))))
-;;     (all-parents-loop () (list sheep))))
-
-;; (defun compute-sheep-hierarchy-list (sheep)
-;;   (handler-case
-;;     (let ((sheeple-to-order (collect-parents sheep)))
-;;       (topological-sort sheeple-to-order
-;;                         (remove-duplicates
-;;                          (mapappend #'local-precedence-ordering
-;;                                     sheeple-to-order))
-;;                         #'std-tie-breaker-rule))
-;;     (simple-error ()
-;;                   (error 'sheep-hierarchy-error
-;;                          :format-control "A circular precedence graph was generated for ~A"
-;;                          :format-args (list sheep)))))
-
-;; (defun local-precedence-ordering (sheep)
-;;   (mapcar #'list
-;;           (cons sheep
-;;                 (butlast (sheep-parents sheep)))
-;;           (sheep-parents sheep)))
-
-;; (defun std-tie-breaker-rule (minimal-elements hl-so-far)
-;;   (dolist (hl-constituent (reverse hl-so-far))
-;;     (let* ((supers (sheep-parents hl-constituent))
-;;            (common (intersection minimal-elements supers)))
-;;       (when (not (null common))
-;;         (return-from std-tie-breaker-rule (car common))))))
-
-;; ;;;
-;; ;;; Memoization
-;; ;;;
-;; (defun memoize-sheep-hierarchy-list (sheep)
-;;   (let ((list (compute-sheep-hierarchy-list sheep)))
-;;     (setf (sheep-hierarchy-list sheep)
-;;           list)
-;;     (maphash (lambda (descendant iggy)
-;;                (declare (ignore iggy))
-;;                (memoize-sheep-hierarchy-list descendant))
-;;              (%children sheep))))
 
 ;; ;;;
 ;; ;;; DEFCLONE macro

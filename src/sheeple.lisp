@@ -80,8 +80,7 @@ everything is initialized to nil."
   (svref (cdr sheep) 4))
 (defun (setf %sheep-hierarchy-cache) (new-value sheep)
   (setf (svref (cdr sheep) 4) new-value))
-(defun sheep-hierarchy-list (sheep)
-  (%sheep-hierarchy-cache sheep))
+
 
 (defun %sheep-children (sheep)
   (svref (cdr sheep) 5))
@@ -222,6 +221,10 @@ to the front of the list)"
           (add-parent parent sheep))
         (reverse parents))
   sheep)
+
+(defun sheep-hierarchy-list (sheep)
+  "Returns the full hierarchy-list for SHEEP"
+  (%sheep-hierarchy-cache sheep))
 
 ;;; Inheritance predicates
 (defun parentp (maybe-parent child)

@@ -36,6 +36,41 @@
                                        (1- max))))
         (t nil)))
 
+;;; These two are here for comparison only...
+(defun mapappend (fun &rest args)
+  (if (some #'null args)
+      ()
+      (append (apply fun (mapcar #'car args))
+              (apply #'mapappend fun (mapcar #'cdr args)))))
+
+(defun topological-sort-old (elements constraints tie-breaker)
+  (let ((remaining-constraints constraints)
+        (remaining-elements elements)
+        (result ()))
+    (loop
+       (let ((minimal-elements
+              (remove-if
+               (lambda (sheep)
+                 (member sheep remaining-constraints
+                         :key #'cadr))
+               remaining-elements)))
+         (when (null minimal-elements)
+           (if (null remaining-elements)
+               (return-from topological-sort-old result)
+               (error "Inconsistent precedence graph.")))
+         (let ((choice (if (null (cdr minimal-elements))
+                           (car minimal-elements)
+                           (funcall tie-breaker
+                                    minimal-elements
+                                    result))))
+           (setf result (append result (list choice)))
+           (setf remaining-elements
+                 (remove choice remaining-elements))
+           (setf remaining-constraints
+                 (remove choice
+                         remaining-constraints
+                         :test #'member)))))))
+
 (defun topological-sort (elements constraints tie-breaker)
   "Sorts ELEMENTS such that they satisfy the CONSTRAINTS, falling back
 on the TIE-BREAKER in the case of ambiguous constraints. On the assumption

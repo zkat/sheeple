@@ -363,6 +363,7 @@
 ;;     (is (eql standard-sheep (car (sheep-parents (spawn-sheep (list standard-sheep))))))
 ;;     (is (eql (find-class 'test-sheep-class) (class-of test-metaclass-sheep)))))
 
+;;; The following two should be moved to a different file. These are not defined in sheeple.lisp
 ;; (test init-sheep
 ;;   (let ((parent (spawn-sheep () :properties '((prop1 NIL)))))
 ;;     (defreply init-sheep :before ((sheep parent) &key)

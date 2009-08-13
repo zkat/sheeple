@@ -217,15 +217,6 @@
   ;; todo - write tests for this once bootstrapping is set...
 )
 
-(test (sheep-hierarchy-list :fixture allocate-std-sheep)
-  ;; TODO - these tests suck balls. It should be tested after add/remove parent,
-  ;;        and should be defined in terms of actual sheeple, not this symbol dinkyness.
-  (is (eql nil (sheep-hierarchy-list sheep)))
-  (is (equal '(foo) (setf (%sheep-hierarchy-cache sheep) '(foo))))
-  (is (equal '(foo) (sheep-hierarchy-list sheep)))
-  (is (equal '(bar foo) (push 'bar (%sheep-hierarchy-cache sheep))))
-  (is (equal '(bar foo) (sheep-hierarchy-list sheep))))
-
 (test remove-parent
   (let ((sheep1 (allocate-std-sheep))
         (sheep2 (allocate-std-sheep)))
@@ -237,7 +228,7 @@
     (signals error (remove-parent sheep2 sheep1))
     (signals error (remove-parent sheep1 sheep1)))
   ;; todo - more thorough tests, post-bootstrap
-  )
+)
 
 (test std-remove-parent
   (let ((sheep1 (allocate-std-sheep))
@@ -269,6 +260,7 @@
     (signals sheeple-hierarchy-error (add-parent sheep1 sheep2)))
   ;; todo - more thorough tests post-bootstrap
   )
+
 (test add-parents
   (let ((a (allocate-std-sheep))
         (b (allocate-std-sheep))
@@ -276,13 +268,22 @@
     (is (eql c (add-parents (list a b) c)))
     (is (equal (list a b) (sheep-parents c)))))
 
+(test sheep-hierarchy-list
+  (let ((a (allocate-std-sheep))
+        (b (allocate-std-sheep))
+        (c (allocate-std-sheep)))
+    (is (eql nil (sheep-hierarchy-list c)))
+    (is (eql a (add-parent b a)))
+    (is (eql b (add-parent c b)))
+    (is (equal (list a b c) (sheep-hierarchy-list a)))))
+
 (test parentp
   (let ((a (allocate-std-sheep))
         (b (allocate-std-sheep))
         (c (allocate-std-sheep)))
     (add-parent a b)
     (add-parent b c)
-    (is (parentp a b))
+`    (is (parentp a b))
     (is (parentp b c))
     (is (not (parentp a c)))
     (is (not (parentp c a)))

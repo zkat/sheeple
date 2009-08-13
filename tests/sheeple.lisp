@@ -250,9 +250,40 @@
     (is (simple-vector-p (%create-child-cache sheep)))
     (is (simple-vector-p (%sheep-children sheep)))))
 
-(test %add-child)
-(test %remove-child)
-(test %map-children)
+(test %add-child
+  (let ((sheep1 (allocate-std-sheep))
+        (sheep2 (allocate-std-sheep)))
+    (is (null (%sheep-children sheep1)))
+    (is (null (%sheep-children sheep2)))
+    (is (eql sheep1 (%add-child sheep2 sheep1)))
+    (is (null (%sheep-children sheep2)))
+    (is (simple-vector-p (%sheep-children sheep1)))
+    (is (find sheep2 (%sheep-children sheep1) :key #'weak-pointer-value))))
+
+(test %remove-child
+  (let ((sheep1 (allocate-std-sheep))
+        (sheep2 (allocate-std-sheep)))
+    (is (null (%sheep-children sheep1)))
+    (is (null (%sheep-children sheep2)))
+    (%add-child sheep2 sheep1)
+    (is (eql sheep1 (%remove-child sheep2 sheep1) ))
+    (is (simple-vector-p (%sheep-children sheep1)))
+    (is (not (find sheep2 (%sheep-children sheep1) :key #'weak-pointer-value)))))
+
+(test %map-children
+  (let ((parent (allocate-std-sheep))
+        (child1 (allocate-std-sheep))
+        (child2 (allocate-std-sheep))
+        (child3 (allocate-std-sheep)))
+    (%add-child child1 parent)
+    (%add-child child2 parent)
+    (%add-child child3 parent)
+    (is (vectorp (%map-children (lambda (child)
+                                  (setf (cdr child) nil))
+                                parent)))
+    (is (null (cdr child1)))
+    (is (null (cdr child2)))
+    (is (null (cdr child3)))))
 
 (test (initialize-children-cache :fixture allocate-std-sheep)
   (is (null (%sheep-children sheep)))

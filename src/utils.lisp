@@ -36,7 +36,7 @@
                                        (1- max))))
         (t nil)))
 
-;;; These two are here for comparison only...
+;;; <<<<<<< BEGIN OUTDATED CODE BLOCK >>>>>>>
 (defun mapappend (fun &rest args)
   (if (some #'null args)
       ()
@@ -70,6 +70,7 @@
                  (remove choice
                          remaining-constraints
                          :test #'member)))))))
+;;; <<<<<<< END OUTDATED CODE BLOCK >>>>>>>
 
 (defun topological-sort (elements constraints tie-breaker)
   "Sorts ELEMENTS such that they satisfy the CONSTRAINTS, falling back

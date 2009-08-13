@@ -16,12 +16,6 @@
 (defmacro pushend (obj list)
   `(setf ,list (nconc ,list (cons ,obj nil))))
 
-(defun mapappend (fun &rest args)
-  (if (some #'null args)
-      ()
-      (append (apply fun (mapcar #'car args))
-              (apply #'mapappend fun (mapcar #'cdr args)))))
-
 (defun flatten (x)
   "Flattens a list."
   (labels ((rec (x acc)

@@ -121,7 +121,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 
 ;; This pair just pretties up the options during macro expansion
 (defun canonize-message-options (options)
-  (mapappend #'canonize-message-option options))
+  (mapcan #'canonize-message-option options))
 (defun canonize-message-option (option)
   (list `',(car option) `',(cadr option)))
 

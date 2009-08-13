@@ -18,7 +18,9 @@
 (test allocate-sheep)
 (test allocate-std-sheep
   (let ((sheep (allocate-std-sheep)))
-    (is (vectorp sheep))
+    (is (consp sheep))
+    (is (sheepp (car sheep)))
+    (is (vectorp (cdr sheep)))
     (is (eql =standard-sheep= (svref sheep 0)))
     (is (eql =standard-sheep= (sheep-metasheep sheep)))
     (is (null (svref sheep 1)))

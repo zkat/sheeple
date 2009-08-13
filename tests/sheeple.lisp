@@ -15,28 +15,41 @@
 (def-suite allocation :in sheeple)
 (in-suite allocation)
 
-(test allocate-sheep)
 (test allocate-std-sheep
   (let ((sheep (allocate-std-sheep)))
     (is (consp sheep))
-    (is (sheepp (car sheep)))
+    (is (eql =standard-sheep= (car sheep)))
     (is (vectorp (cdr sheep)))
-    (is (eql =standard-sheep= (svref sheep 0)))
-    (is (eql =standard-sheep= (sheep-metasheep sheep)))
-    (is (null (svref sheep 1)))
-    (is (null (sheep-parents sheep)))
-    (is (null (svref sheep 2)))
-    (is (null (sheep-properties sheep)))
-    (is (null (svref sheep 3)))
-    (is (null (sheep-roles sheep)))
-    (is (null (svref sheep 4)))
-    (is (null (sheep-hierarchy-list sheep)))
-    (is (null (svref sheep 5)))
-    (is (null (%sheep-children sheep)))
-    (signals simple-error (svref sheep 6))
-    
-    ))
+    (is (null (svref (cdr sheep) 0)))
+    (is (null (svref (cdr sheep) 1)))
+    (is (null (svref (cdr sheep) 2)))
+    (is (null (svref (cdr sheep) 3)))
+    (is (null (svref (cdr sheep) 4)))
+    (is (null (svref (cdr sheep) 5)))
+    (signals simple-error (svref (cdr sheep) 6))))
 
+(test std-sheep-p
+  (let ((sheep (allocate-std-sheep)))
+    (is (std-sheep-p sheep))
+    (is (not (std-sheep-p (cons 1 2))))
+    (is (not (std-sheep-p (cons =standard-sheep=
+                                nil))))
+    (is (std-sheep-p (cons =standard-sheep=
+                           (make-array 6 :initial-element nil))))
+    (is (not (std-sheep-p (cons =standard-sheep=
+                                (make-array 5 :initial-element nil)))))
+    (is (not (std-sheep-p (cons =standard-sheep=
+                                (make-array 6 :initial-element 0)))))
+    (is (not (std-sheep-p (cons =standard-sheep=
+                                (make-array 7 :initial-element nil)))))))
+
+(test allocate-sheep
+  (let ((sheep (allocate-sheep =standard-sheep=)))
+    (is (std-sheep-p sheep))))
+
+(test sheepp
+  (let ((sheep (allocate-sheep =standard-sheep=)))
+    (is (sheepp sheep))))
 
 ;; ;;;
 ;; ;;; Cloning

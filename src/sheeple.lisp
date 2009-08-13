@@ -127,7 +127,7 @@ everything is initialized to nil."
                                       sheeple-to-order))
                           #'std-tie-breaker-rule))
     (simple-error ()
-      (error 'sheep-hierarchy-error :sheep sheep))))
+      (error 'sheeple-hierarchy-error :sheep sheep))))
 
 (defun initialize-children-cache (sheep)
   (setf (%sheep-children sheep)
@@ -159,51 +159,67 @@ everything is initialized to nil."
   (memoize-sheep-hierarchy-list sheep)
   sheep)
 
-;; ;;; Add/remove parents
-;; (defun add-parent (new-parent sheep)
-;;   "Adds NEW-PARENT as a parent to SHEEP."
-;;   (if (and (std-sheep-p new-parent)
-;;            (std-sheep-p sheep))
-;;       (std-add-parent new-parent sheep)
-;;       (add-parent-using-metasheeple (sheep-metasheep new-parent)
-;;                                     (sheep-metasheep sheep)
-;;                                     new-parent sheep)))
+;;; Add/remove parents
+(defun remove-parent (parent sheep)
+  "Remove PARENT as a parent of SHEEP."
+  (if (and (std-sheep-p parent)
+           (std-sheep-p sheep))
+      (std-remove-parent parent sheep)
+      (remove-parent-using-metasheeple (sheep-metasheep parent)
+                                       (sheep-metasheep sheep)
+                                       parent sheep)))
 
-;; (defun std-add-parent (new-parent child)
-;;   "Some basic checking here, and then the parent is actually added to the sheep's list."
-;;   (cond ((equal new-parent child)
-;;          (error "Sheeple cannot be parents of themselves."))
-;;         ((member new-parent (std-sheep-parents child))
-;;          (error "~A is already a parent of ~A." new-parent child))
-;;         (t
-;;          (handler-case
-;;              (progn
-;;                (push new-parent (std-sheep-parents child))
-;;                (setf (gethash child (%sheep-children new-parent)) t)
-;;                (finalize-sheep-inheritance child)
-;;                child)
-;;            ;; This error is signaled by compute-sheep-hierarchy-list, which right now
-;;            ;; is called from inside finalize-sheep-inheritance (this is probably a bad idea, move
-;;            ;; c-s-h-l in here just to do the check?)
-;;            (sheep-hierarchy-error ()
-;;              (progn
-;;                (setf (std-sheep-parents child)
-;;                      (delete new-parent
-;;                              (std-sheep-parents child)))
-;;                (finalize-sheep-inheritance child)
-;;                (error 'sheep-hierarchy-error
-;;                       :format-control "A circular precedence graph was generated for ~A"
-;;                       :format-args (list child)))))
-;;          child)))
+(defun std-remove-parent (parent child)
+  "Removing PARENT to SHEEP's parent list is a matter of deleting it from the parent list."
+  (if (member parent (sheep-parents child))
+      ;; TODO - this could check to make sure that the hierarchy list is still valid.
+      (progn
+        (setf (sheep-parents child)
+              (delete parent (sheep-parents child)))
+        (remhash child (%sheep-children parent))
+        (finalize-sheep-inheritance child)
+        child)
+      (error "~A is not a parent of ~A" parent child)))
 
-;; (defun add-parents (parents sheep)
-;;   "Mostly a utility function for easily adding multiple parents. They will be added to
-;; the front of the sheep's parent list in reverse order (so they will basically be appended
-;; to the front of the list)"
-;;   (mapc (lambda (parent) 
-;;           (add-parent parent sheep))
-;;         (reverse parents))
-;;   sheep)
+(defun add-parent (new-parent sheep)
+  "Adds NEW-PARENT as a parent to SHEEP."
+  (if (and (std-sheep-p new-parent)
+           (std-sheep-p sheep))
+      (std-add-parent new-parent sheep)
+      (add-parent-using-metasheeple (sheep-metasheep new-parent)
+                                    (sheep-metasheep sheep)
+                                    new-parent sheep)))
+
+(defun std-add-parent (new-parent child)
+  "Some basic checking here, and then the parent is actually added to the sheep's list."
+  (cond ((equal new-parent child)
+         (error "Sheeple cannot be parents of themselves."))
+        ((member new-parent (sheep-parents child))
+         (error "~A is already a parent of ~A." new-parent child))
+        (t
+         (handler-case
+             (progn
+               (push new-parent (sheep-parents child))
+               (finalize-sheep-inheritance child)
+               child)
+           ;; This error is signaled by compute-sheep-hierarchy-list, which right now
+           ;; is called from inside finalize-sheep-inheritance (this is probably a bad idea, move
+           ;; c-s-h-l in here just to do the check?)
+           (sheeple-hierarchy-error ()
+             (progn
+               (remove-parent new-parent child)
+               (error 'sheeple-hierarchy-error
+                      :sheep child))))
+         child)))
+
+(defun add-parents (parents sheep)
+  "Mostly a utility function for easily adding multiple parents. They will be added to
+the front of the sheep's parent list in reverse order (so they will basically be appended
+to the front of the list)"
+  (mapc (lambda (parent) 
+          (add-parent parent sheep))
+        (reverse parents))
+  sheep)
 
 ;; (defclass standard-sheep ()
 ;;   (;;; Core slots
@@ -298,13 +314,13 @@ everything is initialized to nil."
 ;;            ;; This error is signaled by compute-sheep-hierarchy-list, which right now
 ;;            ;; is called from inside finalize-sheep-inheritance (this is probably a bad idea, move
 ;;            ;; c-s-h-l in here just to do the check?)
-;;            (sheep-hierarchy-error ()
+;;            (sheeple-hierarchy-error ()
 ;;              (progn
 ;;                (setf (sheep-parents child)
 ;;                      (delete new-parent
 ;;                              (sheep-parents child)))
 ;;                (finalize-sheep-inheritance child)
-;;                (error 'sheep-hierarchy-error :sheep child))))
+;;                (error 'sheeple-hierarchy-error :sheep child))))
 ;;          child)))
 
 ;; (defun add-parents (parents sheep)
@@ -316,24 +332,6 @@ everything is initialized to nil."
 ;;         (reverse parents))
 ;;   sheep)
 
-;; (defgeneric remove-parent (parent sheep)
-;;   (:documentation "Remove PARENT as a parent of SHEEP."))
-
-;; (defmethod remove-parent (unsheepish-parent (child standard-sheep))
-;;   "As with add-parent, we make sure to box the parent first if it's not already a standard-sheep."
-;;   (remove-parent (sheepify unsheepish-parent) child))
-
-;; (defmethod remove-parent ((parent standard-sheep) (child standard-sheep))
-;;   "Removing PARENT to SHEEP's parent list is a matter of deleting it from the parent list."
-;;   (if (member parent (sheep-parents child))
-;;       ;; TODO - this could check to make sure that the hierarchy list is still valid.
-;;       (progn
-;;         (setf (sheep-parents child)
-;;               (delete parent (sheep-parents child)))
-;;         (remhash child (%children parent))
-;;         (finalize-sheep-inheritance child)
-;;         child)
-;;       (error "~A is not a parent of ~A" parent child)))
 
 ;; ;;; Inheritance predicates
 ;; (defun parent-p (maybe-parent child)

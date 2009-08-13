@@ -9,16 +9,16 @@
 ;; TODO - write validate-hierarchy-list, which could be called whenever the parents list changes.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
-(declaim (optimize (debug 1) (safety 1) (speed 3)))
 
 ;; We declare these base vars here so that bootstrapping won't complain.
-(defvar =standard-sheep=)
-(defvar =t=)
-(defvar =dolly=)
+(defvar =standard-sheep= nil)
+(defvar =t= nil)
+(defvar =dolly= nil)
 
 ;;;
 ;;; Sheeple object
 ;;;
+
 
 
 ;; (defclass standard-sheep ()

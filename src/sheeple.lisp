@@ -52,6 +52,94 @@ everything is initialized to nil."
       (and (consp sheep)
            (std-sheep-p (car sheep)))))
 
+;;; Some useful accessors...
+(defun sheep-metasheep (sheep)
+  (assert (sheepp sheep))
+  (car sheep))
+;; no (setf sheep-metasheep) for now.
+
+(defun std-sheep-parents (sheep)
+  (assert (sheepp sheep))
+  (svref (cdr sheep) 0))
+(defun (setf std-sheep-parents) (new-value sheep)
+  (setf (svref (cdr sheep) new-value)))
+
+(defun std-sheep-pvalue-vector (sheep)
+  (assert (sheepp sheep))
+  (svref (cdr sheep) 1))
+(defun (setf std-sheep-pvalue-vector) (new-value sheep)
+  (setf (svref (cdr sheep) 1) new-value))
+
+(defun std-sheep-property-metaobjects (sheep)
+  (assert (sheepp sheep))
+  (svref (cdr sheep) 2))
+(defun (setf std-sheep-property-metaobjects) (new-value sheep)
+  (setf (svref (cdr sheep) 2) new-value))
+
+(defun std-sheep-roles (sheep)
+  (assert (sheepp sheep))
+  (svref (cdr sheep) 3))
+(defun (setf std-sheep-roles) (new-value sheep)
+  (setf (svref (cdr sheep) 3) new-value))
+
+(defun %std-sheep-hierarchy-cache (sheep)
+  (assert (sheepp sheep))
+  (svref (cdr sheep) 4))
+(defun (setf %std-sheep-hierarchy-cache) (new-value sheep)
+  (setf (svref (cdr sheep) 4) new-value))
+
+(defun %std-sheep-children (sheep)
+  (assert (sheepp sheep))
+  (svref (cdr sheep) 5))
+(defun (setf %std-sheep-children) (new-value children)
+  (setf (svref (cdr sheep) 5) new-value))
+
+;;; Inheritance setup
+;; (defun add-parent (new-parent sheep)
+;;   "Adds NEW-PARENT as a parent to SHEEP."
+;;   (if (and (std-sheep-p new-parent)
+;;            (std-sheep-p sheep))
+;;       (std-add-parent new-parent sheep)
+;;       (add-parent-using-metasheeple (sheep-metasheep new-parent)
+;;                                     (sheep-metasheep sheep)
+;;                                     new-parent sheep)))
+
+;; (defun std-add-parent (new-parent child)
+;;   "Some basic checking here, and then the parent is actually added to the sheep's list."
+;;   (cond ((equal new-parent child)
+;;          (error "Sheeple cannot be parents of themselves."))
+;;         ((member new-parent (std-sheep-parents child))
+;;          (error "~A is already a parent of ~A." new-parent child))
+;;         (t
+;;          (handler-case
+;;              (progn
+;;                (push new-parent (std-sheep-parents child))
+;;                (setf (gethash child (%sheep-children new-parent)) t)
+;;                (finalize-sheep child)
+;;                child)
+;;            ;; This error is signaled by compute-sheep-hierarchy-list, which right now
+;;            ;; is called from inside finalize-sheep (this is probably a bad idea, move
+;;            ;; c-s-h-l in here just to do the check?)
+;;            (sheep-hierarchy-error ()
+;;              (progn
+;;                (setf (std-sheep-parents child)
+;;                      (delete new-parent
+;;                              (std-sheep-parents child)))
+;;                (finalize-sheep child)
+;;                (error 'sheep-hierarchy-error
+;;                       :format-control "A circular precedence graph was generated for ~A"
+;;                       :format-args (list child)))))
+;;          child)))
+
+;; (defun add-parents (parents sheep)
+;;   "Mostly a utility function for easily adding multiple parents. They will be added to
+;; the front of the sheep's parent list in reverse order (so they will basically be appended
+;; to the front of the list)"
+;;   (mapc (lambda (parent) 
+;;           (add-parent parent sheep))
+;;         (reverse parents))
+;;   sheep)
+
 ;; (defclass standard-sheep ()
 ;;   (;;; Core slots
 ;;    (nickname :accessor sheep-nickname :initform nil

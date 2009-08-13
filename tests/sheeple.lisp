@@ -51,6 +51,16 @@
   (let ((sheep (allocate-sheep =standard-sheep=)))
     (is (sheepp sheep))))
 
+(def-suite low-level-accessors :in sheeple)
+(in-suite low-level-accessors)
+(test sheep-metasheep)
+(test std-sheep-parents)
+(test std-sheep-pvalue-vector)
+(test std-sheep-property-metaobjects)
+(test std-sheep-roles)
+(test %std-sheep-hierarchy-cache)
+(test %std-sheep-children)
+
 ;; ;;;
 ;; ;;; Cloning
 ;; ;;;

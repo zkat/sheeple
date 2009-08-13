@@ -267,8 +267,11 @@
   ;; todo - more thorough tests post-bootstrap
   )
 (test add-parents
-  ;; todo
-)
+  (let ((a (allocate-std-sheep))
+        (b (allocate-std-sheep))
+        (c (allocate-std-sheep)))
+    (is (eql c (add-parents (list a b) c)))
+    (is (equal (list a b) (sheep-parents c)))))
 
 ;; (def-suite cloning :in sheeple)
 ;; (in-suite cloning)

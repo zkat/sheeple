@@ -129,8 +129,8 @@
     (is (equal '(bar foo) (push 'bar (%sheep-children sheep))))
     (is (equal '(bar foo) (%sheep-children sheep)))))
 
-(def-suite hierarchy-list :in sheeple)
-(in-suite hierarchy-list)
+(def-suite inheritance :in sheeple)
+(in-suite inheritance)
 
 (test collect-ancestors
   (let ((sheep1 (allocate-std-sheep))
@@ -213,14 +213,46 @@
 (test std-finalize-sheep-inheritance
   (let ((sheep1 (allocate-std-sheep))
         (sheep2 (allocate-std-sheep)))
-    (setf (sheep-parents sheep1) (list sheep2))
-    (std-finalize-sheep-inheritance sheep1)
+    (is (equal (list sheep2) (setf (sheep-parents sheep1) (list sheep2))))
+    (is (eql sheep1 (std-finalize-sheep-inheritance sheep1)))
     (is (hash-table-p (%sheep-children sheep2)))
     (is (gethash sheep1 (%sheep-children sheep2)))
     (is (find sheep2 (sheep-parents sheep1)))
     (is (find sheep2 (%sheep-hierarchy-cache sheep1)))))
 
-(test finalize-sheep-inheritance)
+(test finalize-sheep-inheritance
+  ;; todo - write tests for this once bootstrapping is set...
+  )
+(test remove-parent
+  ;; todo - write after bootstrapping works
+  )
+(test std-remove-parent
+  (let ((sheep1 (allocate-std-sheep))
+        (sheep2 (allocate-std-sheep)))
+    (std-add-parent sheep2 sheep1)
+    (is (eql sheep2 (car (sheep-parents sheep1))))
+    (signals error (std-remove-parent sheep1 sheep1))
+    (is (eql sheep1 (std-remove-parent sheep2 sheep1)))
+    (is (null (sheep-parents sheep1)))
+    (signals error (std-remove-parent sheep2 sheep1))
+    (signals error (std-remove-parent sheep1 sheep1))))
+
+(test std-add-parent
+  (let ((sheep1 (allocate-std-sheep))
+        (sheep2 (allocate-std-sheep)))
+    (is (eql sheep1 (std-add-parent sheep2 sheep1)))
+    (is (eql sheep2 (car (sheep-parents sheep1))))
+    (signals error (std-add-parent sheep1 sheep1))
+    (signals error (std-add-parent sheep2 sheep1))
+    (signals sheeple-hierarchy-error (std-add-parent sheep1 sheep2))))
+
+(test add-parent
+  ;; todo - write after bootstrapping works
+  )
+(test add-parents
+  ;; todo - write after bootstrapping works  
+  )
+
 
 ;; (def-suite cloning :in sheeple)
 ;; (in-suite cloning)

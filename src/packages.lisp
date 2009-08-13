@@ -2,7 +2,7 @@
 
 (defpackage #:sheeple
   (:use :cl :trivial-garbage)
-  (:export
+#+nil(:export
 
    ;; Cloning and management
    :clone

@@ -13,9 +13,9 @@
 ;; We declare these base vars here so that bootstrapping won't complain.
 ;; They're also initialized to (gensym) so that pre-bootstrap tests have
 ;; something to check against that isn't all NIL.
-(defvar =standard-sheep= (gensym))
-(defvar =t= (gensym))
-(defvar =dolly= (gensym))
+(defvar =standard-sheep= (gensym "=STANDARD-SHEEP="))
+(defvar =t= (gensym "=T="))
+(defvar =dolly= (gensym "=DOLLY="))
 
 ;;;
 ;;; Sheeple object

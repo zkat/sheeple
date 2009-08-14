@@ -13,9 +13,9 @@
 ;; We declare these base vars here so that bootstrapping won't complain.
 ;; They're also initialized to (gensym) so that pre-bootstrap tests have
 ;; something to check against that isn't all NIL.
-(defvar =standard-sheep= (gensym "=STANDARD-SHEEP="))
+(defvar =standard-metasheep= (gensym "=STANDARD-METASHEEP="))
 (defvar =t= (gensym "=T="))
-(defvar =dolly= (gensym "=DOLLY="))
+(defvar =standard-sheep= (gensym "=STANDARD-SHEEP="))
 
 ;;;
 ;;; Sheeple object
@@ -28,7 +28,7 @@
 ;; By default, everything in the cdr of the sheep is initialized to nil.
 (defun allocate-std-sheep ()
   "Creates a standard sheep object."
-  (cons =standard-sheep=
+  (cons =standard-metasheep=
         (make-array 6 :initial-element nil)))
 
 (defun std-sheep-p (obj)
@@ -36,7 +36,7 @@
 'metaproperties' live. For a standard sheep object, this vector is 6 elements long, and
 everything is initialized to nil."
   (when (and (consp obj)
-             (eql =standard-sheep=
+             (eql =standard-metasheep=
                   (car obj))
              (vectorp (cdr obj))
              (= 6 (length (cdr obj))))
@@ -44,7 +44,7 @@ everything is initialized to nil."
 
 (defun allocate-sheep (metasheep)
   "Allocates the basic skeleton for a sheep object in memory and returns it."
-  (if (eql =standard-sheep= metasheep)
+  (if (eql =standard-metasheep= metasheep)
       (allocate-std-sheep)
       (allocate-sheep-using-metasheep metasheep)))
 
@@ -361,7 +361,7 @@ to the front of the list)"
 ;;                          sheep-or-sheeple
 ;;                          (list sheep-or-sheeple))
 ;;                      sheep)
-;;         (add-parent =dolly= sheep))
+;;         (add-parent =standard-sheep= sheep))
 ;;     (apply #'init-sheep sheep all-keys)))
 
 ;; (defun clone (&rest sheeple)

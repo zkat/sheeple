@@ -279,6 +279,18 @@
     (is (simple-vector-p (%sheep-children sheep1)))
     (is (find sheep2 (%sheep-children sheep1) :key #'maybe-weak-pointer-value))))
 
+(test (overwriting-garbage-children :depends-on %add-child)
+  (loop :repeat 5 :for sheep := (allocate-std-sheep)
+     :do (loop :repeat 5 :do (%add-child (allocate-std-sheep) sheep)
+            (loop :repeat 9999 :collect (list))
+            :finally (gc :full t))
+     (unless (every #'maybe-weak-pointer-value (%sheep-children sheep))
+       (return
+         (if (= 5 (length (%sheep-children (%add-child (allocate-std-sheep) sheep))))
+             (5am:pass "#'%ADD-CHILD overrode a garbage-collected child")
+             (5am:fail "#'%ADD-CHILD didn't override garbage-collected children"))))
+     :finally (5am:skip "Unable to perform test -- not enough garbage collected")))
+
 (test %remove-child
   (let ((sheep1 (allocate-std-sheep))
         (sheep2 (allocate-std-sheep)))

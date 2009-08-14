@@ -280,12 +280,20 @@
     (is (find sheep2 (%sheep-children sheep1) :key #'maybe-weak-pointer-value))))
 
 ;;;; God does not play dice with the universe... just with the GC.
-#+ (or)
+;#+ (or)
 (test (finalized-children :fixture allocate-std-sheep
                           :depends-on %add-child)
-  (loop :repeat 5 :do (%add-child (allocate-std-sheep) sheep))
+  (dotimes (i 5) (%add-child (allocate-std-sheep) sheep
+                             (format nil "gced sheep ~D" i)))
   (loop :repeat 9999 :sum (expt 1234 234))
+  (pprint (%sheep-children sheep))
+  (loop :for ptr :across (%sheep-children sheep)
+     :do (print (maybe-weak-pointer-value ptr)))
   (gc :full t)
+  (pprint (%sheep-children sheep))
+  (loop :for ptr :across (%sheep-children sheep)
+     :do (print (maybe-weak-pointer-value ptr)))
+  (terpri)
   (loop :for potential-child :across (%sheep-children sheep)
      :do (cond
            ;; Is there a weak pointer?

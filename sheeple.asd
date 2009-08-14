@@ -39,6 +39,7 @@
             :serial t
             :components
             ((:file "setup-tests")
+             (:file "utils")
              (:file "sheeple")
              ;; (:file "properties")
              ;; (:file "compatibility")

@@ -149,6 +149,9 @@ It sets the vector as SHEEP's child cache."
     (%adjust-child-cache sheep))
   (unless (find child (%sheep-children sheep) :key #'weak-pointer-value)
     (let ((entry (make-weak-pointer child)))
+      ;; we need to add a finalizer here. Otherwise, we'll get flooded with dead pointers.
+      (finalize child (lambda () (setf (%sheep-children sheep)
+                                       (delete entry (%sheep-children sheep)))))
       (loop for i below (length (%sheep-children sheep))
          when (null (aref (%sheep-children sheep) i))
          do (setf (aref (%sheep-children sheep) i) entry)

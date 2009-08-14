@@ -223,6 +223,12 @@ return when any list is NIL to avoid traversing the entire parent list."
         (return-from std-tie-breaker-rule (car common))))))
 
 (defun compute-sheep-hierarchy-list (sheep)
+  (if (std-sheep-p sheep)
+      (std-compute-sheep-hierarchy-list sheep)
+      (compute-sheep-hierarchy-list-using-metasheep (sheep-metasheep sheep)
+                                                    sheep)))
+
+(defun std-compute-sheep-hierarchy-list (sheep)
   "Because #'local-precedence-ordering returns a fresh list each time, we can
 afford to use the destructive #'mapcan and cons less."
   (handler-case
@@ -235,7 +241,6 @@ afford to use the destructive #'mapcan and cons less."
                           #'std-tie-breaker-rule))
     (simple-error ()
       (error 'sheeple-hierarchy-error :sheep sheep))))
-
 
 (defun memoize-sheep-hierarchy-list (sheep)
   (let ((list (compute-sheep-hierarchy-list sheep)))

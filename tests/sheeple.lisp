@@ -291,13 +291,13 @@
            ;; Is there a weak pointer?
            ((null potential-child)
             ;; Nope. This child was garbage-collected and finalized.
-            (5am:pass "A garbage-collected sheep was finalized correctly."))
+            (5am:pass "A garbage-collected sheep was finalized correctly"))
            ;; Was the sheep garbage-collected?
            ((null (weak-pointer-value potential-child))
             ;; Err, what is this pointer doing here?
-            (5am:fail "A garbage-collected sheep was not finalized correctly."))
+            (5am:fail "A garbage-collected sheep was not finalized correctly"))
            ;; SYS::GC, get your act together!
-           (t (5am:skip "A sheep was not garbage-collected. This is not a bug.")))))
+           (t (5am:skip "A sheep was not garbage-collected. This is not a bug")))))
 
 (test %remove-child
   (let ((sheep1 (allocate-std-sheep))

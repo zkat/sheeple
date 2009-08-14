@@ -103,12 +103,20 @@ everything is initialized to nil."
 
 ;;; children cache
 (defun %child-cache-full-p (sheep)
+  "A child cache is full if all items in it are weak pointers to other sheep.
+In reality, we can sort of get away with just checking if it's a pointer, since
+it's astronomically unlikely anything else will make it in..."
   (when (and (%sheep-children sheep)
-             (every (lambda (x) x)
+             (every (lambda (x) (weak-pointer-p x))
                     (%sheep-children sheep)))
     t))
 
 (defun %adjust-child-cache (sheep)
+  "When the child cache gets full, we have to make it bigger. In general, we assume
+a 5-slot array will be enough for sheeple that only have a couple of children. Once that
+threshold is crossed, though, we assume the worst and replace that relatively small vector
+with a massive 100-slot adjustable array. When -that- is full, we'll resize the vector
+by 100 each time."
   (cond ((and (= 5 (length (%sheep-children sheep)))
               (not (adjustable-array-p (%sheep-children sheep))))
          (let ((old-vector (%sheep-children sheep)))
@@ -123,14 +131,18 @@ everything is initialized to nil."
          (adjust-array (%sheep-children sheep)
                        (+ 100 (length (%sheep-children sheep)))
                        :initial-element nil))
+        ;; may as well.
         (t (error "Something went wrong with adjusting the array. Weird.")))
   sheep)
 
 (defun %create-child-cache (sheep)
+  "This creates only the basic child cache: A simple 5-item vector of NILs.
+It sets the vector as SHEEP's child cache."
   (setf (%sheep-children sheep)
         (make-array 5 :initial-element nil)))
 
 (defun %add-child (child sheep)
+  "Registers CHILD as a weak pointer in SHEEP's child cache."
   (unless (%sheep-children sheep)
     (%create-child-cache sheep))
   (when (%child-cache-full-p sheep)
@@ -144,12 +156,15 @@ everything is initialized to nil."
   sheep)
 
 (defun %remove-child (child sheep)
+  "Takes CHILD out of SHEEP's child cache."
   (when (find child (%sheep-children sheep) :key #'weak-pointer-value)
     (setf (%sheep-children sheep)
           (delete child (%sheep-children sheep) :key #'weak-pointer-value)))
   sheep)
 
 (defun %map-children (function sheep)
+  "Iteratively applies FUNCTION to SHEEP's children (it takes care of taking each child out
+of the weak pointer)."
   (when (%sheep-children sheep)
     (map 'vector (lambda (pointer)
                    (when (weak-pointer-p pointer)

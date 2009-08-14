@@ -279,6 +279,8 @@
     (is (simple-vector-p (%sheep-children sheep1)))
     (is (find sheep2 (%sheep-children sheep1) :key #'maybe-weak-pointer-value))))
 
+;;;; God does not play dice with the universe... just with the GC.
+#+ (or)
 (test (finalized-children :fixture allocate-std-sheep
                           :depends-on %add-child)
   (loop :repeat 5 :do (%add-child (allocate-std-sheep) sheep))

@@ -149,7 +149,7 @@ It sets the vector as SHEEP's child cache."
   (setf (%sheep-children sheep)
         (make-array 5 :initial-element nil)))
 
-(defun %add-child (child sheep)
+(defun %add-child (child sheep &optional (message "finalizing a sheep"))
   "Registers CHILD as a weak pointer in SHEEP's child cache."
   (unless (%sheep-children sheep)
     (%create-child-cache sheep))
@@ -159,10 +159,11 @@ It sets the vector as SHEEP's child cache."
     (let ((entry (make-weak-pointer child)))
       ;; we need to add a finalizer here. Otherwise, we'll get flooded with dead pointers.
       (finalize child #'(lambda ()
-                          (setf (%sheep-children sheep)
-                                (map 'vector #'(lambda (child)
-                                                 (unless (eq child entry) child))
-                                     (%sheep-children sheep)))))
+                          (print message)
+                          (awhen cell (position entry (%sheep-children sheep))
+                            (print "found link in a parent, clearing it.")
+                            (setf (elt (%sheep-children sheep) cell) nil)
+                            (print (%sheep-children sheep)))))
       (loop for i below (length (%sheep-children sheep))
          when (null (aref (%sheep-children sheep) i))
          do (setf (aref (%sheep-children sheep) i) entry)

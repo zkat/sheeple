@@ -45,6 +45,7 @@ everything is initialized to nil."
 (defun early-print-sheep (sheep stream)
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Early Sheep")))
+
 (defmethod print-object ((obj cons) stream)
   (if (std-sheep-p obj)
       (early-print-sheep obj stream)
@@ -115,7 +116,7 @@ everything is initialized to nil."
 In reality, we can sort of get away with just checking if it's a pointer, since
 it's astronomically unlikely anything else will make it in..."
   (when (and (%sheep-children sheep)
-             (every (lambda (x) (weak-pointer-p x))
+             (every #'maybe-weak-pointer-value
                     (%sheep-children sheep)))
     t))
 
@@ -149,25 +150,17 @@ It sets the vector as SHEEP's child cache."
   (setf (%sheep-children sheep)
         (make-array 5 :initial-element nil)))
 
-(defun %add-child (child sheep &optional (message "finalizing a sheep"))
+(defun %add-child (child sheep)
   "Registers CHILD as a weak pointer in SHEEP's child cache."
   (unless (%sheep-children sheep)
     (%create-child-cache sheep))
   (when (%child-cache-full-p sheep)
     (%adjust-child-cache sheep))
   (unless (find child (%sheep-children sheep) :key #'maybe-weak-pointer-value)
-    (let ((entry (make-weak-pointer child)))
-      ;; we need to add a finalizer here. Otherwise, we'll get flooded with dead pointers.
-      (finalize child #'(lambda ()
-                          (print message)
-                          (awhen cell (position entry (%sheep-children sheep))
-                            (print "found link in a parent, clearing it.")
-                            (setf (elt (%sheep-children sheep) cell) nil)
-                            (print (%sheep-children sheep)))))
-      (loop for i below (length (%sheep-children sheep))
-         when (null (aref (%sheep-children sheep) i))
-         do (setf (aref (%sheep-children sheep) i) entry)
-         (return))))
+    (let ((children (%sheep-children sheep)))
+      (dotimes (i (length children))
+        (unless (maybe-weak-pointer-value (aref children i))
+          (return (setf (aref children i) (make-weak-pointer child)))))))
   sheep)
 
 (defun %remove-child (child sheep)

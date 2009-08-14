@@ -17,52 +17,57 @@
 (defvar =t= (gensym "=T="))
 (defvar =standard-sheep= (gensym "=STANDARD-SHEEP="))
 (defvar *bootstrappedp* nil)
+
 ;;;
 ;;; Sheeple object
 ;;;
 
-;; Sketch of a freshly-consed sheep:
-;; (cons =standard-metasheep=)
-;;       (vector parents properties property-metaobjects roles hierarchy-list children))
-;;
-;; By default, everything in the cdr of the sheep is initialized to nil.
+(defun standard-metasheep-p (obj)
+  "Tests whether OBJ is EQ to =STANDARD-METASHEEP= at run-time."
+  (eq obj =standard-metasheep=))
+
+(deftype std-sheep ()
+  "A standard sheep is a cons, the CAR of which points to =standard-metasheep=,
+and the CDR of which points to a simple-vector with 6 elements, containing the
+metaproperties for the sheep.
+
+Put another way, this is the structure of a standard-sheep:
+
+  (=standard-metasheep=
+    . #(parents properties property-metaobjects roles hierarchy-list children))"
+  '(cons (satisfies standard-metasheep-p) (simple-vector 6)))
+
+(deftype sheep ()
+  "A sheep is a cons, the CAR of which points to a metasheep. The contents of the
+CDR are dependant upon the metasheep."
+  '(or std-sheep (cons std-sheep)))
+
+(defun std-sheep-p (sheep)
+  "Internal predicate for sheepdom."
+  (typep sheep 'std-sheep))
+
+(defun sheepp (sheep)
+  "Predicate for sheepdom."
+  (typep sheep 'sheep))
+
 (defun allocate-std-sheep ()
-  "Creates a standard sheep object."
-  (cons =standard-metasheep=
-        (make-array 6 :initial-element nil)))
+  "Creates a standard sheep object. By default, all the metaproperties are NIL."
+  (cons =standard-metasheep= (make-array 6 :initial-element nil)))
 
-(defun std-sheep-p (obj)
-  "A standard sheep object is a simple cons that points to the vector where the actual
-'metaproperties' live. For a standard sheep object, this vector is 6 elements long, and
-everything is initialized to nil."
-  (when (and (consp obj)
-             (eql =standard-metasheep=
-                  (car obj))
-             (vectorp (cdr obj))
-             (= 6 (length (cdr obj))))
-    t))
-
-(defun early-print-sheep (sheep stream)
+(defun print-young-sheep (sheep stream)
   (print-unreadable-object (sheep stream :identity t)
-    (format stream "Early Sheep")))
+    (format stream "Young Sheep")))
 
 (defmethod print-object ((obj cons) stream)
-  (if (std-sheep-p obj)
-      (early-print-sheep obj stream)
-      (call-next-method)))
+  (typecase obj
+    (std-sheep (print-young-sheep obj stream))
+    (otherwise (call-next-method))))
 
 (defun allocate-sheep (metasheep)
   "Allocates the basic skeleton for a sheep object in memory and returns it."
   (if (eql =standard-metasheep= metasheep)
       (allocate-std-sheep)
       (allocate-sheep-using-metasheep metasheep)))
-
-(defun sheepp (sheep)
-  "Predicate for sheepdom."
-  (if (std-sheep-p sheep)
-      t
-      (and (consp sheep)
-           (std-sheep-p (car sheep)))))
 
 ;;; Some useful accessors...
 (defun sheep-metasheep (sheep)
@@ -231,10 +236,10 @@ return when any list is NIL to avoid traversing the entire parent list."
         (return-from std-tie-breaker-rule (car common))))))
 
 (defun compute-sheep-hierarchy-list (sheep)
-  (if (std-sheep-p sheep)
-      (std-compute-sheep-hierarchy-list sheep)
-      (compute-sheep-hierarchy-list-using-metasheep (sheep-metasheep sheep)
-                                                    sheep)))
+  (typecase sheep
+    (std-sheep (std-compute-sheep-hierarchy-list sheep))
+    (otherwise (compute-sheep-hierarchy-list-using-metasheep
+                (sheep-metasheep sheep) sheep))))
 
 (defun std-compute-sheep-hierarchy-list (sheep)
   "Because #'local-precedence-ordering returns a fresh list each time, we can
@@ -259,10 +264,10 @@ afford to use the destructive #'mapcan and cons less."
                    sheep)))
 
 (defun finalize-sheep-inheritance (sheep)
-  (if (std-sheep-p sheep)
-      (std-finalize-sheep-inheritance sheep)
-      (finalize-sheep-inheritance-using-metasheep
-       (sheep-metasheep sheep) sheep)))
+  (typecase sheep
+    (std-sheep (std-finalize-sheep-inheritance sheep))
+    (otherwise (finalize-sheep-inheritance-using-metasheep
+                (sheep-metasheep sheep) sheep))))
 
 (defun std-finalize-sheep-inheritance (sheep)
   "we memoize the hierarchy list here."

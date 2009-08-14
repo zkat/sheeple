@@ -450,22 +450,19 @@
     (is (not (descendantp a b)))
     (is (not (descendantp b c)))))
 
-;; ;;;
-;; ;;; Cloning
-;; ;;;
-;; (def-suite cloning :in sheeple)
+;;;
+;;; Cloning
+;;;
+(def-suite cloning :in sheeple)
 
-;; (def-suite clone-general :in cloning)
-;; (in-suite clone-general)
+(def-suite clone-general :in cloning)
+(in-suite clone-general)
 
-
-;; (defclass test-sheep-class (standard-sheep) ())
-;; (test spawn-sheep
-;;   (let ((standard-sheep (clone))
-;;         (test-metaclass-sheep (spawn-sheep nil :metaclass 'test-sheep-class)))
-;;     (is (eql =standard-sheep= (car (sheep-parents (spawn-sheep nil)))))
-;;     (is (eql standard-sheep (car (sheep-parents (spawn-sheep (list standard-sheep))))))
-;;     (is (eql (find-class 'test-sheep-class) (class-of test-metaclass-sheep)))))
+(test ensure-sheep
+  (let ((sheep (ensure-sheep nil)))
+    (is (eql =standard-sheep= (car (sheep-parents (ensure-sheep nil)))))
+    (is (eql sheep (car (sheep-parents (spawn-sheep (list sheep))))))
+    (is (eql =standard-metasheep= (sheep-metasheep sheep)))))
 
 ;;; The following two should be moved to a different file. These are not defined in sheeple.lisp
 ;; (test init-sheep

@@ -280,7 +280,9 @@
     (is (eql sheep1 (%add-child sheep2 sheep1)))
     (is (null (%sheep-children sheep2)))
     (is (simple-vector-p (%sheep-children sheep1)))
-    (is (find sheep2 (%sheep-children sheep1) :key #'weak-pointer-value))))
+    (is (find sheep2 (%sheep-children sheep1) :key (lambda (x)
+                                                     (when (weak-pointer-p x)
+                                                       (weak-pointer-value x)))))))
 
 (test %remove-child
   (let ((sheep1 (allocate-std-sheep))
@@ -290,7 +292,9 @@
     (%add-child sheep2 sheep1)
     (is (eql sheep1 (%remove-child sheep2 sheep1) ))
     (is (simple-vector-p (%sheep-children sheep1)))
-    (is (not (find sheep2 (%sheep-children sheep1) :key #'weak-pointer-value)))))
+    (is (not (find sheep2 (%sheep-children sheep1) :key (lambda (x)
+                                                          (when (weak-pointer-p x)
+                                                            (weak-pointer-value x))))))))
 
 (test %map-children
   (let ((parent (allocate-std-sheep))

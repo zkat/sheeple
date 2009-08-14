@@ -155,7 +155,9 @@ It sets the vector as SHEEP's child cache."
     (%create-child-cache sheep))
   (when (%child-cache-full-p sheep)
     (%adjust-child-cache sheep))
-  (unless (find child (%sheep-children sheep) :key #'weak-pointer-value)
+  (unless (find child (%sheep-children sheep) :key (lambda (x)
+                                                     (when (weak-pointer-p x)
+                                                       (weak-pointer-value x))))
     (let ((entry (make-weak-pointer child)))
       ;; we need to add a finalizer here. Otherwise, we'll get flooded with dead pointers.
       (finalize child (lambda () (setf (%sheep-children sheep)
@@ -168,9 +170,13 @@ It sets the vector as SHEEP's child cache."
 
 (defun %remove-child (child sheep)
   "Takes CHILD out of SHEEP's child cache."
-  (when (find child (%sheep-children sheep) :key #'weak-pointer-value)
+  (when (find child (%sheep-children sheep) :key (lambda (x)
+                                                     (when (weak-pointer-p x)
+                                                       (weak-pointer-value x))))
     (setf (%sheep-children sheep)
-          (delete child (%sheep-children sheep) :key #'weak-pointer-value)))
+          (delete child (%sheep-children sheep) :key (lambda (x)
+                                                       (when (weak-pointer-p x)
+                                                         (weak-pointer-value x))))))
   sheep)
 
 (defun %map-children (function sheep)

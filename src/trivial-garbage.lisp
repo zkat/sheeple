@@ -84,7 +84,11 @@
   #+clisp (values (ext:weak-pointer-value weak-pointer))
   #+ecl (error "not implemented")
   #+allegro (svref (weak-pointer-pointer weak-pointer) 0)
-  #+openmcl (values (gethash weak-pointer *weak-pointers*))
+  #+openmcl (if (typep weak-pointer 'weak-pointer)
+                (gethash weak-pointer *weak-pointers*)
+                (error 'type-error
+                       :datum weak-pointer
+                       :expected-type 'weak-pointer))
   #+corman (ccl:weak-pointer-obj weak-pointer)
   #+lispworks (svref (weak-pointer-pointer weak-pointer) 0))
 

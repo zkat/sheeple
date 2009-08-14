@@ -126,3 +126,7 @@ regards to the CONSTRAINTS. A future version will undo this change."
                                (setq ,n-tail ,n-res  ,n-value ,n-res)))))
                    forms)
          ,n-value)))
+
+(defun maybe-weak-pointer-value (x)
+  (when (weak-pointer-p x)
+    (weak-pointer-value x)))

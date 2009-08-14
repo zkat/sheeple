@@ -46,10 +46,9 @@ of setf methods, whose names are lists.")
   "Finds a message object in `*message-table*', given its `name'.
 Raises an error if no message is found, unless `errorp' is set to NIL."
   (multiple-value-bind (message foundp) (gethash name *message-table*)
-    (cond (foundp message)
-          (errorp (error 'no-such-message
-                         :format-control "There is no message named ~A"
-                         :format-args (list name))))))
+    (if foundp message
+        (when errorp
+          (error 'no-such-message :message-name name)))))
 
 (defun (setf find-message) (new-value name)
   (setf (gethash name *message-table*) new-value))
@@ -72,10 +71,8 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 (defun finalize-message (message)
   (let ((name (message-name message)))
     (when (and (fboundp name)
-               (not (find-message name nil)))
-      (warn 'clobbering-function-definition
-            :format-control "Clobbering regular function or generic function definition for ~A"
-            :format-args (list name)))
+	       (not (find-message name nil)))
+      (warn 'clobbering-function-definition :format-args (list name)))
     (setf (fdefinition name) (lambda (&rest args) (apply-message message args)))))
 
 ;; This handles actual setup of the message object (and finalization)
@@ -129,10 +126,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 (defun check-msg-lambda-list (lambda-list)
   (flet ((ensure (arg ok)
            (unless ok
-             (error 'message-lambda-list-error
-                    :format-control
-                    "~@<invalid ~S ~_in the message lambda list ~S~:>"
-                    :format-args (list arg lambda-list)))))
+             (error 'message-lambda-list-error :arg arg :lambda-list lambda-list))))
     (multiple-value-bind (required optional restp rest keyp keys allowp
                                    auxp aux morep more-context more-count)
         (parse-lambda-list lambda-list)
@@ -158,8 +152,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
                              (null (cdr i)))))))
       ;; no &AUX allowed
       (when auxp
-        (error "&AUX is not allowed in a message lambda list: ~S"
-               lambda-list))
+        (error "&AUX is not allowed in a message lambda list: ~S" lambda-list))
       ;; Oh, *puhlease*... not specifically as per section 3.4.2 of
       ;; the ANSI spec, but the CMU CL &MORE extension does not
       ;; belong here!
@@ -222,9 +215,8 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
             (unless (and (= (the fixnum nreq) msg-nreq)
                          (= (the fixnum nopt) (the fixnum msg-nopt))
                          (eq (or keysp restp) msg-key/rest-p))
-              (error "The lambda-list ~S is incompatible with ~
-                     existing replies of ~S."
-                     lambda-list msg))))
+              (error 'reply-lambda-list-conflict
+                     :lambda-list lambda-list :message msg))))
         (setf (arg-info-lambda-list arg-info)
               (if lambda-list-p
                   lambda-list

@@ -61,10 +61,10 @@ NIL otherwise."))
 would yield a value (i.e. not signal an unbound-property condition)."))
 
 ;;; Value
-(defgeneric direct-property-value (sheep property)
-  (:documentation "Returns the property-value set locally in SHEEP for PROPERTY.
-If the value is non-local (is delegated or does not exist in the hierarchy list), an
-UNBOUND-PROPERTY condition is signaled."))
+(defgeneric direct-property-value (sheep property-name)
+  (:documentation "Returns the property-value set locally in SHEEP for PROPERTY-NAME.
+If the value is non-local (is delegated or does not exist in the hierarchy list),
+a condition of type UNBOUND-DIRECT-PROPERTY condition is signalled."))
 
 (defgeneric property-value (sheep property-name)
   (:documentation "Returns a property-value that is not necessarily local to SHEEP."))
@@ -166,17 +166,14 @@ SHEEP, including inherited ones."))
   (let ((property (gethash property-name (sheep-property-metaobject-table sheep))))
     (if property
         (direct-property-value sheep property)
-        (error 'unbound-property
-               :format-control "~A has no direct property with name ~A"
-               :format-args (list sheep property-name)))))
+        (error 'unbound-property :sheep sheep :property-name property-name))))
 (defmethod direct-property-value ((sheep standard-sheep) (property standard-property))
   (multiple-value-bind (value hasp)
       (gethash (property-name property) (sheep-property-value-table sheep))
     (if hasp
         value
-        (error 'unbound-property
-               :format-control "~A has no direct property with name ~A"
-               :format-args (list sheep (property-name property))))))
+        (error 'unbound-direct-property :sheep sheep
+               :property-name (property-name property)))))
 
 (defmethod property-value ((sheep standard-sheep) property-name)
   (property-value-with-hierarchy-list sheep property-name))
@@ -187,9 +184,7 @@ SHEEP, including inherited ones."))
                 (when hasp
                   (return-from property-value-with-hierarchy-list
                     (direct-property-value sheep property-name)))))
-        (error 'unbound-property
-               :format-control "Property ~A is unbound for sheep ~S"
-               :format-args (list property-name sheep)))))
+        (error 'unbound-property :sheep sheep :property-name property-name))))
 
 ;; What the following code SHOULD do:
 ;; 1. If there is no ancestor with a property added with that name, error.
@@ -230,7 +225,7 @@ SHEEP, including inherited ones."))
 
 (defmethod direct-property-metaobject ((sheep standard-sheep) property-name)
   (unless (has-direct-property-p sheep property-name)
-    (signal 'unbound-property))
+    (error 'unbound-direct-property :sheep sheep :property-name property-name))
   (nth-value 0 (gethash property-name (sheep-property-metaobject-table sheep))))
 
 (defmethod property-owner ((sheep standard-sheep) property-name &optional (errorp t))
@@ -240,9 +235,7 @@ SHEEP, including inherited ones."))
             return obj)))
     (or owner
         (if errorp
-            (error 'unbound-property
-                   :format-control "Property ~A is unbound for sheep ~S"
-                   :format-args (list property-name sheep))
+            (error 'unbound-property :sheep sheep :property-name property-name)
             nil))))
 
 (defmethod available-properties ((sheep standard-sheep))

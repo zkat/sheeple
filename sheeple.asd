@@ -16,15 +16,16 @@
              (:file "conditions")
              (:file "utils")
              (:file "sheeple")
-             (:file "properties")
-             (:file "builtins")
-             (:file "parse-lambda-list")
-             (:file "messages")
-             (:file "reply-definition")
-             (:file "reply-dispatch")
-             (:file "bootstrap")
-             (:file "post-boot")
-             (:file "glue")))))
+             ;; (:file "properties")
+             ;; (:file "builtins")
+             ;; (:file "parse-lambda-list")
+             ;; (:file "messages")
+             ;; (:file "reply-definition")
+             ;; (:file "reply-dispatch")
+             ;; (:file "bootstrap")
+             ;; (:file "post-boot")
+             ;; (:file "glue")
+             ))))
 
 (asdf:defsystem sheeple-tests
   :version "Baahh"
@@ -37,10 +38,12 @@
   ((:module tests
             :serial t
             :components
-            ((:file "sheeple")
-             (:file "properties")
-             (:file "compatibility")
-             (:file "messages")))))
+            ((:file "setup-tests")
+             (:file "sheeple")
+             ;; (:file "properties")
+             ;; (:file "compatibility")
+             ;; (:file "messages")
+             ))))
 
 (defmethod asdf:perform ((o asdf:test-op) (c (eql (asdf:find-system :sheeple))))
   (format t "~&~%*******************~%~

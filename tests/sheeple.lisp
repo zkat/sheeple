@@ -461,10 +461,96 @@
 (test ensure-sheep
   (let ((sheep (ensure-sheep nil)))
     (is (eql =standard-sheep= (car (sheep-parents (ensure-sheep nil)))))
-    (is (eql sheep (car (sheep-parents (spawn-sheep (list sheep))))))
+    (is (eql sheep (car (sheep-parents (ensure-sheep (list sheep))))))
     (is (eql =standard-metasheep= (sheep-metasheep sheep)))))
 
-;;; The following two should be moved to a different file. These are not defined in sheeple.lisp
+(test clone
+  (is (eql =standard-metasheep= (sheep-metasheep (clone))))
+  (is (sheepp (clone)))
+  (is (std-sheep-p (clone)))
+  (is (eql =standard-sheep= (car (sheep-parents (clone)))))
+  (let ((obj1 (clone)))
+    (is (eql obj1
+             (car (sheep-parents (clone obj1))))))
+  (let* ((obj1 (clone))
+         (obj2 (clone obj1)))
+    (is (eql obj1
+             (car (sheep-parents obj2))))))
+
+;; (test sheep-nickname
+;;   (let ((sheep (clone)))
+;;     (setf (sheep-nickname sheep) 'test)
+;;     (is (eq 'test (sheep-nickname sheep)))))
+
+;; (test sheep-documentation
+;;   (let ((sheep (clone)))
+;;     (setf (sheep-documentation sheep) 'test)
+;;     (is (eq 'test (sheep-documentation sheep)))))
+
+;; (test copy-sheep ;; TODO - this isn't even written properly yet
+;;   )
+
+;;;
+;;; DEFCLONE
+;;;
+(def-suite defclone :in cloning)
+(in-suite defclone)
+
+;;; macro processing
+(test canonize-sheeple
+  (is (equal '(list foo bar baz) (canonize-sheeple '(foo bar baz)))))
+
+(test canonize-property
+  (is (equal '(list 'VAR "value") (canonize-property '(var "value"))))
+  (is (equal '(list 'VAR "value" :readers '(var) :writers '((setf var)))
+             (canonize-property '(var "value") t)))
+  (is (equal '(list 'VAR "value" :writers '((setf var)))
+             (canonize-property '(var "value" :reader nil) t)))
+  (is (equal '(list 'VAR "value" :readers '(var))
+             (canonize-property '(var "value" :writer nil) t)))
+  (is (equal '(list 'VAR "value")
+             (canonize-property '(var "value" :accessor nil) t))))
+
+(test canonize-properties
+  (is (equal '(list (list 'VAR "value")) (canonize-properties '((var "value"))))))
+
+(test canonize-clone-options
+  (is (equal '(:metasheep foo :other-option 'bar)
+             (canonize-clone-options '((:metasheep foo) (:other-option 'bar))))))
+
+(test defclone
+  (let* ((parent (clone))
+         (test-sheep (defclone (parent) ((var "value")))))
+    (is (sheepp test-sheep))
+    (is (parentp parent test-sheep))
+    (is (has-direct-property-p test-sheep 'var))
+    ;; TODO - this should also check that reader/writer/accessor combinations are properly added
+    ))
+
+;;;
+;;; Protos
+;;;
+(def-suite protos :in cloning)
+(in-suite protos)
+
+(test defproto
+  (let ((test-proto (defproto =test-proto= () ((var "value")))))
+    (is (sheepp test-proto))
+    (is (eql test-proto =test-proto=))
+    (is (eql =standard-sheep= (car (sheep-parents test-proto))))
+    (is (sheepp =test-proto=))
+    (is (equal "value" (var =test-proto=)))
+    (defproto =test-proto= () ((something-else "another-one")))
+    (is (eql test-proto =test-proto=))
+    (is (eql =standard-sheep= (car (sheep-parents test-proto))))
+    (signals unbound-property (direct-property-value test-proto 'var))
+    (is (equal "another-one" (something-else =test-proto=)))
+    (is (equal "another-one" (something-else test-proto))))
+  ;; TODO - check that options work properly (:metaclass, :documentation, :nickname, etc)
+  ;;        remember that :nickname should override defproto's own nickname-setting.
+  )
+
+;; The following two should be moved to a different file. These are not defined in sheeple.lisp
 ;; (test init-sheep
 ;;   (let ((parent (spawn-sheep () :properties '((prop1 NIL)))))
 ;;     (defreply init-sheep :before ((sheep parent) &key)
@@ -498,95 +584,3 @@
 ;;     (is (not (parent-p another test-sheep)))
 ;;     (is (eql test-sheep (reinit-sheep test-sheep :new-parents (list another))))
 ;;     (is (parent-p another test-sheep))))
-
-;; (test clone
-;;   (is (eql =standard-sheep= (car (sheep-parents (clone)))))
-;;   (let ((obj1 (clone)))
-;;     (is (eql obj1
-;;              (car (sheep-parents (clone obj1))))))
-;;   (let* ((obj1 (clone))
-;;          (obj2 (clone obj1)))
-;;     (is (eql obj1
-;;              (car (sheep-parents obj2))))))
-
-;; (test sheep-nickname
-;;   (let ((sheep (clone)))
-;;     (setf (sheep-nickname sheep) 'test)
-;;     (is (eq 'test (sheep-nickname sheep)))))
-
-;; (test sheep-documentation
-;;   (let ((sheep (clone)))
-;;     (setf (sheep-documentation sheep) 'test)
-;;     (is (eq 'test (sheep-documentation sheep)))))
-
-;; (test sheep-direct-roles)
-;; (test sheep-hierarchy-list
-;;   (let* ((parent (clone))
-;;          (child (clone parent)))
-;;     (is (member child (sheep-hierarchy-list child)))
-;;     (is (member parent (sheep-hierarchy-list child)))
-;;     (is (member =standard-sheep= (sheep-hierarchy-list child)))
-;;     (is (member =t= (sheep-hierarchy-list child)))))
-
-;; (test copy-sheep ;; TODO - this isn't even written properly yet
-;;   )
-
-;; ;;;
-;; ;;; DEFCLONE
-;; ;;;
-;; (def-suite defclone :in cloning)
-;; (in-suite defclone)
-
-;; ;;; macro processing
-;; (test canonize-sheeple
-;;   (is (equal '(list foo bar baz) (canonize-sheeple '(foo bar baz)))))
-
-;; (test canonize-property
-;;   (is (equal '(list 'VAR "value") (canonize-property '(var "value"))))
-;;   (is (equal '(list 'VAR "value" :readers '(var) :writers '((setf var)))
-;;              (canonize-property '(var "value") t)))
-;;   (is (equal '(list 'VAR "value" :writers '((setf var)))
-;;              (canonize-property '(var "value" :reader nil) t)))
-;;   (is (equal '(list 'VAR "value" :readers '(var))
-;;              (canonize-property '(var "value" :writer nil) t)))
-;;   (is (equal '(list 'VAR "value")
-;;              (canonize-property '(var "value" :accessor nil) t))))
-
-;; (test canonize-properties
-;;   (is (equal '(list (list 'VAR "value")) (canonize-properties '((var "value"))))))
-
-;; (test canonize-clone-options
-;;   (is (equal '(:metaclass 'foo :other-option 'bar)
-;;              (canonize-clone-options '((:metaclass 'foo) (:other-option 'bar))))))
-
-;; (test defclone
-;;   (let* ((parent (clone))
-;;          (test-sheep (defclone (parent) ((var "value")))))
-;;     (is (sheep-p test-sheep))
-;;     (is (parent-p parent test-sheep))
-;;     (is (has-direct-property-p test-sheep 'var))
-;;     ;; TODO - this should also check that reader/writer/accessor combinations are properly added
-;;     ))
-
-;; ;;;
-;; ;;; Protos
-;; ;;;
-;; (def-suite protos :in cloning)
-;; (in-suite protos)
-
-;; (test defproto
-;;   (let ((test-proto (defproto =test-proto= () ((var "value")))))
-;;     (is (sheep-p test-proto))
-;;     (is (eql test-proto =test-proto=))
-;;     (is (eql =standard-sheep= (car (sheep-parents test-proto))))
-;;     (is (sheep-p =test-proto=))
-;;     (is (equal "value" (var =test-proto=)))
-;;     (defproto =test-proto= () ((something-else "another-one")))
-;;     (is (eql test-proto =test-proto=))
-;;     (is (eql =standard-sheep= (car (sheep-parents test-proto))))
-;;     (signals unbound-property (direct-property-value test-proto 'var))
-;;     (is (equal "another-one" (something-else =test-proto=)))
-;;     (is (equal "another-one" (something-else test-proto))))
-;;   ;; TODO - check that options work properly (:metaclass, :documentation, :nickname, etc)
-;;   ;;        remember that :nickname should override defproto's own nickname-setting.
-;;   )

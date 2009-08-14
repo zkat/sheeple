@@ -379,98 +379,96 @@ allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
                          (list sheep-or-sheeple))
                      sheep)
         (add-parent =standard-sheep= sheep))
-    (unless *bootstrappedp*
-     (apply #'init-sheep sheep all-keys))))
+     (apply #'init-sheep sheep all-keys)))
 
-;; (defun clone (&rest sheeple)
-;;   "Creates a new standard-sheep object with SHEEPLE as its parents."
-;;   (spawn-sheep sheeple))
+(defun clone (&rest sheeple)
+  "Creates a new standard-sheep object with SHEEPLE as its parents."
+  (ensure-sheep sheeple))
 
+;;;
+;;; DEFCLONE macro
+;;;
+(defun canonize-sheeple (sheeple)
+  `(list ,@sheeple))
 
-;; ;;;
-;; ;;; DEFCLONE macro
-;; ;;;
-;; (defun canonize-sheeple (sheeple)
-;;   `(list ,@sheeple))
+(defun canonize-properties (properties &optional (accessors-by-default nil))
+  `(list ,@(mapcar (lambda (p)
+                     (canonize-property p accessors-by-default))
+                   properties)))
 
-;; (defun canonize-properties (properties &optional (accessors-by-default nil))
-;;   `(list ,@(mapcar (lambda (p)
-;;                      (canonize-property p accessors-by-default))
-;;                    properties)))
+(defun canonize-property (property &optional (accessors-by-default nil))
+  (let ((name (car property)) (value (cadr property)) (readers nil)
+        (writers nil) (other-options nil) (no-reader-p nil) (no-writer-p nil))
+    (do ((olist (cddr property) (cddr olist)))
+        ((null olist))
+      (case (car olist)
+        (:reader
+         (cond (no-reader-p
+                (error "You said you didn't want a reader, but now you want one? Make up your mind."))
+               ((null (cadr olist))
+                (if (null readers) (setf no-reader-p t)
+                    (error "You already defined a reader, but now you say you don't want one? Make up your mind.")))
+               (t (pushnew (cadr olist) readers))))
+        (:writer
+         (cond (no-writer-p
+                (error "You said you didn't want a writer, but now you want one? Make up your mind."))
+               ((null (cadr olist))
+                (if (null writers) (setf no-writer-p t)
+                    (error "You already defined a writer, but now you say you don't want one? Make up your mind.")))
+               (t (pushnew (cadr olist) writers))))
+        ((:manipulator :accessor)
+         (cond ((or no-reader-p no-writer-p)
+                (error "You said you didn't want a reader or a writer, but now you want one? Make up your mind."))
+               ((null (cadr olist))
+                (if (and (null writers) (null readers))
+                    (progn
+                      (setf no-reader-p t)
+                      (setf no-writer-p t))
+                    (error "You already defined a reader or writer, but now you say you don't want any of them? Make up your mind.")))
+               (t
+                (pushnew (cadr olist) readers)
+                (pushnew `(setf ,(cadr olist)) writers))))
+        (otherwise
+         (pushnew (cadr olist) other-options)
+         (pushnew (car olist) other-options))))
+    (when accessors-by-default
+      (unless (or readers no-reader-p)
+        (pushnew name readers))
+      (unless (or writers no-writer-p)
+        (pushnew `(setf ,name) writers)))
+    `(list ',name ,value
+           ,@(when readers `(:readers ',readers))
+           ,@(when writers `(:writers ',writers))
+           ,@other-options)))
 
-;; (defun canonize-property (property &optional (accessors-by-default nil))
-;;   (let ((name (car property)) (value (cadr property)) (readers nil)
-;;         (writers nil) (other-options nil) (no-reader-p nil) (no-writer-p nil))
-;;     (do ((olist (cddr property) (cddr olist)))
-;;         ((null olist))
-;;       (case (car olist)
-;;         (:reader
-;;          (cond (no-reader-p
-;;                 (error "You said you didn't want a reader, but now you want one? Make up your mind."))
-;;                ((null (cadr olist))
-;;                 (if (null readers) (setf no-reader-p t)
-;;                     (error "You already defined a reader, but now you say you don't want one? Make up your mind.")))
-;;                (t (pushnew (cadr olist) readers))))
-;;         (:writer
-;;          (cond (no-writer-p
-;;                 (error "You said you didn't want a writer, but now you want one? Make up your mind."))
-;;                ((null (cadr olist))
-;;                 (if (null writers) (setf no-writer-p t)
-;;                     (error "You already defined a writer, but now you say you don't want one? Make up your mind.")))
-;;                (t (pushnew (cadr olist) writers))))
-;;         ((:manipulator :accessor)
-;;          (cond ((or no-reader-p no-writer-p)
-;;                 (error "You said you didn't want a reader or a writer, but now you want one? Make up your mind."))
-;;                ((null (cadr olist))
-;;                 (if (and (null writers) (null readers))
-;;                     (progn
-;;                       (setf no-reader-p t)
-;;                       (setf no-writer-p t))
-;;                     (error "You already defined a reader or writer, but now you say you don't want any of them? Make up your mind.")))
-;;                (t
-;;                 (pushnew (cadr olist) readers)
-;;                 (pushnew `(setf ,(cadr olist)) writers))))
-;;         (otherwise
-;;          (pushnew (cadr olist) other-options)
-;;          (pushnew (car olist) other-options))))
-;;     (when accessors-by-default
-;;       (unless (or readers no-reader-p)
-;;         (pushnew name readers))
-;;       (unless (or writers no-writer-p)
-;;         (pushnew `(setf ,name) writers)))
-;;     `(list ',name ,value
-;;            ,@(when readers `(:readers ',readers))
-;;            ,@(when writers `(:writers ',writers))
-;;            ,@other-options)))
+(defun canonize-clone-options (options)
+  (mapappend #'canonize-clone-option options))
 
-;; (defun canonize-clone-options (options)
-;;   (mapappend #'canonize-clone-option options))
+(defun canonize-clone-option (option)
+  (list `,(car option) (cadr option)))
 
-;; (defun canonize-clone-option (option)
-;;   (list `,(car option) (cadr option)))
+(defmacro defclone (sheeple properties &rest options)
+  "Standard sheep-generation macro. This variant auto-generates accessors."
+  `(let ((sheep (ensure-sheep
+                 ,(canonize-sheeple sheeple)
+                 :properties ,(canonize-properties properties)
+                 ,@(canonize-clone-options options))))
+     sheep))
 
-;; (defmacro defclone (sheeple properties &rest options)
-;;   "Standard sheep-generation macro. This variant auto-generates accessors."
-;;   `(let ((sheep (spawn-sheep
-;;                  ,(canonize-sheeple sheeple)
-;;                  :properties ,(canonize-properties properties)
-;;                  ,@(canonize-clone-options options))))
-;;      sheep))
+(defmacro defproto (name sheeple properties &rest options)
+  `(progn
+     (declaim (special ,name))
+     (let ((sheep (create-or-reinit-sheep
+                   (if (boundp ',name)
+                       ,name nil)
+                   ,(canonize-sheeple sheeple)
+                   :properties ,(canonize-properties properties t)
+                   ,@(canonize-clone-options options))))
+       (unless (sheep-nickname sheep)
+         (setf (sheep-nickname sheep) ',name))
+       (setf (symbol-value ',name) sheep))))
 
-;; (defmacro defproto (name sheeple properties &rest options)
-;;   `(progn
-;;      (declaim (special ,name))
-;;      (let ((sheep (spawn-or-reinit-sheep
-;;                    (if (boundp ',name)
-;;                        ,name nil)
-;;                    ,(canonize-sheeple sheeple)
-;;                    :properties ,(canonize-properties properties t)
-;;                    ,@(canonize-clone-options options))))
-;;        (unless (sheep-nickname sheep)
-;;          (setf (sheep-nickname sheep) ',name))
-;;        (setf (symbol-value ',name) sheep))))
-
-;; (defun spawn-or-reinit-sheep (maybe-sheep parents &rest options)
-;;   (if maybe-sheep
-;;       (apply #'reinit-sheep maybe-sheep :new-parents parents options)
-;;       (apply #'spawn-sheep parents options)))
+(defun create-or-reinit-sheep (maybe-sheep parents &rest options)
+  (if maybe-sheep
+      (apply #'reinit-sheep maybe-sheep :new-parents parents options)
+      (apply #'ensure-sheep parents options)))

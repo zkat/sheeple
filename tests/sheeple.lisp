@@ -36,7 +36,7 @@
 (test (std-sheep-initial-values
        :depends-on std-sheep-basic-structure
        :fixture allocate-std-sheep)
-  (is (eql =standard-sheep= (car sheep)))
+  (is (eql =standard-metasheep= (car sheep)))
   (is (null (svref (cdr sheep) 0)))
   (is (null (svref (cdr sheep) 1)))
   (is (null (svref (cdr sheep) 2)))
@@ -60,21 +60,21 @@
 (test (std-sheep-p :fixture allocate-std-sheep)
   (is (std-sheep-p sheep))
   (is (not (std-sheep-p (cons 1 2))))
-  (is (not (std-sheep-p (cons =standard-sheep=
+  (is (not (std-sheep-p (cons =standard-metasheep=
                               nil))))
-  (is (std-sheep-p (cons =standard-sheep=
+  (is (std-sheep-p (cons =standard-metasheep=
                          (make-array 6 :initial-element nil))))
-  (is (not (std-sheep-p (cons =standard-sheep=
+  (is (not (std-sheep-p (cons =standard-metasheep=
                               (make-array 5 :initial-element nil)))))
-  (is (not (std-sheep-p (cons =standard-sheep=
+  (is (not (std-sheep-p (cons =standard-metasheep=
                               (make-array 7 :initial-element nil)))))
   (setf (sheep-parents sheep) '(foo))
   (is (std-sheep-p sheep)))
 
-(test (allocate-sheep :fixture (allocate-sheep =standard-sheep=))
+(test (allocate-sheep :fixture (allocate-sheep =standard-metasheep=))
   (is (std-sheep-p sheep)))
 
-(test (sheepp :fixture (allocate-sheep =standard-sheep=))
+(test (sheepp :fixture (allocate-sheep =standard-metasheep=))
   (is (sheepp sheep)))
 
 (test equality-basic
@@ -89,7 +89,7 @@
 (in-suite low-level-accessors)
 
 (test (sheep-metasheep :fixture allocate-std-sheep)
-  (is (eql =standard-sheep= (sheep-metasheep sheep))))
+  (is (eql =standard-metasheep= (sheep-metasheep sheep))))
 
 (test (sheep-parents :fixture allocate-std-sheep)
   (is (eql nil (sheep-parents sheep)))
@@ -154,9 +154,9 @@
          (b (allocate-std-sheep))
          (c (allocate-std-sheep))
          (d (allocate-std-sheep)))
-    (setf (sheep-parents a) (list =dolly=))
-    (setf (sheep-parents b) (list =dolly=))
-    (setf (sheep-parents c) (list =dolly=))
+    (setf (sheep-parents a) (list =standard-sheep=))
+    (setf (sheep-parents b) (list =standard-sheep=))
+    (setf (sheep-parents c) (list =standard-sheep=))
     (setf (sheep-parents d) (list a b c))
     (is (equal (list (list d a) (list a b) (list b c))
                (local-precedence-ordering d)))))
@@ -168,9 +168,9 @@
          (e (allocate-std-sheep))
          (f (allocate-std-sheep))
          (g (allocate-std-sheep)))
-    (setf (sheep-parents a) (list =dolly=))
-    (setf (sheep-parents b) (list =dolly=))
-    (setf (sheep-parents c) (list =dolly=))
+    (setf (sheep-parents a) (list =standard-sheep=))
+    (setf (sheep-parents b) (list =standard-sheep=))
+    (setf (sheep-parents c) (list =standard-sheep=))
     (setf (sheep-parents e) (list a))
     (setf (sheep-parents f) (list b))
     (setf (sheep-parents g) (list c))
@@ -459,7 +459,7 @@
 ;; (test spawn-sheep
 ;;   (let ((standard-sheep (clone))
 ;;         (test-metaclass-sheep (spawn-sheep nil :metaclass 'test-sheep-class)))
-;;     (is (eql =dolly= (car (sheep-parents (spawn-sheep nil)))))
+;;     (is (eql =standard-sheep= (car (sheep-parents (spawn-sheep nil)))))
 ;;     (is (eql standard-sheep (car (sheep-parents (spawn-sheep (list standard-sheep))))))
 ;;     (is (eql (find-class 'test-sheep-class) (class-of test-metaclass-sheep)))))
 
@@ -492,14 +492,14 @@
 ;;     (is (eql test-sheep (add-parent another test-sheep)))
 ;;     (is (parent-p another test-sheep))
 ;;     (is (eql test-sheep (reinit-sheep test-sheep)))
-;;     (is (parent-p =dolly= test-sheep))
+;;     (is (parent-p =standard-sheep= test-sheep))
 ;;     (is (not (has-direct-property-p test-sheep 'var)))
 ;;     (is (not (parent-p another test-sheep)))
 ;;     (is (eql test-sheep (reinit-sheep test-sheep :new-parents (list another))))
 ;;     (is (parent-p another test-sheep))))
 
 ;; (test clone
-;;   (is (eql =dolly= (car (sheep-parents (clone)))))
+;;   (is (eql =standard-sheep= (car (sheep-parents (clone)))))
 ;;   (let ((obj1 (clone)))
 ;;     (is (eql obj1
 ;;              (car (sheep-parents (clone obj1))))))
@@ -524,7 +524,7 @@
 ;;          (child (clone parent)))
 ;;     (is (member child (sheep-hierarchy-list child)))
 ;;     (is (member parent (sheep-hierarchy-list child)))
-;;     (is (member =dolly= (sheep-hierarchy-list child)))
+;;     (is (member =standard-sheep= (sheep-hierarchy-list child)))
 ;;     (is (member =t= (sheep-hierarchy-list child)))))
 
 ;; (test copy-sheep ;; TODO - this isn't even written properly yet
@@ -577,12 +577,12 @@
 ;;   (let ((test-proto (defproto =test-proto= () ((var "value")))))
 ;;     (is (sheep-p test-proto))
 ;;     (is (eql test-proto =test-proto=))
-;;     (is (eql =dolly= (car (sheep-parents test-proto))))
+;;     (is (eql =standard-sheep= (car (sheep-parents test-proto))))
 ;;     (is (sheep-p =test-proto=))
 ;;     (is (equal "value" (var =test-proto=)))
 ;;     (defproto =test-proto= () ((something-else "another-one")))
 ;;     (is (eql test-proto =test-proto=))
-;;     (is (eql =dolly= (car (sheep-parents test-proto))))
+;;     (is (eql =standard-sheep= (car (sheep-parents test-proto))))
 ;;     (signals unbound-property (direct-property-value test-proto 'var))
 ;;     (is (equal "another-one" (something-else =test-proto=)))
 ;;     (is (equal "another-one" (something-else test-proto))))

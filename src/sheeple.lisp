@@ -42,6 +42,14 @@ everything is initialized to nil."
              (= 6 (length (cdr obj))))
     t))
 
+(defun early-print-sheep (sheep stream)
+  (print-unreadable-object (sheep stream :identity t)
+    (format stream "Early Sheep")))
+(defmethod print-object ((obj cons) stream)
+  (if (std-sheep-p obj)
+      (early-print-sheep obj stream)
+      (call-next-method)))
+
 (defun allocate-sheep (metasheep)
   "Allocates the basic skeleton for a sheep object in memory and returns it."
   (if (eql =standard-metasheep= metasheep)

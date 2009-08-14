@@ -21,20 +21,19 @@
         (add-parent =t= sheep)
         sheep))
 
-(defmessage init-sheep (sheep &key &allow-other-keys))
-(defreply init-sheep (sheep
-                      &key
-                      nickname
-                      documentation
-                      properties)
+(defmessage shared-init (sheep &key &allow-other-keys))
+(defreply shared-init (sheep &key properties)
   (when properties
     (mapcar (lambda (prop-spec)
               (apply #'add-property sheep prop-spec))
             properties))
-  (when nickname
-    (setf (sheep-nickname sheep) nickname))
-  (when documentation
-    (setf (sheep-documentation sheep) documentation))
+  sheep)
+
+(defmessage init-sheep (sheep &key &allow-other-keys))
+(defreply init-sheep (sheep
+                      &key
+                      properties)
+  (shared-init sheep :properties properties)
   sheep)
 
 (defmessage reinit-sheep (sheep &key &allow-other-keys)

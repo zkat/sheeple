@@ -16,12 +16,6 @@
 (defmacro pushend (obj list)
   `(setf ,list (nconc ,list (cons ,obj nil))))
 
-(defun mapappend (fun &rest args)
-  (if (some #'null args)
-      ()
-      (append (apply fun (mapcar #'car args))
-              (apply #'mapappend fun (mapcar #'cdr args)))))
-
 (defun flatten (x)
   "Flattens a list."
   (labels ((rec (x acc)
@@ -42,7 +36,14 @@
                                        (1- max))))
         (t nil)))
 
-(defun topological-sort (elements constraints tie-breaker)
+;;; <<<<<<< BEGIN OUTDATED CODE BLOCK >>>>>>>
+(defun mapappend (fun &rest args)
+  (if (some #'null args)
+      ()
+      (append (apply fun (mapcar #'car args))
+              (apply #'mapappend fun (mapcar #'cdr args)))))
+
+(defun topological-sort-old (elements constraints tie-breaker)
   (let ((remaining-constraints constraints)
         (remaining-elements elements)
         (result ()))
@@ -55,7 +56,7 @@
                remaining-elements)))
          (when (null minimal-elements)
            (if (null remaining-elements)
-               (return-from topological-sort result)
+               (return-from topological-sort-old result)
                (error "Inconsistent precedence graph.")))
          (let ((choice (if (null (cdr minimal-elements))
                            (car minimal-elements)
@@ -69,6 +70,38 @@
                  (remove choice
                          remaining-constraints
                          :test #'member)))))))
+;;; <<<<<<< END OUTDATED CODE BLOCK >>>>>>>
+
+(defun topological-sort (elements constraints tie-breaker)
+  "Sorts ELEMENTS such that they satisfy the CONSTRAINTS, falling back
+on the TIE-BREAKER in the case of ambiguous constraints. On the assumption
+that they are freshly generated, this implementation is destructive with
+regards to the CONSTRAINTS. A future version will undo this change."
+  (loop
+     :for minimal-elements :=
+     (remove-if (lambda (sheep)
+                  (member sheep constraints
+                          :key #'cadr))
+                elements)
+     :while minimal-elements
+     :for choice := (if (null (cdr minimal-elements))
+                        (car minimal-elements)
+                        (funcall tie-breaker minimal-elements result))
+     :collect choice :into result
+     :do (setf constraints (delete choice constraints :test #'member)
+               elements (remove choice elements))
+     :finally
+     (if (null elements)
+         (return-from topological-sort result)
+         (error "Inconsistent precedence graph."))))
+
+(defmacro once-only ((&rest names) &body body)
+  "Modified from a macro in Practical Common Lisp, by Peter Seibel."
+  (let ((gensyms (loop repeat (length names) collect (gensym))))
+    `(let (,@(loop for g in gensyms collect `(,g (gensym))))
+      `(let (,,@(loop for g in gensyms for n in names collect ``(,,g ,,n)))
+        ,(let (,@(loop for n in names for g in gensyms collect `(,n ,g)))
+           ,@body)))))
 
 (defun memq (item list)
   "Return tail of LIST beginning with first element EQ to ITEM."

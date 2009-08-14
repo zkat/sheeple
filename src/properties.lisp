@@ -19,28 +19,16 @@
                                        (writers nil))))
 (defvar =standard-property= (gensym "=STANDARD-PROPERTY="))
 
-;; (defclass standard-property ()
-;;   ((name :initarg :name :accessor property-name)
-;;    (allocation :initarg :allocation :accessor property-allocation)
-;;    (readers :initform nil :initarg :readers :accessor property-readers)
-;;    (writers :initform nil :initarg :writers :accessor property-writers)))
+;;;
+;;; API
+;;;
 
-;; (defun property-equal-p (spec1 spec2)
-;;   (with-slots ((name1 name) (allocation1 allocation) (readers1 readers) (writers1 writers)) spec1
-;;     (with-slots ((name2 name) (allocation2 allocation) (readers2 readers) (writers2 writers)) spec2
-;;       (and (equal name1 name2)
-;;            (equal allocation1 allocation2)
-;;            (equal readers1 readers2)
-;;            (equal writers1 writers2)))))
-
-;; (defmethod print-object ((property standard-property) stream)
-;;   (print-unreadable-object (property stream :identity t)
-;;     (format stream "STANDARD-PROPERTY ~A" (property-name property))))
-;; ;;;
-;; ;;; API
-;; ;;;
-;; ;;; - Generic functions that define the basic interface for interacting with sheep properties.
-
+(defun add-property (sheep property-name value &rest all-keys)
+  )
+(defun std-add-property (sheep property-name value 
+                         &key readers writers
+                         make-accessor-p (property-prototype =standard-property=))
+  )
 ;; ;;; Existential functions
 ;; (defgeneric add-property (sheep property-name value &key)
 ;;   (:documentation "Adds a property named PROPERTY-NAME to SHEEP, initalized with VALUE."))

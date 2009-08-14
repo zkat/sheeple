@@ -277,15 +277,12 @@
     (is (eql sheep1 (%add-child sheep2 sheep1)))
     (is (null (%sheep-children sheep2)))
     (is (simple-vector-p (%sheep-children sheep1)))
-    (is (find sheep2 (%sheep-children sheep1) :key (lambda (x)
-                                                     (when (weak-pointer-p x)
-                                                       (weak-pointer-value x)))))))
+    (is (find sheep2 (%sheep-children sheep1) :key #'maybe-weak-pointer-value))))
 
 (test (finalized-children :fixture allocate-std-sheep
                           :depends-on %add-child)
-  (loop :repeat 5 :do
-     (let ((child (allocate-std-sheep)))
-       (%add-child child sheep)))
+  (loop :repeat 5 :do (%add-child (allocate-std-sheep) sheep))
+  (loop :repeat 9999 :sum (expt 1234 234))
   (gc :full t)
   (loop :for potential-child :across (%sheep-children sheep)
      :do (cond
@@ -308,9 +305,7 @@
     (%add-child sheep2 sheep1)
     (is (eql sheep1 (%remove-child sheep2 sheep1) ))
     (is (simple-vector-p (%sheep-children sheep1)))
-    (is (not (find sheep2 (%sheep-children sheep1) :key (lambda (x)
-                                                          (when (weak-pointer-p x)
-                                                            (weak-pointer-value x))))))))
+    (is (not (find sheep2 (%sheep-children sheep1) :key #'maybe-weak-pointer-value)))))
 
 (test %map-children
   (let ((parent (allocate-std-sheep))

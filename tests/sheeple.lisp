@@ -279,34 +279,6 @@
     (is (simple-vector-p (%sheep-children sheep1)))
     (is (find sheep2 (%sheep-children sheep1) :key #'maybe-weak-pointer-value))))
 
-;;;; God does not play dice with the universe... just with the GC.
-;#+ (or)
-(test (finalized-children :fixture allocate-std-sheep
-                          :depends-on %add-child)
-  (dotimes (i 5) (%add-child (allocate-std-sheep) sheep
-                             (format nil "gced sheep ~D" i)))
-  (loop :repeat 9999 :sum (expt 1234 234))
-  (pprint (%sheep-children sheep))
-  (loop :for ptr :across (%sheep-children sheep)
-     :do (print (maybe-weak-pointer-value ptr)))
-  (gc :full t)
-  (pprint (%sheep-children sheep))
-  (loop :for ptr :across (%sheep-children sheep)
-     :do (print (maybe-weak-pointer-value ptr)))
-  (terpri)
-  (loop :for potential-child :across (%sheep-children sheep)
-     :do (cond
-           ;; Is there a weak pointer?
-           ((null potential-child)
-            ;; Nope. This child was garbage-collected and finalized.
-            (5am:pass "A garbage-collected sheep was finalized correctly"))
-           ;; Was the sheep garbage-collected?
-           ((null (weak-pointer-value potential-child))
-            ;; Err, what is this pointer doing here?
-            (5am:fail "A garbage-collected sheep was not finalized correctly"))
-           ;; SYS::GC, get your act together!
-           (t (5am:skip "A sheep was not garbage-collected. This is not a bug")))))
-
 (test %remove-child
   (let ((sheep1 (allocate-std-sheep))
         (sheep2 (allocate-std-sheep)))

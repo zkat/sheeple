@@ -601,3 +601,4 @@
     (is (equal "another-one" (something-else test-proto))))
   ;; TODO - check that options work properly
   )
+(test create-or-reinit-sheep)

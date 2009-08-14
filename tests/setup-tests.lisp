@@ -15,6 +15,15 @@
 (defmacro test (name &body body)
   `(5am:test ,name ,@body))
 
+(macrolet ((import-5am-test-macros (&rest names)
+             `(progn
+                ,@(mapcar #'(lambda (name)
+                              `(defmacro ,name (&rest message-args)
+                                 `(,(intern (symbol-name ',name) :5am)
+                                    ,@message-args)))
+                          names))))
+  (import-5am-test-macros pass fail skip))
+
 (export 'run-all-tests)
 
 (def-suite sheeple)

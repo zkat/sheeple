@@ -103,10 +103,6 @@ regards to the CONSTRAINTS. A future version will undo this change."
         ,(let (,@(loop for n in names for g in gensyms collect `(,n ,g)))
            ,@body)))))
 
-(defmacro awhen (var condition &body body)
-  `(let ((,var ,condition))
-     (when ,var ,@body)))
-
 (defun memq (item list)
   "Return tail of LIST beginning with first element EQ to ITEM."
   (do ((i list (cdr i)))

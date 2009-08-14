@@ -17,6 +17,7 @@
                                       ((name 'std-property)
                                        (readers nil)
                                        (writers nil))))
+
 (defvar =standard-property= (gensym "=STANDARD-PROPERTY="))
 
 ;;;
@@ -24,7 +25,12 @@
 ;;;
 
 (defun add-property (sheep property-name value &rest all-keys)
-  )
+  (if (std-sheep-p sheep)
+      (apply #'std-add-property sheep property-name value all-keys)
+      (apply #'add-property-using-metasheep
+             (sheep-metasheep sheep) sheep
+             property-name value all-keys)))
+
 (defun std-add-property (sheep property-name value 
                          &key readers writers
                          make-accessor-p (property-prototype =standard-property=))

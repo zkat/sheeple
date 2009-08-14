@@ -24,12 +24,12 @@
              ;; (:file "reply-dispatch")
              ;; (:file "bootstrap")
              ;; (:file "post-boot")
-             ;; (:file "glue")
+             ;; (:file "glue") ;this file should go away.
              ))))
 
 (asdf:defsystem sheeple-tests
   :version "Baahh"
-  :description "Clone-crazy hackery tool, unit tests."
+  :description "Unit tests for Sheeple"
   :author "Josh Marchan <sykopomp at sykosomatic-dot-org>"
   :licence "MIT"
   :depends-on (:sheeple :fiveam)
@@ -42,8 +42,13 @@
              (:file "utils")
              (:file "sheeple")
              ;; (:file "properties")
-             ;; (:file "compatibility")
+             ;; (:file "builtins")
+             ;; (:file "parse-lambda-list")
              ;; (:file "messages")
+             ;; (:file "reply-definition")
+             ;; (:file "reply-dispatch")
+             ;; (:file "bootstrap")
+             ;; (:file "post-boot")
              ))))
 
 (defmethod asdf:perform ((o asdf:test-op) (c (eql (asdf:find-system :sheeple))))

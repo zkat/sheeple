@@ -287,9 +287,9 @@
      (unless (every #'maybe-weak-pointer-value (%sheep-children sheep))
        (return
          (if (= 5 (length (%sheep-children (%add-child (allocate-std-sheep) sheep))))
-             (5am:pass "#'%ADD-CHILD overrode a garbage-collected child")
-             (5am:fail "#'%ADD-CHILD didn't override garbage-collected children"))))
-     :finally (5am:skip "Unable to perform test -- not enough garbage collected")))
+             (pass "#'%ADD-CHILD overrode a garbage-collected child")
+             (fail "#'%ADD-CHILD didn't override garbage-collected children"))))
+     :finally (skip "Unable to perform test -- not enough garbage collected")))
 
 (test %remove-child
   (let ((sheep1 (allocate-std-sheep))

@@ -378,7 +378,7 @@
         (c (allocate-std-sheep)))
     (add-parent a b)
     (add-parent b c)
-`    (is (parentp a b))
+    (is (parentp a b))
     (is (parentp b c))
     (is (not (parentp a c)))
     (is (not (parentp c a)))

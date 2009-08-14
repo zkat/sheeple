@@ -94,7 +94,7 @@ everything is initialized to nil."
   (setf (svref (cdr sheep) 4) new-value))
 
 ;; The current caching scheme also requires us to keep track of any children a sheep has,
-;; so changes in the hierarchy can be propagated. This could be probably done in a 
+;; so changes in the hierarchy can be propagated. This could be probably done in a
 ;; much better way...
 (defun %sheep-children (sheep)
   (svref (cdr sheep) 5))
@@ -122,7 +122,7 @@ by 100 each time."
          (let ((old-vector (%sheep-children sheep)))
            (setf (%sheep-children sheep)
                  (make-array 100 :adjustable t :initial-element nil))
-           (loop 
+           (loop
               for old-entry across old-vector
               for i below (length (%sheep-children sheep))
               do (setf (aref (%sheep-children sheep) i)  old-entry))))
@@ -189,11 +189,31 @@ of the weak pointer)."
                               parents)))))))
     (all-parents-loop () (sheep-parents sheep))))
 
-(defun local-precedence-ordering (sheep)
+;;; <<<<<<< BEGIN OUTDATED CODE BLOCK >>>>>>>
+(defun compute-sheep-hierarchy-list-old (sheep)
+  (handler-case
+      ;; since collect-ancestors only collects the _ancestors_, we cons the sheep in front.
+      (let ((sheeple-to-order (cons sheep (collect-ancestors sheep))))
+        (topological-sort sheeple-to-order
+                          (remove-duplicates
+                           (mapappend #'local-precedence-ordering
+                                      sheeple-to-order))
+                          #'std-tie-breaker-rule))
+    (simple-error ()
+      (error 'sheeple-hierarchy-error :sheep sheep))))
+
+(defun local-precedence-ordering-old (sheep)
   (mapcar #'list
           (cons sheep
                 (butlast (sheep-parents sheep)))
           (sheep-parents sheep)))
+;;; <<<<<<< END OUTDATED CODE BLOCK >>>>>>>
+
+(defun local-precedence-ordering (sheep)
+  "Calculates the local precedence ordering. Relies on the fact that mapcar will
+return when any list is NIL to avoid traversing the entire parent list."
+  (let ((parents (sheep-parents sheep)))
+    (mapcar #'list (cons sheep parents) parents)))
 
 (defun std-tie-breaker-rule (minimal-elements hl-so-far)
   (dolist (hl-constituent (reverse hl-so-far))
@@ -203,16 +223,19 @@ of the weak pointer)."
         (return-from std-tie-breaker-rule (car common))))))
 
 (defun compute-sheep-hierarchy-list (sheep)
+  "Because #'local-precedence-ordering returns a fresh list each time, we can
+afford to use the destructive #'mapcan and cons less."
   (handler-case
-      ;; since collect-ancestors only collects the _ancestors_, we cons the sheep in front..
+      ;; since collect-ancestors only collects the _ancestors_, we cons the sheep in front.
       (let ((sheeple-to-order (cons sheep (collect-ancestors sheep))))
         (topological-sort sheeple-to-order
                           (remove-duplicates
-                           (mapappend #'local-precedence-ordering
+                           (mapcan #'local-precedence-ordering
                                       sheeple-to-order))
                           #'std-tie-breaker-rule))
     (simple-error ()
       (error 'sheeple-hierarchy-error :sheep sheep))))
+
 
 (defun memoize-sheep-hierarchy-list (sheep)
   (let ((list (compute-sheep-hierarchy-list sheep)))
@@ -284,15 +307,14 @@ of the weak pointer)."
            (sheeple-hierarchy-error ()
              (progn
                (remove-parent new-parent child)
-               (error 'sheeple-hierarchy-error
-                      :sheep child))))
+               (error 'sheeple-hierarchy-error :sheep child))))
          child)))
 
 (defun add-parents (parents sheep)
   "Mostly a utility function for easily adding multiple parents. They will be added to
 the front of the sheep's parent list in reverse order (so they will basically be appended
 to the front of the list)"
-  (mapc (lambda (parent) 
+  (mapc (lambda (parent)
           (add-parent parent sheep))
         (reverse parents))
   sheep)

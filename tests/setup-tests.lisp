@@ -9,8 +9,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
+;;; Setting up the :SHEEPLE package to include :5AM stuff
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (import '(5am:def-suite 5am:run! 5am:is 5am:in-suite 5am:signals 5am:def-fixture)))
+  (import '(5am:def-suite 5am:run! 5am:is 5am:in-suite 5am:signals 5am:def-fixture))
+  (export 'run-all-tests))
 
 (defmacro test (name &body body)
   `(5am:test ,name ,@body))
@@ -24,11 +26,23 @@
                           names))))
   (import-5am-test-macros pass fail skip))
 
-(export 'run-all-tests)
-
+;;; Preparing the test suite
 (def-suite sheeple)
+
 (defun run-all-tests ()
   (run! 'sheeple))
+
+(in-suite sheeple)
+
+(test bootstrapped?
+ (if *bootstrappedp*
+     (pass "Sheeple has bootstrapped")
+     (skip "Sheeple has not yet bootstrapped")))
+
+(defmacro postboot-test (name &body body)
+  `(test (,name :depends-on bootstrapped?) ,body))
+
+;;; Hooking into ASDF
 (defmethod asdf:perform ((o asdf:test-op) (c (eql (asdf:find-system :sheeple-tests))))
   (format t "~&~%*******************~%~
                  ** Starting test **~%~

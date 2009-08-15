@@ -9,14 +9,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(in-suite sheeple)
-
-;;; Secures sanity of pre-bootstrap development in a "fire-and-forget" fashion.
-(test bootstrappedp
-  (if *bootstrappedp*
-      (pass "Sheeple has bootstrapped")
-      (skip "Sheeple has not yet bootstrapped")))
-
 ;;;
 ;;; Allocation
 ;;;
@@ -471,7 +463,7 @@
 (def-suite clone-general :in cloning)
 (in-suite clone-general)
 
-(test (ensure-sheep :depends-on bootstrappedp)
+(postboot-test ensure-sheep
   ;; basic
   (let ((sheep (ensure-sheep nil)))
     (is (sheepp sheep))
@@ -499,7 +491,7 @@
     (is (eql test-metasheep (sheep-metasheep sheep)))
     (is (eql =standard-sheep= (car (sheep-parents sheep))))))
 
-(test (clone :depends-on bootstrappedp)
+(postboot-test clone
   (is (eql =standard-metasheep= (sheep-metasheep (clone))))
   (is (sheepp (clone)))
   (is (std-sheep-p (clone)))
@@ -521,13 +513,13 @@
     (is (parentp o3 sheep))
     (is (parentp o4 sheep))))
 
-(test (sheep-nickname :depends-on bootstrappedp)
+(postboot-test sheep-nickname
   (let ((sheep (clone)))
     (setf (sheep-nickname sheep) 'test)
     (is (eq 'test (sheep-nickname sheep)))
     (is (eq 'test (sheep-nickname (clone sheep))))))
 
-(test (sheep-documentation :depends-on bootstrappedp)
+(postboot-test sheep-documentation
   (let ((sheep (clone)))
     (setf (sheep-documentation sheep) 'test)
     (is (eq 'test (sheep-documentation sheep)))
@@ -571,7 +563,7 @@
   (is (equal '(:metasheep foo :other-option 'bar)
              (canonize-clone-options '((:metasheep foo) (:other-option 'bar))))))
 
-(test (defclone :depends-on bootstrappedp)
+(postboot-test defclone
   (let* ((parent (clone))
          (test-sheep (defclone (parent) ((var "value")))))
     (is (sheepp test-sheep))
@@ -586,7 +578,7 @@
 (def-suite protos :in cloning)
 (in-suite protos)
 
-(test (defproto :depends-on bootstrappedp)
+(postboot-test defproto
   (let ((test-proto (defproto =test-proto= () ((var "value")))))
     (is (sheepp test-proto))
     (is (eql test-proto =test-proto=))

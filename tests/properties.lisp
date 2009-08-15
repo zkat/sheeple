@@ -17,7 +17,7 @@
 (def-suite properties-basic :in properties)
 (in-suite properties-basic)
 
-(test add-property
+(postboot-test add-property
   ;; TODO - errors could be more specific?
   (let ((sheep (clone)))
     (is (eql sheep (add-property sheep 'var "value")))
@@ -40,7 +40,7 @@
     (is (string= "I read it" (read-it sheep)))
     (signals error (setf (read-it sheep) "hurr durr"))))
 
-(test remove-property
+(postboot-test remove-property
   ;; TODO - more specific errors?
   (let ((sheep (defclone () ((var "value")))))
     (is (has-direct-property-p sheep 'var))
@@ -49,7 +49,7 @@
     (signals error (remove-property sheep 'var))
     (signals error (remove-property sheep 'something-else))))
 
-(test remove-all-direct-properties
+(postboot-test remove-all-direct-properties
   (let ((sheep (defclone () ((var "value") (another-prop "another-value")))))
     (is (has-direct-property-p sheep 'var))
     (is (has-direct-property-p sheep 'another-prop))
@@ -58,7 +58,7 @@
     (signals unbound-property (direct-property-value sheep 'var))
     (signals unbound-property (direct-property-value sheep 'another-prop))))
 
-(test direct-property-value
+(postboot-test direct-property-value
   (let* ((parent (defclone () ((parent-var "foo"))))
          (child (defclone (parent) ((child-var "bar")))))
     (is (equal "foo" (direct-property-value parent 'parent-var)))
@@ -69,7 +69,7 @@
     (is (equal "x" (direct-property-value child 'child-var)))
     (signals unbound-property (setf (direct-property-value child 'something-else) "y"))))
 
-(test property-value
+(postboot-test property-value
   (let* ((parent (defclone () ((parent-var "foo"))))
          (child (defclone (parent) ((child-var "bar")))))
     (is (equal "foo" (property-value parent 'parent-var)))
@@ -81,14 +81,14 @@
     (is (equal "zap" (property-value child 'parent-var)))
     (is (equal "foo" (property-value parent 'parent-var)))))
 
-(test has-direct-property-p
+(postboot-test has-direct-property-p
   (let* ((sheep (defclone () ((var "value"))))
          (child (clone sheep)))
     (is (has-direct-property-p sheep 'var))
     (is (not (has-direct-property-p sheep 'anything-else)))
     (is (not (has-direct-property-p child 'var)))))
 
-(test has-property-p
+(postboot-test has-property-p
   (let* ((parent (defclone () ((parent-var "foo"))))
          (child (defclone (parent) ((child-var "bar")))))
     (is (has-property-p parent 'parent-var))

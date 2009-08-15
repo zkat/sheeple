@@ -41,7 +41,7 @@
             ((:file "setup-tests")
              (:file "utils")
              (:file "sheeple")
-             ;; (:file "properties")
+             (:file "properties")
              ;; (:file "builtins")
              ;; (:file "parse-lambda-list")
              ;; (:file "messages")

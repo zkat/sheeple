@@ -70,119 +70,127 @@ CDR are dependant upon the metasheep."
       (allocate-sheep-using-metasheep metasheep)))
 
 ;;; Some useful accessors...
-(defun sheep-metasheep (sheep)
-  "Returns SHEEP's metasheep. For now, there is no support for changing a sheep's metasheep."
-  (car sheep))
-;; no (setf sheep-metasheep) for now.
+(defmacro define-std-sheep-accessor (thing place &optional docstring)
+  (flet ((link-symbol-names (a b)
+           (intern (format nil "~A-~A" (symbol-name a) (symbol-name b)))))
+    (let ((name (link-symbol-names 'sheep thing))
+          (new-value (link-symbol-names 'new thing)))
+      `(progn
+         (defun ,name (sheep)
+           ,@(when (stringp docstring) (list docstring))
+           ,place)
+         (defun (setf ,name) (,new-value sheep)
+           (setf ,place ,new-value))))))
 
-(defun sheep-parents (sheep)
-  (svref (cdr sheep) 0))
-(defun (setf sheep-parents) (new-value sheep)
-  (setf (svref (cdr sheep) 0) new-value))
+;;; We in fact -should- still have (setf sheep-metasheep) at the low level, for
+;;; instantiating non-std-sheep, and ease of interactive development. Having it
+;;; defined now just makes our job easier when we choose to offer it officially. -- Adlai
+(define-std-sheep-accessor metasheep
+    (car sheep)
+  "SHEEP's metasheep. Should only be set by low-level code.")
 
-;; Sheep properties are split into two separate data structures:
-;; The first is a vector of values, where each entry is (cons 'property-name value)
-;; The second is a vector of property metaobjects.
-;; Having a local property metaobject means the sheep MUST have a value for that property,
-;; but the inverse is not necessarily true.
-(defun sheep-pvalue-vector (sheep)
-  (svref (cdr sheep) 1))
-(defun (setf sheep-pvalue-vector) (new-value sheep)
-  (setf (svref (cdr sheep) 1) new-value))
+(define-std-sheep-accessor parents
+    (svref (cdr sheep) 0)
+  "SHEEP's parents. Should only be set by low-level code.")
 
-(defun sheep-property-metaobjects (sheep)
-  (svref (cdr sheep) 2))
-(defun (setf sheep-property-metaobjects) (new-value sheep)
-  (setf (svref (cdr sheep) 2) new-value))
+;;; Sheep properties are split into two separate data structures:
+;;; The first is a vector of values, where each entry is (cons 'property-name value)
+;;; The second is a vector of property metaobjects.
+;;; Having a local property metaobject means the sheep MUST have a value for that property,
+;;; but the inverse is not necessarily true.
 
-(defun sheep-roles (sheep)
-  (svref (cdr sheep) 3))
-(defun (setf sheep-roles) (new-value sheep)
-  (setf (svref (cdr sheep) 3) new-value))
+(define-std-sheep-accessor pvalue-vector
+    (svref (cdr sheep) 1)
+  "SHEEP's property values. Should only be set by low-level code.")
+(define-std-sheep-accessor property-metasheep
+    (svref (cdr sheep) 2)
+  "SHEEP's property metasheep. Should only be set by low-level code.")
+
+;;; Roles are vital to the reply dispatch algorithm.
+
+(define-std-sheep-accessor roles
+    (svref (cdr sheep) 3)
+  "SHEEP's roles. Should only be set by low-level code.")
 
 ;; Although it makes the sheep objects much heavier, we cache the sheep's hierarchy list,
 ;; so we don't have to run through the fairly heavy sorting algorithm each time.
-(defun %sheep-hierarchy-cache (sheep)
-  (svref (cdr sheep) 4))
-(defun (setf %sheep-hierarchy-cache) (new-value sheep)
-  (setf (svref (cdr sheep) 4) new-value))
-
 ;; The current caching scheme also requires us to keep track of any children a sheep has,
 ;; so changes in the hierarchy can be propagated. This could be probably done in a
 ;; much better way...
-(defun %sheep-children (sheep)
-  (svref (cdr sheep) 5))
-(defun (setf %sheep-children) (new-value sheep)
-  (setf (svref (cdr sheep) 5) new-value))
+
+(define-std-sheep-accessor hierarchy-cache
+    (svref (cdr sheep) 4)
+  "SHEEP's hierarchy list. Should only be set by low-level code.")
+
+(define-std-sheep-accessor children
+    (svref (cdr sheep) 5)
+  "SHEEEP's direct children. Should only be set by low-level code.")
 
 ;;; children cache
-(defun %child-cache-full-p (sheep)
-  "A child cache is full if all items in it are weak pointers to other sheep.
-In reality, we can sort of get away with just checking if it's a pointer, since
-it's astronomically unlikely anything else will make it in..."
-  (when (and (%sheep-children sheep)
-             (every #'maybe-weak-pointer-value
-                    (%sheep-children sheep)))
-    t))
+(defun child-cache-full-p (sheep)
+  "A child cache is full if all items in it are live weak pointers to other sheep."
+  (and (sheep-children sheep)
+       (every #'maybe-weak-pointer-value
+              (sheep-children sheep))))
 
-(defun %adjust-child-cache (sheep)
+(defun adjust-child-cache (sheep)
   "When the child cache gets full, we have to make it bigger. In general, we assume
 a 5-slot array will be enough for sheeple that only have a couple of children. Once that
 threshold is crossed, though, we assume the worst and replace that relatively small vector
 with a massive 100-slot adjustable array. When -that- is full, we'll resize the vector
 by 100 each time."
-  (cond ((and (= 5 (length (%sheep-children sheep)))
-              (not (adjustable-array-p (%sheep-children sheep))))
-         (let ((old-vector (%sheep-children sheep)))
-           (setf (%sheep-children sheep)
+  (cond ((and (= 5 (length (sheep-children sheep)))
+              (not (adjustable-array-p (sheep-children sheep))))
+         (let ((old-vector (sheep-children sheep)))
+           (setf (sheep-children sheep)
                  (make-array 100 :adjustable t :initial-element nil))
            (loop
               for old-entry across old-vector
-              for i below (length (%sheep-children sheep))
-              do (setf (aref (%sheep-children sheep) i)  old-entry))))
-        ((and (<= 100 (length (%sheep-children sheep)))
-              (adjustable-array-p (%sheep-children sheep)))
-         (adjust-array (%sheep-children sheep)
-                       (+ 100 (length (%sheep-children sheep)))
+              for i below (length (sheep-children sheep))
+              do (setf (aref (sheep-children sheep) i)  old-entry))))
+        ((and (<= 100 (length (sheep-children sheep)))
+              (adjustable-array-p (sheep-children sheep)))
+         (adjust-array (sheep-children sheep)
+                       (+ 100 (length (sheep-children sheep)))
                        :initial-element nil))
         ;; may as well.
         (t (error "Something went wrong with adjusting the array. Weird.")))
   sheep)
 
-(defun %create-child-cache (sheep)
+(defun create-child-cache (sheep)
   "This creates only the basic child cache: A simple 5-item vector of NILs.
 It sets the vector as SHEEP's child cache."
-  (setf (%sheep-children sheep)
+  (setf (sheep-children sheep)
         (make-array 5 :initial-element nil)))
 
-(defun %add-child (child sheep)
+(defun add-child (child sheep)
   "Registers CHILD as a weak pointer in SHEEP's child cache."
-  (unless (%sheep-children sheep)
-    (%create-child-cache sheep))
-  (when (%child-cache-full-p sheep)
-    (%adjust-child-cache sheep))
-  (unless (find child (%sheep-children sheep) :key #'maybe-weak-pointer-value)
-    (let ((children (%sheep-children sheep)))
+  (unless (sheep-children sheep)
+    (create-child-cache sheep))
+  (when (child-cache-full-p sheep)
+    (adjust-child-cache sheep))
+  (unless (find child (sheep-children sheep) :key #'maybe-weak-pointer-value)
+    (let ((children (sheep-children sheep)))
       (dotimes (i (length children))
         (unless (maybe-weak-pointer-value (aref children i))
           (return (setf (aref children i) (make-weak-pointer child)))))))
   sheep)
 
-(defun %remove-child (child sheep)
+(defun remove-child (child sheep)
   "Takes CHILD out of SHEEP's child cache."
-  (when (find child (%sheep-children sheep) :key #'maybe-weak-pointer-value)
-    (setf (%sheep-children sheep)
-          (delete child (%sheep-children sheep) :key #'maybe-weak-pointer-value)))
+  (when (find child (sheep-children sheep) :key #'maybe-weak-pointer-value)
+    (setf (sheep-children sheep)
+          (delete child (sheep-children sheep) :key #'maybe-weak-pointer-value)))
   sheep)
 
-(defun %map-children (function sheep)
+(defun map-children (function sheep)
   "Iteratively applies FUNCTION to SHEEP's children (it takes care of taking each child out
 of the weak pointer)."
-  (when (%sheep-children sheep)
+  (when (sheep-children sheep)
     (map 'vector (lambda (pointer)
                    (when (weak-pointer-p pointer)
                      (funcall function (weak-pointer-value pointer))))
-         (%sheep-children sheep))))
+         (sheep-children sheep))))
 
 ;;;
 ;;; Inheritance
@@ -257,9 +265,9 @@ afford to use the destructive #'mapcan and cons less."
 
 (defun memoize-sheep-hierarchy-list (sheep)
   (let ((list (compute-sheep-hierarchy-list sheep)))
-    (setf (%sheep-hierarchy-cache sheep)
+    (setf (sheep-hierarchy-cache sheep)
           list)
-    (%map-children (lambda (child)
+    (map-children (lambda (child)
                      (memoize-sheep-hierarchy-list child))
                    sheep)))
 
@@ -272,7 +280,7 @@ afford to use the destructive #'mapcan and cons less."
 (defun std-finalize-sheep-inheritance (sheep)
   "we memoize the hierarchy list here."
   (loop for parent in (sheep-parents sheep)
-     do (%add-child sheep parent))
+     do (add-child sheep parent))
   (memoize-sheep-hierarchy-list sheep)
   sheep)
 
@@ -293,7 +301,7 @@ afford to use the destructive #'mapcan and cons less."
       (progn
         (setf (sheep-parents child)
               (delete parent (sheep-parents child)))
-        (%remove-child child parent)
+        (remove-child child parent)
         (finalize-sheep-inheritance child)
         child)
       (error "~A is not a parent of ~A" parent child)))
@@ -339,7 +347,7 @@ to the front of the list)"
 
 (defun sheep-hierarchy-list (sheep)
   "Returns the full hierarchy-list for SHEEP"
-  (%sheep-hierarchy-cache sheep))
+  (sheep-hierarchy-cache sheep))
 
 ;;; Inheritance predicates
 (defun parentp (maybe-parent child)

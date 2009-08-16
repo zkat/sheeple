@@ -1,21 +1,20 @@
 ;;;; -*- Mode: lisp; indent-tabs-mode: nil -*-
-;;;
-;; This file is part of Sheeple
+;;;;
+;;;; This file is part of Sheeple
 
-;; utils.lisp
-;;
-;; Miscellaneous utilities for Sheeple
-;;
-;; TODO:
-;; * Move conditions in here, or into a new file?
-;; * DOCUMENTATION!
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; utils.lisp
+;;;;
+;;;; Miscellaneous utilities for Sheeple
+;;;;
+;;;; TODO:
+;;;; * Move conditions in here, or into a new file?
+;;;; * DOCUMENTATION!
+;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(defmacro pushend (obj list)
-  `(setf ,list (nconc ,list (cons ,obj nil))))
-
+;;; This is only here because it gets called once in src/properties.lisp
+;;; It gets called to mitigate a hierarchy traversal. Maybe get rid of it?
 (defun flatten (x)
   "Flattens a list."
   (labels ((rec (x acc)

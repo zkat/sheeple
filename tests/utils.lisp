@@ -25,7 +25,7 @@
   (is (null (proper-list-of-length-p '(1) 0)))
   (is (not (null (proper-list-of-length-p '(1 2 3) 0 4))))
   (is (null (proper-list-of-length-p '(1 2 3) 1 2)))
-  (5am:finishes (proper-list-of-length-p #1='(:P . #1#) 0 2)))
+  (is (null (proper-list-of-length-p #1='(:P . #1#) 0 2))))
 
 (test topological-sort)
 (test once-only)

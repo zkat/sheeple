@@ -30,6 +30,52 @@
     (when (numberp length)
       (<= min length max))))
 
+(defun collect-normal-expander (n-value fun forms)
+    `(progn
+       ,@(mapcar (lambda (form) `(setq ,n-value (,fun ,form ,n-value))) forms)
+       ,n-value))
+
+(defun collect-list-expander (n-value n-tail forms)
+    (let ((n-res (gensym)))
+      `(progn
+         ,@(mapcar (lambda (form)
+                     `(let ((,n-res (cons ,form nil)))
+                        (cond (,n-tail
+                               (setf (cdr ,n-tail) ,n-res)
+                               (setq ,n-tail ,n-res))
+                              (t
+                               (setq ,n-tail ,n-res  ,n-value ,n-res)))))
+                   forms)
+         ,n-value)))
+
+(defmacro collect (collections &body body)
+  (let ((macros ())
+        (binds ()))
+    (dolist (spec collections)
+      (assert (proper-list-of-length-p spec 1 3) ()
+              "Malformed collection specifier: ~S" spec)
+      (let* ((name (first spec))
+             (default (second spec))
+             (kind (or (third spec) 'collect))
+             (n-value (gensym (concatenate 'string
+                                           (symbol-name name)
+                                           "-N-VALUE-"))))
+        (push `(,n-value ,default) binds)
+        (if (eq kind 'collect)
+            (let ((n-tail (gensym (concatenate 'string
+                                               (symbol-name name)
+                                               "-N-TAIL-"))))
+              (if default
+                  (push `(,n-tail (last ,n-value)) binds)
+                  (push n-tail binds))
+              (push `(,name (&rest args)
+                            (collect-list-expander ',n-value ',n-tail args))
+                    macros))
+            (push `(,name (&rest args)
+                          (collect-normal-expander ',n-value ',kind args))
+                  macros))))
+    `(macrolet ,macros (let* ,(nreverse binds) ,@body))))
+
 ;;; <<<<<<< BEGIN OUTDATED CODE BLOCK >>>>>>>
 (defun mapappend (fun &rest args)
   (if (some #'null args)
@@ -103,23 +149,6 @@ regards to the CONSTRAINTS. A future version will undo this change."
       ((null i))
     (when (eq (car i) item)
       (return i))))
-
-(defun collect-normal-expander (n-value fun forms)
-    `(progn
-       ,@(mapcar (lambda (form) `(setq ,n-value (,fun ,form ,n-value))) forms)
-       ,n-value))
-(defun collect-list-expander (n-value n-tail forms)
-    (let ((n-res (gensym)))
-      `(progn
-         ,@(mapcar (lambda (form)
-                     `(let ((,n-res (cons ,form nil)))
-                        (cond (,n-tail
-                               (setf (cdr ,n-tail) ,n-res)
-                               (setq ,n-tail ,n-res))
-                              (t
-                               (setq ,n-tail ,n-res  ,n-value ,n-res)))))
-                   forms)
-         ,n-value)))
 
 (defun maybe-weak-pointer-value (x)
   (when (weak-pointer-p x)

@@ -23,17 +23,12 @@
                    (t (rec (car x) (rec (cdr x) acc))))))
     (rec x nil)))
 
-(defun proper-list-of-length-p (x min &optional (max min))
-  (cond ((minusp max) nil)
-        ((null x) (zerop min))
-        ((consp x)
-         (and (plusp max)
-              (proper-list-of-length-p (cdr x)
-                                       (if (plusp (1- min))
-                                           (1- min)
-                                           0)
-                                       (1- max))))
-        (t nil)))
+;;; This only gets called once, during the macroexpansion of collect.
+(defun proper-list-of-length-p (list min &optional (max min))
+  "Returns T if the length of X is between MIN and MAX, NIL otherwise."
+  (let ((length (list-length list)))
+    (when (numberp length)
+      (<= min length max))))
 
 ;;; <<<<<<< BEGIN OUTDATED CODE BLOCK >>>>>>>
 (defun mapappend (fun &rest args)

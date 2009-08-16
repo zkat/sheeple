@@ -1,32 +1,76 @@
 * TODO Later
+** TODO Documentation
+*** TODO [#A] Go through the whole thing and make it more CLHS-like (only partially done)
+    The entire basic API for Sheeple should be correctly documented.
+*** TODO [#C] Put together html and pdf versions of user-guide.org
+** TODO Messages/Replies
+*** TODO [#A] Write unit tests for messages and replies
+    This really goes hand-in-hand with the heading below, but I'm refraining
+    from deleting this heading just because of how important it is.
+*** TODO [#B] Standard Reply Combination
+    The Standard Method Combination of CLOS is the one
+    with :around, :after, :before, and "primary" replies.  It would be good to
+    get Sheeple's standard reply combination to behave in the same way as this.
+**** DONE Remove CALL-NEXT-REPLY from :before and :after replies
+**** DONE Enable nesting of :around replies
+**** TODO Ensure proper order of replies:
+     Most specific :around
+      ...
+       Least specific :around
+        Most specific :before
+        ...                      ; Return values ignored
+        Least specific :before
+        Most specific "primary"
+         ...                     ; Return values go to :around
+          Least specific "primary"
+        Least specific :after
+        ...                      ; Return values ignored
+        Most specific :after
+
+*** TODO [#B] Clean up sources
+    These files are all pretty messy, and might have some low hacks that could
+    be re-hacked in a more elegant way.
+**** TODO messages.lisp
+**** TODO reply-definition.lisp
+**** TODO reply-dispatch.lisp
+*** TODO [#C] Flexible Reply Combinations
+***** TODO CLOS Built-In Method Combinations
+      Each of these method combinations accepts 2 types of methods: "primary"
+      methods and :around methods.  The :around methods are called like the
+      standard combination.  "Primary" methods are qualified with the name of
+      the combination, and are called in most-specific-first order.  Their
+      return values are collected and passed to the function named in the method
+      combination.
+****** TODO PROGN, OR, AND
+       Control structure combinations. Note that the OR and AND combinations are
+       not short-circuiting like the macros of the same name -- they could more
+       appropriately (and maybe should, in Sheeple's version) be called EVERY
+       and SOME combinations.
+****** TODO LIST, APPEND, NCONC
+       Collection combinations. Useful for messages that need to build up
+       data. I can imagine these also being useful for extending the behavior of
+       some accessors.
+****** TODO MAX, MIN, +
+       Computation combinations. I'd say that these are least important, because
+       they can be easily fudged using the LIST combination -- just wrap with
+       an :around reply, all specializers on =T=, and #'APPLY the right function.
+***** TODO DEFINE-REPLY-COMBINATION
+      Under CLOS, it's possible to define a completely customized method
+      combination.  Even though this is not frequently used, Sheeple should
+      provide a similar feature.
 ** TODO Dynamicity
-*** TODO Inconsistent lambda lists
+*** TODO [#A] Better error handling
+    I should go over the entirety of sheeple and start filling the thing with
+    restarts.  If this is going to be usably dynamic, it needs to have proper
+    reporting of crummy conditions, and a nice way of recovering from them.
+*** TODO [#B] Inconsistent lambda lists
     Adlai pointed out how CLOS offers a restart when lambda-lists are inconsistent,
-    offering to remove inconsistent methods. It's useful for interactively working.
+    offering to remove inconsistent methods.  It's useful for interactively working.
     Could I support something like this in sheeple?
-*** TODO Dynamic reply handling
-   Under CLOS, it's possible to dynamically mess with replies. Sheeple is currently
-   not as flexible in this regard. Let's get fixing.
-*** TODO Removing replies dynamically
-    Given a message and a lambda-list of specifiers, remove the corresponding reply.
-*** TODO Inspecting replies dynamically
-    Check whether certain replies exist, inspect their qualifiers and specializers, etc.
-*** TODO Allow message/reply undefinition again
-** TODO Convenience
-*** TODO Implement :message option for defmessage (like CLOS' :method option)
-   I don't care about this feature all that much, so I might just keep bumping it until someone
-   who -does- care asks for it.
-   UPDATE: I don't think I even want this. It makes the defmessage macro horribly bloated and
-   complex, and I don't even like the idea of stuffing everything into a message definition. Things
-   need to stay flexible, and this would be just plain ugly.
-** TODO Stability
-*** TODO Better error handling
-   I should go over the entirety of sheeple and start filling the thing with restarts.
-   If this is going to be usably dynamic, it needs to have proper reporting of crummy conditions,
-   and a nice way of recovering from them.
-*** TODO messages.lisp
-*** TODO reply-definition.lisp
-*** TODO reply-dispatch.lisp
+*** TODO [#C] Dynamic message and reply handling
+   Under CLOS, it's possible to dynamically mess with replies.  Sheeple is
+   currently not as flexible in this regard.  Basically, we should provide for
+   messagen and replies all the stuff in AMOP for generic functions and methods.
 ** TODO Integration
 *** TODO With Lisp
     The backtraces are awful. Good god.
@@ -35,59 +79,52 @@
     of Sheeple forms, and if it had facilities for inspecting sheeple objects.
     Being able to do M-. and stuff would also be a HUGE plus.
 ** TODO Other features
+*** TODO Property MOP
+**** TODO Local Property Creation
+     Let the user control what happens when a property is created locally
+     through #'(setf property-value). This could be done with the same
+     *-using-metaobject interface that we've used for the MOP code this far.
+**** TODO Accessor Creation
+     Let the user control how accessors are created for properties. A possible
+     use of such a MOP feature could be a wrapper for mapping properties, such
+     as the "channel-local" properties used in Sykobot, where accessors would
+     take an additional argument used as a key in the mapping.
 *** TODO Messages/replies
-**** TODO Flexible Reply Combinations
-**** TODO CLOS Built-In Method Combinations
-    Each of these method combinations accepts 2 types of methods: "primary" methods
-    and :around methods. The :around methods are called like the standard combination.
-    "Primary" methods are qualified with the name of the combination, and are called
-    in most-specific-first order. Their return values are collected and passed to the
-    function named in the method combination.
-**** TODO PROGN, OR, AND
-**** TODO LIST, APPEND, NCONC
-**** TODO MAX, MIN, +
-**** TODO DEFINE-REPLY-COMBINATION
-    Under CLOS, it's possible to define a completely customized method combination. Even
-    though this is not frequently used, Sheeple should provide a similar feature.
-*** TODO Properties
-**** TODO There should be an exposed MOP interface for how (setf property-value) creates props.
+*** TODO Implement :message option for defmessage (like CLOS' :method option)
+   I don't care about this feature all that much, so I might just keep bumping it until someone
+   who -does- care asks for it.
+   UPDATE: I don't think I even want this. It makes the defmessage macro horribly bloated and
+   complex, and I don't even like the idea of stuffing everything into a message definition. Things
+   need to stay flexible, and this would be just plain ugly.
 ** TODO Optimization
 *** TODO Speed up accessors
    Accessors need to be fast. Really fast. Find ways to cheat that won't break everything.
 *** TODO Speed up instantiation
-    Takes forever to make a sheep object. It may not be possible to speed things up too much
-    until Sheeple has a native MOP, though...
+    Since sheep are sheep now, we have to be fanatical "tree pruners" when it
+    comes to optimizing any further. If we find that std-sheep are still too
+    kludgy, find some way to reduce that kludge!
 *** TODO Consider caching scheme for property access
-    I should've done this in the first place. A simpler version of the same system used to dispatch
-    replies would do wonders for read performance, without seriously harming writer performance.
-* TODO 2.3
-** TODO Documentation
-*** TODO Go through the whole thing and make it more CLHS-like (only partially done)
-    The entire basic API for Sheeple should be correctly documented.
-*** TODO Put together html and pdf versions of user-guide.org
-** TODO Stability
-*** TODO Write unit tests for messages and replies.
-** TODO Messages/Replies
-*** TODO Standard Reply Combination
-   The Standard Method Combination of CLOS is the one with :around, :after, :before,
-   and "primary" replies. It would be good to get Sheeple's standard reply combination
-   to behave in the same way as this.
-**** TODO Remove CALL-NEXT-REPLY from :before and :after replies
-*** TODO Enable nesting of :around replies
-*** TODO Ensure proper order of replies:
-    Most specific :around
-     ...
-      Least specific :around
-       Most specific :before
-       ...                      ; Return values ignored
-       Least specific :before
-       Most specific "primary"
-        ...                     ; Return values go to :around
-         Least specific "primary"
-       Least specific :after
-       ...                      ; Return values ignored
-       Most specific :after
-
+    I should've done this in the first place. A simpler version of the same
+    system used to dispatch replies would do wonders for read performance,
+    without seriously harming writer performance.
+* TODO 3.0
+  [Adlai:] This is a rough sketch of The Road to Sheeple 3.0, as I see it right
+  now.  It's also mainly an invitation for you, sykopomp, to flesh out any
+  headings if you feel like it.
+** TODO "Test all the fucking time."
+   This is very important. Watch the entire thing, twice.
+   http://rubyhoedown2008.confreaks.com/05-bryan-liles-lightning-talk-tatft-test-all-the-f-in-time.html
+   Then watch this:
+   http://www.vimeo.com/1534976?pg=embed&sec=1534976
+   Then go write some tests, and test all the fucking time.
+** TODO Properties + PropMOP
+   Properties need to be implemented as a type of sheep, with a bunch of
+   functions special cased on =STANDARD-PROPERTY= to give metastability.
+** TODO Messages, Replies, and a possible MOP here too?
+   These all need to be sheep, and there are probably going to be a few circular
+   aspects to resolve here as well. We should extend an AMOP-like MOP too.
+** TODO "Sanely Bootstrappable"
+   Let's not go insane between now and when (test bootstrapped?) passes.
 * DONE 2.2
 ** DONE [#A] Fix #'(setf property-value) Bug
    When a call to #'(setf property-value) requires a new direct property object

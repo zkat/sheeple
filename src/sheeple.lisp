@@ -73,7 +73,7 @@ CDR are dependant upon the metasheep."
 (defmacro define-std-sheep-accessor (thing place &optional docstring)
   (flet ((link-symbol-names (a b)
            (intern (format nil "~A-~A" (symbol-name a) (symbol-name b)))))
-    (let ((name (link-symbol-names 'sheep thing))
+    (let ((name (link-symbol-names 'std-sheep thing))
           (new-value (link-symbol-names 'new thing)))
       `(progn
          (defun ,name (sheep)
@@ -82,7 +82,7 @@ CDR are dependant upon the metasheep."
          (defun (setf ,name) (,new-value sheep)
            (setf ,place ,new-value))))))
 
-;;; We in fact -should- still have (setf sheep-metasheep) at the low level, for
+;;; We in fact -should- still have (setf std-sheep-metasheep) at the low level, for
 ;;; instantiating non-std-sheep, and ease of interactive development. Having it
 ;;; defined now just makes our job easier when we choose to offer it officially. -- Adlai
 (define-std-sheep-accessor metasheep
@@ -129,9 +129,9 @@ CDR are dependant upon the metasheep."
 ;;; children cache
 (defun child-cache-full-p (sheep)
   "A child cache is full if all items in it are live weak pointers to other sheep."
-  (and (sheep-children sheep)
+  (and (std-sheep-children sheep)
        (every #'maybe-weak-pointer-value
-              (sheep-children sheep))))
+              (std-sheep-children sheep))))
 
 (defun adjust-child-cache (sheep)
   "When the child cache gets full, we have to make it bigger. In general, we assume
@@ -139,19 +139,19 @@ a 5-slot array will be enough for sheeple that only have a couple of children. O
 threshold is crossed, though, we assume the worst and replace that relatively small vector
 with a massive 100-slot adjustable array. When -that- is full, we'll resize the vector
 by 100 each time."
-  (cond ((and (= 5 (length (sheep-children sheep)))
-              (not (adjustable-array-p (sheep-children sheep))))
-         (let ((old-vector (sheep-children sheep)))
-           (setf (sheep-children sheep)
+  (cond ((and (= 5 (length (std-sheep-children sheep)))
+              (not (adjustable-array-p (std-sheep-children sheep))))
+         (let ((old-vector (std-sheep-children sheep)))
+           (setf (std-sheep-children sheep)
                  (make-array 100 :adjustable t :initial-element nil))
            (loop
               for old-entry across old-vector
-              for i below (length (sheep-children sheep))
-              do (setf (aref (sheep-children sheep) i)  old-entry))))
-        ((and (<= 100 (length (sheep-children sheep)))
-              (adjustable-array-p (sheep-children sheep)))
-         (adjust-array (sheep-children sheep)
-                       (+ 100 (length (sheep-children sheep)))
+              for i below (length (std-sheep-children sheep))
+              do (setf (aref (std-sheep-children sheep) i)  old-entry))))
+        ((and (<= 100 (length (std-sheep-children sheep)))
+              (adjustable-array-p (std-sheep-children sheep)))
+         (adjust-array (std-sheep-children sheep)
+                       (+ 100 (length (std-sheep-children sheep)))
                        :initial-element nil))
         ;; may as well.
         (t (error "Something went wrong with adjusting the array. Weird.")))
@@ -160,17 +160,17 @@ by 100 each time."
 (defun create-child-cache (sheep)
   "This creates only the basic child cache: A simple 5-item vector of NILs.
 It sets the vector as SHEEP's child cache."
-  (setf (sheep-children sheep)
+  (setf (std-sheep-children sheep)
         (make-array 5 :initial-element nil)))
 
 (defun add-child (child sheep)
   "Registers CHILD as a weak pointer in SHEEP's child cache."
-  (unless (sheep-children sheep)
+  (unless (std-sheep-children sheep)
     (create-child-cache sheep))
   (when (child-cache-full-p sheep)
     (adjust-child-cache sheep))
-  (unless (find child (sheep-children sheep) :key #'maybe-weak-pointer-value)
-    (let ((children (sheep-children sheep)))
+  (unless (find child (std-sheep-children sheep) :key #'maybe-weak-pointer-value)
+    (let ((children (std-sheep-children sheep)))
       (dotimes (i (length children))
         (unless (maybe-weak-pointer-value (aref children i))
           (return (setf (aref children i) (make-weak-pointer child)))))))
@@ -178,19 +178,19 @@ It sets the vector as SHEEP's child cache."
 
 (defun remove-child (child sheep)
   "Takes CHILD out of SHEEP's child cache."
-  (when (find child (sheep-children sheep) :key #'maybe-weak-pointer-value)
-    (setf (sheep-children sheep)
-          (delete child (sheep-children sheep) :key #'maybe-weak-pointer-value)))
+  (when (find child (std-sheep-children sheep) :key #'maybe-weak-pointer-value)
+    (setf (std-sheep-children sheep)
+          (delete child (std-sheep-children sheep) :key #'maybe-weak-pointer-value)))
   sheep)
 
 (defun map-children (function sheep)
   "Iteratively applies FUNCTION to SHEEP's children (it takes care of taking each child out
 of the weak pointer)."
-  (when (sheep-children sheep)
+  (when (std-sheep-children sheep)
     (map 'vector (lambda (pointer)
                    (when (weak-pointer-p pointer)
                      (funcall function (weak-pointer-value pointer))))
-         (sheep-children sheep))))
+         (std-sheep-children sheep))))
 
 ;;;
 ;;; Inheritance
@@ -206,9 +206,9 @@ of the weak pointer)."
                            (car to-be-processed)))
                       (all-parents-loop
                        (cons sheep-to-process seen)
-                       (union (sheep-parents sheep-to-process)
+                       (union (std-sheep-parents sheep-to-process)
                               parents)))))))
-    (all-parents-loop () (sheep-parents sheep))))
+    (all-parents-loop () (std-sheep-parents sheep))))
 
 ;;; <<<<<<< BEGIN OUTDATED CODE BLOCK >>>>>>>
 (defun compute-sheep-hierarchy-list-old (sheep)
@@ -226,19 +226,19 @@ of the weak pointer)."
 (defun local-precedence-ordering-old (sheep)
   (mapcar #'list
           (cons sheep
-                (butlast (sheep-parents sheep)))
-          (sheep-parents sheep)))
+                (butlast (std-sheep-parents sheep)))
+          (std-sheep-parents sheep)))
 ;;; <<<<<<< END OUTDATED CODE BLOCK >>>>>>>
 
 (defun local-precedence-ordering (sheep)
   "Calculates the local precedence ordering. Relies on the fact that mapcar will
 return when any list is NIL to avoid traversing the entire parent list."
-  (let ((parents (sheep-parents sheep)))
+  (let ((parents (std-sheep-parents sheep)))
     (mapcar #'list (cons sheep parents) parents)))
 
 (defun std-tie-breaker-rule (minimal-elements hl-so-far)
   (dolist (hl-constituent (reverse hl-so-far))
-    (let* ((supers (sheep-parents hl-constituent))
+    (let* ((supers (std-sheep-parents hl-constituent))
            (common (intersection minimal-elements supers)))
       (when (not (null common))
         (return-from std-tie-breaker-rule (car common))))))
@@ -247,7 +247,7 @@ return when any list is NIL to avoid traversing the entire parent list."
   (typecase sheep
     (std-sheep (std-compute-sheep-hierarchy-list sheep))
     (otherwise (compute-sheep-hierarchy-list-using-metasheep
-                (sheep-metasheep sheep) sheep))))
+                (std-sheep-metasheep sheep) sheep))))
 
 (defun std-compute-sheep-hierarchy-list (sheep)
   "Because #'local-precedence-ordering returns a fresh list each time, we can
@@ -265,7 +265,7 @@ afford to use the destructive #'mapcan and cons less."
 
 (defun memoize-sheep-hierarchy-list (sheep)
   (let ((list (compute-sheep-hierarchy-list sheep)))
-    (setf (sheep-hierarchy-cache sheep)
+    (setf (std-sheep-hierarchy-cache sheep)
           list)
     (map-children (lambda (child)
                      (memoize-sheep-hierarchy-list child))
@@ -275,11 +275,11 @@ afford to use the destructive #'mapcan and cons less."
   (typecase sheep
     (std-sheep (std-finalize-sheep-inheritance sheep))
     (otherwise (finalize-sheep-inheritance-using-metasheep
-                (sheep-metasheep sheep) sheep))))
+                (std-sheep-metasheep sheep) sheep))))
 
 (defun std-finalize-sheep-inheritance (sheep)
   "we memoize the hierarchy list here."
-  (loop for parent in (sheep-parents sheep)
+  (loop for parent in (std-sheep-parents sheep)
      do (add-child sheep parent))
   (memoize-sheep-hierarchy-list sheep)
   sheep)
@@ -290,17 +290,17 @@ afford to use the destructive #'mapcan and cons less."
   (if (and (std-sheep-p parent)
            (std-sheep-p sheep))
       (std-remove-parent parent sheep)
-      (remove-parent-using-metasheeple (sheep-metasheep parent)
-                                       (sheep-metasheep sheep)
+      (remove-parent-using-metasheeple (std-sheep-metasheep parent)
+                                       (std-sheep-metasheep sheep)
                                        parent sheep)))
 
 (defun std-remove-parent (parent child)
   "Removing PARENT to SHEEP's parent list is a matter of deleting it from the parent list."
-  (if (member parent (sheep-parents child))
+  (if (member parent (std-sheep-parents child))
       ;; TODO - this could check to make sure that the hierarchy list is still valid.
       (progn
-        (setf (sheep-parents child)
-              (delete parent (sheep-parents child)))
+        (setf (std-sheep-parents child)
+              (delete parent (std-sheep-parents child)))
         (remove-child child parent)
         (finalize-sheep-inheritance child)
         child)
@@ -311,20 +311,20 @@ afford to use the destructive #'mapcan and cons less."
   (if (and (std-sheep-p new-parent)
            (std-sheep-p sheep))
       (std-add-parent new-parent sheep)
-      (add-parent-using-metasheeple (sheep-metasheep new-parent)
-                                    (sheep-metasheep sheep)
+      (add-parent-using-metasheeple (std-sheep-metasheep new-parent)
+                                    (std-sheep-metasheep sheep)
                                     new-parent sheep)))
 
 (defun std-add-parent (new-parent child)
   "Some basic checking here, and then the parent is actually added to the sheep's list."
   (cond ((equal new-parent child)
          (error "Sheeple cannot be parents of themselves."))
-        ((member new-parent (sheep-parents child))
+        ((member new-parent (std-sheep-parents child))
          (error "~A is already a parent of ~A." new-parent child))
         (t
          (handler-case
              (progn
-               (push new-parent (sheep-parents child))
+               (push new-parent (std-sheep-parents child))
                (finalize-sheep-inheritance child)
                child)
            ;; This error is signaled by compute-sheep-hierarchy-list, which right now
@@ -347,12 +347,12 @@ to the front of the list)"
 
 (defun sheep-hierarchy-list (sheep)
   "Returns the full hierarchy-list for SHEEP"
-  (sheep-hierarchy-cache sheep))
+  (std-sheep-hierarchy-cache sheep))
 
 ;;; Inheritance predicates
 (defun parentp (maybe-parent child)
   "A parent is a sheep directly in CHILD's parent list."
-  (when (member maybe-parent (sheep-parents child))
+  (when (member maybe-parent (std-sheep-parents child))
     t))
 
 (defun ancestorp (maybe-ancestor descendant)

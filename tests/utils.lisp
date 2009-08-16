@@ -27,9 +27,10 @@
   (is (null (proper-list-of-length-p '(1 2 3) 1 2)))
   (is (null (proper-list-of-length-p #1='(:P . #1#) 0 2))))
 
+(test collect-normal-expander)
+(test collect-list-expander)
+(test collect)
 (test topological-sort)
 (test once-only)
 (test memq)
-(test collect-normal-expander)
-(test collect-list-expander)
 (test maybe-weak-pointer-value)

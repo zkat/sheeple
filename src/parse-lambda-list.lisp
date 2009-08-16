@@ -44,33 +44,6 @@
 ;;                            (values list list boolean t boolean list boolean
 ;;                                    boolean list boolean t t))
 ;;                 parse-lambda-list))
-(defmacro collect (collections &body body)
-  (let ((macros ())
-        (binds ()))
-    (dolist (spec collections)
-      (assert (proper-list-of-length-p spec 1 3) ()
-              "malformed collection specifier: ~S" spec)
-      (let* ((name (first spec))
-             (default (second spec))
-             (kind (or (third spec) 'collect))
-             (n-value (gensym (concatenate 'string
-                                           (symbol-name name)
-                                           "-N-VALUE-"))))
-        (push `(,n-value ,default) binds)
-        (if (eq kind 'collect)
-            (let ((n-tail (gensym (concatenate 'string
-                                               (symbol-name name)
-                                               "-N-TAIL-"))))
-              (if default
-                  (push `(,n-tail (last ,n-value)) binds)
-                  (push n-tail binds))
-              (push `(,name (&rest args)
-                            (collect-list-expander ',n-value ',n-tail args))
-                    macros))
-            (push `(,name (&rest args)
-                          (collect-normal-expander ',n-value ',kind args))
-                  macros))))
-    `(macrolet ,macros (let* ,(nreverse binds) ,@body))))
 
 (defun parse-lambda-list-like-thing (list &key silent)
   (collect ((required)

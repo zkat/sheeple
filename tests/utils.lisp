@@ -8,8 +8,8 @@
 (in-package :sheeple)
 
 (def-suite utils :in sheeple)
+(in-suite sheeple)
 
-(test pushend)
 (test flatten)
 (test proper-list-of-length-p)
 

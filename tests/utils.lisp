@@ -10,9 +10,15 @@
 (def-suite utils :in sheeple)
 (in-suite sheeple)
 
-(test flatten)
-(test proper-list-of-length-p)
+(test flatten
+  (is (null (flatten ())))
+  (is (null (flatten '(() (()) ((()))))))
+  (is (equal '(a b c) (flatten '(a b c))))
+  (is (equal '(a b c) (flatten '((a b c)))))
+  (is (equal '(a b c) (flatten '((a) (b) (c)))))
+  (is (equal '(a b c) (flatten '((a . b) . c)))))
 
+(test proper-list-of-length-p)
 (test topological-sort)
 (test once-only)
 (test memq)

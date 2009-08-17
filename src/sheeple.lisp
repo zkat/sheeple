@@ -189,22 +189,42 @@ Would produce this familiar \"diamond\" hierarchy:
 ;;;
 ;;; Inheritance
 ;;;
-(defun collect-ancestors (sheep)
-  "Recursively collects all of SHEEP's ancestors."
-  (labels ((all-parents-loop (seen parents)
-              (let ((to-be-processed
-                     (set-difference parents seen)))
-                (if (null to-be-processed)
-                    parents
-                    (let ((sheep-to-process
-                           (car to-be-processed)))
-                      (all-parents-loop
-                       (cons sheep-to-process seen)
-                       (union (sheep-parents sheep-to-process)
-                              parents)))))))
-    (all-parents-loop () (sheep-parents sheep))))
 
 ;;; <<<<<<< BEGIN OUTDATED CODE BLOCK >>>>>>>
+(defun mapappend (fun &rest args)
+  (if (some #'null args)
+      ()
+      (append (apply fun (mapcar #'car args))
+              (apply #'mapappend fun (mapcar #'cdr args)))))
+
+(defun topological-sort-old (elements constraints tie-breaker)
+  (let ((remaining-constraints constraints)
+        (remaining-elements elements)
+        (result ()))
+    (loop
+       (let ((minimal-elements
+              (remove-if
+               (lambda (sheep)
+                 (member sheep remaining-constraints
+                         :key #'cadr))
+               remaining-elements)))
+         (when (null minimal-elements)
+           (if (null remaining-elements)
+               (return-from topological-sort-old result)
+               (error "Inconsistent precedence graph.")))
+         (let ((choice (if (null (cdr minimal-elements))
+                           (car minimal-elements)
+                           (funcall tie-breaker
+                                    minimal-elements
+                                    result))))
+           (setf result (append result (list choice)))
+           (setf remaining-elements
+                 (remove choice remaining-elements))
+           (setf remaining-constraints
+                 (remove choice
+                         remaining-constraints
+                         :test #'member)))))))
+
 (defun compute-sheep-hierarchy-list-old (sheep)
   (handler-case
       ;; since collect-ancestors only collects the _ancestors_, we cons the sheep in front.
@@ -224,6 +244,44 @@ Would produce this familiar \"diamond\" hierarchy:
           (sheep-parents sheep)))
 ;;; <<<<<<< END OUTDATED CODE BLOCK >>>>>>>
 
+(defun topological-sort (elements constraints tie-breaker)
+  "Sorts ELEMENTS such that they satisfy the CONSTRAINTS, falling back
+on the TIE-BREAKER in the case of ambiguous constraints. On the assumption
+that they are freshly generated, this implementation is destructive with
+regards to the CONSTRAINTS. A future version will undo this change."
+  (loop
+     :for minimal-elements :=
+     (remove-if (lambda (sheep)
+                  (member sheep constraints
+                          :key #'cadr))
+                elements)
+     :while minimal-elements
+     :for choice := (if (null (cdr minimal-elements))
+                        (car minimal-elements)
+                        (funcall tie-breaker minimal-elements result))
+     :collect choice :into result
+     :do (setf constraints (delete choice constraints :test #'member)
+               elements (remove choice elements))
+     :finally
+     (if (null elements)
+         (return-from topological-sort result)
+         (error "Inconsistent precedence graph."))))
+
+(defun collect-ancestors (sheep)
+  "Recursively collects all of SHEEP's ancestors."
+  (labels ((all-parents-loop (seen parents)
+              (let ((to-be-processed
+                     (set-difference parents seen)))
+                (if (null to-be-processed)
+                    parents
+                    (let ((sheep-to-process
+                           (car to-be-processed)))
+                      (all-parents-loop
+                       (cons sheep-to-process seen)
+                       (union (sheep-parents sheep-to-process)
+                              parents)))))))
+    (all-parents-loop () (sheep-parents sheep))))
+
 (defun local-precedence-ordering (sheep)
   "Calculates the local precedence ordering. Relies on the fact that mapcar will
 return when any list is NIL to avoid traversing the entire parent list."
@@ -236,12 +294,6 @@ return when any list is NIL to avoid traversing the entire parent list."
            (common (intersection minimal-elements supers)))
       (when (not (null common))
         (return-from std-tie-breaker-rule (car common))))))
-
-(defun compute-sheep-hierarchy-list (sheep)
-  (typecase sheep
-    (std-sheep (std-compute-sheep-hierarchy-list sheep))
-    (otherwise (compute-sheep-hierarchy-list-using-metasheep
-                (sheep-metasheep sheep) sheep))))
 
 (defun std-compute-sheep-hierarchy-list (sheep)
   "Because #'local-precedence-ordering returns a fresh list each time, we can
@@ -257,6 +309,12 @@ afford to use the destructive #'mapcan and cons less."
     (simple-error ()
       (error 'sheeple-hierarchy-error :sheep sheep))))
 
+(defun compute-sheep-hierarchy-list (sheep)
+  (typecase sheep
+    (std-sheep (std-compute-sheep-hierarchy-list sheep))
+    (otherwise (compute-sheep-hierarchy-list-using-metasheep
+                (sheep-metasheep sheep) sheep))))
+
 (defun memoize-sheep-hierarchy-list (sheep)
   (let ((list (compute-sheep-hierarchy-list sheep)))
     (setf (%sheep-hierarchy-cache sheep)
@@ -265,18 +323,18 @@ afford to use the destructive #'mapcan and cons less."
                      (memoize-sheep-hierarchy-list child))
                    sheep)))
 
-(defun finalize-sheep-inheritance (sheep)
-  (typecase sheep
-    (std-sheep (std-finalize-sheep-inheritance sheep))
-    (otherwise (finalize-sheep-inheritance-using-metasheep
-                (sheep-metasheep sheep) sheep))))
-
 (defun std-finalize-sheep-inheritance (sheep)
   "we memoize the hierarchy list here."
   (loop for parent in (sheep-parents sheep)
      do (%add-child sheep parent))
   (memoize-sheep-hierarchy-list sheep)
   sheep)
+
+(defun finalize-sheep-inheritance (sheep)
+  (typecase sheep
+    (std-sheep (std-finalize-sheep-inheritance sheep))
+    (otherwise (finalize-sheep-inheritance-using-metasheep
+                (sheep-metasheep sheep) sheep))))
 
 ;;; Add/remove parents
 (defun remove-parent (parent sheep)

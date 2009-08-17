@@ -44,6 +44,19 @@
   (is (null (svref (cdr sheep) 4)))
   (is (null (svref (cdr sheep) 5))))
 
+(test allocate-sheep
+  (let ((sheep (allocate-sheep =standard-metasheep=)))
+  (is (consp sheep))
+  (is (vectorp (cdr sheep)))
+  (is (= 6 (length (cdr sheep))))
+  (is (eql =standard-metasheep= (car sheep)))
+  (is (null (svref (cdr sheep) 0)))
+  (is (null (svref (cdr sheep) 1)))
+  (is (null (svref (cdr sheep) 2)))
+  (is (null (svref (cdr sheep) 3)))
+  (is (null (svref (cdr sheep) 4)))
+  (is (null (svref (cdr sheep) 5)))))
+
 (test (std-sheep-accessors
        :depends-on std-sheep-basic-structure
        :fixture allocate-std-sheep)
@@ -98,33 +111,26 @@
   (is (equal '(bar foo) (push 'bar (%sheep-parents sheep))))
   (is (equal '(bar foo) (%sheep-parents sheep))))
 
-(test (sheep-parents :fixture allocate-std-sheep)
-  (is (eql nil (sheep-parents sheep)))
-  (setf (%sheep-parents sheep) '(foo))
-  (is (equal '(foo) (sheep-parents sheep)))
-  (push 'bar (%sheep-parents sheep))
-  (is (equal '(bar foo) (%sheep-parents sheep))))
+(test (%sheep-pvalue-vector :fixture allocate-std-sheep)
+  (is (eql nil (%sheep-pvalue-vector sheep)))
+  (is (equal '(foo) (setf (%sheep-pvalue-vector sheep) '(foo))))
+  (is (equal '(foo) (%sheep-pvalue-vector sheep)))
+  (is (equal '(bar foo) (push 'bar (%sheep-pvalue-vector sheep))))
+  (is (equal '(bar foo) (%sheep-pvalue-vector sheep))))
 
-(test (sheep-pvalue-vector :fixture allocate-std-sheep)
-  (is (eql nil (sheep-pvalue-vector sheep)))
-  (is (equal '(foo) (setf (sheep-pvalue-vector sheep) '(foo))))
-  (is (equal '(foo) (sheep-pvalue-vector sheep)))
-  (is (equal '(bar foo) (push 'bar (sheep-pvalue-vector sheep))))
-  (is (equal '(bar foo) (sheep-pvalue-vector sheep))))
+(test (%sheep-property-metaobjects :fixture allocate-std-sheep)
+  (is (eql nil (%sheep-property-metaobjects sheep)))
+  (is (equal '(foo) (setf (%sheep-property-metaobjects sheep) '(foo))))
+  (is (equal '(foo) (%sheep-property-metaobjects sheep)))
+  (is (equal '(bar foo) (push 'bar (%sheep-property-metaobjects sheep))))
+  (is (equal '(bar foo) (%sheep-property-metaobjects sheep))))
 
-(test (sheep-property-metaobjects :fixture allocate-std-sheep)
-  (is (eql nil (sheep-property-metaobjects sheep)))
-  (is (equal '(foo) (setf (sheep-property-metaobjects sheep) '(foo))))
-  (is (equal '(foo) (sheep-property-metaobjects sheep)))
-  (is (equal '(bar foo) (push 'bar (sheep-property-metaobjects sheep))))
-  (is (equal '(bar foo) (sheep-property-metaobjects sheep))))
-
-(test (sheep-roles :fixture allocate-std-sheep)
-  (is (eql nil (sheep-roles sheep)))
-  (is (equal '(foo) (setf (sheep-roles sheep) '(foo))))
-  (is (equal '(foo) (sheep-roles sheep)))
-  (is (equal '(bar foo) (push 'bar (sheep-roles sheep))))
-  (is (equal '(bar foo) (sheep-roles sheep))))
+(test (%sheep-roles :fixture allocate-std-sheep)
+  (is (eql nil (%sheep-roles sheep)))
+  (is (equal '(foo) (setf (%sheep-roles sheep) '(foo))))
+  (is (equal '(foo) (%sheep-roles sheep)))
+  (is (equal '(bar foo) (push 'bar (%sheep-roles sheep))))
+  (is (equal '(bar foo) (%sheep-roles sheep))))
 
 (test (%sheep-hierarchy-cache :fixture allocate-std-sheep)
   (is (eql nil (%sheep-hierarchy-cache sheep)))
@@ -139,6 +145,16 @@
   (is (equal '(foo) (%sheep-children sheep)))
   (is (equal '(bar foo) (push 'bar (%sheep-children sheep))))
   (is (equal '(bar foo) (%sheep-children sheep))))
+
+(def-suite interface-accessors :in sheep-objects)
+(in-suite interface-accessors)
+
+(test (sheep-parents :fixture allocate-std-sheep)
+  (is (eql nil (sheep-parents sheep)))
+  (setf (%sheep-parents sheep) '(foo))
+  (is (equal '(foo) (sheep-parents sheep)))
+  (push 'bar (%sheep-parents sheep))
+  (is (equal '(bar foo) (sheep-parents sheep))))
 
 (def-suite inheritance :in sheep-objects)
 (def-suite inheritance-basic :in inheritance)
@@ -533,7 +549,7 @@
     (is (eq 'test (sheep-documentation (clone sheep))))))
 
 (test copy-sheep
-  ;; TODO
+  ;; TODO - I don't even know if I want this.
   )
 
 ;;;

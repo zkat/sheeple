@@ -76,7 +76,7 @@ CDR are dependant upon the metasheep."
 ;;; STD-SHEEP accessor definitions
 (defmacro define-internal-accessors (&body names-and-indexes)
   `(progn 
-     ,@(loop for (name index) on names-and-indexes
+     ,@(loop for (name index) on names-and-indexes by #'cddr
           collect 
           `(progn
              (defun ,name (sheep)
@@ -100,6 +100,12 @@ CDR are dependant upon the metasheep."
                            ;; These last two are used internally, for hierarchy caching.
                            %sheep-hierarchy-cache 4
                            %sheep-children 5)
+
+;; If we didn't define this function, Lisp's package system would 
+;; export the SETF version as well as the reader.
+(defun sheep-parents (sheep)
+  (declare (inline %sheep-parents))
+  (%sheep-parents sheep))
 
 ;;; children cache
 (defun %child-cache-full-p (sheep)
@@ -274,8 +280,8 @@ afford to use the destructive #'mapcan and cons less."
   (if (member parent (sheep-parents child))
       ;; TODO - this could check to make sure that the hierarchy list is still valid.
       (progn
-        (setf (sheep-parents child)
-              (delete parent (sheep-parents child)))
+        (setf (%sheep-parents child)
+              (delete parent (%sheep-parents child)))
         (%remove-child child parent)
         (finalize-sheep-inheritance child)
         child)
@@ -299,7 +305,7 @@ afford to use the destructive #'mapcan and cons less."
         (t
          (handler-case
              (progn
-               (push new-parent (sheep-parents child))
+               (push new-parent (%sheep-parents child))
                (finalize-sheep-inheritance child)
                child)
            ;; This error is signaled by compute-sheep-hierarchy-list, which right now

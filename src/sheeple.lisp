@@ -112,13 +112,10 @@ CDR are dependant upon the metasheep."
 
 ;;; children cache
 (defun %child-cache-full-p (sheep)
-  "A child cache is full if all items in it are weak pointers to other sheep.
-In reality, we can sort of get away with just checking if it's a pointer, since
-it's astronomically unlikely anything else will make it in..."
-  (when (and (%sheep-children sheep)
-             (every #'maybe-weak-pointer-value
-                    (%sheep-children sheep)))
-    t))
+  "A child cache is full if all its items are live weak pointers to other sheep."
+  (and (%sheep-children sheep)
+       (every #'maybe-weak-pointer-value
+              (%sheep-children sheep))))
 
 (defun %adjust-child-cache (sheep)
   "When the child cache gets full, we have to make it bigger. In general, we assume

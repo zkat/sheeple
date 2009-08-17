@@ -69,7 +69,7 @@ CDR are dependant upon the metasheep."
       (allocate-std-sheep)
       (allocate-sheep-using-metasheep metasheep)))
 
-(defmacro define-std-sheep-accessor (name place docstring)
+(defmacro define-std-sheep-accessor (name place &optional docstring)
   `(progn
      (defun ,name (sheep)
        ,@(when (stringp docstring) (list docstring))

@@ -161,6 +161,13 @@
     (is (equal (list (list d a) (list a b) (list b c))
                (local-precedence-ordering d)))))
 
+(test with-some-sheep-hierarchy
+  (5am:finishes
+    (with-some-sheep-hierarchy (a b c) (() (a) (b a))
+      (is (null (sheep-parents a)))
+      (is (equal (list a) (sheep-parents b)))
+      (is (equal (list b a) (sheep-parents c))))))
+
 (test std-tie-breaker-rule
   (let* ((a (allocate-std-sheep))
          (b (allocate-std-sheep))

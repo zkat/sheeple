@@ -111,12 +111,15 @@
   [Adlai:] This is a rough sketch of The Road to Sheeple 3.0, as I see it right
   now.  It's also mainly an invitation for you, zkat, to flesh out any
   headings if you feel like it.
-** TODO "Test all the fucking time."
+** TODO [#A] "Test all the fucking time."
    This is very important. Watch the entire thing, twice.
    http://rubyhoedown2008.confreaks.com/05-bryan-liles-lightning-talk-tatft-test-all-the-f-in-time.html
    Then watch this:
    http://www.vimeo.com/1534976?pg=embed&sec=1534976
    Then go write some tests, and test all the fucking time.
+** TODO [#B] Fix Sheep Allocation
+   We need std-allocate-sheep, along with a MOP hook so that, for
+   example, you could allocate storage in a database in an :after reply.
 ** TODO Properties + PropMOP
    Properties need to be implemented as a type of sheep, with a bunch of
    functions special cased on =STANDARD-PROPERTY= to give metastability.

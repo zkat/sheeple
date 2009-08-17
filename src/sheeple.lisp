@@ -252,6 +252,15 @@ afford to use the destructive #'mapcan and cons less."
     (simple-error ()
       (error 'sheeple-hierarchy-error :sheep sheep))))
 
+(defmacro with-some-sheep-hierarchy (&body body)
+  `(let ,(mapcar #'(lambda (var) `(,var (allocate-std-sheep)))
+                 '(a b c d e f g h))
+     ,@(mapcar #'(lambda (sheep parents)
+                   `(add-parents parents sheep))
+               '(a b c d e f g h)
+               '(() () (a) (a) (b c) (d) (c f) (g e)))
+     ,@body))
+
 (defun memoize-sheep-hierarchy-list (sheep)
   (let ((list (compute-sheep-hierarchy-list sheep)))
     (setf (%sheep-hierarchy-cache sheep)

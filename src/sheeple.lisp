@@ -69,51 +69,46 @@ CDR are dependant upon the metasheep."
       (allocate-std-sheep)
       (allocate-sheep-using-metasheep metasheep)))
 
-;;; Some useful accessors...
-(defun sheep-metasheep (sheep)
-  "Returns SHEEP's metasheep. For now, there is no support for changing a sheep's metasheep."
-  (car sheep))
-;; no (setf sheep-metasheep) for now.
+(defmacro define-std-sheep-accessor (name place docstring)
+  `(progn
+     (defun ,name (sheep)
+       ,@(when (stringp docstring) (list docstring))
+       ,place)
+     (defun (setf ,name) (new-value sheep)
+       (setf ,place new-value))))
 
-(defun sheep-parents (sheep)
-  (svref (cdr sheep) 0))
-(defun (setf sheep-parents) (new-value sheep)
-  (setf (svref (cdr sheep) 0) new-value))
+;;; Some useful accessors...
+(define-std-sheep-accessor sheep-metasheep
+    (car sheep)
+  "Returns SHEEP's metasheep. Do not try to set this place from user code.")
+
+(define-std-sheep-accessor sheep-parents
+    (svref (cdr sheep) 0))
 
 ;; Sheep properties are split into two separate data structures:
 ;; The first is a vector of values, where each entry is (cons 'property-name value)
 ;; The second is a vector of property metaobjects.
 ;; Having a local property metaobject means the sheep MUST have a value for that property,
 ;; but the inverse is not necessarily true.
-(defun sheep-pvalue-vector (sheep)
-  (svref (cdr sheep) 1))
-(defun (setf sheep-pvalue-vector) (new-value sheep)
-  (setf (svref (cdr sheep) 1) new-value))
+(define-std-sheep-accessor sheep-pvalue-vector
+    (svref (cdr sheep) 1))
 
-(defun sheep-property-metaobjects (sheep)
-  (svref (cdr sheep) 2))
-(defun (setf sheep-property-metaobjects) (new-value sheep)
-  (setf (svref (cdr sheep) 2) new-value))
+(define-std-sheep-accessor sheep-property-metaobjects
+    (svref (cdr sheep) 2))
 
-(defun sheep-roles (sheep)
-  (svref (cdr sheep) 3))
-(defun (setf sheep-roles) (new-value sheep)
-  (setf (svref (cdr sheep) 3) new-value))
+(define-std-sheep-accessor sheep-roles
+    (svref (cdr sheep) 3))
 
 ;; Although it makes the sheep objects much heavier, we cache the sheep's hierarchy list,
 ;; so we don't have to run through the fairly heavy sorting algorithm each time.
-(defun %sheep-hierarchy-cache (sheep)
-  (svref (cdr sheep) 4))
-(defun (setf %sheep-hierarchy-cache) (new-value sheep)
-  (setf (svref (cdr sheep) 4) new-value))
+(define-std-sheep-accessor %sheep-hierarchy-cache
+    (svref (cdr sheep) 4))
 
 ;; The current caching scheme also requires us to keep track of any children a sheep has,
 ;; so changes in the hierarchy can be propagated. This could be probably done in a
 ;; much better way...
-(defun %sheep-children (sheep)
-  (svref (cdr sheep) 5))
-(defun (setf %sheep-children) (new-value sheep)
-  (setf (svref (cdr sheep) 5) new-value))
+(define-std-sheep-accessor %sheep-children
+    (svref (cdr sheep) 5))
 
 ;;; children cache
 (defun %child-cache-full-p (sheep)

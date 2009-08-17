@@ -224,7 +224,7 @@
     (setf (%sheep-parents h) (list g e))
     (is (equal (list h g e b c f d a) (compute-sheep-hierarchy-list h)))))
 
-(test std-compute-sheep-hierarchy-list
+(test compute-sheep-hierarchy-list
   (let* ((parent (allocate-std-sheep))
          (child (allocate-std-sheep)))
     (setf (%sheep-parents child) (list parent))
@@ -550,7 +550,8 @@
     (is (eq 'test (sheep-documentation (clone sheep))))))
 
 (test copy-sheep
-  ;; TODO - I don't even know if I want this.
+  ;; TODO - I don't even know if I want this. -- Sykopomp
+  ;; Why not? -- Adlai
   )
 
 ;;;

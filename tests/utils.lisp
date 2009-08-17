@@ -35,7 +35,6 @@
 (test collect-normal-expander)
 (test collect-list-expander)
 (test collect)
-(test topological-sort)
 (test once-only)
 (test memq)
 (test maybe-weak-pointer-value)

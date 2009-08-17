@@ -50,9 +50,13 @@ CDR are dependant upon the metasheep."
   "Predicate for sheepdom."
   (typep sheep 'sheep))
 
-(defun allocate-std-sheep ()
+(defun std-allocate-sheep (metasheep)
   "Creates a standard sheep object. By default, all the metaproperties are NIL."
-  (cons =standard-metasheep= (make-array 6 :initial-element nil)))
+  (cons metasheep (make-array 6 :initial-element nil)))
+
+(defun allocate-std-sheep ()
+  "Confusing convenience function that will go away very soon."
+  (std-allocate-sheep =standard-metasheep=))
 
 (defun print-young-sheep (sheep stream)
   (print-unreadable-object (sheep stream :identity t)
@@ -66,54 +70,36 @@ CDR are dependant upon the metasheep."
 (defun allocate-sheep (metasheep)
   "Allocates the basic skeleton for a sheep object in memory and returns it."
   (if (eql =standard-metasheep= metasheep)
-      (allocate-std-sheep)
+      (std-allocate-sheep metasheep)
       (allocate-sheep-using-metasheep metasheep)))
 
 ;;; STD-SHEEP accessor definitions
-(macrolet ((define-std-sheep-accessor (name place &optional docstring)
-             `(progn (defun ,name (sheep)
-                       ,@(when (stringp docstring) (list docstring))
-                       ,place)
-                     (defun (setf ,name) (new-value sheep)
-                       (setf ,place new-value)))))
+(defmacro define-internal-accessors (&body names-and-indexes)
+  `(progn 
+     ,@(loop for (name index) on names-and-indexes
+          collect 
+          `(progn
+             (defun ,name (sheep)
+               (svref (cdr sheep) ,index))
+             (defun (setf ,name) (new-value sheep)
+               (setf (svref (cdr sheep) ,index) new-value))))))
 
-  (define-std-sheep-accessor sheep-metasheep
-      (car sheep)
-    "SHEEP's metasheep. Do not set this place.")
+;; Sheep properties are split into two separate data structures:
+;; The first is a vector of values, where each entry is (cons 'property-name value)
+;; The second is a vector of property metaobjects.
+;; Having a local property metaobject means the sheep MUST have a value for that property,
+;; but the inverse is not necessarily true.
+(defun sheep-metasheep (sheep)
+  (car sheep))
 
-  (define-std-sheep-accessor sheep-parents
-      (svref (cdr sheep) 0)
-    "SHEEP's parents.")
-
-  ;; Sheep properties are split into two separate data structures:
-  ;; The first is a vector of values, where each entry is (cons 'property-name value)
-  ;; The second is a vector of property metaobjects.
-  ;; Having a local property metaobject means the sheep MUST have a value for that property,
-  ;; but the inverse is not necessarily true.
-  (define-std-sheep-accessor sheep-pvalue-vector
-      (svref (cdr sheep) 1)
-    "SHEEP's property values. A property's existence here doesn't guarantee a corresponging
- metaobject in (sheep-property-metaobjects SHEEP).")
-
-  (define-std-sheep-accessor sheep-property-metaobjects
-      (svref (cdr sheep) 2)
-    "SHEEP's property metaobjects. A property metaobject is only present when SHEEP's
- metasheep is not =STANDARD-SHEEP=.")
-
-  (define-std-sheep-accessor sheep-roles
-      (svref (cdr sheep) 3)
-    "SHEEP's roles. These are relevant to reply dispatch.")
-
-  ;; These last two are used internally, for hierarchy caching.
-
-  (define-std-sheep-accessor %sheep-hierarchy-cache
-      (svref (cdr sheep) 4)
-    "SHEEP's hierarchy cache. Lets us avoid running the heavy sorting algorithm each time.")
-
-  (define-std-sheep-accessor %sheep-children
-      (svref (cdr sheep) 5)
-    "SHEEP's children cache. Enables propagation of changes in the hierarchy list.")
-) ; End STD-SHEEP accessor definitions
+;; Pattern abstracted!
+(define-internal-accessors %sheep-parents 0 ; actual parents
+                           %sheep-pvalue-vector 1 ; vector with direct property values
+                           %sheep-property-metaobjects 2 ; vector with property metaobjects
+                           %sheep-roles 3 ; direct roles
+                           ;; These last two are used internally, for hierarchy caching.
+                           %sheep-hierarchy-cache 4
+                           %sheep-children 5)
 
 ;;; children cache
 (defun %child-cache-full-p (sheep)

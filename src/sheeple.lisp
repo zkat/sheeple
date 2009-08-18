@@ -252,13 +252,29 @@ afford to use the destructive #'mapcan and cons less."
     (simple-error ()
       (error 'sheeple-hierarchy-error :sheep sheep))))
 
-(defmacro with-some-sheep-hierarchy (&body body)
-  `(let ,(mapcar #'(lambda (var) `(,var (allocate-std-sheep)))
-                 '(a b c d e f g h))
+(defmacro with-some-sheep-hierarchy (sheep parents &body body)
+  "This macro sets up a sheep hierarchy consisting of SHEEP. The parent-child
+ relationships are resolved by adding as parents to each SHEEP the corresponding
+ PARENTS.
+
+As an example, the following call:
+
+  (with-some-sheep-hierarchy (a b c d) (() (a) (a) (b c)))
+    ...)
+
+Would produce this familiar \"diamond\" hierarchy:
+
+   A
+  / \\
+ B   C
+  \\ /
+   D"
+  `(let ,(mapcar #'(lambda (var)
+                     `(,var (allocate-std-sheep)))
+                 sheep)
      ,@(mapcar #'(lambda (sheep parents)
-                   `(add-parents parents sheep))
-               '(a b c d e f g h)
-               '(() () (a) (a) (b c) (d) (c f) (g e)))
+                   `(add-parents (list ,@parents) ,sheep))
+               sheep parents)
      ,@body))
 
 (defun memoize-sheep-hierarchy-list (sheep)

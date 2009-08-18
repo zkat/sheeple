@@ -46,6 +46,24 @@ of its descendants."
       (and (typep sheep '(simple-vector 6))
            (typep (elt sheep 0) 'std-sheep))))
 
+;;; The basics of printing sheep
+
+(unless *print-circle*
+  (warn "*PRINT-CIRCLE* is set to NIL. This is liable to cause problems if you
+ try to view the low-level representation of sheep. As long as *PRINT-PRETTY*
+ is set to T, this should not be a problem, but set *PRINT-CIRCLE* to T as well
+ if you ever set *PRINT-PRETTY* to NIL."))
+
+(unless *print-pretty*
+  (setf *print-pretty* t)
+  (warn "*PRINT-PRETTY* was set to NIL. It has been set to T."))
+
+(defun print-young-sheep (stream sheep)
+  (print-unreadable-object (sheep stream :identity t)
+    (format stream "Young Sheep")))
+
+(set-pprint-dispatch 'sheep #'print-young-sheep 0.1)
+
 (defun std-allocate-sheep (metasheep)
   "Creates a standard sheep object. By default, all the metaproperties are NIL."
   (let ((array (make-array 6 :initial-element nil)))
@@ -56,14 +74,6 @@ of its descendants."
   "Confusing convenience function that will go away very soon."
   (std-allocate-sheep =standard-metasheep=))
 
-(defun print-young-sheep (sheep stream)
-  (print-unreadable-object (sheep stream :identity t)
-    (format stream "Young Sheep")))
-
-(defmethod print-object ((obj cons) stream)
-  (typecase obj
-    (std-sheep (print-young-sheep obj stream))
-    (otherwise (call-next-method))))
 
 ;;; STD-SHEEP accessor definitions
 (defmacro define-internal-accessors (&body names-and-indexes)

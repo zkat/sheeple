@@ -156,6 +156,18 @@
   (push 'bar (%sheep-parents sheep))
   (is (equal '(bar foo) (sheep-parents sheep))))
 
+;;; Testing the utility...
+(in-suite sheep-objects)
+(test with-sheep-hierarchy
+  (with-sheep-hierarchy (a (b a) (c a) (d b c))
+    (is (null (sheep-parents a)))
+    (is (equal (list a) (sheep-parents b)))
+    (is (equal (list a) (sheep-parents c)))
+    (is (equal (list b c) (sheep-parents d))))
+  (signals sheeple-hierarchy-error
+    (with-sheep-hierarchy (a (b a) (c b) (d a c))
+      (declare (ignore d)))))
+
 (def-suite inheritance :in sheep-objects)
 (def-suite inheritance-basic :in inheritance)
 (in-suite inheritance-basic)

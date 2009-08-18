@@ -117,6 +117,11 @@
    Then watch this:
    http://www.vimeo.com/1534976?pg=embed&sec=1534976
    Then go write some tests, and test all the fucking time.
+*** TODO Improve test for WITH-SHEEP-HIERARCHY
+    It's too brittle right now -- the entire thing fails if something is wrong
+    in the implementation. Make the tests more modular.
+*** TODO Convert tests to use WITH-SHEEP-HIERARCHY
+    We might as well use this macro, since it's so compact.
 ** TODO [#B] Fix Sheep Allocation
    We need std-allocate-sheep, along with a MOP hook so that, for
    example, you could allocate storage in a database in an :after reply.
@@ -128,6 +133,7 @@
    aspects to resolve here as well. We should extend an AMOP-like MOP too.
 ** TODO "Sanely Bootstrappable"
    Let's not go insane between now and when (test bootstrapped?) passes.
+*** TODO Once bootstrapped, update WITH-SHEEP-HIERARCHY to use #'clone
 * DONE 2.2
 ** DONE [#A] Fix #'(setf property-value) Bug
    When a call to #'(setf property-value) requires a new direct property object

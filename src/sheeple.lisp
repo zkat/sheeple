@@ -181,6 +181,33 @@ of the weak pointer)."
                      (funcall function (weak-pointer-value pointer))))
          (%sheep-children sheep))))
 
+;;; This utility is useful for concisely setting up sheep hierarchies
+(defmacro with-sheep-hierarchy (sheep-and-parents &body body)
+  "This macro sets up a sheep hierarchy. The parent-child are expressend in a
+ list passed as the first parameter. Each item in the list is either a variable,
+ which will be bound to a fresh sheep, or a list of form (var &rest parents), in
+ which case VAR will be bound to a fresh sheep with PARENTS as its parents.
+
+As an example, the following call:
+
+  (with-some-sheep-hierarchy (a (b a) (c a) (d b c))
+    ...)
+
+Would produce this familiar \"diamond\" hierarchy:
+
+   A
+  / \\
+ B   C
+  \\ /
+   D"
+  `(let* ,(mapcar #'(lambda (hierarchy-spec)
+                      (destructuring-bind (sheep &rest parents)
+                          (ensure-list hierarchy-spec)
+                        `(,sheep (add-parents (list ,@parents)
+                                              (allocate-std-sheep)))))
+                  sheep-and-parents)
+     ,@body))
+
 ;;;
 ;;; Inheritance
 ;;;
@@ -251,32 +278,6 @@ afford to use the destructive #'mapcan and cons less."
                           #'std-tie-breaker-rule))
     (simple-error ()
       (error 'sheeple-hierarchy-error :sheep sheep))))
-
-(defmacro with-sheep-hierarchy (sheep-and-parents &body body)
-  "This macro sets up a sheep hierarchy. The parent-child are expressend in a
- list passed as the first parameter. Each item in the list is either a variable,
- which will be bound to a fresh sheep, or a list of form (var &rest parents), in
- which case VAR will be bound to a fresh sheep with PARENTS as its parents.
-
-As an example, the following call:
-
-  (with-some-sheep-hierarchy (a (b a) (c a) (d b c))
-    ...)
-
-Would produce this familiar \"diamond\" hierarchy:
-
-   A
-  / \\
- B   C
-  \\ /
-   D"
-  `(let* ,(mapcar #'(lambda (hierarchy-spec)
-                      (destructuring-bind (sheep &rest parents)
-                          (ensure-list hierarchy-spec)
-                        `(,sheep (add-parents (list ,@parents)
-                                              (allocate-std-sheep)))))
-                  sheep-and-parents)
-     ,@body))
 
 (defun memoize-sheep-hierarchy-list (sheep)
   (let ((list (compute-sheep-hierarchy-list sheep)))

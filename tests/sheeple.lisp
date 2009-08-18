@@ -162,11 +162,15 @@
                (local-precedence-ordering d)))))
 
 (test with-some-sheep-hierarchy
-  (5am:finishes
-    (with-some-sheep-hierarchy (a b c) (() (a) (b a))
-      (is (null (sheep-parents a)))
-      (is (equal (list a) (sheep-parents b)))
-      (is (equal (list b a) (sheep-parents c))))))
+  (with-some-sheep-hierarchy (a b c d)
+      (() (a) (a) (b c))
+    (is (null (sheep-parents a)))
+    (is (equal (list a) (sheep-parents b)))
+    (is (equal (list a) (sheep-parents c)))
+    (is (equal (list b c) (sheep-parents d))))
+  (signals sheeple-hierarchy-error
+    (with-some-sheep-hierarchy (a b c d)
+        (() (a) (b) (a c)))))
 
 (test std-tie-breaker-rule
   (let* ((a (allocate-std-sheep))

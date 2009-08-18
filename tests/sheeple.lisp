@@ -161,16 +161,15 @@
     (is (equal (list (list d a) (list a b) (list b c))
                (local-precedence-ordering d)))))
 
-(test with-some-sheep-hierarchy
-  (with-some-sheep-hierarchy (a b c d)
-      (() (a) (a) (b c))
+(test with-sheep-hierarchy
+  (with-sheep-hierarchy (a (b a) (c a) (d b c))
     (is (null (sheep-parents a)))
     (is (equal (list a) (sheep-parents b)))
     (is (equal (list a) (sheep-parents c)))
     (is (equal (list b c) (sheep-parents d))))
   (signals sheeple-hierarchy-error
-    (with-some-sheep-hierarchy (a b c d)
-        (() (a) (b) (a c)))))
+    (with-sheep-hierarchy (a (b a) (c b) (d a c))
+      (declare (ignore d)))))
 
 (test std-tie-breaker-rule
   (let* ((a (allocate-std-sheep))

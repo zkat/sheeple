@@ -252,14 +252,15 @@ afford to use the destructive #'mapcan and cons less."
     (simple-error ()
       (error 'sheeple-hierarchy-error :sheep sheep))))
 
-(defmacro with-some-sheep-hierarchy (sheep parents &body body)
-  "This macro sets up a sheep hierarchy consisting of SHEEP. The parent-child
- relationships are resolved by adding as parents to each SHEEP the corresponding
- PARENTS.
+(defmacro with-sheep-hierarchy (sheep-and-parents &body body)
+  "This macro sets up a sheep hierarchy. The parent-child are expressend in a
+ list passed as the first parameter. Each item in the list is either a variable,
+ which will be bound to a fresh sheep, or a list of form (var &rest parents), in
+ which case VAR will be bound to a fresh sheep with PARENTS as its parents.
 
 As an example, the following call:
 
-  (with-some-sheep-hierarchy (a b c d) (() (a) (a) (b c)))
+  (with-some-sheep-hierarchy (a (b a) (c a) (d b c))
     ...)
 
 Would produce this familiar \"diamond\" hierarchy:
@@ -269,12 +270,12 @@ Would produce this familiar \"diamond\" hierarchy:
  B   C
   \\ /
    D"
-  `(let ,(mapcar #'(lambda (var)
-                     `(,var (allocate-std-sheep)))
-                 sheep)
-     ,@(mapcar #'(lambda (sheep parents)
-                   `(add-parents (list ,@parents) ,sheep))
-               sheep parents)
+  `(let* ,(mapcar #'(lambda (hierarchy-spec)
+                      (destructuring-bind (sheep &rest parents)
+                          (ensure-list hierarchy-spec)
+                        `(,sheep (add-parents (list ,@parents)
+                                              (allocate-std-sheep)))))
+                  sheep-and-parents)
      ,@body))
 
 (defun memoize-sheep-hierarchy-list (sheep)

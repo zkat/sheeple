@@ -117,6 +117,9 @@
    Then watch this:
    http://www.vimeo.com/1534976?pg=embed&sec=1534976
    Then go write some tests, and test all the fucking time.
+*** TODO Improve tests for printing
+    This might require CL-PPCRE.  Also, there should be better tests for the
+    initialization of various *print-foobar* settings.
 *** TODO Improve test for WITH-SHEEP-HIERARCHY
     It's too brittle right now -- the entire thing fails if something is wrong
     in the implementation. Make the tests more modular.
@@ -134,6 +137,19 @@
    aspects to resolve here as well. We should extend an AMOP-like MOP too.
 ** TODO "Sanely Bootstrappable"
    Let's not go insane between now and when (test bootstrapped?) passes.
+*** TODO Write proper print functions
+    It makes sense to me (Adlai) to do all printing through the pretty-printer
+    right now -- that way, we have a quick hook to examine raw sheep without
+    messing around with #'print-object.  This is basically how it should look:
+**** TODO #'print-young-sheep with lowest priority
+     Specialized on type 'sheep, this function should print sheep that have
+     absolutely no info about them. It should use sheep-nickname of the sheep's
+     metasheep.
+**** TODO #'print-orphaned-sheep with second-lowest priority
+     For sheep that have no parents, but are otherwise functional. Ditto wrt the
+     metasheep nickname.
+**** TODO #'print-sheep with highest priority
+     A method, user-extensible and awesome.
 *** TODO Once bootstrapped, update WITH-SHEEP-HIERARCHY to use #'clone
 * DONE 2.2
 ** DONE [#A] Fix #'(setf property-value) Bug

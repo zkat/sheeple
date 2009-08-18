@@ -10,6 +10,11 @@
 (def-suite utils :in sheeple)
 (in-suite sheeple)
 
+(test ensure-list
+  (is (null (ensure-list nil)))
+  (is (equal '(1) (ensure-list 1)))
+  (is (equal '(1) (ensure-list '(1)))))
+
 (test flatten
   (is (null (flatten ())))
   (is (null (flatten '(() (()) ((()))))))

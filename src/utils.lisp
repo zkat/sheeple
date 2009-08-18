@@ -13,6 +13,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
+(defun ensure-list (x)
+  "X if X is a list, otherwise (list X)."
+  (if (listp x) x (list x)))
+
 ;;; This is only here because it gets called once in src/properties.lisp
 ;;; It gets called to mitigate a hierarchy traversal. Maybe get rid of it?
 (defun flatten (x)

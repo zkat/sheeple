@@ -9,6 +9,38 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
+(def-fixture allocate-std-sheep ()
+  (let ((sheep (allocate-std-sheep)))
+    (&body)))
+
+(def-fixture allocate-sheep (metasheep)
+  (let ((sheep (allocate-sheep metasheep)))
+    (&body)))
+
+(def-suite sheep-objects :in sheeple)
+
+;;;
+;;; Early printing
+;;;
+
+(def-suite early-printing :in sheep-objects)
+(in-suite early-printing)
+
+(test print-pretty
+  (if *print-pretty*
+      (pass "*PRINT-PRETTY* is true.")
+      (fail "*PRINT-PRETTY* is false. This is such a transparent bit of code that
+ the .asd is probably messed up if this test is failing.")))
+
+;;; This test is pretty crude. The correct thing to do would be to
+;;; parse the output, extract the implementation-dependant stuff,
+;;; and verify the rest. This would be painful without CL-PPCRE.
+(test sheep-printing
+  (with-output-to-string (*standard-output*)
+    (5am:finishes (print (allocate-std-sheep)))
+    (5am:finishes (print (add-parent (allocate-std-sheep)
+                                     (allocate-std-sheep))))))
+
 ;;;
 ;;; Allocation
 ;;;
@@ -21,20 +53,11 @@
 ;; %hierarchy-cache := list that holds a cached version of the sheep's entire hierarchy-list
 ;; %children := a vector of weak pointers that points to all of this sheep's children
 
-(def-suite sheep-objects :in sheeple)
 (def-suite creation :in sheep-objects)
 (def-suite allocation :in creation)
 
 (def-suite allocate-std-sheep :in allocation)
 (in-suite allocate-std-sheep)
-
-(def-fixture allocate-std-sheep ()
-  (let ((sheep (allocate-std-sheep)))
-    (&body)))
-
-(def-fixture allocate-sheep (metasheep)
-  (let ((sheep (allocate-sheep metasheep)))
-    (&body)))
 
 (test (std-sheep-basic-structure
        :fixture allocate-std-sheep)

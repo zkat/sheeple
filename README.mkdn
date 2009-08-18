@@ -65,10 +65,10 @@ Confirmed to work (pass all tests):
 Sheeple doesn't use any OS-specific code (or threads), so it should be fairly
 stable on all operating systems. OSX and Linux x86 have both been actually
 tested on the aforementioned platforms.  In theory, it should work on any
-implementation that supports weak hash tables with key weakness through
-[trivial-garbage][12].  If you run the test suite on a platform not listed
-above, and all tests pass, please e-mail me and I'll add it to the list of
-supported platforms.
+implementation that supports weap pointers and weak hash tables with key
+weakness through [trivial-garbage][12].  If you run the test suite on a platform
+not listed above, and all tests pass, please e-mail me and I'll add it to the
+list of supported platforms.
 
 Loading Sheeple
 ---------------
@@ -131,8 +131,9 @@ Features
 Using Sheeple
 =============
 
-Please refer to #P"doc;user-guide.org" for a (mostly) full guide to Sheeple and
-how to use it.
+The user guide in "doc/user-guide.org" is currently out-of-date. The best way to
+learn how to use Sheeple is to either read the source and examples, or head on
+over to #sykosomatic @ freenode.
 
 For a quicker introduction, you can also take a peek at the examples/ directory.
 

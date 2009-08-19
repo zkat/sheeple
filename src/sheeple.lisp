@@ -48,7 +48,7 @@ of its descendants."
 (defun std-allocate-sheep (metasheep)
   "Creates a standard sheep object. By default, all the metaproperties are NIL."
   (let ((array (make-array 6 :initial-element nil)))
-    (setf (svref array 0) metasheep) 
+    (setf (svref array 0) metasheep)
     array))
 
 (defun allocate-std-sheep ()
@@ -66,9 +66,9 @@ of its descendants."
 
 ;;; STD-SHEEP accessor definitions
 (defmacro define-internal-accessors (&body names-and-indexes)
-  `(progn 
+  `(progn
      ,@(loop for (name index) on names-and-indexes by #'cddr
-          collect 
+          collect
           `(progn
              (defun ,name (sheep)
                (svref sheep ,index))
@@ -83,7 +83,7 @@ of its descendants."
                            %sheep-hierarchy-cache 4
                            %sheep-children 5)
 
-;; If we didn't define these functions, Lisp's package system would 
+;; If we didn't define these functions, Lisp's package system would
 ;; export the SETF version as well as the reader.
 (defun sheep-metasheep (sheep)
   (%sheep-metasheep sheep))
@@ -202,6 +202,26 @@ Would produce this familiar \"diamond\" hierarchy:
                        (union (sheep-parents sheep-to-process)
                               parents)))))))
     (all-parents-loop () (sheep-parents sheep))))
+
+;;; <<<<<<< BEGIN OUTDATED CODE BLOCK >>>>>>>
+(defun compute-sheep-hierarchy-list-old (sheep)
+  (handler-case
+      ;; since collect-ancestors only collects the _ancestors_, we cons the sheep in front.
+      (let ((sheeple-to-order (cons sheep (collect-ancestors sheep))))
+        (topological-sort sheeple-to-order
+                          (remove-duplicates
+                           (mapappend #'local-precedence-ordering
+                                      sheeple-to-order))
+                          #'std-tie-breaker-rule))
+    (simple-error ()
+      (error 'sheeple-hierarchy-error :sheep sheep))))
+
+(defun local-precedence-ordering-old (sheep)
+  (mapcar #'list
+          (cons sheep
+                (butlast (sheep-parents sheep)))
+          (sheep-parents sheep)))
+;;; <<<<<<< END OUTDATED CODE BLOCK >>>>>>>
 
 (defun local-precedence-ordering (sheep)
   "Calculates the local precedence ordering. Relies on the fact that mapcar will

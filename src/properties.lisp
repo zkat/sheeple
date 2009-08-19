@@ -31,7 +31,7 @@
              (sheep-metasheep sheep) sheep
              property-name value all-keys)))
 
-(defun std-add-property (sheep property-name value 
+(defun std-add-property (sheep property-name value
                          &key readers writers
                          make-accessor-p (property-prototype =standard-property=))
   )

@@ -5,17 +5,72 @@
 @c %**end of header
 
 @copying
-@c Put the actual license here...
-Sheeple is licensed under the MIT license
+This manual is for Sheeple v3.0
 
-Copyright @copyright{} 2009, Kat Marchan
+Copyright @copyright{} 2008, 2009 Kat Marchan.
+
+This software is composed in part of code taken from SBCL's version of
+PCL, and Closette as presented in Art of the Metaobject Protocol, at
+times with only small modifications. It also contains some original
+code. Copying and distribution of this software must retain the
+copyright notice for Xerox, as well as Kat Marchan's:
+
+@quotation
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+@end quotation
+
+Xerox's copyright, from original PCL sources:
+
+@quotation
+Copyright @copyright{} 1985, 1986, 1987, 1988, 1989, 1990 Xerox
+Corporation.  All rights reserved.
+
+Use and copying of this software and preparation of derivative works
+based upon this software are permitted. Any distribution of this
+software or derivative works must comply with all applicable United
+States export control laws.
+
+This software is made available AS IS, and Xerox Corporation makes no
+warranty about the software, its performance or its conformity to any
+specification.
+@end quotation
+
+Additionally, Sheeple uses Luis Oliveira's trivial-garbage for
+portability across implementations. trivial-garbage is in the public
+domain, thus although the statement packaged with it is included here,
+copies and derivatives of Sheeple need not include it:
+
+@quotation
+This software is placed in the public domain by Luis Oliveira
+<loliveira@@common-lisp.net> and is provided with absolutely no
+warranty.
+@end quotation
 @end copying
 
 @titlepage
 @title Sheeple Manual
-
+@author by Adlai Chandrasekhar and Kat Marchan
 @page
-@vskip 0put plus 1filll
+@vskip 0pt plus 1filll
 @insertcopying
 @end titlepage
 
@@ -25,36 +80,38 @@ Copyright @copyright{} 2009, Kat Marchan
 @node Top
 @top Sheeple Manual
 
-This is the user guide for Sheeple.
+This manual is for Sheeple v3.0
 @end ifnottex
 
 @menu
-* First Chapter:: The first chapter is the
-                    only chapter in this example.
-* Index::         Complete Index.
+* First Chapter::               Getting Started
+* Second Chapter::              Sheeple, the Object System
+* Concept Index::               Index
+* Copying::                     Your rights and freedoms
 @end menu
 
 @node First Chapter
 @chapter First Chapter
 
+@cindex first chapter
 @cindex chapter, first
 
 This is the first chapter.
-@cindex index entry, another
 
-Here is a numbered list.
+@node Second Chapter
+@chapter Second Chapter
 
-@enumerate
-@item
-This is the first item.
+@cindex second chapter
+@cindex chapter, second
 
-@item
-This is the second item.
-@end enumerate
+This is the second chapter.
 
-@node Index
-@unnumbered Index
+@node Concept Index
+@unnumbered Concept Index
 
 @printindex cp
 
+@node Copying
+@appendix Copying
+@insertcopying
 @bye

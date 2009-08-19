@@ -1,0 +1,60 @@
+\input texinfo @c -*- texinfo -*-
+@c %**start of header
+@setfilename sheeple.info
+@settitle Sheeple v3.0 Manual
+@c %**end of header
+
+@copying
+@c Put the actual license here...
+Sheeple is licensed under the MIT license
+
+Copyright @copyright{} 2009, Kat Marchan
+@end copying
+
+@titlepage
+@title Sheeple Manual
+
+@page
+@vskip 0put plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top
+@top Sheeple Manual
+
+This is the user guide for Sheeple.
+@end ifnottex
+
+@menu
+* First Chapter:: The first chapter is the
+                    only chapter in this example.
+* Index::         Complete Index.
+@end menu
+
+@node First Chapter
+@chapter First Chapter
+
+@cindex chapter, first
+
+This is the first chapter.
+@cindex index entry, another
+
+Here is a numbered list.
+
+@enumerate
+@item
+This is the first item.
+
+@item
+This is the second item.
+@end enumerate
+
+@node Index
+@unnumbered Index
+
+@printindex cp
+
+@bye

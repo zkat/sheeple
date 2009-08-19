@@ -173,6 +173,7 @@
 *** TODO #'std-remove-parent should make sure that the hierarchy list is still valid.
 *** TODO Once bootstrapped, update WITH-SHEEP-HIERARCHY to use SPAWN
 *** TODO Write VALIDATE-HIERARCHY-LIST
+** TODO Document everything in doc/sheeple.texinfo
 * DONE 2.2
 ** DONE [#A] Fix #'(setf property-value) Bug
    When a call to #'(setf property-value) requires a new direct property object

@@ -42,8 +42,9 @@ of its descendants."
 
 (defun sheepp (sheep)
   "Predicate for sheepdom."
-  (and (vectorp sheep)
-       (eql =standard-metasheep= (sheep-metasheep (sheep-metasheep sheep)))))
+  (or (typep sheep 'std-sheep)
+      (and (typep sheep '(simple-vector 6))
+           (typep (elt sheep 0) 'std-sheep))))
 
 (defun std-allocate-sheep (metasheep)
   "Creates a standard sheep object. By default, all the metaproperties are NIL."

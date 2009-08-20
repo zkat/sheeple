@@ -161,6 +161,60 @@
 (def-suite inheritance-basic :in inheritance)
 (in-suite inheritance-basic)
 
+;;; <<<<<<< BEGIN OUTDATED CODE BLOCK >>>>>>>
+(defun mapappend (fun &rest args)
+  (if (some #'null args)
+      ()
+      (append (apply fun (mapcar #'car args))
+              (apply #'mapappend fun (mapcar #'cdr args)))))
+
+(defun topological-sort-old (elements constraints tie-breaker)
+  (let ((remaining-constraints constraints)
+        (remaining-elements elements)
+        (result ()))
+    (loop
+       (let ((minimal-elements
+              (remove-if
+               (lambda (sheep)
+                 (member sheep remaining-constraints
+                         :key #'cadr))
+               remaining-elements)))
+         (when (null minimal-elements)
+           (if (null remaining-elements)
+               (return-from topological-sort-old result)
+               (error "Inconsistent precedence graph.")))
+         (let ((choice (if (null (cdr minimal-elements))
+                           (car minimal-elements)
+                           (funcall tie-breaker
+                                    minimal-elements
+                                    result))))
+           (setf result (append result (list choice)))
+           (setf remaining-elements
+                 (remove choice remaining-elements))
+           (setf remaining-constraints
+                 (remove choice
+                         remaining-constraints
+                         :test #'member)))))))
+
+(defun compute-sheep-hierarchy-list-old (sheep)
+  (handler-case
+      ;; since collect-ancestors only collects the _ancestors_, we cons the sheep in front.
+      (let ((sheeple-to-order (cons sheep (collect-ancestors sheep))))
+        (topological-sort sheeple-to-order
+                          (remove-duplicates
+                           (mapappend #'local-precedence-ordering
+                                      sheeple-to-order))
+                          #'std-tie-breaker-rule))
+    (simple-error ()
+      (error 'sheeple-hierarchy-error :sheep sheep))))
+
+(defun local-precedence-ordering-old (sheep)
+  (mapcar #'list
+          (cons sheep
+                (butlast (sheep-parents sheep)))
+          (sheep-parents sheep)))
+;;; <<<<<<< END OUTDATED CODE BLOCK >>>>>>>
+
 (test collect-ancestors
   (let ((sheep1 (allocate-std-sheep))
         (sheep2 (allocate-std-sheep))

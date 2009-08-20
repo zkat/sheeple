@@ -135,9 +135,7 @@
 
 (test (sheep-metasheep :fixture allocate-std-sheep)
   (is (eql =standard-metasheep= (sheep-metasheep sheep)))
-  (signals error (setf (sheep-metasheep sheep) nil))
-  ;; just to make sure nothing was inappropriately side-effected..
-  (is (eql =standard-metasheep= (sheep-metasheep sheep))))
+  (is (null (fboundp '(setf sheep-metasheep)))))
 
 (test (sheep-parents :fixture allocate-std-sheep)
   (is (null (sheep-parents sheep)))
@@ -145,8 +143,7 @@
   (is (equal '(foo) (sheep-parents sheep)))
   (push 'bar (%sheep-parents sheep))
   (is (equal '(bar foo) (sheep-parents sheep)))
-  (signals error (setf (sheep-parents sheep) 'uh-oh))
-  (is (equal '(bar foo) (sheep-parents sheep))))
+  (is (null (fboundp '(setf sheep-parents)))))
 
 ;;; Testing the utility...
 (in-suite sheep-objects)

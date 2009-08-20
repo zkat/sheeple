@@ -2,6 +2,7 @@
 @c %**start of header
 @setfilename sheeple.info
 @settitle Sheeple v3.0 Manual
+@firstparagraphindent insert
 @c %**end of header
 
 @copying
@@ -68,6 +69,7 @@ warranty.
 
 @titlepage
 @title Sheeple Manual
+@subtitle This manual covers Sheeple v3.0
 @author by Adlai Chandrasekhar and Kat Marchan
 @page
 @vskip 0pt plus 1filll
@@ -77,41 +79,166 @@ warranty.
 @contents
 
 @ifnottex
-@node Top
+
+@node Top, General Information, (dir), (dir)
 @top Sheeple Manual
 
 This manual is for Sheeple v3.0
 @end ifnottex
 
 @menu
-* First Chapter::               Getting Started
-* Second Chapter::              Sheeple, the Object System
+* General Information::         Overview of Sheeple
 * Concept Index::               Index
 * Copying::                     Your rights and freedoms
 @end menu
+@node General Information, Concept Index, Top, Top
+@chapter General Information
 
-@node First Chapter
-@chapter First Chapter
+@menu
+* About Sheeple::               A Non-Technical Overview
+* Installing Sheeple::          A Slightly Technical Guide
+@end menu
 
-@cindex first chapter
-@cindex chapter, first
+@node About Sheeple, Installing Sheeple, General Information, General Information
+@section About Sheeple
+@cindex Sheeple, general overview of
 
-This is the first chapter.
+@menu
+* Vision::                      The Grand Plan for Sheeple
+* History::                     What Inspired Sheeple? What Influenced Sheeple?
+@end menu
 
-@node Second Chapter
-@chapter Second Chapter
+@node Vision, History, About Sheeple, About Sheeple
+@subsection Vision
+@cindex Vision
+Sheeple is a Dynamic, CLOS-like, Delegative Prototype-based
+Object-Oriented Programming Framework (or "POOP Framework") that
+strives to optimize application flexibility, minimize cost while
+increasing value, maximize programmer resources, and empower
+application implementers to better assist them in leveraging modern
+paradigms in order to proactively achieve next-generation synergy in
+tomorrow's web 3.0 world. It is implemented in (mostly) ANSI Common
+Lisp. Sheeple is fully buzzword compliant.
 
-@cindex second chapter
-@cindex chapter, second
+@node History,  , Vision, About Sheeple
+@subsection History
+@cindex history, of Sheeple
+Sheeple was originally written as a persistent library for use with
+Sykosomatic. Because of a desire to use it in other applications, it
+was rewritten as a regular prototype object system and provided as a
+standalone library meant for general-purpose OO hackery.
 
-This is the second chapter.
+Persistent Sheeple has not been abandoned, instead, it's being
+implemented as a separate library using Sheeple's reflection features.
 
-@node Concept Index
+Sheeple is inspired by a number of Object-Oriented systems, mainly:
+@enumerate
+@item
+CLOS, the Common Lisp Object System.
+@cindex CLOS
+
+@item
+Slate, a Smalltalk-like language with Prototype Multiple Dispatch that
+  Sheeple bases its message dispatch system on.
+@cindex Slate
+@cindex Smalltalk
+@cindex PMD
+@cindex
+
+@item
+Self, another Smalltalk-like language with lots of papers written about
+  it, and the concept of prototype OO.
+
+@item
+Io, a pure prototype-based language. Sheeple, like Io, implements
+  differential inheritance.
+@end enumerate
+
+It was written with the purpose of providing a lot of the goodies of
+CLOS programming in a completely prototype-based environment. As such,
+it shares a lot of features and syntax with CLOS. The most notable of
+these are multiple inheritance and multiple dispatch of methods.
+
+@page
+@node Installing Sheeple,  , About Sheeple, General Information
+@section Installing Sheeple
+
+@menu
+* Supported Platforms::         In which systems and implementations does
+                                Sheeple currently perform best?
+* Loading Sheeple::             A quick guide to starting Sheeple
+@end menu
+
+@node Supported Platforms, Loading Sheeple, Installing Sheeple, Installing Sheeple
+@subsection Supported Platforms
+@cindex platforms, supported
+@cindex supported platforms
+Confirmed to work (pass all tests):
+
+@enumerate
+@item
+SBCL
+@cindex SBCL
+
+@item
+Clozure CL
+@cindex Clozure CL
+@cindex OpenMCL
+
+@item
+GNU CLISP
+@cindex CLISP
+@cindex GNU CLISP
+
+@item
+LispWorks (was tested a while ago -- will probably pass again)
+@cindex LispWorks
+@end enumerate
+
+Sheeple doesn't use any OS-specific code (or threads), so it should be
+fairly stable on all operating systems.  OSX and Linux x86 have both
+been actually tested on the aforementioned platforms.  In theory, it
+should work on any implementation that supports weap pointers and weak
+hash tables with key weakness through trivial-garbage.  If you run the
+test suite on a platform not listed above, and all tests pass, please
+e-mail me and I'll add it to the list of supported platforms.
+
+@node Loading Sheeple,  , Supported Platforms, Installing Sheeple
+@subsection Loading Sheeple
+@cindex loading
+It's fairly effortless to get Sheeple working. To get started, simply
+
+@lisp
+(asdf:oos 'asdf:load-op 'sheeple)
+(in-package sheeple-user)
+@end lisp
+
+And mess around from there. Be aware that if your implementation does
+not include ASDF, you will have to acquire it and load it
+yourself. Clisp, for example, will require this.  For information on
+how to do this, check out Cliki, or the ASDF Homepage.
+
+Sheeple should work on most Lisp implementations that support weak
+pointers and hash tables with key weakness, although it's mainly
+written and tested in SBCL and Clozure CL on Linux x86.
+
+Sheeple also includes a suite of tests you can run on whatever
+platform you're trying to get it to work on. The test suite depends on
+Fiveam. To run it:
+
+@lisp
+(asdf:oos 'asdf:test-op 'sheeple)
+@end lisp
+
+And watch the tests scroll by. All tests should pass as long as you're
+using a tagged release.
+
+@node Concept Index, Copying, General Information, Top
 @unnumbered Concept Index
-
 @printindex cp
 
-@node Copying
+@node Copying,  , Concept Index, Top
 @appendix Copying
 @insertcopying
+
 @bye

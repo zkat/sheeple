@@ -22,25 +22,19 @@
 ;;; Sheeple object
 ;;;
 
-(defun standard-metasheep-p (obj)
+(defun %std-sheep-p (obj)
   "Tests whether OBJ is EQ to =STANDARD-METASHEEP= at run-time."
-  (eq obj =standard-metasheep=))
+  (eq (svref obj 0) =standard-metasheep=))
 
 (deftype std-sheep ()
-  "A standard sheep is a cons, the CAR of which points to =standard-metasheep=,
-and the CDR of which points to a simple-vector with 6 elements, containing the
-metaproperties for the sheep.
-
-Put another way, this is the structure of a standard-sheep:
-
-  (=standard-metasheep=
-    . #(parents properties property-metaobjects roles hierarchy-list children))"
-  '(cons (satisfies standard-metasheep-p) (simple-vector 6)))
+  "A standard sheep object is a 6-slot simple vector where the 0th element
+is =standard-metasheep=."
+  '(and (simple-vector 6) (satisfies %std-sheep-p)))
 
 (deftype sheep ()
-  "A sheep is a cons, the CAR of which points to a metasheep. The contents of the
-CDR are dependant upon the metasheep."
-  '(or std-sheep (cons std-sheep)))
+  "A sheep is a 6-slot simple vector where the 0th element is =standard-metasheep= or one
+of its descendants."
+  '(satisfies sheepp))
 
 (defun std-sheep-p (sheep)
   "Internal predicate for sheepdom."
@@ -48,11 +42,14 @@ CDR are dependant upon the metasheep."
 
 (defun sheepp (sheep)
   "Predicate for sheepdom."
-  (typep sheep 'sheep))
+  (and (vectorp sheep)
+       (eql =standard-metasheep= (sheep-metasheep (sheep-metasheep sheep)))))
 
 (defun std-allocate-sheep (metasheep)
   "Creates a standard sheep object. By default, all the metaproperties are NIL."
-  (cons metasheep (make-array 6 :initial-element nil)))
+  (let ((array (make-array 6 :initial-element nil)))
+    (setf (svref array 0) metasheep) 
+    array))
 
 (defun allocate-std-sheep ()
   "Confusing convenience function that will go away very soon."
@@ -67,12 +64,6 @@ CDR are dependant upon the metasheep."
     (std-sheep (print-young-sheep obj stream))
     (otherwise (call-next-method))))
 
-(defun allocate-sheep (metasheep)
-  "Allocates the basic skeleton for a sheep object in memory and returns it."
-  (if (eql =standard-metasheep= metasheep)
-      (std-allocate-sheep metasheep)
-      (allocate-sheep-using-metasheep metasheep)))
-
 ;;; STD-SHEEP accessor definitions
 (defmacro define-internal-accessors (&body names-and-indexes)
   `(progn 
@@ -80,29 +71,23 @@ CDR are dependant upon the metasheep."
           collect 
           `(progn
              (defun ,name (sheep)
-               (svref (cdr sheep) ,index))
+               (svref sheep ,index))
              (defun (setf ,name) (new-value sheep)
-               (setf (svref (cdr sheep) ,index) new-value))))))
+               (setf (svref sheep ,index) new-value))))))
 
-;; Sheep properties are split into two separate data structures:
-;; The first is a vector of values, where each entry is (cons 'property-name value)
-;; The second is a vector of property metaobjects.
-;; Having a local property metaobject means the sheep MUST have a value for that property,
-;; but the inverse is not necessarily true.
-(defun sheep-metasheep (sheep)
-  (car sheep))
-
-;; Pattern abstracted!
-(define-internal-accessors %sheep-parents 0 ; actual parents
-                           %sheep-pvalue-vector 1 ; vector with direct property values
-                           %sheep-property-metaobjects 2 ; vector with property metaobjects
+(define-internal-accessors %sheep-metasheep 0
+                           %sheep-parents 1 ; actual parents
+                           %sheep-direct-properties 2 ; direct property vector
                            %sheep-roles 3 ; direct roles
                            ;; These last two are used internally, for hierarchy caching.
                            %sheep-hierarchy-cache 4
                            %sheep-children 5)
 
-;; If we didn't define this function, Lisp's package system would 
+;; If we didn't define these functions, Lisp's package system would 
 ;; export the SETF version as well as the reader.
+(defun sheep-metasheep (sheep)
+  (%sheep-metasheep sheep))
+
 (defun sheep-parents (sheep)
   (declare (inline %sheep-parents))
   (%sheep-parents sheep))
@@ -217,26 +202,6 @@ Would produce this familiar \"diamond\" hierarchy:
                        (union (sheep-parents sheep-to-process)
                               parents)))))))
     (all-parents-loop () (sheep-parents sheep))))
-
-;;; <<<<<<< BEGIN OUTDATED CODE BLOCK >>>>>>>
-(defun compute-sheep-hierarchy-list-old (sheep)
-  (handler-case
-      ;; since collect-ancestors only collects the _ancestors_, we cons the sheep in front.
-      (let ((sheeple-to-order (cons sheep (collect-ancestors sheep))))
-        (topological-sort sheeple-to-order
-                          (remove-duplicates
-                           (mapappend #'local-precedence-ordering
-                                      sheeple-to-order))
-                          #'std-tie-breaker-rule))
-    (simple-error ()
-      (error 'sheeple-hierarchy-error :sheep sheep))))
-
-(defun local-precedence-ordering-old (sheep)
-  (mapcar #'list
-          (cons sheep
-                (butlast (sheep-parents sheep)))
-          (sheep-parents sheep)))
-;;; <<<<<<< END OUTDATED CODE BLOCK >>>>>>>
 
 (defun local-precedence-ordering (sheep)
   "Calculates the local precedence ordering. Relies on the fact that mapcar will
@@ -380,18 +345,20 @@ to the front of the list)"
 ;;; Cloning
 ;;;
 (defun ensure-sheep (sheep-or-sheeple &rest all-keys
-                    &key (metasheep =standard-metasheep=)
-                    &allow-other-keys)
+                     &key (metasheep =standard-metasheep=)
+                     &allow-other-keys)
   "Creates a new sheep with SHEEPLE as its parents. METASHEEP is used as the metasheep when
 allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
-  (let ((sheep (allocate-sheep metasheep)))
+  (let ((sheep (if (eql =standard-metasheep= metasheep)
+                   (std-allocate-sheep metasheep)
+                   (allocate-sheep metasheep))))
     (if sheep-or-sheeple
         (add-parents (if (listp sheep-or-sheeple)
                          sheep-or-sheeple
                          (list sheep-or-sheeple))
                      sheep)
         (add-parent =standard-sheep= sheep))
-     (apply #'init-sheep sheep all-keys)))
+    (apply #'init-sheep sheep all-keys)))
 
 (defun clone (&rest sheeple)
   "Creates a new standard-sheep object with SHEEPLE as its parents."

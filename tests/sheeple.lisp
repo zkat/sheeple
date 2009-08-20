@@ -12,6 +12,15 @@
 ;;;
 ;;; Allocation
 ;;;
+;; new structure for sheep objects:
+;; #(metasheep parents properties roles %hierarchy-cache %children)
+;; parents := proper list of parents, in order of precedence.
+;; properties := property*
+;; property := (property-metaobject . property-value)
+;; roles := proper list of direct roles
+;; %hierarchy-cache := list that holds a cached version of the sheep's entire hierarchy-list
+;; %children := a vector of weak pointers that points to all of this sheep's children
+
 (def-suite sheep-objects :in sheeple)
 (def-suite creation :in sheep-objects)
 (def-suite allocation :in creation)
@@ -29,65 +38,45 @@
 
 (test (std-sheep-basic-structure
        :fixture allocate-std-sheep)
-  (is (consp sheep))
-  (is (vectorp (cdr sheep)))
-  (is (= 6 (length (cdr sheep)))))
+  (is (vectorp sheep))
+  (is (= 6 (length sheep))))
 
 (test (std-sheep-initial-values
        :depends-on std-sheep-basic-structure
        :fixture allocate-std-sheep)
-  (is (eql =standard-metasheep= (car sheep)))
-  (is (null (svref (cdr sheep) 0)))
-  (is (null (svref (cdr sheep) 1)))
-  (is (null (svref (cdr sheep) 2)))
-  (is (null (svref (cdr sheep) 3)))
-  (is (null (svref (cdr sheep) 4)))
-  (is (null (svref (cdr sheep) 5))))
+  (is (eql =standard-metasheep= (svref sheep 0)))
+  (is (null (svref sheep 1)))
+  (is (null (svref sheep 2)))
+  (is (null (svref sheep 3)))
+  (is (null (svref sheep 4)))
+  (is (null (svref sheep 5))))
 
-(test allocate-sheep
+(postboot-test allocate-sheep
   (let ((sheep (allocate-sheep =standard-metasheep=)))
-  (is (consp sheep))
-  (is (vectorp (cdr sheep)))
-  (is (= 6 (length (cdr sheep))))
-  (is (eql =standard-metasheep= (car sheep)))
-  (is (null (svref (cdr sheep) 0)))
-  (is (null (svref (cdr sheep) 1)))
-  (is (null (svref (cdr sheep) 2)))
-  (is (null (svref (cdr sheep) 3)))
-  (is (null (svref (cdr sheep) 4)))
-  (is (null (svref (cdr sheep) 5)))))
-
-(test (std-sheep-accessors
-       :depends-on std-sheep-basic-structure
-       :fixture allocate-std-sheep)
-  (is (eq (setf (car sheep) (gensym)) (sheep-metasheep sheep)))
-  (is (eq (setf (svref (cdr sheep) 0) (gensym)) (%sheep-parents sheep)))
-  (is (eq (setf (svref (cdr sheep) 1) (gensym)) (%sheep-pvalue-vector sheep)))
-  (is (eq (setf (svref (cdr sheep) 2) (gensym)) (%sheep-property-metaobjects sheep)))
-  (is (eq (setf (svref (cdr sheep) 3) (gensym)) (%sheep-roles sheep)))
-  (is (eq (setf (svref (cdr sheep) 4) (gensym)) (%sheep-hierarchy-cache sheep)))
-  (is (eq (setf (svref (cdr sheep) 5) (gensym)) (%sheep-children sheep))))
+    (is (vectorp sheep))
+    (is (= 6 (length sheep)))
+    (is (eql =standard-metasheep= (svref sheep 0)))
+    (is (null (svref sheep 1)))
+    (is (null (svref sheep 2)))
+    (is (null (svref sheep 3)))
+    (is (null (svref sheep 4)))
+    (is (null (svref sheep 5)))))
 
 (in-suite allocation)
 
 (test (std-sheep-p :fixture allocate-std-sheep)
   (is (std-sheep-p sheep))
-  (is (not (std-sheep-p (cons 1 2))))
-  (is (not (std-sheep-p (cons =standard-metasheep=
-                              nil))))
-  (is (std-sheep-p (cons =standard-metasheep=
-                         (make-array 6 :initial-element nil))))
-  (is (not (std-sheep-p (cons =standard-metasheep=
-                              (make-array 5 :initial-element nil)))))
-  (is (not (std-sheep-p (cons =standard-metasheep=
-                              (make-array 7 :initial-element nil)))))
+  (is (not (std-sheep-p (vector 1 2 3 4 5 6))))
+  (is (not (std-sheep-p (vector 1 2))))
+  (is (not (std-sheep-p (vector =standard-metasheep= 2 3 4 5))))
+  (is (not (std-sheep-p (vector =standard-metasheep= 2 3 4 5 6 7))))
+  (is (std-sheep-p (vector =standard-metasheep= nil nil nil nil nil)))
+  (is (not (std-sheep-p (vector =standard-metasheep= nil nil nil nil))))
+  (is (not (std-sheep-p (vector =standard-metasheep= nil nil nil nil nil nil))))
   (setf (%sheep-parents sheep) '(foo))
   (is (std-sheep-p sheep)))
 
-(test (allocate-sheep :fixture (allocate-sheep =standard-metasheep=))
-  (is (std-sheep-p sheep)))
-
-(test (sheepp :fixture (allocate-sheep =standard-metasheep=))
+(postboot-test (sheepp :fixture (allocate-sheep =standard-metasheep=))
   (is (sheepp sheep)))
 
 (test equality-basic
@@ -101,46 +90,41 @@
 (def-suite low-level-accessors :in sheep-objects)
 (in-suite low-level-accessors)
 
-(test (sheep-metasheep :fixture allocate-std-sheep)
-  (is (eql =standard-metasheep= (sheep-metasheep sheep))))
+(test (%sheep-metasheep :fixture allocate-std-sheep)
+  (is (eql =standard-metasheep= (%sheep-metasheep sheep)))
+  (is (null (setf (%sheep-metasheep sheep) nil)))
+  (is (null (%sheep-metasheep sheep))))
 
 (test (%sheep-parents :fixture allocate-std-sheep)
-  (is (eql nil (%sheep-parents sheep)))
+  (is (null (%sheep-parents sheep)))
   (is (equal '(foo) (setf (%sheep-parents sheep) '(foo))))
   (is (equal '(foo) (%sheep-parents sheep)))
   (is (equal '(bar foo) (push 'bar (%sheep-parents sheep))))
   (is (equal '(bar foo) (%sheep-parents sheep))))
 
-(test (%sheep-pvalue-vector :fixture allocate-std-sheep)
-  (is (eql nil (%sheep-pvalue-vector sheep)))
-  (is (equal '(foo) (setf (%sheep-pvalue-vector sheep) '(foo))))
-  (is (equal '(foo) (%sheep-pvalue-vector sheep)))
-  (is (equal '(bar foo) (push 'bar (%sheep-pvalue-vector sheep))))
-  (is (equal '(bar foo) (%sheep-pvalue-vector sheep))))
-
-(test (%sheep-property-metaobjects :fixture allocate-std-sheep)
-  (is (eql nil (%sheep-property-metaobjects sheep)))
-  (is (equal '(foo) (setf (%sheep-property-metaobjects sheep) '(foo))))
-  (is (equal '(foo) (%sheep-property-metaobjects sheep)))
-  (is (equal '(bar foo) (push 'bar (%sheep-property-metaobjects sheep))))
-  (is (equal '(bar foo) (%sheep-property-metaobjects sheep))))
+(test (%sheep-direct-properties :fixture allocate-std-sheep)
+  (is (null (%sheep-direct-properties sheep)))
+  (is (equal '(foo) (setf (%sheep-direct-properties sheep) '(foo))))
+  (is (equal '(foo) (%sheep-direct-properties sheep)))
+  (is (equal '(bar foo) (push 'bar (%sheep-direct-properties sheep))))
+  (is (equal '(bar foo) (%sheep-direct-properties sheep))))
 
 (test (%sheep-roles :fixture allocate-std-sheep)
-  (is (eql nil (%sheep-roles sheep)))
+  (is (null (%sheep-roles sheep)))
   (is (equal '(foo) (setf (%sheep-roles sheep) '(foo))))
   (is (equal '(foo) (%sheep-roles sheep)))
   (is (equal '(bar foo) (push 'bar (%sheep-roles sheep))))
   (is (equal '(bar foo) (%sheep-roles sheep))))
 
 (test (%sheep-hierarchy-cache :fixture allocate-std-sheep)
-  (is (eql nil (%sheep-hierarchy-cache sheep)))
+  (is (null (%sheep-hierarchy-cache sheep)))
   (is (equal '(foo) (setf (%sheep-hierarchy-cache sheep) '(foo))))
   (is (equal '(foo) (%sheep-hierarchy-cache sheep)))
   (is (equal '(bar foo) (push 'bar (%sheep-hierarchy-cache sheep))))
   (is (equal '(bar foo) (%sheep-hierarchy-cache sheep))))
 
 (test (%sheep-children :fixture allocate-std-sheep)
-  (is (eql nil (%sheep-children sheep)))
+  (is (null (%sheep-children sheep)))
   (is (equal '(foo) (setf (%sheep-children sheep) '(foo))))
   (is (equal '(foo) (%sheep-children sheep)))
   (is (equal '(bar foo) (push 'bar (%sheep-children sheep))))
@@ -149,11 +133,19 @@
 (def-suite interface-accessors :in sheep-objects)
 (in-suite interface-accessors)
 
+(test (sheep-metasheep :fixture allocate-std-sheep)
+  (is (eql =standard-metasheep= (sheep-metasheep sheep)))
+  (signals error (setf (sheep-metasheep sheep) nil))
+  ;; just to make sure nothing was inappropriately side-effected..
+  (is (eql =standard-metasheep= (sheep-metasheep sheep))))
+
 (test (sheep-parents :fixture allocate-std-sheep)
-  (is (eql nil (sheep-parents sheep)))
+  (is (null (sheep-parents sheep)))
   (setf (%sheep-parents sheep) '(foo))
   (is (equal '(foo) (sheep-parents sheep)))
   (push 'bar (%sheep-parents sheep))
+  (is (equal '(bar foo) (sheep-parents sheep)))
+  (signals error (setf (sheep-parents sheep) 'uh-oh))
   (is (equal '(bar foo) (sheep-parents sheep))))
 
 ;;; Testing the utility...
@@ -345,11 +337,11 @@
     (%add-child child2 parent)
     (%add-child child3 parent)
     (is (vectorp (%map-children (lambda (child)
-                                  (setf (cdr child) nil))
+                                  (setf (elt child 0) nil))
                                 parent)))
-    (is (null (cdr child1)))
-    (is (null (cdr child2)))
-    (is (null (cdr child3)))))
+    (is (null (elt child1 0)))
+    (is (null (elt child2 0)))
+    (is (null (elt child3 0)))))
 
 (test memoize-sheep-hierarchy-list
   (let ((sheep1 (allocate-std-sheep))

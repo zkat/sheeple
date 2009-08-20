@@ -1,11 +1,11 @@
 ;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
 
-;; This file is part of Sheeple
+;;;; This file is part of Sheeple
 
-;; properties.lisp
-;;
-;; Property access, inspection, and management stuff, for the most part.
-;;
+;;;; properties.lisp
+;;;;
+;;;; Property access, inspection, and management stuff, for the most part.
+;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 

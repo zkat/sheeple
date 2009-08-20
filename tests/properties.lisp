@@ -1,11 +1,11 @@
 ;;;; -*- Mode: lisp; indent-tabs-mode: nil -*-
-;;;
-;; This file is part of Sheeple.
+;;;;
+;;;; This file is part of Sheeple.
 
-;; tests/properties.lisp
-;;
-;; Unit tests for src/properties.lisp
-;;
+;;;; tests/properties.lisp
+;;;;
+;;;; Unit tests for src/properties.lisp
+;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 

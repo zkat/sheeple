@@ -203,28 +203,6 @@
     (is (eq a (std-tie-breaker-rule (list a b c) (list g f e))))))
 
 (test compute-sheep-hierarchy-list
-  (let* ((parent (allocate-std-sheep))
-         (child (allocate-std-sheep)))
-    (setf (%sheep-parents child) (list parent))
-    (is (equal (list child parent)
-               (compute-sheep-hierarchy-list child))))
-  (let ((a (allocate-std-sheep))
-        (b (allocate-std-sheep))
-        (c (allocate-std-sheep))
-        (d (allocate-std-sheep))
-        (e (allocate-std-sheep))
-        (f (allocate-std-sheep))
-        (g (allocate-std-sheep))
-        (h (allocate-std-sheep)))
-    (setf (%sheep-parents c) (list a))
-    (setf (%sheep-parents d) (list a))
-    (setf (%sheep-parents e) (list b c))
-    (setf (%sheep-parents f) (list d))
-    (setf (%sheep-parents g) (list c f))
-    (setf (%sheep-parents h) (list g e))
-    (is (equal (list h g e b c f d a) (compute-sheep-hierarchy-list h)))))
-
-(test compute-sheep-hierarchy-list
   (let ((parent (allocate-std-sheep))
         (child (allocate-std-sheep)))
     (setf (%sheep-parents child) (list parent))

@@ -122,6 +122,7 @@
     in the implementation. Make the tests more modular.
 *** TODO Convert tests to use WITH-SHEEP-HIERARCHY
     We might as well use this macro, since it's so compact.
+*** TODO Do #'std-c-s-h-l and #'c-s-h-l need separate tests?
 ** TODO [#B] Fix Sheep Allocation
    We need std-allocate-sheep, along with a MOP hook so that, for
    example, you could allocate storage in a database in an :after reply.

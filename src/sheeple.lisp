@@ -48,21 +48,33 @@ of its descendants."
 
 ;;; The basics of printing sheep
 
-(unless *print-circle*
-  (warn "*PRINT-CIRCLE* is set to NIL. This is liable to cause problems if you
- try to view the low-level representation of sheep. As long as *PRINT-PRETTY*
- is set to T, this should not be a problem, but set *PRINT-CIRCLE* to T as well
- if you ever set *PRINT-PRETTY* to NIL."))
+(defun verify-print-settings ()
+  (assert (or *print-pretty* *print-circle*)
+          (*print-pretty* *print-circle*)
+          (format nil "It is impossible to print sheep when both *PRINT-PRETTY* ~
+                       and *PRINT-CIRCLE* are~%disabled. Please enable at least ~
+                       one of them, and try again.~%Unless you are hacking ~
+                       Sheeple internals, it is highly recommended that you~@
+                       enable pretty-printing."))
+  (unless *print-pretty*
+    (warn "Pretty-printing is disabled. Sheep objects will be printed raw.")))
 
-(unless *print-pretty*
-  (setf *print-pretty* t)
-  (warn "*PRINT-PRETTY* was set to NIL. It has been set to T."))
+;;; This form currently overrides the previous print settings. We should decide
+;;; whether we want to take this approach, or just get people to stick a form
+;;; in their Lisp's init file.
+(handler-case (verify-print-settings)
+  (condition ()
+    (setf *print-pretty* t
+          *print-circle* t)
+    (verify-print-settings)))
 
 (defun print-young-sheep (stream sheep)
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Young Sheep")))
 
 (set-pprint-dispatch 'sheep #'print-young-sheep 0.1)
+
+;;; The basics of allocating sheep objects
 
 (defun std-allocate-sheep (metasheep)
   "Creates a standard sheep object. By default, all the metaproperties are NIL."
@@ -73,7 +85,6 @@ of its descendants."
 (defun allocate-std-sheep ()
   "Confusing convenience function that will go away very soon."
   (std-allocate-sheep =standard-metasheep=))
-
 
 ;;; STD-SHEEP accessor definitions
 (defmacro define-internal-accessors (&body names-and-indexes)

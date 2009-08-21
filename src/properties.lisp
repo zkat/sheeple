@@ -12,11 +12,8 @@
 ;;;
 ;;; Property spec object
 ;;;
-(defparameter the-std-property-form '(defproto =standard-property=
-                                      ()
-                                      ((name 'std-property)
-                                       (readers nil)
-                                       (writers nil))))
+(defparameter the-std-property-form '(defproto =standard-property= ()
+                                      ((property-name 'std-property))))
 
 (defvar =standard-property= (gensym "=STANDARD-PROPERTY="))
 
@@ -24,54 +21,142 @@
 ;;; API
 ;;;
 
-(defun add-property (sheep property-name value &rest all-keys)
-  (if (std-sheep-p sheep)
-      (apply #'std-add-property sheep property-name value all-keys)
-      (apply #'add-property-using-metasheep
-             (sheep-metasheep sheep) sheep
-             property-name value all-keys)))
+;; (defmethod old-add-property ((sheep standard-sheep) property-name value
+;;                              &key readers writers (make-accessor-p t)
+;;                              (property-metaclass 'standard-property))
+;;   "Allocates VALUE as one of SHEEP's direct-properties."
+;;   (when (has-direct-property-p sheep property-name)
+;;     (warn "~A already has a direct property named ~A. Overwriting." sheep property-name))
 
-(defun std-add-property (sheep property-name value
-                         &key readers writers
-                         make-accessor-p (property-prototype =standard-property=))
+;;   (add-property-using-property-metaobject sheep value
+;;                                           (make-instance property-metaclass
+;;                                                          :name property-name)
+;;                                           :readers readers :writers writers)
+;;   sheep)
+
+;; (defun add-property (sheep property-name value
+;;                      &rest all-keys
+;;                      &key readers writers 
+;;                      make-accessor-p (property-prototype =standard-property=)
+;;                      &allow-other-keys)
+;;   "Adds a property named PROPERTY-NAME to SHEEP, initialized with VALUE."
+;;   (assert (symbolp property-name))
+;;   (when (has-direct-property-p sheep property-name)
+;;     (cerror "Add property anyway."
+;;             "~A already has a direct property named ~A."
+;;             sheep property-name))
+;;   (when make-accessor-p
+;;     (pushnew property-name readers)
+;;     (pushnew `(setf ,property-name) writers))
+;;   (let ((property-metaobject (defclone (property-prototype) ((name property-name)))))
+;;     (if (std-sheep-p sheep)
+;;         (apply #'std-add-property sheep property-metaobject value all-keys)
+;;         (apply #'add-property-using-metasheep
+;;                (sheep-metasheep sheep) sheep
+;;                property-name value all-keys))))
+
+;; (defun add-property-metaobject-to-sheep (sheep property)
+;;   (let ((pname (property-name property)))
+;;     (setf (gethash pname (sheep-property-metaobject-table sheep))
+;;           property)))
+
+;; (defmethod add-property-using-property-metaobject ((sheep standard-sheep) value
+;;                                                    (property standard-property)
+;;                                                    &key readers writers)
+;;   (let ((pname (property-name property)))
+;;     (add-property-metaobject-to-sheep sheep property)
+;;     (when readers
+;;       (mapc (lambda (reader) (add-reader-to-sheep reader pname sheep))
+;;             readers))
+;;     (when writers
+;;       (mapc (lambda (writer) (add-writer-to-sheep writer pname sheep))
+;;             writers))
+;;     (setf (property-value sheep pname) value))
+;;   sheep)
+
+
+
+;; (defun std-add-property (sheep property-name value
+;;                          &key readers writers
+;;                          make-accessor-p (property-prototype =standard-property=))
+
+;;   )
+
+;; (defun remove-property (sheep property)
+;;   "If PROPERTY-NAME is a direct property of SHEEP, this function removes it. If PROPERTY-NAME
+;; is inherited from one of SHEEP's parents, or if PROPERTY-NAME does not exist in SHEEP's hierarchy
+;; list, an error is signaled. This function returns SHEEP after property removal."
+;;   ;; todo
+;;   )
+
+;; (defun remove-all-direct-properties (sheep)
+;;   "Wipes out all direct properties and their values from SHEEP."
+;;   ;; todo
+;;   )
+
+(defun has-direct-property-p (sheep property-name)
+  "Returns T if SHEEP has a property called PROPERTY-NAME as a direct property.
+NIL otherwise."
+  ;; todo
   )
-;; ;;; Existential functions
-;; (defgeneric add-property (sheep property-name value &key)
-;;   (:documentation "Adds a property named PROPERTY-NAME to SHEEP, initalized with VALUE."))
 
-;; (defgeneric add-property-using-property-metaobject (sheep value property &key)
-;;   (:documentation "Adds PROPERTY as a registered property to SHEEP. Clients must -not-
-;; override the primary method for this generic function."))
+(defun has-property-p (sheep property-name)
+  "Returns T if calling PROPERTY-VALUE on SHEEP using the same property-name
+would yield a value (i.e. not signal an unbound-property condition)."
+  ;; todo
+  )
 
-;; (defgeneric remove-property (sheep property)
-;;   (:documentation "If PROPERTY-NAME is a direct property of SHEEP, this function removes it. If
-;; PROPERTY-NAME is inherited from one of SHEEP's parents, or if PROPERTY-NAME does not exist in SHEEP's
-;; hierarchy list, an error is signaled. This function returns SHEEP after property removal."))
+;;; Value
+(defun direct-property-value (sheep property-name)
+  "Returns the property-value set locally in SHEEP for PROPERTY-NAME.
+If the value is non-local (is delegated or does not exist in the hierarchy list),
+a condition of type UNBOUND-DIRECT-PROPERTY condition is signalled."
+  (if (std-sheep-p sheep)
+      (std-direct-property-value sheep property-name)
+      (direct-property-value-using-metasheep (sheep-metasheep sheep)
+                                             sheep property-name)))
+(defun std-direct-property-value (sheep property-name)
+  (awhen (%sheep-direct-properties sheep)
+    (cdr (or (find property-name it :test #'eq :key (lambda (cons)
+                                                      (property-name (car cons))))
+             (error 'unbound-direct-property
+                    :sheep sheep :property-name (property-name property))))))
 
-;; (defgeneric remove-all-direct-properties (sheep)
-;;   (:documentation "Wipes out all direct properties and their values from SHEEP."))
+(defun property-value (sheep property-name)
+  "Returns a property-value that is not necessarily local to SHEEP."
+  (if (std-sheep-p sheep)
+      (std-property-value sheep property-name)
+      (property-value-using-metasheep (sheep-metasheep sheep)
+                                      sheep property-name)))
 
-;; (defgeneric has-direct-property-p (sheep property-name)
-;;   (:documentation "Returns T if SHEEP has a property called PROPERTY-NAME as a direct property.
-;; NIL otherwise."))
+(defun std-property-value (sheep property-name)
+  (property-value-with-hierarchy-list sheep property-name))
+(defun property-value-with-hierarchy-list (sheep property-name)
+  (let ((hl (sheep-hierarchy-list sheep)))
+    (or (loop for sheep in hl
+           do (let ((hasp (has-direct-property-p sheep property-name)))
+                (when hasp
+                  (return-from property-value-with-hierarchy-list
+                    (direct-property-value sheep property-name)))))
+        (error 'unbound-property :sheep sheep :property-name property-name))))
 
-;; (defgeneric has-property-p (sheep property-name)
-;;   (:documentation "Returns T if calling PROPERTY-VALUE on SHEEP using the same property-name
-;; would yield a value (i.e. not signal an unbound-property condition)."))
+(defun (setf property-value) (new-value sheep property-name)
+  "Sets NEW-VALUE as the value of a direct-property belonging to SHEEP, named
+PROPERTY-NAME. If the property does not already exist anywhere in the hierarchy list, an error
+is signaled."
+  ;; this should also check that property-name is for a standard property, and all that shit.. sigh
+  (if (std-sheep-p sheep)
+      (setf (std-property-value sheep property-name) new-value)
+      (setf (property-value-using-metasheep (sheep-metasheep sheep)
+                                            sheep property-name)
+            new-value)))
 
-;; ;;; Value
-;; (defgeneric direct-property-value (sheep property-name)
-;;   (:documentation "Returns the property-value set locally in SHEEP for PROPERTY-NAME.
-;; If the value is non-local (is delegated or does not exist in the hierarchy list),
-;; a condition of type UNBOUND-DIRECT-PROPERTY condition is signalled."))
-
-;; (defgeneric property-value (sheep property-name)
-;;   (:documentation "Returns a property-value that is not necessarily local to SHEEP."))
-
-;; (defgeneric (setf property-value) (new-value sheep property-name)
-;;   (:documentation "Sets NEW-VALUE as the value of a direct-property belonging to SHEEP, named
-;; PROPERTY-NAME. If the property does not already exist anywhere in the hierarchy list, an error
-;; is signaled."))
+(defun (setf std-property-value) (new-value sheep property-name)
+  ;; todo
+  (flet ((set-prop-val (sh prop val)
+           (let ((property-cons (find prop (%sheep-direct-properties sh)
+                                      :test #'eq :key (lambda (cons) (property-name (car cons))))))
+             (setf (cdr property-cons) new-value))))))
 
 ;; ;;; Reflection API
 ;; (defgeneric property-owner (sheep property-name &optional errorp)
@@ -92,43 +177,13 @@
 ;; (defgeneric direct-property-summary (sheep &optional stream)
 ;;   (:documentation "Provides a pretty-printed representation of SHEEP's direct properties."))
 
-;; ;;;
-;; ;;; Methods
-;; ;;;
-;; (defun add-property-metaobject-to-sheep (sheep property)
-;;   (let ((pname (property-name property)))
-;;     (setf (gethash pname (sheep-property-metaobject-table sheep))
-;;           property)))
+;;;
+;;; Methods
+;;;
 
-;; ;;; Existential
-;; (defmethod add-property-using-property-metaobject ((sheep standard-sheep) value
-;;                                                    (property standard-property)
-;;                                                    &key readers writers)
-;;   (let ((pname (property-name property)))
-;;     (add-property-metaobject-to-sheep sheep property)
-;;     (when readers
-;;       (add-readers-to-sheep readers pname sheep)
-;;       (pushnew readers (property-readers property)))
-;;     (when writers
-;;       (add-writers-to-sheep writers pname sheep)
-;;       (pushnew writers (property-writers property)))
-;;     (setf (property-value sheep pname) value))
-;;   sheep)
+;;; Existential
 
-;; (defmethod add-property ((sheep standard-sheep) property-name value
-;;                          &key readers writers (make-accessor-p t)
-;;                          (property-metaclass 'standard-property))
-;;   "Allocates VALUE as one of SHEEP's direct-properties."
-;;   (when (has-direct-property-p sheep property-name)
-;;     (warn "~A already has a direct property named ~A. Overwriting." sheep property-name))
-;;   (when make-accessor-p
-;;     (pushnew property-name readers)
-;;     (pushnew `(setf ,property-name) writers))
-;;   (add-property-using-property-metaobject sheep value
-;;                                           (make-instance property-metaclass
-;;                                                          :name property-name)
-;;                                           :readers readers :writers writers)
-;;   sheep)
+
 
 ;; ;; TODO - remove-property should look at the property metaobject and remove any replies for
 ;; ;;        accessors that it points to. This will have to wait until reply-undefinition works

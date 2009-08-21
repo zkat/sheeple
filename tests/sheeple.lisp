@@ -26,6 +26,21 @@
 (def-suite early-printing :in sheep-objects)
 (in-suite early-printing)
 
+(test verify-print-settings
+  (let ((*print-pretty* *print-pretty*)
+        (*print-circle* *print-circle*))
+    (flet ((set-them (pretty circle)
+             (setf *print-pretty* pretty
+                   *print-circle* circle)))
+      (set-them nil nil)
+      (signals error (verify-print-settings))
+      (set-them nil t)
+      (signals warning (verify-print-settings))
+      (set-them t nil)
+      (5am:finishes (verify-print-settings))
+      (set-them t t)
+      (5am:finishes (verify-print-settings)))))
+
 (test print-pretty
   (if *print-pretty*
       (pass "*PRINT-PRETTY* is true.")
@@ -44,14 +59,14 @@
 ;;;
 ;;; Allocation
 ;;;
-;; new structure for sheep objects:
-;; #(metasheep parents properties roles %hierarchy-cache %children)
-;; parents := proper list of parents, in order of precedence.
-;; properties := property*
-;; property := (property-metaobject . property-value)
-;; roles := proper list of direct roles
-;; %hierarchy-cache := list that holds a cached version of the sheep's entire hierarchy-list
-;; %children := a vector of weak pointers that points to all of this sheep's children
+;;; new structure for sheep objects:
+;;; #(metasheep parents properties roles %hierarchy-cache %children)
+;;; parents := proper list of parents, in order of precedence.
+;;; properties := property*
+;;; property := (property-metaobject . property-value)
+;;; roles := proper list of direct roles
+;;; %hierarchy-cache := list that holds a cached version of the sheep's entire hierarchy-list
+;;; %children := a vector of weak pointers that points to all of this sheep's children
 
 (def-suite creation :in sheep-objects)
 (def-suite allocation :in creation)

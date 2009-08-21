@@ -98,3 +98,17 @@
 (defun maybe-weak-pointer-value (x)
   (when (weak-pointer-p x)
     (weak-pointer-value x)))
+
+(defmacro aif (test-form then-form &optional else-form)
+  `(let ((it ,test-form))
+     (if it ,then-form ,else-form)))
+
+(defmacro awhen (test-form &body body)
+  `(aif ,test-form
+	(progn ,@body)))
+
+(defmacro aand (&rest args)
+  (cond ((null args) t)
+	((null (cdr args)) (car args))
+	(t `(aif ,(car args) (aand ,@(cdr args))))))
+

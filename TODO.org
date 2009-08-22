@@ -117,6 +117,9 @@
    Then watch this:
    http://www.vimeo.com/1534976?pg=embed&sec=1534976
    Then go write some tests, and test all the fucking time.
+*** TODO %enlarge-child-cache
+**** TODO Check that entries are moved over
+**** TODO Check that errors are signalled if there is no child cache
 *** TODO Improve tests for printing
     This might require CL-PPCRE.  Also, there should be better tests for the
     initialization of various *print-foobar* settings.

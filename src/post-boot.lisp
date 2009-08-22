@@ -1,11 +1,11 @@
 ;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
 
-;; This file is part of Sheeple
+;;;; This file is part of Sheeple
 
-;; post-boot.lisp
-;;
-;; Once sheeple is booted up, we can define messages/replies normally
-;;
+;;;; post-boot.lisp
+;;;;
+;;;; Once sheeple is booted up, we can define messages/replies normally
+;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
@@ -26,17 +26,6 @@
                                        (property-value ,sh ',property-name))))
                                  properties)
          ,@body))))
-
-(defmacro with-manipulators (properties sheep &body body)
-  (let ((sh (gensym)))
-    `(let ((,sh ,sheep))
-       (symbol-macrolet ,(mapcar (lambda (property-entry)
-                                   (let ((var-name (car property-entry))
-                                         (manipulator-name (cadr property-entry)))
-                                     `(,var-name (,manipulator-name ,sh))))
-                                 properties)
-         ,@body))))
-
 
 ;;;
 ;;; Printing sheep!

@@ -1,11 +1,11 @@
 ;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
 
-;; This file is part of Sheeple
+;;;; This file is part of Sheeple
 
-;; bootstrap.lisp
-;;
-;; This creates all the base objects that will be used during cloning.
-;;
+;;;; bootstrap.lisp
+;;;;
+;;;; This creates all the base objects that will be used during cloning.
+;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 

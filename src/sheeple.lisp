@@ -1,13 +1,12 @@
-
 ;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
 
-;; This file is part of Sheeple
+;;;; This file is part of Sheeple
 
-;; sheep-creation.lisp
-;;
-;; Sheep creation, cloning, inspection
-;;
-;; TODO - write validate-hierarchy-list, which could be called whenever the parents list changes.
+;;;; sheep-creation.lisp
+;;;;
+;;;; Sheep creation, cloning, inspection
+;;;;
+;;;; TODO - write validate-hierarchy-list, which could be called whenever the parents list changes.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 

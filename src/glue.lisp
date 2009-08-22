@@ -1,10 +1,12 @@
 ;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
 
-;; This file is part of Sheeple
+;;;; This file is part of Sheeple
 
-;; glue.lisp
-;;
-;; Extra glue things
+;;;; glue.lisp
+;;;;
+;;;; Extra glue things
+;;;; 
+;;;; TODO - move the contents elsewhere. It's only really being used for print-object.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 

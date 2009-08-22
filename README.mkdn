@@ -46,7 +46,7 @@ Sheeple is inspired by a number of Object-Oriented systems, mainly:
   it, and the concept of prototype OO.
 
 * [Io][4], a pure prototype-based language. Sheeple, like Io, implements
-  differential inheritance.
+  differential inheritance as a central thing.
 
 It was written with the purpose of providing a lot of the goodies of CLOS
 programming in a completely prototype-based environment. As such, it shares a
@@ -62,13 +62,11 @@ Confirmed to work (pass all tests):
 * GNU CLISP
 * LispWorks (was tested a while ago -- will probably pass again)
 
-Sheeple doesn't use any OS-specific code (or threads), so it should be fairly
-stable on all operating systems. OSX and Linux x86 have both been actually
-tested on the aforementioned platforms.  In theory, it should work on any
-implementation that supports weap pointers and weak hash tables with key
-weakness through [trivial-garbage][12].  If you run the test suite on a platform
-not listed above, and all tests pass, please e-mail me and I'll add it to the
-list of supported platforms.
+Sheeple doesn't use any OS-specific code (or threads), so it should be fairly stable on all
+operating systems. OSX and Linux x86 have both been actually tested on the aforementioned platforms.
+In theory, it should work on any implementation that supports weak pointers through
+[trivial-garbage][12].  If you run the test suite on a platform not listed above, and all tests
+pass, please e-mail me and I'll add it to the list of supported platforms.
 
 Loading Sheeple
 ---------------
@@ -78,13 +76,12 @@ It's fairly effortless to get Sheeple working. To get started, simply
          (in-package sheeple-user)
 
 And mess around from there. Be aware that if your implementation does not
-include ASDF, you will have to acquire it and load it yourself. Clisp, for
+include ASDF, you will have to acquire it and load it yourself. CLISP, for
 example, will require this.  For information on how to do this, check out
 [Cliki][1], or the [ASDF Homepage][2].
 
-Sheeple should work on most Lisp implementations that support weak pointers and
-hash tables with key weakness, although it's mainly written and tested in SBCL
-and Clozure CL on Linux x86.
+Sheeple should work on most Lisp implementations that support weak pointers, although it's mainly
+developed and tested on SBCL and Clozure CL.
 
 Sheeple also includes a suite of tests you can run on whatever platform you're
 trying to get it to work on. The test suite depends on [Fiveam][11]. To run it:
@@ -92,7 +89,7 @@ trying to get it to work on. The test suite depends on [Fiveam][11]. To run it:
          (asdf:oos 'asdf:test-op 'sheeple)
 
 And watch the tests scroll by. All tests should pass as long as you're using a
-tagged release.
+tagged release on a supported platform.
 
 Notes
 -----
@@ -113,7 +110,7 @@ Features
 
 * Full integration with built-in Lisp types through autoboxing.
 
-* Multiple inheritance through cloning with dynamic inspection and management
+* Multiple inheritance with dynamic inspection and management
   (adding/removing) of parents.
 
 * Multiple dispatch on replies (methods) -- replies specialize on specific
@@ -156,9 +153,9 @@ auto-generates an accessor based on the property name given.
         SHEEPLE-USER> (var *my-sheep*)
         "value"
 
-Cloning a sheep is as simple as... well... cloning it.
+Creating a new sheep object is as simple as spawning it.
 
-        SHEEPLE-USER> (defparameter *child* (clone *my-sheep*))
+        SHEEPLE-USER> (defparameter *child* (spawn *my-sheep*))
         *CHILD*
 
 Sheeple does differential inheritance by default. This means that value lookup
@@ -177,10 +174,10 @@ We've changed *my-sheep*'s VAR value, so *child*'s VAR value will also change.
         SHEEPLE-USER> (var *child*)
         "new-value"
 
-Replies are to Messages as Methods are to Generic Functions, and the semantics
-are very similar.  Note that Sheeple handles built-in Lisp objects, and can
-dispatch on them. They are named just like the lisp types they refer to, with
-the =foo= naming scheme for prototypes.
+Replies are to Messages as Methods are to Generic Functions, and the semantics are very similar (at
+least on the surface).  Note that Sheeple handles built-in Lisp objects, and can dispatch on
+them. They are named just like the lisp types they refer to, with the =foo= naming scheme for
+prototypes.
 
         SHEEPLE-USER> (defmessage synergize (a b))
         #<Message: SYNERGIZE #x157AAC36>

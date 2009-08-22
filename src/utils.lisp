@@ -95,6 +95,7 @@
     (when (eq (car i) item)
       (return i))))
 
+(declaim (inline maybe-weak-pointer-value))
 (defun maybe-weak-pointer-value (x)
   (when (weak-pointer-p x)
     (weak-pointer-value x)))

@@ -33,7 +33,7 @@
 
 (defun box-type-of (x)
   ;; Note: I should really find a way to make this simply use CLOS...
-  (if (sheep-p x)
+  (if (sheepp x)
       (progn
         (warn "This is already a sheep!")
         x)
@@ -65,7 +65,7 @@
   "Finds a previously-boxed object in the boxed object table.
 If ERRORP is T, this signals an error if OBJECT is a sheep, or if OBJECT
 has not already been boxed."
-  (if (sheep-p object)
+  (if (sheepp object)
       (if errorp (error "~S seems to already be a sheep." object) nil)
       (multiple-value-bind (sheep hasp)
           (gethash object *boxed-object-table*)
@@ -75,10 +75,10 @@ has not already been boxed."
 
 (defun box-object (object)
   "Wraps OBJECT with a sheep."
-  (if (sheep-p object)
+  (if (sheepp object)
       (error "~S seems to already be a sheep." object)
       (setf (gethash object *boxed-object-table*)
-            (defclone ((box-type-of object))
+            (defsheep ((box-type-of object))
                 ((wrapped-object object)) (:nickname object)))))
 
 (defun remove-boxed-object (object)
@@ -93,7 +93,7 @@ has not already been boxed."
   "Returns OBJECT or fleeces it."
   (cond ((eq object t)
          =t=)
-        ((not (sheep-p object))
+        ((not (sheepp object))
          (or (find-boxed-object object)
              (values (box-object object) t)))
         (t

@@ -14,7 +14,42 @@
 ;;;
 (def-suite properties :in sheeple)
 
+(def-suite internals :in properties)
+(in-suite internals)
+
+(test %add-property-cons)
+(test %get-property-cons)
+(test %remove-property-cons)
+(test %direct-property-value)
+(test %direct-property-metaobject)
+
 (def-suite existential :in properties)
+(in-suite existential)
+
+(test add-property)
+(test remove-property)
+(test remove-all-direct-properties)
+(test has-direct-property-p)
+(test has-property-p)
+
+(def-suite values :in properties)
+(in-suite values)
+
+(test direct-property-value)
+(test property-value)
+(test property-value-with-hierarchy-list)
+(test setf-property-value)
+
+(def-suite reflection :in properties)
+(in-suite reflection)
+
+(test property-owner)
+(test direct-property-metaobject)
+(test sheep-direct-properties)
+(test available-properties)
+(test property-summary)
+(test direct-property-summary)
+
 
 ;; (def-suite properties-basic :in properties)
 ;; (in-suite properties-basic)

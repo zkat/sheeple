@@ -41,7 +41,9 @@
 (defun (setf %direct-property-metaobject) (new-value sheep pname)
   (setf (car (%get-property-cons sheep pname)) new-value))
 
-
+;;;
+;;; Existential
+;;;
 (defun add-property (sheep property-name value)
   "Adds a property named PROPERTY-NAME to SHEEP, initialized with VALUE."
   (assert (symbolp property-name))
@@ -135,7 +137,7 @@ returned."
   ;; note - this will have to be changed if %sheep-direct-properties switches to vectors.
   (mapcar #'car (%sheep-direct-properties sheep)))
 
-#+nil(defun available-properties (sheep)
+(defun available-properties (sheep)
   "Returns a list of property objects describing all properties available to SHEEP, including
 inherited ones."  
   (let* ((direct-properties (sheep-direct-properties sheep))
@@ -161,7 +163,6 @@ inherited ones."
 
 (defun direct-property-summary (sheep &optional stream)
   "Provides a pretty-printed representation of SHEEP's direct properties."
-  ;; todo
   (format stream
           "~&Sheep: ~A~%~
            Direct Properties: ~%~%~

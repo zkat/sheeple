@@ -1,0 +1,28 @@
+* A few brief guidelines about the coding style for the Sheeple source
+** Documentation
+*** Documentation
+    Please, please, document your code, even if it is not exposed to the user. A
+    well-documented function devoid of comments is better than an undocumented
+    function with several short comments in its body.
+**** Describe WHAT, not HOW
+     Supply an API through docstrings. If a function's algorithm is complex,
+     don't describe it in the docstring; either use comments, or simplify the
+     algorithm.
+*** Commenting
+    Comment your code as described in [[http://www.lispworks.com/documentation/HyperSpec/Body/02_ddb.htm][CLHS 2.4.4.2]]. Occasionally, when large
+    blocks of code must be commented out, it is alright to use whatever
+    mass-commenting your editor provides, but try to stick to these conventions
+    for "permanent" comments.
+**** Signed Comments
+     If a comment is your opinion, rather than a clarification of the code,
+     please make clear that you left that comment. For example:
+;;; This function conses too much. - John Foo
+** Indentation & Wrapping
+*** Standard CL indentation
+    SLIME is a fairly good guide here, although it does mess up some forms, such
+    as definitions of qualified replies. Indent these forms by hand.
+*** Wrap lines below 100 columns
+    In general, aim for a balance between readability and convenience. CL nests
+    a lot, and the MOP identifiers have long names, so it's hard to keep complex
+    definitions wrapped to 70 or 80 columns. Each file has a row of 100
+    semicolons at the end of its header, that can provide a quick reference.

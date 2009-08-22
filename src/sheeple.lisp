@@ -157,8 +157,8 @@ of its descendants."
 
 (defun %remove-child (child sheep)
   "Takes CHILD out of SHEEP's child cache."
-  (when (find child (%sheep-children sheep) :key #'maybe-weak-pointer-value)
-    (deletef (%sheep-children sheep) child :key #'maybe-weak-pointer-value))
+  (awhen (position child (%sheep-children sheep) :key #'maybe-weak-pointer-value)
+    (setf (svref (%sheep-children sheep) it) nil))
   sheep)
 
 (defun %map-children (function sheep)

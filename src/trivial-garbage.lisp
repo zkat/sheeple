@@ -42,7 +42,12 @@
   "Weak value hash-table mapping between pseudo weak pointers and its values.")
 
 #+(or allegro openmcl lispworks)
-(defstruct (weak-pointer (:constructor %make-weak-pointer))
+(defstruct (weak-pointer
+             (:constructor %make-weak-pointer)
+             (:print-object (lambda (wp stream)
+                              (print-unreadable-object (wp stream)
+                                (format stream "Weak Pointer: ~:[Dead~;~:*~S~]"
+                                        (weak-pointer-value wp))))))
   #-openmcl pointer)
 
 (defun make-weak-pointer (object)

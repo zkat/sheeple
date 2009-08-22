@@ -399,12 +399,12 @@ allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
         (add-parent =standard-sheep= sheep))
     (apply #'init-sheep sheep all-keys)))
 
-(defun clone (&rest sheeple)
+(defun make-sheep (&rest sheeple)
   "Creates a new standard-sheep object with SHEEPLE as its parents."
   (ensure-sheep sheeple))
 
 ;;;
-;;; DEFCLONE macro
+;;; DEFSHEEP macro
 ;;;
 (defun canonize-sheeple (sheeple)
   `(list ,@sheeple))
@@ -464,7 +464,7 @@ allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
 (defun canonize-clone-option (option)
   (list `,(car option) (cadr option)))
 
-(defmacro defclone (sheeple properties &rest options)
+(defmacro defsheep (sheeple properties &rest options)
   "Standard sheep-generation macro. This variant auto-generates accessors."
   `(let ((sheep (ensure-sheep
                  ,(canonize-sheeple sheeple)

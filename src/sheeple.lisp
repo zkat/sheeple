@@ -204,6 +204,7 @@ regards to the CONSTRAINTS. A future version will undo this change."
                         (funcall tie-breaker minimal-elements result))
      :collect choice :into result
      :do (deletef constraints choice :test #'member)
+     (setf elements (remove choice elements))
      :finally
      (if (null elements)
          (return-from topological-sort result)

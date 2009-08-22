@@ -1,8 +1,8 @@
 ;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
 
-;; conditions.lisp
-;;
-;; Holds all special conditions used by Sheeple
+;;;; conditions.lisp
+;;;;
+;;;; Holds all special conditions used by Sheeple
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 

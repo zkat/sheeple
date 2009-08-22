@@ -1,10 +1,10 @@
 ;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
 
-;; This file is part of Sheeple
+;;;; This file is part of Sheeple
 
-;; reply-definition.lisp
-;;
-;; Reply and role metasheeple, reply definition and undefinition, role management.
+;;;; reply-definition.lisp
+;;;;
+;;;; Reply and role metasheeple, reply definition and undefinition, role management.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 

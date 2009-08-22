@@ -51,28 +51,28 @@
    ;; :no-primary-replies    ;error (signaled when the only applicable replies are combination replies)
    ;; :specialized-lambda-list-error       ;error
 
-   ;; ;; Protos
-   ;; :=dolly=
-   ;; :=t=
-   ;; :=null=
-   ;; :=symbol=
-   ;; :=complex=
-   ;; :=integer=
-   ;; :=float=
-   ;; :=cons=
-   ;; :=character=
-   ;; :=hash-table=
-   ;; :=package=
-   ;; :=pathname=
-   ;; :=readtable=
-   ;; :=stream=
-   ;; :=number=
-   ;; :=string=
-   ;; :=bit-vector=
-   ;; :=vector=
-   ;; :=array=
-   ;; :=function=
-   ;; :=boxed-object=
+   ;; Protos
+   :=standard-sheep=
+   :=t=
+   :=null=
+   :=symbol=
+   :=complex=
+   :=integer=
+   :=float=
+   :=cons=
+   :=character=
+   :=hash-table=
+   :=package=
+   :=pathname=
+   :=readtable=
+   :=stream=
+   :=number=
+   :=string=
+   :=bit-vector=
+   :=vector=
+   :=array=
+   :=function=
+   :=boxed-object=
 
    ;; ;; built-ins
    ;; :box-type-of ;returns the appropriate sheep for a wolf. Good for getting an idea of what is what.

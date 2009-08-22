@@ -133,16 +133,17 @@ of its descendants."
        (every #'maybe-weak-pointer-value
               (%sheep-children sheep))))
 
-(defun %enlarge-child-cache-new (sheep)
+(defun %enlarge-child-cache (sheep)
   "Enlarges SHEEP's child cache by the value of `CHILD-CACHE.GROW-RATIO'."
   (let ((old-vector (%sheep-children sheep)))
     (setf (%sheep-children sheep)
           (make-array (* CHILD-CACHE.GROW-RATIO (length old-vector))
                       :initial-element nil))
-    (dotimes (i (length old-vector) sheep)
+    (dotimes (i (length old-vector))
       (setf (aref (%sheep-children sheep) i) (aref old-vector i)))))
 
-(defun %enlarge-child-cache (sheep)
+;;; <<<<<<< BEGIN OUTDATED CODE BLOCK >>>>>>>
+(defun %enlarge-child-cache-old (sheep)
   "When the child cache gets full, we have to make it bigger. In general, we assume
 a 5-slot array will be enough for sheeple that only have a couple of children. Once that
 threshold is crossed, though, we assume the worst and replace that relatively small vector
@@ -165,6 +166,7 @@ by 100 each time."
         ;; may as well.
         (t (error "Something went wrong with adjusting the array. Weird.")))
   sheep)
+;;; <<<<<<< END OUTDATED CODE BLOCK >>>>>>>
 
 (defun %add-child (child sheep)
   "Registers CHILD in SHEEP's child cache."

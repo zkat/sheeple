@@ -1,11 +1,11 @@
 ;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
 
-;; This file is part of Sheeple
+;;;; This file is part of Sheeple
 
-;; messages.lisp
-;;
-;; Message metasheep, message definition and management
-;;
+;;;; messages.lisp
+;;;;
+;;;; Message metasheep, message definition and management
+;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
@@ -26,7 +26,7 @@
                                   (message-arg-info (make-arg-info)))))
 
 (defun messagep (obj)
-  ;; todo
+  ;; todo - this is, in fact, not used at all in the implementation.
   )
 
 (defun clear-memo-table (message)

@@ -441,7 +441,7 @@ allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
                 (if (null writers) (setf no-writer-p t)
                     (error "You already defined a writer, but now you say you don't want one? Make up your mind.")))
                (t (pushnew (cadr olist) writers))))
-        ((:manipulator :accessor)
+        ((:accessor)
          (cond ((or no-reader-p no-writer-p)
                 (error "You said you didn't want a reader or a writer, but now you want one? Make up your mind."))
                ((null (cadr olist))

@@ -140,7 +140,7 @@ lurk in #lisp@freenode (as sykopomp).
 Quick Example
 -------------
 
-This creates a standard sheep with only DOLLY as its parent
+This creates a standard sheep with only =STANDARD-SHEEP= as its parent
 
         SHEEPLE-USER> (defparameter *my-sheep* (clone))
         *MY-SHEEP*

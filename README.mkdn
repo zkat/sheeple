@@ -142,7 +142,7 @@ Quick Example
 
 This creates a standard sheep with only =STANDARD-SHEEP= as its parent
 
-        SHEEPLE-USER> (defparameter *my-sheep* (clone))
+        SHEEPLE-USER> (defparameter *my-sheep* (spawn))
         *MY-SHEEP*
 
 We can add properties to a sheep object at any time. This particular call also
@@ -193,7 +193,7 @@ prototypes.
 Replies are defined on sheep objects themselves. No need for eql-specialization,
 everything is an 'instance' in Sheeple.
 
-        SHEEPLE-USER> (defreply synergize ((a *my-sheep*) (b *my-sheep*)) (clone a b))
+        SHEEPLE-USER> (defreply synergize ((a *my-sheep*) (b *my-sheep*)) (spawn a b))
         #<Reply: SYNERGIZE #x157C5596>
         SHEEPLE-USER> (synergize *my-sheep* *child*)
         ; ERROR - circular precedence graph

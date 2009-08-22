@@ -135,6 +135,16 @@
 ** TODO Properties + PropMOP
    Properties need to be implemented as a type of sheep, with a bunch of
    functions special cased on =STANDARD-PROPERTY= to give metastability.
+*** DONE Reimplement properties
+    Write a basic reimplementation of sheep properties.
+*** TODO Improve the whole add-property interface.
+    This is partly done right now... add-property itself has been greatly simplified.
+    I think what needs to be done now is that a macro should be written to take care
+    of all the fancy features that add-property used to handle. Perhaps write a
+    defproperty macro?
+*** TODO Implement a property MOP
+    This'll probably need a bit of shuffling around, but it should be done after the 
+    basics are fully reimplemented.
 ** TODO Messages, Replies, and a possible MOP here too?
    These all need to be sheep, and there are probably going to be a few circular
    aspects to resolve here as well. We should extend an AMOP-like MOP too.

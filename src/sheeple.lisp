@@ -175,7 +175,7 @@ It sets the vector as SHEEP's child cache."
   "Iteratively applies FUNCTION to SHEEP's children (it takes care of taking each child out
 of the weak pointer)."
   (when (%sheep-children sheep)
-    (map 'vector (fn (when (weak-pointer-p _)
+    (map 'vector (fun (when (weak-pointer-p _)
                        (funcall function (weak-pointer-value _))))
          (%sheep-children sheep))))
 
@@ -198,7 +198,7 @@ Would produce this familiar \"diamond\" hierarchy:
  B   C
   \\ /
    D"
-  `(let* ,(mapcar (fn (destructuring-bind (sheep &rest parents)
+  `(let* ,(mapcar (fun (destructuring-bind (sheep &rest parents)
                           (ensure-list _)
                         `(,sheep (add-parents (list ,@parents)
                                               (allocate-std-sheep)))))
@@ -216,7 +216,7 @@ that they are freshly generated, this implementation is destructive with
 regards to the CONSTRAINTS. A future version will undo this change."
   (loop
      :for minimal-elements :=
-     (remove-if (fn (member _ constraints
+     (remove-if (fun (member _ constraints
                             :key #'cadr))
                 elements)
      :while minimal-elements
@@ -283,7 +283,7 @@ afford to use the destructive #'mapcan and cons less."
   (let ((list (compute-sheep-hierarchy-list sheep)))
     (setf (%sheep-hierarchy-cache sheep)
           list)
-    (%map-children (fn (memoize-sheep-hierarchy-list _))
+    (%map-children (fun (memoize-sheep-hierarchy-list _))
                    sheep)))
 
 (defun std-finalize-sheep-inheritance (sheep)
@@ -331,30 +331,26 @@ afford to use the destructive #'mapcan and cons less."
 
 (defun std-add-parent (new-parent child)
   "Some basic checking here, and then the parent is actually added to the sheep's list."
-  (cond ((equal new-parent child)
-         (error "Sheeple cannot be parents of themselves."))
-        ((member new-parent (sheep-parents child))
-         (error "~A is already a parent of ~A." new-parent child))
-        (t
-         (handler-case
-             (progn
-               (push new-parent (%sheep-parents child))
-               (finalize-sheep-inheritance child)
-               child)
-           ;; This error is signaled by compute-sheep-hierarchy-list, which right now
-           ;; is called from inside finalize-sheep-inheritance (this is probably a bad idea, move
-           ;; c-s-h-l in here just to do the check?)
-           (sheeple-hierarchy-error ()
-             (progn
-               (remove-parent new-parent child)
-               (error 'sheeple-hierarchy-error :sheep child))))
-         child)))
+  (when (eq new-parent child) (error "Sheeple cannot be parents of themselves."))
+  (when (member new-parent (sheep-parents child) :test #'eq)
+    (error "~A is already a parent of ~A." new-parent child))
+  (handler-case
+      (progn
+        (push new-parent (%sheep-parents child))
+        (finalize-sheep-inheritance child)
+        child)
+    ;; This error is signaled by compute-sheep-hierarchy-list, which right now
+    ;; is called from inside finalize-sheep-inheritance (this is probably a bad idea, move
+    ;; c-s-h-l in here just to do the check?)
+    ;; one problem with this is that it'll call c-s-h-l twice
+    (sheeple-hierarchy-error () (progn (remove-parent new-parent child)
+                                       (error 'sheeple-hierarchy-error :sheep child)))))
 
 (defun add-parents (parents sheep)
   "Mostly a utility function for easily adding multiple parents. They will be added to
 the front of the sheep's parent list in reverse order (so they will basically be appended
 to the front of the list)"
-  (mapc (fn (add-parent _ sheep))
+  (mapc (fun (add-parent _ sheep))
         (reverse parents))
   sheep)
 
@@ -382,7 +378,7 @@ to the front of the list)"
   (ancestorp ancestor maybe-descendant))
 
 ;;;
-;;; Cloning
+;;; Spawning
 ;;;
 (defun ensure-sheep (sheep-or-sheeple &rest all-keys
                      &key (metasheep =standard-metasheep=)
@@ -400,7 +396,7 @@ allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
         (add-parent =standard-sheep= sheep))
     (apply #'init-sheep sheep all-keys)))
 
-(defun make-sheep (&rest sheeple)
+(defun spawn (&rest sheeple)
   "Creates a new standard-sheep object with SHEEPLE as its parents."
   (ensure-sheep sheeple))
 
@@ -411,8 +407,7 @@ allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
   `(list ,@sheeple))
 
 (defun canonize-properties (properties &optional (accessors-by-default nil))
-  `(list ,@(mapcar (fn (canonize-property _ accessors-by-default))
-                   properties)))
+  `(list ,@(mapcar (fun (canonize-property _ accessors-by-default)) properties)))
 
 (defun canonize-property (property &optional (accessors-by-default nil))
   (let ((name (car property)) (value (cadr property)) (readers nil)
@@ -459,10 +454,10 @@ allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
            ,@(when writers `(:writers ',writers))
            ,@other-options)))
 
-(defun canonize-clone-options (options)
-  (mapappend #'canonize-clone-option options))
+(defun canonize-options (options)
+  (mapcan #'canonize-clone-option options))
 
-(defun canonize-clone-option (option)
+(defun canonize-option (option)
   (list `,(car option) (cadr option)))
 
 (defmacro defsheep (sheeple properties &rest options)
@@ -474,6 +469,7 @@ allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
      sheep))
 
 (defmacro defproto (name sheeple properties &rest options)
+  "Words cannot express how useful this is."
   `(progn
      (declaim (special ,name))
      (let ((sheep (create-or-reinit-sheep

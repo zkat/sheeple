@@ -112,15 +112,16 @@
 	((null (cdr args)) (car args))
 	(t `(aif ,(car args) (aand ,@(cdr args))))))
 
-(defmacro fn (&body stuff)
+(defmacro fun (&body family)
+  "This macro puts the FUN back in FUNCTION."
   (let ((args
-         (loop while (and (not (eq (car stuff) (intern "->")))
-                          stuff)
-              collect (prog1 (car stuff)
-                        (setf stuff (cdr stuff))))))
-    (if (not stuff)
+         (loop while (and (not (eq (car family) (intern "->")))
+                          family)
+              collect (prog1 (car family)
+                        (setf family (cdr family))))))
+    (if (not family)
         `(lambda (,(intern "_")) ,@args)
-        `(lambda (,@args) ,@(cdr stuff)))))
+        `(lambda (,@args) ,@(cdr family)))))
 
 ;; from alexandria:
 (declaim (inline delete/swapped-arguments))

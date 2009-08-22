@@ -343,16 +343,18 @@
     (is (find sheep2 (%sheep-children sheep1) :key #'maybe-weak-pointer-value))))
 
 (test (overwriting-garbage-children :depends-on %add-child)
-  (loop :repeat 5 :for sheep := (allocate-std-sheep)
-     :do (loop :repeat 5 :do (%add-child (allocate-std-sheep) sheep)
+  (loop :repeat 10 :for sheep := (allocate-std-sheep)
+     :do (loop :repeat CHILD-CACHE.INITIAL-SIZE
+            :do (%add-child (allocate-std-sheep) sheep)
             (loop :repeat 9999 :collect (list))
             :finally (gc :full t))
      (unless (every #'maybe-weak-pointer-value (%sheep-children sheep))
        (return
-         (if (= 5 (length (%sheep-children (%add-child (allocate-std-sheep) sheep))))
+         (if (= CHILD-CACHE.INITIAL-SIZE
+                (length (%sheep-children (%add-child (allocate-std-sheep) sheep))))
              (pass "#'%ADD-CHILD overrode a garbage-collected child")
              (fail "#'%ADD-CHILD didn't override garbage-collected children"))))
-     :finally (skip "Unable to perform test -- not enough garbage collected")))
+     :finally (skip "Unable to perform test -- Insufficient garbage collection")))
 
 (test %remove-child
   (let ((sheep1 (allocate-std-sheep))

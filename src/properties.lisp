@@ -48,7 +48,7 @@
   (when (has-direct-property-p sheep property-name)
     (cerror "Add property anyway." "~A already has a direct property named ~A." 
             sheep property-name))
-  (let ((property-metaobject (defclone (=standard-property=) ((name property-name)))))
+  (let ((property-metaobject (defsheep (=standard-property=) ((name property-name)))))
     (%add-property-cons sheep property-metaobject value)))
 
 ;; TODO - remove-property should look at the property metaobject and remove any replies for

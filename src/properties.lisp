@@ -26,7 +26,7 @@
 
 (defun %get-property-cons (sheep property-name)
   (find prop (%sheep-direct-properties sh)
-        :test #'eq :key (fn (property-name (car _)))))
+        :test #'eq :key (fun (property-name (car _)))))
 
 (defun %remove-property-cons (sheep property-name)
   (deletef (%sheep-direct-properties) (%get-property-cons sheep property-name)))
@@ -76,7 +76,7 @@ NIL otherwise."
 (defun has-property-p (sheep property-name)
   "Returns T if calling PROPERTY-VALUE on SHEEP using the same property-name
 would yield a value (i.e. not signal an unbound-property condition)."
-  (some (fn (has-direct-property-p _ property-name))
+  (some (fun (has-direct-property-p _ property-name))
         (sheep-hierarchy-list sheep)))
 
 ;;; Value
@@ -123,7 +123,7 @@ is signaled."
   "Returns the sheep object with a direct-property called PROPERTY-NAME from which SHEEP inherits
 its value. If ERRORP is T, an error is signaled if the property is unbound. Otherwise, NIL is
 returned."
-  (or (find-if (fn (has-direct-property-p _ property-name)) (sheep-hierarchy-list sheep))
+  (or (find-if (fun (has-direct-property-p _ property-name)) (sheep-hierarchy-list sheep))
       (when errorp (error 'unbound-property :sheep sheep :property-name property-name))))
 
 (defun direct-property-metaobject (sheep property-name)
@@ -139,14 +139,14 @@ returned."
   "Returns a list of property objects describing all properties available to SHEEP, including
 inherited ones."  
   (let* ((direct-properties (sheep-direct-properties sheep))
-         (avail-property-names (mapcar (fn (property-name _))
+         (avail-property-names (mapcar (fun (property-name _))
                                        (remove-duplicates
                                         (flatten
                                          (append direct-properties
                                                  (mapcar #'available-properties
                                                          (sheep-parents sheep))))
                                         :key #'property-name))))
-    (mapcar (fn (direct-property-metaobject (property-owner sheep _ nil) _))
+    (mapcar (fun (direct-property-metaobject (property-owner sheep _ nil) _))
             avail-property-names)))
 
 (defun property-summary (sheep &optional (stream *standard-output*))
@@ -154,7 +154,7 @@ inherited ones."
   (format stream
           "~&Sheep: ~A~%Properties:~% ~{~{~&~3TName: ~13T~A~%~3TValue: ~13T~S~%~
            ~3TOwner: ~13T~A~%~%~}~}"
-          sheep (mapcar (fn (list (property-name _)
+          sheep (mapcar (fun (list (property-name _)
                                   (property-value sheep (property-name _))
                                   (property-owner sheep (property-name _))))
                         (available-properties sheep))))
@@ -166,6 +166,6 @@ inherited ones."
           "~&Sheep: ~A~%~
            Direct Properties: ~%~%~
            ~{~{~&~3TName: ~A~%~3TValue: ~S~%~%~}~}"
-          sheep (mapcar (fn (list (property-name _)
+          sheep (mapcar (fun (list (property-name _)
                                   (direct-property-value sheep (property-name _))))
                         (sheep-direct-properties sheep))))

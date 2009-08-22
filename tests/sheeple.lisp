@@ -550,12 +550,12 @@
     (is (not (descendantp b c)))))
 
 ;;;
-;;; Cloning
+;;; Spawning
 ;;;
-(def-suite cloning :in sheeple)
+(def-suite spawning :in sheeple)
 
-(def-suite clone-general :in cloning)
-(in-suite clone-general)
+(def-suite spawn-general :in spawning)
+(in-suite spawn-general)
 
 (postboot-test ensure-sheep
   ;; basic
@@ -585,39 +585,39 @@
     (is (eql test-metasheep (sheep-metasheep sheep)))
     (is (eql =standard-sheep= (car (sheep-parents sheep))))))
 
-(postboot-test clone
-  (is (eql =standard-metasheep= (sheep-metasheep (clone))))
-  (is (sheepp (clone)))
-  (is (std-sheep-p (clone)))
-  (is (eql =standard-sheep= (car (sheep-parents (clone)))))
-  (let ((obj1 (clone)))
+(postboot-test spawn
+  (is (eql =standard-metasheep= (sheep-metasheep (spawn))))
+  (is (sheepp (spawn)))
+  (is (std-sheep-p (spawn)))
+  (is (eql =standard-sheep= (car (sheep-parents (spawn)))))
+  (let ((obj1 (spawn)))
     (is (eql obj1
-             (car (sheep-parents (clone obj1))))))
-  (let* ((obj1 (clone))
-         (obj2 (clone obj1)))
+             (car (sheep-parents (spawn obj1))))))
+  (let* ((obj1 (spawn))
+         (obj2 (spawn obj1)))
     (is (eql obj1
              (car (sheep-parents obj2)))))
-  (let* ((o1 (clone))
-         (o2 (clone))
-         (o3 (clone))
-         (o4 (clone))
-         (sheep (clone o1 o2 o3 o4)))
+  (let* ((o1 (spawn))
+         (o2 (spawn))
+         (o3 (spawn))
+         (o4 (spawn))
+         (sheep (spawn o1 o2 o3 o4)))
     (is (parentp o1 sheep))
     (is (parentp o2 sheep))
     (is (parentp o3 sheep))
     (is (parentp o4 sheep))))
 
 (postboot-test sheep-nickname
-  (let ((sheep (clone)))
+  (let ((sheep (spawn)))
     (setf (sheep-nickname sheep) 'test)
     (is (eq 'test (sheep-nickname sheep)))
-    (is (eq 'test (sheep-nickname (clone sheep))))))
+    (is (eq 'test (sheep-nickname (spawn sheep))))))
 
 (postboot-test sheep-documentation
-  (let ((sheep (clone)))
+  (let ((sheep (spawn)))
     (setf (sheep-documentation sheep) 'test)
     (is (eq 'test (sheep-documentation sheep)))
-    (is (eq 'test (sheep-documentation (clone sheep))))))
+    (is (eq 'test (sheep-documentation (spawn sheep))))))
 
 (test copy-sheep
   ;; TODO - I don't even know if I want this. -- Sykopomp
@@ -625,10 +625,10 @@
   )
 
 ;;;
-;;; DEFCLONE
+;;; DEFSHEEP
 ;;;
-(def-suite defclone :in cloning)
-(in-suite defclone)
+(def-suite defsheep :in spawning)
+(in-suite defsheep)
 
 ;;; macro processing
 (test canonize-sheeple
@@ -654,13 +654,13 @@
                (list 'ANOTHER "another-val" :readers '(another) :writers '((setf another))))
              (canonize-properties '((var "value") (another "another-val")) t))))
 
-(test canonize-clone-options
+(test canonize-options
   (is (equal '(:metasheep foo :other-option 'bar)
-             (canonize-clone-options '((:metasheep foo) (:other-option 'bar))))))
+             (canonize-options '((:metasheep foo) (:other-option 'bar))))))
 
-(postboot-test defclone
-  (let* ((parent (clone))
-         (test-sheep (defclone (parent) ((var "value")))))
+(postboot-test defsheep
+  (let* ((parent (spawn))
+         (test-sheep (defsheep (parent) ((var "value")))))
     (is (sheepp test-sheep))
     (is (parentp parent test-sheep))
     (is (has-direct-property-p test-sheep 'var))
@@ -670,7 +670,7 @@
 ;;;
 ;;; Protos
 ;;;
-(def-suite protos :in cloning)
+(def-suite protos :in spawning)
 (in-suite protos)
 
 (postboot-test defproto

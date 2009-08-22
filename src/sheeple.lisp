@@ -116,13 +116,25 @@ of its descendants."
   (%sheep-parents sheep))
 
 ;;; children cache
+(defvar CHILD-CACHE.INITIAL-SIZE 5
+  "The initial size for a sheep's child cache.")
+
+(defvar CHILD-CACHE.GROW-RATIO 5
+  "The ratio by which the child-cache is expanded when full.")
+
+(defun %create-child-cache (sheep)
+  "This creates only the basic child cache: A simple 5-item vector of NILs.
+It sets the vector as SHEEP's child cache."
+  (setf (%sheep-children sheep)
+        (make-array CHILD-CACHE.INITIAL-SIZE :initial-element nil)))
+
 (defun %child-cache-full-p (sheep)
   "A child cache is full if all its items are live weak pointers to other sheep."
   (and (%sheep-children sheep)
        (every #'maybe-weak-pointer-value
               (%sheep-children sheep))))
 
-(defun %adjust-child-cache (sheep)
+(defun %enlarge-child-cache (sheep)
   "When the child cache gets full, we have to make it bigger. In general, we assume
 a 5-slot array will be enough for sheeple that only have a couple of children. Once that
 threshold is crossed, though, we assume the worst and replace that relatively small vector
@@ -146,18 +158,12 @@ by 100 each time."
         (t (error "Something went wrong with adjusting the array. Weird.")))
   sheep)
 
-(defun %create-child-cache (sheep)
-  "This creates only the basic child cache: A simple 5-item vector of NILs.
-It sets the vector as SHEEP's child cache."
-  (setf (%sheep-children sheep)
-        (make-array 5 :initial-element nil)))
-
 (defun %add-child (child sheep)
-  "Registers CHILD as a weak pointer in SHEEP's child cache."
-  (unless (%sheep-children sheep)
-    (%create-child-cache sheep))
-  (when (%child-cache-full-p sheep)
-    (%adjust-child-cache sheep))
+  "Registers CHILD in SHEEP's child cache."
+  (if (%sheep-children sheep)
+      (when (%child-cache-full-p sheep)
+        (%enlarge-child-cache sheep))
+      (%create-child-cache sheep))
   (unless (find child (%sheep-children sheep) :key #'maybe-weak-pointer-value)
     (let ((children (%sheep-children sheep)))
       (dotimes (i (length children))

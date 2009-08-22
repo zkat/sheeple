@@ -471,7 +471,7 @@ allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
            ,@other-options)))
 
 (defun canonize-options (options)
-  (mapcan #'canonize-clone-option options))
+  (mapcan #'canonize-option options))
 
 (defun canonize-option (option)
   (list `,(car option) (cadr option)))
@@ -481,7 +481,7 @@ allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
   `(let ((sheep (ensure-sheep
                  ,(canonize-sheeple sheeple)
                  :properties ,(canonize-properties properties)
-                 ,@(canonize-clone-options options))))
+                 ,@(canonize-options options))))
      sheep))
 
 (defmacro defproto (name sheeple properties &rest options)
@@ -493,7 +493,7 @@ allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
                        ,name nil)
                    ,(canonize-sheeple sheeple)
                    :properties ,(canonize-properties properties t)
-                   ,@(canonize-clone-options options))))
+                   ,@(canonize-options options))))
        (unless (sheep-nickname sheep)
          (setf (sheep-nickname sheep) ',name))
        (setf (symbol-value ',name) sheep))))

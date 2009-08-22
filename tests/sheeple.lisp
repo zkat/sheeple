@@ -307,6 +307,10 @@
 (def-suite inheritance-caching :in inheritance)
 (in-suite inheritance-caching)
 
+(test (%create-child-cache :fixture allocate-std-sheep)
+  (%create-child-cache sheep)
+  (is (typep (%sheep-children sheep) `(simple-vector ,CHILD-CACHE.INITIAL-SIZE))))
+
 (test (%child-cache-full-p :fixture allocate-std-sheep)
   (is (not (%child-cache-full-p sheep)))
   (setf (%sheep-children sheep)
@@ -320,8 +324,7 @@
         (make-weak-pointer sheep))
   (is (not (%child-cache-full-p sheep))))
 
-(test (%adjust-child-cache :fixture allocate-std-sheep)
-  ;; todo - this needs to check that existing entries are moved over correctly.
+(test (%enlarge-child-cache :fixture allocate-std-sheep)
   (%create-child-cache sheep)
   (is (= 5 (length (%sheep-children sheep))))
   (is (not (adjustable-array-p (%sheep-children sheep))))
@@ -330,7 +333,7 @@
   (setf (aref (%sheep-children sheep) 2) (make-weak-pointer sheep))
   (setf (aref (%sheep-children sheep) 3) (make-weak-pointer sheep))
   (setf (aref (%sheep-children sheep) 4) (make-weak-pointer sheep))
-  (is (eql sheep (%adjust-child-cache sheep)))
+  (is (eql sheep (%enlarge-child-cache sheep)))
   (is (= 100 (length (%sheep-children sheep))))
   (is (eql sheep (weak-pointer-value (aref (%sheep-children sheep) 0))))
   (is (eql sheep (weak-pointer-value (aref (%sheep-children sheep) 1))))
@@ -338,18 +341,13 @@
   (is (eql sheep (weak-pointer-value (aref (%sheep-children sheep) 3))))
   (is (eql sheep (weak-pointer-value (aref (%sheep-children sheep) 4))))
   (is (adjustable-array-p (%sheep-children sheep)))
-  (is (eql sheep (%adjust-child-cache sheep)))
+  (is (eql sheep (%enlarge-child-cache sheep)))
   (is (= 200 (length (%sheep-children sheep))))
   (is (eql sheep (weak-pointer-value (aref (%sheep-children sheep) 0))))
   (is (eql sheep (weak-pointer-value (aref (%sheep-children sheep) 1))))
   (is (eql sheep (weak-pointer-value (aref (%sheep-children sheep) 2))))
   (is (eql sheep (weak-pointer-value (aref (%sheep-children sheep) 3))))
   (is (eql sheep (weak-pointer-value (aref (%sheep-children sheep) 4)))))
-
-(test (%create-child-cache :fixture allocate-std-sheep)
-  (is (null (%sheep-children sheep)))
-  (is (simple-vector-p (%create-child-cache sheep)))
-  (is (simple-vector-p (%sheep-children sheep))))
 
 (test %add-child
   (let ((sheep1 (allocate-std-sheep))

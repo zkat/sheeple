@@ -112,3 +112,22 @@
 	((null (cdr args)) (car args))
 	(t `(aif ,(car args) (aand ,@(cdr args))))))
 
+(defmacro fn (&body stuff)
+  (let ((args
+         (loop while (and (not (eq (car stuff) (intern "->")))
+                          stuff)
+              collect (prog1 (car stuff)
+                        (setf stuff (cdr stuff))))))
+    (if (not stuff)
+        `(lambda (,(intern "_")) ,@args)
+        `(lambda (,@args) ,@(cdr stuff)))))
+
+;; from alexandria:
+(declaim (inline delete/swapped-arguments))
+(defun delete/swapped-arguments (sequence item &rest keyword-arguments)
+  (apply #'delete item sequence keyword-arguments))
+
+(define-modify-macro deletef (item &rest remove-keywords)
+  delete/swapped-arguments
+  "Modify-macro for DELETE. Sets place designated by the first argument to
+the result of calling DELETE with ITEM, place, and the REMOVE-KEYWORDS.")

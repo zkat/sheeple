@@ -283,7 +283,7 @@ afford to use the destructive #'mapcan and cons less."
         (topological-sort sheeple-to-order
                           (remove-duplicates
                            (mapcan #'local-precedence-ordering
-                                      sheeple-to-order))
+                                   sheeple-to-order))
                           #'std-tie-breaker-rule))
     (simple-error ()
       (error 'sheeple-hierarchy-error :sheep sheep))))
@@ -295,16 +295,13 @@ afford to use the destructive #'mapcan and cons less."
                 (sheep-metasheep sheep) sheep))))
 
 (defun memoize-sheep-hierarchy-list (sheep)
-  (let ((list (compute-sheep-hierarchy-list sheep)))
-    (setf (%sheep-hierarchy-cache sheep)
-          list)
-    (%map-children (fun (memoize-sheep-hierarchy-list _))
-                   sheep)))
+  (setf (%sheep-hierarchy-cache sheep)
+        (compute-sheep-hierarchy-list sheep))
+  (%map-children (fun (memoize-sheep-hierarchy-list _)) sheep))
 
 (defun std-finalize-sheep-inheritance (sheep)
   "we memoize the hierarchy list here."
-  (loop for parent in (sheep-parents sheep)
-     do (%add-child sheep parent))
+  (mapc (fun (%add-child sheep _)) (sheep-parents sheep))
   (memoize-sheep-hierarchy-list sheep)
   sheep)
 

@@ -147,17 +147,15 @@ It sets the vector as SHEEP's child cache."
 (defun %remove-child (child sheep)
   "Takes CHILD out of SHEEP's child cache."
   (when (find child (%sheep-children sheep) :key #'maybe-weak-pointer-value)
-    (setf (%sheep-children sheep)
-          (delete child (%sheep-children sheep) :key #'maybe-weak-pointer-value)))
+    (deletef (%sheep-children sheep) child :key #'maybe-weak-pointer-value))
   sheep)
 
 (defun %map-children (function sheep)
   "Iteratively applies FUNCTION to SHEEP's children (it takes care of taking each child out
 of the weak pointer)."
   (when (%sheep-children sheep)
-    (map 'vector (lambda (pointer)
-                   (when (weak-pointer-p pointer)
-                     (funcall function (weak-pointer-value pointer))))
+    (map 'vector (fn (when (weak-pointer-p _)
+                       (funcall function (weak-pointer-value _))))
          (%sheep-children sheep))))
 
 ;;; This utility is useful for concisely setting up sheep hierarchies
@@ -179,9 +177,8 @@ Would produce this familiar \"diamond\" hierarchy:
  B   C
   \\ /
    D"
-  `(let* ,(mapcar #'(lambda (hierarchy-spec)
-                      (destructuring-bind (sheep &rest parents)
-                          (ensure-list hierarchy-spec)
+  `(let* ,(mapcar (fn (destructuring-bind (sheep &rest parents)
+                          (ensure-list _)
                         `(,sheep (add-parents (list ,@parents)
                                               (allocate-std-sheep)))))
                   sheep-and-parents)
@@ -198,17 +195,15 @@ that they are freshly generated, this implementation is destructive with
 regards to the CONSTRAINTS. A future version will undo this change."
   (loop
      :for minimal-elements :=
-     (remove-if (lambda (sheep)
-                  (member sheep constraints
-                          :key #'cadr))
+     (remove-if (fn (member _ constraints
+                            :key #'cadr))
                 elements)
      :while minimal-elements
      :for choice := (if (null (cdr minimal-elements))
                         (car minimal-elements)
                         (funcall tie-breaker minimal-elements result))
      :collect choice :into result
-     :do (setf constraints (delete choice constraints :test #'member)
-               elements (remove choice elements))
+     :do (deletef constraints choice :test #'member)
      :finally
      (if (null elements)
          (return-from topological-sort result)
@@ -266,8 +261,7 @@ afford to use the destructive #'mapcan and cons less."
   (let ((list (compute-sheep-hierarchy-list sheep)))
     (setf (%sheep-hierarchy-cache sheep)
           list)
-    (%map-children (lambda (child)
-                     (memoize-sheep-hierarchy-list child))
+    (%map-children (fn (memoize-sheep-hierarchy-list _))
                    sheep)))
 
 (defun std-finalize-sheep-inheritance (sheep)
@@ -298,8 +292,7 @@ afford to use the destructive #'mapcan and cons less."
   (if (member parent (sheep-parents child))
       ;; TODO - this could check to make sure that the hierarchy list is still valid.
       (progn
-        (setf (%sheep-parents child)
-              (delete parent (%sheep-parents child)))
+        (deletef (%sheep-parents child) parent)
         (%remove-child child parent)
         (finalize-sheep-inheritance child)
         child)
@@ -339,8 +332,7 @@ afford to use the destructive #'mapcan and cons less."
   "Mostly a utility function for easily adding multiple parents. They will be added to
 the front of the sheep's parent list in reverse order (so they will basically be appended
 to the front of the list)"
-  (mapc (lambda (parent)
-          (add-parent parent sheep))
+  (mapc (fn (add-parent _ sheep))
         (reverse parents))
   sheep)
 
@@ -397,8 +389,7 @@ allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
   `(list ,@sheeple))
 
 (defun canonize-properties (properties &optional (accessors-by-default nil))
-  `(list ,@(mapcar (lambda (p)
-                     (canonize-property p accessors-by-default))
+  `(list ,@(mapcar (fn (canonize-property _ accessors-by-default))
                    properties)))
 
 (defun canonize-property (property &optional (accessors-by-default nil))

@@ -93,44 +93,48 @@
 ;;   "Wipes out all direct properties and their values from SHEEP."
 ;;   ;; todo
 ;;   )
+(defun %get-property-cons (sheep property-name)
+  (find prop (%sheep-direct-properties sh)
+        :test #'eq :key (fn (property-name (car _)))))
 
 (defun has-direct-property-p (sheep property-name)
   "Returns T if SHEEP has a property called PROPERTY-NAME as a direct property.
 NIL otherwise."
-  ;; todo
-  )
+  (when (%get-property-cons sheep property-name) t))
 
 (defun has-property-p (sheep property-name)
   "Returns T if calling PROPERTY-VALUE on SHEEP using the same property-name
 would yield a value (i.e. not signal an unbound-property condition)."
-  ;; todo
-  )
+  (some (fn (has-direct-property-p _ property-name))
+        (sheep-hierarchy-list sheep)))
 
 ;;; Value
+(defun %add-property-cons (sheep property-metaobject value)
+  ;; for now, we'll treat %sheep-direct-properties as a list.
+  (push (cons property-metaobject value) (%sheep-direct-properties sheep)))
+(defun %remove-property-cons (sheep property-name)
+  (deletef (%sheep-direct-properties)
+           (%get-property-cons sheep property-name)))
+
+(defun %direct-property-value (sheep property-name)
+  (cdr (%get-property-cons sheep property-name)))
+(defun (setf %direct-property-value) (new-value sheep property-name)
+  (setf (cdr (%get-property-cons sh prop)) new-value))
+
 (defun direct-property-value (sheep property-name)
   "Returns the property-value set locally in SHEEP for PROPERTY-NAME.
 If the value is non-local (is delegated or does not exist in the hierarchy list),
 a condition of type UNBOUND-DIRECT-PROPERTY condition is signalled."
-  (if (std-sheep-p sheep)
-      (std-direct-property-value sheep property-name)
-      (direct-property-value-using-metasheep (sheep-metasheep sheep)
-                                             sheep property-name)))
-(defun std-direct-property-value (sheep property-name)
+  ;;  (declare (inline %sheep-direct-properties %get-property-cons)) ;commented until after testing
   (awhen (%sheep-direct-properties sheep)
-    (cdr (or (find property-name it :test #'eq :key (lambda (cons)
-                                                      (property-name (car cons))))
+    (cdr (or (%get-property-cons sheep property-name)
              (error 'unbound-direct-property
                     :sheep sheep :property-name (property-name property))))))
 
 (defun property-value (sheep property-name)
   "Returns a property-value that is not necessarily local to SHEEP."
-  (if (std-sheep-p sheep)
-      (std-property-value sheep property-name)
-      (property-value-using-metasheep (sheep-metasheep sheep)
-                                      sheep property-name)))
-
-(defun std-property-value (sheep property-name)
   (property-value-with-hierarchy-list sheep property-name))
+
 (defun property-value-with-hierarchy-list (sheep property-name)
   (let ((hl (sheep-hierarchy-list sheep)))
     (or (loop for sheep in hl
@@ -144,19 +148,21 @@ a condition of type UNBOUND-DIRECT-PROPERTY condition is signalled."
   "Sets NEW-VALUE as the value of a direct-property belonging to SHEEP, named
 PROPERTY-NAME. If the property does not already exist anywhere in the hierarchy list, an error
 is signaled."
-  ;; this should also check that property-name is for a standard property, and all that shit.. sigh
-  (if (std-sheep-p sheep)
-      (setf (std-property-value sheep property-name) new-value)
-      (setf (property-value-using-metasheep (sheep-metasheep sheep)
-                                            sheep property-name)
-            new-value)))
+  ;; If the property exists locally already, simply set the new value as the CDR of the property
+  ;; cons. If it doesn't, we first need to check if there's an ancestor that has that property
+  ;; available. If there is, we create a new property cons object with the CAR being a pointer
+  ;; to that ancestor's property's metaobject. The CDR should be set to the local value.
+  ;; If there *isn't* an ancestor that already has the property, a continuable error should be
+  ;; signaled that gives the user the option of creating the property locally with default
+  ;; settings.
+  (cond ((has-direct-property-p sheep property-name)
+         (setf (%direct-property-value sheep property-name new-value)))
+        ((has-property-p sheep property-name)
+         (let ((owner-prop-mo (car (%get-property-cons (property-owner sheep property-name)
+                                                       property-name))))
+           (setf )
+           ))))
 
-(defun (setf std-property-value) (new-value sheep property-name)
-  ;; todo
-  (flet ((set-prop-val (sh prop val)
-           (let ((property-cons (find prop (%sheep-direct-properties sh)
-                                      :test #'eq :key (lambda (cons) (property-name (car cons))))))
-             (setf (cdr property-cons) new-value))))))
 
 ;; ;;; Reflection API
 ;; (defgeneric property-owner (sheep property-name &optional errorp)

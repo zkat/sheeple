@@ -10,25 +10,24 @@
 (in-package :sheeple)
 
 (declaim (optimize (speed 3) (safety 1) (debug 1)))
-
-(defclass message ()
-  ((name :accessor message-name :initform nil :initarg :name)
-   (lambda-list :accessor message-lambda-list :initform nil :initarg :ll)
-   (replies :accessor message-replies :initform nil :initarg :msgs)
-   (memo-vector :accessor message-memo-vector :initform (make-array 40))
-   (arg-info :accessor message-arg-info :initform (make-arg-info))
-   (documentation :accessor message-documentation :initform "" :initarg :dox)))
+(defparameter the-std-message-form '(defproto =standard-message= ()
+                                     ((message-name nil)
+                                      (message-lambda-list nil)
+                                      (message-replies nil)
+                                      (message-memo-vector (make-array 40))
+                                      (message-arg-info (make-arg-info))
+                                      (message-documentation ""))))
+(defvar =standard-message= (gensym "=STANDARD-MESSAGE="))
 
 (defun %make-message (&key name lambda-list replies (documentation ""))
-  (make-instance 'message :name name :ll lambda-list :msgs replies :dox documentation))
+  (defsheep (=standard-message=) ((message-name name) (message-lambda-list lambda-list)
+                                  (message-replies replies) (message-documentation documentation)
+                                  (message-memo-vector (make-array 40))
+                                  (message-arg-info (make-arg-info)))))
 
-(defgeneric message-p (obj))
-(defmethod message-p (obj)
-  (declare (ignore obj))
-  nil)
-(defmethod message-p ((obj message))
-  (declare (ignore obj))
-  t)
+(defun messagep (obj)
+  ;; todo
+  )
 
 (defun clear-memo-table (message)
   (setf (message-memo-vector message) (make-array 40)))
@@ -47,8 +46,7 @@ of setf methods, whose names are lists.")
 Raises an error if no message is found, unless `errorp' is set to NIL."
   (multiple-value-bind (message foundp) (gethash name *message-table*)
     (if foundp message
-        (when errorp
-          (error 'no-such-message :message-name name)))))
+        (when errorp (error 'no-such-message :message-name name)))))
 
 (defun (setf find-message) (new-value name)
   (setf (gethash name *message-table*) new-value))
@@ -57,14 +55,10 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
   (remhash name *message-table*))
 
 (defun forget-all-messages ()
-  (clrhash *message-table*)
-  t)
+  (clrhash *message-table*) t)
 
 (defun clear-all-message-caches ()
-  (maphash (lambda (k v)
-             (declare (ignore k))
-             (clear-memo-table v))
-           *message-table*))
+  (maphash-values (fun (clear-memo-table _)) *message-table*))
 
 ;; Finalizing a message sets the function definition of the message to a
 ;; lambda that calls the top-level dispatch function on the msg args.
@@ -72,7 +66,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
   (let ((name (message-name message)))
     (when (and (fboundp name)
 	       (not (find-message name nil)))
-      (warn 'clobbering-function-definition :format-args (list name)))
+      (cerror "Replace definition." 'clobbering-function-definition :format-args (list name)))
     (setf (fdefinition name) (lambda (&rest args) (apply-message message args)))))
 
 ;; This handles actual setup of the message object (and finalization)
@@ -248,8 +242,8 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
           (restp nil)
           (nrest 0)
           (allow-other-keys-p nil)
-          (keywords ())
-          (keyword-parameters ())
+          (keywords nil)
+          (keyword-parameters nil)
           (state 'required))
       (dolist (x lambda-list)
         (if (memq x lambda-list-keywords)
@@ -309,7 +303,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
         (when (consp msg-keywords)
           (unless (or (and restp (not keysp))
                       allow-other-keys-p
-                      (every (lambda (k) (memq k keywords)) msg-keywords))
+                      (every (fun (memq _ keywords)) msg-keywords))
             (lose "the reply does not accept each of the &KEY arguments~2I~_~
                    ~S."
                   msg-keywords)))))))

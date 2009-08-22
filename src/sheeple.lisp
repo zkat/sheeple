@@ -141,32 +141,6 @@ of its descendants."
     (dotimes (i (length old-vector))
       (setf (aref (%sheep-children sheep) i) (aref old-vector i)))))
 
-;;; <<<<<<< BEGIN OUTDATED CODE BLOCK >>>>>>>
-(defun %enlarge-child-cache-old (sheep)
-  "When the child cache gets full, we have to make it bigger. In general, we assume
-a 5-slot array will be enough for sheeple that only have a couple of children. Once that
-threshold is crossed, though, we assume the worst and replace that relatively small vector
-with a massive 100-slot adjustable array. When -that- is full, we'll resize the vector
-by 100 each time."
-  (cond ((and (= 5 (length (%sheep-children sheep)))
-              (not (adjustable-array-p (%sheep-children sheep))))
-         (let ((old-vector (%sheep-children sheep)))
-           (setf (%sheep-children sheep)
-                 (make-array 100 :adjustable t :initial-element nil))
-           (loop
-              for old-entry across old-vector
-              for i below (length (%sheep-children sheep))
-              do (setf (aref (%sheep-children sheep) i)  old-entry))))
-        ((and (<= 100 (length (%sheep-children sheep)))
-              (adjustable-array-p (%sheep-children sheep)))
-         (adjust-array (%sheep-children sheep)
-                       (+ 100 (length (%sheep-children sheep)))
-                       :initial-element nil))
-        ;; may as well.
-        (t (error "Something went wrong with adjusting the array. Weird.")))
-  sheep)
-;;; <<<<<<< END OUTDATED CODE BLOCK >>>>>>>
-
 (defun %add-child (child sheep)
   "Registers CHILD in SHEEP's child cache."
   (if (%sheep-children sheep)
@@ -275,15 +249,15 @@ return when any list is NIL to avoid traversing the entire parent list."
         (return-from std-tie-breaker-rule (car common))))))
 
 (defun std-compute-sheep-hierarchy-list (sheep)
-  "Because #'local-precedence-ordering returns a fresh list each time, we can
-afford to use the destructive #'mapcan and cons less."
+  "Lists SHEEP's ancestors, in precedence order."
   (handler-case
       ;; since collect-ancestors only collects the _ancestors_, we cons the sheep in front.
       (let ((sheeple-to-order (cons sheep (collect-ancestors sheep))))
         (topological-sort sheeple-to-order
                           (remove-duplicates
-                           (mapcan #'local-precedence-ordering
-                                   sheeple-to-order))
+                           ;; #'local-precedence-ordering conses up fresh structure,
+                           ;; so we can be destructive here
+                           (mapcan #'local-precedence-ordering sheeple-to-order))
                           #'std-tie-breaker-rule))
     (simple-error ()
       (error 'sheeple-hierarchy-error :sheep sheep))))

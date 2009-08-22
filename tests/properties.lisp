@@ -17,7 +17,8 @@
 (def-suite internals :in properties)
 (in-suite internals)
 
-(test %add-property-cons)
+(test %add-property-cons
+  )
 (test %get-property-cons)
 (test %remove-property-cons)
 (test %direct-property-value)

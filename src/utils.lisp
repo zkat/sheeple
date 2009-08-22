@@ -133,3 +133,18 @@
   "Modify-macro for DELETE. Sets place designated by the first argument to
 the result of calling DELETE with ITEM, place, and the REMOVE-KEYWORDS.")
 
+(declaim (inline maphash-keys))
+(defun maphash-keys (function table)
+  "Like MAPHASH, but calls FUNCTION with each key in the hash table TABLE."
+  (maphash (lambda (k v)
+             (declare (ignore v))
+             (funcall function k))
+           table))
+
+(declaim (inline maphash-values))
+(defun maphash-values (function table)
+  "Like MAPHASH, but calls FUNCTION with each value in the hash table TABLE."
+  (maphash (lambda (k v)
+             (declare (ignore k))
+             (funcall function v))
+           table))

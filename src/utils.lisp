@@ -98,3 +98,36 @@
 (defun maybe-weak-pointer-value (x)
   (when (weak-pointer-p x)
     (weak-pointer-value x)))
+
+(defmacro aif (test-form then-form &optional else-form)
+  `(let ((it ,test-form))
+     (if it ,then-form ,else-form)))
+
+(defmacro awhen (test-form &body body)
+  `(aif ,test-form
+	(progn ,@body)))
+
+(defmacro aand (&rest args)
+  (cond ((null args) t)
+	((null (cdr args)) (car args))
+	(t `(aif ,(car args) (aand ,@(cdr args))))))
+
+(defmacro fn (&body stuff)
+  (let ((args
+         (loop while (and (not (eq (car stuff) (intern "->")))
+                          stuff)
+              collect (prog1 (car stuff)
+                        (setf stuff (cdr stuff))))))
+    (if (not stuff)
+        `(lambda (,(intern "_")) ,@args)
+        `(lambda (,@args) ,@(cdr stuff)))))
+
+;; from alexandria:
+(declaim (inline delete/swapped-arguments))
+(defun delete/swapped-arguments (sequence item &rest keyword-arguments)
+  (apply #'delete item sequence keyword-arguments))
+
+(define-modify-macro deletef (item &rest remove-keywords)
+  delete/swapped-arguments
+  "Modify-macro for DELETE. Sets place designated by the first argument to
+the result of calling DELETE with ITEM, place, and the REMOVE-KEYWORDS.")

@@ -128,9 +128,8 @@ of its descendants."
 
 (defun %child-cache-full-p (sheep)
   "A child cache is full if all its items are live weak pointers to other sheep."
-  (and (%sheep-children sheep)
-       (every #'maybe-weak-pointer-value
-              (%sheep-children sheep))))
+  (aand (%sheep-children sheep)
+        (every #'maybe-weak-pointer-value it)))
 
 (defun %enlarge-child-cache (sheep)
   "Enlarges SHEEP's child cache by the value of `CHILD-CACHE.GROW-RATIO'."
@@ -143,12 +142,14 @@ of its descendants."
 
 (defun %add-child (child sheep)
   "Registers CHILD in SHEEP's child cache."
-  (if (%sheep-children sheep)
-      (when (%child-cache-full-p sheep)
-        (%enlarge-child-cache sheep))
-      (%create-child-cache sheep))
-  (unless (find child (%sheep-children sheep) :key #'maybe-weak-pointer-value)
-    (let ((children (%sheep-children sheep)))
+  (let ((children (%sheep-children sheep)))
+    (if children
+        (when (%child-cache-full-p sheep)
+          (%enlarge-child-cache sheep)
+          (setf children (%sheep-children sheep)))
+        (progn (%create-child-cache sheep)
+               (setf children (%sheep-children sheep))))
+    (unless (find child children :key #'maybe-weak-pointer-value)
       (dotimes (i (length children))
         (unless (maybe-weak-pointer-value (aref children i))
           (return (setf (aref children i) (make-weak-pointer child)))))))

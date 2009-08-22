@@ -123,8 +123,7 @@ of its descendants."
   "The ratio by which the child-cache is expanded when full.")
 
 (defun %create-child-cache (sheep)
-  "This creates only the basic child cache: A simple 5-item vector of NILs.
-It sets the vector as SHEEP's child cache."
+  "Sets SHEEP's child cache to a blank (simple-vector `CHILD-CACHE.INITIAL-SIZE')"
   (setf (%sheep-children sheep)
         (make-array CHILD-CACHE.INITIAL-SIZE :initial-element nil)))
 
@@ -133,6 +132,15 @@ It sets the vector as SHEEP's child cache."
   (and (%sheep-children sheep)
        (every #'maybe-weak-pointer-value
               (%sheep-children sheep))))
+
+(defun %enlarge-child-cache-new (sheep)
+  "Enlarges SHEEP's child cache by the value of `CHILD-CACHE.GROW-RATIO'."
+  (let ((old-vector (%sheep-children sheep)))
+    (setf (%sheep-children sheep)
+          (make-array (* CHILD-CACHE.GROW-RATIO (length old-vector))
+                      :initial-element nil))
+    (dotimes (i (length old-vector) sheep)
+      (setf (aref (%sheep-children sheep) i) (aref old-vector i)))))
 
 (defun %enlarge-child-cache (sheep)
   "When the child cache gets full, we have to make it bigger. In general, we assume

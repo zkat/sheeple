@@ -14,87 +14,89 @@
 ;;;
 (def-suite properties :in sheeple)
 
-(def-suite properties-basic :in properties)
-(in-suite properties-basic)
+(def-suite existential :in properties)
 
-(postboot-test add-property
-  ;; TODO - errors could be more specific?
-  (let ((sheep (clone)))
-    (is (eql sheep (add-property sheep 'var "value")))
-    (is (has-direct-property-p sheep 'var))
-    (is (equal "value" (direct-property-value sheep 'var)))
-    (is (participantp sheep 'var))
-    (is (participantp sheep '(setf var)))
-    (is (equal "value" (var sheep)))
-    (is (equal "new-value" (setf (var sheep) "new-value")))
-    (is (equal "new-value" (var sheep)))
-    (is (eql sheep (add-property sheep 'new-var "new-value" :make-accessor-p nil)))
-    (is (equal "new-value" (direct-property-value sheep 'new-var)))
-    (is (not (participantp sheep 'new-var)))
-    (is (not (participantp sheep '(setf new-var))))
-    (is (eql sheep (add-property sheep 'writ "writer!" :writers '(set-writ (setf writ)))))
-    (is (string= "foo" (set-writ sheep "foo")))
-    (is (string= "foo" (direct-property-value sheep 'writ)))
-    (signals error (writ sheep)) ;if :readers or :writers is provider, no accessor is made.
-    (is (eql sheep (add-property sheep 'read "I read it" :readers '(read-it))))
-    (is (string= "I read it" (read-it sheep)))
-    (signals error (setf (read-it sheep) "hurr durr"))))
+;; (def-suite properties-basic :in properties)
+;; (in-suite properties-basic)
 
-(postboot-test remove-property
-  ;; TODO - more specific errors?
-  (let ((sheep (defclone () ((var "value")))))
-    (is (has-direct-property-p sheep 'var))
-    (is (eql sheep (remove-property sheep 'var)))
-    (is (not (has-direct-property-p sheep 'var)))
-    (signals error (remove-property sheep 'var))
-    (signals error (remove-property sheep 'something-else))))
+;; (postboot-test add-property
+;;   ;; TODO - errors could be more specific?
+;;   (let ((sheep (clone)))
+;;     (is (eql sheep (add-property sheep 'var "value")))
+;;     (is (has-direct-property-p sheep 'var))
+;;     (is (equal "value" (direct-property-value sheep 'var)))
+;;     (is (participantp sheep 'var))
+;;     (is (participantp sheep '(setf var)))
+;;     (is (equal "value" (var sheep)))
+;;     (is (equal "new-value" (setf (var sheep) "new-value")))
+;;     (is (equal "new-value" (var sheep)))
+;;     (is (eql sheep (add-property sheep 'new-var "new-value" :make-accessor-p nil)))
+;;     (is (equal "new-value" (direct-property-value sheep 'new-var)))
+;;     (is (not (participantp sheep 'new-var)))
+;;     (is (not (participantp sheep '(setf new-var))))
+;;     (is (eql sheep (add-property sheep 'writ "writer!" :writers '(set-writ (setf writ)))))
+;;     (is (string= "foo" (set-writ sheep "foo")))
+;;     (is (string= "foo" (direct-property-value sheep 'writ)))
+;;     (signals error (writ sheep)) ;if :readers or :writers is provider, no accessor is made.
+;;     (is (eql sheep (add-property sheep 'read "I read it" :readers '(read-it))))
+;;     (is (string= "I read it" (read-it sheep)))
+;;     (signals error (setf (read-it sheep) "hurr durr"))))
 
-(postboot-test remove-all-direct-properties
-  (let ((sheep (defclone () ((var "value") (another-prop "another-value")))))
-    (is (has-direct-property-p sheep 'var))
-    (is (has-direct-property-p sheep 'another-prop))
-    (is (eql sheep (remove-all-direct-properties sheep)))
-    (is (eql nil (sheep-direct-properties sheep)))
-    (signals unbound-property (direct-property-value sheep 'var))
-    (signals unbound-property (direct-property-value sheep 'another-prop))))
+;; (postboot-test remove-property
+;;   ;; TODO - more specific errors?
+;;   (let ((sheep (defclone () ((var "value")))))
+;;     (is (has-direct-property-p sheep 'var))
+;;     (is (eql sheep (remove-property sheep 'var)))
+;;     (is (not (has-direct-property-p sheep 'var)))
+;;     (signals error (remove-property sheep 'var))
+;;     (signals error (remove-property sheep 'something-else))))
 
-(postboot-test direct-property-value
-  (let* ((parent (defclone () ((parent-var "foo"))))
-         (child (defclone (parent) ((child-var "bar")))))
-    (is (equal "foo" (direct-property-value parent 'parent-var)))
-    (is (equal "bar" (direct-property-value child 'child-var)))
-    (signals unbound-direct-property (direct-property-value child 'something-else))
-    ;; setf
-    (is (equal "x" (setf (direct-property-value child 'child-var) "x")))
-    (is (equal "x" (direct-property-value child 'child-var)))
-    (signals unbound-property (setf (direct-property-value child 'something-else) "y"))))
+;; (postboot-test remove-all-direct-properties
+;;   (let ((sheep (defclone () ((var "value") (another-prop "another-value")))))
+;;     (is (has-direct-property-p sheep 'var))
+;;     (is (has-direct-property-p sheep 'another-prop))
+;;     (is (eql sheep (remove-all-direct-properties sheep)))
+;;     (is (eql nil (sheep-direct-properties sheep)))
+;;     (signals unbound-property (direct-property-value sheep 'var))
+;;     (signals unbound-property (direct-property-value sheep 'another-prop))))
 
-(postboot-test property-value
-  (let* ((parent (defclone () ((parent-var "foo"))))
-         (child (defclone (parent) ((child-var "bar")))))
-    (is (equal "foo" (property-value parent 'parent-var)))
-    (is (equal "bar" (property-value child 'child-var)))
-    (is (equal "foo" (property-value child 'parent-var)))
-    (signals unbound-property (property-value parent 'something-else))
-    ;; Test for re-allocation of parent properties in the child sheep
-    (setf (property-value child 'parent-var) "zap")
-    (is (equal "zap" (property-value child 'parent-var)))
-    (is (equal "foo" (property-value parent 'parent-var)))))
+;; (postboot-test direct-property-value
+;;   (let* ((parent (defclone () ((parent-var "foo"))))
+;;          (child (defclone (parent) ((child-var "bar")))))
+;;     (is (equal "foo" (direct-property-value parent 'parent-var)))
+;;     (is (equal "bar" (direct-property-value child 'child-var)))
+;;     (signals unbound-direct-property (direct-property-value child 'something-else))
+;;     ;; setf
+;;     (is (equal "x" (setf (direct-property-value child 'child-var) "x")))
+;;     (is (equal "x" (direct-property-value child 'child-var)))
+;;     (signals unbound-property (setf (direct-property-value child 'something-else) "y"))))
 
-(postboot-test has-direct-property-p
-  (let* ((sheep (defclone () ((var "value"))))
-         (child (clone sheep)))
-    (is (has-direct-property-p sheep 'var))
-    (is (not (has-direct-property-p sheep 'anything-else)))
-    (is (not (has-direct-property-p child 'var)))))
+;; (postboot-test property-value
+;;   (let* ((parent (defclone () ((parent-var "foo"))))
+;;          (child (defclone (parent) ((child-var "bar")))))
+;;     (is (equal "foo" (property-value parent 'parent-var)))
+;;     (is (equal "bar" (property-value child 'child-var)))
+;;     (is (equal "foo" (property-value child 'parent-var)))
+;;     (signals unbound-property (property-value parent 'something-else))
+;;     ;; Test for re-allocation of parent properties in the child sheep
+;;     (setf (property-value child 'parent-var) "zap")
+;;     (is (equal "zap" (property-value child 'parent-var)))
+;;     (is (equal "foo" (property-value parent 'parent-var)))))
 
-(postboot-test has-property-p
-  (let* ((parent (defclone () ((parent-var "foo"))))
-         (child (defclone (parent) ((child-var "bar")))))
-    (is (has-property-p parent 'parent-var))
-    (is (has-property-p child 'child-var))
-    (is (has-property-p child 'parent-var))
-    (is (not (has-property-p parent 'something-else)))))
+;; (postboot-test has-direct-property-p
+;;   (let* ((sheep (defclone () ((var "value"))))
+;;          (child (clone sheep)))
+;;     (is (has-direct-property-p sheep 'var))
+;;     (is (not (has-direct-property-p sheep 'anything-else)))
+;;     (is (not (has-direct-property-p child 'var)))))
+
+;; (postboot-test has-property-p
+;;   (let* ((parent (defclone () ((parent-var "foo"))))
+;;          (child (defclone (parent) ((child-var "bar")))))
+;;     (is (has-property-p parent 'parent-var))
+;;     (is (has-property-p child 'child-var))
+;;     (is (has-property-p child 'parent-var))
+;;     (is (not (has-property-p parent 'something-else)))))
 
 ;; (def-suite property-mop :in properties)
 ;; (in-suite property-mop)

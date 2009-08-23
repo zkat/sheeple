@@ -81,7 +81,7 @@ would yield a value (i.e. not signal an unbound-property condition)."
 direct property. Returns SHEEP."
   (if (has-direct-property-p sheep property-name)
       (prog1 sheep (%remove-property-cons sheep property-name))
-      (error "Cannot remove property: ~A is not a direct property of ~A" name sheep)))
+      (error "Cannot remove property: ~A is not a direct property of ~A" property-name sheep)))
 
 (defun remove-all-direct-properties (sheep)
   "Wipes out all direct properties and their values from SHEEP."

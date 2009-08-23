@@ -111,48 +111,49 @@ of its descendants."
 (defvar *child-cache-grow-ratio* 5
   "The ratio by which the child-cache is expanded when full.")
 
-(defun %create-child-cache (sheep)
-  "Sets SHEEP's child cache to a blank (simple-vector `*child-cache-initial-size*')"
-  (setf (%sheep-children sheep) (make-array *child-cache-initial-size* :initial-element nil)))
+(symbol-macrolet ((%children (%sheep-children sheep)))
 
-(defun %child-cache-full-p (sheep)
-  "A child cache is full if all its items are live weak pointers to other sheep."
-  (aand (%sheep-children sheep) (every #'maybe-weak-pointer-value it)))
+  (defun %create-child-cache (sheep)
+    "Sets SHEEP's child cache to a blank (simple-vector `*child-cache-initial-size*')"
+    (setf %children (make-array *child-cache-initial-size* :initial-element nil)))
 
-(defun %enlarge-child-cache (sheep)
-  "Enlarges SHEEP's child cache by the value of `*child-cache.grow-ratio*'."
-  (let* ((old-vector (%sheep-children sheep))
-         (new-vector (make-array (* *child-cache-grow-ratio* (length old-vector))
-                                 :initial-element nil)))
-    (setf (%sheep-children sheep) (replace new-vector old-vector))
-    sheep))
+  (defun %child-cache-full-p (sheep)
+    "A child cache is full if all its items are live weak pointers to other sheep."
+    (aand %children (every #'maybe-weak-pointer-value it)))
 
-(defun %add-child (child sheep)
-  "Registers CHILD in SHEEP's child cache."
-  (let ((children (%sheep-children sheep)))
-    (if children
-        (when (%child-cache-full-p sheep)
-          (%enlarge-child-cache sheep)
-          (setf children (%sheep-children sheep)))
-        (progn (%create-child-cache sheep)
-               (setf children (%sheep-children sheep))))
-    (unless (find child children :key #'maybe-weak-pointer-value)
-      (dotimes (i (length children))
-        (unless (maybe-weak-pointer-value (aref children i))
-          (return (setf (aref children i) (make-weak-pointer child)))))))
-  sheep)
+  (defun %enlarge-child-cache (sheep)
+    "Enlarges SHEEP's child cache by the value of `*child-cache-grow-ratio*'."
+    (let* ((old-vector (%sheep-children sheep))
+           (new-vector (make-array (* *child-cache-grow-ratio* (length old-vector))
+                                   :initial-element nil)))
+      (setf (%sheep-children sheep) (replace new-vector old-vector))
+      sheep))
 
-(defun %remove-child (child sheep)
-  "Takes CHILD out of SHEEP's child cache."
-  (awhen (position child (%sheep-children sheep) :key #'maybe-weak-pointer-value)
-    (setf (svref (%sheep-children sheep) it) nil))
-  sheep)
+  (defun %add-child (child sheep)
+    "Registers CHILD in SHEEP's child cache."
+    (let ((children %children))
+      (if children
+          (when (%child-cache-full-p sheep)
+            (%enlarge-child-cache sheep)
+            (setf children %children))
+          (progn (%create-child-cache sheep)
+                 (setf children %children)))
+      (unless (find child children :key #'maybe-weak-pointer-value)
+        (dotimes (i (length children))
+          (unless (maybe-weak-pointer-value (aref children i))
+            (return (setf (aref children i) (make-weak-pointer child)))))))
+    sheep)
 
-(defun %map-children (function sheep)
-  "Iteratively applies FUNCTION to SHEEP's children (it takes care of taking each child out
-of the weak pointer)."
-  (awhen (%sheep-children sheep)
-    (map nil (fun (when (weak-pointer-p _) (funcall function (weak-pointer-value _)))) it)))
+  (defun %remove-child (child sheep)
+    "Takes CHILD out of SHEEP's child cache."
+    (awhen (position child %children :key #'maybe-weak-pointer-value)
+      (setf (svref %children it) nil))
+    sheep)
+
+  (defun %map-children (function sheep)
+    "Applies FUNCTION to each of SHEEP's children."
+    (awhen %children
+      (map nil (fun (awhen (maybe-weak-pointer-value _) (funcall function it))) it))))
 
 ;;; This utility is useful for concisely setting up sheep hierarchies
 (defmacro with-sheep-hierarchy (sheep-and-parents &body body)

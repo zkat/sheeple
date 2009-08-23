@@ -139,7 +139,17 @@
     (signals unbound-property (property-value-with-hierarchy-list a 'something-else))
     (signals unbound-property (property-value-with-hierarchy-list c 'test))))
 
-(postboot-test setf-property-value)
+(postboot-test setf-property-value
+  (let* ((a (spawn))
+         (b (spawn a)))
+    (signals unbound-property (setf (property-value a 'test) 'new-val))
+    (add-property a 'test 'value)
+    (is (eq 'new-value (setf (property-value a 'test) 'new-value)))
+    (is (eq 'new-value (direct-property-value a 'test)))
+    (is (eq 'new-value (property-value b 'test)))
+    (is (eq 'foo (setf (property-value b 'test) 'foo)))
+    (is (eq 'foo (property-value b 'test)))
+    (is (eq 'new-value (property-value a 'test)))))
 
 (def-suite reflection :in properties)
 (in-suite reflection)

@@ -11,7 +11,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(declaim (optimize (safety 1) (speed 3) (debug 1)))
 (defun primary-reply-p (reply)
   (null (reply-qualifiers reply)))
 

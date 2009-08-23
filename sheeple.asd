@@ -42,7 +42,7 @@
              (:file "utils")
              (:file "sheeple")
              (:file "properties")
-             ;; (:file "builtins")
+             (:file "builtins")
              ;; (:file "parse-lambda-list")
              ;; (:file "messages")
              ;; (:file "reply-definition")

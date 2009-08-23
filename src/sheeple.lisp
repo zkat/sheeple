@@ -2,11 +2,10 @@
 
 ;;;; This file is part of Sheeple
 
-;;;; sheep-creation.lisp
+;;;; sheeple.lisp
 ;;;;
 ;;;; Sheep creation, cloning, inspection
 ;;;;
-;;;; TODO - write validate-hierarchy-list, which could be called whenever the parents list changes.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 

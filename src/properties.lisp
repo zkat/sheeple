@@ -13,7 +13,11 @@
 ;;; Property spec object
 ;;;
 (defparameter the-std-property-form '(defproto =standard-property= ()
-                                      ((name 'std-property :accessor property-name))))
+                                      ((name 'std-property))))
+(defun property-name (property)
+  (property-value property 'name))
+(defun (setf property-name) (new-value property)
+  (setf (property-value property 'name) new-value))
 
 (defvar =standard-property= (gensym "=STANDARD-PROPERTY="))
 

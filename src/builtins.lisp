@@ -72,8 +72,7 @@ has not already been boxed."
 
 (defun sheepify (object)
   "Returns OBJECT or boxes it."
-  (cond ((eq object t)
-         =t=) ;optimization!
+  (cond ((eq object t) =t=) ;optimization!
         ((not (sheepp object))
          (or (find-boxed-object object)
              (values (box-object object) t)))

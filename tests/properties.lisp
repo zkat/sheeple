@@ -18,7 +18,7 @@
 (in-suite internals)
 
 (postboot-test %add-property-cons
-  (let ((sheep (allocate-std-sheep)))
+  (let ((sheep (spawn)))
     (is (null (%sheep-direct-properties sheep)))
     (is (eq sheep (%add-property-cons sheep (spawn =standard-property=) nil)))
     (is (not (null (%sheep-direct-properties sheep))))
@@ -27,7 +27,7 @@
               :key (fun (property-name (car _)))))))
 
 (postboot-test %get-property-cons
-  (let* ((sheep (allocate-std-sheep))
+  (let* ((sheep (spawn))
          (property (defsheep (=standard-property=) ((property-name 'test)))))
     (is (null (%get-property-cons sheep 'test)))
     (%add-property-cons sheep property 'value)
@@ -37,20 +37,20 @@
     (is (eq 'value (cdr (%get-property-cons sheep 'test)))))
 
 (postboot-test %remove-property-cons
-  (let* ((sheep (allocate-std-sheep))
+  (let* ((sheep (spawn))
          (property (defsheep (=standard-property=) ((property-name 'test)))))
     (%add-property-cons sheep property 'value)
     (is (eq sheep (%remove-property-cons sheep 'test)))
     (is (null (%get-property-cons sheep 'tests)))))
 
 (postboot-test %direct-property-value
-  (let* ((sheep (allocate-std-sheep))
+  (let* ((sheep (spawn))
          (property (defsheep (=standard-property=) ((property-name 'test)))))
     (%add-property-cons sheep property 'value)
     (is (eq 'value (%direct-property-value sheep 'test)))))
 
 (postboot-test %direct-property-metaobject
-  (let* ((sheep (allocate-std-sheep))
+  (let* ((sheep (spawn))
          (property (defsheep (=standard-property=) ((property-name 'test)))))
     (%add-property-cons sheep property 'value)
     (is (eq 'new-value (setf (%direct-property-value sheep 'test) 'new-value)))
@@ -59,11 +59,49 @@
 (def-suite existential :in properties)
 (in-suite existential)
 
-(test add-property)
-(test remove-property)
-(test remove-all-direct-properties)
-(test has-direct-property-p)
-(test has-property-p)
+(postboot-test has-direct-property-p
+  (let* ((sheep (spawn))
+         (property (defsheep (=standard-property=) ((property-name 'test)))))
+    (%add-property-cons sheep property 'value)
+    (is (has-direct-property-p sheep 'test))
+    (is (not (has-direct-property-p sheep 'something-else))))
+  (let* ((a (spawn))
+         (b (spawn a)))
+    (add-property a 'test 'value)
+    (is (has-direct-property-p a 'test))
+    (is (not (has-direct-property-p b 'test)))))
+
+(postboot-test has-property-p
+  (let* ((a (spawn))
+         (b (spawn a)))
+    (add-property a 'test 'value)
+    (is (has-direct-property-p a 'test))
+    (is (not (has-direct-property-p b 'test)))))
+
+(postboot-test add-property
+  (let ((sheep (spawn)))
+    (is (eq sheep (add-property sheep 'test 'value)))
+    (is (has-direct-property-p sheep 'test))
+    (signals error (add-property sheep "foo" "uh oh"))
+    (is (not (has-direct-property-p sheep "foo")))
+    ;; todo - check that the restart works properly.
+    ))
+
+(test remove-property
+  (let ((sheep (spawn)))
+    (add-property sheep 'test 'value)
+    (is (eq sheep (remove-property sheep 'test)))
+    (is (not (has-direct-property-p sheep 'test)))))
+
+(test remove-all-direct-properties
+  (let ((sheep (spawn)))
+    (add-property sheep 'test1 'value)
+    (add-property sheep 'test2 'value)
+    (add-property sheep 'test3 'value)
+    (is (eq sheep (remove-all-direct-properties sheep)))
+    (is (not (or (has-direct-property-p sheep 'test1)
+                 (has-direct-property-p sheep 'test2)
+                 (has-direct-property-p sheep 'test3))))))
 
 (def-suite values :in properties)
 (in-suite values)

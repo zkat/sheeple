@@ -66,7 +66,7 @@
 is inherited from one of SHEEP's parents, or if PROPERTY-NAME does not exist in SHEEP's hierarchy
 list, an error is signaled. This function returns SHEEP after property removal."
   (if (has-direct-property-p sheep property-name)
-      (prog1 sheep (%remove-property-cons sheep property-name) )
+      (prog1 sheep (%remove-property-cons sheep property-name))
       (error "Cannot remove property: ~A is not a direct property of ~A" name sheep)))
 
 (defun remove-all-direct-properties (sheep)

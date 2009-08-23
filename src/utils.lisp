@@ -115,14 +115,7 @@
 
 (defmacro fun (&body family)
   "This macro puts the FUN back in FUNCTION."
-  (let ((args
-         (loop while (and (not (eq (car family) (intern "->")))
-                          family)
-              collect (prog1 (car family)
-                        (setf family (cdr family))))))
-    (if (not family)
-        `(lambda (,(intern "_")) ,@args)
-        `(lambda (,@args) ,@(cdr family)))))
+  `(lambda (,(intern "_")) ,@family))
 
 ;; from alexandria:
 (declaim (inline delete/swapped-arguments))

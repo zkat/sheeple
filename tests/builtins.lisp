@@ -39,15 +39,31 @@
   (is (eq =array= (box-type-of (make-array '(1 2)))))
   (is (eq =function= (box-type-of (lambda () nil)))))
 
-(test *boxed-object-table*
-  (is (hash-table-p *boxed-object-table*))
-  (is (eq 'equal (hash-table-test *boxed-object-table*))))
+(postboot-test box-object
+  (signals error (box-object (spawn)))
+  (is (= 'foo (box-object 'foo)))
+  (is (find-boxed-object 'foo))
+  (is (= 'foo (wrapped-object (find-boxed-object 'foo)))))
 
-(test find-boxed-object)
-(test box-object)
-(test remove-boxed-object)
-(test sheepify)
-(test sheepify-list)
+(postboot-test find-boxed-object
+  (box-object 'foo)
+  (is (find-boxed-object 'foo))
+  (is (null (find-boxed-object 'something-else)))
+  (signals error (find-boxed-object 'something-else t)))
+
+(postboot-test remove-boxed-object
+  (box-object 'foo)
+  (is (remove-boxed-object 'foo))
+  (is (null (find-boxed-object 'foo nil))))
+
+(postboot-test sheepify
+  (let ((sheep (spawn)))
+    (is (eql sheep (sheepify sheep))))
+  (is (sheepp (sheepify 'foo)))
+  (is (find-boxed-object 'foo)))
+
+(postboot-test sheepify-list
+  (is (every #'sheepp (sheepify-list '(1 "foo" 'bar 42)))))
 
 ;; TODO - implement CLOS autoboxing
 ;; (test clos-boxing)

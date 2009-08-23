@@ -45,8 +45,27 @@
         (function                                      =function=)
         (t                                             =boxed-object=))))
 
-(defvar *boxed-object-table* (make-hash-table :test #'equal)
+;; This thing is a bit problematic. We don't necessarily want to keep references around to
+;; objects that have been autoboxed, right? I'm tempted to say that the ideal here would
+;; be a weak hash table with both key *and* value weakness. For now, though, we hold on
+;; to references until a solution is thought out.
+(defvar *boxed-object-table* (make-hash-table)
   "Lisp objects boxed by Sheeple are stored in here.")
+
+(defun wrapped-object (box)
+  (property-value box 'wrapped-object))
+
+(defun box-object (object)
+  "Wraps OBJECT with a sheep."
+  (assert (not (sheepp object)))
+  (setf (gethash object *boxed-object-table*)
+        (defsheep ((box-type-of object))
+            ((wrapped-object object)) (:nickname object)))
+  object)
+
+(defun remove-boxed-object (object)
+  "Kills object dead"
+  (remhash object *boxed-object-table*))
 
 (defun find-boxed-object (object &optional (errorp nil))
   "Finds a previously-boxed object in the boxed object table.
@@ -58,17 +77,6 @@ has not already been boxed."
           (gethash object *boxed-object-table*)
         (if hasp sheep
             (when errorp (error "~S has not been boxed." object))))))
-
-(defun box-object (object)
-  "Wraps OBJECT with a sheep."
-  (assert (not (sheepp object)))
-  (setf (gethash object *boxed-object-table*)
-        (defsheep ((box-type-of object))
-            ((wrapped-object object)) (:nickname object))))
-
-(defun remove-boxed-object (object)
-  "Kills object dead"
-  (remhash object *boxed-object-table*))
 
 (defun sheepify (object)
   "Returns OBJECT or boxes it."

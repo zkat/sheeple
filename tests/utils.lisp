@@ -32,6 +32,10 @@
   (is (null (proper-list-of-length-p '(1 2 3) 1 2)))
   (is (null (proper-list-of-length-p #1='(:P . #1#) 0 2))))
 
+(test fun
+  (is (functionp (fun (* 2 _))))
+  (is (= 5 (funcall (fun (+ 3 _)) 2))))
+
 (test collect-normal-expander)
 (test collect-list-expander)
 (test collect)

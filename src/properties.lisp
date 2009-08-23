@@ -91,7 +91,7 @@ a condition of type UNBOUND-DIRECT-PROPERTY condition is signalled."
   ;;  (declare (inline %sheep-direct-properties %get-property-cons)) ;commented until after testing
   (awhen (%sheep-direct-properties sheep)
     (cdr (or (%get-property-cons sheep property-name)
-             (error 'unbound-direct-property
+             (error 'unbound-property
                     :sheep sheep :property-name property-name)))))
 
 (defun property-value (sheep property-name)
@@ -114,6 +114,10 @@ is signaled."
   (cond ((has-direct-property-p sheep property-name)
          (setf (%direct-property-value sheep property-name) new-value))
         ((has-property-p sheep property-name)
+         ;; We place a restriction on the user that a property metaobject
+         ;; itself cannot be side-effected. That restriction allows us,
+         ;; in the common case of a property already existing in the hierarchy,
+         ;; to reuse the property metaobject by just adding a pointer to it locally.
          (let ((owner-prop-mo (car (%get-property-cons (property-owner sheep property-name)
                                                        property-name))))
            (%add-property-cons sheep owner-prop-mo new-value)))

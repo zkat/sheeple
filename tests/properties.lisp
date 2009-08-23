@@ -76,24 +76,29 @@
          (b (spawn a)))
     (add-property a 'test 'value)
     (is (has-direct-property-p a 'test))
-    (is (not (has-direct-property-p b 'test)))))
+    (is (not (has-direct-property-p a 'something-else)))
+    (is (not (has-direct-property-p b 'test)))
+    (is (not (has-direct-property-p b 'something-else)))))
 
 (postboot-test add-property
   (let ((sheep (spawn)))
     (is (eq sheep (add-property sheep 'test 'value)))
     (is (has-direct-property-p sheep 'test))
+    (is (eq 'value (%direct-property-value sheep 'test)))
     (signals error (add-property sheep "foo" "uh oh"))
     (is (not (has-direct-property-p sheep "foo")))
     ;; todo - check that the restart works properly.
     ))
 
-(test remove-property
+(postboot-test remove-property
   (let ((sheep (spawn)))
+    (signals error (remove-property sheep 'something))
     (add-property sheep 'test 'value)
     (is (eq sheep (remove-property sheep 'test)))
-    (is (not (has-direct-property-p sheep 'test)))))
+    (is (not (has-direct-property-p sheep 'test)))
+    (signals error (remove-property sheep 'test))))
 
-(test remove-all-direct-properties
+(postboot-test remove-all-direct-properties
   (let ((sheep (spawn)))
     (add-property sheep 'test1 'value)
     (add-property sheep 'test2 'value)
@@ -106,133 +111,45 @@
 (def-suite values :in properties)
 (in-suite values)
 
-(test direct-property-value)
-(test property-value)
-(test property-value-with-hierarchy-list)
-(test setf-property-value)
+(postboot-test direct-property-value
+  (let* ((a (spawn))
+         (b (spawn a)))
+    (add-property a 'test 'value)
+    (is (eq 'value (direct-property-value a 'test)))
+    (signals unbound-property (direct-property-value a 'something-else))
+    (signals unbound-property (direct-property-value b 'test))))
+
+(postboot-test property-value
+  (let* ((a (spawn))
+         (b (spawn a))
+         (c (spawn)))
+    (add-property a 'test 'value)
+    (is (eq 'value (property-value a 'test)))
+    (is (eq 'value (property-value b 'test)))
+    (signals unbound-property (property-value a 'something-else))
+    (signals unbound-property (property-value c 'test))))
+
+(postboot-test property-value-with-hierarchy-list
+  (let* ((a (spawn))
+         (b (spawn a))
+         (c (spawn)))
+    (add-property a 'test 'value)
+    (is (eq 'value (property-value-with-hierarchy-list a 'test)))
+    (is (eq 'value (property-value-with-hierarchy-list b 'test)))
+    (signals unbound-property (property-value-with-hierarchy-list a 'something-else))
+    (signals unbound-property (property-value-with-hierarchy-list c 'test))))
+
+(postboot-test setf-property-value)
 
 (def-suite reflection :in properties)
 (in-suite reflection)
 
-(test property-owner)
-(test direct-property-metaobject)
-(test sheep-direct-properties)
-(test available-properties)
-(test property-summary)
-(test direct-property-summary)
-
-
-;; (def-suite properties-basic :in properties)
-;; (in-suite properties-basic)
-
-;; (postboot-test add-property
-;;   ;; TODO - errors could be more specific?
-;;   (let ((sheep (spawn)))
-;;     (is (eql sheep (add-property sheep 'var "value")))
-;;     (is (has-direct-property-p sheep 'var))
-;;     (is (equal "value" (direct-property-value sheep 'var)))
-;;     (is (participantp sheep 'var))
-;;     (is (participantp sheep '(setf var)))
-;;     (is (equal "value" (var sheep)))
-;;     (is (equal "new-value" (setf (var sheep) "new-value")))
-;;     (is (equal "new-value" (var sheep)))
-;;     (is (eql sheep (add-property sheep 'new-var "new-value" :make-accessor-p nil)))
-;;     (is (equal "new-value" (direct-property-value sheep 'new-var)))
-;;     (is (not (participantp sheep 'new-var)))
-;;     (is (not (participantp sheep '(setf new-var))))
-;;     (is (eql sheep (add-property sheep 'writ "writer!" :writers '(set-writ (setf writ)))))
-;;     (is (string= "foo" (set-writ sheep "foo")))
-;;     (is (string= "foo" (direct-property-value sheep 'writ)))
-;;     (signals error (writ sheep)) ;if :readers or :writers is provider, no accessor is made.
-;;     (is (eql sheep (add-property sheep 'read "I read it" :readers '(read-it))))
-;;     (is (string= "I read it" (read-it sheep)))
-;;     (signals error (setf (read-it sheep) "hurr durr"))))
-
-;; (postboot-test remove-property
-;;   ;; TODO - more specific errors?
-;;   (let ((sheep (defsheep () ((var "value")))))
-;;     (is (has-direct-property-p sheep 'var))
-;;     (is (eql sheep (remove-property sheep 'var)))
-;;     (is (not (has-direct-property-p sheep 'var)))
-;;     (signals error (remove-property sheep 'var))
-;;     (signals error (remove-property sheep 'something-else))))
-
-;; (postboot-test remove-all-direct-properties
-;;   (let ((sheep (defsheep () ((var "value") (another-prop "another-value")))))
-;;     (is (has-direct-property-p sheep 'var))
-;;     (is (has-direct-property-p sheep 'another-prop))
-;;     (is (eql sheep (remove-all-direct-properties sheep)))
-;;     (is (eql nil (sheep-direct-properties sheep)))
-;;     (signals unbound-property (direct-property-value sheep 'var))
-;;     (signals unbound-property (direct-property-value sheep 'another-prop))))
-
-;; (postboot-test direct-property-value
-;;   (let* ((parent (defsheep () ((parent-var "foo"))))
-;;          (child (defsheep (parent) ((child-var "bar")))))
-;;     (is (equal "foo" (direct-property-value parent 'parent-var)))
-;;     (is (equal "bar" (direct-property-value child 'child-var)))
-;;     (signals unbound-direct-property (direct-property-value child 'something-else))
-;;     ;; setf
-;;     (is (equal "x" (setf (direct-property-value child 'child-var) "x")))
-;;     (is (equal "x" (direct-property-value child 'child-var)))
-;;     (signals unbound-property (setf (direct-property-value child 'something-else) "y"))))
-
-;; (postboot-test property-value
-;;   (let* ((parent (defsheep () ((parent-var "foo"))))
-;;          (child (defsheep (parent) ((child-var "bar")))))
-;;     (is (equal "foo" (property-value parent 'parent-var)))
-;;     (is (equal "bar" (property-value child 'child-var)))
-;;     (is (equal "foo" (property-value child 'parent-var)))
-;;     (signals unbound-property (property-value parent 'something-else))
-;;     ;; Test for re-allocation of parent properties in the child sheep
-;;     (setf (property-value child 'parent-var) "zap")
-;;     (is (equal "zap" (property-value child 'parent-var)))
-;;     (is (equal "foo" (property-value parent 'parent-var)))))
-
-;; (postboot-test has-direct-property-p
-;;   (let* ((sheep (defsheep () ((var "value"))))
-;;          (child (spawn sheep)))
-;;     (is (has-direct-property-p sheep 'var))
-;;     (is (not (has-direct-property-p sheep 'anything-else)))
-;;     (is (not (has-direct-property-p child 'var)))))
-
-;; (postboot-test has-property-p
-;;   (let* ((parent (defsheep () ((parent-var "foo"))))
-;;          (child (defsheep (parent) ((child-var "bar")))))
-;;     (is (has-property-p parent 'parent-var))
-;;     (is (has-property-p child 'child-var))
-;;     (is (has-property-p child 'parent-var))
-;;     (is (not (has-property-p parent 'something-else)))))
-
-;; (def-suite property-mop :in properties)
-;; (in-suite property-mop)
-
-;; ;; MOP behavior
-;; (defclass fancy-property-sheep (standard-sheep)
-;;   ((fancy-property-table :initform (make-hash-table :test #'eq))))
-;; (defclass fancy-property (standard-property) ())
-
-;; #+nil(test add-property
-;;   ;; TODO - check that property metaobjects are being created properly
-;;   ;; TODO - check that different property metaobject class instances are created
-;;   ;;        depending on the class of the sheep.
-;;   (let ((fancy-spawn (defsheep () (())
-;;                          ))))
-;;   )
-;; (test remove-property
-;;   ;; TODO - check that property metaobjects are being disposed of properly
-;;   )
-;; (test remove-all-direct-properties
-;;   ;; TODO - simple test to make sure basic behavior overriding works.
-;;   )
-;; ;; These two are only supposed to be dispatchable on SHEEP for now.
-;; (test has-direct-property-p)
-;; (test has-property-p)
-
-;; ;; Check that property-spec and standard-sheep can both be subclassed, and behavior
-;; ;; extended for both of these.
-;; (test direct-property-value)
-;; (test property-value) ; includes (setf property-value)
+(postboot-test property-owner)
+(postboot-test direct-property-metaobject)
+(postboot-test sheep-direct-properties)
+(postboot-test available-properties)
+(postboot-test property-summary)
+(postboot-test direct-property-summary)
 
 ;; ;; Reflection stuff
 ;; (test property-owner

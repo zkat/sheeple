@@ -8,7 +8,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(declaim (optimize (speed 3) (safety 1) (debug 1)))
 (defclass reply ()
   ((name :accessor reply-name :initform nil :initarg :name)
    (qualifiers :accessor reply-qualifiers :initform nil :initarg :ql)

@@ -39,6 +39,10 @@
   (is (eq =array= (box-type-of (make-array '(1 2)))))
   (is (eq =function= (box-type-of (lambda () nil)))))
 
+(test *boxed-object-table*
+  (is (hash-table-p *boxed-object-table*))
+  (is (eq 'equal (hash-table-test *boxed-object-table*))))
+
 (test find-boxed-object)
 (test box-object)
 (test remove-boxed-object)

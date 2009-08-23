@@ -9,7 +9,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(declaim (optimize (speed 3) (safety 1) (debug 1)))
 (defparameter the-std-message-form '(defproto =standard-message= ()
                                      ((message-name nil)
                                       (message-lambda-list nil)

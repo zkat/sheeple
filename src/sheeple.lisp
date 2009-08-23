@@ -441,14 +441,13 @@ allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
                 (if (null writers) (setf no-writer-p t)
                     (error "You already defined a writer, but now you say you don't want one? Make up your mind.")))
                (t (pushnew (cadr olist) writers))))
-        ((:accessor)
+        (:accessor
          (cond ((or no-reader-p no-writer-p)
                 (error "You said you didn't want a reader or a writer, but now you want one? Make up your mind."))
                ((null (cadr olist))
                 (if (and (null writers) (null readers))
-                    (progn
-                      (setf no-reader-p t)
-                      (setf no-writer-p t))
+                    (setf no-reader-p t
+                          no-writer-p t)
                     (error "You already defined a reader or writer, but now you say you don't want any of them? Make up your mind.")))
                (t
                 (pushnew (cadr olist) readers)
@@ -485,8 +484,7 @@ allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
   `(progn
      (declaim (special ,name))
      (let ((sheep (create-or-reinit-sheep
-                   (if (boundp ',name)
-                       ,name nil)
+                   (when (boundp ',name) ,name)
                    ,(canonize-sheeple sheeple)
                    :properties ,(canonize-properties properties t)
                    ,@(canonize-options options))))

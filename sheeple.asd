@@ -11,13 +11,13 @@
   ((:module src
             :serial t
             :components
-            ((:file "trivial-garbage")
-             (:file "packages")
+            ((:file "packages")
+             (:file "sheeple-garbage")
              (:file "conditions")
              (:file "utils")
              (:file "sheeple")
-             ;; (:file "properties")
-             ;; (:file "builtins")
+             (:file "properties")
+             (:file "builtins")
              ;; (:file "parse-lambda-list")
              ;; (:file "messages")
              ;; (:file "reply-definition")

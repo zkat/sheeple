@@ -1,7 +1,19 @@
 ;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
 
+(defpackage #:%sheeple-garbage
+  (:use :cl)
+  (:shadow :make-hash-table)
+  (:export :gc
+           :make-weak-pointer
+           :weak-pointer-value
+           :weak-pointer-p
+           :make-weak-hash-table
+           :hash-table-weakness
+           :finalize
+           :cancel-finalization))
+
 (defpackage #:sheeple
-  (:use :cl :trivial-garbage)
+  (:use :cl :%sheeple-garbage)
   (:export
 
    ;; Cloning and management

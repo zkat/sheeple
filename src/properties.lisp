@@ -138,14 +138,18 @@ returned."
   (or (find-if (fun (has-direct-property-p _ property-name)) (sheep-hierarchy-list sheep))
       (when errorp (error 'unbound-property :sheep sheep :property-name property-name))))
 
-(defun direct-property-metaobject (sheep property-name)
+(defun property-metaobject-p (obj)
+  (and (sheepp obj)
+       (find =standard-property= (sheep-hierarchy-list obj))))
+
+(defun direct-property-metaobject (sheep property-name &optional errorp)
   "Returns the direct local metaobject for a property named PROPERTY-NAME."
-  (%direct-property-metaobject sheep property-name))
+  (or (%direct-property-metaobject sheep property-name)
+      (when errorp (error 'unbound-property :sheep sheep :property-name property-name))))
 
 (defun sheep-direct-properties (sheep)
   "Returns a set of direct property definition metaobjects."
-  ;; note - this will have to be changed if %sheep-direct-properties switches to vectors.
-  (mapcar #'car (%sheep-direct-properties sheep)))
+  (map 'list #'car (%sheep-direct-properties sheep)))
 
 (defun available-properties (sheep)
   "Returns a list of property objects describing all properties available to SHEEP, including

@@ -17,7 +17,7 @@
 (def-suite internals :in properties)
 (in-suite internals)
 
-(test %add-property-cons
+(postboot-test %add-property-cons
   (let ((sheep (allocate-std-sheep)))
     (is (null (%sheep-direct-properties sheep)))
     (is (eq sheep (%add-property-cons sheep (spawn =standard-property=) nil)))
@@ -25,7 +25,7 @@
     (is (vectorp (%sheep-direct-properties sheep)))
     (is (find 'std-property (%sheep-direct-properties sheep :key (fun (property-name (car _))))))))
 
-(test %get-property-cons
+(postboot-test %get-property-cons
   (let* ((sheep (allocate-std-sheep))
          (property (defclone (=standard-property=) ((property-name 'test)))))
     (is (null (%get-property-cons sheep 'test)))
@@ -35,20 +35,20 @@
     (is (eq property (car (%get-property-cons sheep 'test))))
     (is (eq 'value (cdr (%get-property-cons sheep 'test)))))
 
-(test %remove-property-cons
+(postboot-test %remove-property-cons
   (let* ((sheep (allocate-std-sheep))
          (property (defclone (=standard-property=) ((property-name 'test)))))
     (%add-property-cons sheep property 'value)
     (is (eq sheep (%remove-property-cons sheep 'test)))
     (is (null (%get-property-cons sheep 'tests)))))
 
-(test %direct-property-value
+(postboot-test %direct-property-value
   (let* ((sheep (allocate-std-sheep))
          (property (defclone (=standard-property=) ((property-name 'test)))))
     (%add-property-cons sheep property 'value)
     (is (eq 'value (%direct-property-value sheep 'test)))))
 
-(test %direct-property-metaobject
+(postboot-test %direct-property-metaobject
   (let* ((sheep (allocate-std-sheep))
          (property (defclone (=standard-property=) ((property-name 'test)))))
     (%add-property-cons sheep property 'value)

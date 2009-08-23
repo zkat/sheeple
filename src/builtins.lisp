@@ -9,30 +9,15 @@
 (in-package :sheeple)
 (declaim (optimize (speed 3) (safety 1)))
 
-(defvar =boxed-object=)
-(defvar =symbol=)
-(defvar =sequence=)
-(defvar =array=)
-(defvar =number=)
-(defvar =character=)
-(defvar =function=)
-(defvar =hash-table=)
-(defvar =package=)
-(defvar =pathname=)
-(defvar =readtable=)
-(defvar =stream=)
-(defvar =list=)
-(defvar =null=)
-(defvar =cons=)
-(defvar =vector=)
-(defvar =bit-vector=)
-(defvar =string=)
-(defvar =complex=)
-(defvar =integer=)
-(defvar =float=)
+(defmacro define-variables (&body variables)
+  `(progn ,@(mapcar (fun `(defvar ,_ (gensym (symbol-name ',_)))) variables)))
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+ (define-variables =boxed-object= =symbol= =sequence= =array= =number= =character= =function=
+                   =hash-table= =package= =pathname= =readtable= =stream= =list= =null= =cons=
+                   =vector= =bit-vector= =string= =complex= =integer= =float=))
 
 (defun box-type-of (x)
-  ;; Note: I should really find a way to make this simply use CLOS...
   (if (sheepp x)
       (progn
         (warn "This is already a sheep!")
@@ -55,7 +40,6 @@
         ((bit-vector *)                                =bit-vector=)
         ((and vector (not string))                     =vector=)
         ((and array (not vector))                      =array=)
-        ;;      ((and sequence (not (or vector list)))         =sequence=])
         (function                                      =function=)
         (t                                             =boxed-object=))))
 
@@ -85,12 +69,8 @@ has not already been boxed."
   "Kills object dead"
   (remhash object *boxed-object-table*))
 
-(defun sheepify-list (obj-list)
-  "Converts OBJ-LIST to a list where each item is either a sheep or a fleeced wolf."
-  (mapcar #'sheepify obj-list))
-
 (defun sheepify (object)
-  "Returns OBJECT or fleeces it."
+  "Returns OBJECT or boxes it."
   (cond ((eq object t)
          =t=)
         ((not (sheepp object))
@@ -98,3 +78,7 @@ has not already been boxed."
              (values (box-object object) t)))
         (t
          (values object nil))))
+
+(defun sheepify-list (obj-list)
+  "Converts OBJ-LIST to a list where each item is either a sheep or a boxed object."
+  (mapcar #'sheepify obj-list))

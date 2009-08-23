@@ -37,7 +37,7 @@
   (is (eq =bit-vector= (box-type-of #*)))
   (is (eq =vector= (box-type-of (vector 1 2 3))))
   (is (eq =array= (box-type-of (make-array '(1 2)))))
-  (is (eq =function= (box-type-of (lambda () 1)))))
+  (is (eq =function= (box-type-of (lambda () nil)))))
 
 (test find-boxed-object)
 (test box-object)

@@ -341,20 +341,16 @@ to the front of the list)"
 ;;;
 ;;; Spawning
 ;;;
-(defun ensure-sheep (sheep-or-sheeple &rest all-keys
-                     &key (metasheep =standard-metasheep=)
-                     &allow-other-keys)
+(defun ensure-sheep (parent* &rest all-keys
+                     &key (metasheep =standard-metasheep=) &allow-other-keys)
   "Creates a new sheep with SHEEPLE as its parents. METASHEEP is used as the metasheep when
 allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
   (let ((sheep (if (eql =standard-metasheep= metasheep)
                    (std-allocate-sheep metasheep)
                    (allocate-sheep metasheep))))
-    (if sheep-or-sheeple
-        (add-parents (if (listp sheep-or-sheeple)
-                         sheep-or-sheeple
-                         (list sheep-or-sheeple))
-                     sheep)
-        (add-parent =standard-sheep= sheep))
+    (aif (ensure-list parent*)
+         (add-parents it sheep)
+         (add-parent =standard-sheep= sheep))
     (apply #'init-sheep sheep all-keys)))
 
 (defun spawn (&rest sheeple)

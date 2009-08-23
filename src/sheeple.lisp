@@ -159,13 +159,13 @@ of its descendants."
     (setf (svref (%sheep-children sheep) it) nil))
   sheep)
 
-(defun %map-children (function sheep)
+(defun %map-children (function sheep &optional (return-type nil))
   "Iteratively applies FUNCTION to SHEEP's children (it takes care of taking each child out
 of the weak pointer)."
-  (when (%sheep-children sheep)
-    (map 'vector (fun (when (weak-pointer-p _)
-                       (funcall function (weak-pointer-value _))))
-         (%sheep-children sheep))))
+  (awhen (%sheep-children sheep)
+    (map return-type (fun (when (weak-pointer-p _)
+                            (funcall function (weak-pointer-value _))))
+         it)))
 
 ;;; This utility is useful for concisely setting up sheep hierarchies
 (defmacro with-sheep-hierarchy (sheep-and-parents &body body)

@@ -142,3 +142,7 @@ the result of calling DELETE with ITEM, place, and the REMOVE-KEYWORDS.")
              (declare (ignore k))
              (funcall function v))
            table))
+
+(defmacro define-metasheep-vars (&body variables)
+  "This handy macro saves us like 40 fucking lines of the same old shit :D"
+  `(progn ,@(mapcar (fun `(defvar ,_ (gensym (symbol-name ',_)))) variables)))

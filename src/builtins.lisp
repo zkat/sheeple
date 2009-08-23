@@ -8,10 +8,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(defmacro define-metasheep-vars (&body variables)
-  "This handy macro saves us like 40 fucking lines of the same old shit :D"
-  `(progn ,@(mapcar (fun `(defvar ,_ (gensym (symbol-name ',_)))) variables)))
-
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (define-metasheep-vars =boxed-object= =symbol= =sequence= =array= =number= =character=
                          =function= =hash-table= =package= =pathname= =readtable= =stream=

@@ -23,7 +23,8 @@
     (is (eq sheep (%add-property-cons sheep (spawn =standard-property=) nil)))
     (is (not (null (%sheep-direct-properties sheep))))
     (is (vectorp (%sheep-direct-properties sheep)))
-    (is (find 'std-property (%sheep-direct-properties sheep :key (fun (property-name (car _))))))))
+    (is (find 'std-property (%sheep-direct-properties sheep)
+              :key (fun (property-name (car _)))))))
 
 (postboot-test %get-property-cons
   (let* ((sheep (allocate-std-sheep))

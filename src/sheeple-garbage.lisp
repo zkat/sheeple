@@ -1,25 +1,13 @@
 ;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
 
-;;; trivial-garbage.lisp --- Trivial Garbage!
-;;;
-;;; This software is placed in the public domain by Luis Oliveira
-;;; <loliveira@common-lisp.net> and is provided with absolutely no
-;;; warranty.
+;;;; %sheeple-garbage.lisp
+;;;;
+;;;; Portability layer for garbage-related operations
+;;;; (based on trivial-garbage by Luis Oliviera)
+;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defpackage #:trivial-garbage
-  (:use #:cl)
-  (:shadow #:make-hash-table)
-  (:nicknames #:tg)
-  (:export #:gc
-           #:make-weak-pointer
-           #:weak-pointer-value
-           #:weak-pointer-p
-           #:make-weak-hash-table
-           #:hash-table-weakness
-           #:finalize
-           #:cancel-finalization))
-
-(in-package #:trivial-garbage)
+(in-package :%sheeple-garbage)
 
 ;;;; GC
 

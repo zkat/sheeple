@@ -164,9 +164,28 @@
     (signals unbound-property (property-owner parent 'some-other-property))
     (signals unbound-property (property-owner parent 'some-other-property t))))
 
-(postboot-test direct-property-metaobject)
-(postboot-test sheep-direct-properties)
-(postboot-test available-properties)
+(postboot-test property-metaobject-p
+  (is (property-metaobject-p (spawn =standard-property=)))
+  (is (not (property-metaobject-p (spawn)))))
+
+(postboot-test direct-property-metaobject
+  (let ((sheep (defsheep () ((var 'value)))))
+    (is (property-metaobject-p (direct-property-metaobject sheep 'var)))
+    (signals unbound-property (direct-property-metaobject sheep 'durr))
+    (is (null (direct-property-metaobject sheep 'durr nil)))
+    (signals unbound-property (direct-property-metaobject sheep 'durr t))))
+
+(postboot-test sheep-direct-properties
+  (let ((sheep (defsheep () ((var1 'val) (var2 'val) (var3 'val)))))
+    (is (= 3 (length (sheep-direct-properties sheep))))
+    (is (every #'property-metaobject-p (sheep-direct-properties sheep)))))
+
+(postboot-test available-properties
+  (let* ((a (defsheep () ((var1 'val))))
+         (b (defsheep (a) ((var2 'val))))
+         (c (defsheep (b) ((var3 'val)))))
+    (is (= 3 (length (available-properties sheep))))
+    (is (every #'property-metaobject-p (available-properties sheep)))))
 
 ;; ugh. I don't want to write tests for these right now.
 (postboot-test property-summary)

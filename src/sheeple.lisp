@@ -12,15 +12,12 @@
 ;; We declare these base vars here so that bootstrapping won't complain.
 ;; They're also initialized to (gensym) so that pre-bootstrap tests have
 ;; something to check against that isn't all NIL.
-(defvar =standard-metasheep= (gensym "=STANDARD-METASHEEP="))
-(defvar =t= (gensym "=T="))
-(defvar =standard-sheep= (gensym "=STANDARD-SHEEP="))
+(define-metasheep-vars =standard-metasheep= =t= =standard-sheep=)
 (defvar *bootstrappedp* nil)
 
 ;;;
 ;;; Sheeple object
 ;;;
-
 (defun %std-sheep-p (obj)
   "Tests whether OBJ is EQ to =STANDARD-METASHEEP= at run-time."
   (eq (svref obj 0) =standard-metasheep=))
@@ -46,7 +43,6 @@ of its descendants."
            (typep (elt sheep 0) 'std-sheep))))
 
 ;;; The basics of printing sheep
-
 (defun verify-print-settings ()
   (assert (or *print-pretty* *print-circle*)
           (*print-pretty* *print-circle*)
@@ -74,7 +70,6 @@ of its descendants."
 (set-pprint-dispatch 'sheep #'print-young-sheep 0.1)
 
 ;;; The basics of allocating sheep objects
-
 (defun std-allocate-sheep (metasheep)
   "Creates a standard sheep object. By default, all the metaproperties are NIL."
   (let ((array (make-array 6 :initial-element nil)))
@@ -87,14 +82,10 @@ of its descendants."
 
 ;;; STD-SHEEP accessor definitions
 (defmacro define-internal-accessors (&body names-and-indexes)
-  `(progn
-     ,@(loop for (name index) on names-and-indexes by #'cddr
-          collect
-          `(progn
-             (defun ,name (sheep)
-               (svref sheep ,index))
-             (defun (setf ,name) (new-value sheep)
-               (setf (svref sheep ,index) new-value))))))
+  `(progn ,@(loop for (name index) on names-and-indexes by #'cddr
+               collect `(progn (defun ,name (sheep) (svref sheep ,index))
+                               (defun (setf ,name) (new-value sheep)
+                                 (setf (svref sheep ,index) new-value))))))
 
 (define-internal-accessors %sheep-metasheep 0
                            %sheep-parents 1 ; actual parents
@@ -122,13 +113,11 @@ of its descendants."
 
 (defun %create-child-cache (sheep)
   "Sets SHEEP's child cache to a blank (simple-vector `*child-cache.initial-size*')"
-  (setf (%sheep-children sheep)
-        (make-array *child-cache.initial-size* :initial-element nil)))
+  (setf (%sheep-children sheep) (make-array *child-cache.initial-size* :initial-element nil)))
 
 (defun %child-cache-full-p (sheep)
   "A child cache is full if all its items are live weak pointers to other sheep."
-  (aand (%sheep-children sheep)
-        (every #'maybe-weak-pointer-value it)))
+  (aand (%sheep-children sheep) (every #'maybe-weak-pointer-value it)))
 
 (defun %enlarge-child-cache (sheep)
   "Enlarges SHEEP's child cache by the value of `*child-cache.grow-ratio*'."
@@ -163,8 +152,9 @@ of its descendants."
   "Iteratively applies FUNCTION to SHEEP's children (it takes care of taking each child out
 of the weak pointer)."
   (awhen (%sheep-children sheep)
-    (map return-type (fun (when (weak-pointer-p _)
-                            (funcall function (weak-pointer-value _))))
+    (map return-type
+         (fun (when (weak-pointer-p _)
+                (funcall function (weak-pointer-value _))))
          it)))
 
 ;;; This utility is useful for concisely setting up sheep hierarchies
@@ -203,49 +193,41 @@ on the TIE-BREAKER in the case of ambiguous constraints. On the assumption
 that they are freshly generated, this implementation is destructive with
 regards to the CONSTRAINTS. A future version will undo this change."
   (loop
-     :for minimal-elements :=
-     (remove-if (fun (member _ constraints
-                            :key #'cadr))
-                elements)
-     :while minimal-elements
-     :for choice := (if (null (cdr minimal-elements))
-                        (car minimal-elements)
-                        (funcall tie-breaker minimal-elements result))
-     :collect choice :into result
-     :do (deletef constraints choice :test #'member)
-     (setf elements (remove choice elements))
-     :finally
-     (if (null elements)
-         (return-from topological-sort result)
-         (error "Inconsistent precedence graph."))))
+     for minimal-elements = (remove-if (fun (member _ constraints :key #'cadr)) elements)
+     while minimal-elements
+     for choice = (if (null (cdr minimal-elements))
+                      (car minimal-elements)
+                      (funcall tie-breaker minimal-elements result))
+     collect choice into result
+     do (deletef constraints choice :test #'member)
+        (setf elements (remove choice elements))
+     finally (if (null elements)
+                 (return-from topological-sort result)
+                 (error "Inconsistent precedence graph."))))
 
 (defun collect-ancestors (sheep)
   "Recursively collects all of SHEEP's ancestors."
   (labels ((all-parents-loop (seen parents)
-              (let ((to-be-processed
-                     (set-difference parents seen)))
-                (if (null to-be-processed)
-                    parents
-                    (let ((sheep-to-process
-                           (car to-be-processed)))
-                      (all-parents-loop
-                       (cons sheep-to-process seen)
-                       (union (sheep-parents sheep-to-process)
-                              parents)))))))
+             (let ((to-be-processed (set-difference parents seen)))
+               (if (null to-be-processed)
+                   parents
+                   (let ((sheep-to-process (car to-be-processed)))
+                     (all-parents-loop (cons sheep-to-process seen)
+                                       (union (sheep-parents sheep-to-process)
+                                              parents)))))))
     (all-parents-loop () (sheep-parents sheep))))
 
 (defun local-precedence-ordering (sheep)
   "Calculates the local precedence ordering. Relies on the fact that mapcar will
 return when any list is NIL to avoid traversing the entire parent list."
   (let ((parents (sheep-parents sheep)))
-    (mapcar #'list (cons sheep parents) parents)))
+   (mapcar #'list (cons sheep parents) parents)))
 
 (defun std-tie-breaker-rule (minimal-elements hl-so-far)
-  (dolist (hl-constituent (reverse hl-so-far))
-    (let* ((supers (sheep-parents hl-constituent))
-           (common (intersection minimal-elements supers)))
-      (when (not (null common))
-        (return-from std-tie-breaker-rule (car common))))))
+  (mapc (fun (let ((common (intersection minimal-elements (sheep-parents _))))
+               (when (not (null common))
+                 (return-from std-tie-breaker-rule (car common)))))
+        (reverse hl-so-far)))
 
 (defun std-compute-sheep-hierarchy-list (sheep)
   "Lists SHEEP's ancestors, in precedence order."
@@ -258,8 +240,7 @@ return when any list is NIL to avoid traversing the entire parent list."
                            ;; so we can be destructive here
                            (mapcan #'local-precedence-ordering sheeple-to-order))
                           #'std-tie-breaker-rule))
-    (simple-error ()
-      (error 'sheeple-hierarchy-error :sheep sheep))))
+    (simple-error () (error 'sheeple-hierarchy-error :sheep sheep))))
 
 (defun compute-sheep-hierarchy-list (sheep)
   (typecase sheep
@@ -268,8 +249,7 @@ return when any list is NIL to avoid traversing the entire parent list."
                 (sheep-metasheep sheep) sheep))))
 
 (defun memoize-sheep-hierarchy-list (sheep)
-  (setf (%sheep-hierarchy-cache sheep)
-        (compute-sheep-hierarchy-list sheep))
+  (setf (%sheep-hierarchy-cache sheep) (compute-sheep-hierarchy-list sheep))
   (%map-children (fun (memoize-sheep-hierarchy-list _)) sheep))
 
 (defun std-finalize-sheep-inheritance (sheep)
@@ -298,11 +278,10 @@ return when any list is NIL to avoid traversing the entire parent list."
   "Removing PARENT to SHEEP's parent list is a matter of deleting it from the parent list."
   (if (member parent (sheep-parents child))
       ;; TODO - this could check to make sure that the hierarchy list is still valid.
-      (progn
+      (prog1 child
         (deletef (%sheep-parents child) parent)
         (%remove-child child parent)
-        (finalize-sheep-inheritance child)
-        child)
+        (finalize-sheep-inheritance child))
       (error "~A is not a parent of ~A" parent child)))
 
 (defun add-parent (new-parent sheep)
@@ -335,8 +314,7 @@ return when any list is NIL to avoid traversing the entire parent list."
   "Mostly a utility function for easily adding multiple parents. They will be added to
 the front of the sheep's parent list in reverse order (so they will basically be appended
 to the front of the list)"
-  (mapc (fun (add-parent _ sheep))
-        (reverse parents))
+  (mapc (fun (add-parent _ sheep)) (reverse parents))
   sheep)
 
 (defun sheep-hierarchy-list (sheep)
@@ -446,11 +424,10 @@ allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
 
 (defmacro defsheep (sheeple properties &rest options)
   "Standard sheep-generation macro. This variant auto-generates accessors."
-  `(let ((sheep (ensure-sheep
-                 ,(canonize-sheeple sheeple)
-                 :properties ,(canonize-properties properties)
-                 ,@(canonize-options options))))
-     sheep))
+  `(ensure-sheep
+    ,(canonize-sheeple sheeple)
+    :properties ,(canonize-properties properties)
+    ,@(canonize-options options)))
 
 (defmacro defproto (name sheeple properties &rest options)
   "Words cannot express how useful this is."

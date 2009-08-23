@@ -164,6 +164,7 @@
 **** TODO #'print-sheep with highest priority
      A method, user-extensible and awesome.
 *** TODO Once bootstrapped, update WITH-SHEEP-HIERARCHY to use #'clone
+*** TODO Write #'validate-hierarchy-list
 * DONE 2.2
 ** DONE [#A] Fix #'(setf property-value) Bug
    When a call to #'(setf property-value) requires a new direct property object

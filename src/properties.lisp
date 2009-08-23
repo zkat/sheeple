@@ -13,7 +13,7 @@
 ;;; Property spec object
 ;;;
 (defparameter the-std-property-form '(defproto =standard-property= ()
-                                      ((property-name 'std-property))))
+                                      ((name 'std-property :accessor property-name))))
 
 (defvar =standard-property= (gensym "=STANDARD-PROPERTY="))
 
@@ -47,6 +47,17 @@
 ;;;
 ;;; Existential
 ;;;
+(defun has-direct-property-p (sheep property-name)
+  "Returns T if SHEEP has a property called PROPERTY-NAME as a direct property.
+NIL otherwise."
+  (when (%get-property-cons sheep property-name) t))
+
+(defun has-property-p (sheep property-name)
+  "Returns T if calling PROPERTY-VALUE on SHEEP using the same property-name
+would yield a value (i.e. not signal an unbound-property condition)."
+  (some (fun (has-direct-property-p _ property-name))
+        (sheep-hierarchy-list sheep)))
+
 (defun add-property (sheep property-name value)
   "Adds a property named PROPERTY-NAME to SHEEP, initialized with VALUE."
   (assert (symbolp property-name))
@@ -71,17 +82,6 @@ direct property. Returns SHEEP."
 (defun remove-all-direct-properties (sheep)
   "Wipes out all direct properties and their values from SHEEP."
   (setf (%sheep-direct-properties sheep) nil))
-
-(defun has-direct-property-p (sheep property-name)
-  "Returns T if SHEEP has a property called PROPERTY-NAME as a direct property.
-NIL otherwise."
-  (when (%get-property-cons sheep property-name) t))
-
-(defun has-property-p (sheep property-name)
-  "Returns T if calling PROPERTY-VALUE on SHEEP using the same property-name
-would yield a value (i.e. not signal an unbound-property condition)."
-  (some (fun (has-direct-property-p _ property-name))
-        (sheep-hierarchy-list sheep)))
 
 ;;; Value
 (defun direct-property-value (sheep property-name)

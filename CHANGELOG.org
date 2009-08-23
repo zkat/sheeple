@@ -1,3 +1,10 @@
+* 3.0
+** Features
+*** Complete reimplementation
+    Sheeple itself has been reimplemented (again). It runs faster and lighter than ever.
+*** Various interface changes
+    Various functions have been renamed, others changed at an interface level.
+** Bugfixes
 * 2.2
 ** Features
 *** PROPERTY-SPEC works more like the CLOS MOP's slotd-based stuff now.

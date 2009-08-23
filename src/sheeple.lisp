@@ -311,7 +311,7 @@ return when any list is NIL to avoid traversing the entire parent list."
   "Mostly a utility function for easily adding multiple parents. They will be added to
 the front of the sheep's parent list in reverse order (so they will basically be appended
 to the front of the list)"
-  (mapc (fun (add-parent _ sheep)) (reverse parents))
+  (map nil (fun (add-parent _ sheep)) (reverse parents))
   sheep)
 
 (defun sheep-hierarchy-list (sheep)

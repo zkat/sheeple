@@ -107,10 +107,13 @@
     I should've done this in the first place. A simpler version of the same
     system used to dispatch replies would do wonders for read performance,
     without seriously harming writer performance.
+* TODO 3.1
+** TODO Metasheep Protocol
+*** TODO Property MOP
+*** TODO Extend sheep-creation MOP
+*** TODO Begin work on message/reply MOP (maybe)
 * TODO 3.0
-  [Adlai:] This is a rough sketch of The Road to Sheeple 3.0, as I see it right
-  now.  It's also mainly an invitation for you, sykopomp, to flesh out any
-  headings if you feel like it.
+  This is a rough sketch of The Road to Sheeple 3.0
 ** TODO [#A] "Test all the fucking time."
    This is very important. Watch the entire thing, twice.
    http://rubyhoedown2008.confreaks.com/05-bryan-liles-lightning-talk-tatft-test-all-the-f-in-time.html
@@ -129,25 +132,20 @@
 *** TODO Convert tests to use WITH-SHEEP-HIERARCHY
     We might as well use this macro, since it's so compact.
 *** TODO Do #'std-c-s-h-l and #'c-s-h-l need separate tests?
-** TODO [#B] Fix Sheep Allocation
+** DONE [#B] Fix Sheep Allocation
    We need std-allocate-sheep, along with a MOP hook so that, for
    example, you could allocate storage in a database in an :after reply.
-** TODO Properties + PropMOP
-   Properties need to be implemented as a type of sheep, with a bunch of
-   functions special cased on =STANDARD-PROPERTY= to give metastability.
+** TODO Properties
 *** DONE Reimplement properties
     Write a basic reimplementation of sheep properties.
+*** DONE TATFT
 *** TODO Improve the whole add-property interface.
     This is partly done right now... add-property itself has been greatly simplified.
     I think what needs to be done now is that a macro should be written to take care
     of all the fancy features that add-property used to handle. Perhaps write a
     defproperty macro?
-*** TODO Implement a property MOP
-    This'll probably need a bit of shuffling around, but it should be done after the 
-    basics are fully reimplemented.
-** TODO Messages, Replies, and a possible MOP here too?
-   These all need to be sheep, and there are probably going to be a few circular
-   aspects to resolve here as well. We should extend an AMOP-like MOP too.
+** TODO Messages, Replies
+   Update code so that these work again.
 ** TODO "Sanely Bootstrappable"
    Let's not go insane between now and when (test bootstrapped?) passes.
 *** TODO Write proper print functions
@@ -163,8 +161,8 @@
      metasheep nickname.
 **** TODO #'print-sheep with highest priority
      A method, user-extensible and awesome.
-*** TODO Once bootstrapped, update WITH-SHEEP-HIERARCHY to use #'clone
-*** TODO Write #'validate-hierarchy-list
+*** TODO Once bootstrapped, update WITH-SHEEP-HIERARCHY to use SPAWN
+*** TODO Write VALIDATE-HIERARCHY-LIST
 * DONE 2.2
 ** DONE [#A] Fix #'(setf property-value) Bug
    When a call to #'(setf property-value) requires a new direct property object

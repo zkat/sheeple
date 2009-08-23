@@ -7,7 +7,6 @@
 ;;;; Boxing of built-in lisp types
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
-(declaim (optimize (speed 3) (safety 1)))
 
 (defmacro define-variables (&body variables)
   `(progn ,@(mapcar (fun `(defvar ,_ (gensym (symbol-name ',_)))) variables)))
@@ -59,11 +58,11 @@ has not already been boxed."
 
 (defun box-object (object)
   "Wraps OBJECT with a sheep."
-  (if (sheepp object)
-      (error "~S seems to already be a sheep." object)
-      (setf (gethash object *boxed-object-table*)
-            (defsheep ((box-type-of object))
-                ((wrapped-object object)) (:nickname object)))))
+  (when (sheepp object)
+    (error "~S seems to already be a sheep." object))
+  (setf (gethash object *boxed-object-table*)
+        (defsheep ((box-type-of object))
+            ((wrapped-object object)) (:nickname object))))
 
 (defun remove-boxed-object (object)
   "Kills object dead"

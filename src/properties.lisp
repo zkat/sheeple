@@ -31,13 +31,13 @@
         :test #'eq :key (fun (property-name (car _)))))
 
 (defun %remove-property-cons (sheep property-name)
-  (deletef (%sheep-direct-properties) (%get-property-cons sheep property-name))
+  (deletef (%sheep-direct-properties sheep) (%get-property-cons sheep property-name))
   sheep)
 
 (defun %direct-property-value (sheep property-name)
   (cdr (%get-property-cons sheep property-name)))
 (defun (setf %direct-property-value) (new-value sheep property-name)
-  (setf (cdr (%get-property-cons sh prop)) new-value))
+  (setf (cdr (%get-property-cons sheep property-name)) new-value))
 
 (defun %direct-property-metaobject (sheep property-name)
   (car (%get-property-cons sheep property-name)))
@@ -51,7 +51,7 @@
   "Adds a property named PROPERTY-NAME to SHEEP, initialized with VALUE."
   (assert (symbolp property-name))
   (when (has-direct-property-p sheep property-name)
-    (cerror "Add property anyway." "~A already has a direct property named ~A." 
+    (cerror "Add property anyway." "~A already has a direct property named ~A."
             sheep property-name))
   (let ((property-metaobject (defsheep (=standard-property=) ((name property-name)))))
     (%add-property-cons sheep property-metaobject value)))
@@ -62,16 +62,15 @@
 ;; Addendum - this may not count anymore. I'm not sure if we'll still have the metaobjects
 ;;            keep track of this info
 (defun remove-property (sheep property-name)
-  "If PROPERTY-NAME is a direct property of SHEEP, this function removes it. If PROPERTY-NAME
-is inherited from one of SHEEP's parents, or if PROPERTY-NAME does not exist in SHEEP's hierarchy
-list, an error is signaled. This function returns SHEEP after property removal."
+  "Removes SHEEP's direct property named PROPERTY-NAME. Signals an error if there is no such
+direct property. Returns SHEEP."
   (if (has-direct-property-p sheep property-name)
       (prog1 sheep (%remove-property-cons sheep property-name))
       (error "Cannot remove property: ~A is not a direct property of ~A" name sheep)))
 
 (defun remove-all-direct-properties (sheep)
   "Wipes out all direct properties and their values from SHEEP."
-  (setf (%sheep-direct-properties) nil) sheep)
+  (setf (%sheep-direct-properties sheep) nil))
 
 (defun has-direct-property-p (sheep property-name)
   "Returns T if SHEEP has a property called PROPERTY-NAME as a direct property.
@@ -93,7 +92,7 @@ a condition of type UNBOUND-DIRECT-PROPERTY condition is signalled."
   (awhen (%sheep-direct-properties sheep)
     (cdr (or (%get-property-cons sheep property-name)
              (error 'unbound-direct-property
-                    :sheep sheep :property-name (property-name property))))))
+                    :sheep sheep :property-name property-name)))))
 
 (defun property-value (sheep property-name)
   "Returns a property-value that is not necessarily local to SHEEP."
@@ -113,13 +112,13 @@ a condition of type UNBOUND-DIRECT-PROPERTY condition is signalled."
 PROPERTY-NAME. If the property does not already exist anywhere in the hierarchy list, an error
 is signaled."
   (cond ((has-direct-property-p sheep property-name)
-         (setf (%direct-property-value sheep property-name new-value)))
+         (setf (%direct-property-value sheep property-name) new-value))
         ((has-property-p sheep property-name)
          (let ((owner-prop-mo (car (%get-property-cons (property-owner sheep property-name)
                                                        property-name))))
            (%add-property-cons sheep owner-prop-mo new-value)))
         (t (cerror "Add the property locally" 'unbound-property
-                   :sheep sheep 
+                   :sheep sheep
                    :property-name property-name)
            (add-property sheep property-name new-value))))
 
@@ -142,7 +141,7 @@ returned."
 
 (defun available-properties (sheep)
   "Returns a list of property objects describing all properties available to SHEEP, including
-inherited ones."  
+inherited ones."
   (let* ((direct-properties (sheep-direct-properties sheep))
          (avail-property-names (mapcar (fun (property-name _))
                                        (remove-duplicates
@@ -160,8 +159,8 @@ inherited ones."
           "~&Sheep: ~A~%Properties:~% ~{~{~&~3TName: ~13T~A~%~3TValue: ~13T~S~%~
            ~3TOwner: ~13T~A~%~%~}~}"
           sheep (mapcar (fun (list (property-name _)
-                                  (property-value sheep (property-name _))
-                                  (property-owner sheep (property-name _))))
+                                   (property-value sheep (property-name _))
+                                   (property-owner sheep (property-name _))))
                         (available-properties sheep))))
 
 (defun direct-property-summary (sheep &optional stream)
@@ -171,5 +170,5 @@ inherited ones."
            Direct Properties: ~%~%~
            ~{~{~&~3TName: ~A~%~3TValue: ~S~%~%~}~}"
           sheep (mapcar (fun (list (property-name _)
-                                  (direct-property-value sheep (property-name _))))
+                                   (direct-property-value sheep (property-name _))))
                         (sheep-direct-properties sheep))))

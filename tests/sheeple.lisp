@@ -309,7 +309,7 @@
 
 (test (%create-child-cache :fixture allocate-std-sheep)
   (%create-child-cache sheep)
-  (is (typep (%sheep-children sheep) `(simple-vector ,CHILD-CACHE.INITIAL-SIZE))))
+  (is (typep (%sheep-children sheep) `(simple-vector ,*CHILD-CACHE.INITIAL-SIZE*))))
 
 (test (%child-cache-full-p :fixture allocate-std-sheep)
   (macrolet ((full (&body body)
@@ -329,8 +329,8 @@
   (%create-child-cache sheep)
   (%enlarge-child-cache sheep)
   (is (typep (%sheep-children sheep)
-             `(simple-vector ,(* CHILD-CACHE.INITIAL-SIZE
-                                 CHILD-CACHE.GROW-RATIO)))))
+             `(simple-vector ,(* *CHILD-CACHE.INITIAL-SIZE*
+                                 *CHILD-CACHE.GROW-RATIO*)))))
 
 (test %add-child
   (let ((sheep1 (allocate-std-sheep))
@@ -344,13 +344,13 @@
 
 (test (overwriting-garbage-children :depends-on %add-child)
   (loop :repeat 10 :for sheep := (allocate-std-sheep)
-     :do (loop :repeat CHILD-CACHE.INITIAL-SIZE
+     :do (loop :repeat *CHILD-CACHE.INITIAL-SIZE*
             :do (%add-child (allocate-std-sheep) sheep)
             (loop :repeat 9999 :collect (list))
             :finally (gc :full t))
      (unless (every #'maybe-weak-pointer-value (%sheep-children sheep))
        (return
-         (if (= CHILD-CACHE.INITIAL-SIZE
+         (if (= *CHILD-CACHE.INITIAL-SIZE*
                 (length (%sheep-children (%add-child (allocate-std-sheep) sheep))))
              (pass "#'%ADD-CHILD overrode a garbage-collected child")
              (fail "#'%ADD-CHILD didn't override garbage-collected children"))))

@@ -356,15 +356,13 @@
              (fail "#'%ADD-CHILD didn't override garbage-collected children"))))
      :finally (skip "Unable to perform test -- Insufficient garbage collection")))
 
-(test %remove-child
-  (let ((sheep1 (allocate-std-sheep))
-        (sheep2 (allocate-std-sheep)))
-    (is (null (%sheep-children sheep1)))
-    (is (null (%sheep-children sheep2)))
-    (%add-child sheep2 sheep1)
-    (is (eql sheep1 (%remove-child sheep2 sheep1) ))
-    (is (simple-vector-p (%sheep-children sheep1)))
-    (is (not (find sheep2 (%sheep-children sheep1) :key #'maybe-weak-pointer-value)))))
+(test (%remove-child :fixture allocate-std-sheep)
+  (let ((child (allocate-std-sheep)))
+    (is (eq sheep (%add-child child sheep)))
+    (let ((original-children (%sheep-children sheep)))
+      (is (eq sheep (%remove-child child sheep)))
+      (is (eq original-children (%sheep-children sheep))))
+    (is (null (find child (%sheep-children sheep) :key #'maybe-weak-pointer-value)))))
 
 (test %map-children
   (let ((parent (allocate-std-sheep))

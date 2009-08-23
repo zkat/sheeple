@@ -132,12 +132,11 @@ of its descendants."
 
 (defun %enlarge-child-cache (sheep)
   "Enlarges SHEEP's child cache by the value of `*child-cache.grow-ratio*'."
-  (let ((old-vector (%sheep-children sheep)))
-    (setf (%sheep-children sheep)
-          (make-array (* *child-cache.grow-ratio* (length old-vector))
-                      :initial-element nil))
-    (dotimes (i (length old-vector))
-      (setf (aref (%sheep-children sheep) i) (aref old-vector i)))))
+  (let* ((old-vector (%sheep-children sheep))
+         (new-vector (make-array (* *child-cache.grow-ratio* (length old-vector))
+                                 :initial-element nil)))
+    (setf (%sheep-children sheep) (map-into new-vector #'identity old-vector))
+    sheep))
 
 (defun %add-child (child sheep)
   "Registers CHILD in SHEEP's child cache."

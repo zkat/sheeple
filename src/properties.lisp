@@ -22,14 +22,17 @@
 ;;;
 (defun %add-property-cons (sheep property-metaobject value)
   ;; treating it as a list for now...
-  (push (cons property-metaobject value) (%sheep-direct-properties sheep)))
+  (push (cons property-metaobject value) (%sheep-direct-properties sheep))
+  sheep)
 
 (defun %get-property-cons (sheep property-name)
-  (find prop (%sheep-direct-properties sh)
+  (find property-name (%sheep-direct-properties sheep)
+        ;; note: It would be nice to have COMPOSE here.
         :test #'eq :key (fun (property-name (car _)))))
 
 (defun %remove-property-cons (sheep property-name)
-  (deletef (%sheep-direct-properties) (%get-property-cons sheep property-name)))
+  (deletef (%sheep-direct-properties) (%get-property-cons sheep property-name))
+  sheep)
 
 (defun %direct-property-value (sheep property-name)
   (cdr (%get-property-cons sheep property-name)))

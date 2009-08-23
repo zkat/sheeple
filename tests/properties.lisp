@@ -154,48 +154,20 @@
 (def-suite reflection :in properties)
 (in-suite reflection)
 
-(postboot-test property-owner)
+(postboot-test property-owner
+  (let* ((parent (defsheep () ((var "value"))))
+         (child (defsheep (parent) ((child-var "child-value")))))
+    (is (eq parent (property-owner parent 'var)))
+    (is (eq parent (property-owner child 'var)))
+    (is (eq child (property-owner child 'child-var)))
+    (is (not (property-owner parent 'some-other-property nil)))
+    (signals unbound-property (property-owner parent 'some-other-property))
+    (signals unbound-property (property-owner parent 'some-other-property t))))
+
 (postboot-test direct-property-metaobject)
 (postboot-test sheep-direct-properties)
 (postboot-test available-properties)
+
+;; ugh. I don't want to write tests for these right now.
 (postboot-test property-summary)
 (postboot-test direct-property-summary)
-
-;; ;; Reflection stuff
-;; (test property-owner
-;;   (let* ((parent (defsheep () ((var "value"))))
-;;          (child (defsheep (parent) ((child-var "child-value")))))
-;;     (is (eql parent (property-owner parent 'var)))
-;;     (is (eql parent (property-owner child 'var)))
-;;     (is (eql child (property-owner child 'child-var)))
-;;     ;; todo - make sure to check that error is signaled (or not signaled) as appropriate
-;;     (is (not (property-owner parent 'some-other-property nil)))
-;;     (signals unbound-property (property-owner parent 'some-other-property))))
-
-;; (test available-properties
-;;   (let ((sheep (defsheep () ((var "value" :accessor var)))))
-;;     (is (eql 1 (length (available-properties sheep))))
-;;     (is (eql (find-class 'standard-property)
-;;              (class-of (car (available-properties sheep)))))
-;;     (is (eql sheep (add-property sheep 'new-var "new-value")))
-;;     (is (eql 2 (length (available-properties sheep))))))
-
-;; (test direct-property-metaobject
-;;   ;; TODO - this should check that the standard property-spec's capabilities work properly.
-;;   (let ((sheep (defsheep () ((var "value" :accessor var)))))
-;;     (is (eql (find-class 'standard-property)
-;;              (class-of (direct-property-metaobject sheep 'var))))
-;;     (signals unbound-direct-property (direct-property-metaobject sheep 'whoops))))
-
-;; (test sheep-direct-properties
-;;   ;; TODO - This one just needs to check that all the direct property spec metaobjects are returned.
-;;   (let ((sheep (defsheep () ((var "value" :accessor var) (another-var "another-value")))))
-;;     (is (eql 2 (length (sheep-direct-properties sheep))))
-;;     (is (eql (find-class 'standard-property)
-;;              (class-of (car (sheep-direct-properties sheep)))))
-;;     (is (eql (find-class 'standard-property)
-;;              (class-of (cadr (sheep-direct-properties sheep)))))))
-
-;; ;; ugh. I don't want to write tests for these right now. I probably need cl-ppcre :\
-;; (test property-summary)
-;; (test direct-property-summary)

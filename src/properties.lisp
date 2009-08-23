@@ -24,9 +24,44 @@
 ;;;
 ;;; Internals
 ;;;
+
+(defvar *property-vector-initial-size* 5
+  "The initial size for a sheep's property vector.")
+
+(defvar *property-vector-grow-ratio* 5
+  "The ratio by which the property vector is expanded when full.")
+
+(defun %create-property-vector (sheep)
+  "Sets SHEEP's property vector to a (simple-vector `*property-vector-initial-size*')."
+  (setf (%sheep-direct-properties sheep)
+        (make-array *property-vector-initial-size* :initial-element nil)))
+
+(defun %property-vector-full-p (sheep)
+  "A property vector is full when all elements are non-NIL."
+  (aand (%sheep-direct-properties sheep)
+        (find nil it :test #'eq)))
+
+(defun %enlarge-property-vector (sheep)
+  (let ((old-vector (%sheep-direct-properties sheep)))
+    (setf (%sheep-direct-properties sheep)
+          (make-array (* *property-vector-grow-ratio* (length old-vector))
+                      :initial-element nil))
+    (dotimes (i (length old-vector))
+      (setf (svref (%sheep-direct-properties sheep) i) (svref old-vector i))))
+  (values))
+
 (defun %add-property-cons (sheep property-metaobject value)
-  ;; treating it as a list for now...
-  (push (cons property-metaobject value) (%sheep-direct-properties sheep))
+  (let ((properties (%sheep-direct-properties sheep)))
+    (if properties
+        (when (%property-vector-full-p sheep)
+          (%enlarge-property-vector sheep)
+          (setf properties (%sheep-direct-properties sheep)))
+        (progn (%create-property-vector sheep)
+               (setf properties (%sheep-direct-properties sheep))))
+    (unless (find property-metaobject properties :key #'property-name :test #'eq)
+      (dotimes (i (length properties))
+        (unless (svref properties i)
+          (return (setf (svref properties i) (cons property-metaobject value)))))))
   sheep)
 
 (defun %get-property-cons (sheep property-name)
@@ -35,7 +70,9 @@
         :test #'eq :key (fun (property-name (car _)))))
 
 (defun %remove-property-cons (sheep property-name)
-  (deletef (%sheep-direct-properties sheep) (%get-property-cons sheep property-name))
+  (awhen (position property-name (%sheep-direct-properties sheep)
+                   :key (fun (property-name (car _))) :test #'eq)
+    (setf (svref (%sheep-direct-properties sheep) it) nil))
   sheep)
 
 (defun %direct-property-value (sheep property-name)

@@ -105,15 +105,15 @@ of its descendants."
   (%sheep-parents sheep))
 
 ;;; children cache
-(defvar *child-cache.initial-size* 5
+(defvar *child-cache-initial-size* 5
   "The initial size for a sheep's child cache.")
 
-(defvar *child-cache.grow-ratio* 5
+(defvar *child-cache-grow-ratio* 5
   "The ratio by which the child-cache is expanded when full.")
 
 (defun %create-child-cache (sheep)
-  "Sets SHEEP's child cache to a blank (simple-vector `*child-cache.initial-size*')"
-  (setf (%sheep-children sheep) (make-array *child-cache.initial-size* :initial-element nil)))
+  "Sets SHEEP's child cache to a blank (simple-vector `*child-cache-initial-size*')"
+  (setf (%sheep-children sheep) (make-array *child-cache-initial-size* :initial-element nil)))
 
 (defun %child-cache-full-p (sheep)
   "A child cache is full if all its items are live weak pointers to other sheep."
@@ -122,7 +122,7 @@ of its descendants."
 (defun %enlarge-child-cache (sheep)
   "Enlarges SHEEP's child cache by the value of `*child-cache.grow-ratio*'."
   (let* ((old-vector (%sheep-children sheep))
-         (new-vector (make-array (* *child-cache.grow-ratio* (length old-vector))
+         (new-vector (make-array (* *child-cache-grow-ratio* (length old-vector))
                                  :initial-element nil)))
     (setf (%sheep-children sheep) (replace new-vector old-vector))
     sheep))

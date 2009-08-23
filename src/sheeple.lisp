@@ -135,7 +135,7 @@ of its descendants."
   (let* ((old-vector (%sheep-children sheep))
          (new-vector (make-array (* *child-cache.grow-ratio* (length old-vector))
                                  :initial-element nil)))
-    (setf (%sheep-children sheep) (map-into new-vector #'identity old-vector))
+    (setf (%sheep-children sheep) (replace new-vector old-vector))
     sheep))
 
 (defun %add-child (child sheep)

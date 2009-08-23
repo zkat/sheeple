@@ -103,13 +103,11 @@ a condition of type UNBOUND-DIRECT-PROPERTY condition is signalled."
   (property-value-with-hierarchy-list sheep property-name))
 
 (defun property-value-with-hierarchy-list (sheep property-name)
-  (let ((hl (sheep-hierarchy-list sheep)))
-    (or (loop for sheep in hl
-           do (let ((hasp (has-direct-property-p sheep property-name)))
-                (when hasp
+  (map nil (fun (when (has-direct-property-p _ property-name)
                   (return-from property-value-with-hierarchy-list
-                    (direct-property-value sheep property-name)))))
-        (error 'unbound-property :sheep sheep :property-name property-name))))
+                    (direct-property-value _ property-name))))
+       (sheep-hierarchy-list sheep))
+  (error 'unbound-property :sheep sheep :property-name property-name))
 
 (defun (setf property-value) (new-value sheep property-name)
   "Sets NEW-VALUE as the value of a direct-property belonging to SHEEP, named

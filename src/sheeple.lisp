@@ -348,7 +348,7 @@ to the front of the list)"
 ;;;
 ;;; Spawning
 ;;;
-(defun ensure-sheep (parent* &rest all-keys
+(defun make-sheep (parent* &rest all-keys
                      &key (metasheep =standard-metasheep=) &allow-other-keys)
   "Creates a new sheep with SHEEPLE as its parents. METASHEEP is used as the metasheep when
 allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
@@ -359,13 +359,13 @@ allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
 
 (defun spawn (&rest sheeple)
   "Creates a new standard-sheep object with SHEEPLE as its parents."
-  (ensure-sheep sheeple))
+  (make-sheep sheeple))
 
 ;;; Feel free to change the exact interface if you don't like it. -- Adlai
 (defun clone (sheep &optional (metasheep (sheep-metasheep sheep)))
   "Creates a sheep with the same parents and metasheep as SHEEP. If supplied, METASHEEP
 will be used instead of SHEEP's metasheep, but SHEEP itself remains unchanged."
-  (ensure-sheep (sheep-parents sheep) :metasheep metasheep))
+  (make-sheep (sheep-parents sheep) :metasheep metasheep))
 
 ;;;
 ;;; DEFSHEEP macro
@@ -428,7 +428,7 @@ will be used instead of SHEEP's metasheep, but SHEEP itself remains unchanged."
 
 (defmacro defsheep (sheeple properties &rest options)
   "Standard sheep-generation macro. This variant auto-generates accessors."
-  `(ensure-sheep
+  `(make-sheep
     ,(canonize-sheeple sheeple)
     :properties ,(canonize-properties properties)
     ,@(canonize-options options)))
@@ -437,7 +437,7 @@ will be used instead of SHEEP's metasheep, but SHEEP itself remains unchanged."
   "Words cannot express how useful this is."
   `(progn
      (declaim (special ,name))
-     (let ((sheep (create-or-reinit-sheep
+     (let ((sheep (ensure-sheep
                    (when (boundp ',name) ,name)
                    ,(canonize-sheeple sheeple)
                    :properties ,(canonize-properties properties t)
@@ -446,7 +446,7 @@ will be used instead of SHEEP's metasheep, but SHEEP itself remains unchanged."
          (setf (sheep-nickname sheep) ',name))
        (setf (symbol-value ',name) sheep))))
 
-(defun create-or-reinit-sheep (maybe-sheep parents &rest options)
+(defun ensure-sheep (maybe-sheep parents &rest options)
   (if maybe-sheep
       (apply #'reinit-sheep maybe-sheep :new-parents parents options)
-      (apply #'ensure-sheep parents options)))
+      (apply #'make-sheep parents options)))

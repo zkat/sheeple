@@ -537,24 +537,24 @@
 (def-suite spawn-general :in spawning)
 (in-suite spawn-general)
 
-(postboot-test ensure-sheep
+(postboot-test make-sheep
   ;; basic
-  (let ((sheep (ensure-sheep nil)))
+  (let ((sheep (make-sheep nil)))
     (is (sheepp sheep))
     (is (std-sheep-p sheep))
-    (is (eql =standard-sheep= (car (sheep-parents (ensure-sheep nil)))))
-    (is (eql sheep (car (sheep-parents (ensure-sheep (list sheep))))))
+    (is (eql =standard-sheep= (car (sheep-parents (make-sheep nil)))))
+    (is (eql sheep (car (sheep-parents (make-sheep (list sheep))))))
     (is (eql =standard-metasheep= (sheep-metasheep sheep))))
   ;; properties arg
-  (let ((sheep (ensure-sheep nil
+  (let ((sheep (make-sheep nil
                              :properties '((foo bar) (baz quux)))))
     (is (has-direct-property-p sheep 'foo))
     (is (has-direct-property-p sheep 'baz))
     (is (eql 'bar (direct-property-value sheep 'foo)))
     (is (eql 'quux (direct-property-value sheep 'baz))))
   ;; other metasheep
-  (let* ((test-metasheep (ensure-sheep =standard-metasheep=))
-         (sheep (ensure-sheep nil :metasheep test-metasheep)))
+  (let* ((test-metasheep (make-sheep =standard-metasheep=))
+         (sheep (make-sheep nil :metasheep test-metasheep)))
     ;; metasheep tests
     (is (sheepp test-metasheep))
     (is (std-sheep-p test-metasheep))
@@ -665,4 +665,4 @@
     (is (equal "another-one" (something-else test-proto))))
   ;; TODO - check that options work properly
   )
-(test create-or-reinit-sheep)
+(test ensure-sheep)

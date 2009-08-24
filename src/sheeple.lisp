@@ -361,6 +361,12 @@ allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
   "Creates a new standard-sheep object with SHEEPLE as its parents."
   (ensure-sheep sheeple))
 
+;;; Feel free to change the exact interface if you don't like it. -- Adlai
+(defun clone (sheep &optional (metasheep (sheep-metasheep sheep)))
+  "Creates a sheep with the same parents and metasheep as SHEEP. If supplied, METASHEEP
+will be used instead of SHEEP's metasheep, but SHEEP itself remains unchanged."
+  (ensure-sheep (sheep-parents sheep) :metasheep metasheep))
+
 ;;;
 ;;; DEFSHEEP macro
 ;;;

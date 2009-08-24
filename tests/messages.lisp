@@ -14,22 +14,16 @@
 (def-suite reply-combination :in messages)
 (in-suite reply-combination)
 
-(5am:def-fixture reply-stack ()
-  (macrolet ((with-reply-stack (target-stack &body body)
-               (let ((stack (gensym)))
-                 `(let (,stack)
-                    (macrolet ((flag (tag)
-                                 `(push ',tag ,',stack)))
-                      ,@body
-                      (is (equal ',target-stack ,stack)))))))
-    (&body)))
+(defmacro with-flag-stack (&body body)
+  (let ((stack (gensym)))
+    `(let (,stack)
+       (flet ((flag (tag) (push tag ,stack))) ,@body)
+       (nreverse ,stack))))
 
-(test (reply-stack :fixture reply-stack)
-  (with-reply-stack ())
-  (with-reply-stack (1)
-    (flag 1))
-  (with-reply-stack (1 2 3)
-    (flag 3) (flag 2) (flag 1)))
+(test reply-stack
+  (is (null (with-flag-stack)))
+  (is (equal '(1) (with-flag-stack (flag 1))))
+  (is (equal '(1 2 3) (with-flag-stack (flag 1) (flag 2) (flag 3)))))
 
 (def-suite message-definition :in messages)
 (in-suite message-definition)

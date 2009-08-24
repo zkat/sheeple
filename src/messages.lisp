@@ -65,13 +65,14 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
     (setf (fdefinition name) (lambda (&rest args) (apply-message message args)))))
 
 ;; This handles actual setup of the message object (and finalization)
-(defun generate-message (&key name
+(defun generate-message (metasheep &key name
                           lambda-list
                           (documentation ""))
-  (let ((message (%make-message
-                   :name name
-                   :lambda-list lambda-list
-                   :documentation documentation)))
+  (let ((message (%make-message 
+                  metasheep
+                  :name name
+                  :lambda-list lambda-list
+                  :documentation documentation)))
     (set-arg-info message :lambda-list lambda-list)
     (finalize-message message)
     message))
@@ -80,18 +81,18 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 ;; its args, checking lamda-list, etc.)
 (defun ensure-message (name
                        &rest all-keys
-                       &key lambda-list
+                       &key (metasheep =standard-message=)
+                       lambda-list
                        &allow-other-keys)
   (let* ((existing (find-message name nil))
          (message (or existing
                       (apply #'generate-message
+                             metasheep
                              :name name
                              :lambda-list lambda-list
                              all-keys))))
-    (setf (find-message name) message)
-    (prog1 message
-      (when existing
-        (set-arg-info message :lambda-list lambda-list)))))
+    (when existing (set-arg-info message :lambda-list lambda-list))
+    (setf (find-message name) message)))
 
 ;; This is the actual message definition macro.
 ;; It first verifies that the lambda-list provided is a valid message ll,

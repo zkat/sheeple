@@ -76,9 +76,10 @@ of its descendants."
     (setf (svref array 0) metasheep)
     array))
 
-(defun allocate-std-sheep ()
-  "Confusing convenience function that will go away very soon."
-  (std-allocate-sheep =standard-metasheep=))
+(defun maybe-std-allocate-sheep (metasheep)
+  (if (eq =standard-metasheep= metasheep)
+      (std-allocate-sheep metasheep)
+      (allocate-sheep metasheep)))
 
 ;;; STD-SHEEP accessor definitions
 (defmacro define-internal-accessors (&body names-and-indexes)
@@ -105,54 +106,55 @@ of its descendants."
   (%sheep-parents sheep))
 
 ;;; children cache
-(defvar *child-cache.initial-size* 5
+(defvar *child-cache-initial-size* 5
   "The initial size for a sheep's child cache.")
 
-(defvar *child-cache.grow-ratio* 5
+(defvar *child-cache-grow-ratio* 5
   "The ratio by which the child-cache is expanded when full.")
 
-(defun %create-child-cache (sheep)
-  "Sets SHEEP's child cache to a blank (simple-vector `*child-cache.initial-size*')"
-  (setf (%sheep-children sheep) (make-array *child-cache.initial-size* :initial-element nil)))
+(symbol-macrolet ((%children (%sheep-children sheep)))
 
-(defun %child-cache-full-p (sheep)
-  "A child cache is full if all its items are live weak pointers to other sheep."
-  (aand (%sheep-children sheep) (every #'maybe-weak-pointer-value it)))
+  (defun %create-child-cache (sheep)
+    "Sets SHEEP's child cache to a blank (simple-vector `*child-cache-initial-size*')"
+    (setf %children (make-array *child-cache-initial-size* :initial-element nil)))
 
-(defun %enlarge-child-cache (sheep)
-  "Enlarges SHEEP's child cache by the value of `*child-cache.grow-ratio*'."
-  (let* ((old-vector (%sheep-children sheep))
-         (new-vector (make-array (* *child-cache.grow-ratio* (length old-vector))
-                                 :initial-element nil)))
-    (setf (%sheep-children sheep) (replace new-vector old-vector))
-    sheep))
+  (defun %child-cache-full-p (sheep)
+    "A child cache is full if all its items are live weak pointers to other sheep."
+    (aand %children (every #'maybe-weak-pointer-value it)))
 
-(defun %add-child (child sheep)
-  "Registers CHILD in SHEEP's child cache."
-  (let ((children (%sheep-children sheep)))
-    (if children
-        (when (%child-cache-full-p sheep)
-          (%enlarge-child-cache sheep)
-          (setf children (%sheep-children sheep)))
-        (progn (%create-child-cache sheep)
-               (setf children (%sheep-children sheep))))
-    (unless (find child children :key #'maybe-weak-pointer-value)
-      (dotimes (i (length children))
-        (unless (maybe-weak-pointer-value (aref children i))
-          (return (setf (aref children i) (make-weak-pointer child)))))))
-  sheep)
+  (defun %enlarge-child-cache (sheep)
+    "Enlarges SHEEP's child cache by the value of `*child-cache-grow-ratio*'."
+    (let* ((old-vector (%sheep-children sheep))
+           (new-vector (make-array (* *child-cache-grow-ratio* (length old-vector))
+                                   :initial-element nil)))
+      (setf (%sheep-children sheep) (replace new-vector old-vector))
+      sheep))
 
-(defun %remove-child (child sheep)
-  "Takes CHILD out of SHEEP's child cache."
-  (awhen (position child (%sheep-children sheep) :key #'maybe-weak-pointer-value)
-    (setf (svref (%sheep-children sheep) it) nil))
-  sheep)
+  (defun %add-child (child sheep)
+    "Registers CHILD in SHEEP's child cache."
+    (let ((children %children))
+      (if children
+          (when (%child-cache-full-p sheep)
+            (%enlarge-child-cache sheep)
+            (setf children %children))
+          (progn (%create-child-cache sheep)
+                 (setf children %children)))
+      (unless (find child children :key #'maybe-weak-pointer-value)
+        (dotimes (i (length children))
+          (unless (maybe-weak-pointer-value (aref children i))
+            (return (setf (aref children i) (make-weak-pointer child)))))))
+    sheep)
 
-(defun %map-children (function sheep)
-  "Iteratively applies FUNCTION to SHEEP's children (it takes care of taking each child out
-of the weak pointer)."
-  (awhen (%sheep-children sheep)
-    (map nil (fun (when (weak-pointer-p _) (funcall function (weak-pointer-value _)))) it)))
+  (defun %remove-child (child sheep)
+    "Takes CHILD out of SHEEP's child cache."
+    (awhen (position child %children :key #'maybe-weak-pointer-value)
+      (setf (svref %children it) nil))
+    sheep)
+
+  (defun %map-children (function sheep)
+    "Applies FUNCTION to each of SHEEP's children."
+    (awhen %children
+      (map nil (fun (awhen (maybe-weak-pointer-value _) (funcall function it))) it))))
 
 ;;; This utility is useful for concisely setting up sheep hierarchies
 (defmacro with-sheep-hierarchy (sheep-and-parents &body body)
@@ -174,9 +176,9 @@ Would produce this familiar \"diamond\" hierarchy:
   \\ /
    D"
   `(let* ,(mapcar (fun (destructuring-bind (sheep &rest parents)
-                          (ensure-list _)
-                        `(,sheep (add-parents (list ,@parents)
-                                              (allocate-std-sheep)))))
+                           (ensure-list _)
+                         `(,sheep (add-parents (list ,@parents)
+                                               (std-allocate-sheep =standard-metasheep=)))))
                   sheep-and-parents)
      ,@body))
 
@@ -314,6 +316,12 @@ to the front of the list)"
   (map nil (fun (add-parent _ sheep)) (reverse parents))
   sheep)
 
+(defun add-parent* (parent* sheep)
+  "A utility/interface/laziness function, for adding parent(s) to a sheep."
+  (ctypecase parent*
+    (sheep (add-parent parent* sheep))
+    (cons (add-parents parent* sheep))))
+
 (defun sheep-hierarchy-list (sheep)
   "Returns the full hierarchy-list for SHEEP"
   (%sheep-hierarchy-cache sheep))
@@ -340,25 +348,24 @@ to the front of the list)"
 ;;;
 ;;; Spawning
 ;;;
-(defun ensure-sheep (sheep-or-sheeple &rest all-keys
-                     &key (metasheep =standard-metasheep=)
-                     &allow-other-keys)
+(defun ensure-sheep (parent* &rest all-keys
+                     &key (metasheep =standard-metasheep=) &allow-other-keys)
   "Creates a new sheep with SHEEPLE as its parents. METASHEEP is used as the metasheep when
 allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
-  (let ((sheep (if (eql =standard-metasheep= metasheep)
-                   (std-allocate-sheep metasheep)
-                   (allocate-sheep metasheep))))
-    (if sheep-or-sheeple
-        (add-parents (if (listp sheep-or-sheeple)
-                         sheep-or-sheeple
-                         (list sheep-or-sheeple))
-                     sheep)
-        (add-parent =standard-sheep= sheep))
-    (apply #'init-sheep sheep all-keys)))
+  (apply #'init-sheep
+         (add-parent* (or (ensure-list parent*) =standard-sheep=)
+                      (maybe-std-allocate-sheep metasheep))
+         all-keys))
 
 (defun spawn (&rest sheeple)
   "Creates a new standard-sheep object with SHEEPLE as its parents."
   (ensure-sheep sheeple))
+
+;;; Feel free to change the exact interface if you don't like it. -- Adlai
+(defun clone (sheep &optional (metasheep (sheep-metasheep sheep)))
+  "Creates a sheep with the same parents and metasheep as SHEEP. If supplied, METASHEEP
+will be used instead of SHEEP's metasheep, but SHEEP itself remains unchanged."
+  (ensure-sheep (sheep-parents sheep) :metasheep metasheep))
 
 ;;;
 ;;; DEFSHEEP macro

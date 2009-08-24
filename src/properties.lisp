@@ -97,6 +97,15 @@ would yield a value (i.e. not signal an unbound-property condition)."
   (some (fun (has-direct-property-p _ property-name))
         (sheep-hierarchy-list sheep)))
 
+;; TODO - The way adding/removing properties is done needs to be thought out better.
+;;        Right now, doing (defspawn (something) ((var "value"))) would create that
+;;        property locally, which could become problematic, specially wrt to how much
+;;        space I was hoping to save by adding fresh local property metasheeple only
+;;        when they're non-existent in the hierarchy-list, or when add-property is used.
+;;
+;;        A good part of this issue will probably be resolved when there's a clean,
+;;        straightforward API for adding/removing properties. The current interface
+;;        is suboptimal, needless to say.
 (defun add-property (sheep property-name value)
   "Adds a property named PROPERTY-NAME to SHEEP, initialized with VALUE."
   (assert (symbolp property-name))

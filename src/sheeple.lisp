@@ -76,9 +76,6 @@ of its descendants."
     (setf (svref array 0) metasheep)
     array))
 
-(defun allocate-std-sheep ()
-  "Confusing convenience function that will go away very soon."
-  (std-allocate-sheep =standard-metasheep=))
 
 ;;; STD-SHEEP accessor definitions
 (defmacro define-internal-accessors (&body names-and-indexes)
@@ -175,9 +172,9 @@ Would produce this familiar \"diamond\" hierarchy:
   \\ /
    D"
   `(let* ,(mapcar (fun (destructuring-bind (sheep &rest parents)
-                          (ensure-list _)
-                        `(,sheep (add-parents (list ,@parents)
-                                              (allocate-std-sheep)))))
+                           (ensure-list _)
+                         `(,sheep (add-parents (list ,@parents)
+                                               (std-allocate-sheep =standard-metasheep=)))))
                   sheep-and-parents)
      ,@body))
 

@@ -17,8 +17,8 @@
 
 (test make-vector
   "Might fail if your Lisp does no vector optimization"
-  (5am:for-all ((size (5am:gen-integer :min 0 :max 1023))
-                (value  (5am:gen-integer)))
+  (for-all ((size (gen-integer :min 0 :max 1023))
+            (value  (gen-integer)))
     (is (typep  (make-vector size) 'simple-vector))
     (is (equalp (apply #'vector (make-list size :initial-element value))
                 (make-vector size value)))))

@@ -103,17 +103,17 @@
 
 (in-suite allocation)
 
-(test (std-sheep-p :fixture allocate-std-sheep)
-  (is (std-sheep-p sheep))
-  (is (not (std-sheep-p (vector 1 2 3 4 5 6))))
-  (is (not (std-sheep-p (vector 1 2))))
-  (is (not (std-sheep-p (vector =standard-metasheep= 2 3 4 5))))
-  (is (not (std-sheep-p (vector =standard-metasheep= 2 3 4 5 6 7))))
-  (is (std-sheep-p (vector =standard-metasheep= nil nil nil nil nil)))
-  (is (not (std-sheep-p (vector =standard-metasheep= nil nil nil nil))))
-  (is (not (std-sheep-p (vector =standard-metasheep= nil nil nil nil nil nil))))
-  (setf (%sheep-parents sheep) '(foo))
-  (is (std-sheep-p sheep)))
+(test std-sheep-p
+  (for-all ((sheep (gen-vector :length (constantly 6))))
+    (setf (elt sheep 0) =standard-metasheep=)
+    (is (std-sheep-p sheep)))
+  (for-all ((dummy (gen-vector)))
+    (is (not (std-sheep-p dummy))))
+  (for-all ((dummy (gen-vector)
+                   (and (/= 6 (length dummy))
+                        (not (zerop (length dummy))))))
+    (setf (elt dummy 0) =standard-metasheep=)
+    (is (not (std-sheep-p dummy)))))
 
 (postboot-test (sheepp :fixture (allocate-sheep =standard-metasheep=))
   (is (sheepp sheep)))

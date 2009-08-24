@@ -15,6 +15,13 @@
             5am:for-all 5am:gen-integer 5am:gen-list 5am:gen-tree))
   (export 'run-all-tests))
 
+(defun gen-vector (&key (length (gen-integer :min 0 :max 10))
+                        (elements (gen-integer :min -10 :max 10)))
+  (lambda ()
+    (apply #'vector
+           (funcall (gen-list :length length
+                              :elements elements)))))
+
 (defmacro test (name &body body)
   `(5am:test ,name ,@body))
 

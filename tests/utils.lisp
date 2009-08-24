@@ -16,12 +16,10 @@
   (is (equal '(1) (ensure-list '(1)))))
 
 (test make-vector
-  "Might fail if your Lisp does no vector optimization"
   (for-all ((size (gen-integer :min 0 :max 1023))
             (value  (gen-integer)))
-    (is (typep  (make-vector size) 'simple-vector))
     (is (equalp (apply #'vector (make-list size :initial-element value))
-                (make-vector size value)))))
+                (make-vector size :initial-element value)))))
 
 (test flatten
   (for-all ((tree (gen-tree :elements (constantly nil))))

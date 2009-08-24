@@ -17,6 +17,10 @@
   "X if X is a list, otherwise (list X)."
   (if (listp x) x (list x)))
 
+(defun make-vector (size &optional value)
+  "Constructs a vector with SIZE elements, each set to VALUE. See `make-list'."
+  (make-array size :initial-element value))
+
 ;;; This is only here because it gets called once in src/properties.lisp
 ;;; It gets called to mitigate a hierarchy traversal. Maybe get rid of it?
 (defun flatten (x)

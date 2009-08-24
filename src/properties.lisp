@@ -35,7 +35,7 @@
 
   (defun %create-property-vector (sheep)
     "Sets SHEEP's property vector to a (simple-vector `*property-vector-initial-size*')."
-    (setf %properties (make-array *property-vector-initial-size* :initial-element nil)))
+    (setf %properties (make-vector *property-vector-initial-size*)))
 
   (defun %property-vector-full-p (sheep)
     "A property vector is full when all elements are non-NIL." (aand %properties
@@ -44,8 +44,7 @@
   (defun %enlarge-property-vector (sheep)
     (let ((old-vector %properties))
       (setf %properties
-            (make-array (* *property-vector-grow-ratio* (length old-vector))
-                        :initial-element nil))
+            (make-vector (* *property-vector-grow-ratio* (length old-vector))))
       (dotimes (i (length old-vector))
         (setf (svref %properties i) (svref old-vector i))))
     (values))

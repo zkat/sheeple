@@ -76,6 +76,10 @@ of its descendants."
     (setf (svref array 0) metasheep)
     array))
 
+(defun maybe-std-allocate-sheep (metasheep)
+  (if (eq =standard-metasheep= metasheep)
+      (std-allocate-sheep metasheep)
+      (allocate-sheep metasheep)))
 
 ;;; STD-SHEEP accessor definitions
 (defmacro define-internal-accessors (&body names-and-indexes)
@@ -312,6 +316,12 @@ to the front of the list)"
   (mapc (fun (add-parent _ sheep)) (reverse parents))
   sheep)
 
+(defun add-parent* (parent* sheep)
+  "A utility/interface/laziness function, for adding parent(s) to a sheep."
+  (ctypecase parent*
+    (sheep (add-parent parent* sheep))
+    (cons (add-parents parent* sheep))))
+
 (defun sheep-hierarchy-list (sheep)
   "Returns the full hierarchy-list for SHEEP"
   (%sheep-hierarchy-cache sheep))
@@ -342,13 +352,10 @@ to the front of the list)"
                      &key (metasheep =standard-metasheep=) &allow-other-keys)
   "Creates a new sheep with SHEEPLE as its parents. METASHEEP is used as the metasheep when
 allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
-  (let ((sheep (if (eql =standard-metasheep= metasheep)
-                   (std-allocate-sheep metasheep)
-                   (allocate-sheep metasheep))))
-    (aif (ensure-list parent*)
-         (add-parents it sheep)
-         (add-parent =standard-sheep= sheep))
-    (apply #'init-sheep sheep all-keys)))
+  (apply #'init-sheep
+         (add-parent* (or (ensure-list parent*) =standard-sheep=)
+                      (maybe-std-allocate-sheep metasheep))
+         all-keys))
 
 (defun spawn (&rest sheeple)
   "Creates a new standard-sheep object with SHEEPLE as its parents."

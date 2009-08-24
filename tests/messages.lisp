@@ -13,7 +13,7 @@
 (def-suite message-definition :in messages)
 (in-suite message-definition)
 
-(test message-class
+(postboot-test message-object
   (let ((test-message (%make-message :name 'name
                                      :lambda-list 'lambda-list
                                      :replies 'replies

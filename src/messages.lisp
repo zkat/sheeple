@@ -9,24 +9,20 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
+(define-metasheep-vars =standard-message=)
 (defparameter the-std-message-form '(defproto =standard-message= ()
-                                     ((message-name nil)
-                                      (message-lambda-list nil)
-                                      (message-replies nil)
-                                      (message-memo-vector (make-array 40))
-                                      (message-arg-info (make-arg-info))
-                                      (message-documentation ""))))
-(defvar =standard-message= (gensym "=STANDARD-MESSAGE="))
+                                     ((name nil :accessor nil)
+                                      (lambda-list nil :accessor nil)
+                                      (replies nil :accessor nil)
+                                      (memo-vector (make-array 40) :accessor nil)
+                                      (arg-info (make-arg-info) :accessor nil)
+                                      (documentation "" :accessor nil))))
 
 (defun %make-message (&key name lambda-list replies (documentation ""))
-  (defsheep (=standard-message=) ((message-name name) (message-lambda-list lambda-list)
-                                  (message-replies replies) (message-documentation documentation)
-                                  (message-memo-vector (make-array 40))
-                                  (message-arg-info (make-arg-info)))))
-
-(defun messagep (obj)
-  ;; todo - this is, in fact, not used at all in the implementation.
-  )
+  (defsheep (=standard-message=) ((name name) (lambda-list lambda-list)
+                                  (replies replies) (documentation documentation)
+                                  (memo-vector (make-array 40))
+                                  (arg-info (make-arg-info)))))
 
 (defun clear-memo-table (message)
   (setf (message-memo-vector message) (make-array 40)))
@@ -83,19 +79,19 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 ;; The defmessage macro basically expands to a call to this function (after processing
 ;; its args, checking lamda-list, etc.)
 (defun ensure-message (name
-                        &rest all-keys
-                        &key lambda-list
-                        &allow-other-keys)
-  (let ((existing (find-message name nil)))
-    (let ((message (or existing
-                        (apply #'generate-message
-                               :name name
-                               :lambda-list lambda-list
-                               all-keys))))
-      (setf (find-message name) message)
-      (prog1 message
-        (when existing
-          (set-arg-info message :lambda-list lambda-list))))))
+                       &rest all-keys
+                       &key lambda-list
+                       &allow-other-keys)
+  (let* ((existing (find-message name nil))
+         (message (or existing
+                      (apply #'generate-message
+                             :name name
+                             :lambda-list lambda-list
+                             all-keys))))
+    (setf (find-message name) message)
+    (prog1 message
+      (when existing
+        (set-arg-info message :lambda-list lambda-list)))))
 
 ;; This is the actual message definition macro.
 ;; It first verifies that the lambda-list provided is a valid message ll,
@@ -129,9 +125,11 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
       (declare (ignore aux)) ; since we require AUXP=NIL
       (declare (ignore more-context more-count)) ; safely ignored unless MOREP
       ;; no defaults allowed for &OPTIONAL arguments
-      (dolist (i optional)
-        (ensure i (or (symbolp i)
-                      (and (consp i) (symbolp (car i)) (null (cdr i))))))
+      (mapc (fun (ensure _ (or (symbolp _)
+                               (and (consp _)
+                                    (symbolp (car _)) 
+                                    (null (cdr _))))))
+            optional)
       ;; no defaults allowed for &KEY arguments
       (when keyp
         (dolist (i keys)
@@ -157,22 +155,19 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 ;;;   Present is also the function that confirms validity of reply lambda-lists,
 ;;;   and the code that updates the valid arg info for a message whenever a reply
 ;;;   is added. The add-reply function, though, is in reply-generation.lisp
-(defstruct (arg-info
-             (:conc-name nil)
-             (:constructor make-arg-info ())
-             (:copier nil))
+(defstruct (arg-info (:conc-name nil)
+                     (:constructor make-arg-info ())
+                     (:copier nil))
   (arg-info-lambda-list :no-lambda-list)
   arg-info-precedence
   arg-info-metatypes
   arg-info-number-optional
   arg-info-key/rest-p
-  arg-info-keys   ;nil        no &KEY or &REST allowed
+  arg-info-keys                         ;nil        no &KEY or &REST allowed
                                         ;(k1 k2 ..) Each reply must accept these &KEY arguments.
                                         ;T          must have &KEY or &REST
-
-  msg-info-simple-accessor-type ; nil, reader, writer, boundp
-  (msg-precompute-dfun-and-emf-p nil) ; set by set-arg-info
-
+  msg-info-simple-accessor-type         ; nil, reader, writer, boundp
+  (msg-precompute-dfun-and-emf-p nil)   ; set by set-arg-info
   msg-info-static-c-a-m-emf
   (msg-info-c-a-m-emf-std-p t)
   msg-info-fast-mf-p)

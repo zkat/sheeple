@@ -11,7 +11,8 @@
 
 ;;; Setting up the :SHEEPLE package to include :5AM stuff
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (import '(5am:def-suite 5am:run! 5am:is 5am:in-suite 5am:signals 5am:def-fixture))
+  (import '(5am:def-suite 5am:run! 5am:is 5am:in-suite 5am:signals 5am:def-fixture
+            5am:for-all 5am:gen-integer 5am:gen-list 5am:gen-tree))
   (export 'run-all-tests))
 
 (defmacro test (name &body body)

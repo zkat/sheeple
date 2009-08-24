@@ -25,6 +25,23 @@
   (is (equal '(1) (with-flag-stack (flag 1))))
   (is (equal '(1 2 3) (with-flag-stack (flag 1) (flag 2) (flag 3)))))
 
+(postboot-test primary
+  (defmessage tester (x y))
+  (with-sheep-hierarchy ((a) (b a))
+    (is (equal '(:a-)
+               (with-flag-stack
+                 (defreply tester ((x a) y)
+                   (flag :a-))
+                 (tester a nil))))
+    (is (equal '(:b- :a-)
+               (with-flag-stack
+                 (defreply tester ((x a) y)
+                   (flag :a-))
+                 (defreply tester ((x b) y)
+                   (flag :b-)
+                   (call-next-reply))
+                 (tester b nil))))))
+
 (def-suite message-definition :in messages)
 (in-suite message-definition)
 

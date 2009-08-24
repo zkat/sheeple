@@ -133,15 +133,15 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
             optional)
       ;; no defaults allowed for &KEY arguments
       (when keyp
-        (dolist (i keys)
-          (ensure i (or (symbolp i)
-                        (and (consp i)
-                             (or (symbolp (car i))
-                                 (and (consp (car i))
-                                      (symbolp (caar i))
-                                      (symbolp (cadar i))
-                                      (null (cddar i))))
-                             (null (cdr i)))))))
+        (mapc (fun (ensure _ (or (symbolp _)
+                                 (and (consp _)
+                                      (or (symbolp (car _))
+                                          (and (consp (car _))
+                                               (symbolp (caar _))
+                                               (symbolp (cadar _))
+                                               (null (cddar _))))
+                                      (null (cdr _))))))
+              keys))
       ;; no &AUX allowed
       (when auxp
         (error "&AUX is not allowed in a message lambda list: ~S" lambda-list))

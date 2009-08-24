@@ -72,7 +72,7 @@ of its descendants."
 ;;; The basics of allocating sheep objects
 (defun std-allocate-sheep (metasheep)
   "Creates a standard sheep object. By default, all the metaproperties are NIL."
-  (let ((array (make-array 6 :initial-element nil)))
+  (let ((array (make-vector 6)))
     (setf (svref array 0) metasheep)
     array))
 
@@ -116,7 +116,7 @@ of its descendants."
 
   (defun %create-child-cache (sheep)
     "Sets SHEEP's child cache to a blank (simple-vector `*child-cache-initial-size*')"
-    (setf %children (make-array *child-cache-initial-size* :initial-element nil)))
+    (setf %children (make-vector *child-cache-initial-size*)))
 
   (defun %child-cache-full-p (sheep)
     "A child cache is full if all its items are live weak pointers to other sheep."
@@ -125,8 +125,7 @@ of its descendants."
   (defun %enlarge-child-cache (sheep)
     "Enlarges SHEEP's child cache by the value of `*child-cache-grow-ratio*'."
     (let* ((old-vector (%sheep-children sheep))
-           (new-vector (make-array (* *child-cache-grow-ratio* (length old-vector))
-                                   :initial-element nil)))
+           (new-vector (make-vector (* *child-cache-grow-ratio* (length old-vector)))))
       (setf (%sheep-children sheep) (replace new-vector old-vector))
       sheep))
 

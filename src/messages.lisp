@@ -14,18 +14,18 @@
                                      ((name nil :accessor nil)
                                       (lambda-list nil :accessor nil)
                                       (replies nil :accessor nil)
-                                      (memo-vector (make-array 40) :accessor nil)
+                                      (memo-vector (make-vector 40) :accessor nil)
                                       (arg-info (make-arg-info) :accessor nil)
                                       (documentation "" :accessor nil))))
 
 (defun %make-message (&key name lambda-list replies (documentation ""))
   (defsheep (=standard-message=) ((name name) (lambda-list lambda-list)
                                   (replies replies) (documentation documentation)
-                                  (memo-vector (make-array 40))
+                                  (memo-vector (make-vector 40))
                                   (arg-info (make-arg-info)))))
 
 (defun clear-memo-table (message)
-  (setf (message-memo-vector message) (make-array 40)))
+  (setf (message-memo-vector message) (make-vector 40)))
 
 ;;;
 ;;; Message definition
@@ -209,7 +209,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
               (if lambda-list-p
                   lambda-list
                   (create-msg-lambda-list lambda-list)))
-        (setf (arg-info-metatypes arg-info) (make-array nreq))
+        (setf (arg-info-metatypes arg-info) (make-vector nreq))
         (setf (arg-info-number-optional arg-info) nopt)
         (setf (arg-info-key/rest-p arg-info) (not (null (or keysp restp))))
         (setf (arg-info-keys arg-info)

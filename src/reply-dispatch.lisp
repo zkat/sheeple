@@ -238,8 +238,7 @@
 (defun contain-reply (reply)
   (make-reply-container
    :reply reply
-   :rank (make-array (length (reply-specialized-portion reply))
-                     :initial-element nil)))
+   :rank (make-vector (length (reply-specialized-portion reply)))))
 
 (defstruct (reply-container (:type vector))
   reply

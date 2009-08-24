@@ -35,12 +35,17 @@
   (is (equal '(a b c) (flatten '((a . b) . c)))))
 
 (test proper-list-of-length-p
+  (for-all ((min (gen-integer :min 0 :max 1023))
+            (max (gen-integer :min 0 :max 1023) (>= max min))
+            (list (gen-list :length (gen-integer :min 0 :max 1023))
+                  (<= min (length list) max)))
+    (is (not (null (proper-list-of-length-p list min max)))))
+  (for-all ((min (gen-integer :min 0 :max 1023))
+            (max (gen-integer :min 0 :max 1023) (>= max min))
+            (list (gen-list :length (gen-integer :min 0 :max 1023))
+                  (or (< (length list) min) (> (length list) max))))
+    (is (null (proper-list-of-length-p list min max))))
   (signals type-error (proper-list-of-length-p 5 0))
-  (is (not (null (proper-list-of-length-p () 0))))
-  (is (null (proper-list-of-length-p '() 1)))
-  (is (null (proper-list-of-length-p '(1) 0)))
-  (is (not (null (proper-list-of-length-p '(1 2 3) 0 4))))
-  (is (null (proper-list-of-length-p '(1 2 3) 1 2)))
   (is (null (proper-list-of-length-p #1='(:P . #1#) 0 2))))
 
 (test fun

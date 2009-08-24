@@ -586,6 +586,8 @@
     (is (parentp o3 sheep))
     (is (parentp o4 sheep))))
 
+(postboot-test clone)
+
 (postboot-test sheep-nickname
   (let ((sheep (spawn)))
     (setf (sheep-nickname sheep) 'test)
@@ -597,11 +599,6 @@
     (setf (sheep-documentation sheep) 'test)
     (is (eq 'test (sheep-documentation sheep)))
     (is (eq 'test (sheep-documentation (spawn sheep))))))
-
-(test copy-sheep
-  ;; TODO - I don't even know if I want this. -- Sykopomp
-  ;; Why not? -- Adlai
-  )
 
 ;;;
 ;;; DEFSHEEP

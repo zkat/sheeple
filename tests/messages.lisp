@@ -10,6 +10,27 @@
 (in-package :sheeple)
 
 (def-suite messages :in sheeple)
+
+(def-suite reply-combination :in messages)
+(in-suite reply-combination)
+
+(5am:def-fixture reply-stack ()
+  (macrolet ((with-reply-stack (target-stack &body body)
+               (let ((stack (gensym)))
+                 `(let (,stack)
+                    (macrolet ((flag (tag)
+                                 `(push ',tag ,',stack)))
+                      ,@body
+                      (is (equal ',target-stack ,stack)))))))
+    (&body)))
+
+(test (reply-stack :fixture reply-stack)
+  (with-reply-stack ())
+  (with-reply-stack (1)
+    (flag 1))
+  (with-reply-stack (1 2 3)
+    (flag 3) (flag 2) (flag 1)))
+
 (def-suite message-definition :in messages)
 (in-suite message-definition)
 

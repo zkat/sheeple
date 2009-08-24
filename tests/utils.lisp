@@ -24,9 +24,12 @@
                 (make-vector size value)))))
 
 (test flatten
-  (is (null (flatten ())))
-  (is (null (flatten '(() (()) ((()))))))
-  (is (equal '(a b c) (flatten '(a b c))))
+  (for-all ((tree (gen-tree :elements (constantly nil))))
+    (is (null (flatten tree))))
+  (for-all ((list (gen-list)))
+    (is (equal list (flatten list))))
+  (for-all ((tree (gen-tree)))
+    (is (every #'atom (flatten tree))))
   (is (equal '(a b c) (flatten '((a b c)))))
   (is (equal '(a b c) (flatten '((a) (b) (c)))))
   (is (equal '(a b c) (flatten '((a . b) . c)))))

@@ -9,8 +9,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
+(defun cons-std-sheep () (std-allocate-sheep =standard-metasheep=))
+
 (def-fixture allocate-std-sheep ()
-  (let ((sheep (allocate-std-sheep)))
+  (let ((sheep (cons-std-sheep)))
     (&body)))
 
 (def-fixture allocate-sheep (metasheep)
@@ -52,9 +54,8 @@
 ;;; and verify the rest. This would be painful without CL-PPCRE.
 (test sheep-printing
   (with-output-to-string (*standard-output*)
-    (5am:finishes (print (allocate-std-sheep)))
-    (5am:finishes (print (add-parent (allocate-std-sheep)
-                                     (allocate-std-sheep))))))
+    (5am:finishes (print (cons-std-sheep)))
+    (5am:finishes (print (add-parent (cons-std-sheep) (cons-std-sheep))))))
 
 ;;;
 ;;; Allocation
@@ -118,7 +119,7 @@
   (is (sheepp sheep)))
 
 (test equality-basic
-  (let ((sheep1 (allocate-std-sheep)))
+  (let ((sheep1 (cons-std-sheep)))
     (is (eq sheep1 sheep1))
     (is (eql sheep1 sheep1))
     ;; These two are run so I know the heap isn't blowing up.
@@ -242,9 +243,9 @@
 ;;; <<<<<<< END OUTDATED CODE BLOCK >>>>>>>
 
 (test collect-ancestors
-  (let ((sheep1 (allocate-std-sheep))
-        (sheep2 (allocate-std-sheep))
-        (sheep3 (allocate-std-sheep)))
+  (let ((sheep1 (cons-std-sheep))
+        (sheep2 (cons-std-sheep))
+        (sheep3 (cons-std-sheep)))
     (setf (%sheep-parents sheep1) (list sheep2))
     (setf (%sheep-parents sheep2) (list sheep3))
     (is (find sheep2 (collect-ancestors sheep1)))
@@ -254,10 +255,10 @@
     (is (not (find sheep1 (collect-ancestors sheep2))))))
 
 (test local-precedence-ordering
-  (let* ((a (allocate-std-sheep))
-         (b (allocate-std-sheep))
-         (c (allocate-std-sheep))
-         (d (allocate-std-sheep)))
+  (let* ((a (cons-std-sheep))
+         (b (cons-std-sheep))
+         (c (cons-std-sheep))
+         (d (cons-std-sheep)))
     (setf (%sheep-parents a) (list =standard-sheep=))
     (setf (%sheep-parents b) (list =standard-sheep=))
     (setf (%sheep-parents c) (list =standard-sheep=))
@@ -266,12 +267,12 @@
                (local-precedence-ordering d)))))
 
 (test std-tie-breaker-rule
-  (let* ((a (allocate-std-sheep))
-         (b (allocate-std-sheep))
-         (c (allocate-std-sheep))
-         (e (allocate-std-sheep))
-         (f (allocate-std-sheep))
-         (g (allocate-std-sheep)))
+  (let* ((a (cons-std-sheep))
+         (b (cons-std-sheep))
+         (c (cons-std-sheep))
+         (e (cons-std-sheep))
+         (f (cons-std-sheep))
+         (g (cons-std-sheep)))
     (setf (%sheep-parents a) (list =standard-sheep=))
     (setf (%sheep-parents b) (list =standard-sheep=))
     (setf (%sheep-parents c) (list =standard-sheep=))
@@ -283,19 +284,19 @@
     (is (eq a (std-tie-breaker-rule (list a b c) (list g f e))))))
 
 (test compute-sheep-hierarchy-list
-  (let ((parent (allocate-std-sheep))
-        (child (allocate-std-sheep)))
+  (let ((parent (cons-std-sheep))
+        (child (cons-std-sheep)))
     (setf (%sheep-parents child) (list parent))
     (is (equal (list child parent)
                (compute-sheep-hierarchy-list child))))
-  (let ((a (allocate-std-sheep))
-        (b (allocate-std-sheep))
-        (c (allocate-std-sheep))
-        (d (allocate-std-sheep))
-        (e (allocate-std-sheep))
-        (f (allocate-std-sheep))
-        (g (allocate-std-sheep))
-        (h (allocate-std-sheep)))
+  (let ((a (cons-std-sheep))
+        (b (cons-std-sheep))
+        (c (cons-std-sheep))
+        (d (cons-std-sheep))
+        (e (cons-std-sheep))
+        (f (cons-std-sheep))
+        (g (cons-std-sheep))
+        (h (cons-std-sheep)))
     (setf (%sheep-parents c) (list a))
     (setf (%sheep-parents d) (list a))
     (setf (%sheep-parents e) (list b c))
@@ -309,7 +310,7 @@
 
 (test (%create-child-cache :fixture allocate-std-sheep)
   (%create-child-cache sheep)
-  (is (typep (%sheep-children sheep) `(simple-vector ,*CHILD-CACHE.INITIAL-SIZE*))))
+  (is (typep (%sheep-children sheep) `(simple-vector ,*child-cache-initial-size*))))
 
 (test (%child-cache-full-p :fixture allocate-std-sheep)
   (macrolet ((full (&body body)
@@ -329,12 +330,12 @@
   (%create-child-cache sheep)
   (%enlarge-child-cache sheep)
   (is (typep (%sheep-children sheep)
-             `(simple-vector ,(* *CHILD-CACHE.INITIAL-SIZE*
-                                 *CHILD-CACHE.GROW-RATIO*)))))
+             `(simple-vector ,(* *child-cache-initial-size*
+                                 *child-cache-grow-ratio*)))))
 
 (test %add-child
-  (let ((sheep1 (allocate-std-sheep))
-        (sheep2 (allocate-std-sheep)))
+  (let ((sheep1 (cons-std-sheep))
+        (sheep2 (cons-std-sheep)))
     (is (null (%sheep-children sheep1)))
     (is (null (%sheep-children sheep2)))
     (is (eql sheep1 (%add-child sheep2 sheep1)))
@@ -343,21 +344,21 @@
     (is (find sheep2 (%sheep-children sheep1) :key #'maybe-weak-pointer-value))))
 
 (test (overwriting-garbage-children :depends-on %add-child)
-  (loop :repeat 10 :for sheep := (allocate-std-sheep)
-     :do (loop :repeat *CHILD-CACHE.INITIAL-SIZE*
-            :do (%add-child (allocate-std-sheep) sheep)
+  (loop :repeat 10 :for sheep := (cons-std-sheep)
+     :do (loop :repeat *child-cache-initial-size*
+            :do (%add-child (cons-std-sheep) sheep)
             (loop :repeat 9999 :collect (list))
             :finally (gc :full t))
      (unless (every #'maybe-weak-pointer-value (%sheep-children sheep))
        (return
-         (if (= *CHILD-CACHE.INITIAL-SIZE*
-                (length (%sheep-children (%add-child (allocate-std-sheep) sheep))))
+         (if (= *child-cache-initial-size*
+                (length (%sheep-children (%add-child (cons-std-sheep) sheep))))
              (pass "#'%ADD-CHILD overrode a garbage-collected child")
              (fail "#'%ADD-CHILD didn't override garbage-collected children"))))
      :finally (skip "Unable to perform test -- Insufficient garbage collection")))
 
 (test (%remove-child :fixture allocate-std-sheep)
-  (let ((child (allocate-std-sheep)))
+  (let ((child (cons-std-sheep)))
     (is (eq sheep (%add-child child sheep)))
     (let ((original-children (%sheep-children sheep)))
       (is (eq sheep (%remove-child child sheep)))
@@ -365,23 +366,21 @@
     (is (null (find child (%sheep-children sheep) :key #'maybe-weak-pointer-value)))))
 
 (test %map-children
-  (let ((parent (allocate-std-sheep))
-        (child1 (allocate-std-sheep))
-        (child2 (allocate-std-sheep))
-        (child3 (allocate-std-sheep)))
+  (let ((parent (cons-std-sheep))
+        (child1 (cons-std-sheep))
+        (child2 (cons-std-sheep))
+        (child3 (cons-std-sheep)))
     (%add-child child1 parent)
     (%add-child child2 parent)
     (%add-child child3 parent)
-    (is (null (%map-children (lambda (child)
-                               (setf (elt child 0) nil))
-                             parent)))
+    (%map-children (fun (setf (elt _ 0) nil)) parent)
     (is (null (elt child1 0)))
     (is (null (elt child2 0)))
     (is (null (elt child3 0)))))
 
 (test memoize-sheep-hierarchy-list
-  (let ((sheep1 (allocate-std-sheep))
-        (sheep2 (allocate-std-sheep)))
+  (let ((sheep1 (cons-std-sheep))
+        (sheep2 (cons-std-sheep)))
     (setf (%sheep-parents sheep1) (list sheep2))
     (is (null (%sheep-hierarchy-cache sheep1)))
     (is (null (%sheep-hierarchy-cache sheep2)))
@@ -389,8 +388,8 @@
     (is (equal (list sheep1 sheep2) (%sheep-hierarchy-cache sheep1)))))
 
 (test std-finalize-sheep-inheritance
-  (let ((sheep1 (allocate-std-sheep))
-        (sheep2 (allocate-std-sheep)))
+  (let ((sheep1 (cons-std-sheep))
+        (sheep2 (cons-std-sheep)))
     (is (equal (list sheep2) (setf (%sheep-parents sheep1) (list sheep2))))
     (is (eql sheep1 (std-finalize-sheep-inheritance sheep1)))
     (is (find sheep2 (sheep-parents sheep1)))
@@ -416,8 +415,8 @@
 (in-suite add/remove-parents)
 
 (test remove-parent
-  (let ((sheep1 (allocate-std-sheep))
-        (sheep2 (allocate-std-sheep)))
+  (let ((sheep1 (cons-std-sheep))
+        (sheep2 (cons-std-sheep)))
     (add-parent sheep2 sheep1)
     (is (eql sheep2 (car (sheep-parents sheep1))))
     (signals error (remove-parent sheep1 sheep1))
@@ -429,8 +428,8 @@
 )
 
 (test std-remove-parent
-  (let ((sheep1 (allocate-std-sheep))
-        (sheep2 (allocate-std-sheep)))
+  (let ((sheep1 (cons-std-sheep))
+        (sheep2 (cons-std-sheep)))
     (std-add-parent sheep2 sheep1)
     (is (eql sheep2 (car (%sheep-parents sheep1))))
     (signals error (std-remove-parent sheep1 sheep1))
@@ -440,8 +439,8 @@
     (signals error (std-remove-parent sheep1 sheep1))))
 
 (test std-add-parent
-  (let ((sheep1 (allocate-std-sheep))
-        (sheep2 (allocate-std-sheep)))
+  (let ((sheep1 (cons-std-sheep))
+        (sheep2 (cons-std-sheep)))
     (is (eql sheep1 (std-add-parent sheep2 sheep1)))
     (is (eql sheep2 (car (sheep-parents sheep1))))
     (signals error (std-add-parent sheep1 sheep1))
@@ -449,8 +448,8 @@
     (signals sheeple-hierarchy-error (std-add-parent sheep1 sheep2))))
 
 (test add-parent
-  (let ((sheep1 (allocate-std-sheep))
-        (sheep2 (allocate-std-sheep)))
+  (let ((sheep1 (cons-std-sheep))
+        (sheep2 (cons-std-sheep)))
     (is (eql sheep1 (add-parent sheep2 sheep1)))
     (is (eql sheep2 (car (sheep-parents sheep1))))
     (signals error (add-parent sheep1 sheep1))
@@ -460,16 +459,16 @@
   )
 
 (test add-parents
-  (let ((a (allocate-std-sheep))
-        (b (allocate-std-sheep))
-        (c (allocate-std-sheep)))
+  (let ((a (cons-std-sheep))
+        (b (cons-std-sheep))
+        (c (cons-std-sheep)))
     (is (eql c (add-parents (list a b) c)))
     (is (equal (list a b) (sheep-parents c)))))
 
 (test sheep-hierarchy-list
-  (let ((a (allocate-std-sheep))
-        (b (allocate-std-sheep))
-        (c (allocate-std-sheep)))
+  (let ((a (cons-std-sheep))
+        (b (cons-std-sheep))
+        (c (cons-std-sheep)))
     (is (eql nil (sheep-hierarchy-list c)))
     (is (eql a (add-parent b a)))
     (is (eql b (add-parent c b)))
@@ -479,9 +478,9 @@
 (in-suite inheritance-predicates)
 
 (test parentp
-  (let ((a (allocate-std-sheep))
-        (b (allocate-std-sheep))
-        (c (allocate-std-sheep)))
+  (let ((a (cons-std-sheep))
+        (b (cons-std-sheep))
+        (c (cons-std-sheep)))
     (add-parent a b)
     (add-parent b c)
     (is (parentp a b))
@@ -492,9 +491,9 @@
     (is (not (parentp c b)))))
 
 (test childp
-  (let ((a (allocate-std-sheep))
-        (b (allocate-std-sheep))
-        (c (allocate-std-sheep)))
+  (let ((a (cons-std-sheep))
+        (b (cons-std-sheep))
+        (c (cons-std-sheep)))
     (add-parent a b)
     (add-parent b c)
     (is (childp b a))
@@ -505,9 +504,9 @@
     (is (not (childp b c)))))
 
 (test ancestorp
-  (let ((a (allocate-std-sheep))
-        (b (allocate-std-sheep))
-        (c (allocate-std-sheep)))
+  (let ((a (cons-std-sheep))
+        (b (cons-std-sheep))
+        (c (cons-std-sheep)))
     (add-parent a b)
     (add-parent b c)
     (is (ancestorp a b))
@@ -518,9 +517,9 @@
     (is (not (ancestorp c b)))))
 
 (test descendantp
-  (let ((a (allocate-std-sheep))
-        (b (allocate-std-sheep))
-        (c (allocate-std-sheep)))
+  (let ((a (cons-std-sheep))
+        (b (cons-std-sheep))
+        (c (cons-std-sheep)))
     (add-parent a b)
     (add-parent b c)
     (is (descendantp b a))
@@ -588,6 +587,8 @@
     (is (parentp o3 sheep))
     (is (parentp o4 sheep))))
 
+(postboot-test clone)
+
 (postboot-test sheep-nickname
   (let ((sheep (spawn)))
     (setf (sheep-nickname sheep) 'test)
@@ -599,11 +600,6 @@
     (setf (sheep-documentation sheep) 'test)
     (is (eq 'test (sheep-documentation sheep)))
     (is (eq 'test (sheep-documentation (spawn sheep))))))
-
-(test copy-sheep
-  ;; TODO - I don't even know if I want this. -- Sykopomp
-  ;; Why not? -- Adlai
-  )
 
 ;;;
 ;;; DEFSHEEP

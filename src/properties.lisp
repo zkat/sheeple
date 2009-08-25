@@ -38,17 +38,15 @@
     (setf %properties (make-vector *property-vector-initial-size*)))
 
   (defun %property-vector-full-p (sheep)
-    "A property vector is full when all elements are non-NIL." (aand %properties
-          (find nil it :test #'eq)))
+    "A property vector is full when all elements are non-NIL." 
+    (aand %properties (find nil it :test #'eq)))
 
   (defun %enlarge-property-vector (sheep)
-    (let ((old-vector %properties))
-      (setf %properties
-            (make-vector (* *property-vector-grow-ratio* (length old-vector))))
-      (dotimes (i (length old-vector))
-        (setf (svref %properties i) (svref old-vector i))))
-    (values))
-
+    (let* ((old-vector %properties)
+           (new-vector (make-vector (* *property-vector-grow-ratio* (length old-vector)))))
+      (setf %properties (replace new-vector old-vector)))
+    sheep)
+  
   (defun %add-property-cons (sheep property-metaobject value)
     (let ((properties %properties))
       (if properties
@@ -97,7 +95,7 @@ would yield a value (i.e. not signal an unbound-property condition)."
         (sheep-hierarchy-list sheep)))
 
 ;; TODO - The way adding/removing properties is done needs to be thought out better.
-;;        Right now, doing (defspawn (something) ((var "value"))) would create that
+;;        Right now, doing (defsheep (something) ((var "value"))) would create that
 ;;        property locally, which could become problematic, specially wrt to how much
 ;;        space I was hoping to save by adding fresh local property metasheeple only
 ;;        when they're non-existent in the hierarchy-list, or when add-property is used.
@@ -111,7 +109,9 @@ would yield a value (i.e. not signal an unbound-property condition)."
   (when (has-direct-property-p sheep property-name)
     (cerror "Add property anyway." "~A already has a direct property named ~A."
             sheep property-name))
-  (let ((property-metaobject (defsheep (=standard-property=) ((name property-name)))))
+  (let ((property-metaobject (if (has-property-p sheep property-name)
+                                 (%direct-property-metaobject (property-owner sheep property-name))
+                                 (defsheep (=standard-property=) ((name property-name))))))
     (%add-property-cons sheep property-metaobject value)))
 
 ;; TODO - remove-property should look at the property metaobject and remove any replies for
@@ -156,6 +156,7 @@ a condition of type UNBOUND-DIRECT-PROPERTY condition is signalled."
   "Sets NEW-VALUE as the value of a direct-property belonging to SHEEP, named
 PROPERTY-NAME. If the property does not already exist anywhere in the hierarchy list, an error
 is signaled."
+  ;; TODO - the changes to add-property may have changed the way this should work.
   (cond ((has-direct-property-p sheep property-name)
          (setf (%direct-property-value sheep property-name) new-value))
         ((has-property-p sheep property-name)

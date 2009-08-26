@@ -250,12 +250,14 @@ return when any list is NIL to avoid traversing the entire parent list."
   (%map-children (fun (memoize-sheep-hierarchy-list _)) sheep))
 
 (defun std-finalize-sheep-inheritance (sheep)
-  "we memoize the hierarchy list here."
+  "Memoizes SHEEP's hierarchy list."
   (mapc (fun (%add-child sheep _)) (sheep-parents sheep))
   (memoize-sheep-hierarchy-list sheep)
   sheep)
 
 (defun finalize-sheep-inheritance (sheep)
+  "Memoizes SHEEP's hierarchy list, running a MOP hook along the way.
+See `finalize-sheep-inheritance-using-metasheep'."
   (typecase sheep
     (std-sheep (std-finalize-sheep-inheritance sheep))
     (otherwise (finalize-sheep-inheritance-using-metasheep
@@ -263,35 +265,32 @@ return when any list is NIL to avoid traversing the entire parent list."
 
 ;;; Add/remove parents
 (defun remove-parent (parent sheep)
-  "Remove PARENT as a parent of SHEEP."
-  (if (and (std-sheep-p parent)
-           (std-sheep-p sheep))
+  "Removes PARENT from SHEEP, running a MOP hook along the way.
+See `remove-parent-using-metasheeple'."
+  (if (and (std-sheep-p parent) (std-sheep-p sheep))
       (std-remove-parent parent sheep)
-      (remove-parent-using-metasheeple (sheep-metasheep parent)
-                                       (sheep-metasheep sheep)
+      (remove-parent-using-metasheeple (sheep-metasheep parent) (sheep-metasheep sheep)
                                        parent sheep)))
 
 (defun std-remove-parent (parent child)
-  "Removing PARENT to SHEEP's parent list is a matter of deleting it from the parent list."
+  "Removes PARENT from SHEEP."
   (if (member parent (sheep-parents child))
-      ;; TODO - this could check to make sure that the hierarchy list is still valid.
       (prog1 child
         (deletef (%sheep-parents child) parent)
         (%remove-child child parent)
         (finalize-sheep-inheritance child))
       (error "~A is not a parent of ~A" parent child)))
 
-(defun add-parent (new-parent sheep)
-  "Adds NEW-PARENT as a parent to SHEEP."
-  (if (and (std-sheep-p new-parent)
-           (std-sheep-p sheep))
-      (std-add-parent new-parent sheep)
-      (add-parent-using-metasheeple (sheep-metasheep new-parent)
-                                    (sheep-metasheep sheep)
-                                    new-parent sheep)))
+(defun add-parent (new-parent child)
+  "Adds NEW-PARENT as a parent to CHILD, running a MOP hook along the way.
+See `add-parent-using-metasheeple'."
+  (if (and (std-sheep-p new-parent) (std-sheep-p child))
+      (std-add-parent new-parent child)
+      (add-parent-using-metasheeple (sheep-metasheep new-parent) (sheep-metasheep child)
+                                    new-parent child)))
 
 (defun std-add-parent (new-parent child)
-  "Some basic checking here, and then the parent is actually added to the sheep's list."
+  "Adds NEW-PARENT as a parent to CHILD."
   (when (eq new-parent child) (error "Sheeple cannot be parents of themselves."))
   (when (member new-parent (sheep-parents child) :test 'eq)
     (error "~A is already a parent of ~A." new-parent child))

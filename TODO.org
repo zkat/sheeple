@@ -165,6 +165,7 @@
      metasheep nickname.
 **** TODO #'print-sheep with highest priority
      A method, user-extensible and awesome.
+*** TODO #'std-remove-parent should make sure that the hierarchy list is still valid.
 *** TODO Once bootstrapped, update WITH-SHEEP-HIERARCHY to use SPAWN
 *** TODO Write VALIDATE-HIERARCHY-LIST
 * DONE 2.2

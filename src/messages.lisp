@@ -60,7 +60,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 (defun finalize-message (message)
   (let ((name (message-name message)))
     (when (and (fboundp name)
-	       (not (find-message name nil)))
+               (not (find-message name nil)))
       (cerror "Replace definition." 'clobbering-function-definition :format-args (list name)))
     (setf (fdefinition name) (lambda (&rest args) (apply-message message args)))))
 
@@ -68,7 +68,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 (defun generate-message (metasheep &key name
                           lambda-list
                           (documentation ""))
-  (let ((message (%make-message 
+  (let ((message (%make-message
                   metasheep
                   :name name
                   :lambda-list lambda-list
@@ -128,7 +128,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
       ;; no defaults allowed for &OPTIONAL arguments
       (mapc (fun (ensure _ (or (symbolp _)
                                (and (consp _)
-                                    (symbolp (car _)) 
+                                    (symbolp (car _))
                                     (null (cdr _))))))
             optional)
       ;; no defaults allowed for &KEY arguments

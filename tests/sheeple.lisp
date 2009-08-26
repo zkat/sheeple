@@ -11,7 +11,7 @@
 
 (defun cons-std-sheep () (std-allocate-sheep =standard-metasheep=))
 
-(def-fixture allocate-std-sheep ()
+(def-fixture with-std-sheep ()
   (let ((sheep (cons-std-sheep)))
     (&body)))
 
@@ -72,17 +72,14 @@
 (def-suite creation :in sheep-objects)
 (def-suite allocation :in creation)
 
-(def-suite allocate-std-sheep :in allocation)
-(in-suite allocate-std-sheep)
+(def-suite std-allocate-sheep :in allocation)
+(in-suite std-allocate-sheep)
 
-(test (std-sheep-basic-structure
-       :fixture allocate-std-sheep)
+(test (std-sheep-basic-structure :fixture with-std-sheep)
   (is (vectorp sheep))
   (is (= 6 (length sheep))))
 
-(test (std-sheep-initial-values
-       :depends-on std-sheep-basic-structure
-       :fixture allocate-std-sheep)
+(test (std-sheep-initial-values :fixture with-std-sheep :depends-on std-sheep-basic-structure)
   (is (eql =standard-metasheep= (svref sheep 0)))
   (is (null (svref sheep 1)))
   (is (null (svref sheep 2)))
@@ -129,40 +126,40 @@
 (def-suite low-level-accessors :in sheep-objects)
 (in-suite low-level-accessors)
 
-(test (%sheep-metasheep :fixture allocate-std-sheep)
+(test (%sheep-metasheep :fixture with-std-sheep)
   (is (eql =standard-metasheep= (%sheep-metasheep sheep)))
   (is (null (setf (%sheep-metasheep sheep) nil)))
   (is (null (%sheep-metasheep sheep))))
 
-(test (%sheep-parents :fixture allocate-std-sheep)
+(test (%sheep-parents :fixture with-std-sheep)
   (is (null (%sheep-parents sheep)))
   (is (equal '(foo) (setf (%sheep-parents sheep) '(foo))))
   (is (equal '(foo) (%sheep-parents sheep)))
   (is (equal '(bar foo) (push 'bar (%sheep-parents sheep))))
   (is (equal '(bar foo) (%sheep-parents sheep))))
 
-(test (%sheep-direct-properties :fixture allocate-std-sheep)
+(test (%sheep-direct-properties :fixture with-std-sheep)
   (is (null (%sheep-direct-properties sheep)))
   (is (equal '(foo) (setf (%sheep-direct-properties sheep) '(foo))))
   (is (equal '(foo) (%sheep-direct-properties sheep)))
   (is (equal '(bar foo) (push 'bar (%sheep-direct-properties sheep))))
   (is (equal '(bar foo) (%sheep-direct-properties sheep))))
 
-(test (%sheep-roles :fixture allocate-std-sheep)
+(test (%sheep-roles :fixture with-std-sheep)
   (is (null (%sheep-roles sheep)))
   (is (equal '(foo) (setf (%sheep-roles sheep) '(foo))))
   (is (equal '(foo) (%sheep-roles sheep)))
   (is (equal '(bar foo) (push 'bar (%sheep-roles sheep))))
   (is (equal '(bar foo) (%sheep-roles sheep))))
 
-(test (%sheep-hierarchy-cache :fixture allocate-std-sheep)
+(test (%sheep-hierarchy-cache :fixture with-std-sheep)
   (is (null (%sheep-hierarchy-cache sheep)))
   (is (equal '(foo) (setf (%sheep-hierarchy-cache sheep) '(foo))))
   (is (equal '(foo) (%sheep-hierarchy-cache sheep)))
   (is (equal '(bar foo) (push 'bar (%sheep-hierarchy-cache sheep))))
   (is (equal '(bar foo) (%sheep-hierarchy-cache sheep))))
 
-(test (%sheep-children :fixture allocate-std-sheep)
+(test (%sheep-children :fixture with-std-sheep)
   (is (null (%sheep-children sheep)))
   (is (equal '(foo) (setf (%sheep-children sheep) '(foo))))
   (is (equal '(foo) (%sheep-children sheep)))
@@ -172,11 +169,11 @@
 (def-suite interface-accessors :in sheep-objects)
 (in-suite interface-accessors)
 
-(test (sheep-metasheep :fixture allocate-std-sheep)
+(test (sheep-metasheep :fixture with-std-sheep)
   (is (eql =standard-metasheep= (sheep-metasheep sheep)))
   (is (null (fboundp '(setf sheep-metasheep)))))
 
-(test (sheep-parents :fixture allocate-std-sheep)
+(test (sheep-parents :fixture with-std-sheep)
   (is (null (sheep-parents sheep)))
   (setf (%sheep-parents sheep) '(foo))
   (is (equal '(foo) (sheep-parents sheep)))
@@ -308,11 +305,11 @@
 (def-suite inheritance-caching :in inheritance)
 (in-suite inheritance-caching)
 
-(test (%create-child-cache :fixture allocate-std-sheep)
+(test (%create-child-cache :fixture with-std-sheep)
   (%create-child-cache sheep)
   (is (typep (%sheep-children sheep) `(simple-vector ,*child-cache-initial-size*))))
 
-(test (%child-cache-full-p :fixture allocate-std-sheep)
+(test (%child-cache-full-p :fixture with-std-sheep)
   (macrolet ((full (&body body)
                `(progn ,@body (is (%child-cache-full-p sheep))))
              (not-full (&body body)
@@ -326,7 +323,7 @@
                 (apply #'vector
                        (make-list 3 :initial-element (make-weak-pointer T)))))))
 
-(test (%enlarge-child-cache :fixture allocate-std-sheep)
+(test (%enlarge-child-cache :fixture with-std-sheep)
   (%create-child-cache sheep)
   (%enlarge-child-cache sheep)
   (is (typep (%sheep-children sheep)
@@ -357,7 +354,7 @@
              (fail "#'%ADD-CHILD didn't override garbage-collected children"))))
      :finally (skip "Unable to perform test -- Insufficient garbage collection")))
 
-(test (%remove-child :fixture allocate-std-sheep)
+(test (%remove-child :fixture with-std-sheep)
   (let ((child (cons-std-sheep)))
     (is (eq sheep (%add-child child sheep)))
     (let ((original-children (%sheep-children sheep)))

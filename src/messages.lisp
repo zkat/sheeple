@@ -10,7 +10,7 @@
 (in-package :sheeple)
 
 #+sheeple3.1
-(define-metasheep-vars =standard-message=)
+(define-bound-variable =standard-message=)
 #+sheeple3.1
 (defparameter the-std-message-form '(defproto =standard-message= ()
                                      ((name nil :accessor nil)

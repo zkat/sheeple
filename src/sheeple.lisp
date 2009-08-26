@@ -10,9 +10,8 @@
 (in-package :sheeple)
 
 ;; We declare these base vars here so that bootstrapping won't complain.
-;; They're also initialized to (gensym) so that pre-bootstrap tests have
-;; something to check against that isn't all NIL.
-(define-metasheep-vars =standard-metasheep= =t= =standard-sheep=)
+(define-bound-variables =t= =standard-sheep= =standard-metasheep=)
+
 (defvar *bootstrappedp* nil)
 
 ;;;

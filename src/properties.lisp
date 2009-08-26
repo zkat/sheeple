@@ -244,20 +244,15 @@ returned."
   "Returns a list of property objects describing all properties available to SHEEP, including
 inherited ones."
   #+sheeple3.1
-  (let* ((direct-properties (sheep-direct-properties sheep))
-         (avail-property-names (mapcar (fun (property-name _))
-                                       (remove-duplicates
-                                        (flatten
-                                         (append direct-properties
-                                                 (mapcar 'available-properties
-                                                         (sheep-parents sheep))))
-                                        :key 'property-name))))
-    (mapcar (fun (direct-property-metaobject (property-owner sheep _ nil) _))
-            avail-property-names))
+  (mapcar (fun (direct-property-metaobject (property-owner sheep _ nil) _))
+          (mapcar (fun (property-name _))
+                  (delete-duplicates (nconc (sheep-direct-properties sheep)
+                                            (mapcan #'available-properties
+                                                    (sheep-parents sheep)))
+                                     :key #'property-name)))
   #-sheeple3.1
-  (remove-duplicates (flatten 
-                      (append (sheep-direct-properties sheep)
-                              (mapcar 'available-properties (sheep-parents sheep))))))
+  (delete-duplicates (nconc (sheep-direct-properties sheep)
+                            (mapcan 'available-properties (sheep-parents sheep)))))
 
 (defun property-summary (sheep &optional (stream *standard-output*))
   "Provides a pretty-printed representation of SHEEP's available properties."

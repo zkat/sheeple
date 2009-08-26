@@ -18,8 +18,9 @@
 ;;        to be able to just get rid of the alternate implementation as
 ;;        soon as I go back to using metaobjects instead of just symbol names.
 #+sheeple3.1
-(defparameter the-std-property-form '(defproto =standard-property= ()
-                                      ((name 'std-property))))
+(defparameter the-std-property-form
+ '(defproto =standard-property= ()
+    ((name 'std-property))))
 #+sheeple3.1
 (defun property-name (property)
   (property-value property 'name))
@@ -28,7 +29,7 @@
   (setf (property-value property 'name) new-value))
 
 #+sheeple3.1
-(defvar =standard-property= (gensym "=STANDARD-PROPERTY="))
+(define-bound-variable =standard-property=)
 
 ;;;
 ;;; Internals

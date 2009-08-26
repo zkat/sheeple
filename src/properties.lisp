@@ -109,10 +109,12 @@ would yield a value (i.e. not signal an unbound-property condition)."
   (when (has-direct-property-p sheep property-name)
     (cerror "Add property anyway." "~A already has a direct property named ~A."
             sheep property-name))
-  (let ((property-metaobject (if (has-property-p sheep property-name)
-                                 (%direct-property-metaobject (property-owner sheep property-name))
-                                 (defsheep (=standard-property=) ((name property-name))))))
-    (%add-property-cons sheep property-metaobject value)))
+  (%add-property-cons sheep
+                      (if (has-property-p sheep property-name)
+                          (%direct-property-metaobject (property-owner sheep property-name)
+                                                       property-name)
+                          (defsheep (=standard-property=) ((name property-name))))
+                      value))
 
 ;; TODO - remove-property should look at the property metaobject and remove any replies for
 ;;        accessors that it points to. This will have to wait until reply-undefinition works

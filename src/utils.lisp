@@ -147,6 +147,11 @@ the result of calling DELETE with ITEM, place, and the REMOVE-KEYWORDS.")
              (funcall function v))
            table))
 
-(defmacro define-metasheep-vars (&body variables)
-  "This handy macro saves us like 40 fucking lines of the same old shit :D"
-  `(progn ,@(mapcar (fun `(defvar ,_ (gensym (symbol-name ',_)))) variables)))
+(defmacro define-bound-variable (variable &optional docstring)
+  "Define a global dynamic variable. If the variable is already bound, the binding
+will not be affected; otherwise, it will be bound to a recognizeable and unique value."
+  `(defvar ,variable (make-symbol ,(symbol-name variable))
+     ,@(when (stringp docstring) (list docstring))))
+
+(defmacro define-bound-variables (&rest variables)
+  `(progn ,@(mapcar (fun `(define-bound-variable ,@(ensure-list _))) variables)))

@@ -108,7 +108,8 @@ would yield a value (i.e. not signal an unbound-property condition)."
   (assert (symbolp property-name))
   (when (has-direct-property-p sheep property-name)
     (cerror "Add property anyway." "~A already has a direct property named ~A."
-            sheep property-name))
+            sheep property-name)
+    (remove-property sheep property-name))
   (%add-property-cons sheep
                       (if (has-property-p sheep property-name)
                           (%direct-property-metaobject (property-owner sheep property-name)

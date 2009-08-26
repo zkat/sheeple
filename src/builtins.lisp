@@ -8,11 +8,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (define-metasheep-vars =boxed-object= =symbol= =sequence= =array= =number= =character=
-                         =function= =hash-table= =package= =pathname= =readtable= =stream=
-                         =list= =null= =cons= =vector= =bit-vector= =string= =complex=
-                         =integer= =float=))
+(define-bound-variables
+    =boxed-object= =symbol= =sequence= =array= =number= =character= =function=
+    =hash-table= =package= =pathname= =readtable= =stream= =list= =null= =cons=
+    =vector= =bit-vector= =string= =complex= =integer= =float=)
 
 (defun box-type-of (x)
   "Maps the type of X to a built-in sheep."

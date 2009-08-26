@@ -83,4 +83,3 @@
 (test canonize-message-options)
 (test check-msg-lambda-list)
 (test analyze-lambda-list)
-

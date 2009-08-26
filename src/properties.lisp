@@ -38,7 +38,7 @@
     (setf %properties (make-vector *property-vector-initial-size*)))
 
   (defun %property-vector-full-p (sheep)
-    "A property vector is full when all elements are non-NIL." 
+    "A property vector is full when all elements are non-NIL."
     (aand %properties (find nil it :test #'eq)))
 
   (defun %enlarge-property-vector (sheep)
@@ -46,7 +46,7 @@
            (new-vector (make-vector (* *property-vector-grow-ratio* (length old-vector)))))
       (setf %properties (replace new-vector old-vector)))
     sheep)
-  
+
   (defun %add-property-cons (sheep property-metaobject value)
     (let ((properties %properties))
       (if properties

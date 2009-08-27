@@ -67,7 +67,7 @@ of its descendants."
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Young Sheep")))
 
-(set-pprint-dispatch 'sheep #'print-young-sheep 0.1)
+(set-pprint-dispatch 'sheep 'print-young-sheep 0.1)
 
 ;;; The basics of allocating sheep objects
 (defun std-allocate-sheep (metasheep)
@@ -120,7 +120,7 @@ of its descendants."
 
   (defun %child-cache-full-p (sheep)
     "A child cache is full if all its items are live weak pointers to other sheep."
-    (aand %children (every #'maybe-weak-pointer-value it)))
+    (aand %children (every 'maybe-weak-pointer-value it)))
 
   (defun %enlarge-child-cache (sheep)
     "Enlarges SHEEP's child cache by the value of `*child-cache-grow-ratio*'."
@@ -138,7 +138,7 @@ of its descendants."
             (setf children %children))
           (progn (%create-child-cache sheep)
                  (setf children %children)))
-      (unless (find child children :key #'maybe-weak-pointer-value)
+      (unless (find child children :key 'maybe-weak-pointer-value)
         (dotimes (i (length children))
           (unless (maybe-weak-pointer-value (aref children i))
             (return (setf (aref children i) (make-weak-pointer child)))))))
@@ -146,7 +146,7 @@ of its descendants."
 
   (defun %remove-child (child sheep)
     "Takes CHILD out of SHEEP's child cache."
-    (awhen (position child %children :key #'maybe-weak-pointer-value)
+    (awhen (position child %children :key 'maybe-weak-pointer-value)
       (setf (svref %children it) nil))
     sheep)
 
@@ -191,13 +191,13 @@ on the TIE-BREAKER in the case of ambiguous constraints. On the assumption
 that they are freshly generated, this implementation is destructive with
 regards to the CONSTRAINTS. A future version will undo this change."
   (loop
-     for minimal-elements = (remove-if (fun (member _ constraints :key #'cadr)) elements)
+     for minimal-elements = (remove-if (fun (member _ constraints :key 'cadr)) elements)
      while minimal-elements
      for choice = (if (null (cdr minimal-elements))
                       (car minimal-elements)
                       (funcall tie-breaker minimal-elements result))
      collect choice into result
-     do (deletef constraints choice :test #'member)
+     do (deletef constraints choice :test 'member)
         (setf elements (remove choice elements))
      finally (if (null elements)
                  (return-from topological-sort result)
@@ -219,7 +219,7 @@ regards to the CONSTRAINTS. A future version will undo this change."
   "Calculates the local precedence ordering. Relies on the fact that mapcar will
 return when any list is NIL to avoid traversing the entire parent list."
   (let ((parents (sheep-parents sheep)))
-   (mapcar #'list (cons sheep parents) parents)))
+   (mapcar 'list (cons sheep parents) parents)))
 
 (defun std-tie-breaker-rule (minimal-elements hl-so-far)
   (mapc (fun (let ((common (intersection minimal-elements (sheep-parents _))))
@@ -234,10 +234,10 @@ return when any list is NIL to avoid traversing the entire parent list."
       (let ((sheeple-to-order (cons sheep (collect-ancestors sheep))))
         (topological-sort sheeple-to-order
                           (remove-duplicates
-                           ;; #'local-precedence-ordering conses up fresh structure,
+                           ;; LOCAL-PRECEDENCE-ORDERING conses up fresh structure,
                            ;; so we can be destructive here
-                           (mapcan #'local-precedence-ordering sheeple-to-order))
-                          #'std-tie-breaker-rule))
+                           (mapcan 'local-precedence-ordering sheeple-to-order))
+                          'std-tie-breaker-rule))
     (simple-error () (error 'sheeple-hierarchy-error :sheep sheep))))
 
 (defun compute-sheep-hierarchy-list (sheep)
@@ -294,7 +294,7 @@ return when any list is NIL to avoid traversing the entire parent list."
 (defun std-add-parent (new-parent child)
   "Some basic checking here, and then the parent is actually added to the sheep's list."
   (when (eq new-parent child) (error "Sheeple cannot be parents of themselves."))
-  (when (member new-parent (sheep-parents child) :test #'eq)
+  (when (member new-parent (sheep-parents child) :test 'eq)
     (error "~A is already a parent of ~A." new-parent child))
   (handler-case
       (progn
@@ -351,7 +351,7 @@ to the front of the list)"
                      &key (metasheep =standard-metasheep=) &allow-other-keys)
   "Creates a new sheep with SHEEPLE as its parents. METASHEEP is used as the metasheep when
 allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
-  (apply #'init-sheep
+  (apply 'init-sheep
          (add-parent* (or (ensure-list parent*) =standard-sheep=)
                       (maybe-std-allocate-sheep metasheep))
          all-keys))
@@ -420,7 +420,7 @@ will be used instead of SHEEP's metasheep, but SHEEP itself remains unchanged."
            ,@other-options)))
 
 (defun canonize-options (options)
-  (mapcan #'canonize-option options))
+  (mapcan 'canonize-option options))
 
 (defun canonize-option (option)
   (list `,(car option) (cadr option)))
@@ -447,5 +447,5 @@ will be used instead of SHEEP's metasheep, but SHEEP itself remains unchanged."
 
 (defun ensure-sheep (maybe-sheep parents &rest options)
   (if maybe-sheep
-      (apply #'reinit-sheep maybe-sheep :new-parents parents options)
-      (apply #'make-sheep parents options)))
+      (apply 'reinit-sheep maybe-sheep :new-parents parents options)
+      (apply 'make-sheep parents options)))

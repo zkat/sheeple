@@ -63,99 +63,16 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 (defun forget-all-messages ()
   (clrhash *message-table*) t)
 
+;;; Reply caching
+;; NOTE: Even though these two functions are defined here, their tests are in
+;;       tests/reply-dispatch.lisp, since it's the most relevant place for them to be.
+;;       In the case of implementation, they live here because this is where message
+;;       object stuff lives. This could be changed later, ofc. --sykopomp
 (defun clear-dispatch-cache (message)
   (setf (message-dispatch-cache message) (make-vector 40)))
 
 (defun clear-all-message-caches ()
   (maphash-values 'clear-memo-table *message-table*))
-
-;; Finalizing a message sets the function definition of the message to a
-;; lambda that calls the top-level dispatch function on the msg args.
-(defun finalize-message (message)
-  (let ((name (message-name message)))
-    (when (and (fboundp name)
-               (not (find-message name nil)))
-      (cerror "Replace definition." 'clobbering-function-definition :format-args (list name)))
-    (setf (fdefinition name) (lambda (&rest args) (apply-message message args)))))
-
-;; This handles actual setup of the message object (and finalization)
-(defun generate-message (&key name
-                         lambda-list
-                         (documentation ""))
-  (let ((message (%make-message
-                  :name name
-                  :lambda-list lambda-list
-                  :documentation documentation)))
-    (set-arg-info message :lambda-list lambda-list)
-    (finalize-message message)
-    message))
-
-;; The defmessage macro basically expands to a call to this function (after processing
-;; its args, checking lamda-list, etc.)
-(defun ensure-message (name
-                       &rest all-keys
-                       &key lambda-list
-                       &allow-other-keys)
-  (let* ((existing (find-message name nil))
-         (message (or existing
-                      (apply #'generate-message
-                             :name name
-                             :lambda-list lambda-list
-                             all-keys))))
-    (when existing (set-arg-info message :lambda-list lambda-list))
-    (setf (find-message name) message)))
-
-;; This is the actual message definition macro.
-;; It first verifies that the lambda-list provided is a valid message ll,
-;; then expands to a call to ensure-message
-(defmacro defmessage (name lambda-list &rest options)
-  `(progn
-     (check-msg-lambda-list ',lambda-list)
-     (eval-when (:compile-toplevel :load-toplevel :execute)
-       (ensure-message
-        ',name
-        :lambda-list ',lambda-list
-        ,@(canonize-message-options options)))))
-
-;; This pair just pretties up the options during macro expansion
-(defun canonize-message-option (option)
-  (list `',(car option) `',(cadr option)))
-(defun canonize-message-options (options)
-  (mapcan #'canonize-message-option options))
-
-;;; LL analysis
-(defun check-msg-lambda-list (lambda-list)
-  (flet ((ensure (arg ok)
-           (unless ok
-             (error 'message-lambda-list-error :arg arg :lambda-list lambda-list))))
-    (multiple-value-bind (required optional restp rest keyp keys allowp
-                                   auxp aux morep more-context more-count)
-        (parse-lambda-list lambda-list)
-      (declare (ignore required)) ; since they're no different in a msg ll
-      (declare (ignore restp rest)) ; since they're no different in a msg ll
-      (declare (ignore allowp)) ; since &ALLOW-OTHER-KEYS is fine either way
-      (declare (ignore aux)) ; since we require AUXP=NIL
-      (declare (ignore more-context more-count)) ; safely ignored unless MOREP
-      ;; no defaults allowed for &OPTIONAL arguments
-      (mapc (fun (ensure _ (or (symbolp _)
-                               (and (consp _)
-                                    (symbolp (car _))
-                                    (null (cdr _))))))
-            optional)
-      ;; no defaults allowed for &KEY arguments
-      (when keyp
-        (mapc (fun (ensure _ (or (symbolp _)
-                                 (and (consp _)
-                                      (or (symbolp (car _))
-                                          (and (consp (car _))
-                                               (symbolp (caar _))
-                                               (symbolp (cadar _))
-                                               (null (cddar _))))
-                                      (null (cdr _))))))
-              keys))
-      ;; no &AUX allowed
-      (when auxp
-        (error "&AUX is not allowed in a message lambda list: ~S" lambda-list)))))
 
 ;;;
 ;;; Arg info
@@ -309,3 +226,92 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
             (lose "the reply does not accept each of the &KEY arguments~2I~_~
                    ~S."
                   msg-keywords)))))))
+
+(defun check-msg-lambda-list (lambda-list)
+  (flet ((ensure (arg ok)
+           (unless ok
+             (error 'message-lambda-list-error :arg arg :lambda-list lambda-list))))
+    (multiple-value-bind (required optional restp rest keyp keys allowp
+                                   auxp aux morep more-context more-count)
+        (parse-lambda-list lambda-list)
+      (declare (ignore required)) ; since they're no different in a msg ll
+      (declare (ignore restp rest)) ; since they're no different in a msg ll
+      (declare (ignore allowp)) ; since &ALLOW-OTHER-KEYS is fine either way
+      (declare (ignore aux)) ; since we require AUXP=NIL
+      (declare (ignore more-context more-count)) ; safely ignored unless MOREP
+      ;; no defaults allowed for &OPTIONAL arguments
+      (mapc (fun (ensure _ (or (symbolp _)
+                               (and (consp _)
+                                    (symbolp (car _))
+                                    (null (cdr _))))))
+            optional)
+      ;; no defaults allowed for &KEY arguments
+      (when keyp
+        (mapc (fun (ensure _ (or (symbolp _)
+                                 (and (consp _)
+                                      (or (symbolp (car _))
+                                          (and (consp (car _))
+                                               (symbolp (caar _))
+                                               (symbolp (cadar _))
+                                               (null (cddar _))))
+                                      (null (cdr _))))))
+              keys))
+      ;; no &AUX allowed
+      (when auxp
+        (error "&AUX is not allowed in a message lambda list: ~S" lambda-list)))))
+
+;; Finalizing a message sets the function definition of the message to a
+;; lambda that calls the top-level dispatch function on the msg args.
+(defun finalize-message (message)
+  (let ((name (message-name message)))
+    (when (and (fboundp name)
+               (not (find-message name nil)))
+      (cerror "Replace definition." 'clobbering-function-definition :format-args (list name)))
+    (setf (fdefinition name) (lambda (&rest args) (apply-message message args)))))
+
+;; This handles actual setup of the message object (and finalization)
+(defun make-message (&key name
+                     lambda-list
+                     (documentation ""))
+  (let ((message (%make-message
+                  :name name
+                  :lambda-list lambda-list
+                  :documentation documentation)))
+    (set-arg-info message :lambda-list lambda-list)
+    (finalize-message message)
+    message))
+
+;; The defmessage macro basically expands to a call to this function (after processing
+;; its args, checking lamda-list, etc.)
+(defun ensure-message (name
+                       &rest all-keys
+                       &key lambda-list
+                       &allow-other-keys)
+  (let* ((existing (find-message name nil))
+         (message (or existing
+                      (apply 'make-message
+                             :name name
+                             :lambda-list lambda-list
+                             all-keys))))
+    (when existing (set-arg-info message :lambda-list lambda-list))
+    (setf (find-message name) message)))
+
+;; This is the actual message definition macro.
+;; It first verifies that the lambda-list provided is a valid message ll,
+;; then expands to a call to ensure-message
+;; This pair just pretties up the options during macro expansion
+(defun canonize-message-option (option)
+  (list `',(car option) `',(cadr option)))
+(defun canonize-message-options (options)
+  (mapcan #'canonize-message-option options))
+
+(defmacro defmessage (name lambda-list &rest options)
+  `(progn
+     (check-msg-lambda-list ',lambda-list)
+     (eval-when (:compile-toplevel :load-toplevel :execute)
+       (ensure-message
+        ',name
+        :lambda-list ',lambda-list
+        ,@(canonize-message-options options)))))
+
+

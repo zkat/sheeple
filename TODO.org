@@ -135,6 +135,10 @@
 ** DONE [#B] Fix Sheep Allocation
    We need std-allocate-sheep, along with a MOP hook so that, for
    example, you could allocate storage in a database in an :after reply.
+** TODO Instantiation
+   It could use some work. The defproto/defsheep/spawn triumverate needs a cleanup. Particularly,
+   it would be nice to merge spawn/defsheep into a simpler function/macro. Maybe it should just be
+   defsheep, in the end.
 ** TODO Properties
 *** DONE Reimplement properties
     Write a basic reimplementation of sheep properties.

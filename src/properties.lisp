@@ -178,8 +178,6 @@ returned."
   (or (find-if (fun (has-direct-property-p _ property-name)) (sheep-hierarchy-list sheep))
       (when errorp (error 'unbound-property :sheep sheep :property-name property-name))))
 
-;; TODO - I could make these sort-of work for 3.0
-
 ;; Not these two...
 ;; (defun property-metaobject-p (obj)
 ;;   (and (sheepp obj)

@@ -48,7 +48,7 @@
 
   (defun %property-vector-full-p (sheep)
     "SHEEP's property vector is full when all elements are non-NIL, assuming it has one."
-    (aand %properties (find nil it :test #'eq)))
+    (aand %properties (notany #'null it)))
 
   (defun %enlarge-property-vector (sheep)
     "This function takes care of enlarging a sheep's property vector -- usually called when

@@ -12,26 +12,34 @@
 ;;;
 ;;; Property spec object
 ;;;
-;; TODO - I'll add this again once I go back to the propmop.
-;; (defparameter the-std-property-form '(defproto =standard-property= ()
-;;                                       ((name 'std-property))))
-;; (defun property-name (property)
-;;   (property-value property 'name))
-;; (defun (setf property-name) (new-value property)
-;;   (setf (property-value property 'name) new-value))
 
-;; (defvar =standard-property= (gensym "=STANDARD-PROPERTY="))
+;; TODO - I'll add this stuff again once I go back to the propmop.
+;;        In the meantime, #+/-sheeple will pepper the file. It's nice
+;;        to be able to just get rid of the alternate implementation as
+;;        soon as I go back to using metaobjects instead of just symbol names.
+#+sheeple3.1
+(defparameter the-std-property-form '(defproto =standard-property= ()
+                                      ((name 'std-property))))
+#+sheeple3.1
+(defun property-name (property)
+  (property-value property 'name))
+#+sheeple3.1
+(defun (setf property-name) (new-value property)
+  (setf (property-value property 'name) new-value))
+
+#+sheeple3.1
+(defvar =standard-property= (gensym "=STANDARD-PROPERTY="))
 
 ;;;
 ;;; Internals
 ;;;
-
 (defvar *property-vector-initial-size* 5
   "The initial size for a sheep's property vector.")
 
 (defvar *property-vector-grow-ratio* 5
   "The ratio by which the property vector is expanded when full.")
 
+;; this macrolet is for quite a bit of convenience for the following functions..
 (symbol-macrolet ((%properties (%sheep-direct-properties sheep)))
 
   (defun %create-property-vector (sheep)
@@ -39,47 +47,76 @@
     (setf %properties (make-vector *property-vector-initial-size*)))
 
   (defun %property-vector-full-p (sheep)
-    "A property vector is full when all elements are non-NIL."
+    "SHEEP's property vector is full when all elements are non-NIL, assuming it has one."
     (aand %properties (find nil it :test #'eq)))
 
   (defun %enlarge-property-vector (sheep)
+    "This function takes care of enlarging a sheep's property vector -- usually called when
+the vector needs to make space for new property conses. The amount the vector is enlarged by
+depends on the value of *property-vector-grow-ratio*. The property vector is not guaranteed to
+be EQ when 'enlarged', but it's guaranteed to keep all the previous property conses."
+    ;; This implementation conses up a completely new simple-vector.
+    ;; Using extendable vectors forces us to use AREF (a time price), and 
+    ;; it also carries some extra space overhead. The case of many properties being added
+    ;; en-masse to a sheep object isn't expected to be very common, so this is probably
+    ;; a nice approach.
     (let* ((old-vector %properties)
            (new-vector (make-vector (* *property-vector-grow-ratio* (length old-vector)))))
       (setf %properties (replace new-vector old-vector)))
     sheep)
 
-  (defun %add-property-cons (sheep property-name value)
+  (defun %get-property-cons (sheep property)
+    (find property %properties :test #'eq 
+          :key #-sheeple3.1 #'car
+          #+sheeple3.1 (fun (property-name (car _)))))
+  
+  (defun %add-property-cons (sheep property value)
+    "This function puts PROPERTY and VALUE into a cons cell and adds the cell to
+SHEEP's property-vector if the property is unique. It should come as a warning that this
+function will basically do nothing if a property wiith the given name already exists."
+    ;; Since we start off all sheep objects with their property-vector slot set to NIL,
+    ;; we have to check for that case and cons up a fresh property-vector. If the vector
+    ;; turns out to be full, we also have to enlarge it.
     (let ((properties %properties))
       (if properties
+          ;; TODO - a property-vector may be full, but we might be trying to add
+          ;;        a property with a name that already exists.
+          ;;        In the worst case scenario, this function fails to do anything
+          ;;        with property-name and value, and we enlarge the property-vector
+          ;;        unnecessarily. -sykopomp
           (when (%property-vector-full-p sheep)
             (%enlarge-property-vector sheep)
             (setf properties %properties))
           (progn (%create-property-vector sheep)
                  (setf properties %properties)))
-      (unless (find property-name properties :test #'eq)
+      (unless (%get-property-cons sheep property)
         (dotimes (i (length properties))
           (unless (svref properties i)
-            (return (setf (svref properties i) (cons property-name value)))))))
+            (return (setf (svref properties i) (cons property value)))))))
     sheep)
 
-  (defun %get-property-cons (sheep property-name)
-    (find property-name %properties :test #'eq :key #'car))
-
-  (defun %remove-property-cons (sheep property-name)
-    (awhen (position property-name %properties
-                     :test #'eq :key #'car)
+  (defun %remove-property-cons (sheep property)
+    "Removes the actual property-cons representing PROPERTY."
+    (awhen (position property %properties
+                     :test #'eq 
+                     :key #-sheeple3.1 #'car
+                     #+sheeple3.1 (fun (property-name (car _))))
       (setf (svref %properties it) nil))
-    sheep))
+    sheep)
+
+  ) ; end symbol-macrolet
 
 (defun %direct-property-value (sheep property-name)
   (cdr (%get-property-cons sheep property-name)))
 (defun (setf %direct-property-value) (new-value sheep property-name)
   (setf (cdr (%get-property-cons sheep property-name)) new-value))
 
-;; (defun %direct-property-metaobject (sheep property-name)
-;;   (car (%get-property-cons sheep property-name)))
-;; (defun (setf %direct-property-metaobject) (new-value sheep pname)
-;;   (setf (car (%get-property-cons sheep pname)) new-value))
+#+sheeple3.1
+(defun %direct-property-metaobject (sheep property-name)
+  (car (%get-property-cons sheep property-name)))
+#+sheeple3.1
+(defun (setf %direct-property-metaobject) (new-value sheep pname)
+  (setf (car (%get-property-cons sheep pname)) new-value))
 
 ;;;
 ;;; Existential
@@ -103,7 +140,7 @@ would yield a value (i.e. not signal an unbound-property condition)."
 ;;
 ;;        A good part of this issue will probably be resolved when there's a clean,
 ;;        straightforward API for adding/removing properties. The current interface
-;;        is suboptimal, needless to say.
+;;        is suboptimal, needless to say. -sykopomp
 (defun add-property (sheep property-name value)
   "Adds a property named PROPERTY-NAME to SHEEP, initialized with VALUE."
   (assert (symbolp property-name))
@@ -111,7 +148,14 @@ would yield a value (i.e. not signal an unbound-property condition)."
     (cerror "Add property anyway." "~A already has a direct property named ~A."
             sheep property-name)
     (remove-property sheep property-name))
-  (%add-property-cons sheep property-name value))
+  (%add-property-cons sheep
+                      #+sheeple3.1
+                      (if (has-property-p sheep property-name)
+                          (%direct-property-metaobject (property-owner sheep property-name)
+                                                       property-name)
+                          (defsheep (=standard-property=) ((name property-name))))
+                      #-sheeple3.1 property-name
+                      value))
 
 ;; TODO - remove-property should look at the property metaobject and remove any replies for
 ;;        accessors that it points to. This will have to wait until reply-undefinition works
@@ -154,7 +198,7 @@ a condition of type UNBOUND-DIRECT-PROPERTY condition is signalled."
   "Sets NEW-VALUE as the value of a direct-property belonging to SHEEP, named
 PROPERTY-NAME. If the property does not already exist anywhere in the hierarchy list, an error
 is signaled."
-  ;; TODO - the changes to add-property may have changed the way this should work.
+  ;; TODO - the changes to add-property may have changed the way this should work. -sykopomp
   (cond ((has-direct-property-p sheep property-name)
          (setf (%direct-property-value sheep property-name) new-value))
         ((has-property-p sheep property-name)
@@ -162,8 +206,10 @@ is signaled."
          ;; itself cannot be side-effected. That restriction allows us,
          ;; in the common case of a property already existing in the hierarchy,
          ;; to reuse the property metaobject by just adding a pointer to it locally.
-         (let ((owner-prop-mo (car (%get-property-cons (property-owner sheep property-name)
-                                                       property-name))))
+         (let ((owner-prop-mo #+sheeple3.1 (car (%get-property-cons
+                                                 (property-owner sheep property-name)
+                                                 property-name))
+                              #-sheeple3.1 property-name))
            (%add-property-cons sheep owner-prop-mo new-value)))
         (t (cerror "Add the property locally" 'unbound-property
                    :sheep sheep
@@ -178,15 +224,16 @@ returned."
   (or (find-if (fun (has-direct-property-p _ property-name)) (sheep-hierarchy-list sheep))
       (when errorp (error 'unbound-property :sheep sheep :property-name property-name))))
 
-;; Not these two...
-;; (defun property-metaobject-p (obj)
-;;   (and (sheepp obj)
-;;        (find =standard-property= (sheep-hierarchy-list obj))))
+#+sheeple3.1
+(defun property-metaobject-p (obj)
+  (and (sheepp obj)
+       (find =standard-property= (sheep-hierarchy-list obj))))
 
-;; (defun direct-property-metaobject (sheep property-name &optional errorp)
-;;   "Returns the direct local metaobject for a property named PROPERTY-NAME."
-;;   (or (%direct-property-metaobject sheep property-name)
-;;       (when errorp (error 'unbound-property :sheep sheep :property-name property-name))))
+#+sheeple3.1
+(defun direct-property-metaobject (sheep property-name &optional errorp)
+  "Returns the direct local metaobject for a property named PROPERTY-NAME."
+  (or (%direct-property-metaobject sheep property-name)
+      (when errorp (error 'unbound-property :sheep sheep :property-name property-name))))
 
 (defun sheep-direct-properties (sheep)
   #-sheeple3.1 "Returns a set of direct property definition metaobjects."
@@ -207,11 +254,10 @@ inherited ones."
                                         :key #'property-name))))
     (mapcar (fun (direct-property-metaobject (property-owner sheep _ nil) _))
             avail-property-names))
-    #-sheeple3.1
-  (let ((dprops (sheep-direct-properties sheep)))
-    (remove-duplicates (flatten 
-                        (append dprops 
-                                (mapcar #'available-properties (sheep-parents sheep)))))))
+  #-sheeple3.1
+  (remove-duplicates (flatten 
+                      (append (sheep-direct-properties sheep)
+                              (mapcar #'available-properties (sheep-parents sheep))))))
 
 (defun property-summary (sheep &optional (stream *standard-output*))
   "Provides a pretty-printed representation of SHEEP's available properties."

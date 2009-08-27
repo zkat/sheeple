@@ -48,7 +48,7 @@
 
   (defun %property-vector-full-p (sheep)
     "SHEEP's property vector is full when all elements are non-NIL, assuming it has one."
-    (aand %properties (notany #'null it)))
+    (aand %properties (notany 'null it)))
 
   (defun %enlarge-property-vector (sheep)
     "This function takes care of enlarging a sheep's property vector -- usually called when
@@ -66,8 +66,8 @@ be EQ when 'enlarged', but it's guaranteed to keep all the previous property con
     sheep)
 
   (defun %get-property-cons (sheep property)
-    (find property %properties :test #'eq 
-          :key #-sheeple3.1 #'car
+    (find property %properties :test 'eq 
+          :key #-sheeple3.1 'car
           #+sheeple3.1 (fun (property-name (car _)))))
   
   (defun %add-property-cons (sheep property value)
@@ -98,8 +98,8 @@ function will basically do nothing if a property wiith the given name already ex
   (defun %remove-property-cons (sheep property)
     "Removes the actual property-cons representing PROPERTY."
     (awhen (position property %properties
-                     :test #'eq 
-                     :key #-sheeple3.1 #'car
+                     :test 'eq 
+                     :key #-sheeple3.1 'car
                      #+sheeple3.1 (fun (property-name (car _))))
       (setf (svref %properties it) nil))
     sheep)
@@ -238,7 +238,7 @@ returned."
 (defun sheep-direct-properties (sheep)
   #-sheeple3.1 "Returns a set of direct property definition metaobjects."
   #+sheeple3.1 "Returns a set of direct property definition metaobjects."
-  (map 'list #'car (%sheep-direct-properties sheep)))
+  (map 'list 'car (%sheep-direct-properties sheep)))
 
 (defun available-properties (sheep)
   "Returns a list of property objects describing all properties available to SHEEP, including
@@ -249,15 +249,15 @@ inherited ones."
                                        (remove-duplicates
                                         (flatten
                                          (append direct-properties
-                                                 (mapcar #'available-properties
+                                                 (mapcar 'available-properties
                                                          (sheep-parents sheep))))
-                                        :key #'property-name))))
+                                        :key 'property-name))))
     (mapcar (fun (direct-property-metaobject (property-owner sheep _ nil) _))
             avail-property-names))
   #-sheeple3.1
   (remove-duplicates (flatten 
                       (append (sheep-direct-properties sheep)
-                              (mapcar #'available-properties (sheep-parents sheep))))))
+                              (mapcar 'available-properties (sheep-parents sheep))))))
 
 (defun property-summary (sheep &optional (stream *standard-output*))
   "Provides a pretty-printed representation of SHEEP's available properties."

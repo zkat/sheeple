@@ -9,6 +9,37 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
+(def-suite reply-combination :in messages)
+(in-suite reply-combination)
+
+(defmacro with-flag-stack (&body body)
+  (let ((stack (gensym)))
+    `(let (,stack)
+       (flet ((flag (tag) (push tag ,stack))) ,@body)
+       (nreverse ,stack))))
+
+(test reply-stack
+  (is (null (with-flag-stack)))
+  (is (equal '(1) (with-flag-stack (flag 1))))
+  (is (equal '(1 2 3) (with-flag-stack (flag 1) (flag 2) (flag 3)))))
+
+(postboot-test primary
+  (defmessage tester (x y))
+  (with-sheep-hierarchy ((a) (b a))
+    (is (equal '(:a-)
+               (with-flag-stack
+                 (defreply tester ((x a) y)
+                   (flag :a-))
+                 (tester a nil))))
+    (is (equal '(:b- :a-)
+               (with-flag-stack
+                 (defreply tester ((x a) y)
+                   (flag :a-))
+                 (defreply tester ((x b) y)
+                   (flag :b-)
+                   (call-next-reply))
+                 (tester b nil))))))
+
 (def-suite reply-dispatch :in messages)
 (in-suite reply-dispatch)
 

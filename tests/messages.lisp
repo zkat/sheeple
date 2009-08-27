@@ -32,11 +32,9 @@
       (is (eq 'name        name))
       (is (eq 'lambda-list lambda-list))
       (is (eq 'replies     replies))
-      (is (eq 'cache       cache))
+      (is (eq 'cache       dispatch-cache))
       (is (eq 'arg-info    arg-info))
-      (is (string= documentation "dox"))
-      (is (typep dispatch-cache '(vector t 40)))
-      (is (typep arg-info 'arg-info)))))
+      (is (string= documentation "dox")))))
 
 (test *message-table*
   (is (message-table-p *message-table*))

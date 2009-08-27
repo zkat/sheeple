@@ -32,12 +32,9 @@
   (name nil)
   (lambda-list nil)
   (replies nil)
-  (memo-vector (make-vector 40))
+  (dispatch-cache (make-vector 40))
   (arg-info (make-arg-info))
   (documentation ""))
-
-(defun clear-memo-table (message)
-  (setf (message-memo-vector message) (make-vector 40)))
 
 ;;;
 ;;; Message definition
@@ -48,12 +45,14 @@
   "Hashtable for storing message objects. Needs to :test #'equal because
 of setf methods, whose names are lists.")
 
+(defun message-table-p (table)
+  (hash-table-p table))
+
 (defun find-message (name &optional (errorp t))
   "Finds a message object in `*message-table*', given its `name'.
 Raises an error if no message is found, unless `errorp' is set to NIL."
-  (multiple-value-bind (message foundp) (gethash name *message-table*)
-    (if foundp message
-        (when errorp (error 'no-such-message :message-name name)))))
+  (or (gethash name *message-table*)
+      (when errorp (error 'no-such-message :message-name name))))
 
 (defun (setf find-message) (new-value name)
   (setf (gethash name *message-table*) new-value))
@@ -63,6 +62,9 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 
 (defun forget-all-messages ()
   (clrhash *message-table*) t)
+
+(defun clear-dispatch-cache (message)
+  (setf (message-dispatch-cache message) (make-vector 40)))
 
 (defun clear-all-message-caches ()
   (maphash-values 'clear-memo-table *message-table*))
@@ -116,10 +118,10 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
         ,@(canonize-message-options options)))))
 
 ;; This pair just pretties up the options during macro expansion
-(defun canonize-message-options (options)
-  (mapcan #'canonize-message-option options))
 (defun canonize-message-option (option)
   (list `',(car option) `',(cadr option)))
+(defun canonize-message-options (options)
+  (mapcan #'canonize-message-option options))
 
 ;;; LL analysis
 (defun check-msg-lambda-list (lambda-list)

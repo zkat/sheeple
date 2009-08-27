@@ -144,13 +144,11 @@ a condition of type UNBOUND-DIRECT-PROPERTY condition is signalled."
   "Returns a property-value that is not necessarily local to SHEEP."
   (property-value-with-hierarchy-list sheep property-name))
 
+(declaim (inline property-value-with-hierarchy-list))
 (defun property-value-with-hierarchy-list (sheep property-name)
-  ;; todo - this is leaky and ugly
-  (map nil (fun (when (has-direct-property-p _ property-name)
-                  (return-from property-value-with-hierarchy-list
-                    (direct-property-value _ property-name))))
-       (sheep-hierarchy-list sheep))
-  (error 'unbound-property :sheep sheep :property-name property-name))
+  (aif (find-if (fun (has-direct-property-p _ property-name)) (sheep-hierarchy-list sheep))
+       (direct-property-value it property-name)
+       (error 'unbound-property :sheep sheep :property-name property-name)))
 
 (defun (setf property-value) (new-value sheep property-name)
   "Sets NEW-VALUE as the value of a direct-property belonging to SHEEP, named

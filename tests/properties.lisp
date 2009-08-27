@@ -18,17 +18,23 @@
 (in-suite internals)
 
 (postboot-test %add-property-cons
-  (let ((sheep (spawn)))
+  (let ((sheep (spawn))
+        (property
+         #+sheeple3.1 (spawn =standard-property=)
+         #-sheeple3.1 'test))
     (is (null (%sheep-direct-properties sheep)))
-    (is (eq sheep (%add-property-cons sheep (spawn =standard-property=) nil)))
+    (is (eq sheep (%add-property-cons sheep property nil)))
+    (is (eq sheep (%add-property-cons sheep 'test nil)))
     (is (not (null (%sheep-direct-properties sheep))))
     (is (vectorp (%sheep-direct-properties sheep)))
-    (is (find 'std-property (%sheep-direct-properties sheep)
+    (is (find property (%sheep-direct-properties sheep)
               :key (fun (property-name (car _)))))))
 
 (postboot-test %get-property-cons
   (let* ((sheep (spawn))
-         (property (defsheep (=standard-property=) ((property-name 'test)))))
+         (property 
+          #+sheeple3.1 (defsheep (=standard-property=) ((property-name 'test)))
+          #-sheeple3.1 'test))
     (is (null (%get-property-cons sheep 'test)))
     (%add-property-cons sheep property 'value)
     (is (consp (%get-property-cons sheep 'test))))
@@ -38,20 +44,27 @@
 
 (postboot-test %remove-property-cons
   (let* ((sheep (spawn))
-         (property (defsheep (=standard-property=) ((property-name 'test)))))
+         (property 
+          #+sheeple3.1 (defsheep (=standard-property=) ((property-name 'test)))
+          #-sheeple3.1 'test))
     (%add-property-cons sheep property 'value)
     (is (eq sheep (%remove-property-cons sheep 'test)))
     (is (null (%get-property-cons sheep 'tests)))))
 
 (postboot-test %direct-property-value
   (let* ((sheep (spawn))
-         (property (defsheep (=standard-property=) ((property-name 'test)))))
+         (property 
+          #+sheeple3.1 (defsheep (=standard-property=) ((property-name 'test)))
+          #-sheeple3.1 'test))
     (%add-property-cons sheep property 'value)
     (is (eq 'value (%direct-property-value sheep 'test)))))
 
+#+sheeple3.1
 (postboot-test %direct-property-metaobject
   (let* ((sheep (spawn))
-         (property (defsheep (=standard-property=) ((property-name 'test)))))
+         (property 
+          #+sheeple3.1 (defsheep (=standard-property=) ((property-name 'test)))
+          #-sheeple3.1 'test))
     (%add-property-cons sheep property 'value)
     (is (eq 'new-value (setf (%direct-property-value sheep 'test) 'new-value)))
     (is (eq 'new-value (%direct-property-value sheep 'test)))))
@@ -61,7 +74,9 @@
 
 (postboot-test has-direct-property-p
   (let* ((sheep (spawn))
-         (property (defsheep (=standard-property=) ((property-name 'test)))))
+         (property 
+          #+sheeple3.1 (defsheep (=standard-property=) ((property-name 'test)))
+          #-sheeple3.1 'test))
     (%add-property-cons sheep property 'value)
     (is (has-direct-property-p sheep 'test))
     (is (not (has-direct-property-p sheep 'something-else))))
@@ -151,42 +166,44 @@
     (is (eq 'foo (property-value b 'test)))
     (is (eq 'new-value (property-value a 'test)))))
 
-(def-suite reflection :in properties)
-(in-suite reflection)
+;; This whole block is out of commission for now:
 
-(postboot-test property-owner
-  (let* ((parent (defsheep () ((var "value"))))
-         (child (defsheep (parent) ((child-var "child-value")))))
-    (is (eq parent (property-owner parent 'var)))
-    (is (eq parent (property-owner child 'var)))
-    (is (eq child (property-owner child 'child-var)))
-    (is (not (property-owner parent 'some-other-property nil)))
-    (signals unbound-property (property-owner parent 'some-other-property))
-    (signals unbound-property (property-owner parent 'some-other-property t))))
+;; (def-suite reflection :in properties)
+;; (in-suite reflection)
 
-(postboot-test property-metaobject-p
-  (is (property-metaobject-p (spawn =standard-property=)))
-  (is (not (property-metaobject-p (spawn)))))
+;; (postboot-test property-owner
+;;   (let* ((parent (defsheep () ((var "value"))))
+;;          (child (defsheep (parent) ((child-var "child-value")))))
+;;     (is (eq parent (property-owner parent 'var)))
+;;     (is (eq parent (property-owner child 'var)))
+;;     (is (eq child (property-owner child 'child-var)))
+;;     (is (not (property-owner parent 'some-other-property nil)))
+;;     (signals unbound-property (property-owner parent 'some-other-property))
+;;     (signals unbound-property (property-owner parent 'some-other-property t))))
 
-(postboot-test direct-property-metaobject
-  (let ((sheep (defsheep () ((var 'value)))))
-    (is (property-metaobject-p (direct-property-metaobject sheep 'var)))
-    (signals unbound-property (direct-property-metaobject sheep 'durr))
-    (is (null (direct-property-metaobject sheep 'durr nil)))
-    (signals unbound-property (direct-property-metaobject sheep 'durr t))))
+;; (postboot-test property-metaobject-p
+;;   (is (property-metaobject-p (spawn =standard-property=)))
+;;   (is (not (property-metaobject-p (spawn)))))
 
-(postboot-test sheep-direct-properties
-  (let ((sheep (defsheep () ((var1 'val) (var2 'val) (var3 'val)))))
-    (is (= 3 (length (sheep-direct-properties sheep))))
-    (is (every #'property-metaobject-p (sheep-direct-properties sheep)))))
+;; (postboot-test direct-property-metaobject
+;;   (let ((sheep (defsheep () ((var 'value)))))
+;;     (is (property-metaobject-p (direct-property-metaobject sheep 'var)))
+;;     (signals unbound-property (direct-property-metaobject sheep 'durr))
+;;     (is (null (direct-property-metaobject sheep 'durr nil)))
+;;     (signals unbound-property (direct-property-metaobject sheep 'durr t))))
 
-(postboot-test available-properties
-  (let* ((a (defsheep () ((var1 'val))))
-         (b (defsheep (a) ((var2 'val))))
-         (c (defsheep (b) ((var3 'val)))))
-    (is (= 3 (length (available-properties sheep))))
-    (is (every #'property-metaobject-p (available-properties sheep)))))
+;; (postboot-test sheep-direct-properties
+;;   (let ((sheep (defsheep () ((var1 'val) (var2 'val) (var3 'val)))))
+;;     (is (= 3 (length (sheep-direct-properties sheep))))
+;;     (is (every #'property-metaobject-p (sheep-direct-properties sheep)))))
 
-;; ugh. I don't want to write tests for these right now.
-(postboot-test property-summary)
-(postboot-test direct-property-summary)
+;; (postboot-test available-properties
+;;   (let* ((a (defsheep () ((var1 'val))))
+;;          (b (defsheep (a) ((var2 'val))))
+;;          (c (defsheep (b) ((var3 'val)))))
+;;     (is (= 3 (length (available-properties sheep))))
+;;     (is (every #'property-metaobject-p (available-properties sheep)))))
+
+;; ;; ugh. I don't want to write tests for these right now.
+;; (postboot-test property-summary)
+;; (postboot-test direct-property-summary)

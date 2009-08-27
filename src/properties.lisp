@@ -72,27 +72,26 @@ be EQ when 'enlarged', but it's guaranteed to keep all the previous property con
   
   (defun %add-property-cons (sheep property value)
     "This function puts PROPERTY and VALUE into a cons cell and adds the cell to
-SHEEP's property-vector if the property is unique. It should come as a warning that this
-function will basically do nothing if a property wiith the given name already exists."
+SHEEP's property-vector if the property is unique. If it's not unique a generic error
+is signaled."
     ;; Since we start off all sheep objects with their property-vector slot set to NIL,
     ;; we have to check for that case and cons up a fresh property-vector. If the vector
     ;; turns out to be full, we also have to enlarge it.
     (let ((properties %properties))
-      (if properties
-          ;; TODO - a property-vector may be full, but we might be trying to add
-          ;;        a property with a name that already exists.
-          ;;        In the worst case scenario, this function fails to do anything
-          ;;        with property-name and value, and we enlarge the property-vector
-          ;;        unnecessarily. -zkat
-          (when (%property-vector-full-p sheep)
-            (%enlarge-property-vector sheep)
-            (setf properties %properties))
-          (progn (%create-property-vector sheep)
-                 (setf properties %properties)))
-      (unless (%get-property-cons sheep property)
-        (dotimes (i (length properties))
-          (unless (svref properties i)
-            (return (setf (svref properties i) (cons property value)))))))
+      (unless properties
+        (%create-property-vector sheep)
+        (setf properties %properties))
+      (if (%get-property-cons sheep
+                              #+sheeple3.1(property-name property)
+                              #-sheeple3.1 property)
+          (error "Property already exists!")
+          (progn
+            (when (%property-vector-full-p sheep)
+              (%enlarge-property-vector sheep)
+              (setf properties %properties))
+            (dotimes (i (length properties))
+              (unless (svref properties i)
+                (return (setf (svref properties i) (cons property value))))))))
     sheep)
 
   (defun %remove-property-cons (sheep property)

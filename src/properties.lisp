@@ -178,6 +178,9 @@ returned."
   (or (find-if (fun (has-direct-property-p _ property-name)) (sheep-hierarchy-list sheep))
       (when errorp (error 'unbound-property :sheep sheep :property-name property-name))))
 
+;; TODO - I could make these sort-of work for 3.0
+
+;; Not these two...
 ;; (defun property-metaobject-p (obj)
 ;;   (and (sheepp obj)
 ;;        (find =standard-property= (sheep-hierarchy-list obj))))
@@ -187,40 +190,51 @@ returned."
 ;;   (or (%direct-property-metaobject sheep property-name)
 ;;       (when errorp (error 'unbound-property :sheep sheep :property-name property-name))))
 
-;; (defun sheep-direct-properties (sheep)
-;;   "Returns a set of direct property definition metaobjects."
-;;   (map 'list #'car (%sheep-direct-properties sheep)))
+(defun sheep-direct-properties (sheep)
+  #-sheeple3.1 "Returns a set of direct property definition metaobjects."
+  #+sheeple3.1 "Returns a set of direct property definition metaobjects."
+  (map 'list #'car (%sheep-direct-properties sheep)))
 
-;; (defun available-properties (sheep)
-;;   "Returns a list of property objects describing all properties available to SHEEP, including
-;; inherited ones."
-;;   (let* ((direct-properties (sheep-direct-properties sheep))
-;;          (avail-property-names (mapcar (fun (property-name _))
-;;                                        (remove-duplicates
-;;                                         (flatten
-;;                                          (append direct-properties
-;;                                                  (mapcar #'available-properties
-;;                                                          (sheep-parents sheep))))
-;;                                         :key #'property-name))))
-;;     (mapcar (fun (direct-property-metaobject (property-owner sheep _ nil) _))
-;;             avail-property-names)))
+(defun available-properties (sheep)
+  "Returns a list of property objects describing all properties available to SHEEP, including
+inherited ones."
+  #+sheeple3.1
+  (let* ((direct-properties (sheep-direct-properties sheep))
+         (avail-property-names (mapcar (fun (property-name _))
+                                       (remove-duplicates
+                                        (flatten
+                                         (append direct-properties
+                                                 (mapcar #'available-properties
+                                                         (sheep-parents sheep))))
+                                        :key #'property-name))))
+    (mapcar (fun (direct-property-metaobject (property-owner sheep _ nil) _))
+            avail-property-names))
+    #-sheeple3.1
+  (let ((dprops (sheep-direct-properties sheep)))
+    (remove-duplicates (flatten 
+                        (append dprops 
+                                (mapcar #'available-properties (sheep-parents sheep)))))))
 
-;; (defun property-summary (sheep &optional (stream *standard-output*))
-;;   "Provides a pretty-printed representation of SHEEP's available properties."
-;;   (format stream
-;;           "~&Sheep: ~A~%Properties:~% ~{~{~&~3TName: ~13T~A~%~3TValue: ~13T~S~%~
-;;            ~3TOwner: ~13T~A~%~%~}~}"
-;;           sheep (mapcar (fun (list (property-name _)
-;;                                    (property-value sheep (property-name _))
-;;                                    (property-owner sheep (property-name _))))
-;;                         (available-properties sheep))))
+(defun property-summary (sheep &optional (stream *standard-output*))
+  "Provides a pretty-printed representation of SHEEP's available properties."
+  (format stream
+          "~&Sheep: ~A~%Properties:~% ~{~{~&~3TName: ~13T~A~%~3TValue: ~13T~S~%~
+           ~3TOwner: ~13T~A~%~%~}~}"
+          sheep (mapcar (fun (let ((pname #+sheeple3.1(property-name _)
+                                          #-sheeple3.1 _))
+                               (list pname
+                                     (property-value sheep pname)
+                                     (property-owner sheep pname))))
+                        (available-properties sheep))))
 
-;; (defun direct-property-summary (sheep &optional stream)
-;;   "Provides a pretty-printed representation of SHEEP's direct properties."
-;;   (format stream
-;;           "~&Sheep: ~A~%~
-;;            Direct Properties: ~%~%~
-;;            ~{~{~&~3TName: ~A~%~3TValue: ~S~%~%~}~}"
-;;           sheep (mapcar (fun (list (property-name _)
-;;                                    (direct-property-value sheep (property-name _))))
-;;                         (sheep-direct-properties sheep))))
+(defun direct-property-summary (sheep &optional stream)
+  "Provides a pretty-printed representation of SHEEP's direct properties."
+  (format stream
+          "~&Sheep: ~A~%~
+           Direct Properties: ~%~%~
+           ~{~{~&~3TName: ~A~%~3TValue: ~S~%~%~}~}"
+          sheep (mapcar (fun (let ((pname #+sheeple3.1 (property-name_)
+                                          #-sheeple3.1 _))
+                               (list pname
+                                     (direct-property-value sheep pname))))
+                        (sheep-direct-properties sheep))))

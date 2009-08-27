@@ -9,7 +9,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
+#+sheeple3.1
 (define-metasheep-vars =standard-message=)
+#+sheeple3.1
 (defparameter the-std-message-form '(defproto =standard-message= ()
                                      ((name nil :accessor nil)
                                       (lambda-list nil :accessor nil)
@@ -18,11 +20,21 @@
                                       (arg-info (make-arg-info) :accessor nil)
                                       (documentation "" :accessor nil))))
 
+#+sheeple3.1
 (defun %make-message (&key name lambda-list replies (documentation ""))
   (defsheep (=standard-message=) ((name name) (lambda-list lambda-list)
                                   (replies replies) (documentation documentation)
                                   (memo-vector (make-vector 40))
                                   (arg-info (make-arg-info)))))
+
+(defstruct (message (:constructor %make-message)
+                    (:predicate messagep))
+  (name nil)
+  (lambda-list nil)
+  (replies nil)
+  (memo-vector (make-vector 40))
+  (arg-info (make-arg-info))
+  (documentation ""))
 
 (defun clear-memo-table (message)
   (setf (message-memo-vector message) (make-vector 40)))
@@ -53,7 +65,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
   (clrhash *message-table*) t)
 
 (defun clear-all-message-caches ()
-  (maphash-values (fun (clear-memo-table _)) *message-table*))
+  (maphash-values 'clear-memo-table *message-table*))
 
 ;; Finalizing a message sets the function definition of the message to a
 ;; lambda that calls the top-level dispatch function on the msg args.
@@ -65,11 +77,10 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
     (setf (fdefinition name) (lambda (&rest args) (apply-message message args)))))
 
 ;; This handles actual setup of the message object (and finalization)
-(defun generate-message (metasheep &key name
-                          lambda-list
-                          (documentation ""))
+(defun generate-message (&key name
+                         lambda-list
+                         (documentation ""))
   (let ((message (%make-message
-                  metasheep
                   :name name
                   :lambda-list lambda-list
                   :documentation documentation)))
@@ -81,13 +92,11 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 ;; its args, checking lamda-list, etc.)
 (defun ensure-message (name
                        &rest all-keys
-                       &key (metasheep =standard-message=)
-                       lambda-list
+                       &key lambda-list
                        &allow-other-keys)
   (let* ((existing (find-message name nil))
          (message (or existing
                       (apply #'generate-message
-                             metasheep
                              :name name
                              :lambda-list lambda-list
                              all-keys))))
@@ -144,11 +153,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
               keys))
       ;; no &AUX allowed
       (when auxp
-        (error "&AUX is not allowed in a message lambda list: ~S" lambda-list))
-      ;; Oh, *puhlease*... not specifically as per section 3.4.2 of
-      ;; the ANSI spec, but the CMU CL &MORE extension does not
-      ;; belong here!
-      (assert (not morep)))))
+        (error "&AUX is not allowed in a message lambda list: ~S" lambda-list)))))
 
 ;;;
 ;;; Arg info
@@ -184,7 +189,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
   (length (the simple-array (arg-info-metatypes arg-info))))
 
 (defun arg-info-nkeys (arg-info)
-  (count-if (lambda (x) (not (eq x t))) (arg-info-metatypes arg-info)))
+  (count-if (fun (not (eq _ t))) (arg-info-metatypes arg-info)))
 
 (defun set-arg-info (msg &key new-reply (lambda-list nil lambda-list-p))
   (let* ((arg-info (message-arg-info msg))

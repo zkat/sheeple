@@ -11,8 +11,8 @@
 
 (def-suite messages :in sheeple)
 
-(def-suite message-definition :in messages)
-(in-suite message-definition)
+(def-suite message-basics :in messages)
+(in-suite message-basics)
 
 (test message-struct
   (let ((test-message (%make-message :name 'name
@@ -76,19 +76,9 @@
     (is (null (find-message 'b nil)))
     (is (null (find-message 'c nil)))))
 
-(test clear-dispatch-table)
-(test clear-all-message-caches)
-(test finalize-message)
-(test generate-message)
-(test ensure-message)
-(test defmessage)
-(test canonize-message-option)
-(test canonize-message-options)
-
 (def-suite arg-info :in messages)
 (in-suite arg-info)
 
-(test check-msg-lambda-list)
 (test arg-info)
 (test arg-info-valid-p)
 (test arg-info-applyp)
@@ -97,3 +87,14 @@
 (test set-arg-info)
 (test analyze-lambda-list)
 (test check-reply-arg-info)
+(test check-msg-lambda-list)
+
+(def-suite message-definition :in messages)
+(in-suite message-definition)
+
+(test finalize-message)
+(test make-message)
+(test ensure-message)
+(test defmessage)
+(test canonize-message-option)
+(test canonize-message-options)

@@ -1,0 +1,10 @@
+<sykopomp> tcr: is there a way to add custom indentation/highlighting rules to slime? custom
+    inspection stuff?
+<tcr> sykopomp: Depends on what you mean by that. For inspection, you can specialize on
+    SWANK::EMACS-INSPECT. It uses a very easy sexp-based markup scheme
+<tcr> sykopomp: There's some initial work for setting indentation information from Common
+    Lisp in contrib/swank-indentation.lisp.  
+<tcr> sykopomp: No you implementation should provide such a hook for M-. See
+    https://bugs.launchpad.net/sbcl/+bug/313242
+<tcr> sykopomp: if you use slime-fontifying-fu, all form beginning with a symbol like
+    define-foo are fontified the same as defun is fontified

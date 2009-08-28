@@ -152,7 +152,9 @@ of its descendants."
   (defun %map-children (function sheep)
     "Applies FUNCTION to each of SHEEP's children."
     (awhen %children
-      (map nil (fun (awhen (maybe-weak-pointer-value _) (funcall function it))) it))))
+      (map nil (fun (awhen (maybe-weak-pointer-value _) (funcall function it))) it)))
+
+) ;end symbol-macrolet
 
 ;;; This utility is useful for concisely setting up sheep hierarchies
 (defmacro with-sheep-hierarchy (sheep-and-parents &body body)

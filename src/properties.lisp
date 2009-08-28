@@ -246,13 +246,13 @@ inherited ones."
   #+sheeple3.1
   (mapcar (fun (direct-property-metaobject (property-owner sheep _ nil) _))
           (mapcar (fun (property-name _))
-                  (delete-duplicates (nconc (sheep-direct-properties sheep)
-                                            (mapcan #'available-properties
-                                                    (sheep-parents sheep)))
+                  (delete-duplicates (append (sheep-direct-properties sheep)
+                                             (mapcan #'available-properties
+                                                     (sheep-parents sheep)))
                                      :key #'property-name)))
   #-sheeple3.1
-  (delete-duplicates (nconc (sheep-direct-properties sheep)
-                            (mapcan 'available-properties (sheep-parents sheep)))))
+  (delete-duplicates (append (sheep-direct-properties sheep)
+                             (mapcan 'available-properties (sheep-parents sheep)))))
 
 (defun property-summary (sheep &optional (stream *standard-output*))
   "Provides a pretty-printed representation of SHEEP's available properties."

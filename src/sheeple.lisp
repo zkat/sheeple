@@ -247,11 +247,11 @@ return when any list is NIL to avoid traversing the entire parent list."
 
 (defun memoize-sheep-hierarchy-list (sheep)
   (setf (%sheep-hierarchy-cache sheep) (compute-sheep-hierarchy-list sheep))
-  (%map-children (fun (memoize-sheep-hierarchy-list _)) sheep))
+  (%map-children 'memoize-sheep-hierarchy-list sheep))
 
 (defun std-finalize-sheep-inheritance (sheep)
   "Memoizes SHEEP's hierarchy list."
-  (mapc (fun (%add-child sheep _)) (sheep-parents sheep))
+  (mapc (curry '%add-child sheep) (sheep-parents sheep))
   (memoize-sheep-hierarchy-list sheep)
   sheep)
 
@@ -310,7 +310,7 @@ See `add-parent-using-metasheeple'."
   "Mostly a utility function for easily adding multiple parents. They will be added to
 the front of the sheep's parent list in reverse order (so they will basically be appended
 to the front of the list)"
-  (map nil (fun (add-parent _ sheep)) (reverse parents))
+  (map nil (rcurry 'add-parent sheep) (reverse parents))
   sheep)
 
 (defun add-parent* (parent* sheep)
@@ -371,7 +371,7 @@ will be used instead of SHEEP's metasheep, but SHEEP itself remains unchanged."
   `(list ,@sheeple))
 
 (defun canonize-properties (properties &optional (accessors-by-default nil))
-  `(list ,@(mapcar (fun (canonize-property _ accessors-by-default)) properties)))
+  `(list ,@(mapcar (rcurry 'canonize-property accessors-by-default) properties)))
 
 (defun canonize-property (property &optional (accessors-by-default nil))
   (let ((name (car property)) (value (cadr property)) (readers nil)

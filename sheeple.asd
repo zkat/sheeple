@@ -13,9 +13,9 @@
             :components
             ((:file "packages")
              (:file "sheeple-garbage")
-             (:file "conditions")
              (:file "functions")
              (:file "utils")
+             (:file "conditions")
              (:file "sheeple")
              (:file "properties")
              (:file "builtins")

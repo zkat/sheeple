@@ -242,7 +242,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
     (when (and (fboundp name)
                (not (find-message name nil)))
       (cerror "Replace definition." 'clobbering-function-definition :format-args (list name)))
-    (setf (fdefinition name) (lambda (&rest args) (apply-message message args)))))
+    (setf (fdefinition name) (curry 'apply-message message))))
 
 ;; This handles actual setup of the message object (and finalization)
 (defun make-message (&key name

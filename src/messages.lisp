@@ -225,38 +225,15 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
                   msg-keywords)))))))
 
 (defun check-msg-lambda-list (lambda-list)
-  (flet ((ensure (arg ok)
-           (unless ok
-             (error 'message-lambda-list-error :arg arg :lambda-list lambda-list))))
-    (multiple-value-bind (required optional restp rest keyp keys allowp
-                                   auxp aux morep more-context more-count)
+  (flet ((check-no-defaults (list)
+           (awhen (find-if (complement (rcurry 'typep '(or symbol (cons * null)))) list)
+             (error 'message-lambda-list-error :arg it :lambda-list lambda-list))))
+    (multiple-value-bind (required optional restp rest keyp keys aok auxp)
         (parse-lambda-list lambda-list)
-      (declare (ignore required)) ; since they're no different in a msg ll
-      (declare (ignore restp rest)) ; since they're no different in a msg ll
-      (declare (ignore allowp)) ; since &ALLOW-OTHER-KEYS is fine either way
-      (declare (ignore aux)) ; since we require AUXP=NIL
-      (declare (ignore more-context more-count)) ; safely ignored unless MOREP
-      (declare (ignore morep)) ; Isn't used by the current code
-      ;; no defaults allowed for &OPTIONAL arguments
-      (mapc (fun (ensure _ (or (symbolp _)
-                               (and (consp _)
-                                    (symbolp (car _))
-                                    (null (cdr _))))))
-            optional)
-      ;; no defaults allowed for &KEY arguments
-      (when keyp
-        (mapc (fun (ensure _ (or (symbolp _)
-                                 (and (consp _)
-                                      (or (symbolp (car _))
-                                          (and (consp (car _))
-                                               (symbolp (caar _))
-                                               (symbolp (cadar _))
-                                               (null (cddar _))))
-                                      (null (cdr _))))))
-              keys))
-      ;; no &AUX allowed
-      (when auxp
-        (error "&AUX is not allowed in a message lambda list: ~S" lambda-list)))))
+      (declare (ignore required restp rest keyp aok))
+      (check-no-defaults optional)
+      (check-no-defaults keys)
+      (when auxp (error 'message-lambda-list-error :arg '&aux :lambda-list lambda-list)))))
 
 ;; Finalizing a message sets the function definition of the message to a
 ;; lambda that calls the top-level dispatch function on the msg args.

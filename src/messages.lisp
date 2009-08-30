@@ -245,12 +245,8 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
     (setf (fdefinition name) (curry 'apply-message message))))
 
 ;; This handles actual setup of the message object (and finalization)
-(defun make-message (&key name
-                     lambda-list
-                     (documentation ""))
-  (let ((message (%make-message
-                  :name name
-                  :lambda-list lambda-list)))
+(defun make-message (&key name lambda-list (documentation ""))
+  (let ((message (%make-message :name name :lambda-list lambda-list)))
     (set-arg-info message :lambda-list lambda-list)
     (finalize-message message)
     (setf (documentation message 'message) documentation)
@@ -258,10 +254,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 
 ;; The defmessage macro basically expands to a call to this function (after processing
 ;; its args, checking lamda-list, etc.)
-(defun ensure-message (name
-                       &rest all-keys
-                       &key lambda-list
-                       &allow-other-keys)
+(defun ensure-message (name &rest all-keys &key lambda-list &allow-other-keys)
   (let* ((existing (find-message name nil))
          (message (or existing
                       (apply 'make-message

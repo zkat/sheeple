@@ -79,8 +79,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 ;;;   and the code that updates the valid arg info for a message whenever a reply
 ;;;   is added. The add-reply function, though, is in reply-generation.lisp
 (defstruct (arg-info (:conc-name nil)
-                     (:constructor make-arg-info ())
-                     (:copier nil))
+                     (:constructor make-arg-info))
   (arg-info-lambda-list :no-lambda-list)
   arg-info-precedence
   arg-info-metatypes
@@ -96,14 +95,14 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
   msg-info-fast-mf-p)
 
 (defun arg-info-valid-p (arg-info)
-  (not (null (arg-info-number-optional arg-info))))
+  (numberp (arg-info-number-optional arg-info)))
 
 (defun arg-info-applyp (arg-info)
-  (or (plusp (the fixnum (arg-info-number-optional arg-info)))
+  (or (plusp (arg-info-number-optional arg-info))
       (arg-info-key/rest-p arg-info)))
 
 (defun arg-info-number-required (arg-info)
-  (length (the simple-array (arg-info-metatypes arg-info))))
+  (length (arg-info-metatypes arg-info)))
 
 (defun arg-info-nkeys (arg-info)
   (count-if (fun (not (eq _ t))) (arg-info-metatypes arg-info)))
@@ -123,8 +122,8 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
           (let ((msg-nreq (arg-info-number-required arg-info))
                 (msg-nopt (arg-info-number-optional arg-info))
                 (msg-key/rest-p (arg-info-key/rest-p arg-info)))
-            (unless (and (= (the fixnum nreq) msg-nreq)
-                         (= (the fixnum nopt) (the fixnum msg-nopt))
+            (unless (and (= nreq msg-nreq)
+                         (= nopt msg-nopt)
                          (eq (or keysp restp) msg-key/rest-p))
               (error 'reply-lambda-list-conflict
                      :lambda-list lambda-list :message msg))))
@@ -176,11 +175,11 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
                (error "encountered the non-standard lambda list keyword ~S"
                       x)))
             (ecase state
-              (required  (incf (the fixnum nrequired)))
-              (optional  (incf (the fixnum noptional)))
+              (required  (incf nrequired))
+              (optional  (incf noptional))
               (key       (push (parse-key-arg x) keywords)
                          (push x keyword-parameters))
-              (rest      (incf (the fixnum nrest))))))
+              (rest      (incf nrest)))))
       (when (and restp (zerop nrest))
         (error "Error in lambda-list:~%~
                 After &REST, a DEFMESSAGE lambda-list ~

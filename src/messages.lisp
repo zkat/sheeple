@@ -239,6 +239,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
       (declare (ignore allowp)) ; since &ALLOW-OTHER-KEYS is fine either way
       (declare (ignore aux)) ; since we require AUXP=NIL
       (declare (ignore more-context more-count)) ; safely ignored unless MOREP
+      (declare (ignore morep)) ; Isn't used by the current code
       ;; no defaults allowed for &OPTIONAL arguments
       (mapc (fun (ensure _ (or (symbolp _)
                                (and (consp _)

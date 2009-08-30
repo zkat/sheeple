@@ -17,13 +17,12 @@
                                       (lambda-list nil :accessor nil)
                                       (replies nil :accessor nil)
                                       (memo-vector (make-vector 40) :accessor nil)
-                                      (arg-info (make-arg-info) :accessor nil)
-                                      (documentation "" :accessor nil))))
+                                      (arg-info (make-arg-info) :accessor nil))))
 
 #+sheeple3.1
 (defun %make-message (&key name lambda-list replies (documentation ""))
   (defsheep (=standard-message=) ((name name) (lambda-list lambda-list)
-                                  (replies replies) (documentation documentation)
+                                  (replies replies)
                                   (memo-vector (make-vector 40))
                                   (arg-info (make-arg-info)))))
 
@@ -33,8 +32,7 @@
   (lambda-list nil)
   (replies nil)
   (dispatch-cache (make-vector 40))
-  (arg-info (make-arg-info))
-  (documentation ""))
+  (arg-info (make-arg-info)))
 
 ;;;
 ;;; Message definition
@@ -276,10 +274,10 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
                      (documentation ""))
   (let ((message (%make-message
                   :name name
-                  :lambda-list lambda-list
-                  :documentation documentation)))
+                  :lambda-list lambda-list)))
     (set-arg-info message :lambda-list lambda-list)
     (finalize-message message)
+    (setf (documentation message 'message) documentation)
     message))
 
 ;; The defmessage macro basically expands to a call to this function (after processing

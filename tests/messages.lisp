@@ -79,7 +79,8 @@
 (def-suite arg-info :in messages)
 (in-suite arg-info)
 
-(test arg-info)
+(test arg-info
+  )
 (test arg-info-valid-p)
 (test arg-info-applyp)
 (test arg-info-number-required)

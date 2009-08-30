@@ -14,6 +14,7 @@
             ((:file "packages")
              (:file "sheeple-garbage")
              (:file "conditions")
+             (:file "functions")
              (:file "utils")
              (:file "sheeple")
              (:file "properties")

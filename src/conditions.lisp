@@ -14,7 +14,7 @@
 (defmacro define-sheeple-condition (name super (&optional string &rest args)
                                     &rest condition-options)
   (let (reader-names)
-    `(define-condition ,name ,(if (listp super) super (list super))
+    `(define-condition ,name ,(ensure-list super)
        ,(loop for arg in args for reader = (intern (format nil "~A-~A" name arg))
            collect
              `(,arg :initarg ,(intern (symbol-name arg) :keyword) :reader ,reader)
@@ -23,7 +23,7 @@
         (lambda (condition stream)
           (funcall #'format stream (sheeple-condition-format-control condition)
                    ,@(mapcar #'(lambda (reader) `(,reader condition))
-                             reader-names))))
+                             (nreverse reader-names)))))
        (:default-initargs :format-control ,string
          ,@(cdr (assoc :default-initargs condition-options)))
        ,@(remove :default-initargs condition-options :key #'car))))
@@ -65,7 +65,7 @@
   ("There is no message named ~A" message-name))
 
 (define-sheeple-condition message-lambda-list-error sheeple-message-error
-  ("~@<invalid ~S ~_in the message lambda list ~S~:>" arg lambda-list))
+  ("~@<Invalid ~S ~_in the message lambda list ~S~:>" arg lambda-list))
 
 ;;; Replies
 

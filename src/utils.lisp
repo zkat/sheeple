@@ -21,16 +21,6 @@
   "Constructs a vector of SIZE elements set to INITIAL-ELEMENT. See `make-list'."
   (make-array size :initial-element initial-element))
 
-;;; This is only here because it gets called once in src/properties.lisp
-;;; It gets called to mitigate a hierarchy traversal. Maybe get rid of it?
-(defun flatten (x)
-  "Flattens a list."
-  (labels ((rec (x acc)
-             (cond ((null x) acc)
-                   ((atom x) (cons x acc))
-                   (t (rec (car x) (rec (cdr x) acc))))))
-    (rec x nil)))
-
 ;;; This only gets called once, during the macroexpansion of collect.
 (defun proper-list-of-length-p (list min &optional (max min))
   "Returns T if the length of X is between MIN and MAX, NIL otherwise."

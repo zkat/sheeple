@@ -19,29 +19,25 @@
                                      :lambda-list 'lambda-list
                                      :replies 'replies
                                      :dispatch-cache 'cache
-                                     :arg-info 'arg-info
-                                     :documentation "dox")))
+                                     :arg-info 'arg-info)))
     (is (messagep test-message))
     (with-accessors ((name           message-name)
                      (lambda-list    message-lambda-list)
                      (replies        message-replies)
                      (dispatch-cache message-dispatch-cache)
-                     (arg-info       message-arg-info)
-                     (documentation  message-documentation))
+                     (arg-info       message-arg-info))
         test-message
       (is (eq 'name        name))
       (is (eq 'lambda-list lambda-list))
       (is (eq 'replies     replies))
       (is (eq 'cache       dispatch-cache))
-      (is (eq 'arg-info    arg-info))
-      (is (string= documentation "dox")))))
+      (is (eq 'arg-info    arg-info)))))
 
 (test *message-table*
   (is (message-table-p *message-table*))
   (let ((test-message (%make-message :name 'name
                                      :lambda-list 'lambda-list
-                                     :replies 'replies
-                                     :documentation "dox")))
+                                     :replies 'replies)))
     (setf (find-message 'name) test-message)
     (is (eq test-message (find-message 'name)))
     (forget-message 'name)

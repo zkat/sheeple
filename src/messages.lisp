@@ -223,16 +223,16 @@ more entries the cache will be able to hold, but the slower lookup will be.")
       (analyze-lambda-list (reply-lambda-list reply))
     (flet ((lose (string &rest args)
              (error 'sheeple-error
-                    :format-control "~@<attempt to add the reply~2I~_~S~I~_~
-                                     to the message~2I~_~S;~I~_~
-                                     but ~?~:>"
+                    :format-control "~@<The reply~2I~_~S~I~_ can't be added~
+                                     to the message~2I~_~S;~I~_ because ~?~:>"
                     :format-args (list reply msg string args)))
            (comparison-description (x y)
              (if (> x y) "more" "fewer")))
-      (with-accessors ((msg-nreq arg-info-number-required)
-                       (msg-nopt arg-info-number-optional)
+      (with-accessors ((msg-nreq       arg-info-number-required)
+                       (msg-nopt       arg-info-number-optional)
                        (msg-key/rest-p arg-info-key/rest-p)
-                       (msg-keywords arg-info-keys)) arg-info
+                       (msg-keywords   arg-info-keys))
+          arg-info
         (unless (= nreq msg-nreq)
           (lose "the reply has ~A required arguments than the message."
                 (comparison-description nreq msg-nreq)))
@@ -242,10 +242,9 @@ more entries the cache will be able to hold, but the slower lookup will be.")
         (unless (eq (or keysp restp) msg-key/rest-p)
           (lose "the reply and message differ in whether they accept~_~
                  &REST or &KEY arguments."))
-        (when (and (consp msg-keywords)
-                   (not (or (and restp (not keysp))
-                            allow-other-keys-p
-                            (every (fun (memq _ keywords)) msg-keywords)) ))
+        (unless (and (atom msg-keywords)
+                     (or (and restp (not keysp)) allow-other-keys-p
+                         (every (rcurry 'memq keywords) msg-keywords)))
           (lose "the reply does not accept each of the &KEY arguments~2I~_~S."
                 msg-keywords))))))
 

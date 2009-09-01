@@ -266,6 +266,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 ;; This pair just pretties up the options during macro expansion
 (defun canonize-message-option (option)
   (list `',(car option) `',(cadr option)))
+
 (defun canonize-message-options (options)
   (mapcan #'canonize-message-option options))
 
@@ -277,5 +278,3 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
         ',name
         :lambda-list ',lambda-list
         ,@(canonize-message-options options)))))
-
-

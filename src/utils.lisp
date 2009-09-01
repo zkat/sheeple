@@ -102,7 +102,8 @@
   `(aif ,test-form
 	(progn ,@body)))
 
-(defmacro awhen1 (test-form &body body)
+(defmacro awhen-prog1 (test-form &body body)
+  "A combination of AWHEN and PROG1; always returns the result of TEST-FORM."
   `(aif ,test-form
         (prog1 it ,@body)))
 

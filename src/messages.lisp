@@ -255,7 +255,7 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 ;; The defmessage macro basically expands to a call to this function (after processing
 ;; its args, checking lamda-list, etc.)
 (defun ensure-message (name &rest all-keys &key lambda-list &allow-other-keys)
-  (or (awhen1 (find-message name nil)
+  (or (awhen-prog1 (find-message name nil)
         (set-arg-info it :lambda-list lambda-list))
       (setf (find-message name)
             (apply 'make-message :name name :lambda-list lambda-list all-keys))))

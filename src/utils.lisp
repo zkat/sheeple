@@ -102,6 +102,10 @@
   `(aif ,test-form
 	(progn ,@body)))
 
+(defmacro awhen1 (test-form &body body)
+  `(aif ,test-form
+        (prog1 it ,@body)))
+
 (defmacro aand (&rest args)
   (cond ((null args) t)
 	((null (cdr args)) (car args))

@@ -265,10 +265,10 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 ;; then expands to a call to ensure-message
 ;; This pair just pretties up the options during macro expansion
 (defun canonize-message-option (option)
-  (list `',(car option) `',(cadr option)))
+  `(',(car option) ',(cadr option)))
 
 (defun canonize-message-options (options)
-  (mapcan #'canonize-message-option options))
+  (mapcan 'canonize-message-option options))
 
 (defmacro defmessage (name lambda-list &rest options)
   `(progn

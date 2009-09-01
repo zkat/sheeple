@@ -421,7 +421,7 @@ will be used instead of SHEEP's metasheep, but SHEEP itself remains unchanged."
   (mapcan 'canonize-option options))
 
 (defun canonize-option (option)
-  (list `,(car option) (cadr option)))
+  (list (car option) (cadr option)))
 
 (defmacro defsheep (sheeple properties &rest options)
   "Standard sheep-generation macro. This variant auto-generates accessors."

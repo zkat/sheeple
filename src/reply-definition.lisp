@@ -26,8 +26,9 @@
                    (sheep-direct-roles sheep))
     t))
 
-(defun ensure-reply (name lambda-list participants 
-                     &rest all-keys)
+(defun ensure-reply (name &rest all-keys
+                     &key lambda-list participants
+                     &allow-other-keys)
   (when (not (find-message name nil))
     (progn
       (warn 'style-warning)

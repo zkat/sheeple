@@ -186,6 +186,36 @@ more entries the cache will be able to hold, but the slower lookup will be.")
               (reverse keywords)
               (reverse keyword-parameters)))))
 
+(defun check-reply-arg-info (msg arg-info reply)
+  (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)
+      (analyze-lambda-list (reply-lambda-list reply))
+    (flet ((lose (string &rest args)
+             (error 'sheeple-error
+                    :format-control "~@<The reply~2I~_~S~I~_ can't be added~
+                                     to the message~2I~_~S;~I~_ because ~?~:>"
+                    :format-args (list reply msg string args)))
+           (comparison-description (x y)
+             (if (> x y) "more" "fewer")))
+      (with-accessors ((msg-nreq       arg-info-number-required)
+                       (msg-nopt       arg-info-number-optional)
+                       (msg-key/rest-p arg-info-key/rest-p)
+                       (msg-keywords   arg-info-keys))
+          arg-info
+        (unless (= nreq msg-nreq)
+          (lose "the reply has ~A required arguments than the message."
+                (comparison-description nreq msg-nreq)))
+        (unless (= nopt msg-nopt)
+          (lose "the reply has ~A optional arguments than the message."
+                (comparison-description nopt msg-nopt)))
+        (unless (eq (or keysp restp) msg-key/rest-p)
+          (lose "the reply and message differ in whether they accept~_~
+                 &REST or &KEY arguments."))
+        (unless (and (atom msg-keywords)
+                     (or (and restp (not keysp)) allow-other-keys-p
+                         (every (rcurry 'memq keywords) msg-keywords)))
+          (lose "the reply does not accept each of the &KEY arguments~2I~_~S."
+                msg-keywords))))))
+
 (defun set-arg-info (msg &key new-reply (lambda-list nil lambda-list-p))
   (let* ((arg-info (message-arg-info msg))
          (replies (message-replies msg))
@@ -217,36 +247,6 @@ more entries the cache will be able to hold, but the slower lookup will be.")
                                            (arg-info-key/rest-p arg-info)))))
     (when new-reply (check-reply-arg-info msg arg-info new-reply))
     arg-info))
-
-(defun check-reply-arg-info (msg arg-info reply)
-  (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)
-      (analyze-lambda-list (reply-lambda-list reply))
-    (flet ((lose (string &rest args)
-             (error 'sheeple-error
-                    :format-control "~@<The reply~2I~_~S~I~_ can't be added~
-                                     to the message~2I~_~S;~I~_ because ~?~:>"
-                    :format-args (list reply msg string args)))
-           (comparison-description (x y)
-             (if (> x y) "more" "fewer")))
-      (with-accessors ((msg-nreq       arg-info-number-required)
-                       (msg-nopt       arg-info-number-optional)
-                       (msg-key/rest-p arg-info-key/rest-p)
-                       (msg-keywords   arg-info-keys))
-          arg-info
-        (unless (= nreq msg-nreq)
-          (lose "the reply has ~A required arguments than the message."
-                (comparison-description nreq msg-nreq)))
-        (unless (= nopt msg-nopt)
-          (lose "the reply has ~A optional arguments than the message."
-                (comparison-description nopt msg-nopt)))
-        (unless (eq (or keysp restp) msg-key/rest-p)
-          (lose "the reply and message differ in whether they accept~_~
-                 &REST or &KEY arguments."))
-        (unless (and (atom msg-keywords)
-                     (or (and restp (not keysp)) allow-other-keys-p
-                         (every (rcurry 'memq keywords) msg-keywords)))
-          (lose "the reply does not accept each of the &KEY arguments~2I~_~S."
-                msg-keywords))))))
 
 (defun check-msg-lambda-list (lambda-list)
   (flet ((check-no-defaults (list)
@@ -280,7 +280,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 ;; its args, checking lamda-list, etc.)
 (defun ensure-message (name &rest all-keys &key lambda-list &allow-other-keys)
   (or (awhen-prog1 (find-message name nil)
-                   (set-arg-info it :lambda-list lambda-list))
+        (set-arg-info it :lambda-list lambda-list))
       (setf (%find-message name)
             (apply 'make-message :name name :lambda-list lambda-list all-keys))))
 

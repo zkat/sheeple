@@ -118,25 +118,14 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 
 ;;;
 ;;; Arg info
-;;; - The stuff in here contains the arg-info object, plus code to handle it.
-;;;   Present is also the function that confirms validity of reply lambda-lists,
-;;;   and the code that updates the valid arg info for a message whenever a reply
-;;;   is added. The add-reply function, though, is in reply-generation.lisp
-(defstruct (arg-info (:conc-name nil)
-                     (:constructor make-arg-info))
-  (arg-info-lambda-list :no-lambda-list)
-  arg-info-precedence
-  arg-info-metatypes
-  arg-info-number-optional
-  arg-info-key/rest-p
-  arg-info-keys                         ;nil        no &KEY or &REST allowed
-                                        ;(k1 k2 ..) Each reply must accept these &KEY arguments.
-                                        ;T          must have &KEY or &REST
-  msg-info-simple-accessor-type         ; nil, reader, writer, boundp
-  (msg-precompute-dfun-and-emf-p nil)   ; set by set-arg-info
-  msg-info-static-c-a-m-emf
-  (msg-info-c-a-m-emf-std-p t)
-  msg-info-fast-mf-p)
+;;;
+(defstruct (arg-info (:constructor make-arg-info))
+  (lambda-list :no-lambda-list)
+  precedence metatypes number-optional key/rest-p
+  ;; nil: no &KEY or &REST allowed 
+  ;; (k1 k2 ..): Each reply must accept these &KEY arguments.
+  ;; T: must have &KEY or &REST
+  keys)
 
 (defun arg-info-valid-p (arg-info)
   (numberp (arg-info-number-optional arg-info)))

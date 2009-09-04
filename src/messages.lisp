@@ -295,10 +295,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
   (mapcan 'canonize-message-option options))
 
 (defmacro defmessage (name lambda-list &rest options)
-  `(progn
+  `(eval-when (:compile-toplevel :load-toplevel :execute)
      (check-msg-lambda-list ',lambda-list)
-     (eval-when (:compile-toplevel :load-toplevel :execute)
-       (ensure-message
-        ',name
-        :lambda-list ',lambda-list
-        ,@(canonize-message-options options)))))
+     (ensure-message ',name :lambda-list ',lambda-list
+                     ,@(canonize-message-options options))))

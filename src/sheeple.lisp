@@ -228,14 +228,22 @@ return when any list is NIL to avoid traversing the entire parent list."
 
 (defun std-compute-sheep-hierarchy-list (sheep)
   "Lists SHEEP's ancestors, in precedence order."
-  (handler-case
-      ;; since collect-ancestors only collects the _ancestors_, we cons the sheep in front.
-      ;; LOCAL-PRECEDENCE-ORDERING returns fresh conses, so we can be destructive.
-      (let ((unordered (cons sheep (collect-ancestors sheep))))
-        (topological-sort unordered
-                          (delete-duplicates (mapcan 'local-precedence-ordering unordered))
-                          'std-tie-breaker-rule))
-    (simple-error () (error 'sheeple-hierarchy-error :sheep sheep))))
+  (cond
+    ((cdr (%sheep-parents sheep))
+     (handler-case
+         ;; since collect-ancestors only collects the _ancestors_, we cons the sheep in front.
+         ;; LOCAL-PRECEDENCE-ORDERING returns fresh conses, so we can be destructive.
+         (let ((unordered (cons sheep (collect-ancestors sheep))))
+           (topological-sort unordered
+                             (delete-duplicates (mapcan 'local-precedence-ordering unordered))
+                             'std-tie-breaker-rule))
+       (simple-error () (error 'sheeple-hierarchy-error :sheep sheep))))
+    ((car (%sheep-parents sheep))
+     (let ((cache (%sheep-hierarchy-cache (car (%sheep-parents sheep)))))
+       (if (find sheep cache)
+           (error 'sheeple-hierarchy-error :sheep sheep)
+           (cons sheep cache))))
+    (t nil)))
 
 (defun compute-sheep-hierarchy-list (sheep)
   (typecase sheep

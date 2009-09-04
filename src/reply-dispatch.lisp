@@ -146,34 +146,6 @@
                     (return-from fetch-memo-vector-entry (vector-entry-msg-cache entry))))
             nil)))))
 
-(defstruct (vector-entry (:type vector))
-  args
-  msg-cache)
-
-(declaim (inline add-entry-to-message))
-(defun add-entry-to-message (cache message args index)
-  (declare (fixnum index))
-  (let ((memo-vector (message-memo-vector message))
-        (vector-entry (make-vector-entry
-                       :args (make-weak-pointer args)
-                       :msg-cache cache)))
-    (cond ((loop for i from index below (length (the simple-vector memo-vector))
-              when (eql (elt (the simple-vector memo-vector) i) 0)
-              do (progn
-                   (setf (elt memo-vector i) vector-entry)
-                   (return t))
-              finally (return nil))
-           t)
-          ((loop for i from index downto 0
-             when (eql (elt memo-vector i) 0)
-             do (progn
-                  (setf (elt memo-vector i) vector-entry)
-                  (return t))
-              finally (return nil))
-           t)
-          ((setf (elt memo-vector index) vector-entry)
-           t))))
-
 (defun memoize-reply-dispatch (message args msg-list)
   (let ((msg-cache (create-reply-cache message msg-list))
         (maybe-index (mod (the fixnum (sxhash (if (sheep-p (car args))

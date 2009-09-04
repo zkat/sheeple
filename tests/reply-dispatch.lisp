@@ -43,9 +43,6 @@
 (def-suite reply-dispatch :in messages)
 (in-suite reply-dispatch)
 
-(test clear-dispatch-cache)
-(test clear-all-message-caches)
-
 (test primary-reply-p)
 (test before-reply-p)
 (test after-reply-p)

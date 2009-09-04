@@ -221,10 +221,10 @@ regards to the CONSTRAINTS. A future version will undo this change."
     ;; Since MAPCAR returns once any list is NIL, we only traverse the parent list once.
     (mapcar 'list (cons sheep parents) parents)))
 
-(defun std-tie-breaker-rule (minimal-elements hl-so-far)
+(defun std-tie-breaker-rule (minimal-elements chosen-elements)
   (mapc (fun (awhen (intersection minimal-elements (sheep-parents _))
                (return-from std-tie-breaker-rule (car it))))
-        (reverse hl-so-far)))
+        (reverse chosen-elements)))
 
 (defun std-compute-sheep-hierarchy-list (sheep)
   "Lists SHEEP's ancestors, in precedence order."

@@ -216,9 +216,9 @@ regards to the CONSTRAINTS. A future version will undo this change."
     (all-parents-loop () (sheep-parents sheep))))
 
 (defun local-precedence-ordering (sheep)
-  "Calculates the local precedence ordering. Relies on the fact that mapcar will
-return when any list is NIL to avoid traversing the entire parent list."
+  "Calculates the local precedence ordering."
   (let ((parents (sheep-parents sheep)))
+    ;; Since MAPCAR returns once any list is NIL, we only traverse the parent list once.
     (mapcar 'list (cons sheep parents) parents)))
 
 (defun std-tie-breaker-rule (minimal-elements hl-so-far)

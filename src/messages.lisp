@@ -48,7 +48,7 @@
   (name nil)
   (lambda-list nil)
   (replies nil)
-  (dispatch-cache (make-vector 40))
+  (dispatch-cache (make-dispatch-cache))
   (arg-info (make-arg-info)))
 
 ;;;
@@ -78,13 +78,36 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 (defun forget-all-messages ()
   (clrhash *message-table*) t)
 
-;;; Reply caching
-;; NOTE: Even though these two functions are defined here, their tests are in
-;;       tests/reply-dispatch.lisp, since it's the most relevant place for them to be.
-;;       In the case of implementation, they live here because this is where message
-;;       object stuff lives. This could be changed later, ofc. --zkat
+;;;
+;;; Global dispatch cache
+;;;
+;;; - We hold a global cache for each message, which is filled as different objects are dispatched on.
+;;;   This allows fairly quick lookup of applicable replies when a particular message is called over
+;;;   and over on the same arguments.
+(defparameter *dispatch-cache-size* 40)
+
+(defun make-dispatch-cache ()
+  (make-vector *dispatch-cache-size*))
+
+(defun make-dispatch-cache-entry (args replies)
+  (cons (make-weak-pointer args) replies))
+(defun cache-entry-args (entry)
+  (car entry))
+(defun cache-entry-replies (entry)
+  (cdr entry))
+
+(defun add-entry-to-message (message applicable-replies args index-if-full)
+  (let ((dispatch-cache (message-dispatch-cache message))
+        (entry (make-dispatch-cache-entry args applicable-replies)))
+    (declare (simple-vector dispatch-cache) (fixnum index))
+    ;; We first try to make sure a cache is filled up. If it is, we insert the new entry
+    ;; into INDEX-IF-FULL. This is a bit leaky, and should probably be improved.
+    (aif (position 0 dispatch-cache)
+         (setf (svref dispatch-cache it) entry)
+         (setf (svref dispatch-cache index-if-full) entry))))
+
 (defun clear-dispatch-cache (message)
-  (setf (message-dispatch-cache message) (make-vector 40)))
+  (setf (message-dispatch-cache message) (make-dispatch-cache)))
 
 (defun clear-all-message-caches ()
   (maphash-values 'clear-memo-table *message-table*))

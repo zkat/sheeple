@@ -31,7 +31,21 @@
       (is (eq 'lambda-list lambda-list))
       (is (eq 'replies     replies))
       (is (eq 'cache       dispatch-cache))
-      (is (eq 'arg-info    arg-info)))))
+      (is (eq 'arg-info    arg-info))))
+  (let ((test-message (%make-message)))
+    (is (messagep test-message))
+    (with-accessors ((name           message-name)
+                     (lambda-list    message-lambda-list)
+                     (replies        message-replies)
+                     (dispatch-cache message-dispatch-cache)
+                     (arg-info       message-arg-info))
+        test-message
+      (is (null name))
+      (is (null lambda-list))
+      (is (null replies))
+      (is (dispatch-cache-p dispatch-cache))
+      (is (arf-info-p arg-info)))))
+
 
 (test *message-table*
   (is (message-table-p *message-table*))
@@ -72,11 +86,23 @@
     (is (null (find-message 'b nil)))
     (is (null (find-message 'c nil)))))
 
+(def-suite dispatch-cache :in messages)
+(in-suite dispatch-cache)
+
+(test *dispatch-cache-size*)
+(test make-dispatch-cache)
+(test dispatch-cache-p)
+(test make-dispatch-cache-entry)
+(test cache-entry-args)
+(test cache-entry-replies)
+(test add-entry-to-message)
+(test clear-dispatch-cache)
+(test clear-all-message-caches)
+
 (def-suite arg-info :in messages)
 (in-suite arg-info)
 
-(test arg-info
-  )
+(test arg-info)
 (test arg-info-valid-p)
 (test arg-info-applyp)
 (test arg-info-number-required)

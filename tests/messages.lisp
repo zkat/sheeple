@@ -44,47 +44,46 @@
       (is (null lambda-list))
       (is (null replies))
       (is (dispatch-cache-p dispatch-cache))
-      (is (arf-info-p arg-info)))))
-
+      (is (arg-info-p arg-info)))))
 
 (test *message-table*
   (is (message-table-p *message-table*))
   (let ((test-message (%make-message :name 'name
                                      :lambda-list 'lambda-list
                                      :replies 'replies)))
-    (setf (find-message 'name) test-message)
-    (is (eq test-message (find-message 'name)))
+    (setf (%find-message 'name) test-message)
+    (is (eq test-message (%find-message 'name)))
     (forget-message 'name)
-    (is (eq nil (find-message 'name nil)))
+    (is (eq nil (%find-message 'name)))
     (signals no-such-message (find-message 'name))))
 
-(test find-message
+(test %find-message
   (let ((test-message (%make-message)))
-    (is (eq test-message (setf (find-message 'name) test-message)))
-    (is (eq test-message (find-message 'name)))
+    (is (eq test-message (setf (%find-message 'name) test-message)))
+    (is (eq test-message (%find-message 'name)))
     (forget-message 'name)
-    (is (eq nil (find-message 'name nil)))
+    (is (eq nil (%find-message 'name)))
     (signals no-such-message (find-message 'name))))
 
 (test forget-message
   (let ((test-message (%make-message)))
-    (setf (find-message 'test) test-message)
+    (setf (%find-message 'test) test-message)
     (is (forget-message 'test))
-    (is (null (find-message 'name nil)))
+    (is (null (%find-message 'name)))
     (is (null (forget-message 'test)))))
 
 (test forget-all-messages
   (let ((a (%make-message))
         (b (%make-message))
         (c (%make-message)))
-    (setf (find-message 'a) a)
-    (setf (find-message 'b) b)
-    (setf (find-message 'c) c)
+    (setf (%find-message 'a) a)
+    (setf (%find-message 'b) b)
+    (setf (%find-message 'c) c)
     (is (forget-all-messages))
     (is (message-table-p *message-table*))
-    (is (null (find-message 'a nil)))
-    (is (null (find-message 'b nil)))
-    (is (null (find-message 'c nil)))))
+    (is (null (%find-message 'a)))
+    (is (null (%find-message 'b)))
+    (is (null (%find-message 'c)))))
 
 (def-suite dispatch-cache :in messages)
 (in-suite dispatch-cache)

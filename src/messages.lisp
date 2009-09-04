@@ -55,21 +55,19 @@
 ;;; Message definition
 ;;;
 
-;;; Message table
 (defvar *message-table* (make-hash-table :test #'equal)
   "Hashtable for storing message objects. Needs to :test #'equal because
 of setf methods, whose names are lists.")
 
 (defun message-table-p (table)
+  ;; This is sort of stupid, but I'm sort of hoping it's going to help me make the interface more
+  ;; generic, in case I ever want to change what the message table is actually represented as.
   (hash-table-p table))
 
-(defun find-message (name &optional (errorp t))
-  "Finds a message object in `*message-table*', given its `name'.
-Raises an error if no message is found, unless `errorp' is set to NIL."
-  (or (gethash name *message-table*)
-      (when errorp (error 'no-such-message :message-name name))))
-
-(defun (setf find-message) (new-value name)
+;; We define these two as internal first, so we don't export (setf find-message)
+(defun %find-message (name)
+  (nth-value 0 (gethash name *message-table*)))
+(defun (setf %find-message) (new-value name)
   (setf (gethash name *message-table*) new-value))
 
 (defun forget-message (name)
@@ -77,6 +75,12 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 
 (defun forget-all-messages ()
   (clrhash *message-table*) t)
+
+(defun find-message (name &optional (errorp t))
+  "Finds a message object in `*message-table*', given its `name'.
+Raises an error if no message is found, unless `errorp' is set to NIL."
+  (or (%find-message name)
+      (when errorp (error 'no-such-message :message-name name))))
 
 ;;;
 ;;; Global dispatch cache
@@ -296,8 +300,8 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 ;; its args, checking lamda-list, etc.)
 (defun ensure-message (name &rest all-keys &key lambda-list &allow-other-keys)
   (or (awhen-prog1 (find-message name nil)
-        (set-arg-info it :lambda-list lambda-list))
-      (setf (find-message name)
+                   (set-arg-info it :lambda-list lambda-list))
+      (setf (%find-message name)
             (apply 'make-message :name name :lambda-list lambda-list all-keys))))
 
 ;; This is the actual message definition macro.

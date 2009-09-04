@@ -94,6 +94,8 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 
 (defun make-dispatch-cache ()
   (make-vector *dispatch-cache-size*))
+(defun dispatch-cache-p (x)
+  (vectorp x))
 
 (defun make-dispatch-cache-entry (args replies)
   ;; Since args points to actual arguments for a message, we wrap it in a weak pointer to make sure

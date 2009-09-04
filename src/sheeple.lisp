@@ -196,11 +196,11 @@ regards to the CONSTRAINTS. A future version will undo this change."
      :for choice := (if (null (cdr minimal-elements))
                         (car minimal-elements)
                         (funcall tie-breaker minimal-elements result))
-     :collect choice :into result
      :do (deletef constraints choice :test 'member)
          (setf elements (remove choice elements))
+         (push choice result) :with result
      :finally (if (null elements)
-                  (return-from topological-sort result)
+                  (return-from topological-sort (nreverse result))
                   (error "Inconsistent precedence graph."))))
 
 (defun collect-ancestors (sheep)
@@ -224,7 +224,7 @@ regards to the CONSTRAINTS. A future version will undo this change."
 (defun std-tie-breaker-rule (minimal-elements chosen-elements)
   (mapc (fun (awhen (intersection minimal-elements (sheep-parents _))
                (return-from std-tie-breaker-rule (car it))))
-        (reverse chosen-elements)))
+        chosen-elements))
 
 (defun std-compute-sheep-hierarchy-list (sheep)
   "Lists SHEEP's ancestors, in precedence order."

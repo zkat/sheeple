@@ -66,7 +66,7 @@ of setf methods, whose names are lists.")
 
 ;; We define these two as internal first, so we don't export (setf find-message)
 (defun %find-message (name)
-  (nth-value 0 (gethash name *message-table*)))
+  (values (gethash name *message-table*)))
 (defun (setf %find-message) (new-value name)
   (setf (gethash name *message-table*) new-value))
 
@@ -110,7 +110,6 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 (defun add-entry-to-message (message applicable-replies args index-if-full)
   (let ((dispatch-cache (message-dispatch-cache message))
         (entry (make-dispatch-cache-entry args applicable-replies)))
-    (declare (simple-vector dispatch-cache) (fixnum index))
     ;; We first try to make sure a cache is filled up. If it is, we insert the new entry
     ;; into INDEX-IF-FULL. This is a bit leaky, and should probably be improved.
     (aif (position 0 dispatch-cache)
@@ -131,7 +130,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 (defstruct (arg-info (:constructor make-arg-info))
   (lambda-list :no-lambda-list)
   metatypes number-optional key/rest-p
-  ;; nil: no &KEY or &REST allowed 
+  ;; nil: no &KEY or &REST allowed
   ;; (k1 k2 ..): Each reply must accept these &KEY arguments.
   ;; T: must have &KEY or &REST
   keys)
@@ -181,8 +180,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
                          (push x keyword-parameters))
               (rest      (incf nrest)))))
       (when (and restp (zerop nrest))
-        (error "Error in lambda-list:~%~
-                After &REST, a DEFMESSAGE lambda-list ~
+        (error "A &REST in a DEFMESSAGE lambda-list ~
                 must be followed by at least one variable."))
       (values nrequired noptional keysp restp allow-other-keys-p
               (reverse keywords)

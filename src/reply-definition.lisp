@@ -22,14 +22,12 @@
   (find-message (role-name role) nil))
 
 (defun participant-p (sheep reply-name)
-  (when (member-if (lambda (role) (equal reply-name (role-name role)))
+  (when (member-if (fun (equal reply-name (role-name _)))
                    (sheep-direct-roles sheep))
     t))
 
-(defun ensure-reply (name &rest all-keys
-                       &key participants
-                       lambda-list
-                       &allow-other-keys)
+(defun ensure-reply (name lambda-list participants 
+                     &rest all-keys)
   (when (not (find-message name nil))
     (progn
       (warn 'style-warning)
@@ -39,28 +37,28 @@
   (let* ((message (find-message name))
          (target-sheeple (sheepify-list participants))
          (reply (apply
-                   #'generate-reply
-                   :message message
-                   :lambda-list lambda-list
-                   :participants target-sheeple
-                   all-keys)))
+                 #'generate-reply
+                 :message message
+                 :lambda-list lambda-list
+                 :participants target-sheeple
+                 all-keys)))
     (clear-memo-table message)
     reply))
 
 (defun generate-reply (&key qualifiers
-                         lambda-list
-                         participants
-                         message
-                         function
-                         body
-                         (documentation ""))
+                       lambda-list
+                       participants
+                       message
+                       function
+                       body
+                       (documentation ""))
   (let ((reply (%make-reply
-                   :name (message-name message)
-                   :lambda-list lambda-list
-                   :qualifiers qualifiers
-                   :function function
-                   :body body
-                   :documentation documentation)))
+                :name (message-name message)
+                :lambda-list lambda-list
+                :qualifiers qualifiers
+                :function function
+                :body body
+                :documentation documentation)))
     (remove-specific-reply message qualifiers participants)
     (add-reply-to-message reply message)
     (add-reply-to-sheeple message reply participants)

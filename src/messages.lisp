@@ -88,12 +88,17 @@ Raises an error if no message is found, unless `errorp' is set to NIL."
 ;;; - We hold a global cache for each message, which is filled as different objects are dispatched on.
 ;;;   This allows fairly quick lookup of applicable replies when a particular message is called over
 ;;;   and over on the same arguments.
-(defparameter *dispatch-cache-size* 40)
+(defparameter *dispatch-cache-size* 40
+  "This variable determines the size of messages' dispatch caches. The bigger the number, the
+more entries the cache will be able to hold, but the slower lookup will be.")
 
 (defun make-dispatch-cache ()
   (make-vector *dispatch-cache-size*))
 
 (defun make-dispatch-cache-entry (args replies)
+  ;; Since args points to actual arguments for a message, we wrap it in a weak pointer to make sure
+  ;; the args can be GCd. Otherwise, calling any message on a number of arguments will make those
+  ;; arguments stick around indefinitely.
   (cons (make-weak-pointer args) replies))
 (defun cache-entry-args (entry)
   (car entry))

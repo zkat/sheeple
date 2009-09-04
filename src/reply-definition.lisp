@@ -8,24 +8,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(defclass reply ()
-  ((name :accessor reply-name :initform nil :initarg :name)
-   (qualifiers :accessor reply-qualifiers :initform nil :initarg :ql)
-   (lambda-list :accessor reply-lambda-list :initform nil :initarg :ll)
-   (body :accessor reply-body :initform '(lambda () nil) :initarg :body)
-   (function :accessor reply-function :initform (lambda () nil) :initarg :fn)
-   (documentation :accessor reply-documentation :initform "" :initarg :dox)))
-
-(defun %make-reply (&key name qualifiers lambda-list body function (documentation ""))
-  (make-instance 'reply :name name :ql qualifiers :ll lambda-list
-                 :body body :fn function :dox documentation))
-(defgeneric reply-p (obj))
-(defmethod reply-p (obj)
-  (declare (ignore obj))
-  nil)
-(defmethod reply-p ((obj reply))
-  (declare (ignore obj))
-  t)
+(defstruct (reply (:constructor %make-reply))
+  name qualifiers lambda-list (body '(lambda () nil))
+  (function (lambda () nil)))
 
 (defun reply-message (reply)
   (find-message (reply-name reply) nil))

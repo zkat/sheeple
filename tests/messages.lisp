@@ -95,3 +95,10 @@
 (test defmessage)
 (test canonize-message-option)
 (test canonize-message-options)
+
+(def-suite message-cache :in messages)
+(in-suite message-cache)
+
+(test clear-dispatch-cache)
+(test clear-all-message-caches)
+

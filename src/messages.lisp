@@ -126,9 +126,11 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 ;;;
 ;;; Arg info
 ;;;
+;;; - Arg info objects and the operations on them are meant to check that Message/Reply lambda-lists
+;;;   comply with http://www.lispworks.com/documentation/HyperSpec/Body/07_fd.htm
 (defstruct (arg-info (:constructor make-arg-info))
   (lambda-list :no-lambda-list)
-  precedence metatypes number-optional key/rest-p
+  metatypes number-optional key/rest-p
   ;; nil: no &KEY or &REST allowed 
   ;; (k1 k2 ..): Each reply must accept these &KEY arguments.
   ;; T: must have &KEY or &REST
@@ -145,42 +147,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
   (length (arg-info-metatypes arg-info)))
 
 (defun arg-info-nkeys (arg-info)
-  (count-if (fun (not (eq _ t))) (arg-info-metatypes arg-info)))
-
-(defun set-arg-info (msg &key new-reply (lambda-list nil lambda-list-p))
-  (let* ((arg-info (message-arg-info msg))
-         (replies (message-replies msg))
-         (first-p (and new-reply (null (cdr replies)))))
-    (when (and (not lambda-list-p) replies)
-      (setq lambda-list (message-lambda-list msg)))
-    (when (or lambda-list-p
-              (and first-p
-                   (eq (arg-info-lambda-list arg-info) :no-lambda-list)))
-      (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)
-          (analyze-lambda-list lambda-list)
-        (when (and replies (not first-p))
-          (let ((msg-nreq (arg-info-number-required arg-info))
-                (msg-nopt (arg-info-number-optional arg-info))
-                (msg-key/rest-p (arg-info-key/rest-p arg-info)))
-            (unless (and (= nreq msg-nreq)
-                         (= nopt msg-nopt)
-                         (eq (or keysp restp) msg-key/rest-p))
-              (error 'reply-lambda-list-conflict
-                     :lambda-list lambda-list :message msg))))
-        (setf (arg-info-lambda-list arg-info)
-              (if lambda-list-p
-                  lambda-list
-                  (create-msg-lambda-list lambda-list)))
-        (setf (arg-info-metatypes arg-info) (make-vector nreq))
-        (setf (arg-info-number-optional arg-info) nopt)
-        (setf (arg-info-key/rest-p arg-info) (not (null (or keysp restp))))
-        (setf (arg-info-keys arg-info)
-              (if lambda-list-p
-                  (if allow-other-keys-p t keywords)
-                  (arg-info-key/rest-p arg-info)))))
-    (when new-reply
-      (check-reply-arg-info msg arg-info new-reply))
-    arg-info))
+  (count-if (curry 'neq t) (arg-info-metatypes arg-info)))
 
 (defun analyze-lambda-list (lambda-list)
   (labels ((make-keyword (symbol)
@@ -192,28 +159,21 @@ more entries the cache will be able to hold, but the slower lookup will be.")
                      (caar arg)
                      (make-keyword (car arg)))
                  (make-keyword arg))))
-    (let ((nrequired 0)
-          (noptional 0)
-          (keysp nil)
-          (restp nil)
-          (nrest 0)
-          (allow-other-keys-p nil)
-          (keywords nil)
-          (keyword-parameters nil)
+    (let ((nrequired 0) (noptional 0) (keysp nil) (restp nil) (nrest 0)
+          (allow-other-keys-p nil) (keywords nil) (keyword-parameters nil)
           (state 'required))
       (dolist (x lambda-list)
         (if (memq x lambda-list-keywords)
             (case x
-              (&optional         (setq state 'optional))
-              (&key              (setq keysp t
+              (&optional         (setf state 'optional))
+              (&key              (setf keysp t
                                        state 'key))
-              (&allow-other-keys (setq allow-other-keys-p t))
-              (&rest             (setq restp t
+              (&allow-other-keys (setf allow-other-keys-p t))
+              (&rest             (setf restp t
                                        state 'rest))
               (&aux           (return t))
               (otherwise
-               (error "encountered the non-standard lambda list keyword ~S"
-                      x)))
+               (error "encountered the non-standard lambda list keyword ~S" x)))
             (ecase state
               (required  (incf nrequired))
               (optional  (incf noptional))
@@ -228,6 +188,38 @@ more entries the cache will be able to hold, but the slower lookup will be.")
               (reverse keywords)
               (reverse keyword-parameters)))))
 
+(defun set-arg-info (msg &key new-reply (lambda-list nil lambda-list-p))
+  (let* ((arg-info (message-arg-info msg))
+         (replies (message-replies msg))
+         (firstp (and new-reply (null (cdr replies)))))
+    (when (and (not lambda-list-p) replies)
+      (setf lambda-list (message-lambda-list msg)))
+    (when (or lambda-list-p
+              (and firstp
+                   (eq (arg-info-lambda-list arg-info) :no-lambda-list)))
+      (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)
+          (analyze-lambda-list lambda-list)
+        (when (and replies (not firstp))
+          (let ((msg-nreq (arg-info-number-required arg-info))
+                (msg-nopt (arg-info-number-optional arg-info))
+                (msg-key/rest-p (arg-info-key/rest-p arg-info)))
+            (unless (and (= nreq msg-nreq)
+                         (= nopt msg-nopt)
+                         (eq (or keysp restp) msg-key/rest-p))
+              (error 'reply-lambda-list-conflict
+                     :lambda-list lambda-list :message msg))))
+        (setf (arg-info-lambda-list arg-info) (if lambda-list-p
+                                                  lambda-list
+                                                  (create-msg-lambda-list lambda-list))
+              (arg-info-metatypes arg-info) (make-vector nreq)
+              (arg-info-number-optional arg-info) nopt
+              (arg-info-key/rest-p arg-info) (not (null (or keysp restp)))
+              (arg-info-keys arg-info) (if lambda-list-p
+                                           (if allow-other-keys-p t keywords)
+                                           (arg-info-key/rest-p arg-info)))))
+    (when new-reply (check-reply-arg-info msg arg-info new-reply))
+    arg-info))
+
 (defun check-reply-arg-info (msg arg-info reply)
   (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)
       (analyze-lambda-list (reply-lambda-list reply))
@@ -238,31 +230,26 @@ more entries the cache will be able to hold, but the slower lookup will be.")
                                      but ~?~:>"
                     :format-args (list reply msg string args)))
            (comparison-description (x y)
-             (declare (fixnum x y))
              (if (> x y) "more" "fewer")))
-      (let ((msg-nreq (arg-info-number-required arg-info))
-            (msg-nopt (arg-info-number-optional arg-info))
-            (msg-key/rest-p (arg-info-key/rest-p arg-info))
-            (msg-keywords (arg-info-keys arg-info)))
+      (with-accessors ((msg-nreq arg-info-number-required)
+                       (msg-nopt arg-info-number-optional)
+                       (msg-key/rest-p arg-info-key/rest-p)
+                       (msg-keywords arg-info-keys)) arg-info
         (unless (= nreq msg-nreq)
-          (lose
-           "the reply has ~A required arguments than the message."
-           (comparison-description nreq msg-nreq)))
+          (lose "the reply has ~A required arguments than the message."
+                (comparison-description nreq msg-nreq)))
         (unless (= nopt msg-nopt)
-          (lose
-           "the reply has ~A optional arguments than the message."
-           (comparison-description nopt msg-nopt)))
+          (lose "the reply has ~A optional arguments than the message."
+                (comparison-description nopt msg-nopt)))
         (unless (eq (or keysp restp) msg-key/rest-p)
-          (lose
-           "the reply and message differ in whether they accept~_~
-            &REST or &KEY arguments."))
-        (when (consp msg-keywords)
-          (unless (or (and restp (not keysp))
-                      allow-other-keys-p
-                      (every (fun (memq _ keywords)) msg-keywords))
-            (lose "the reply does not accept each of the &KEY arguments~2I~_~
-                   ~S."
-                  msg-keywords)))))))
+          (lose "the reply and message differ in whether they accept~_~
+                 &REST or &KEY arguments."))
+        (when (and (consp msg-keywords)
+                   (not (or (and restp (not keysp))
+                            allow-other-keys-p
+                            (every (fun (memq _ keywords)) msg-keywords)) ))
+          (lose "the reply does not accept each of the &KEY arguments~2I~_~S."
+                msg-keywords))))))
 
 (defun check-msg-lambda-list (lambda-list)
   (flet ((check-no-defaults (list)

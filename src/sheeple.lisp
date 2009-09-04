@@ -190,17 +190,17 @@ on the TIE-BREAKER in the case of ambiguous constraints. On the assumption
 that they are freshly generated, this implementation is destructive with
 regards to the CONSTRAINTS. A future version will undo this change."
   (loop
-     for minimal-elements = (remove-if (fun (member _ constraints :key 'cadr)) elements)
-     while minimal-elements
-     for choice = (if (null (cdr minimal-elements))
-                      (car minimal-elements)
-                      (funcall tie-breaker minimal-elements result))
-     collect choice into result
-     do (deletef constraints choice :test 'member)
-        (setf elements (remove choice elements))
-     finally (if (null elements)
-                 (return-from topological-sort result)
-                 (error "Inconsistent precedence graph."))))
+     :for minimal-elements := (remove-if (fun (member _ constraints :key 'cadr)) elements)
+     :while minimal-elements
+     :for choice := (if (null (cdr minimal-elements))
+                        (car minimal-elements)
+                        (funcall tie-breaker minimal-elements result))
+     :collect choice :into result
+     :do (deletef constraints choice :test 'member)
+         (setf elements (remove choice elements))
+     :finally (if (null elements)
+                  (return-from topological-sort result)
+                  (error "Inconsistent precedence graph."))))
 
 (defun collect-ancestors (sheep)
   "Recursively collects all of SHEEP's ancestors."
@@ -218,12 +218,11 @@ regards to the CONSTRAINTS. A future version will undo this change."
   "Calculates the local precedence ordering. Relies on the fact that mapcar will
 return when any list is NIL to avoid traversing the entire parent list."
   (let ((parents (sheep-parents sheep)))
-   (mapcar 'list (cons sheep parents) parents)))
+    (mapcar 'list (cons sheep parents) parents)))
 
 (defun std-tie-breaker-rule (minimal-elements hl-so-far)
-  (mapc (fun (let ((common (intersection minimal-elements (sheep-parents _))))
-               (when (not (null common))
-                 (return-from std-tie-breaker-rule (car common)))))
+  (mapc (fun (awhen (intersection minimal-elements (sheep-parents _))
+               (return-from std-tie-breaker-rule (car it))))
         (reverse hl-so-far)))
 
 (defun std-compute-sheep-hierarchy-list (sheep)

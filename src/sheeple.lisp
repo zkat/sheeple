@@ -230,12 +230,10 @@ return when any list is NIL to avoid traversing the entire parent list."
   "Lists SHEEP's ancestors, in precedence order."
   (handler-case
       ;; since collect-ancestors only collects the _ancestors_, we cons the sheep in front.
-      (let ((sheeple-to-order (cons sheep (collect-ancestors sheep))))
-        (topological-sort sheeple-to-order
-                          (remove-duplicates
-                           ;; LOCAL-PRECEDENCE-ORDERING conses up fresh structure,
-                           ;; so we can be destructive here
-                           (mapcan 'local-precedence-ordering sheeple-to-order))
+      ;; LOCAL-PRECEDENCE-ORDERING returns fresh conses, so we can be destructive.
+      (let ((unordered (cons sheep (collect-ancestors sheep))))
+        (topological-sort unordered
+                          (delete-duplicates (mapcan 'local-precedence-ordering unordered))
                           'std-tie-breaker-rule))
     (simple-error () (error 'sheeple-hierarchy-error :sheep sheep))))
 

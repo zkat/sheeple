@@ -31,7 +31,7 @@
   ;; Again, we just have a global lookup instead of a backlink.
   (find-message (role-name role) nil))
 
-(defun participant-p (sheep reply-name)
+(defun participantp (sheep reply-name)
   (when (member-if (fun (equal reply-name (role-name _)))
                    (sheep-direct-roles sheep))
     t))
@@ -93,7 +93,7 @@
                          message participants :errorp nil))))
     (when (and reply
                (every (lambda (sheep)
-                        (participant-p sheep (reply-name reply)))
+                        (participantp sheep (reply-name reply)))
                       participants))
       (loop for sheep in participants
          for i from 0

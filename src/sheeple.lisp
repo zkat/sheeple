@@ -70,9 +70,10 @@ of its descendants."
 
 ;;; The basics of allocating sheep objects
 (defun std-allocate-sheep (metasheep)
-  "Creates a standard sheep object. By default, all the metaproperties are NIL."
+  "Creates a standard sheep object."
   (let ((array (make-vector 6)))
-    (setf (svref array 0) metasheep)
+    (setf (svref array 0) metasheep
+          (svref array 4) (list array))
     array))
 
 (defun maybe-std-allocate-sheep (metasheep)

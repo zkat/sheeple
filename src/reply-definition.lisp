@@ -130,11 +130,10 @@
 ;;; Reply undefinition
 ;;;
 (defun undefine-reply (name &key qualifiers participants)
-  (let ((msg (find-message name nil)))
-    (when msg
-      (remove-applicable-reply msg qualifiers participants)
-      (clear-dispatch-cache msg)
-      t)))
+  (awhen (find-message name nil)
+    (remove-applicable-reply it qualifiers participants)
+    (clear-dispatch-cache it)
+    t))
 
 (defun remove-specific-reply (message qualifiers participants)
   (let ((reply (find-if (lambda (msg)

@@ -114,8 +114,7 @@
 
 (defmacro fun (&body body)
   "This macro puts the FUN back in FUNCTION."
-  (let ((var (intern "_")))
-    `(lambda (,var) (declare (ignorable ,var)) ,@body)))
+  `(lambda (&optional _) (declare (ignorable _)) ,@body))
 
 ;; from alexandria:
 (declaim (inline delete/swapped-arguments))

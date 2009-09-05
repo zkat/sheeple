@@ -32,7 +32,7 @@
   (find-message (role-name role) nil))
 
 (defun participantp (sheep reply-name)
-  (when (member-if (fun (equal reply-name (role-name _)))
+  (when (member-if (compose (curry 'equal reply-name) 'role-name)
                    (sheep-direct-roles sheep))
     t))
 

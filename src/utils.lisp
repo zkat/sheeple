@@ -112,9 +112,10 @@
 	((null (cdr args)) (car args))
 	(t `(aif ,(car args) (aand ,@(cdr args))))))
 
-(defmacro fun (&body family)
+(defmacro fun (&body body)
   "This macro puts the FUN back in FUNCTION."
-  `(lambda (,(intern "_")) ,@family))
+  (let ((var (intern "_")))
+    `(lambda (,var) (declare (ignorable ,var)) ,@body)))
 
 ;; from alexandria:
 (declaim (inline delete/swapped-arguments))

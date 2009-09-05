@@ -10,7 +10,22 @@
 (in-package :sheeple)
 
 (def-suite reply-definition :in messages)
-(in-suite reply-definition)
+
+(def-suite reply-objects :in reply-definition)
+(in-suite reply-objects)
+
+(test %make-reply)
+(test replyp)
+(test reply-name)
+
+(def-suite role-objects :in reply-definition)
+(in-suite role-objects)
+
+(test %make-role)
+(test rolep)
+(test role-reply)
+(test role-position)
+(test role-message)
 
 (test reply-p)
 (test role-p)

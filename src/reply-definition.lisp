@@ -33,10 +33,10 @@
 ;;;   The algorithm takes care of putting everything else together.
 (defun make-role (reply position)
   (cons reply position))
+(deftype role ()
+  '(cons reply fixnum))
 (defun rolep (maybe-role)
-  (and (consp maybe-role)
-       (replyp (role-reply maybe-role))
-       (fixnump (role-position maybe-role))))
+  (typep maybe-role 'role))
 ;; We hand-define some readers here to hide the fact that it's just a cons.
 (defun role-reply (role)
   (car role))

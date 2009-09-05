@@ -109,29 +109,32 @@
     (append (sheep-direct-roles sheep) (mapcar 'available-replies (sheep-parents sheep))))
    :test 'equal))
 
+(defun add-reader-to-sheep (reader prop-name sheep)
+  (ensure-message reader :lambda-list '(sheep))
+  (ensure-reply reader
+                :lambda-list '(sheep)
+                :participants (list sheep)
+                :function (eval (make-reply-lambda reader
+                                                   '(sheep)
+                                                   `((property-value sheep ',prop-name))))))
 
 (defun add-readers-to-sheep (readers prop-name sheep)
-  (loop for reader in readers
-     do
-       (ensure-message reader :lambda-list '(sheep))
-       (ensure-reply reader
-                     :lambda-list '(sheep)
-                     :participants (list sheep)
-                     :function (eval (make-reply-lambda reader
-                                                        '(sheep)
-                                                        `((property-value sheep ',prop-name)))))))
+  (map nil (fun (add-reader-to-sheep _ prop-name sheep)) readers)
+  sheep)
+
+(defun add-writer-to-sheep (writer prop-name sheep)
+  (ensure-message writer :lambda-list '(new-value sheep))
+  (ensure-reply writer
+                :lambda-list '(new-value sheep)
+                :participants (list =t= sheep)
+                :function (eval (make-reply-lambda writer
+                                                   '(new-value sheep)
+                                                   `((setf (property-value sheep ',prop-name)
+                                                           new-value))))))
 
 (defun add-writers-to-sheep (writers prop-name sheep)
-  (loop for writer in writers
-     do
-       (ensure-message writer :lambda-list '(new-value sheep))
-       (ensure-reply writer
-                     :lambda-list '(new-value sheep)
-                     :participants (list =t= sheep)
-                     :function (eval (make-reply-lambda writer
-                                                        '(new-value sheep)
-                                                        `((setf (property-value sheep ',prop-name)
-                                                                new-value)))))))
+  (map nil (fun (add-writer-to-sheep _ prop-name sheep)) writers)
+  sheep)
 
 ;;;
 ;;; Reply undefinition

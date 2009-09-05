@@ -151,20 +151,17 @@
       (delete-reply reply))))
 
 (defun remove-applicable-reply (message qualifiers participants)
-  (let ((reply (find-if (lambda (reply)
-                          (equal (reply-qualifiers reply)
-                                 qualifiers))
+  (let ((reply (find-if (fun (equal qualifiers (reply-qualifiers _)))
                         (%find-applicable-replies
                          message participants :errorp nil))))
     (when reply
-      (loop for sheep in participants
+      (loop 
+         for sheep in participants
          for i from 0
-         do (loop for role in (sheep-direct-roles sheep)
-               do (let ((role-reply (role-reply role)))
-                    (when (and
-                           (equal reply role-reply)
-                           (= i (role-position role)))
-                      (delete-role role sheep)))))
+         do (map nil (fun (when (and (eq reply (role-reply role))
+                                     (= i (role-position role)))
+                            (delete-role role sheep)))
+                 (sheep-direct-roles sheep)))
       (delete-reply reply))))
 
 (defun delete-reply (reply)

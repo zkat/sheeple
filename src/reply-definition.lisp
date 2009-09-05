@@ -104,11 +104,11 @@
               (sheep-direct-roles sheep))))
 
 (defun available-replies (sheep)
-  (let ((roles (loop for role in (sheep-direct-roles sheep)
-                  collect (vector (role-name role) (role-position role)))))
-    (remove-duplicates
-     (flatten
-      (append roles (mapcar 'available-replies (sheep-parents sheep)))))))
+  (remove-duplicates
+   (flatten
+    (append (sheep-direct-roles sheep) (mapcar 'available-replies (sheep-parents sheep))))
+   :test 'equal))
+
 
 (defun add-readers-to-sheep (readers prop-name sheep)
   (loop for reader in readers

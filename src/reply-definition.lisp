@@ -87,8 +87,8 @@
 
 (defun remove-specific-reply (message qualifiers participants)
   (let ((reply (find-if (lambda (msg)
-                            (equal (reply-qualifiers msg)
-                                   qualifiers))
+                          (equal (reply-qualifiers msg)
+                                 qualifiers))
                         (%find-applicable-replies
                          message participants :errorp nil))))
     (when (and reply
@@ -128,16 +128,16 @@
 (defun undefine-reply (name &key qualifiers participants)
   (let ((msg (find-message name nil)))
     (when msg
-     (remove-applicable-reply msg qualifiers participants)
-     (clear-memo-table msg)
-     t)))
+      (remove-applicable-reply msg qualifiers participants)
+      (clear-memo-table msg)
+      t)))
 
 (defun remove-applicable-reply (message qualifiers participants)
   (let ((reply (find-if (lambda (reply)
-                            (equal (reply-qualifiers reply)
-                                   qualifiers))
-                          (%find-applicable-replies
-                           message participants :errorp nil))))
+                          (equal (reply-qualifiers reply)
+                                 qualifiers))
+                        (%find-applicable-replies
+                         message participants :errorp nil))))
     (when reply
       (loop for sheep in participants
          for i from 0
@@ -161,25 +161,25 @@
      do
        (ensure-message reader :lambda-list '(sheep))
        (ensure-reply reader
-                        :lambda-list '(sheep)
-                        :participants (list sheep)
-                        :body `(property-value sheep ',prop-name)
-                        :function (eval (make-reply-lambda reader
-                                                             '(sheep)
-                                                             `((property-value sheep ',prop-name)))))))
+                     :lambda-list '(sheep)
+                     :participants (list sheep)
+                     :body `(property-value sheep ',prop-name)
+                     :function (eval (make-reply-lambda reader
+                                                        '(sheep)
+                                                        `((property-value sheep ',prop-name)))))))
 
 (defun add-writers-to-sheep (writers prop-name sheep)
   (loop for writer in writers
      do
        (ensure-message writer :lambda-list '(new-value sheep))
        (ensure-reply writer
-                        :lambda-list '(new-value sheep)
-                        :participants (list =t= sheep)
-                        :body `(setf (property-value sheep ',prop-name) new-value)
-                        :function (eval (make-reply-lambda writer
-                                                             '(new-value sheep)
-                                                             `((setf (property-value sheep ',prop-name)
-                                                                     new-value)))))))
+                     :lambda-list '(new-value sheep)
+                     :participants (list =t= sheep)
+                     :body `(setf (property-value sheep ',prop-name) new-value)
+                     :function (eval (make-reply-lambda writer
+                                                        '(new-value sheep)
+                                                        `((setf (property-value sheep ',prop-name)
+                                                                new-value)))))))
 
 ;;; macro
 (defmacro defreply (&rest args)

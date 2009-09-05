@@ -70,11 +70,7 @@
                   (funcall (reply-function after) args nil)))))))))
 
 (defun compute-primary-erfun (replies)
-  (if (null replies)
-      nil
-      (let ((next-erfun (compute-primary-erfun (cdr replies))))
-        (lambda (args)
-          (funcall (reply-function (car replies)) args next-erfun)))))
+  (when replies (rcurry (reply-function (car replies)) (compute-primary-erfun (cdr replies)))))
 
 (defun create-reply-cache (message replies)
   (make-cache

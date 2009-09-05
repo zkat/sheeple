@@ -54,6 +54,9 @@
                  (sheep-direct-roles sheep) :key 'role-reply)
     t))
 
+;;;
+;;; Reply definition
+;;;
 (defun ensure-reply (name &rest all-keys
                      &key lambda-list participants
                      &allow-other-keys)
@@ -92,7 +95,7 @@
     reply))
 
 (defun create-msg-lambda-list (lambda-list)
-  ;;; Create a message lambda list from a reply lambda list
+  "Create a message lambda list from a reply lambda list"
   (loop for x in lambda-list
      collect (if (consp x) (list (car x)) x)
      if (eq x '&key) do (loop-finish)))
@@ -101,35 +104,6 @@
   (set-arg-info message :new-reply reply)
   (push reply (message-replies message)))
 
-(defun remove-specific-reply (message qualifiers participants)
-  (let ((reply (find-if (lambda (msg)
-                          (equal (reply-qualifiers msg)
-                                 qualifiers))
-                        (%find-applicable-replies
-                         message participants :errorp nil))))
-    (when (and reply
-               (every (lambda (sheep)
-                        (participantp sheep (reply-name reply)))
-                      participants))
-      (loop for sheep in participants
-         for i from 0
-         do (loop for role in (sheep-direct-roles sheep)
-               do (let ((role-reply (role-reply role)))
-                    (when (and
-                           (eq reply role-reply)
-                           (= i (role-position role)))
-                      (delete-role role sheep)))))
-      (delete-reply reply))))
-
-(defun delete-reply (reply)
-  (let ((message (reply-message reply)))
-    (setf (message-replies message)
-          (delete reply (message-replies message)))))
-
-(defun delete-role (role sheep)
-  (setf (sheep-direct-roles sheep)
-        (delete role (sheep-direct-roles sheep))))
-
 (defun add-reply-to-sheeple (message reply sheeple)
   (loop
      for sheep in sheeple
@@ -137,30 +111,6 @@
      do (let ((role (%make-role reply i)))
           (push role
                 (sheep-direct-roles sheep)))))
-
-(defun undefine-reply (name &key qualifiers participants)
-  (let ((msg (find-message name nil)))
-    (when msg
-      (remove-applicable-reply msg qualifiers participants)
-      (clear-memo-table msg)
-      t)))
-
-(defun remove-applicable-reply (message qualifiers participants)
-  (let ((reply (find-if (lambda (reply)
-                          (equal (reply-qualifiers reply)
-                                 qualifiers))
-                        (%find-applicable-replies
-                         message participants :errorp nil))))
-    (when reply
-      (loop for sheep in participants
-         for i from 0
-         do (loop for role in (sheep-direct-roles sheep)
-               do (let ((role-reply (role-reply role)))
-                    (when (and
-                           (equal reply role-reply)
-                           (= i (role-position role)))
-                      (delete-role role sheep)))))
-      (delete-reply reply))))
 
 (defun available-replies (sheep)
   (let ((roles (loop for role in (sheep-direct-roles sheep)
@@ -192,7 +142,67 @@
                                                         `((setf (property-value sheep ',prop-name)
                                                                 new-value)))))))
 
-;;; macro
+;;;
+;;; Reply undefinition
+;;;
+(defun undefine-reply (name &key qualifiers participants)
+  (let ((msg (find-message name nil)))
+    (when msg
+      (remove-applicable-reply msg qualifiers participants)
+      (clear-memo-table msg)
+      t)))
+
+(defun remove-specific-reply (message qualifiers participants)
+  (let ((reply (find-if (lambda (msg)
+                          (equal (reply-qualifiers msg)
+                                 qualifiers))
+                        (%find-applicable-replies
+                         message participants :errorp nil))))
+    (when (and reply
+               (every (lambda (sheep)
+                        (participantp sheep (reply-name reply)))
+                      participants))
+      (loop for sheep in participants
+         for i from 0
+         do (loop for role in (sheep-direct-roles sheep)
+               do (let ((role-reply (role-reply role)))
+                    (when (and
+                           (eq reply role-reply)
+                           (= i (role-position role)))
+                      (delete-role role sheep)))))
+      (delete-reply reply))))
+
+(defun remove-applicable-reply (message qualifiers participants)
+  (let ((reply (find-if (lambda (reply)
+                          (equal (reply-qualifiers reply)
+                                 qualifiers))
+                        (%find-applicable-replies
+                         message participants :errorp nil))))
+    (when reply
+      (loop for sheep in participants
+         for i from 0
+         do (loop for role in (sheep-direct-roles sheep)
+               do (let ((role-reply (role-reply role)))
+                    (when (and
+                           (equal reply role-reply)
+                           (= i (role-position role)))
+                      (delete-role role sheep)))))
+      (delete-reply reply))))
+
+(defun delete-reply (reply)
+  (let ((message (reply-message reply)))
+    (setf (message-replies message)
+          (delete reply (message-replies message)))))
+
+(defun delete-role (role sheep)
+  (setf (sheep-direct-roles sheep)
+        (delete role (sheep-direct-roles sheep))))
+
+;;;
+;;; User interface
+;;;
+
+;;; Definition
 (defmacro defreply (&rest args)
   (multiple-value-bind (name qualifiers specialized-lambda-list docstring body)
       (parse-defreply args)
@@ -270,6 +280,7 @@
       var-name
       (error "Invalid var name.")))
 
+;;; Undefinition
 (defmacro undefreply (&rest args)
   (multiple-value-bind (name qualifiers lambda-list)
       (parse-undefreply args)
@@ -292,3 +303,4 @@
     (values name
             qualifiers
             lambda-list)))
+

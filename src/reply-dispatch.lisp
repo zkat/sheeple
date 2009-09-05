@@ -121,7 +121,7 @@
              (equal (car args) (car vector-args)))
             (t
              (loop
-                for i upto relevant-args-length
+                for i upto relevant-args-length ;should this be :BELOW?
                 for v-arg in vector-args
                 for arg in args
                 do (when (not (equal v-arg arg))
@@ -168,7 +168,7 @@
         (declare (list discovered-replies contained-applicable-replies))
         (loop
            for arg in args
-           for index upto (1- n)
+           for index below n
            do (let* ((arg (if (sheep-p arg)
                               arg
                               (or (find-boxed-object arg)
@@ -176,7 +176,7 @@
                      (curr-sheep-list (sheep-hierarchy-list arg)))
                 (loop
                    for curr-sheep in curr-sheep-list
-                   for hierarchy-position upto (1- (length curr-sheep-list))
+                   for hierarchy-position below (length curr-sheep-list)
                    do (dolist (role (sheep-direct-roles curr-sheep))
                         (when (and (equal selector (role-name role)) ;(eql message (role-message role))
                                    (= (the fixnum index) (the fixnum (role-position role))))

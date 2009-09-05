@@ -11,7 +11,7 @@
 ;;;
 ;;; Reply objects
 ;;;
-(defstruct (reply (:constructor %make-reply))
+(defstruct reply
   ;; Replies are the Sheeple equivalent of methods. Replies themselves are objects that hold
   ;; some basic information about what the reply does, what kind of reply it is, etc.
   ;; When reply objects are 'called', their reply-function is fetched directly. By using lambdas,
@@ -31,7 +31,7 @@
 ;;;   particular message. As it turns out, all the information roles have to hold is the position
 ;;;   in which it is supposed to be called, and the actual reply object it's associated with.
 ;;;   The algorithm takes care of putting everything else together.
-(defun %make-role (reply position)
+(defun make-role (reply position)
   (cons reply position))
 (defun rolep (maybe-role)
   (and (consp maybe-role)
@@ -81,7 +81,7 @@
 
 (defun generate-reply (&key qualifiers lambda-list participants
                        message function (documentation ""))
-  (let ((reply (%make-reply
+  (let ((reply (make-reply
                 :message message
                 :lambda-list lambda-list
                 :qualifiers qualifiers
@@ -100,7 +100,7 @@
   (loop
      for sheep in sheeple
      for i below (length sheeple)
-     do (push (%make-role reply i)
+     do (push (make-role reply i)
               (sheep-direct-roles sheep))))
 
 (defun available-replies (sheep)

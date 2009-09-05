@@ -23,9 +23,12 @@
   (find-message (reply-name reply) nil))
 
 (defstruct (role (:constructor %make-role))
+  ;; Roles are objects stored directly in sheeple objects that represent some information
+  ;; necessary to dispatching a particular reply.
   name position reply)
 
 (defun role-message (role)
+  ;; Again, we just have a global lookup instead of a backlink.
   (find-message (role-name role) nil))
 
 (defun participant-p (sheep reply-name)

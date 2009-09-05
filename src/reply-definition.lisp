@@ -145,9 +145,9 @@
       (loop
          for sheep in participants
          for i from 0
-         do (map nil (fun (when (and (eq reply (role-reply role))
-                                     (= i (role-position role)))
-                            (delete-role role sheep)))
+         do (map nil (fun (when (and (eq reply (role-reply _))
+                                     (= i (role-position _)))
+                            (delete-role _ sheep)))
                  (%sheep-roles sheep)))
       (delete-reply reply))))
 
@@ -159,9 +159,9 @@
       (loop 
          for sheep in participants
          for i from 0
-         do (map nil (fun (when (and (eq reply (role-reply role))
-                                     (= i (role-position role)))
-                            (delete-role role sheep)))
+         do (map nil (fun (when (and (eq reply (role-reply _))
+                                     (= i (role-position _)))
+                            (delete-role _ sheep)))
                  (%sheep-roles sheep)))
       (delete-reply reply))))
 

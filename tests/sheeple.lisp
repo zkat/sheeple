@@ -84,7 +84,7 @@
   (is (null (svref sheep 1)))
   (is (null (svref sheep 2)))
   (is (null (svref sheep 3)))
-  (is (null (svref sheep 4)))
+  (is (equal (list sheep) (svref sheep 4)))
   (is (null (svref sheep 5))))
 
 (postboot-test allocate-sheep
@@ -153,7 +153,7 @@
   (is (equal '(bar foo) (%sheep-roles sheep))))
 
 (test (%sheep-hierarchy-cache :fixture with-std-sheep)
-  (is (null (%sheep-hierarchy-cache sheep)))
+  (is (equal (list sheep) (%sheep-hierarchy-cache sheep)))
   (is (equal '(foo) (setf (%sheep-hierarchy-cache sheep) '(foo))))
   (is (equal '(foo) (%sheep-hierarchy-cache sheep)))
   (is (equal '(bar foo) (push 'bar (%sheep-hierarchy-cache sheep))))
@@ -379,8 +379,6 @@
   (let ((sheep1 (cons-std-sheep))
         (sheep2 (cons-std-sheep)))
     (setf (%sheep-parents sheep1) (list sheep2))
-    (is (null (%sheep-hierarchy-cache sheep1)))
-    (is (null (%sheep-hierarchy-cache sheep2)))
     (memoize-sheep-hierarchy-list sheep1)
     (is (equal (list sheep1 sheep2) (%sheep-hierarchy-cache sheep1)))))
 
@@ -466,7 +464,6 @@
   (let ((a (cons-std-sheep))
         (b (cons-std-sheep))
         (c (cons-std-sheep)))
-    (is (eql nil (sheep-hierarchy-list c)))
     (is (eql a (add-parent b a)))
     (is (eql b (add-parent c b)))
     (is (equal (list a b c) (sheep-hierarchy-list a)))))

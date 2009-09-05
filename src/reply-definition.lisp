@@ -14,13 +14,12 @@
   ;; When reply objects are 'called', their reply-function is fetched directly. By using lambdas,
   ;; we're able to latch on to the lexical environment the reply was defined in (so they can be
   ;; closures)
-  name qualifiers lambda-list
+  message qualifiers lambda-list
   (body '(lambda () nil)) ; I could get rid of this. It makes messages pretty heavy...
   (function (lambda () nil)))
 
-(defun reply-message (reply)
-  ;; Instead of adding a backlink to the message, we just do a global search for that message.
-  (find-message (reply-name reply) nil))
+(defun reply-name (reply)
+  (message-name (reply-message reply)))
 
 (defstruct (role (:constructor %make-role))
   ;; Roles are objects stored directly in sheeple objects that represent some information
@@ -64,7 +63,7 @@
                        body
                        (documentation ""))
   (let ((reply (%make-reply
-                :name (message-name message)
+                :message message
                 :lambda-list lambda-list
                 :qualifiers qualifiers
                 :function function

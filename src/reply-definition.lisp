@@ -48,7 +48,7 @@
   (let* ((message (find-message name))
          (target-sheeple (sheepify-list participants))
          (reply (apply
-                 #'generate-reply
+                 'generate-reply
                  :message message
                  :lambda-list lambda-list
                  :participants target-sheeple
@@ -151,10 +151,10 @@
 
 (defun available-replies (sheep)
   (let ((roles (loop for role in (sheep-direct-roles sheep)
-                    collect (vector (role-name role) (role-position role)))))
+                  collect (vector (role-name role) (role-position role)))))
     (remove-duplicates
      (flatten
-      (append roles (mapcar #'available-replies (sheep-parents sheep)))))))
+      (append roles (mapcar 'available-replies (sheep-parents sheep)))))))
 
 (defun add-readers-to-sheep (readers prop-name sheep)
   (loop for reader in readers

@@ -21,14 +21,16 @@
 (defun reply-name (reply)
   (message-name (reply-message reply)))
 
-(defstruct (role (:constructor %make-role))
-  ;; Roles are objects stored directly in sheeple objects that represent some information
-  ;; necessary to dispatching a particular reply.
-  name position reply)
-
+(defun %make-role (reply position)
+  (cons reply position))
+(defun role-reply (role)
+  (car role))
+(defun role-position (role)
+  (cdr role))
 (defun role-message (role)
-  ;; Again, we just have a global lookup instead of a backlink.
-  (find-message (role-name role) nil))
+  (reply-message (role-reply role)))
+(defun role-name (role)
+  (reply-name (role-reply role)))
 
 (defun participantp (sheep reply-name)
   (when (member-if (compose (curry 'equal reply-name) 'role-name)
@@ -99,7 +101,7 @@
          do (loop for role in (sheep-direct-roles sheep)
                do (let ((role-reply (role-reply role)))
                     (when (and
-                           (equal reply role-reply)
+                           (eq reply role-reply)
                            (= i (role-position role)))
                       (delete-role role sheep)))))
       (delete-reply reply))))
@@ -117,10 +119,7 @@
   (loop
      for sheep in sheeple
      for i upto (1- (length sheeple))
-     do (let ((role (%make-role
-                     :name (message-name message)
-                     :position i
-                     :reply reply)))
+     do (let ((role (%make-role reply i)))
           (push role
                 (sheep-direct-roles sheep)))))
 

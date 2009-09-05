@@ -95,9 +95,8 @@
               (sheep-direct-roles sheep))))
 
 (defun available-replies (sheep)
-  (remove-duplicates
-   (flatten
-    (append (sheep-direct-roles sheep) (mapcar 'available-replies (sheep-parents sheep))))
+  (delete-duplicates
+   (append (sheep-direct-roles sheep) (mapcan 'available-replies (sheep-parents sheep)))
    :test 'equal))
 
 (defun add-reader-to-sheep (reader prop-name sheep)

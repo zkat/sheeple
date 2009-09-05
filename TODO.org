@@ -136,6 +136,10 @@
 ** DONE [#B] Fix Sheep Allocation
    We need std-allocate-sheep, along with a MOP hook so that, for
    example, you could allocate storage in a database in an :after reply.
+** TODO Checking hierarchies
+   #'ADD-PARENT shouldn't rely on the hierarchy list computation to
+   check the validity of new hierarchy lists. In fact, the hierarchy
+   checking as a whole needs to be revamped a bit.
 ** TODO Instantiation
    It could use some work. The defproto/defsheep/spawn triumverate needs a cleanup. Particularly,
    it would be nice to merge spawn/defsheep into a simpler function/macro. Maybe it should just be

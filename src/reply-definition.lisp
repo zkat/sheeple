@@ -57,40 +57,31 @@
 ;;;
 ;;; Reply definition
 ;;;
-(defun ensure-reply (name &rest all-keys
-                     &key lambda-list participants
-                     &allow-other-keys)
+(defun ensure-reply (name &key qualifiers lambda-list participants function (documentation ""))
   ;; shouldn't this just be a plain call to ensure-message? -- syko
-  (when (not (find-message name nil))
+  (when (null (find-message name nil))
     ;; TODO - this style warning could be -much- nicer.
     (warn 'style-warning)
     (ensure-message name :lambda-list (create-msg-lambda-list lambda-list)))
-  (prog1 (apply 'generate-reply
+  (let ((reply (make-reply
                 :message (find-message name)
                 :lambda-list lambda-list
-                :participants (sheepify-list participants)
-                all-keys)
+                :qualifiers qualifiers
+                :function function
+                :documentation documentation))
+        (sheepified-participants (sheepify-list participants)))
     ;; We must clear the cache because the dispatch landscape has changed.
-    (clear-dispatch-cache message)))
+    (clear-dispatch-cache message)
+    (remove-specific-reply message qualifiers sheepified-participants)
+    (add-reply-to-message reply message)
+    (add-reply-to-sheeple message reply sheepified-participants)
+    reply))
 
 (defun create-msg-lambda-list (lambda-list)
   "Create a message lambda list from a reply lambda list"
   (loop for x in lambda-list
      collect (if (consp x) (list (car x)) x)
      if (eq x '&key) do (loop-finish)))
-
-(defun generate-reply (&key qualifiers lambda-list participants
-                       message function (documentation ""))
-  (let ((reply (make-reply
-                :message message
-                :lambda-list lambda-list
-                :qualifiers qualifiers
-                :function function
-                :documentation documentation)))
-    (remove-specific-reply message qualifiers participants)
-    (add-reply-to-message reply message)
-    (add-reply-to-sheeple message reply participants)
-    reply))
 
 (defun add-reply-to-message (reply message)
   (set-arg-info message :new-reply reply)

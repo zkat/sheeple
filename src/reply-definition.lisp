@@ -18,7 +18,6 @@
   ;; we're able to latch on to the lexical environment the reply was defined in (so they can be
   ;; closures)
   message qualifiers lambda-list
-  (body '(lambda () nil)) ; I could get rid of this. It makes messages pretty heavy...
   (function (lambda () nil)))
 
 (defun reply-name (reply)
@@ -76,14 +75,12 @@
                        participants
                        message
                        function
-                       body
                        (documentation ""))
   (let ((reply (%make-reply
                 :message message
                 :lambda-list lambda-list
                 :qualifiers qualifiers
                 :function function
-                :body body
                 :documentation documentation)))
     (remove-specific-reply message qualifiers participants)
     (add-reply-to-message reply message)
@@ -175,7 +172,6 @@
        (ensure-reply reader
                      :lambda-list '(sheep)
                      :participants (list sheep)
-                     :body `(property-value sheep ',prop-name)
                      :function (eval (make-reply-lambda reader
                                                         '(sheep)
                                                         `((property-value sheep ',prop-name)))))))
@@ -187,7 +183,6 @@
        (ensure-reply writer
                      :lambda-list '(new-value sheep)
                      :participants (list =t= sheep)
-                     :body `(setf (property-value sheep ',prop-name) new-value)
                      :function (eval (make-reply-lambda writer
                                                         '(new-value sheep)
                                                         `((setf (property-value sheep ',prop-name)
@@ -211,8 +206,7 @@
       :lambda-list ',ll
       :participants (list ,@participants)
       :documentation ,docstring
-      :function ,(make-reply-lambda name ll body)
-      :body '(block ,name ,@body))))
+      :function ,(make-reply-lambda name ll body))))
 
 (defun make-reply-lambda (name lambda-list body)
   (let* ((msg (find-message name nil))

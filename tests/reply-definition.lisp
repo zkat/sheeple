@@ -32,7 +32,6 @@
 
 (test ensure-reply)
 (test create-msg-lambda-list)
-(test generate-reply)
 (test add-reply-to-message)
 (test add-reply-to-sheeple)
 (test available-replies)

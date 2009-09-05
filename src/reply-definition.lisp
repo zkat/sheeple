@@ -51,7 +51,7 @@
 (defun participantp (sheep reply)
   "Checks if SHEEP is actually involved in dispatching REPLY"
   (when (find-if (curry 'eq reply)
-                 (sheep-direct-roles sheep) :key 'role-reply)
+                 (%sheep-roles sheep) :key 'role-reply)
     t))
 
 ;;;
@@ -92,11 +92,11 @@
      for sheep in sheeple
      for i below (length sheeple)
      do (push (make-role reply i)
-              (sheep-direct-roles sheep))))
+              (%sheep-roles sheep))))
 
 (defun available-replies (sheep)
   (delete-duplicates
-   (append (sheep-direct-roles sheep) (mapcan 'available-replies (sheep-parents sheep)))
+   (append (%sheep-roles sheep) (mapcan 'available-replies (sheep-parents sheep)))
    :test 'equal))
 
 (defun add-reader-to-sheep (reader prop-name sheep)
@@ -147,7 +147,7 @@
          do (map nil (fun (when (and (eq reply (role-reply role))
                                      (= i (role-position role)))
                             (delete-role role sheep)))
-                 (sheep-direct-roles sheep)))
+                 (%sheep-roles sheep)))
       (delete-reply reply))))
 
 (defun remove-applicable-reply (message qualifiers participants)
@@ -161,7 +161,7 @@
          do (map nil (fun (when (and (eq reply (role-reply role))
                                      (= i (role-position role)))
                             (delete-role role sheep)))
-                 (sheep-direct-roles sheep)))
+                 (%sheep-roles sheep)))
       (delete-reply reply))))
 
 (defun delete-reply (reply)
@@ -170,8 +170,8 @@
           (delete reply (message-replies message)))))
 
 (defun delete-role (role sheep)
-  (setf (sheep-direct-roles sheep)
-        (delete role (sheep-direct-roles sheep))))
+  (setf (%sheep-roles sheep)
+        (delete role (%sheep-roles sheep))))
 
 ;;;
 ;;; User interface

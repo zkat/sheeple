@@ -155,24 +155,24 @@
   (if (null args)
       (message-replies message)
       (let ((selector (message-name message))
-            (n (length args))
             (discovered-replies nil)
             (contained-applicable-replies nil))
         (declare (list discovered-replies contained-applicable-replies))
         (loop
            for arg in args
-           for index below n
-           do (let* ((arg (if (sheep-p arg)
+           for index below (length args)
+           do (let* ((arg (if (sheepp arg)
                               arg
                               (or (find-boxed-object arg)
                                   (box-type-of arg))))
                      (curr-sheep-list (sheep-hierarchy-list arg)))
+                (declare (fixnum index))
                 (loop
                    for curr-sheep in curr-sheep-list
                    for hierarchy-position below (length curr-sheep-list)
                    do (dolist (role (sheep-direct-roles curr-sheep))
                         (when (and (equal selector (role-name role)) ;(eql message (role-message role))
-                                   (= (the fixnum index) (the fixnum (role-position role))))
+                                   (= index (the fixnum (role-position role))))
                           (let ((curr-reply (role-reply role)))
                             (when (= n (length (the list (reply-specialized-portion curr-reply))))
                               (when (not (member curr-reply
@@ -181,16 +181,16 @@
                                 (pushnew (the vector (contain-reply curr-reply))
                                          discovered-replies))
                               (let ((contained-reply (find curr-reply
-                                                             discovered-replies
-                                                             :key #'reply-container-reply)))
+                                                           discovered-replies
+                                                           :key #'reply-container-reply)))
                                 (setf (elt (reply-container-rank contained-reply) index)
                                       hierarchy-position)
                                 (when (fully-specified-p (reply-container-rank contained-reply))
-                                  (pushnew contained-reply contained-applicable-replies :test #'equalp))))))))))
+                                  (pushnew contained-reply contained-applicable-replies
+                                           :test #'equalp))))))))))
         (if contained-applicable-replies
             (unbox-replies (sort-applicable-replies contained-applicable-replies))
-            (when errorp
-              (error 'no-applicable-replies :message selector :args args))))))
+            (when errorp (error 'no-applicable-replies :message selector :args args))))))
 
 (defun unbox-replies (replies)
   (mapcar #'reply-container-reply replies))

@@ -87,6 +87,7 @@
   (push reply (message-replies message)))
 
 (defun add-reply-to-sheeple (message reply sheeple)
+  (declare (ignore message)) ; Am I missing something?
   (loop
      for sheep in sheeple
      for i below (length sheeple)
@@ -130,6 +131,7 @@
 ;;;
 (defun undefine-reply (name &key qualifiers participants)
   (awhen (find-message name nil)
+    ;; TODO -- Remove documentation - Adlai
     (remove-applicable-reply it qualifiers participants)
     (clear-dispatch-cache it)
     t))

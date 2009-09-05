@@ -45,9 +45,10 @@
 (defun role-name (role)
   (reply-name (role-reply role)))
 
-(defun participantp (sheep reply-name)
-  (when (member-if (compose (curry 'equal reply-name) 'role-name)
-                   (sheep-direct-roles sheep))
+(defun participantp (sheep reply)
+  "Checks if SHEEP is actually involved in dispatching REPLY"
+  (when (find-if (curry 'eq reply)
+                 (sheep-direct-roles sheep) :key 'role-reply)
     t))
 
 (defun ensure-reply (name &rest all-keys

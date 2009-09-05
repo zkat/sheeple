@@ -60,22 +60,18 @@
 (defun ensure-reply (name &rest all-keys
                      &key lambda-list participants
                      &allow-other-keys)
+  ;; shouldn't this just be a plain call to ensure-message? -- syko
   (when (not (find-message name nil))
-    (progn
-      (warn 'style-warning)
-      ;; FIXME: can't just give the lambda-list over. Should prepare it for messages
-      (ensure-message
-       name :lambda-list (create-msg-lambda-list lambda-list))))
-  (let* ((message (find-message name))
-         (target-sheeple (sheepify-list participants))
-         (reply (apply
-                 'generate-reply
-                 :message message
-                 :lambda-list lambda-list
-                 :participants target-sheeple
-                 all-keys)))
-    (clear-memo-table message)
-    reply))
+    ;; TODO - this style warning could be -much- nicer.
+    (warn 'style-warning)
+    (ensure-message name :lambda-list (create-msg-lambda-list lambda-list)))
+  (prog1 (apply 'generate-reply
+                :message (find-message name)
+                :lambda-list lambda-list
+                :participants (sheepify-list participants)
+                all-keys)
+    ;; We must clear the cache because the dispatch landscape has changed.
+    (clear-dispatch-cache message)))
 
 (defun generate-reply (&key qualifiers
                        lambda-list

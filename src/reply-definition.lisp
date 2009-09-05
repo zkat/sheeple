@@ -9,10 +9,17 @@
 (in-package :sheeple)
 
 (defstruct (reply (:constructor %make-reply))
-  name qualifiers lambda-list (body '(lambda () nil))
+  ;; Replies are the Sheeple equivalent of methods. Replies themselves are objects that hold
+  ;; some basic information about what the reply does, what kind of reply it is, etc.
+  ;; When reply objects are 'called', their reply-function is fetched directly. By using lambdas,
+  ;; we're able to latch on to the lexical environment the reply was defined in (so they can be
+  ;; closures)
+  name qualifiers lambda-list
+  (body '(lambda () nil)) ; I could get rid of this. It makes messages pretty heavy...
   (function (lambda () nil)))
 
 (defun reply-message (reply)
+  ;; Instead of adding a backlink to the message, we just do a global search for that message.
   (find-message (reply-name reply) nil))
 
 (defstruct (role (:constructor %make-role))

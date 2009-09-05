@@ -294,17 +294,11 @@ See `add-parent-using-metasheeple'."
   (when (eq new-parent child) (error "Sheeple cannot be parents of themselves."))
   (when (member new-parent (sheep-parents child) :test 'eq)
     (error "~A is already a parent of ~A." new-parent child))
-  (handler-case
-      (progn
-        (push new-parent (%sheep-parents child))
-        (finalize-sheep-inheritance child)
-        child)
-    ;; This error is signaled by compute-sheep-hierarchy-list, which right now
-    ;; is called from inside finalize-sheep-inheritance (this is probably a bad idea, move
-    ;; c-s-h-l in here just to do the check?)
-    ;; one problem with this is that it'll call c-s-h-l twice
-    (sheeple-hierarchy-error () (progn (remove-parent new-parent child)
-                                       (error 'sheeple-hierarchy-error :sheep child)))))
+  (handler-bind
+      ((sheeple-hierarchy-error (fun (remove-parent new-parent child))))
+    (push new-parent (%sheep-parents child))
+    (finalize-sheep-inheritance child)
+    child))
 
 (defun add-parents (parents sheep)
   "Mostly a utility function for easily adding multiple parents. They will be added to

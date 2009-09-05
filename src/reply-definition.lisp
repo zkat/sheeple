@@ -73,12 +73,14 @@
     ;; We must clear the cache because the dispatch landscape has changed.
     (clear-dispatch-cache message)))
 
-(defun generate-reply (&key qualifiers
-                       lambda-list
-                       participants
-                       message
-                       function
-                       (documentation ""))
+(defun create-msg-lambda-list (lambda-list)
+  "Create a message lambda list from a reply lambda list"
+  (loop for x in lambda-list
+     collect (if (consp x) (list (car x)) x)
+     if (eq x '&key) do (loop-finish)))
+
+(defun generate-reply (&key qualifiers lambda-list participants
+                       message function (documentation ""))
   (let ((reply (%make-reply
                 :message message
                 :lambda-list lambda-list
@@ -89,12 +91,6 @@
     (add-reply-to-message reply message)
     (add-reply-to-sheeple message reply participants)
     reply))
-
-(defun create-msg-lambda-list (lambda-list)
-  "Create a message lambda list from a reply lambda list"
-  (loop for x in lambda-list
-     collect (if (consp x) (list (car x)) x)
-     if (eq x '&key) do (loop-finish)))
 
 (defun add-reply-to-message (reply message)
   (set-arg-info message :new-reply reply)

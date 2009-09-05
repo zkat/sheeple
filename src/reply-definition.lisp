@@ -8,6 +8,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
+;;;
+;;; Reply objects
+;;;
 (defstruct (reply (:constructor %make-reply))
   ;; Replies are the Sheeple equivalent of methods. Replies themselves are objects that hold
   ;; some basic information about what the reply does, what kind of reply it is, etc.
@@ -21,12 +24,22 @@
 (defun reply-name (reply)
   (message-name (reply-message reply)))
 
+;;;
+;;; Roles
+;;;
+;;; - Roles encapsulate the idea of dispatch. Roles live in sheep objects themselves and represent
+;;;   the basic information about what 'role' that particular object has in dispatching on a 
+;;;   particular message. As it turns out, all the information roles have to hold is the position
+;;;   in which it is supposed to be called, and the actual reply object it's associated with.
+;;;   The algorithm takes care of putting everything else together.
 (defun %make-role (reply position)
   (cons reply position))
+;; We hand-define some readers here to hide the fact that it's just a cons.
 (defun role-reply (role)
   (car role))
 (defun role-position (role)
   (cdr role))
+;; backlinks ftw...
 (defun role-message (role)
   (reply-message (role-reply role)))
 (defun role-name (role)

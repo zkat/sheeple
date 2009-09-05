@@ -99,10 +99,9 @@
 (defun add-reply-to-sheeple (message reply sheeple)
   (loop
      for sheep in sheeple
-     for i upto (1- (length sheeple))
-     do (let ((role (%make-role reply i)))
-          (push role
-                (sheep-direct-roles sheep)))))
+     for i below (length sheeple)
+     do (push (%make-role reply i)
+              (sheep-direct-roles sheep))))
 
 (defun available-replies (sheep)
   (let ((roles (loop for role in (sheep-direct-roles sheep)

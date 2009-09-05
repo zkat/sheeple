@@ -143,7 +143,7 @@
   (let ((msg (find-message name nil)))
     (when msg
       (remove-applicable-reply msg qualifiers participants)
-      (clear-memo-table msg)
+      (clear-dispatch-cache msg)
       t)))
 
 (defun remove-specific-reply (message qualifiers participants)

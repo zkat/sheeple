@@ -136,23 +136,18 @@
     t))
 
 (defun remove-specific-reply (message qualifiers participants)
-  (let ((reply (find-if (lambda (msg)
-                          (equal (reply-qualifiers msg)
-                                 qualifiers))
-                        (%find-applicable-replies
+  (let ((reply (find-if (fun (equal qualifiers (reply-qualifiers _)))
+                        (%find-applicable-replies ;defined in reply-dispatch.lisp
                          message participants :errorp nil))))
     (when (and reply
-               (every (lambda (sheep)
-                        (participantp sheep (reply-name reply)))
-                      participants))
-      (loop for sheep in participants
+               (every (rcurry 'participantp (reply-name reply)) participants))
+      (loop
+         for sheep in participants
          for i from 0
-         do (loop for role in (sheep-direct-roles sheep)
-               do (let ((role-reply (role-reply role)))
-                    (when (and
-                           (eq reply role-reply)
-                           (= i (role-position role)))
-                      (delete-role role sheep)))))
+         do (map nil (fun (when (and (eq reply (role-reply role))
+                                     (= i (role-position role)))
+                            (delete-role role sheep)))
+                 (sheep-direct-roles sheep)))
       (delete-reply reply))))
 
 (defun remove-applicable-reply (message qualifiers participants)

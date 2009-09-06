@@ -7,8 +7,8 @@
 
 @set EDITION 0.1
 @set VERSION v3.0
-@set UPDATED-MONTH August 2009
-@set UPDATED 22 @value{UPDATED-MONTH}
+@set UPDATED-MONTH September 2009
+@set UPDATED 6 @value{UPDATED-MONTH}
 
 @copying
 This is Edition @value{EDITION},
@@ -267,6 +267,11 @@ Clozure CL
 GNU CLISP
 @cindex CLISP
 @cindex GNU CLISP
+
+@item
+Scieneer CL
+@cindex Scieneer CL
+@cindex SCL
 @end enumerate
 
 Sheeple doesn't use any OS-specific code (or threads), so it should be stable on

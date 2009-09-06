@@ -11,7 +11,7 @@
 ;;;
 ;;; Reply objects
 ;;;
-(defstruct reply
+(defstruct (reply (:predicate replyp))
   ;; Replies are the Sheeple equivalent of methods. Replies themselves are objects that hold
   ;; some basic information about what the reply does, what kind of reply it is, etc.
   ;; When reply objects are 'called', their reply-function is fetched directly. By using lambdas,

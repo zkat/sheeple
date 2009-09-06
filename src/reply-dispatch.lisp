@@ -15,15 +15,15 @@
   (null (reply-qualifiers reply)))
 
 (defun before-reply-p (reply)
-  (when (member :before (reply-qualifiers reply))
+  (when (find :before (reply-qualifiers reply))
     t))
 
 (defun after-reply-p (reply)
-  (when (member :after (reply-qualifiers reply))
+  (when (find :after (reply-qualifiers reply))
     t))
 
 (defun around-reply-p (reply)
-  (when (member :around (reply-qualifiers reply))
+  (when (find :around (reply-qualifiers reply))
     t))
 
 (defun apply-message (message args)
@@ -175,9 +175,9 @@
                                    (= index (the fixnum (role-position role))))
                           (let ((curr-reply (role-reply role)))
                             (when (= n (length (the list (reply-specialized-portion curr-reply))))
-                              (when (not (member curr-reply
-                                                 discovered-replies
-                                                 :key #'reply-container-reply))
+                              (when (not (find curr-reply
+                                               discovered-replies
+                                               :key #'reply-container-reply))
                                 (pushnew (the vector (contain-reply curr-reply))
                                          discovered-replies))
                               (let ((contained-reply (find curr-reply

@@ -27,7 +27,7 @@
 ;;; Roles
 ;;;
 ;;; - Roles encapsulate the idea of dispatch. Roles live in sheep objects themselves and represent
-;;;   the basic information about what 'role' that particular object has in dispatching on a 
+;;;   the basic information about what 'role' that particular object has in dispatching on a
 ;;;   particular message. As it turns out, all the information roles have to hold is the position
 ;;;   in which it is supposed to be called, and the actual reply object it's associated with.
 ;;;   The algorithm takes care of putting everything else together.
@@ -156,7 +156,7 @@
                         (%find-applicable-replies
                          message participants :errorp nil))))
     (when reply
-      (loop 
+      (loop
          for sheep in participants
          for i from 0
          do (map nil (fun (when (and (eq reply (role-reply _))
@@ -278,4 +278,3 @@
     (values name
             qualifiers
             lambda-list)))
-

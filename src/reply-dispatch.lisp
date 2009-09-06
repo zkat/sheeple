@@ -153,8 +153,7 @@
   (declare (list args))
   (if (null args)
       (message-replies message)
-      (let ((selector (message-name message))
-            (discovered-replies nil)
+      (let ((discovered-replies nil)
             (contained-applicable-replies nil))
         (declare (list discovered-replies contained-applicable-replies))
         (loop
@@ -170,10 +169,11 @@
                    for curr-sheep in curr-sheep-list
                    for hierarchy-position below (length curr-sheep-list)
                    do (dolist (role (sheep-direct-roles curr-sheep))
-                        (when (and (equal selector (role-name role)) ;(eql message (role-message role))
+                        (when (and (eq message (role-reply role)) ;(eql message (role-message role))
                                    (= index (the fixnum (role-position role))))
                           (let ((curr-reply (role-reply role)))
-                            (when (= n (length (the list (reply-specialized-portion curr-reply))))
+                            (when (= (length args)
+                                     (length (the list (reply-specialized-portion curr-reply))))
                               (when (not (find curr-reply
                                                discovered-replies
                                                :key #'reply-container-reply))
@@ -189,7 +189,7 @@
                                            :test #'equalp))))))))))
         (if contained-applicable-replies
             (unbox-replies (sort-applicable-replies contained-applicable-replies))
-            (when errorp (error 'no-applicable-replies :message selector :args args))))))
+            (when errorp (error 'no-applicable-replies :message (message-name message) :args args))))))
 
 (defun unbox-replies (replies)
   (mapcar #'reply-container-reply replies))

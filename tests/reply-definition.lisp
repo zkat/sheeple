@@ -42,7 +42,10 @@
     (is (typep (make-role reply position) 'role))
     (is (rolep (make-role reply position)))))
 
-(test role-message)
+(test role-message
+  (for-all ((message (fun (%make-message))))
+    (is (eq message (role-message (make-role (make-reply :message message) 0))))))
+
 (test role-name)
 (test participantp)
 

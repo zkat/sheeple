@@ -228,9 +228,16 @@
                           (remove-duplicates
                            (mapappend #'local-precedence-ordering
                                       sheeple-to-order))
-                          #'std-tie-breaker-rule))
+                          #'std-tie-breaker-rule-old))
     (simple-error ()
       (error 'sheeple-hierarchy-error :sheep sheep))))
+
+(defun std-tie-breaker-rule-old (minimal-elements hl-so-far)
+  (dolist (hl-constituent (reverse hl-so-far))
+    (let* ((supers (sheep-parents hl-constituent))
+           (common (intersection minimal-elements supers)))
+      (when (not (null common))
+        (return-from std-tie-breaker-rule-old (car common))))))
 
 (defun local-precedence-ordering-old (sheep)
   (mapcar #'list

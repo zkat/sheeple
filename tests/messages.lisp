@@ -109,12 +109,12 @@
 (test cache-entry-args
   (let ((entry (make-dispatch-cache-entry '(a b) '(c d))))
     (is (equal '(a b) (cache-entry-args entry)))
-    (signals undefined-function (setf (cache-entry-args entry) '(e f)))))
+    (is (not (fboundp '(setf cache-entry-args))))))
 
 (test cache-entry-replies
   (let ((entry (make-dispatch-cache-entry '(a b) '(c d))))
     (is (equal '(c d) (cache-entry-replies entry)))
-    (signals undefined-function (setf (cache-entry-replies entry) '(e f)))))
+    (is (not (fboundp '(setf cache-entry-replies))))))
 
 (test add-entry-to-message)
 (test clear-dispatch-cache)

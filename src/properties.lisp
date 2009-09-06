@@ -57,7 +57,7 @@ the vector needs to make space for new property conses. The amount the vector is
 depends on the value of *property-vector-grow-ratio*. The property vector is not guaranteed to
 be EQ when 'enlarged', but it's guaranteed to keep all the previous property conses."
     ;; This implementation conses up a completely new simple-vector.
-    ;; Using extendable vectors forces us to use AREF (a time price), and 
+    ;; Using extendable vectors forces us to use AREF (a time price), and
     ;; it also carries some extra space overhead. The case of many properties being added
     ;; en-masse to a sheep object isn't expected to be very common, so this is probably
     ;; a nice approach.
@@ -67,10 +67,10 @@ be EQ when 'enlarged', but it's guaranteed to keep all the previous property con
     sheep)
 
   (defun %get-property-cons (sheep property)
-    (find property %properties :test 'eq 
+    (find property %properties :test 'eq
           :key #-sheeple3.1 'car
           #+sheeple3.1 (compose 'property-name 'car)))
-  
+
   (defun %add-property-cons (sheep property value)
     "This function puts PROPERTY and VALUE into a cons cell and adds the cell to
 SHEEP's property-vector if the property is unique. If it's not unique a generic error
@@ -98,7 +98,7 @@ is signaled."
   (defun %remove-property-cons (sheep property)
     "Removes the actual property-cons representing PROPERTY."
     (awhen (position property %properties
-                     :test 'eq 
+                     :test 'eq
                      :key #-sheeple3.1 'car
                      #+sheeple3.1 (compose 'property-name 'car))
       (setf (svref %properties it) nil))

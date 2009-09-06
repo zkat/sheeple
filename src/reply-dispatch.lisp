@@ -169,7 +169,7 @@
                    for curr-sheep in curr-sheep-list
                    for hierarchy-position below (length curr-sheep-list)
                    do (dolist (role (sheep-direct-roles curr-sheep))
-                        (when (and (eq message (role-reply role)) ;(eql message (role-message role))
+                        (when (and (eq message (role-reply role))
                                    (= index (the fixnum (role-position role))))
                           (let ((curr-reply (role-reply role)))
                             (when (= (length args)

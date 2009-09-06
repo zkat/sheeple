@@ -40,8 +40,7 @@
   replies)
 
 (defun apply-replies (cache args)
-  (funcall (compute-effective-reply-function cache)
-           args))
+  (funcall (compute-effective-reply-function cache) args))
 
 (defun compute-effective-reply-function (cache)
   (let ((replies (cache-replies cache))

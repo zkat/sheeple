@@ -50,7 +50,10 @@
   (for-all ((message (fun (%make-message :name (gensym)))))
     (is (eq (message-name message) (role-name (make-role (make-reply :message message) 0))))))
 
-(test participantp)
+(test participantp
+  (for-all ((sheep (fun (cons-std-sheep))) (reply (fun (make-reply))) (position (gen-integer)))
+    (push (make-role reply position) (%sheep-roles sheep))
+    (is (not (null (participantp sheep reply))))))
 
 (in-suite reply-definition)
 

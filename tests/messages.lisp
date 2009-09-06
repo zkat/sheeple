@@ -89,7 +89,7 @@
 (in-suite dispatch-cache)
 
 (test *dispatch-cache-size*
-  (is (fixnump *dispatch-cache-size*)))
+  (is (integerp *dispatch-cache-size*)))
 
 (test make-dispatch-cache
   (let ((cache (make-dispatch-cache)))
@@ -144,9 +144,10 @@
   (let ((o1 '(:documentation "foo"))
         (o2 '(:metasheep "thesheep")))
     (is (equal (list :documentation "foo") (canonize-message-option o1)))
-    (is (equal (list :metasheep "thesheep") (canonize-message-option o1)))))
+    (is (equal (list :metasheep "thesheep") (canonize-message-option o2)))))
 
 (test canonize-message-options
     (let ((o1 '(:documentation "foo"))
-        (o2 '(:metasheep "thesheep")))
-    (is (equal (list :documentation "foo" :metasheep "thesheep") (canonize-message-option o1)))))
+          (o2 '(:metasheep "thesheep")))
+    (is (equal (list :documentation "foo" :metasheep "thesheep") 
+               (canonize-message-options (list o1 o2))))))

@@ -27,22 +27,22 @@
 ;;; Roles
 ;;;
 ;;; - Roles encapsulate the idea of dispatch. Roles live in sheep objects themselves and represent
-;;;   the basic information about what 'role' that particular object has in dispatching on a 
+;;;   the basic information about what 'role' that particular object has in dispatching on a
 ;;;   particular message. As it turns out, all the information roles have to hold is the position
 ;;;   in which it is supposed to be called, and the actual reply object it's associated with.
 ;;;   The algorithm takes care of putting everything else together.
 (defun make-role (reply position)
   (cons reply position))
-(deftype role ()
-  '(cons reply fixnum))
-(defun rolep (maybe-role)
-  (typep maybe-role 'role))
-;; We hand-define some readers here to hide the fact that it's just a cons.
 (defun role-reply (role)
   (car role))
 (defun role-position (role)
   (cdr role))
-;; backlinks ftw...
+
+(deftype role ()
+  '(cons reply fixnum))
+(defun rolep (maybe-role)
+  (typep maybe-role 'role))
+
 (defun role-message (role)
   (reply-message (role-reply role)))
 (defun role-name (role)
@@ -62,7 +62,7 @@
   (let ((message (find-message name nil)))
     (when (null message)
       ;; TODO - this style warning could be -much- nicer.
-      (warn 'style-warning)
+      (warn 'style-warning )
       (setf message (ensure-message name :lambda-list (create-msg-lambda-list lambda-list))))
     (let ((reply (make-reply :message (find-message name)
                              :lambda-list lambda-list
@@ -156,7 +156,7 @@
                         (%find-applicable-replies
                          message participants :errorp nil))))
     (when reply
-      (loop 
+      (loop
          for sheep in participants
          for i from 0
          do (map nil (fun (when (and (eq reply (role-reply _))
@@ -278,4 +278,3 @@
     (values name
             qualifiers
             lambda-list)))
-

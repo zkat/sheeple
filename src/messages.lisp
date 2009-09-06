@@ -262,6 +262,10 @@ more entries the cache will be able to hold, but the slower lookup will be.")
       (check-no-defaults keys)
       (when auxp (error 'message-lambda-list-error :arg '&aux :lambda-list lambda-list)))))
 
+
+;;;
+;;; Message definition (finally!)
+;;;
 ;; Finalizing a message sets the function definition of the message to a
 ;; lambda that calls the top-level dispatch function on the msg args.
 (defun finalize-message (message)
@@ -298,7 +302,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
                      ,@(canonize-message-options options))))
 
 (defun canonize-message-option (option)
-  `(',(car option) ',(cadr option)))
+  `(,(car option) ,(cadr option)))
 
 (defun canonize-message-options (options)
   (mapcan 'canonize-message-option options))

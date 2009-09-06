@@ -106,7 +106,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
   (and (consp x) (weak-pointer-p (car x)) (listp (cdr x))))
 
 (defun cache-entry-args (entry)
-  (car entry))
+  (weak-pointer-value (car entry)))
 (defun cache-entry-replies (entry)
   (cdr entry))
 

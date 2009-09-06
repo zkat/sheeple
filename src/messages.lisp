@@ -127,7 +127,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 ;;;
 ;;; - Arg info objects and the operations on them are meant to check that Message/Reply lambda-lists
 ;;;   comply with http://www.lispworks.com/documentation/HyperSpec/Body/07_fd.htm
-(defstruct (arg-info (:constructor make-arg-info))
+(defstruct arg-info
   (lambda-list :no-lambda-list)
   metatypes number-optional key/rest-p
   ;; nil: no &KEY or &REST allowed
@@ -299,5 +299,4 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 
 (defun canonize-message-options (options)
   (mapcan 'canonize-message-option options))
-
 

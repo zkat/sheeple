@@ -16,7 +16,7 @@
 
 (test make-reply
   (let ((test-reply (make-reply :message 0 :qualifiers 1 :lambda-list 2 :function 3)))
-    (is (reply-p test-reply))
+    (is (replyp test-reply))
     (is (eq 'reply (type-of test-reply)))
     (is (= 0 (reply-message     test-reply)))
     (is (= 1 (reply-qualifiers  test-reply)))

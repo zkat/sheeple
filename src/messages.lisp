@@ -102,6 +102,9 @@ more entries the cache will be able to hold, but the slower lookup will be.")
   ;; the args can be GCd. Otherwise, calling any message on a number of arguments will make those
   ;; arguments stick around indefinitely.
   (cons (make-weak-pointer args) replies))
+(defun dispatch-cache-entry-p (x)
+  (and (consp x) (weak-pointer-p (car x)) (listp (cdr x))))
+
 (defun cache-entry-args (entry)
   (car entry))
 (defun cache-entry-replies (entry)

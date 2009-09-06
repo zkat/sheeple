@@ -14,8 +14,15 @@
 (def-suite reply-objects :in reply-definition)
 (in-suite reply-objects)
 
-(test make-reply)
-(test replyp)
+(test make-reply
+  (let ((test-reply (make-reply :message 0 :qualifiers 1 :lambda-list 2 :function 3)))
+    (is (reply-p test-reply))
+    (is (eq 'reply (type-of test-reply)))
+    (is (= 0 (reply-message     test-reply)))
+    (is (= 1 (reply-qualifiers  test-reply)))
+    (is (= 2 (reply-lambda-list test-reply)))
+    (is (= 3 (reply-function    test-reply)))))
+
 (test reply-name)
 
 (def-suite role-objects :in reply-definition)

@@ -82,26 +82,28 @@ This software is placed in the public domain by Luis Oliveira
 
 @ifnottex
 
-@node Top, General Information, (dir), (dir)
+@node Top, Overview, (dir), (dir)
 @top Sheeple Manual
 
 This manual is for Sheeple @value{VERSION}
 @end ifnottex
 
 @menu
-* General Information::         Overview of Sheeple
-* Concept Index::               Index
+* Overview::                    Non-Technical Overview of Sheeple
+* Concepts::                    Introduction to the Concepts of Sheeple
+* Concept Index::               Index of General Concepts
+* Variable Index::              Index of Variables and Objects of Sheeple
 * Copying::                     Your rights and freedoms
 @end menu
-@node General Information, Concept Index, Top, Top
-@chapter General Information
+@node Overview, Concepts, Top, Top
+@chapter Overview
 
 @menu
 * About Sheeple::               A Non-Technical Overview
 * Installing Sheeple::          A Slightly Technical Guide
 @end menu
 
-@node About Sheeple, Installing Sheeple, General Information, General Information
+@node About Sheeple, Installing Sheeple, Overview, Overview
 @section About Sheeple
 @cindex Sheeple, general overview of
 
@@ -160,7 +162,7 @@ lot of features and syntax with CLOS. The most notable of these are multiple
 inheritance and multiple dispatch of methods.
 
 @page
-@node Installing Sheeple,  , About Sheeple, General Information
+@node Installing Sheeple,  , About Sheeple, Overview
 @section Installing Sheeple
 
 @menu
@@ -312,11 +314,70 @@ trying to get it to work on. The test suite depends on Fiveam. To run it:
 And watch the tests scroll by. All tests should pass as long as you're using a
 tagged release.
 
-@node Concept Index, Copying, General Information, Top
+@node Concepts, Concept Index, Overview, Top
+@chapter Concepts
+
+Sheeple bears many resemblances to CLOS, yet also introduces new
+concepts. This section goes introduces the concepts critical to a full
+understanding of Sheeple. It should be read regardless of whether you
+have prior experience with CLOS.
+
+@menu
+* Sheep Objects::               The Basic Data Structure of Sheeple
+@end menu
+
+@node Sheep Objects,  , Concepts, Concepts
+@section Sheep Objects
+
+@cindex sheep
+@cindex sheeple
+@cindex Sheeple
+A @dfn{sheep} is a single object within the object system. For the
+plural, sometimes the same word is used, and sometimes the word
+@dfn{sheeple} is employed instead. Note however that @dfn{sheeple}
+doubles both as the plural of sheep and, when used as the proper noun
+(i.e. ``Sheeple''), as the name of the project.
+
+@cindex sheeple, built-in
+@cindex built-in sheep objects
+Sheep objects have their behavior defined by three things, namely,
+their parents, properties, and any replies specialized upon
+them. There are a few built-in sheeple, exported from the
+@code{SHEEPLE} package, that play special roles in Sheeple. The
+consequences of modifying these sheeple from user code are undefined.
+
+@table @code
+@cindex t
+@vindex =T=
+@item =T=
+An ancestor of every other sheep, and is the only sheep
+with no parents. It is primarily used for reply specialization.
+
+@vindex =STANDARD-SHEEP=
+@cindex standard-sheep
+@item =STANDARD-SHEEP=
+An ancestor of all normally-defined sheeple. It has
+@code{=T=} as its only parent. It is also primarily used for reply
+specialization, and in termination cases for functions which recurse
+up the parent-child hierarchy.
+
+@vindex =STANDARD-METASHEEP=
+@cindex standard-metasheep
+@item =STANDARD-METASHEEP=
+The metasheep of all normally-defined sheeple. It is the root of the
+MOP, and many MOP functions are specialized upon it or use it
+as a reference point.
+@end table
+
+@node Concept Index, Variable Index, Concepts, Top
 @unnumbered Concept Index
 @printindex cp
 
-@node Copying,  , Concept Index, Top
+@node Variable Index, Copying, Concept Index, Top
+@unnumbered Variable Index
+@printindex vr
+
+@node Copying,  , Variable Index, Top
 @appendix Copying
 @insertcopying
 

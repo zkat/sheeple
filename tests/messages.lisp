@@ -140,5 +140,13 @@
 (test make-message)
 (test ensure-message)
 (test defmessage)
-(test canonize-message-option)
-(test canonize-message-options)
+(test canonize-message-option
+  (let ((o1 '(:documentation "foo"))
+        (o2 '(:metasheep "thesheep")))
+    (is (equal (list :documentation "foo") (canonize-message-option o1)))
+    (is (equal (list :metasheep "thesheep") (canonize-message-option o1)))))
+
+(test canonize-message-options
+    (let ((o1 '(:documentation "foo"))
+        (o2 '(:metasheep "thesheep")))
+    (is (equal (list :documentation "foo" :metasheep "thesheep") (canonize-message-option o1)))))

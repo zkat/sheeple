@@ -9,6 +9,7 @@
 @set VERSION v3.0
 @set UPDATED-MONTH September 2009
 @set UPDATED 6 @value{UPDATED-MONTH}
+@clear mop
 
 @copying
 This is Edition @value{EDITION},
@@ -361,12 +362,14 @@ An ancestor of all normally-defined sheeple. It has
 specialization, and in termination cases for functions which recurse
 up the parent-child hierarchy.
 
+@ifset mop
 @vindex =STANDARD-METASHEEP=
 @cindex standard-metasheep
 @item =STANDARD-METASHEEP=
 The metasheep of all normally-defined sheeple. It is the root of the
 MOP, and many MOP functions are specialized upon it or use it
 as a reference point.
+@end ifset
 @end table
 
 @node Concept Index, Variable Index, Concepts, Top

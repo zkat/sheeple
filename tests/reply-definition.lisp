@@ -23,7 +23,10 @@
     (is (= 2 (reply-lambda-list test-reply)))
     (is (= 3 (reply-function    test-reply)))))
 
-(test reply-name)
+(test reply-name
+  (let* ((message (%make-message :name (gensym)))
+         (reply   (make-reply :message message)))
+    (is (eq (message-name message) (reply-name reply)))))
 
 (def-suite role-objects :in reply-definition)
 (in-suite role-objects)

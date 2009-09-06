@@ -84,7 +84,7 @@
   (declare (message message) (list args))
   (let (;; This doesn't seem to be expensive at all..
          (relevant-args-length (the fixnum (arg-info-number-required (message-arg-info message))))
-         ;; If I can avoid calling fetch-memo-vector-entry for singly-dispatched readers, that
+         ;; If I can avoid calling fetch-dispatch-cache-entry for singly-dispatched readers, that
          ;; would be -lovely-. Not sure how to do that yet, though.
         )
     (when (< (length args) relevant-args-length)
@@ -94,7 +94,7 @@
           (create-reply-cache message (%find-applicable-replies
                                           message relevant-args
                                           :errorp errorp)))
-        (let ((memo-entry (fetch-memo-vector-entry args message relevant-args-length)))
+        (let ((memo-entry (fetch-dispatch-cache-entry args message relevant-args-length)))
           (or memo-entry
               memo-entry
               (let* ((relevant-args (subseq args 0 relevant-args-length))
@@ -103,11 +103,11 @@
                                                               :errorp errorp)))
                 (memoize-reply-dispatch message relevant-args new-msg-list)))))))
 
-(declaim (inline desired-vector-entry-p))
-(defun desired-vector-entry-p (args vector-entry relevant-args-length)
+(declaim (inline desired-cache-entry-p))
+(defun desired-cache-entry-p (args cache-entry relevant-args-length)
   (declare (fixnum relevant-args-length) (list args))
-  (when (vectorp vector-entry)
-    (let ((vector-args (weak-pointer-value (vector-entry-args vector-entry))))
+  (when cache-entry
+    (let ((vector-args (weak-pointer-value (cache-entry-args cache-entry))))
       (cond ((= 0 relevant-args-length)
              t)
             ((= 1 relevant-args-length)
@@ -118,33 +118,33 @@
                 for v-arg in vector-args
                 for arg in args
                 do (when (not (equal v-arg arg))
-                     (return-from desired-vector-entry-p nil))))))))
+                     (return-from desired-cache-entry-p nil))))))))
 
-(defun fetch-memo-vector-entry (args message relevant-args-length)
-  (let* ((memo-vector (message-memo-vector message))
-         (orig-index (mod (the fixnum (sxhash (if (sheep-p (car args))
+(defun fetch-dispatch-cache-entry (args message relevant-args-length)
+  (let* ((dispatch-cache (message-dispatch-cache message))
+         (orig-index (mod (the fixnum (sxhash (if (sheepp (car args))
                                                   (car args)
                                                   (or (find-boxed-object (car args))
                                                       (box-type-of (car args))))))
-                          (length memo-vector))))
+                          (length dispatch-cache))))
     ;; I don't know how this could be any faster. My best choice is probably to avoid calling it.
-    (declare (vector memo-vector) (fixnum orig-index))
-    (let ((attempt (aref memo-vector orig-index)))
-      (if (desired-vector-entry-p args attempt relevant-args-length)
-          (vector-entry-msg-cache attempt)
+    (declare (vector dispatch-cache) (fixnum orig-index))
+    (let ((attempt (aref dispatch-cache orig-index)))
+      (if (desired-cache-entry-p args attempt relevant-args-length)
+          (cache-entry-replies attempt)
           (progn
-            (loop for entry across memo-vector
-               do (when (desired-vector-entry-p args entry relevant-args-length)
-                    (return-from fetch-memo-vector-entry (vector-entry-msg-cache entry))))
+            (loop for entry across dispatch-cache
+               do (when (desired-cache-entry-p args entry relevant-args-length)
+                    (return-from fetch-dispatch-cache-entry (cache-entry-replies entry))))
             nil)))))
 
 (defun memoize-reply-dispatch (message args msg-list)
   (let ((msg-cache (create-reply-cache message msg-list))
-        (maybe-index (mod (the fixnum (sxhash (if (sheep-p (car args))
+        (maybe-index (mod (the fixnum (sxhash (if (sheepp (car args))
                                                   (car args)
                                                   (or (find-boxed-object (car args))
                                                       (box-type-of (car args))))))
-                          (length (the vector (message-memo-vector message))))))
+                          (length (the vector (message-dispatch-cache message))))))
     (add-entry-to-message msg-cache message args maybe-index)
     msg-cache))
 
@@ -168,7 +168,7 @@
                 (loop
                    for curr-sheep in curr-sheep-list
                    for hierarchy-position below (length curr-sheep-list)
-                   do (dolist (role (sheep-direct-roles curr-sheep))
+                   do (dolist (role (%sheep-roles curr-sheep))
                         (when (and (eq message (role-reply role))
                                    (= index (the fixnum (role-position role))))
                           (let ((curr-reply (role-reply role)))

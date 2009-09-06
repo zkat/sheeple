@@ -88,12 +88,34 @@
 (def-suite dispatch-cache :in messages)
 (in-suite dispatch-cache)
 
-(test *dispatch-cache-size*)
-(test make-dispatch-cache)
-(test dispatch-cache-p)
-(test make-dispatch-cache-entry)
-(test cache-entry-args)
-(test cache-entry-replies)
+(test *dispatch-cache-size*
+  (is (fixnump *dispatch-cache-size*)))
+
+(test make-dispatch-cache
+  (let ((cache (make-dispatch-cache)))
+    (is (dispatch-cache-p cache))
+    (is (= *dispatch-cache-size* (length cache)))))
+
+(test dispatch-cache-p
+  (let ((cache (make-dispatch-cache)))
+    (is (dispatch-cache-p cache))))
+
+(test make-dispatch-cache-entry
+  (let ((entry (make-dispatch-cache-entry '(a b) '(c d))))
+    (is (dispatch-cache-entry-p entry))
+    (is (equal '(a b) (cache-entry-args entry)))
+    (is (equal '(c d) (cache-entry-replies entry)))))
+
+(test cache-entry-args
+  (let ((entry (make-dispatch-cache-entry '(a b) '(c d))))
+    (is (equal '(a b) (cache-entry-args entry)))
+    (signals undefined-function (setf (cache-entry-args entry) '(e f)))))
+
+(test cache-entry-replies
+  (let ((entry (make-dispatch-cache-entry '(a b) '(c d))))
+    (is (equal '(c d) (cache-entry-replies entry)))
+    (signals undefined-function (setf (cache-entry-replies entry) '(e f)))))
+
 (test add-entry-to-message)
 (test clear-dispatch-cache)
 (test clear-all-message-caches)

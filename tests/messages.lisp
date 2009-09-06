@@ -4,7 +4,7 @@
 
 ;;;; tests/messages.lisp
 ;;;;
-;;;; Unit tests for messages and replies
+;;;; Unit tests for messages objects, ll-congruence, dispatch-caching, and message interface
 ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)

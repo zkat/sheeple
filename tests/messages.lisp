@@ -149,5 +149,5 @@
 (test canonize-message-options
     (let ((o1 '(:documentation "foo"))
           (o2 '(:metasheep "thesheep")))
-    (is (equal (list :documentation "foo" :metasheep "thesheep") 
+    (is (equal (list :documentation "foo" :metasheep "thesheep")
                (canonize-message-options (list o1 o2))))))

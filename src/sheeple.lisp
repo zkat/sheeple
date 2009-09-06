@@ -222,9 +222,10 @@ regards to the CONSTRAINTS. A future version will undo this change."
     (mapcar 'list (cons sheep parents) parents)))
 
 (defun std-tie-breaker-rule (minimal-elements chosen-elements)
-  (mapc (fun (awhen (intersection minimal-elements (sheep-parents _))
-               (return-from std-tie-breaker-rule (car it))))
-        chosen-elements))
+  (dolist (candidate chosen-elements)
+    (awhen (dolist (parent (sheep-parents candidate))
+             (awhen (find parent minimal-elements :test 'eq) (return it)))
+      (return-from std-tie-breaker-rule it))))
 
 (defun std-compute-sheep-hierarchy-list (sheep)
   "Lists SHEEP's ancestors, in precedence order."

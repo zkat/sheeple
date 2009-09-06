@@ -62,7 +62,7 @@
   (let ((message (find-message name nil)))
     (when (null message)
       ;; TODO - this style warning could be -much- nicer.
-      (warn 'style-warning )
+      (warn 'style-warning)
       (setf message (ensure-message name :lambda-list (create-msg-lambda-list lambda-list))))
     (let ((reply (make-reply :message (find-message name)
                              :lambda-list lambda-list

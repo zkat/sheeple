@@ -37,7 +37,11 @@
       (is (eq dummy-reply (role-reply role)))
       (is (eq dummy-position (role-position role))))))
 
-(test role-type)
+(test role-type
+  (for-all ((reply (fun (make-reply))) (position (gen-integer)))
+    (is (typep (make-role reply position) 'role))
+    (is (rolep (make-role reply position)))))
+
 (test role-message)
 (test role-name)
 (test participantp)

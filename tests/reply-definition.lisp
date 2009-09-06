@@ -31,11 +31,10 @@
 (def-suite role-objects :in reply-definition)
 (in-suite role-objects)
 
-(test make-role)
-(test rolep)
-(test role-reply)
-(test role-position)
+(test role-implementation)
+(test role-type)
 (test role-message)
+(test role-name)
 (test participantp)
 
 (in-suite reply-definition)

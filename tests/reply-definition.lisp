@@ -31,7 +31,12 @@
 (def-suite role-objects :in reply-definition)
 (in-suite role-objects)
 
-(test role-implementation)
+(test role-implementation
+  (for-all ((dummy-reply (gen-integer)) (dummy-position (gen-integer)))
+    (let ((role (make-role dummy-reply dummy-position)))
+      (is (eq dummy-reply (role-reply role)))
+      (is (eq dummy-position (role-position role))))))
+
 (test role-type)
 (test role-message)
 (test role-name)

@@ -288,14 +288,16 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 ;; It first verifies that the lambda-list provided is a valid message ll,
 ;; then expands to a call to ensure-message
 ;; This pair just pretties up the options during macro expansion
+(defmacro defmessage (name lambda-list &rest options)
+  `(progn
+     (check-msg-lambda-list ',lambda-list)
+     (ensure-message ',name :lambda-list ',lambda-list
+                     ,@(canonize-message-options options))))
+
 (defun canonize-message-option (option)
   `(',(car option) ',(cadr option)))
 
 (defun canonize-message-options (options)
   (mapcan 'canonize-message-option options))
 
-(defmacro defmessage (name lambda-list &rest options)
-  `(eval-when (:compile-toplevel :load-toplevel :execute)
-     (check-msg-lambda-list ',lambda-list)
-     (ensure-message ',name :lambda-list ',lambda-list
-                     ,@(canonize-message-options options))))
+

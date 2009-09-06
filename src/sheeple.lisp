@@ -191,13 +191,13 @@ on the TIE-BREAKER in the case of ambiguous constraints. On the assumption
 that they are freshly generated, this implementation is destructive with
 regards to the CONSTRAINTS. A future version will undo this change."
   (loop
-     :for minimal-elements := (remove-if (fun (member _ constraints :key 'cadr)) elements)
-     :while minimal-elements
+     :for minimal-elements := (remove-if (fun (member _ constraints :key 'cadr :test 'eq))
+                                         elements) :while minimal-elements
      :for choice := (if (null (cdr minimal-elements))
                         (car minimal-elements)
                         (funcall tie-breaker minimal-elements result))
      :do (deletef constraints choice :test 'member)
-         (setf elements (remove choice elements))
+         (setf elements (remove choice elements :test 'eq))
          (push choice result) :with result
      :finally (if (null elements)
                   (return-from topological-sort (nreverse result))
@@ -206,13 +206,13 @@ regards to the CONSTRAINTS. A future version will undo this change."
 (defun collect-ancestors (sheep)
   "Recursively collects all of SHEEP's ancestors."
   (labels ((all-parents-loop (seen parents)
-             (let ((to-be-processed (set-difference parents seen)))
+             (let ((to-be-processed (set-difference parents seen :test 'eq)))
                (if (null to-be-processed)
                    parents
                    (let ((sheep-to-process (car to-be-processed)))
                      (all-parents-loop (cons sheep-to-process seen)
                                        (union (sheep-parents sheep-to-process)
-                                              parents)))))))
+                                              parents :test 'eq)))))))
     (all-parents-loop () (sheep-parents sheep))))
 
 (defun local-precedence-ordering (sheep)

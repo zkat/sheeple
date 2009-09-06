@@ -191,22 +191,22 @@ Sheeple, you will need to follow the directions in @ref{Informing ASDF}.
 @cindex release, latest
 @cindex downloading
 A tagged release is preferable for stability --- we test new features
-extensively before including them in a tagged release. At the time of this
-writing, the latest tagged release is available as a tarball from
-@uref{http://github.com/zkat/sheeple/tarball/v2.2}.
+extensively before including them in a tagged release. At the time of
+this writing, the latest tagged release is available as a tarball from
+@uref{http://github.com/zkat/sheeple/tarball/@value{VERSION}}.
 
 @node Tracking the Git Repo, Informing ASDF, Tagged Release, Installation Procedure
 @unnumberedsubsubsec Tracking the Git Repo
 @cindex git, repository, tracking
 @cindex bleeding edge, tracking the
-Since all new features are developed and tested carefully before inclusion in
-tagged releases, the best way to track the ``bleeding edge'' of Sheeple
-development is through @command{git}. @command{git} is a sophisticated revision
-control system, used extensively by all of Sheeple's developers. A full overview
-of @command{git} is beyond the scope of this section; those interested should
-refer to the
-@uref{http://www.kernel.org/pub/software/scm/git/docs/user-manual.html, Git
-Manual}.
+Since all new features are developed and tested carefully before
+inclusion in tagged releases, the best way to track the ``bleeding
+edge'' of Sheeple development is through @command{git}. @command{git}
+is a sophisticated revision control system, used extensively by all of
+Sheeple's developers. A full overview of @command{git} is beyond the
+scope of this section; those interested should refer to the
+@uref{http://www.kernel.org/pub/software/scm/git/docs/user-manual.html,
+Git Manual}.
 
 You can browse Sheeple's main git repository with a browser through
 @uref{http://github.com/zkat/sheeple}. This command will create a copy of
@@ -220,16 +220,21 @@ git clone git://github.com/zkat/sheeple.git
 @subsubsection Informing ASDF
 @cindex ASDF
 @cindex Windows
-Sheeple is organized using @acronym{@dfn{ASDF}, Another System Definition
-Facility}, the standard system-definition facility for Common Lisp programs. For
-more information about ASDF, you should refer to the
-@uref{http://common-lisp.net/project/asdf/manual.html, @acronym{ASDF} Manual};
-the rest of this section assumes that you are familiar with the basic concepts.
+Sheeple is organized using @acronym{@dfn{ASDF}, Another System
+Definition Facility}, the standard (at the time of this writing)
+system-definition facility for Common Lisp programs. For more
+information about @acronym{ASDF}, you should refer to the
+@uref{http://common-lisp.net/project/asdf/manual.html, @acronym{ASDF}
+Manual}; the rest of this section assumes that you are familiar with
+the basic concepts of @acronym{ASDF}, and have configured your
+implementation to use it.
 
-@strong{Please Notice:} If your implementation does not include ASDF, you will
-have to acquire it and load it yourself. Information on installing
-@acronym{ASDF} is available via the @uref{http://www.cliki.net/asdf, ASDF CLiki
-page}.
+@strong{Please Notice} that if your implementation does not include
+ASDF, you will have to acquire it and load it separately. Up-to-date
+information on installing @acronym{ASDF} should be available via the
+@acronym{ASDF} @uref{http://www.cliki.net/asdf, CLiki page}; The
+official @acronym{ASDF} @uref{http://common-lisp.net/project/asdf,
+Project webpage} should also have the relevant information.
 
 To complete a Sheeple installation, you must inform @acronym{ASDF} where it can
 find the file @file{sheeple.asd}. Substituting @var{registry} and @var{sheeple}

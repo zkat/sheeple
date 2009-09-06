@@ -46,7 +46,10 @@
   (for-all ((message (fun (%make-message))))
     (is (eq message (role-message (make-role (make-reply :message message) 0))))))
 
-(test role-name)
+(test role-name
+  (for-all ((message (fun (%make-message :name (gensym)))))
+    (is (eq (message-name message) (role-name (make-role (make-reply :message message) 0))))))
+
 (test participantp)
 
 (in-suite reply-definition)

@@ -168,7 +168,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
               ((not (= nopt msg-nopt))
                (lose "the reply has ~A optional arguments than the message."
                      (comparison-description nopt msg-nopt)))
-              ((neq (or keysp restp) msg-key/rest-p)
+              ((not (eq (or keysp restp) msg-key/rest-p))
                (lose "the reply and message differ in whether they accept~_~
                       &REST or &KEY arguments."))
               ((not (and (atom msg-keywords)
@@ -178,12 +178,12 @@ more entries the cache will be able to hold, but the slower lookup will be.")
                      msg-keywords))
               (t t))))))
 
-(defun set-arg-info (msg &key new-reply (lambda-list nil lambda-list-p))
-  (let* ((arg-info (message-arg-info msg))
-         (replies (message-replies msg))
+(defun set-arg-info (message &key new-reply (lambda-list nil lambda-list-p))
+  (let* ((arg-info (message-arg-info message))
+         (replies (message-replies message))
          (firstp (and new-reply (null (cdr replies)))))
     (when (and (not lambda-list-p) replies)
-      (setf lambda-list (message-lambda-list msg)))
+      (setf lambda-list (message-lambda-list message)))
     (when (or lambda-list-p
               (and firstp
                    (eq (arg-info-lambda-list arg-info) :no-lambda-list)))
@@ -193,7 +193,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
                      (= nreq (arg-info-number-required arg-info))
                      (= nopt (arg-info-number-optional arg-info))
                      (eq (or keysp restp) (arg-info-key/rest-p arg-info)))
-          (error 'reply-lambda-list-conflict :lambda-list lambda-list :message msg))
+          (error 'reply-lambda-list-conflict :lambda-list lambda-list :message message))
         (setf (arg-info-lambda-list arg-info) (if lambda-list-p
                                                   lambda-list
                                                   (create-msg-lambda-list lambda-list))
@@ -203,10 +203,10 @@ more entries the cache will be able to hold, but the slower lookup will be.")
               (arg-info-keys arg-info) (if lambda-list-p
                                            (if allow-other-keys-p t keywords)
                                            (arg-info-key/rest-p arg-info)))))
-    (when new-reply (check-reply-arg-info msg arg-info new-reply))
+    (when new-reply (check-reply-arg-info message arg-info new-reply))
     arg-info))
 
-(defun check-msg-lambda-list (lambda-list)
+(defun check-message-lambda-list (lambda-list)
   (flet ((check-no-defaults (list)
            (awhen (find-if (complement (rcurry 'typep '(or symbol (cons * null)))) list)
              (error 'message-lambda-list-error :arg it :lambda-list lambda-list))))
@@ -221,7 +221,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 ;;; Message definition (finally!)
 ;;;
 ;; Finalizing a message sets the function definition of the message to a
-;; lambda that calls the top-level dispatch function on the msg args.
+;; lambda that calls the top-level dispatch function on the message args.
 (defun finalize-message (message)
   (let ((name (message-name message)))
     (when (and (fboundp name)
@@ -251,7 +251,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 ;; This pair just pretties up the options during macro expansion
 (defmacro defmessage (name lambda-list &rest options)
   `(progn
-     (check-msg-lambda-list ',lambda-list)
+     (check-message-lambda-list ',lambda-list)
      (ensure-message ',name :lambda-list ',lambda-list
                      ,@(canonize-message-options options))))
 

@@ -141,10 +141,6 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 (defun arg-info-valid-p (arg-info)
   (numberp (arg-info-number-optional arg-info)))
 
-(defun arg-info-applyp (arg-info)
-  (or (plusp (arg-info-number-optional arg-info))
-      (arg-info-key/rest-p arg-info)))
-
 (defun arg-info-number-required (arg-info)
   (length (arg-info-metatypes arg-info)))
 

@@ -129,7 +129,6 @@
 (test arg-info-number-required)
 (test arg-info-nkeys)
 (test set-arg-info)
-(test analyze-lambda-list)
 (test check-reply-arg-info)
 (test check-msg-lambda-list)
 

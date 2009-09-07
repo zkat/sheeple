@@ -280,3 +280,45 @@
                      (cons (if (listp arg) (car arg) arg) lambda-list)
                      (cons (if (listp arg) (cadr arg) '=t=) specializers)
                      (cons (if (listp arg) (car arg) arg) required)))))))
+
+(defun analyze-lambda-list (lambda-list)
+  ;; Need to specify exactly what this function does -- is it analyzing
+  ;; any lambda-list, or defmessage lambda-lists? Should it do error
+  ;; reporting, or no error reporting? Right now it's not clear what
+  ;; the answers are...
+  (labels ((make-keyword (symbol)
+             (intern (symbol-name symbol)
+                     (find-package 'keyword)))
+           (parse-key-arg (arg)
+             (if (listp arg)
+                 (if (listp (car arg))
+                     (caar arg)
+                     (make-keyword (car arg)))
+                 (make-keyword arg))))
+    (let ((nrequired 0) (noptional 0) (keysp nil) (restp nil) (nrest 0)
+          (allow-other-keys-p nil) (keywords nil) (keyword-parameters nil)
+          (state 'required))
+      (dolist (x lambda-list)
+        (if (memq x lambda-list-keywords)
+            (case x
+              (&optional         (setf state 'optional))
+              (&key              (setf keysp t
+                                       state 'key))
+              (&allow-other-keys (setf allow-other-keys-p t))
+              (&rest             (setf restp t
+                                       state 'rest))
+              (&aux           (return t))
+              (otherwise
+               (error "encountered the non-standard lambda list keyword ~S" x)))
+            (ecase state
+              (required  (incf nrequired))
+              (optional  (incf noptional))
+              (key       (push (parse-key-arg x) keywords)
+                         (push x keyword-parameters))
+              (rest      (incf nrest)))))
+      (when (and restp (zerop nrest))
+        (error "A &REST in a DEFMESSAGE lambda-list ~
+                must be followed by at least one variable."))
+      (values nrequired noptional keysp restp allow-other-keys-p
+              (reverse keywords)
+              (reverse keyword-parameters)))))

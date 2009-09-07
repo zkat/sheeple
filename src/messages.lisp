@@ -130,6 +130,9 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 ;;;
 ;;; - Arg info objects and the operations on them are meant to check that Message/Reply lambda-lists
 ;;;   comply with http://www.lispworks.com/documentation/HyperSpec/Body/07_fd.htm
+;;;
+;;; Most of this code is taken from SBCL, and I really don't understand exactly how it works yet.
+;;;   -sykopomp
 (defstruct arg-info
   (lambda-list :no-lambda-list)
   metatypes number-optional key/rest-p

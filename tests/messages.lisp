@@ -134,7 +134,9 @@
 (test arg-info-valid-p
   (let ((ai (make-arg-info)))
     (is (null (arg-info-valid-p ai)))
-    (setf (arg-info-number-optional arg-info) 0)
+    (setf (arg-info-number-optional ai) "foo")
+    (is (null (arg-info-valid-p ai)))
+    (setf (arg-info-number-optional ai) 5)
     (is (arg-info-valid-p ai))))
 
 (test arg-info-number-required)

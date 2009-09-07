@@ -129,7 +129,17 @@
     (is (null (arg-info-metatypes arg-info)))
     (is (null (arg-info-number-optional arg-info)))
     (is (null (arg-info-key/rest-p arg-info)))
-    (is (null (arg-info-keys arg-info)))))
+    (is (null (arg-info-keys arg-info)))
+    (is (equal '(a b c) (setf (arg-info-lambda-list arg-info) '(a b c))))
+    (is (equal '(t t t) (setf (arg-info-metatypes arg-info) '(t t t))))
+    (is (= 0 (setf (arg-info-number-optional arg-info)0)))
+    (is (eq t (setf (arg-info-key/rest-p arg-info) t)))
+    (is (equal '(foo) (setf (arg-info-keys arg-info) '(foo))))
+    (is (equal '(a b c) (arg-info-lambda-list arg-info)))
+    (is (equal '(t t t) (arg-info-metatypes arg-info)))
+    (is (= 0 (arg-info-number-optional arg-info)))
+    (is (eq t (arg-info-key/rest-p arg-info)))
+    (is (equal '(foo) (arg-info-keys arg-info)))))
 
 (test arg-info-valid-p
   (let ((ai (make-arg-info)))

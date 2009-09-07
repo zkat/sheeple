@@ -7,7 +7,9 @@ THING = sheeple
 
 TEXI = $(THING).texinfo
 
-all: info pdf html/index.html
+default: pdf htmldir
+
+all: dvi ps info html htmldir html.tgz pdf
 
 dvi ps info html pdf: %: $(THING).%
 
@@ -23,7 +25,7 @@ $(THING).info: $(TEXI)
 $(THING).html: $(TEXI)
 	texi2html $<
 
-html/index.html: $(TEXI)
+htmldir: $(TEXI)
 	makeinfo -o html --html $<
 
 html.tgz: html/index.html

@@ -147,9 +147,6 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 (defun arg-info-number-required (arg-info)
   (length (arg-info-metatypes arg-info)))
 
-(defun arg-info-nkeys (arg-info)
-  (count-if (curry 'neq t) (arg-info-metatypes arg-info)))
-
 (defun check-reply-arg-info (msg arg-info reply)
   (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)
       (analyze-lambda-list (reply-lambda-list reply))

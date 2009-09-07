@@ -138,7 +138,6 @@
     (is (arg-info-valid-p ai))))
 
 (test arg-info-number-required)
-(test arg-info-nkeys)
 (test set-arg-info)
 (test check-reply-arg-info)
 (test check-msg-lambda-list)

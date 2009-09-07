@@ -1,11 +1,33 @@
 * A few brief guidelines about the coding style for the Sheeple source
 ** Documentation
+*** Manual
+    You are highly encouraged to make contributions to the Sheeple Manual,
+    maintained in GNU Texinfo format [[./doc/sheeple.texinfo][here]]. Please follow these guidelines:
+**** Wrap text to 80 columns
+     This is not Common Lisp, so there's no need for a line to go further than
+     80 columns. This is only for text, though; Texinfo commands (particularly,
+     @node definitions) should go as far as necessary to keep them on one line.
+**** Use the index
+     Every index entry is useful. Use separate indices for clarity; if there are
+     too many indices at the end, merge some together, but keep the entries
+     within the source separate. For example, =STANDARD-SHEEP= is both a concept
+     and a variable, and should thus be indexed (at least) twice. At the end of
+     the document, the variable index can be merged with the function index, so
+     that we don't have fifty different half-page indices.
+**** When in doubt, follow the [[http://www.gnu.org/software/texinfo/manual/texinfo/][GNU Texinfo Manual]]
+     Remarkable as it may seem, there's even less TeX talent among the Sheeple
+     developers than there is Common Lisp talent, so please stick to the Texinfo
+     commands, and use them idiomatically, so that we can understand your
+     code. If you are a TeX wizard, let us know, and maybe you can become
+     Sheeple's official documentarian. Otherwise... Keep It Simple, Stupid!
 *** Documentation
-    Document your code, even if it is not exposed to the user. A well-documented function devoid of
-    comments is better than an undocumented function with several short comments in its body.
+    Document your code, even if it is not exposed to the user. A well-documented
+    function devoid of comments is better than an undocumented function with
+    several short comments in its body.
 **** Describe WHAT, not HOW
-     Supply an API through docstrings. If a function's algorithm is complex, don't describe it in
-     the docstring; either use comments, or simplify the algorithm.
+     Supply an API through docstrings. If a function's algorithm is complex,
+     don't describe it in the docstring; either use comments, or simplify the
+     algorithm.
 *** Commenting
     Comment your code as described in [[http://www.lispworks.com/documentation/HyperSpec/Body/02_ddb.htm][CLHS 2.4.4.2]]. Occasionally, when large
     blocks of code must be commented out, it is alright to use whatever

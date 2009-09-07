@@ -21,16 +21,6 @@
   "Constructs a vector of SIZE elements set to INITIAL-ELEMENT. See `make-list'."
   (make-array size :initial-element initial-element))
 
-;;; This is only here because it gets called once in src/properties.lisp
-;;; It gets called to mitigate a hierarchy traversal. Maybe get rid of it?
-(defun flatten (x)
-  "Flattens a list."
-  (labels ((rec (x acc)
-             (cond ((null x) acc)
-                   ((atom x) (cons x acc))
-                   (t (rec (car x) (rec (cdr x) acc))))))
-    (rec x nil)))
-
 ;;; This only gets called once, during the macroexpansion of collect.
 (defun proper-list-of-length-p (list min &optional (max min))
   "Returns T if the length of X is between MIN and MAX, NIL otherwise."
@@ -112,14 +102,19 @@
   `(aif ,test-form
 	(progn ,@body)))
 
+(defmacro awhen-prog1 (test-form &body body)
+  "A combination of AWHEN and PROG1; always returns the result of TEST-FORM."
+  `(aif ,test-form
+        (prog1 it ,@body)))
+
 (defmacro aand (&rest args)
   (cond ((null args) t)
 	((null (cdr args)) (car args))
 	(t `(aif ,(car args) (aand ,@(cdr args))))))
 
-(defmacro fun (&body family)
+(defmacro fun (&body body)
   "This macro puts the FUN back in FUNCTION."
-  `(lambda (,(intern "_")) ,@family))
+  `(lambda (&optional _) (declare (ignorable _)) ,@body))
 
 ;; from alexandria:
 (declaim (inline delete/swapped-arguments))

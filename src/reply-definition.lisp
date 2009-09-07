@@ -8,92 +8,76 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(defclass reply ()
-  ((name :accessor reply-name :initform nil :initarg :name)
-   (qualifiers :accessor reply-qualifiers :initform nil :initarg :ql)
-   (lambda-list :accessor reply-lambda-list :initform nil :initarg :ll)
-   (body :accessor reply-body :initform '(lambda () nil) :initarg :body)
-   (function :accessor reply-function :initform (lambda () nil) :initarg :fn)
-   (documentation :accessor reply-documentation :initform "" :initarg :dox)))
+;;;
+;;; Reply objects
+;;;
+(defstruct (reply (:predicate replyp))
+  ;; Replies are the Sheeple equivalent of methods. Replies themselves are objects that hold
+  ;; some basic information about what the reply does, what kind of reply it is, etc.
+  ;; When reply objects are 'called', their reply-function is fetched directly. By using lambdas,
+  ;; we're able to latch on to the lexical environment the reply was defined in (so they can be
+  ;; closures)
+  message qualifiers lambda-list
+  (function (lambda () nil)))
 
-(defun %make-reply (&key name qualifiers lambda-list body function (documentation ""))
-  (make-instance 'reply :name name :ql qualifiers :ll lambda-list
-                 :body body :fn function :dox documentation))
-(defgeneric reply-p (obj))
-(defmethod reply-p (obj)
-  (declare (ignore obj))
-  nil)
-(defmethod reply-p ((obj reply))
-  (declare (ignore obj))
-  t)
+(defun reply-name (reply)
+  (message-name (reply-message reply)))
 
-(defun reply-message (reply)
-  (find-message (reply-name reply) nil))
+;;;
+;;; Roles
+;;;
+;;; - Roles encapsulate the idea of dispatch. Roles live in sheep objects themselves and represent
+;;;   the basic information about what 'role' that particular object has in dispatching on a
+;;;   particular message. As it turns out, all the information roles have to hold is the position
+;;;   in which it is supposed to be called, and the actual reply object it's associated with.
+;;;   The algorithm takes care of putting everything else together.
+(defun make-role (reply position)
+  (cons reply position))
+(defun role-reply (role)
+  (car role))
+(defun role-position (role)
+  (cdr role))
 
-(defclass role ()
-  ((name :accessor role-name :initform nil :initarg :name)
-   (position :accessor role-position :initform 0 :initarg :pos)
-   (reply :accessor role-reply :initform nil :initarg :msg)))
-(defun %make-role (&key name (position 0) reply)
-  (make-instance 'role :name name :pos position :msg reply))
-(defgeneric role-p (obj))
-(defmethod role-p (obj)
-  (declare (ignore obj))
-  nil)
-(defmethod role-p ((obj role))
-  (declare (ignore obj))
-  t)
+(deftype role ()
+  '(cons reply fixnum))
+(defun rolep (maybe-role)
+  (typep maybe-role 'role))
 
 (defun role-message (role)
-  (find-message (role-name role) nil))
+  (reply-message (role-reply role)))
+(defun role-name (role)
+  (reply-name (role-reply role)))
 
-(defun participant-p (sheep reply-name)
-  (when (member-if (lambda (role) (equal reply-name (role-name role)))
-                   (sheep-direct-roles sheep))
+(defun participantp (sheep reply)
+  "Checks if SHEEP is actually involved in dispatching REPLY"
+  (when (find-if (curry 'eq reply)
+                 (%sheep-roles sheep) :key 'role-reply)
     t))
 
-(defun ensure-reply (name &rest all-keys
-                       &key participants
-                       lambda-list
-                       &allow-other-keys)
-  (when (not (find-message name nil))
-    (progn
+;;;
+;;; Reply definition
+;;;
+(defun ensure-reply (name &key qualifiers lambda-list participants function (documentation ""))
+  ;; shouldn't this just be a plain call to ensure-message? -- syko
+  (let ((message (find-message name nil)))
+    (when (null message)
+      ;; TODO - this style warning could be -much- nicer.
       (warn 'style-warning)
-      ;; FIXME: can't just give the lambda-list over. Should prepare it for messages
-      (ensure-message
-       name :lambda-list (create-msg-lambda-list lambda-list))))
-  (let* ((message (find-message name))
-         (target-sheeple (sheepify-list participants))
-         (reply (apply
-                   #'generate-reply
-                   :message message
-                   :lambda-list lambda-list
-                   :participants target-sheeple
-                   all-keys)))
-    (clear-memo-table message)
-    reply))
-
-(defun generate-reply (&key qualifiers
-                         lambda-list
-                         participants
-                         message
-                         function
-                         body
-                         (documentation ""))
-  (let ((reply (%make-reply
-                   :name (message-name message)
-                   :lambda-list lambda-list
-                   :qualifiers qualifiers
-                   :function function
-                   :body body
-                   :documentation documentation)))
-    (remove-specific-reply message qualifiers participants)
-    (add-reply-to-message reply message)
-    (add-reply-to-sheeple message reply participants)
-    reply))
+      (setf message (ensure-message name :lambda-list (create-msg-lambda-list lambda-list))))
+    (let ((reply (make-reply :message (find-message name)
+                             :lambda-list lambda-list
+                             :qualifiers qualifiers
+                             :function function))
+          (sheepified-participants (sheepify-list participants)))
+      (setf (documentation reply 't) documentation) ; same as dox for CLOS methods
+      (clear-dispatch-cache message) ; because the dispatch landscape has changed
+      (remove-specific-reply message qualifiers sheepified-participants)
+      (add-reply-to-message reply message)
+      (add-reply-to-sheeple message reply sheepified-participants)
+      reply)))
 
 (defun create-msg-lambda-list (lambda-list)
-  ;;; Create a message lambda list from a reply lambda list
+  "Create a message lambda list from a reply lambda list"
   (loop for x in lambda-list
      collect (if (consp x) (list (car x)) x)
      if (eq x '&key) do (loop-finish)))
@@ -102,24 +86,83 @@
   (set-arg-info message :new-reply reply)
   (push reply (message-replies message)))
 
+(defun add-reply-to-sheeple (message reply sheeple)
+  (declare (ignore message)) ; Am I missing something?
+  (loop
+     for sheep in sheeple
+     for i below (length sheeple)
+     do (push (make-role reply i)
+              (%sheep-roles sheep))))
+
+(defun available-replies (sheep)
+  (delete-duplicates
+   (append (%sheep-roles sheep) (mapcan 'available-replies (sheep-parents sheep)))
+   :test 'equal))
+
+(defun add-reader-to-sheep (reader prop-name sheep)
+  (ensure-message reader :lambda-list '(sheep))
+  (ensure-reply reader
+                :lambda-list '(sheep)
+                :participants (list sheep)
+                :function (eval (make-reply-lambda reader
+                                                   '(sheep)
+                                                   `((property-value sheep ',prop-name))))))
+
+(defun add-readers-to-sheep (readers prop-name sheep)
+  (map nil (fun (add-reader-to-sheep _ prop-name sheep)) readers)
+  sheep)
+
+(defun add-writer-to-sheep (writer prop-name sheep)
+  (ensure-message writer :lambda-list '(new-value sheep))
+  (ensure-reply writer
+                :lambda-list '(new-value sheep)
+                :participants (list =t= sheep)
+                :function (eval (make-reply-lambda writer
+                                                   '(new-value sheep)
+                                                   `((setf (property-value sheep ',prop-name)
+                                                           new-value))))))
+
+(defun add-writers-to-sheep (writers prop-name sheep)
+  (map nil (fun (add-writer-to-sheep _ prop-name sheep)) writers)
+  sheep)
+
+;;;
+;;; Reply undefinition
+;;;
+(defun undefine-reply (name &key qualifiers participants)
+  (awhen (find-message name nil)
+    ;; TODO -- Remove documentation - Adlai
+    (remove-applicable-reply it qualifiers participants)
+    (clear-dispatch-cache it)
+    t))
+
 (defun remove-specific-reply (message qualifiers participants)
-  (let ((reply (find-if (lambda (msg)
-                            (equal (reply-qualifiers msg)
-                                   qualifiers))
-                        (%find-applicable-replies
+  (let ((reply (find-if (fun (equal qualifiers (reply-qualifiers _)))
+                        (%find-applicable-replies ;defined in reply-dispatch.lisp
                          message participants :errorp nil))))
     (when (and reply
-               (every (lambda (sheep)
-                        (participant-p sheep (reply-name reply)))
-                      participants))
-      (loop for sheep in participants
+               (every (rcurry 'participantp (reply-name reply)) participants))
+      (loop
+         for sheep in participants
          for i from 0
-         do (loop for role in (sheep-direct-roles sheep)
-               do (let ((role-reply (role-reply role)))
-                    (when (and
-                           (equal reply role-reply)
-                           (= i (role-position role)))
-                      (delete-role role sheep)))))
+         do (map nil (fun (when (and (eq reply (role-reply _))
+                                     (= i (role-position _)))
+                            (delete-role _ sheep)))
+                 (%sheep-roles sheep)))
+      (delete-reply reply))))
+
+(defun remove-applicable-reply (message qualifiers participants)
+  (let ((reply (find-if (fun (equal qualifiers (reply-qualifiers _)))
+                        (%find-applicable-replies
+                         message participants :errorp nil))))
+    (when reply
+      (loop
+         for sheep in participants
+         for i from 0
+         do (map nil (fun (when (and (eq reply (role-reply _))
+                                     (= i (role-position _)))
+                            (delete-role _ sheep)))
+                 (%sheep-roles sheep)))
       (delete-reply reply))))
 
 (defun delete-reply (reply)
@@ -128,82 +171,18 @@
           (delete reply (message-replies message)))))
 
 (defun delete-role (role sheep)
-  (setf (sheep-direct-roles sheep)
-        (delete role (sheep-direct-roles sheep))))
+  (setf (%sheep-roles sheep)
+        (delete role (%sheep-roles sheep))))
 
-(defun add-reply-to-sheeple (message reply sheeple)
-  (loop
-     for sheep in sheeple
-     for i upto (1- (length sheeple))
-     do (let ((role (%make-role
-                     :name (message-name message)
-                     :position i
-                     :reply reply)))
-          (push role
-                (sheep-direct-roles sheep)))))
+;;;
+;;; User interface
+;;;
 
-(defun undefine-reply (name &key qualifiers participants)
-  (let ((msg (find-message name nil)))
-    (when msg
-     (remove-applicable-reply msg qualifiers participants)
-     (clear-memo-table msg)
-     t)))
-
-(defun remove-applicable-reply (message qualifiers participants)
-  (let ((reply (find-if (lambda (reply)
-                            (equal (reply-qualifiers reply)
-                                   qualifiers))
-                          (%find-applicable-replies
-                           message participants :errorp nil))))
-    (when reply
-      (loop for sheep in participants
-         for i from 0
-         do (loop for role in (sheep-direct-roles sheep)
-               do (let ((role-reply (role-reply role)))
-                    (when (and
-                           (equal reply role-reply)
-                           (= i (role-position role)))
-                      (delete-role role sheep)))))
-      (delete-reply reply))))
-
-(defun available-replies (sheep)
-  (let ((roles (loop for role in (sheep-direct-roles sheep)
-                    collect (vector (role-name role) (role-position role)))))
-    (remove-duplicates
-     (flatten
-      (append roles (mapcar #'available-replies (sheep-parents sheep)))))))
-
-(defun add-readers-to-sheep (readers prop-name sheep)
-  (loop for reader in readers
-     do
-       (ensure-message reader :lambda-list '(sheep))
-       (ensure-reply reader
-                        :lambda-list '(sheep)
-                        :participants (list sheep)
-                        :body `(property-value sheep ',prop-name)
-                        :function (eval (make-reply-lambda reader
-                                                             '(sheep)
-                                                             `((property-value sheep ',prop-name)))))))
-
-(defun add-writers-to-sheep (writers prop-name sheep)
-  (loop for writer in writers
-     do
-       (ensure-message writer :lambda-list '(new-value sheep))
-       (ensure-reply writer
-                        :lambda-list '(new-value sheep)
-                        :participants (list =t= sheep)
-                        :body `(setf (property-value sheep ',prop-name) new-value)
-                        :function (eval (make-reply-lambda writer
-                                                             '(new-value sheep)
-                                                             `((setf (property-value sheep ',prop-name)
-                                                                     new-value)))))))
-
-;;; macro
+;;; Definition
 (defmacro defreply (&rest args)
   (multiple-value-bind (name qualifiers specialized-lambda-list docstring body)
       (parse-defreply args)
-    `(eval-when (:load-toplevel :execute)
-       (%defreply-expander ,name ,qualifiers ,specialized-lambda-list ,docstring ,body))))
+    `(%defreply-expander ,name ,qualifiers ,specialized-lambda-list ,docstring ,body)))
 
 (defmacro %defreply-expander (name qualifiers specialized-lambda-list docstring body)
   (multiple-value-bind (parameters ll participants required)
@@ -216,8 +195,7 @@
       :lambda-list ',ll
       :participants (list ,@participants)
       :documentation ,docstring
-      :function ,(make-reply-lambda name ll body)
-      :body '(block ,name ,@body))))
+      :function ,(make-reply-lambda name ll body))))
 
 (defun make-reply-lambda (name lambda-list body)
   (let* ((msg (find-message name nil))
@@ -277,6 +255,7 @@
       var-name
       (error "Invalid var name.")))
 
+;;; Undefinition
 (defmacro undefreply (&rest args)
   (multiple-value-bind (name qualifiers lambda-list)
       (parse-undefreply args)

@@ -32,7 +32,7 @@
 
 (postboot-test %get-property-cons
   (let* ((sheep (spawn))
-         (property 
+         (property
           #+sheeple3.1 (defsheep (=standard-property=) ((property-name 'test)))
           #-sheeple3.1 'test))
     (is (null (%get-property-cons sheep 'test)))
@@ -44,7 +44,7 @@
 
 (postboot-test %remove-property-cons
   (let* ((sheep (spawn))
-         (property 
+         (property
           #+sheeple3.1 (defsheep (=standard-property=) ((property-name 'test)))
           #-sheeple3.1 'test))
     (%add-property-cons sheep property 'value)
@@ -53,7 +53,7 @@
 
 (postboot-test %direct-property-value
   (let* ((sheep (spawn))
-         (property 
+         (property
           #+sheeple3.1 (defsheep (=standard-property=) ((property-name 'test)))
           #-sheeple3.1 'test))
     (%add-property-cons sheep property 'value)
@@ -62,7 +62,7 @@
 #+sheeple3.1
 (postboot-test %direct-property-metaobject
   (let* ((sheep (spawn))
-         (property 
+         (property
           #+sheeple3.1 (defsheep (=standard-property=) ((property-name 'test)))
           #-sheeple3.1 'test))
     (%add-property-cons sheep property 'value)
@@ -74,7 +74,7 @@
 
 (postboot-test has-direct-property-p
   (let* ((sheep (spawn))
-         (property 
+         (property
           #+sheeple3.1 (defsheep (=standard-property=) ((property-name 'test)))
           #-sheeple3.1 'test))
     (%add-property-cons sheep property 'value)

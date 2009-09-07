@@ -70,9 +70,10 @@ of its descendants."
 
 ;;; The basics of allocating sheep objects
 (defun std-allocate-sheep (metasheep)
-  "Creates a standard sheep object. By default, all the metaproperties are NIL."
+  "Creates a standard sheep object."
   (let ((array (make-vector 6)))
-    (setf (svref array 0) metasheep)
+    (setf (svref array 0) metasheep
+          (svref array 4) (list array))
     array))
 
 (defun maybe-std-allocate-sheep (metasheep)
@@ -192,54 +193,60 @@ on the TIE-BREAKER in the case of ambiguous constraints. On the assumption
 that they are freshly generated, this implementation is destructive with
 regards to the CONSTRAINTS. A future version will undo this change."
   (loop
-     for minimal-elements = (remove-if (fun (member _ constraints :key 'cadr)) elements)
-     while minimal-elements
-     for choice = (if (null (cdr minimal-elements))
-                      (car minimal-elements)
-                      (funcall tie-breaker minimal-elements result))
-     collect choice into result
-     do (deletef constraints choice :test 'member)
-        (setf elements (remove choice elements))
-     finally (if (null elements)
-                 (return-from topological-sort result)
-                 (error "Inconsistent precedence graph."))))
+     :for minimal-elements := (remove-if (fun (member _ constraints :key 'cadr :test 'eq))
+                                         elements) :while minimal-elements
+     :for choice := (if (null (cdr minimal-elements))
+                        (car minimal-elements)
+                        (funcall tie-breaker minimal-elements result))
+     :do (deletef constraints choice :test 'member)
+         (setf elements (remove choice elements :test 'eq))
+         (push choice result) :with result
+     :finally (if (null elements)
+                  (return-from topological-sort (nreverse result))
+                  (error "Inconsistent precedence graph."))))
 
 (defun collect-ancestors (sheep)
   "Recursively collects all of SHEEP's ancestors."
   (labels ((all-parents-loop (seen parents)
-             (let ((to-be-processed (set-difference parents seen)))
+             (let ((to-be-processed (set-difference parents seen :test 'eq)))
                (if (null to-be-processed)
                    parents
                    (let ((sheep-to-process (car to-be-processed)))
                      (all-parents-loop (cons sheep-to-process seen)
                                        (union (sheep-parents sheep-to-process)
-                                              parents)))))))
+                                              parents :test 'eq)))))))
     (all-parents-loop () (sheep-parents sheep))))
 
 (defun local-precedence-ordering (sheep)
-  "Calculates the local precedence ordering. Relies on the fact that mapcar will
-return when any list is NIL to avoid traversing the entire parent list."
+  "Calculates the local precedence ordering."
   (let ((parents (sheep-parents sheep)))
-   (mapcar 'list (cons sheep parents) parents)))
+    ;; Since MAPCAR returns once any list is NIL, we only traverse the parent list once.
+    (mapcar 'list (cons sheep parents) parents)))
 
-(defun std-tie-breaker-rule (minimal-elements hl-so-far)
-  (mapc (fun (let ((common (intersection minimal-elements (sheep-parents _))))
-               (when (not (null common))
-                 (return-from std-tie-breaker-rule (car common)))))
-        (reverse hl-so-far)))
+(defun std-tie-breaker-rule (minimal-elements chosen-elements)
+  (dolist (candidate chosen-elements)
+    (awhen (dolist (parent (sheep-parents candidate))
+             (awhen (find parent (the list minimal-elements) :test 'eq) (return it)))
+      (return-from std-tie-breaker-rule it))))
 
 (defun std-compute-sheep-hierarchy-list (sheep)
   "Lists SHEEP's ancestors, in precedence order."
-  (handler-case
-      ;; since collect-ancestors only collects the _ancestors_, we cons the sheep in front.
-      (let ((sheeple-to-order (cons sheep (collect-ancestors sheep))))
-        (topological-sort sheeple-to-order
-                          (remove-duplicates
-                           ;; LOCAL-PRECEDENCE-ORDERING conses up fresh structure,
-                           ;; so we can be destructive here
-                           (mapcan 'local-precedence-ordering sheeple-to-order))
-                          'std-tie-breaker-rule))
-    (simple-error () (error 'sheeple-hierarchy-error :sheep sheep))))
+  (cond
+    ((cdr (%sheep-parents sheep))
+     (handler-case
+         ;; since collect-ancestors only collects the _ancestors_, we cons the sheep in front.
+         ;; LOCAL-PRECEDENCE-ORDERING returns fresh conses, so we can be destructive.
+         (let ((unordered (cons sheep (collect-ancestors sheep))))
+           (topological-sort unordered
+                             (delete-duplicates (mapcan 'local-precedence-ordering unordered))
+                             'std-tie-breaker-rule))
+       (simple-error () (error 'sheeple-hierarchy-error :sheep sheep))))
+    ((car (%sheep-parents sheep))
+     (let ((cache (%sheep-hierarchy-cache (car (%sheep-parents sheep)))))
+       (if (find sheep cache)
+           (error 'sheeple-hierarchy-error :sheep sheep)
+           (cons sheep cache))))
+    (t nil)))
 
 (defun compute-sheep-hierarchy-list (sheep)
   (typecase sheep
@@ -249,11 +256,11 @@ return when any list is NIL to avoid traversing the entire parent list."
 
 (defun memoize-sheep-hierarchy-list (sheep)
   (setf (%sheep-hierarchy-cache sheep) (compute-sheep-hierarchy-list sheep))
-  (%map-children (fun (memoize-sheep-hierarchy-list _)) sheep))
+  (%map-children 'memoize-sheep-hierarchy-list sheep))
 
 (defun std-finalize-sheep-inheritance (sheep)
   "Memoizes SHEEP's hierarchy list."
-  (mapc (fun (%add-child sheep _)) (sheep-parents sheep))
+  (mapc (curry '%add-child sheep) (sheep-parents sheep))
   (memoize-sheep-hierarchy-list sheep)
   sheep)
 
@@ -296,23 +303,17 @@ See `add-parent-using-metasheeple'."
   (when (eq new-parent child) (error "Sheeple cannot be parents of themselves."))
   (when (member new-parent (sheep-parents child) :test 'eq)
     (error "~A is already a parent of ~A." new-parent child))
-  (handler-case
-      (progn
-        (push new-parent (%sheep-parents child))
-        (finalize-sheep-inheritance child)
-        child)
-    ;; This error is signaled by compute-sheep-hierarchy-list, which right now
-    ;; is called from inside finalize-sheep-inheritance (this is probably a bad idea, move
-    ;; c-s-h-l in here just to do the check?)
-    ;; one problem with this is that it'll call c-s-h-l twice
-    (sheeple-hierarchy-error () (progn (remove-parent new-parent child)
-                                       (error 'sheeple-hierarchy-error :sheep child)))))
+  (handler-bind
+      ((sheeple-hierarchy-error (fun (remove-parent new-parent child))))
+    (push new-parent (%sheep-parents child))
+    (finalize-sheep-inheritance child)
+    child))
 
 (defun add-parents (parents sheep)
   "Mostly a utility function for easily adding multiple parents. They will be added to
 the front of the sheep's parent list in reverse order (so they will basically be appended
 to the front of the list)"
-  (map nil (fun (add-parent _ sheep)) (reverse parents))
+  (map nil (rcurry 'add-parent sheep) (reverse parents))
   sheep)
 
 (defun add-parent* (parent* sheep)
@@ -373,7 +374,7 @@ will be used instead of SHEEP's metasheep, but SHEEP itself remains unchanged."
   `(list ,@sheeple))
 
 (defun canonize-properties (properties &optional (accessors-by-default nil))
-  `(list ,@(mapcar (fun (canonize-property _ accessors-by-default)) properties)))
+  `(list ,@(mapcar (rcurry 'canonize-property accessors-by-default) properties)))
 
 (defun canonize-property (property &optional (accessors-by-default nil))
   (let ((name (car property)) (value (cadr property)) (readers nil)
@@ -423,7 +424,7 @@ will be used instead of SHEEP's metasheep, but SHEEP itself remains unchanged."
   (mapcan 'canonize-option options))
 
 (defun canonize-option (option)
-  (list `,(car option) (cadr option)))
+  (list (car option) (cadr option)))
 
 (defmacro defsheep (sheeple properties &rest options)
   "Standard sheep-generation macro. This variant auto-generates accessors."

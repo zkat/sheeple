@@ -162,20 +162,21 @@ more entries the cache will be able to hold, but the slower lookup will be.")
                        (msg-key/rest-p arg-info-key/rest-p)
                        (msg-keywords   arg-info-keys))
           arg-info
-        (unless (= nreq msg-nreq)
-          (lose "the reply has ~A required arguments than the message."
-                (comparison-description nreq msg-nreq)))
-        (unless (= nopt msg-nopt)
-          (lose "the reply has ~A optional arguments than the message."
-                (comparison-description nopt msg-nopt)))
-        (unless (eq (or keysp restp) msg-key/rest-p)
-          (lose "the reply and message differ in whether they accept~_~
-                 &REST or &KEY arguments."))
-        (unless (and (atom msg-keywords)
-                     (or (and restp (not keysp)) allow-other-keys-p
-                         (every (rcurry 'memq keywords) msg-keywords)))
-          (lose "the reply does not accept each of the &KEY arguments~2I~_~S."
-                msg-keywords))))))
+        (cond ((not (= nreq msg-nreq))
+               (lose "the reply has ~A required arguments than the message."
+                     (comparison-description nreq msg-nreq)))
+              ((not (= nopt msg-nopt))
+               (lose "the reply has ~A optional arguments than the message."
+                     (comparison-description nopt msg-nopt)))
+              ((neq (or keysp restp) msg-key/rest-p)
+               (lose "the reply and message differ in whether they accept~_~
+                      &REST or &KEY arguments."))
+              ((not (and (atom msg-keywords)
+                         (or (and restp (not keysp)) allow-other-keys-p
+                             (every (rcurry 'memq keywords) msg-keywords))))
+               (lose "the reply does not accept each of the &KEY arguments~2I~_~S."
+                     msg-keywords))
+              (t t))))))
 
 (defun set-arg-info (msg &key new-reply (lambda-list nil lambda-list-p))
   (let* ((arg-info (message-arg-info msg))
@@ -215,7 +216,6 @@ more entries the cache will be able to hold, but the slower lookup will be.")
       (check-no-defaults optional)
       (check-no-defaults keys)
       (when auxp (error 'message-lambda-list-error :arg '&aux :lambda-list lambda-list)))))
-
 
 ;;;
 ;;; Message definition (finally!)

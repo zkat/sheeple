@@ -123,9 +123,14 @@
 (def-suite arg-info :in messages)
 (in-suite arg-info)
 
-(test arg-info)
-(test arg-info-valid-p)
-(test arg-info-applyp)
+(test arg-info-struct
+  (let ((arg-info (make-arg-info)))
+    (is (eq :no-lambda-list (arg-info-lambda-list arg-info)))
+    (is (null (arg-info-metatypes arg-info)))
+    (is (null (arg-info-number-optional arg-info)))
+    (is (null (arg-info-key/rest-p arg-info)))
+    (is (null (arg-info-keys arg-info)))))
+
 (test arg-info-number-required)
 (test arg-info-nkeys)
 (test set-arg-info)

@@ -139,7 +139,7 @@
 (test finalize-message)
 (test make-message)
 (test ensure-message)
-(test defmessage)
+(postboot-test defmessage)
 (test canonize-message-option
   (let ((o1 '(:documentation "foo"))
         (o2 '(:metasheep "thesheep")))

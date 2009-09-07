@@ -43,9 +43,6 @@
 (def-suite reply-dispatch :in messages)
 (in-suite reply-dispatch)
 
-(test clear-dispatch-cache)
-(test clear-all-message-caches)
-
 (test primary-reply-p)
 (test before-reply-p)
 (test after-reply-p)
@@ -58,12 +55,14 @@
 (test compute-primary-erfun)
 (test find-applicable-replies)
 (test %find-applicable-replies)
+
 ;; caching
 (test create-reply-cache)
 (test desired-vector-entry-p)
 (test fetch-memo-vector-entry)
 (test add-entry-to-message)
 (test memoize-reply-dispatch)
+
 ;; other dispatch stuff
 (test sort-applicable-replies)
 (test contain-reply)

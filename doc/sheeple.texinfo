@@ -1,0 +1,387 @@
+\input texinfo @c -*- texinfo -*-
+@c %**start of header
+@setfilename sheeple.info
+@settitle Sheeple @value{VERSION} Manual
+@firstparagraphindent insert
+@c %**end of header
+
+@set EDITION 0.1
+@set VERSION v3.0
+@set UPDATED-MONTH September 2009
+@set UPDATED 6 @value{UPDATED-MONTH}
+@clear mop
+
+@copying
+This is Edition @value{EDITION},
+last updated @value{UPDATED},
+of @cite{The Sheeple Manual},
+for Sheeple @value{VERSION}.
+
+Copyright @copyright{} 2008, 2009 Kat Marchan.
+
+This software is composed in part of code taken from SBCL's version of PCL, and
+Closette as presented in Art of the Metaobject Protocol, at times with only
+small modifications. It also contains some original code. Copying and
+distribution of this software must retain the copyright notice for Xerox, as
+well as Kat Marchan's:
+
+@quotation
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+@end quotation
+
+Xerox's copyright, from original PCL sources:
+
+@quotation
+Copyright @copyright{} 1985, 1986, 1987, 1988, 1989, 1990 Xerox Corporation. All
+rights reserved.
+
+Use and copying of this software and preparation of derivative works based upon
+this software are permitted. Any distribution of this software or derivative
+works must comply with all applicable United States export control laws.
+
+This software is made available AS IS, and Xerox Corporation makes no warranty
+about the software, its performance or its conformity to any specification.
+@end quotation
+
+Additionally, Sheeple uses Luis Oliveira's trivial-garbage for portability
+across implementations. trivial-garbage is in the public domain, thus although
+the statement packaged with it is included here, copies and derivatives of
+Sheeple need not include it:
+
+@quotation
+This software is placed in the public domain by Luis Oliveira
+<loliveira@@common-lisp.net> and is provided with absolutely no warranty.
+@end quotation
+@end copying
+
+@titlepage
+@title Sheeple Manual
+@subtitle Edition @value{EDITION}, covering Sheeple @value{VERSION}
+@subtitle @value{UPDATED-MONTH}
+@author by Adlai Chandrasekhar and Kat Marchan
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@ifnottex
+
+@node Top, Overview, (dir), (dir)
+@top Sheeple Manual
+
+This manual is for Sheeple @value{VERSION}
+@end ifnottex
+
+@menu
+* Overview::                    Non-Technical Overview of Sheeple
+* Concepts::                    Introduction to the Concepts of Sheeple
+* Concept Index::               Index of General Concepts
+* Variable Index::              Index of Variables and Objects of Sheeple
+* Copying::                     Your rights and freedoms
+@end menu
+@node Overview, Concepts, Top, Top
+@chapter Overview
+
+@menu
+* About Sheeple::               A Non-Technical Overview
+* Installing Sheeple::          A Slightly Technical Guide
+@end menu
+
+@node About Sheeple, Installing Sheeple, Overview, Overview
+@section About Sheeple
+@cindex Sheeple, general overview of
+
+@menu
+* Vision::                      The Grand Plan for Sheeple
+* History::                     What Inspired Sheeple? What Influenced Sheeple?
+@end menu
+
+@node Vision, History, About Sheeple, About Sheeple
+@subsection Vision
+@cindex Vision
+Sheeple is a Dynamic, CLOS-like, Delegative Prototype-based Object-Oriented
+Programming Framework (or "POOP Framework") that strives to optimize application
+flexibility, minimize cost while increasing value, maximize programmer
+resources, and empower application implementers to better assist them in
+leveraging modern paradigms in order to proactively achieve next-generation
+synergy in tomorrow's web 3.0 world. It is implemented in (mostly) ANSI Common
+Lisp. Sheeple is fully buzzword compliant.
+
+@node History,  , Vision, About Sheeple
+@subsection History
+@cindex history, of Sheeple
+Sheeple was originally written as a persistent library for use with
+Sykosomatic. Because of a desire to use it in other applications, it was
+rewritten as a regular prototype object system and provided as a standalone
+library meant for general-purpose OO hackery.
+
+Persistent Sheeple has not been abandoned, instead, it's being implemented as a
+separate library using Sheeple's reflection features.
+
+Sheeple is inspired by a number of Object-Oriented systems, mainly:
+@enumerate
+@item
+CLOS, the Common Lisp Object System.
+@cindex CLOS
+
+@item
+Slate, a Smalltalk-like language with Prototype Multiple Dispatch on which
+Sheeple bases its message dispatch system.
+@cindex Slate
+@cindex Smalltalk
+@cindex PMD
+
+@item
+Self, another Smalltalk-like language with lots of papers written about it, and
+the concept of prototype OO.
+
+@item
+Io, a pure prototype-based language. Sheeple, like Io, implements differential
+inheritance.
+@end enumerate
+
+It was written with the purpose of providing a lot of the goodies of CLOS
+programming in a completely prototype-based environment. As such, it shares a
+lot of features and syntax with CLOS. The most notable of these are multiple
+inheritance and multiple dispatch of methods.
+
+@page
+@node Installing Sheeple,  , About Sheeple, Overview
+@section Installing Sheeple
+
+@menu
+* Installation Procedure::      A quick guide to obtaining Sheeple
+* Supported Platforms::         In which systems and implementations does
+                                Sheeple currently perform best?
+* Loading Sheeple::             A quick guide to starting Sheeple
+@end menu
+
+@node Installation Procedure, Supported Platforms, Installing Sheeple, Installing Sheeple
+@subsection Installation Procedure
+@cindex Installation
+@cindex Github
+There are two primary ways to obtain Sheeple, namely, a tagged release, or a
+clone of the public repository, available via git. Unless you are interested in
+contributing to Sheeple development and/or studying Sheeple's internals, you
+should use a tagged release. Regardless of which method you use to obtain
+Sheeple, you will need to follow the directions in @ref{Informing ASDF}.
+
+@menu
+* Tagged Release::              Downloading a stable copy of Sheeple
+* Tracking the Git Repo::       Tracking the ``bleeding edge''
+* Informing ASDF::              Setting up a downloaded copy of Sheeple
+@end menu
+
+@node Tagged Release, Tracking the Git Repo, Installation Procedure, Installation Procedure
+@unnumberedsubsubsec Tagged Release
+@cindex release, latest
+@cindex downloading
+A tagged release is preferable for stability --- we test new features
+extensively before including them in a tagged release. At the time of
+this writing, the latest tagged release is available as a tarball from
+@uref{http://github.com/zkat/sheeple/tarball/@value{VERSION}}.
+
+@node Tracking the Git Repo, Informing ASDF, Tagged Release, Installation Procedure
+@unnumberedsubsubsec Tracking the Git Repo
+@cindex git, repository, tracking
+@cindex bleeding edge, tracking the
+Since all new features are developed and tested carefully before
+inclusion in tagged releases, the best way to track the ``bleeding
+edge'' of Sheeple development is through @command{git}. @command{git}
+is a sophisticated revision control system, used extensively by all of
+Sheeple's developers. A full overview of @command{git} is beyond the
+scope of this section; those interested should refer to the
+@uref{http://www.kernel.org/pub/software/scm/git/docs/user-manual.html,
+Git Manual}.
+
+You can browse Sheeple's main git repository with a browser through
+@uref{http://github.com/zkat/sheeple}. This command will create a copy of
+the Sheeple repository on your local machine:
+
+@example
+git clone git://github.com/zkat/sheeple.git
+@end example
+
+@node Informing ASDF,  , Tracking the Git Repo, Installation Procedure
+@subsubsection Informing ASDF
+@cindex ASDF
+@cindex Windows
+Sheeple is organized using @acronym{@dfn{ASDF}, Another System
+Definition Facility}, the standard (at the time of this writing)
+system-definition facility for Common Lisp programs. For more
+information about @acronym{ASDF}, you should refer to the
+@uref{http://common-lisp.net/project/asdf/manual.html, @acronym{ASDF}
+Manual}; the rest of this section assumes that you are familiar with
+the basic concepts of @acronym{ASDF}, and have configured your
+implementation to use it.
+
+@strong{Please Notice} that if your implementation does not include
+ASDF, you will have to acquire it and load it separately. Up-to-date
+information on installing @acronym{ASDF} should be available via the
+@acronym{ASDF} @uref{http://www.cliki.net/asdf, CLiki page}; The
+official @acronym{ASDF} @uref{http://common-lisp.net/project/asdf,
+Project webpage} should also have the relevant information.
+
+To complete a Sheeple installation, you must inform @acronym{ASDF} where it can
+find the file @file{sheeple.asd}. Substituting @var{registry} and @var{sheeple}
+for your @acronym{ASDF} registry and the directory of your Sheeple installation,
+these commands should work on any @acronym{UNIX}-like system:
+
+@example
+cd @var{registry}
+ln -s @var{sheeple}/sheeple.asd .
+@end example
+
+This method does not work on Windows, which does not support symbolic links. If
+you have to deal with setting up @acronym{ASDF} systems on Windows, you may find
+the @uref{http://common-lisp.net/project/asdf-install/tutorial/index.html,
+ASDF-Install Tutorial} useful --- it contains notes on getting @acronym{ASDF} to
+work on Windows.
+
+@node Supported Platforms, Loading Sheeple, Installation Procedure, Installing Sheeple
+@subsection Supported Platforms
+@cindex platforms, supported
+@cindex supported platforms
+Confirmed to work (pass all tests):
+
+@enumerate
+@item
+SBCL
+@cindex SBCL
+
+@item
+Clozure CL
+@cindex Clozure CL
+@cindex OpenMCL
+
+@item
+GNU CLISP
+@cindex CLISP
+@cindex GNU CLISP
+
+@item
+Scieneer CL
+@cindex Scieneer CL
+@cindex SCL
+@end enumerate
+
+Sheeple doesn't use any OS-specific code (or threads), so it should be stable on
+all operating systems. OSX and Linux x86 have both been actually tested on the
+aforementioned platforms. In theory, it should work on any implementation that
+supports weap pointers and weak hash tables with key weakness through
+trivial-garbage. If you run the test suite on a platform not listed above, and
+all tests pass, please e-mail me and I'll add it to the list of supported
+platforms.
+
+@node Loading Sheeple,  , Supported Platforms, Installing Sheeple
+@subsection Loading Sheeple
+@cindex loading
+Once you have followed the installation instructions (@pxref{Installation
+Procedure}), loading Sheeple into a Lisp image is as simple as:
+
+@lisp
+(asdf:oos 'asdf:load-op 'sheeple)
+(in-package sheeple-user)
+@end lisp
+
+Sheeple should work on most Lisp implementations that support weak pointers and
+hash tables with key weakness, although it's mainly written and tested in SBCL
+and Clozure CL on Linux x86.
+
+Sheeple also includes a suite of tests you can run on whatever platform you're
+trying to get it to work on. The test suite depends on Fiveam. To run it:
+
+@lisp
+(asdf:oos 'asdf:test-op 'sheeple)
+@end lisp
+
+And watch the tests scroll by. All tests should pass as long as you're using a
+tagged release.
+
+@node Concepts, Concept Index, Overview, Top
+@chapter Concepts
+
+Sheeple bears many resemblances to CLOS, yet also introduces new
+concepts. This section goes introduces the concepts critical to a full
+understanding of Sheeple. It should be read regardless of whether you
+have prior experience with CLOS.
+
+@menu
+* Sheep Objects::               The Basic Data Structure of Sheeple
+@end menu
+
+@node Sheep Objects,  , Concepts, Concepts
+@section Sheep Objects
+
+@cindex sheep
+@cindex sheeple
+@cindex Sheeple
+A @dfn{sheep} is a single object within the object system. For the
+plural, sometimes the same word is used, and sometimes the word
+@dfn{sheeple} is employed instead. Note however that @dfn{sheeple}
+doubles both as the plural of sheep and, when used as the proper noun
+(i.e. ``Sheeple''), as the name of the project.
+
+@cindex sheeple, built-in
+@cindex built-in sheep objects
+Sheep objects have their behavior defined by three things, namely,
+their parents, properties, and any replies specialized upon
+them. There are a few built-in sheeple, exported from the
+@code{SHEEPLE} package, that play special roles in Sheeple. The
+consequences of modifying these sheeple from user code are undefined.
+
+@table @code
+@cindex t
+@vindex =T=
+@item =T=
+An ancestor of every other sheep, and is the only sheep
+with no parents. It is primarily used for reply specialization.
+
+@vindex =STANDARD-SHEEP=
+@cindex standard-sheep
+@item =STANDARD-SHEEP=
+An ancestor of all normally-defined sheeple. It has
+@code{=T=} as its only parent. It is also primarily used for reply
+specialization, and in termination cases for functions which recurse
+up the parent-child hierarchy.
+
+@ifset mop
+@vindex =STANDARD-METASHEEP=
+@cindex standard-metasheep
+@item =STANDARD-METASHEEP=
+The metasheep of all normally-defined sheeple. It is the root of the
+MOP, and many MOP functions are specialized upon it or use it
+as a reference point.
+@end ifset
+@end table
+
+@node Concept Index, Variable Index, Concepts, Top
+@unnumbered Concept Index
+@printindex cp
+
+@node Variable Index, Copying, Concept Index, Top
+@unnumbered Variable Index
+@printindex vr
+
+@node Copying,  , Variable Index, Top
+@appendix Copying
+@insertcopying
+
+@bye

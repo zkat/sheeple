@@ -21,17 +21,6 @@
     (is (equalp (apply #'vector (make-list size :initial-element value))
                 (make-vector size :initial-element value)))))
 
-(test flatten
-  (for-all ((tree (gen-tree :elements (constantly nil))))
-    (is (null (flatten tree))))
-  (for-all ((list (gen-list)))
-    (is (equal list (flatten list))))
-  (for-all ((tree (gen-tree)))
-    (is (every #'atom (flatten tree))))
-  (is (equal '(a b c) (flatten '((a b c)))))
-  (is (equal '(a b c) (flatten '((a) (b) (c)))))
-  (is (equal '(a b c) (flatten '((a . b) . c)))))
-
 (test proper-list-of-length-p
   (for-all ((min (gen-integer :min 0 :max 1023))
             (max (gen-integer :min 0 :max 1023) (>= max min))

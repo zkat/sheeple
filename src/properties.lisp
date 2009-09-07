@@ -57,7 +57,7 @@ the vector needs to make space for new property conses. The amount the vector is
 depends on the value of *property-vector-grow-ratio*. The property vector is not guaranteed to
 be EQ when 'enlarged', but it's guaranteed to keep all the previous property conses."
     ;; This implementation conses up a completely new simple-vector.
-    ;; Using extendable vectors forces us to use AREF (a time price), and 
+    ;; Using extendable vectors forces us to use AREF (a time price), and
     ;; it also carries some extra space overhead. The case of many properties being added
     ;; en-masse to a sheep object isn't expected to be very common, so this is probably
     ;; a nice approach.
@@ -67,10 +67,10 @@ be EQ when 'enlarged', but it's guaranteed to keep all the previous property con
     sheep)
 
   (defun %get-property-cons (sheep property)
-    (find property %properties :test 'eq 
+    (find property %properties :test 'eq
           :key #-sheeple3.1 'car
-          #+sheeple3.1 (fun (property-name (car _)))))
-  
+          #+sheeple3.1 (compose 'property-name 'car)))
+
   (defun %add-property-cons (sheep property value)
     "This function puts PROPERTY and VALUE into a cons cell and adds the cell to
 SHEEP's property-vector if the property is unique. If it's not unique a generic error
@@ -98,9 +98,9 @@ is signaled."
   (defun %remove-property-cons (sheep property)
     "Removes the actual property-cons representing PROPERTY."
     (awhen (position property %properties
-                     :test 'eq 
+                     :test 'eq
                      :key #-sheeple3.1 'car
-                     #+sheeple3.1 (fun (property-name (car _))))
+                     #+sheeple3.1 (compose 'property-name 'car))
       (setf (svref %properties it) nil))
     sheep)
 
@@ -129,7 +129,7 @@ NIL otherwise."
 (defun has-property-p (sheep property-name)
   "Returns T if calling PROPERTY-VALUE on SHEEP using the same property-name
 would yield a value (i.e. not signal an unbound-property condition)."
-  (some (fun (has-direct-property-p _ property-name))
+  (some (rcurry 'has-direct-property-p property-name)
         (sheep-hierarchy-list sheep)))
 
 ;; TODO - The way adding/removing properties is done needs to be thought out better.
@@ -190,7 +190,7 @@ a condition of type UNBOUND-DIRECT-PROPERTY condition is signalled."
 
 (declaim (inline property-value-with-hierarchy-list))
 (defun property-value-with-hierarchy-list (sheep property-name)
-  (aif (find-if (fun (has-direct-property-p _ property-name)) (sheep-hierarchy-list sheep))
+  (aif (find-if (rcurry 'has-direct-property-p property-name) (sheep-hierarchy-list sheep))
        (direct-property-value it property-name)
        (error 'unbound-property :sheep sheep :property-name property-name)))
 
@@ -221,7 +221,7 @@ is signaled."
   "Returns the sheep object with a direct-property called PROPERTY-NAME from which SHEEP inherits
 its value. If ERRORP is T, an error is signaled if the property is unbound. Otherwise, NIL is
 returned."
-  (or (find-if (fun (has-direct-property-p _ property-name)) (sheep-hierarchy-list sheep))
+  (or (find-if (rcurry 'has-direct-property-p property-name) (sheep-hierarchy-list sheep))
       (when errorp (error 'unbound-property :sheep sheep :property-name property-name))))
 
 #+sheeple3.1
@@ -245,7 +245,7 @@ returned."
 inherited ones."
   #+sheeple3.1
   (mapcar (fun (direct-property-metaobject (property-owner sheep _ nil) _))
-          (mapcar (fun (property-name _))
+          (mapcar 'property-name
                   (delete-duplicates (append (sheep-direct-properties sheep)
                                              (mapcan #'available-properties
                                                      (sheep-parents sheep)))

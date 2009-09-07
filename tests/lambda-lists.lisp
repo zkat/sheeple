@@ -15,3 +15,4 @@
 (test parse-lambda-list-like-thing)
 (test parse-lambda-list)
 (test parse-specialized-lambda-list)
+(test analyze-lambda-list)

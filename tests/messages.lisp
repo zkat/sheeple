@@ -131,6 +131,12 @@
     (is (null (arg-info-key/rest-p arg-info)))
     (is (null (arg-info-keys arg-info)))))
 
+(test arg-info-valid-p
+  (let ((ai (make-arg-info)))
+    (is (null (arg-info-valid-p ai)))
+    (setf (arg-info-number-optional arg-info) 0)
+    (is (arg-info-valid-p ai))))
+
 (test arg-info-number-required)
 (test arg-info-nkeys)
 (test set-arg-info)

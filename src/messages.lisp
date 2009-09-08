@@ -135,7 +135,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 ;;;   -zkat
 (defstruct arg-info
   (lambda-list :no-lambda-list)
-  metatypes number-optional key/rest-p
+  number-required number-optional key/rest-p
   ;; nil: no &KEY or &REST allowed
   ;; (k1 k2 ..): Each reply must accept these &KEY arguments.
   ;; T: must have &KEY or &REST
@@ -143,9 +143,6 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 
 (defun arg-info-valid-p (arg-info)
   (numberp (arg-info-number-optional arg-info)))
-
-(defun arg-info-number-required (arg-info)
-  (length (arg-info-metatypes arg-info)))
 
 (defun check-reply-arg-info (msg arg-info reply)
   (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)
@@ -197,7 +194,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
         (setf (arg-info-lambda-list arg-info) (if lambda-list-p
                                                   lambda-list
                                                   (create-msg-lambda-list lambda-list))
-              (arg-info-metatypes arg-info) (make-vector nreq)
+              (arg-info-number-required  arg-info) nreq
               (arg-info-number-optional arg-info) nopt
               (arg-info-key/rest-p arg-info) (not (null (or keysp restp)))
               (arg-info-keys arg-info) (if lambda-list-p

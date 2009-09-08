@@ -151,9 +151,10 @@
 (def-suite message-definition :in messages)
 (in-suite message-definition)
 
-(test finalize-message)
-(test make-message)
 (test ensure-message)
+(test make-message)
+(test finalize-message)
+
 (postboot-test defmessage)
 (test canonize-message-option
   (let ((o1 '(:documentation "foo"))

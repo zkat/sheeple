@@ -9,9 +9,9 @@ TEXI = $(THING).texinfo
 
 default: pdf htmldir
 
-all: dvi ps info html htmldir html.tgz pdf
+all: dvi ps info html htmldir tgz pdf
 
-dvi ps info html pdf: %: $(THING).%
+dvi ps info html tgz pdf: %: $(THING).%
 
 $(THING).dvi: $(TEXI)
 	texi2dvi --build-dir=.dvi $<
@@ -25,11 +25,11 @@ $(THING).info: $(TEXI)
 $(THING).html: $(TEXI)
 	texi2html $<
 
-htmldir: $(TEXI)
-	makeinfo -o html --html $<
+$(THING).tgz: htmldir
+	tar -czf $@ sheeple
 
-html.tgz: htmldir
-	tar -czf $@ html
+htmldir: $(TEXI)
+	makeinfo -o sheeple --html $<
 
 $(THING).pdf: $(TEXI)
 	texi2pdf --build-dir=.pdf $<

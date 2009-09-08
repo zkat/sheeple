@@ -144,7 +144,9 @@
 (test set-arg-info)
 (test check-reply-arg-info)
 (test check-msg-lambda-list)
-(test create-msg-lambda-list)
+(test create-msg-lambda-list
+  (let ((ll '(a (b =b-proto=) &key hey)))
+    (is (equal '(a b &key) (create-msg-lambda-list ll)))))
 
 (def-suite message-definition :in messages)
 (in-suite message-definition)

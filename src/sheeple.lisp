@@ -353,7 +353,7 @@ to the front of the list)"
   "Creates a new sheep with SHEEPLE as its parents. METASHEEP is used as the metasheep when
 allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
   (apply 'init-sheep
-         (add-parent* (or (ensure-list parent*) =standard-sheep=)
+         (add-parent* (or parent* =standard-sheep=)
                       (maybe-std-allocate-sheep metasheep))
          all-keys))
 

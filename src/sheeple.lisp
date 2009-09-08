@@ -263,7 +263,7 @@ regards to the CONSTRAINTS. A future version will undo this change."
 
 (defun std-finalize-sheep-inheritance (sheep)
   "Memoizes SHEEP's hierarchy list."
-  (mapc (curry '%add-child sheep) (sheep-parents sheep))
+  (dolist (parent (sheep-parents sheep)) (%add-child sheep parent))
   (memoize-sheep-hierarchy-list sheep)
   sheep)
 

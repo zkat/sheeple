@@ -73,7 +73,7 @@ This software is placed in the public domain by Luis Oliveira
 @title Sheeple Manual
 @subtitle Edition @value{EDITION}, covering Sheeple @value{VERSION}
 @subtitle @value{UPDATED-MONTH}
-@image{logo,,,[Sheeple Logo],.png}
+@image{logo}
 @author by Adlai Chandrasekhar and Kat Marchan
 @page
 @vskip 0pt plus 1filll
@@ -86,7 +86,7 @@ This software is placed in the public domain by Luis Oliveira
 
 @node Top, Overview, (dir), (dir)
 @top Sheeple Manual
-@image{logo,,,[Sheeple Logo]}
+@image{logo}
 
 This manual is for Sheeple @value{VERSION}
 @end ifnottex

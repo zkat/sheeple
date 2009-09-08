@@ -3,10 +3,12 @@
 .dvi/
 .pdf/
 
-# Many documentation formats are produced by the Makefile. This leaves
-# them all out in one fell swoop:
-
+# Many files are produced as output for the compiled documentation
+# formats. This leaves them out in one fell swoop:
 sheeple*
-# However, we want the Texinfo source for the manual to be tracked,
-# thus we un-ignore it here:
+logo.*
+
+# However, we want the Texinfo source for the manual to be tracked, as
+# well as the original logo, so we un-ignore them here:
 !sheeple.texinfo
+!logo.png

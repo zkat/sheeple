@@ -229,7 +229,7 @@ regards to the CONSTRAINTS. A future version will undo this change."
              (awhen (find parent (the list minimal-elements) :test 'eq) (return it)))
       (return-from std-tie-breaker-rule it))))
 
-(defun compute-sheep-hierarchy-cache (sheep)
+(defun std-compute-sheep-hierarchy-list (sheep)
   "Lists SHEEP's ancestors, in precedence order."
   (cond
     ((cdr (%sheep-parents sheep))
@@ -248,18 +248,15 @@ regards to the CONSTRAINTS. A future version will undo this change."
            (cons sheep cache))))
     (t nil)))
 
-(defun memoize-sheep-hierarchy-list (sheep)
-  (setf (%sheep-hierarchy-cache sheep) (compute-sheep-hierarchy-cache sheep))
-  (%map-children 'memoize-sheep-hierarchy-list sheep))
-
-(defun std-compute-sheep-hierarchy-list (sheep)
-  (%sheep-hierarchy-cache sheep))
-
 (defun compute-sheep-hierarchy-list (sheep)
   (typecase sheep
     (std-sheep (std-compute-sheep-hierarchy-list sheep))
     (otherwise (compute-sheep-hierarchy-list-using-metasheep
                 (sheep-metasheep sheep) sheep))))
+
+(defun memoize-sheep-hierarchy-list (sheep)
+  (setf (%sheep-hierarchy-cache sheep) (compute-sheep-hierarchy-list sheep))
+  (%map-children 'memoize-sheep-hierarchy-list sheep))
 
 (defun std-finalize-sheep-inheritance (sheep)
   "Memoizes SHEEP's hierarchy list."
@@ -327,7 +324,7 @@ to the front of the list)"
 
 (defun sheep-hierarchy-list (sheep)
   "Returns the full hierarchy-list for SHEEP"
-  (compute-sheep-hierarchy-list sheep))
+  (%sheep-hierarchy-cache sheep))
 
 ;;; Inheritance predicates
 (defun parentp (maybe-parent child)

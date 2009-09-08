@@ -178,7 +178,10 @@ Would produce this familiar \"diamond\" hierarchy:
    D"
   `(let* ,(mapcar (fun (destructuring-bind (sheep &rest parents)
                            (ensure-list _)
-                         `(,sheep (add-parents (list ,@parents)
+                         `(,sheep #+bootstrapped
+                                  (clone ,@parents)
+                                  #-bootstrapped
+                                  (add-parents (list ,@parents)
                                                (std-allocate-sheep =standard-metasheep=)))))
                   sheep-and-parents)
      ,@body))

@@ -58,7 +58,6 @@
 (in-suite reply-definition)
 
 (test ensure-reply)
-(test create-msg-lambda-list)
 (test add-reply-to-message)
 (test add-reply-to-sheeple)
 (test available-replies)

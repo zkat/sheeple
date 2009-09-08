@@ -35,6 +35,4 @@ $(THING).pdf: $(TEXI)
 	texi2pdf --build-dir=.pdf $<
 
 clean:
-	rm -rf .{pdf,dvi}
-	rm -f $(THING).{info,pdf,dvi,ps,html}
-	rm -rf html{,.tgz}
+	rm -rf .{pdf,dvi} $(THING){,.{info,pdf,dvi,ps,html,tgz}}

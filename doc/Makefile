@@ -28,7 +28,7 @@ $(THING).html: $(TEXI)
 htmldir: $(TEXI)
 	makeinfo -o html --html $<
 
-html.tgz: html/index.html
+html.tgz: htmldir
 	tar -czf $@ html
 
 $(THING).pdf: $(TEXI)

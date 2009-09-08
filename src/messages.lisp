@@ -183,10 +183,10 @@ more entries the cache will be able to hold, but the slower lookup will be.")
                    (eq (arg-info-lambda-list arg-info) :no-lambda-list)))
       (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)
           (analyze-lambda-list lambda-list)
-        (unless (and (or (null replies) firstp)
-                     (eql nreq (arg-info-number-required arg-info))
-                     (eql nopt (arg-info-number-optional arg-info))
-                     (eq (or keysp restp) (arg-info-key/rest-p arg-info)))
+        (unless (or (not replies) firstp
+                    (and (= nreq (arg-info-number-required arg-info))
+                         (= nopt (arg-info-number-optional arg-info))
+                         (eq (or keysp restp) (arg-info-key/rest-p arg-info))))
           (error 'reply-lambda-list-conflict :lambda-list lambda-list :message message))
         (setf (arg-info-lambda-list arg-info) (if lambda-list-p
                                                   lambda-list

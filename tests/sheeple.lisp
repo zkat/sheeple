@@ -115,13 +115,12 @@
 (postboot-test (sheepp :fixture (allocate-sheep =standard-metasheep=))
   (is (sheepp sheep)))
 
-(test equality-basic
-  (let ((sheep1 (cons-std-sheep)))
-    (is (eq sheep1 sheep1))
-    (is (eql sheep1 sheep1))
-    ;; These two are run so I know the heap isn't blowing up.
-    (is (equal sheep1 sheep1))
-    (is (equalp sheep1 sheep1))))
+(test (equality-basic :fixture with-std-sheep)
+  (is (eq sheep sheep))
+  (is (eql sheep sheep))
+  (5am:finishes                         ; Does the heap blow up?
+    (equal sheep sheep)
+    (equalp sheep sheep)))
 
 (def-suite low-level-accessors :in sheep-objects)
 (in-suite low-level-accessors)

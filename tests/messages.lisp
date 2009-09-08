@@ -141,14 +141,6 @@
     (is (eq t (arg-info-key/rest-p arg-info)))
     (is (equal '(foo) (arg-info-keys arg-info)))))
 
-(test arg-info-valid-p
-  (let ((ai (make-arg-info)))
-    (is (null (arg-info-valid-p ai)))
-    (setf (arg-info-number-optional ai) "foo")
-    (is (null (arg-info-valid-p ai)))
-    (setf (arg-info-number-optional ai) 5)
-    (is (arg-info-valid-p ai))))
-
 (test arg-info-number-required)
 (test set-arg-info)
 (test check-reply-arg-info)

@@ -1,0 +1,12 @@
+# These directories contain temporary files used to build dvi, ps, and
+# pdf files. They should NEVER go in a commit.
+.dvi/
+.pdf/
+
+# Many documentation formats are produced by the Makefile. This leaves
+# them all out in one fell swoop:
+
+sheeple*
+# However, we want the Texinfo source for the manual to be tracked,
+# thus we un-ignore it here:
+!sheeple.texinfo

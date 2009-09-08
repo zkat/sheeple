@@ -141,9 +141,6 @@ more entries the cache will be able to hold, but the slower lookup will be.")
   ;; T: must have &KEY or &REST
   keys)
 
-(defun arg-info-valid-p (arg-info)
-  (numberp (arg-info-number-optional arg-info)))
-
 (defun check-reply-arg-info (msg arg-info reply)
   (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)
       (analyze-lambda-list (reply-lambda-list reply))

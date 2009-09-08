@@ -211,6 +211,12 @@ more entries the cache will be able to hold, but the slower lookup will be.")
       (check-no-defaults keys)
       (when auxp (error 'message-lambda-list-error :arg '&aux :lambda-list lambda-list)))))
 
+(defun create-msg-lambda-list (lambda-list)
+  "Create a message lambda list from a reply's lambda list"
+  (loop for x in lambda-list
+     collect (if (consp x) (list (car x)) x)
+     if (eq x '&key) do (loop-finish)))
+
 ;;;
 ;;; Message definition (finally!)
 ;;;

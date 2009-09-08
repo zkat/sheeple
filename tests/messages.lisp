@@ -144,6 +144,7 @@
 (test set-arg-info)
 (test check-reply-arg-info)
 (test check-msg-lambda-list)
+(test create-msg-lambda-list)
 
 (def-suite message-definition :in messages)
 (in-suite message-definition)

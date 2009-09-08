@@ -220,14 +220,14 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 ;;;
 ;;; Message definition (finally!)
 ;;;
-;; Finalizing a message sets the function definition of the message to a
-;; lambda that calls the top-level dispatch function on the message args.
-(defun finalize-message (message)
-  (let ((name (message-name message)))
-    (when (and (fboundp name)
-               (not (find-message name nil)))
-      (cerror "Replace definition." 'clobbering-function-definition :format-args (list name)))
-    (setf (fdefinition name) (curry 'apply-message message))))
+
+;; The defmessage macro basically expands to a call to this function (after processing
+;; its args, checking lamda-list, etc.)
+(defun ensure-message (name &rest all-keys &key lambda-list &allow-other-keys)
+  (or (awhen-prog1 (find-message name nil)
+        (set-arg-info it :lambda-list lambda-list))
+      (setf (%find-message name)
+            (apply 'make-message :name name :lambda-list lambda-list all-keys))))
 
 ;; This handles actual setup of the message object (and finalization)
 (defun make-message (&key name lambda-list (documentation ""))
@@ -237,13 +237,16 @@ more entries the cache will be able to hold, but the slower lookup will be.")
     (setf (documentation message 'message) documentation)
     message))
 
-;; The defmessage macro basically expands to a call to this function (after processing
-;; its args, checking lamda-list, etc.)
-(defun ensure-message (name &rest all-keys &key lambda-list &allow-other-keys)
-  (or (awhen-prog1 (find-message name nil)
-        (set-arg-info it :lambda-list lambda-list))
-      (setf (%find-message name)
-            (apply 'make-message :name name :lambda-list lambda-list all-keys))))
+;; Finalizing a message sets the function definition of the message to a
+;; lambda that calls the top-level dispatch function on the message args.
+(defun finalize-message (message)
+  (let ((name (message-name message)))
+    (when (and (fboundp name)
+               (not (find-message name nil)))
+      (cerror "Replace definition." 'clobbering-function-definition :format-args (list name)))
+    (setf (fdefinition name) (curry 'apply-message message))))
+
+;;; defmessage macro
 
 ;; This is the actual message definition macro.
 ;; It first verifies that the lambda-list provided is a valid message ll,

@@ -141,7 +141,6 @@
     (is (eq t (arg-info-key/rest-p arg-info)))
     (is (equal '(foo) (arg-info-keys arg-info)))))
 
-(test arg-info-number-required)
 (test set-arg-info)
 (test check-reply-arg-info)
 (test check-msg-lambda-list)

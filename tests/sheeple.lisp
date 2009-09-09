@@ -604,21 +604,21 @@ Sheeple bootstraps!")
 
 (test canonize-property
   (is (equal '(list 'VAR "value") (canonize-property '(var "value"))))
-  (is (equal '(list 'VAR "value" :readers '(var) :writers '((setf var)))
+  (is (equal '(list 'VAR "value" :accessor 'var)
              (canonize-property '(var "value") t)))
-  (is (equal '(list 'VAR "value" :writers '((setf var)))
+  (is (equal '(list 'VAR "value" :reader nil :accessor 'var)
              (canonize-property '(var "value" :reader nil) t)))
-  (is (equal '(list 'VAR "value" :readers '(var))
+  (is (equal '(list 'VAR "value" :writer nil :accessor 'var)
              (canonize-property '(var "value" :writer nil) t)))
-  (is (equal '(list 'VAR "value")
+  (is (equal '(list 'VAR "value" :accessor nil)
              (canonize-property '(var "value" :accessor nil) t))))
 
 (test canonize-properties
   (is (equal '(list (list 'VAR "value")) (canonize-properties '((var "value")))))
   (is (equal '(list (list 'VAR "value") (list 'ANOTHER "another-val"))
              (canonize-properties '((var "value") (another "another-val")))))
-  (is (equal '(list (list 'VAR "value" :readers '(var) :writers '((setf var)))
-               (list 'ANOTHER "another-val" :readers '(another) :writers '((setf another))))
+  (is (equal '(list (list 'VAR "value" :accessor 'var)
+               (list 'ANOTHER "another-val" :accessor 'another))
              (canonize-properties '((var "value") (another "another-val")) t))))
 
 (test canonize-options

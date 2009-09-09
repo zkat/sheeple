@@ -372,63 +372,10 @@ will be used instead of SHEEP's metasheep, but SHEEP itself remains unchanged."
   (make-sheep (sheep-parents sheep) :metasheep metasheep))
 
 ;;;
-;;; DEFSHEEP macro
+;;; fancy macros
 ;;;
 (defun canonize-sheeple (sheeple)
   `(list ,@sheeple))
-
-(defun canonize-properties (properties &optional (accessors-by-default nil))
-  `(list ,@(mapcar (rcurry 'canonize-property accessors-by-default) properties)))
-
-(defun canonize-property (property &optional (accessors-by-default nil))
-  (let ((name (car property)) (value (cadr property)) (readers nil)
-        (writers nil) (other-options nil) (no-reader-p nil) (no-writer-p nil))
-    (do ((olist (cddr property) (cddr olist)))
-        ((null olist))
-      (case (car olist)
-        (:reader
-         (cond (no-reader-p
-                (error "You said you didn't want a reader, but now you want one? Make up your mind."))
-               ((null (cadr olist))
-                (if (null readers) (setf no-reader-p t)
-                    (error "You already defined a reader, but now you say you don't want one? Make up your mind.")))
-               (t (pushnew (cadr olist) readers))))
-        (:writer
-         (cond (no-writer-p
-                (error "You said you didn't want a writer, but now you want one? Make up your mind."))
-               ((null (cadr olist))
-                (if (null writers) (setf no-writer-p t)
-                    (error "You already defined a writer, but now you say you don't want one? Make up your mind.")))
-               (t (pushnew (cadr olist) writers))))
-        (:accessor
-         (cond ((or no-reader-p no-writer-p)
-                (error "You said you didn't want a reader or a writer, but now you want one? Make up your mind."))
-               ((null (cadr olist))
-                (if (and (null writers) (null readers))
-                    (setf no-reader-p t
-                          no-writer-p t)
-                    (error "You already defined a reader or writer, but now you say you don't want any of them? Make up your mind.")))
-               (t
-                (pushnew (cadr olist) readers)
-                (pushnew `(setf ,(cadr olist)) writers))))
-        (otherwise
-         (pushnew (cadr olist) other-options)
-         (pushnew (car olist) other-options))))
-    (when accessors-by-default
-      (unless (or readers no-reader-p)
-        (pushnew name readers))
-      (unless (or writers no-writer-p)
-        (pushnew `(setf ,name) writers)))
-    `(list ',name ,value
-           ,@(when readers `(:readers ',readers))
-           ,@(when writers `(:writers ',writers))
-           ,@other-options)))
-
-(defun canonize-options (options)
-  (mapcan 'canonize-option options))
-
-(defun canonize-option (option)
-  (list (car option) (cadr option)))
 
 (defmacro defsheep (sheeple properties &rest options)
   "Standard sheep-generation macro. This variant auto-generates accessors."

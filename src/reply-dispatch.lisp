@@ -181,8 +181,7 @@
 
 (defun sort-applicable-replies (reply-list &key (rank-key #'<))
   (sort reply-list rank-key
-        :key (lambda (contained-reply)
-               (calculate-rank-score (reply-container-rank contained-reply)))))
+        :key (fun (calculate-rank-score (reply-container-rank _)))))
 
 (defun contain-reply (reply)
   (make-reply-container

@@ -141,7 +141,10 @@ would yield a value (i.e. not signal an unbound-property condition)."
 ;;        A good part of this issue will probably be resolved when there's a clean,
 ;;        straightforward API for adding/removing properties. The current interface
 ;;        is suboptimal, needless to say. -zkat
-(defun add-property (sheep property-name value &key reader writer accessor)
+(defun add-property (sheep property-name value 
+                     &key (reader nil readerp)
+                     (writer nil writerp)
+                     accessor)
   "Adds a property named PROPERTY-NAME to SHEEP, initialized with VALUE."
   ;; TODO: do shit with the kwargs
   (assert (symbolp property-name))
@@ -160,8 +163,10 @@ would yield a value (i.e. not signal an unbound-property condition)."
   (when reader (add-reader-to-sheep reader property-name sheep))
   (when writer (add-writer-to-sheep writer property-name sheep))
   (when accessor
-    (add-reader-to-sheep accessor property-name sheep)
-    (add-writer-to-sheep `(setf ,accessor) property-name sheep)))
+    (unless (and readerp (null reader))
+      (add-reader-to-sheep accessor property-name sheep))
+    (unless (and writerp (null writer))
+      (add-writer-to-sheep `(setf ,accessor) property-name sheep))))
 
 ;; TODO - remove-property should look at the property metaobject and remove any replies for
 ;;        accessors that it points to. This will have to wait until reply-undefinition works

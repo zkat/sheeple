@@ -384,7 +384,7 @@ will be used instead of SHEEP's metasheep, but SHEEP itself remains unchanged."
   `(list ',(car property) ,@(cdr property)
          ,@(when (and (not (find :accessor (cddr property)))
                       accessors-by-default)
-                 `(:accessor ,(car property)))))
+                 `(:accessor ',(car property)))))
 
 (defun canonize-options (options)
   (mapcan 'canonize-option options))

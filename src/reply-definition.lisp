@@ -125,7 +125,6 @@
 ;;;
 (defun undefine-reply (name &key qualifiers participants)
   (awhen (find-message name nil)
-    ;; TODO -- Remove documentation - Adlai
     (remove-applicable-reply it qualifiers participants)
     (clear-dispatch-cache it)
     t))
@@ -162,7 +161,8 @@
 (defun delete-reply (reply)
   (let ((message (reply-message reply)))
     (setf (message-replies message)
-          (delete reply (message-replies message)))))
+          (delete reply (message-replies message)))
+    (setf (documentation reply 't) nil)))
 
 (defun delete-role (role sheep)
   (setf (%sheep-roles sheep)

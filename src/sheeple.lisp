@@ -377,6 +377,18 @@ will be used instead of SHEEP's metasheep, but SHEEP itself remains unchanged."
 (defun canonize-sheeple (sheeple)
   `(list ,@sheeple))
 
+(defun canonize-properties (properties &optional (accessors-by-default nil))
+  `(list ,@(mapcar (rcurry 'canonize-property accessors-by-default) properties)))
+
+(defun canonize-property (property &optional (accessors-by-default nil))
+  `(list ',(car property) ,@(cdr property) :generate-accessor ,accessors-by-default))
+
+(defun canonize-options (options)
+  (mapcan 'canonize-option options))
+
+(defun canonize-option (option)
+  (list (car option) (cadr option)))
+
 (defmacro defsheep (sheeple properties &rest options)
   "Standard sheep-generation macro. This variant auto-generates accessors."
   `(make-sheep

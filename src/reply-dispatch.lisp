@@ -118,11 +118,10 @@
     (let ((attempt (aref dispatch-cache orig-index)))
       (if (desired-cache-entry-p args attempt relevant-args-length)
           (cache-entry-replies attempt)
-          (progn
-            (loop for entry across dispatch-cache
-               do (when (desired-cache-entry-p args entry relevant-args-length)
-                    (return-from fetch-dispatch-cache-entry (cache-entry-replies entry))))
-            nil)))))
+          (let ((entry (find (fun (desired-cache-entry-p args _ relevant-args-length))
+                             dispatch-cache)))
+            (when entry
+              (cache-entry-replies entry)))))))
 
 (defun memoize-reply-dispatch (message args msg-list)
   (let ((msg-cache (create-reply-cache message msg-list))

@@ -156,7 +156,12 @@ would yield a value (i.e. not signal an unbound-property condition)."
                                                        property-name)
                           (defsheep (=standard-property=) ((name property-name))))
                       #-sheeple3.1 property-name
-                      value))
+                      value)
+  (when reader (add-reader-to-sheep reader property-name sheep))
+  (when writer (add-writer-to-sheep writer property-name sheep))
+  (when accessor
+    (add-reader-to-sheep accessor property-name sheep)
+    (add-writer-to-sheep `(setf ,accessor) property-name sheep)))
 
 ;; TODO - remove-property should look at the property metaobject and remove any replies for
 ;;        accessors that it points to. This will have to wait until reply-undefinition works

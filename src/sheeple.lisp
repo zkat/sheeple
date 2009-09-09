@@ -196,17 +196,17 @@ on the TIE-BREAKER in the case of ambiguous constraints. On the assumption
 that they are freshly generated, this implementation is destructive with
 regards to the CONSTRAINTS. A future version will undo this change."
   (loop
-     :for minimal-elements := (remove-if (fun (member _ constraints :key 'cadr :test 'eq))
-                                         elements) :while minimal-elements
-     :for choice := (if (null (cdr minimal-elements))
-                        (car minimal-elements)
-                        (funcall tie-breaker minimal-elements result))
-     :do (deletef constraints choice :test 'member)
-         (setf elements (remove choice elements :test 'eq))
-         (push choice result) :with result
-     :finally (if (null elements)
-                  (return-from topological-sort (nreverse result))
-                  (error "Inconsistent precedence graph."))))
+     for minimal-elements = (remove-if (fun (member _ constraints :key 'cadr :test 'eq))
+                                       elements) :while minimal-elements
+     for choice = (if (null (cdr minimal-elements))
+                      (car minimal-elements)
+                      (funcall tie-breaker minimal-elements result))
+     do (deletef constraints choice :test 'member)
+     (setf elements (remove choice elements :test 'eq))
+     (push choice result) :with result
+     finally (if (null elements)
+                 (return-from topological-sort (nreverse result))
+                 (error "Inconsistent precedence graph."))))
 
 (defun collect-ancestors (sheep)
   "Recursively collects all of SHEEP's ancestors."

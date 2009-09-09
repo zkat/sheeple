@@ -193,10 +193,7 @@
   rank)
 
 (defun fully-specified-p (rank)
-  (loop for item across rank
-     do (when (eql item nil)
-          (return-from fully-specified-p nil)))
-  t)
+  (notany 'null rank))
 
 (defun calculate-rank-score (rank)
   (declare (simple-array rank))

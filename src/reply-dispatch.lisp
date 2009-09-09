@@ -143,7 +143,7 @@
         (declare (list discovered-replies contained-applicable-replies))
         (loop
            for arg in args
-           for index below (length args)
+           for index from 0
            do (let* ((arg (if (sheepp arg)
                               arg
                               (or (find-boxed-object arg)
@@ -152,7 +152,7 @@
                 (declare (fixnum index))
                 (loop
                    for curr-sheep in curr-sheep-list
-                   for hierarchy-position below (length curr-sheep-list)
+                   for hierarchy-position from 0
                    do (dolist (role (%sheep-roles curr-sheep))
                         (when (and (eq message (role-reply role))
                                    (= index (the fixnum (role-position role))))

@@ -381,7 +381,10 @@ will be used instead of SHEEP's metasheep, but SHEEP itself remains unchanged."
   `(list ,@(mapcar (rcurry 'canonize-property accessors-by-default) properties)))
 
 (defun canonize-property (property &optional (accessors-by-default nil))
-  `(list ',(car property) ,@(cdr property) :generate-accessor ,accessors-by-default))
+  `(list ',(car property) ,@(cdr property)
+         ,@(when (and (not (find :accessor (cddr property)))
+                      accessors-by-default)
+                 `(:accessor ,(car property)))))
 
 (defun canonize-options (options)
   (mapcan 'canonize-option options))

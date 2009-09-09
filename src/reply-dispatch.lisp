@@ -15,16 +15,13 @@
   (null (reply-qualifiers reply)))
 
 (defun before-reply-p (reply)
-  (when (find :before (reply-qualifiers reply))
-    t))
+  (find :before (reply-qualifiers reply)))
 
 (defun after-reply-p (reply)
-  (when (find :after (reply-qualifiers reply))
-    t))
+  (find :after (reply-qualifiers reply)))
 
 (defun around-reply-p (reply)
-  (when (find :around (reply-qualifiers reply))
-    t))
+  (find :around (reply-qualifiers reply)))
 
 (defun apply-message (message args)
   (let ((replies (find-applicable-replies message args)))

@@ -74,18 +74,17 @@
     ;; In order to replace existing replies, we must remove them before actually adding them again.
     (remove-specific-reply message qualifiers sheepified-participants)
     (add-reply-to-message reply message)
-    (add-reply-to-sheeple message reply sheepified-participants)
+    (add-reply-to-sheeple reply sheepified-participants)
     reply))
 
 (defun add-reply-to-message (reply message)
   (set-arg-info message :new-reply reply)
   (push reply (message-replies message)))
 
-(defun add-reply-to-sheeple (message reply sheeple)
-  (declare (ignore message)) ; Am I missing something?
+(defun add-reply-to-sheeple (reply sheeple)
   (loop
      for sheep in sheeple
-     for i below (length sheeple)
+     for i from 0
      do (push (make-role reply i)
               (%sheep-roles sheep))))
 

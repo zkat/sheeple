@@ -141,7 +141,7 @@ would yield a value (i.e. not signal an unbound-property condition)."
 ;;        A good part of this issue will probably be resolved when there's a clean,
 ;;        straightforward API for adding/removing properties. The current interface
 ;;        is suboptimal, needless to say. -zkat
-(defun add-property (sheep property-name value &key reader writer accessor generate-accessor)
+(defun add-property (sheep property-name value &key reader writer accessor)
   "Adds a property named PROPERTY-NAME to SHEEP, initialized with VALUE."
   ;; TODO: do shit with the kwargs
   (assert (symbolp property-name))

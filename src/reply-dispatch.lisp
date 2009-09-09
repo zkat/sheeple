@@ -29,12 +29,7 @@
 
 (defparameter *caching-active-p* t)
 (defstruct (cache (:type vector))
-  message
-  around
-  primary
-  before
-  after
-  replies)
+  message around primary before after replies)
 
 (defun apply-replies (cache args)
   (funcall (compute-effective-reply-function cache) args))

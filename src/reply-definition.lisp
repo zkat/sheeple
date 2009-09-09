@@ -59,22 +59,23 @@
 ;;;
 (defun ensure-reply (name &key qualifiers lambda-list participants function (documentation ""))
   ;; shouldn't this just be a plain call to ensure-message? -- syko
-  (let ((message (find-message name nil)))
-    (when (null message)
-      ;; TODO - this style warning could be -much- nicer.
-      (warn 'style-warning)
-      (setf message (ensure-message name :lambda-list (create-msg-lambda-list lambda-list))))
-    (let ((reply (make-reply :message (find-message name)
-                             :lambda-list lambda-list
-                             :qualifiers qualifiers
-                             :function function))
-          (sheepified-participants (sheepify-list participants)))
-      (setf (documentation reply 't) documentation) ; same as dox for CLOS methods
-      (clear-dispatch-cache message) ; because the dispatch landscape has changed
-      (remove-specific-reply message qualifiers sheepified-participants)
-      (add-reply-to-message reply message)
-      (add-reply-to-sheeple message reply sheepified-participants)
-      reply)))
+  ;; maybe not. Look into it more -- syko
+  (let* ((message (or (find-message name nil)
+                      (progn (warn 'style-warning) ; this warning could be -much- better -- syko
+                             (ensure-message name :lambda-list
+                                             (create-msg-lambda-list lambda-list)))))
+         (reply (make-reply :message (find-message name)
+                            :lambda-list lambda-list
+                            :qualifiers qualifiers
+                            :function function))
+         (sheepified-participants (sheepify-list participants)))
+    (setf (documentation reply 't) documentation) ; same as dox for CLOS methods
+    (clear-dispatch-cache message)                ; because the dispatch landscape has changed
+    ;; In order to replace existing replies, we must remove them before actually adding them again.
+    (remove-specific-reply message qualifiers sheepified-participants)
+    (add-reply-to-message reply message)
+    (add-reply-to-sheeple message reply sheepified-participants)
+    reply))
 
 (defun add-reply-to-message (reply message)
   (set-arg-info message :new-reply reply)

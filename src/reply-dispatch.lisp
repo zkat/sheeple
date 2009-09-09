@@ -100,16 +100,11 @@
   (declare (fixnum relevant-args-length) (list args))
   (when cache-entry
     (let ((vector-args (weak-pointer-value (cache-entry-args cache-entry))))
+      (declare (simple-vector vector-args))
       (or (= 0 relevant-args-length)
           (when (= 1 relevant-args-length)
             (eq (car args) (car vector-args)))
-          ;; What the fuck? This shit's messed up. -- syko
-          (loop
-             for i upto relevant-args-length ;should this be :BELOW?
-             for v-arg in vector-args
-             for arg in args
-             do (when (not (equal v-arg arg))
-                  (return-from desired-cache-entry-p nil)))))))
+          (every 'equal args vector-args)))))
 
 (defun fetch-dispatch-cache-entry (args message relevant-args-length)
   (let* ((dispatch-cache (message-dispatch-cache message))

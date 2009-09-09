@@ -145,7 +145,7 @@ would yield a value (i.e. not signal an unbound-property condition)."
   "Adds a property named PROPERTY-NAME to SHEEP, initialized with VALUE."
   (assert (symbolp property-name))
   (when (has-direct-property-p sheep property-name)
-    (cerror "Add property anyway." "~A already has a direct property named ~A."
+    (cerror "Remove existing property." "~A already has a direct property named ~A."
             sheep property-name)
     (remove-property sheep property-name))
   (%add-property-cons sheep

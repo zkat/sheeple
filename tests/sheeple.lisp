@@ -95,7 +95,7 @@
     (is (null (svref sheep 1)))
     (is (null (svref sheep 2)))
     (is (null (svref sheep 3)))
-    (is (null (svref sheep 4)))
+    (is (equal (list sheep) (svref sheep 4)))
     (is (null (svref sheep 5)))))
 
 (in-suite allocation)
@@ -387,10 +387,11 @@
 (in-suite sheep-objects)
 (test with-sheep-hierarchy
   (with-sheep-hierarchy (a (b a) (c a) (d b c))
-    (is (eq =standard-sheep= (sheep-parents a)))
-    (is (equal (list a) (sheep-parents b)))
-    (is (equal (list a) (sheep-parents c)))
-    (is (equal (list b c) (sheep-parents d))))
+    (is (eq =standard-sheep= (car (sheep-parents a))))
+    (is (eq a (car (sheep-parents b))))
+    (is (eq a (car (sheep-parents c))))
+    (is (eq b (car (sheep-parents d))))
+    (is (eq c (cadr (sheep-parents d)))))
   (signals sheeple-hierarchy-error
     (with-sheep-hierarchy (a (b a) (c b) (d a c))
       (declare (ignore d)))))

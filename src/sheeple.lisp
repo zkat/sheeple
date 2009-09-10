@@ -399,7 +399,7 @@ will be used instead of SHEEP's metasheep, but SHEEP itself remains unchanged."
   `(progn
      (declaim (special ,name))
      (let ((sheep (ensure-sheep
-                   (when (boundp ',name) ,name)
+                   (when (boundp ',name) (symbol-value ',name))
                    ,(canonize-sheeple sheeple)
                    :properties ,(canonize-properties properties t)
                    ,@(canonize-options options))))

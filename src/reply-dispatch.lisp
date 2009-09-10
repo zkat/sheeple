@@ -135,34 +135,28 @@
 
 (defun %find-applicable-replies  (message args &key (errorp t))
   "Returns the most specific reply using MESSAGE and ARGS."
-  (declare (list args))
-  (if (null args)
-      (message-replies message)
-      (let ((discovered-replies nil)
-            (contained-applicable-replies nil))
-        (declare (list discovered-replies contained-applicable-replies))
+  (if (null args) (message-replies message) ; this handles no-arg messages. Badly. -- zkat
+      (let (discovered-replies contained-applicable-replies)
         (loop
            for arg in args
            for index from 0
-           do (let* ((arg (if (sheepp arg)
-                              arg
+           do (let* ((arg (if (sheepp arg) arg
                               (or (find-boxed-object arg)
                                   (box-type-of arg))))
                      (curr-sheep-list (sheep-hierarchy-list arg)))
-                (declare (fixnum index))
                 (loop
                    for curr-sheep in curr-sheep-list
                    for hierarchy-position from 0
                    do (dolist (role (%sheep-roles curr-sheep))
                         (when (and (eq message (role-reply role))
-                                   (= index (the fixnum (role-position role))))
+                                   (= index (role-position role)))
                           (let ((curr-reply (role-reply role)))
                             (when (= (length args)
-                                     (length (the list (reply-specialized-portion curr-reply))))
+                                     (length (reply-specialized-portion curr-reply)))
                               (when (not (find curr-reply
                                                discovered-replies
                                                :key #'reply-container-reply))
-                                (pushnew (the vector (contain-reply curr-reply))
+                                (pushnew (contain-reply curr-reply)
                                          discovered-replies))
                               (let ((contained-reply (find curr-reply
                                                            discovered-replies

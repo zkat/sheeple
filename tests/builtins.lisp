@@ -17,7 +17,7 @@
 (def-suite autoboxing :in builtins)
 (in-suite autoboxing)
 
-(test box-type-of
+(postboot-test box-type-of
   "Tests that the box-type-of function returns the right fleeced-wolf for each lisp type"
   ;; TODO - This could be a *lot* more thorough
   (is (eq =null= (box-type-of nil)))

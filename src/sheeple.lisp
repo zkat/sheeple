@@ -408,6 +408,7 @@ will be used instead of SHEEP's metasheep, but SHEEP itself remains unchanged."
                    ,(canonize-sheeple sheeple)
                    :properties ,(canonize-properties properties t)
                    ,@(canonize-options options))))
+       #+nil
        (unless (sheep-nickname sheep)
          (setf (sheep-nickname sheep) ',name))
        (setf (symbol-value ',name) sheep))))

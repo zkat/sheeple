@@ -72,19 +72,6 @@
     (is (null (%find-message 'name)))
     (is (null (forget-message 'test)))))
 
-(test forget-all-messages
-  (let ((a (%make-message))
-        (b (%make-message))
-        (c (%make-message)))
-    (setf (%find-message 'a) a)
-    (setf (%find-message 'b) b)
-    (setf (%find-message 'c) c)
-    (is (forget-all-messages))
-    (is (message-table-p *message-table*))
-    (is (null (%find-message 'a)))
-    (is (null (%find-message 'b)))
-    (is (null (%find-message 'c)))))
-
 (def-suite dispatch-cache :in messages)
 (in-suite dispatch-cache)
 

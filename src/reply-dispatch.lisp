@@ -103,10 +103,7 @@
         (if contained-applicable-replies
             (unbox-replies (sort-applicable-replies contained-applicable-replies))
             (when errorp
-              (error 'no-applicable-replies
-                     :format-control
-                     "There are no applicable replies for message ~A when called with args:~%~S"
-                     :format-args (list selector args)))))))
+              (error 'no-applicable-replies :message (message-name message) :args args))))))
 
 (defun unbox-replies (replies)
   (mapcar #'reply-container-reply replies))

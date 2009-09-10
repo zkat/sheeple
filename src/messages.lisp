@@ -44,7 +44,11 @@
 ;;;   can be defined, and the message object can be used as an obvious place to store the cached
 ;;;   dispatch information.
 (defstruct (message (:constructor %make-message)
-                    (:predicate messagep))
+                    (:predicate messagep)
+                    (:print-object
+                     (lambda (message stream)
+                       (print-unreadable-object (message stream :identity t)
+                         (format stream "Message: ~a" (message-name message))))))
   (name nil)
   (lambda-list nil)
   (replies nil)

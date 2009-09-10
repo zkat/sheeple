@@ -9,26 +9,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-;;; with-*
-(defmacro with-properties (properties sheep &body body)
-  (let ((sh (gensym)))
-    `(let ((,sh ,sheep))
-       (symbol-macrolet ,(mapcar (lambda (property-entry)
-                                   (let ((var-name
-                                          (if (symbolp property-entry)
-                                              property-entry
-                                              (car property-entry)))
-                                         (property-name
-                                          (if (symbolp property-entry)
-                                              property-entry
-                                              (cadr property-entry))))
-                                     `(,var-name
-                                       (property-value ,sh ',property-name))))
-                                 properties)
-         ,@body))))
-
 ;;;
-;;; Messages
+;;; Sheep creation protocol
 ;;;
 (defmessage allocate-sheep (metasheep))
 (defreply allocate-sheep ((metasheep =standard-metasheep=))

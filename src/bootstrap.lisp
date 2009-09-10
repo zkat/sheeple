@@ -69,7 +69,9 @@ so DOLLY doesn't end up on the list by default."
   ;; Now we take care of redefining =standard-sheep= normally. This should give us an idea
   ;; of how bootstrapping went.
   (defproto =standard-sheep= (=t=) ())
-  
+  ;; =standard-metasheep= needs to be a child of =standard-sheep= for appropriate replies
+  ;; to work!
+  (add-parent =standard-sheep= =standard-metasheep=)
   ) ; basically bootstrapped!
 
 

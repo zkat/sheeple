@@ -166,14 +166,11 @@
       (delete-reply reply))))
 
 (defun delete-reply (reply)
-  (let ((message (reply-message reply)))
-    (setf (message-replies message)
-          (delete reply (message-replies message)))
-    (setf (documentation reply 't) nil)))
+  (deletef (message-replies (reply-message reply)) reply)
+  (setf (documentation reply 't) nil))
 
 (defun delete-role (role sheep)
-  (setf (%sheep-roles sheep)
-        (delete role (%sheep-roles sheep))))
+  (deletef (%sheep-roles sheep) role))
 
 ;;;
 ;;; User interface

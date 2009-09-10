@@ -131,8 +131,8 @@
 
 (defun remove-specific-reply (message qualifiers participants)
   (let ((reply (find-if (fun (equal qualifiers (reply-qualifiers _)))
-                        (%find-applicable-replies ;defined in reply-dispatch.lisp
-                         message participants :errorp nil))))
+                        (find-applicable-replies ;defined in reply-dispatch.lisp
+                         message participants nil))))
     (when (and reply
                (every (rcurry 'participantp (reply-name reply)) participants))
       (loop
@@ -146,8 +146,8 @@
 
 (defun remove-applicable-reply (message qualifiers participants)
   (let ((reply (find-if (fun (equal qualifiers (reply-qualifiers _)))
-                        (%find-applicable-replies
-                         message participants :errorp nil))))
+                        (find-applicable-replies
+                         message participants nil))))
     (when reply
       (loop
          for sheep in participants

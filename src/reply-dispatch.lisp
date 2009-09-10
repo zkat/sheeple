@@ -152,10 +152,9 @@
                           (let ((curr-reply (role-reply role)))
                             (when (= (length args)
                                      (length (reply-specialized-portion curr-reply)))
-                              (pushnew (contain-reply curr-reply) discovered-replies
-                                       :key 'reply-container-reply)
-                              (let ((contained-reply (find curr-reply discovered-replies
-                                                           :key #'reply-container-reply)))
+                              (let ((contained-reply (contain-reply curr-reply)))
+                                (pushnew curr-reply discovered-replies
+                                         :key 'reply-container-reply)
                                 (setf (elt (reply-container-rank contained-reply) index)
                                       hierarchy-position)
                                 (when (fully-specified-p (reply-container-rank contained-reply))

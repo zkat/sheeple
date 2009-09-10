@@ -176,13 +176,8 @@ Would produce this familiar \"diamond\" hierarchy:
  B   C
   \\ /
    D"
-  `(let* ,(mapcar (fun (destructuring-bind (sheep &rest parents)
-                           (ensure-list _)
-                         `(,sheep #+bootstrapped
-                                  (clone ,@parents)
-                                  #-bootstrapped
-                                  (add-parents (list ,@parents)
-                                               (std-allocate-sheep =standard-metasheep=)))))
+  `(let* ,(mapcar (fun (destructuring-bind (sheep &rest parents) (ensure-list _)
+                         `(,sheep (spawn ,@parents))))
                   sheep-and-parents)
      ,@body))
 

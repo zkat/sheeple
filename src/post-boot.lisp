@@ -43,13 +43,19 @@
 ;;; Printing sheep!
 ;;;
 (set-pprint-dispatch 'sheep (lambda (stream sheep) (print-sheep sheep stream)))
-(defmessage print-sheep (sheep stream)
-  (:documentation "Defines the expression print-object uses."))
-(defreply print-sheep (sheep (stream =stream=))
+(defun std-print-sheep (stream sheep)
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Sheep~@[ AKA ~A~]"
             (ignore-errors (property-value sheep 'name)))))
-;;; BORKED
+;;; BORKED!
+(defmessage print-sheep (sheep stream)
+  (:documentation "Defines the expression print-object uses."))
+;;; BORKED!
+(defreply print-sheep (sheep (stream =stream=))
+  (std-print-sheep stream sheep))
+;;; IT'S ALL BORKED!
 (defreply print-sheep ((sheep =boxed-object=) (stream =stream=))
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Boxed object")))
+;;; Some sanity
+(set-pprint-dispatch 'sheep 'std-print-sheep)

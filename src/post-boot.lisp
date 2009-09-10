@@ -57,6 +57,3 @@
       (print-unreadable-object (sheep stream :type t :identity t)
         (format stream "Orphaned Sheep!"))
       (print-sheep sheep stream)))
-(defmethod print-object ((sheep role) stream)
-  (print-unreadable-object (sheep stream :identity t)
-    (format stream "Role: ~a" (role-name sheep))))

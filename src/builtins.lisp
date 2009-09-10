@@ -55,7 +55,8 @@
   (assert (not (sheepp object)))
   (setf (gethash object *boxed-object-table*)
         (defsheep ((box-type-of object))
-            ((wrapped-object object)) #+nil(:nickname object))))
+            ((wrapped-object object))
+          (:nickname object))))
 
 (defun remove-boxed-object (object)
   "Kills object dead"

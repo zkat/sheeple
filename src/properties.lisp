@@ -146,27 +146,27 @@ would yield a value (i.e. not signal an unbound-property condition)."
                      (writer nil writerp)
                      accessor)
   "Adds a property named PROPERTY-NAME to SHEEP, initialized with VALUE."
-  ;; TODO: do shit with the kwargs
-  (assert (symbolp property-name))
-  (when (has-direct-property-p sheep property-name)
-    (cerror "Remove existing property." "~A already has a direct property named ~A."
-            sheep property-name)
-    (remove-property sheep property-name))
-  (%add-property-cons sheep
-                      #+sheeple3.1
-                      (if (has-property-p sheep property-name)
-                          (%direct-property-metaobject (property-owner sheep property-name)
-                                                       property-name)
-                          (defsheep (=standard-property=) ((name property-name))))
-                      #-sheeple3.1 property-name
-                      value)
-  (when reader (add-reader-to-sheep reader property-name sheep))
-  (when writer (add-writer-to-sheep writer property-name sheep))
-  (when accessor
-    (unless (and readerp (null reader))
-      (add-reader-to-sheep accessor property-name sheep))
-    (unless (and writerp (null writer))
-      (add-writer-to-sheep `(setf ,accessor) property-name sheep))))
+  (prog1 sheep
+    (assert (symbolp property-name))
+    (when (has-direct-property-p sheep property-name)
+      (cerror "Remove existing property." "~A already has a direct property named ~A."
+              sheep property-name)
+      (remove-property sheep property-name))
+    (%add-property-cons sheep
+                        #+sheeple3.1
+                        (if (has-property-p sheep property-name)
+                            (%direct-property-metaobject (property-owner sheep property-name)
+                                                         property-name)
+                            (defsheep (=standard-property=) ((name property-name))))
+                        #-sheeple3.1 property-name
+                        value)
+    (when reader (add-reader-to-sheep reader property-name sheep))
+    (when writer (add-writer-to-sheep writer property-name sheep))
+    (when accessor
+      (unless (and readerp (null reader))
+        (add-reader-to-sheep accessor property-name sheep))
+      (unless (and writerp (null writer))
+        (add-writer-to-sheep `(setf ,accessor) property-name sheep)))))
 
 ;; TODO - remove-property should look at the property metaobject and remove any replies for
 ;;        accessors that it points to. This will have to wait until reply-undefinition works

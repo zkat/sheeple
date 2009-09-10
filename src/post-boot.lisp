@@ -64,21 +64,22 @@
 ;;;
 ;;; Printing sheep!
 ;;;
-(set-pprint-dispatch 'sheep (lambda (stream sheep) (print-sheep sheep stream)))
-(defun std-print-sheep (stream sheep)
+(defun std-print-sheep (sheep stream)
   (print-unreadable-object (sheep stream :identity t)
-    (format stream "Sheep~@[ AKA ~A~]"
+    (format stream "Sheep ~:[[~S]~;~S~]"
+            (has-direct-property-p sheep :nickname)
             (ignore-errors (sheep-nickname sheep)))))
-;;; BORKED!
+
 (defmessage print-sheep (sheep stream)
   (:documentation "Defines the expression print-object uses."))
-;;; BORKED!
+
 (defreply print-sheep (sheep (stream =stream=))
-  (std-print-sheep stream sheep))
-;;; IT'S ALL BORKED!
+  (std-print-sheep sheep stream))
+
 (defreply print-sheep ((sheep =boxed-object=) (stream =stream=))
   (print-unreadable-object (sheep stream :identity t)
-    (format stream "Boxed object~@[ AKA ~A~]"
+    (format stream "Boxed-object ~:[[~S]~;~S~]"
+            (has-direct-property-p sheep :nickname)
             (ignore-errors (sheep-nickname sheep)))))
-;;; Some sanity
-(set-pprint-dispatch 'sheep 'std-print-sheep)
+
+(set-pprint-dispatch 'sheep (lambda (stream sheep) (print-sheep sheep stream)))

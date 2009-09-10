@@ -42,18 +42,14 @@
 ;;;
 ;;; Printing sheep!
 ;;;
+(set-pprint-dispatch 'sheep (lambda (stream sheep) (print-sheep sheep stream)))
 (defmessage print-sheep (sheep stream)
   (:documentation "Defines the expression print-object uses."))
 (defreply print-sheep (sheep (stream =stream=))
   (print-unreadable-object (sheep stream :identity t)
-    (format stream "Sheep")))
+    (format stream "Sheep~@[ AKA ~A~]"
+            (ignore-errors (property-value sheep 'name)))))
+;;; BORKED
 (defreply print-sheep ((sheep =boxed-object=) (stream =stream=))
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Boxed object")))
-
-;; todo: convert this properly
-(defmethod print-object ((sheep standard-sheep) stream)
-  (if (null (sheep-parents sheep))
-      (print-unreadable-object (sheep stream :type t :identity t)
-        (format stream "Orphaned Sheep!"))
-      (print-sheep sheep stream)))

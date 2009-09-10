@@ -62,36 +62,51 @@
       (error 'insufficient-message-args :message message))
     (%find-applicable-replies message (subseq args 0 relevant-args-length) errorp)))
 
-(defun %find-applicable-replies  (message args &optional (errorp t))
-  "Returns the most specific replies using MESSAGE and ARGS."
-  (if (null args) (message-replies message) ; this handles no-arg messages. Badly. -- zkat
-      (let (discovered-replies contained-applicable-replies)
+(defun %find-applicable-replies (message args &optional (errorp t))
+  "Returns the most specific reply using MESSAGE and ARGS."
+  (declare (list args))
+  (if (null args)
+      (message-replies message)
+      (let ((selector (message-name message))
+            (n (length args))
+            (discovered-replies nil)
+            (contained-applicable-replies nil))
+        (declare (list discovered-replies contained-applicable-replies))
         (loop
            for arg in args
-           for index from 0
-           do (let ((arg (if (sheepp arg) arg
-                             (or (find-boxed-object arg)
-                                 (box-type-of arg)))))
+           for index upto (1- n)
+           do (let* ((arg (if (sheepp arg)
+                              arg
+                              (or (find-boxed-object arg)
+                                  (box-type-of arg))))
+                     (curr-sheep-list (sheep-hierarchy-list arg)))
                 (loop
-                   for curr-sheep in (sheep-hierarchy-list arg)
-                   for hierarchy-position from 0
+                   for curr-sheep in curr-sheep-list
+                   for hierarchy-position upto (1- (length curr-sheep-list))
                    do (dolist (role (%sheep-roles curr-sheep))
-                        (when (and (eq message (role-message role))
-                                   (= index (role-position role)))
+                        (when (and (equal selector (message-name (role-message role))) ;(eql message (role-message role))
+                                   (= (the fixnum index) (the fixnum (role-position role))))
                           (let ((curr-reply (role-reply role)))
-                            (when (= (length args)
-                                     (length (reply-specialized-portion curr-reply)))
-                              (let ((contained-reply (contain-reply curr-reply)))
-                                (pushnew contained-reply discovered-replies
-                                         :key 'reply-container-reply)
+                            (when (= n (length (the list (reply-specialized-portion curr-reply))))
+                              (when (not (member curr-reply
+                                                 discovered-replies
+                                                 :key #'reply-container-reply))
+                                (pushnew (the vector (contain-reply curr-reply))
+                                         discovered-replies))
+                              (let ((contained-reply (find curr-reply
+                                                           discovered-replies
+                                                           :key #'reply-container-reply)))
                                 (setf (elt (reply-container-rank contained-reply) index)
                                       hierarchy-position)
                                 (when (fully-specified-p (reply-container-rank contained-reply))
-                                  (pushnew contained-reply contained-applicable-replies
-                                           :test #'equalp))))))))))
+                                  (pushnew contained-reply contained-applicable-replies :test #'equalp))))))))))
         (if contained-applicable-replies
             (unbox-replies (sort-applicable-replies contained-applicable-replies))
-            (when errorp (error 'no-applicable-replies :message (message-name message) :args args))))))
+            (when errorp
+              (error 'no-applicable-replies
+                     :format-control
+                     "There are no applicable replies for message ~A when called with args:~%~S"
+                     :format-args (list selector args)))))))
 
 (defun unbox-replies (replies)
   (mapcar #'reply-container-reply replies))

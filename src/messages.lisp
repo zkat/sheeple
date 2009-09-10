@@ -165,8 +165,8 @@ more entries the cache will be able to hold, but the slower lookup will be.")
               ((not (eq (or keysp restp) msg-key/rest-p))
                (lose "the reply and message differ in whether they accept~_~
                       &REST or &KEY arguments."))
-              ((not (and (atom msg-keywords)
-                         (or (and restp (not keysp)) allow-other-keys-p
+              ((and (consp msg-keywords)
+                    (not (or (and restp (not keysp)) allow-other-keys-p
                              (every (rcurry 'memq keywords) msg-keywords))))
                (lose "the reply does not accept each of the &KEY arguments~2I~_~S."
                      msg-keywords))

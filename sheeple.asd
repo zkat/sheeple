@@ -24,8 +24,7 @@
              (:file "reply-definition")
              (:file "reply-dispatch")
              (:file "bootstrap")
-             ;; (:file "post-boot")
-             ))))
+             (:file "post-boot")))))
 
 (asdf:defsystem sheeple-tests
   :version "Baahh"
@@ -48,8 +47,7 @@
              (:file "reply-definition")
              (:file "reply-dispatch")
              (:file "bootstrap")
-             ;; (:file "post-boot")
-             ))))
+             (:file "post-boot")))))
 
 (defmethod asdf:perform ((o asdf:test-op) (c (eql (asdf:find-system :sheeple))))
   (format t "~&~%*******************~%~

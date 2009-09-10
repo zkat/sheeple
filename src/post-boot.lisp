@@ -41,17 +41,14 @@
 ;;;
 ;;; Nicknames
 ;;;
-(defvar *nickname-symbol* (make-symbol "NICKNAME")
-  "Pointer to the unique symbol used to hold a sheep's nickname")
-
 (defun sheep-nickname (sheep)
   "Returns SHEEP's nickname"
-  (property-value sheep *nickname-symbol*))
+  (property-value sheep :nickname))
 
 (defun (setf sheep-nickname) (new-nickname sheep)
   "Sets SHEEP's nickname to NEW-NICKNAME"
   (handler-bind ((unbound-property 'continue))
-    (setf (property-value sheep *nickname-symbol*) new-nickname)))
+    (setf (property-value sheep :nickname) new-nickname)))
 
 ;;; Now we name all the built-in sheep like we're Adam in Eden.
 (mapc #'(setf sheep-nickname)

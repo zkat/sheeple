@@ -262,13 +262,9 @@
 (defmacro undefreply (&rest args)
   (multiple-value-bind (name qualifiers lambda-list)
       (parse-undefreply args)
-    (multiple-value-bind (iggy1 iggy2 participants iggy3)
-        (parse-specialized-lambda-list lambda-list)
-      (declare (ignore iggy1 iggy2 iggy3))
-      `(undefine-reply
-        ',name
-        :qualifiers ',qualifiers
-        :participants (list ,@participants)))))
+    `(undefine-reply
+      ',name :qualifiers ',qualifiers
+      :participants `(,,@(nth-value 2 (parse-specialized-lambda-list lambda-list))))))
 
 (defun parse-undefreply (args)
   (let ((name (car args))

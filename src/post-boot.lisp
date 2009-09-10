@@ -34,6 +34,11 @@
 (defreply allocate-sheep ((metasheep =standard-metasheep=))
   (std-allocate-sheep metasheep))
 
+(defmessage compute-sheep-hierarchy-list-using-metasheep (metasheep sheep))
+(defreply compute-sheep-hierarchy-list-using-metasheep
+    ((metasheep =standard-metasheep=) sheep)
+  (std-compute-sheep-hierarchy-list sheep))
+
 ;;;
 ;;; Printing sheep!
 ;;;

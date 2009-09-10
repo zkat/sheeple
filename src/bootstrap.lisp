@@ -15,9 +15,10 @@
 ;; before anything works, we need to make it so =standard-metasheep= exists...
   (setf =standard-metasheep= (std-allocate-sheep =standard-metasheep=))
   (setf (%sheep-metasheep =standard-metasheep=) =standard-metasheep=)
+  (finalize-sheep-inheritance =standard-metasheep=)
 
 ;; Since =T= and =STANDARD-SHEEP= have special rules about parents, we hand-craft them first.
-  (setf =t= (std-allocate-sheep =standard-metasheep=)
+  (setf =t= (finalize-sheep-inheritance (std-allocate-sheep =standard-metasheep=))
         =standard-sheep= (add-parent =t= (std-allocate-sheep =standard-metasheep=)))
 
 ;; We can define some special messages now. It's not terribly important to do it in this

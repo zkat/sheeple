@@ -653,5 +653,8 @@
     (is (equal "another-one" (funcall 'something-else (symbol-value '=test-proto=))))
     (is (equal "another-one" (funcall 'something-else test-proto)))
     ;; TODO - check that options work properly
+    (undefreply var ((sheep test-proto)))
+    (undefreply something-else ((sheep test-proto)))
+    (makunbound '=test-proto=)
     ))
 (test ensure-sheep)

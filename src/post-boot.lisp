@@ -50,6 +50,13 @@
                                            parent child)
   (std-remove-parent parent child))
 
+(defmessage add-parent-using-metasheeple (parent-metasheep child-metasheep parent child))
+(defreply add-parent-using-metasheeple ((parent-metasheep =standard-metasheep=)
+                                        (child-metasheep =standard-metasheep=)
+                                        parent child)
+  (std-add-parent parent child))
+
+
 ;;;
 ;;; Printing sheep!
 ;;;

@@ -226,7 +226,8 @@ is signaled."
         (t (cerror "Add the property locally" 'unbound-property
                    :sheep sheep
                    :property-name property-name)
-           (add-property sheep property-name new-value))))
+           (add-property sheep property-name new-value)))
+  new-value)
 
 ;;; Reflection API
 (defun property-owner (sheep property-name &optional errorp)

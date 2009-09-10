@@ -12,7 +12,7 @@
 (test shared-init-sheep)
 
 (test init-sheep
-  (let ((parent (spawn-sheep () :properties '((prop1 NIL)))))
+  (let ((parent (make-sheep () :properties '((prop1 NIL)))))
     (defreply init-sheep :before ((sheep parent) &key)
       (is (has-property-p sheep 'prop1))
       (is (eq NIL (property-value sheep 'prop1)))
@@ -27,7 +27,7 @@
       (prog1 (call-next-reply)
         (is (eq 'val1 (property-value sheep 'prop1)))
         (is (eq 'val2 (property-value sheep 'prop2)))))
-    (let ((test-sheep (spawn-sheep (list parent) :properties '((prop1 val1) (prop2 val2)))))
+    (let ((test-sheep (make-sheep (list parent) :properties '((prop1 val1) (prop2 val2)))))
       (is (eq 'val1 (property-value test-sheep 'prop1)))
       (is (eq 'val2 (property-value test-sheep 'prop2))))))
 

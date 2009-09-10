@@ -39,6 +39,11 @@
     ((metasheep =standard-metasheep=) sheep)
   (std-compute-sheep-hierarchy-list sheep))
 
+(defmessage finalize-sheep-inheritance-using-metasheep (metasheep sheep))
+(defreply finalize-sheep-inheritance-using-metasheep
+    ((metasheep =standard-metasheep=) sheep)
+  (std-finalize-sheep-inheritance sheep))
+
 ;;;
 ;;; Printing sheep!
 ;;;

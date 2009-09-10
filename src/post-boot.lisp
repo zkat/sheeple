@@ -28,6 +28,13 @@
          ,@body))))
 
 ;;;
+;;; Messages
+;;;
+(defmessage allocate-sheep (metasheep))
+(defreply allocate-sheep ((metasheep =standard-metasheep=))
+  (std-allocate-sheep metasheep))
+
+;;;
 ;;; Printing sheep!
 ;;;
 (defmessage print-sheep (sheep stream)

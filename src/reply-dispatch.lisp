@@ -147,7 +147,7 @@
                    for curr-sheep in (sheep-hierarchy-list arg)
                    for hierarchy-position from 0
                    do (dolist (role (%sheep-roles curr-sheep))
-                        (when (and (eq message (reply-message (role-reply role)))
+                        (when (and (eq message (role-message role))
                                    (= index (role-position role)))
                           (let ((curr-reply (role-reply role)))
                             (when (= (length args)

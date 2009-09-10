@@ -244,7 +244,7 @@ regards to the CONSTRAINTS. A future version will undo this change."
        (if (find sheep cache)
            (error 'sheeple-hierarchy-error :sheep sheep)
            (cons sheep cache))))
-    (t nil)))
+    (t (list sheep))))
 
 (defun compute-sheep-hierarchy-list (sheep)
   (typecase sheep

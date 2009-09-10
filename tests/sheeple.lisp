@@ -9,7 +9,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(defun cons-std-sheep () (std-allocate-sheep =standard-metasheep=))
+(defun cons-std-sheep ()
+  (finalize-sheep-inheritance (std-allocate-sheep =standard-metasheep=)))
 
 (def-fixture with-std-sheep ()
   (let ((sheep (cons-std-sheep)))
@@ -79,13 +80,14 @@
   (is (vectorp sheep))
   (is (= 6 (length sheep))))
 
-(test (std-sheep-initial-values :fixture with-std-sheep :depends-on std-sheep-basic-structure)
-  (is (eql =standard-metasheep= (svref sheep 0)))
-  (is (null (svref sheep 1)))
-  (is (null (svref sheep 2)))
-  (is (null (svref sheep 3)))
-  (is (equal (list sheep) (svref sheep 4)))
-  (is (null (svref sheep 5))))
+(test (std-sheep-initial-values :depends-on std-sheep-basic-structure)
+  (let ((sheep (std-allocate-sheep =standard-metasheep=)))
+    (is (eql =standard-metasheep= (svref sheep 0)))
+    (is (null (svref sheep 1)))
+    (is (null (svref sheep 2)))
+    (is (null (svref sheep 3)))
+    (is (null (svref sheep 4)))
+    (is (null (svref sheep 5)))))
 
 (postboot-test allocate-sheep
   (let ((sheep (allocate-sheep =standard-metasheep=)))
@@ -95,7 +97,7 @@
     (is (null (svref sheep 1)))
     (is (null (svref sheep 2)))
     (is (null (svref sheep 3)))
-    (is (equal (list sheep) (svref sheep 4)))
+    (is (null (svref sheep 4)))
     (is (null (svref sheep 5)))))
 
 (in-suite allocation)

@@ -251,7 +251,7 @@ returned."
 (defun sheep-direct-properties (sheep)
   #-sheeple3.1 "Returns a set of direct property definition metaobjects."
   #+sheeple3.1 "Returns a set of direct property definition metaobjects."
-  (map 'list 'car (%sheep-direct-properties sheep)))
+  (delete nil (map 'list 'car (%sheep-direct-properties sheep))))
 
 (defun available-properties (sheep)
   "Returns a list of property objects describing all properties available to SHEEP, including

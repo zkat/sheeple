@@ -24,11 +24,12 @@
          #-sheeple3.1 'test))
     (is (null (%sheep-direct-properties sheep)))
     (is (eq sheep (%add-property-cons sheep property nil)))
-    (is (eq sheep (%add-property-cons sheep 'test nil)))
+    (signals error (%add-property-cons sheep property nil))
     (is (not (null (%sheep-direct-properties sheep))))
     (is (vectorp (%sheep-direct-properties sheep)))
     (is (find property (%sheep-direct-properties sheep)
-              :key (fun (property-name (car _)))))))
+              :key #+sheeple3.1(fun (property-name (car _)))
+              #-sheeple3.1 'car))))
 
 (postboot-test %get-property-cons
   (let* ((sheep (spawn))

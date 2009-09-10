@@ -73,10 +73,11 @@ so DOLLY doesn't end up on the list by default."
     (setf (documentation sheep 't) documentation)
     sheep)
 
-
-  (defproto =standard-sheep= (=t=) ())
-
   ) ; basically bootstrapped!
+
+;; Now we take care of redefining =standard-sheep= normally. This should give us an idea
+;; of how bootstrapping went.
+(defproto =standard-sheep= (=t=) ())
 
 ;; now we just define all the builtins, and we're good to go.
 (defproto =boxed-object= (=t=) ())

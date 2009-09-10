@@ -215,7 +215,7 @@
   (let ((arg (car arglist)))
     (cond ((null arglist) (values nil nil nil nil))
           ((eq arg '&aux)
-           (values nil arglist nil nil))
+           (values nil arglist nil nil nil))
           ((memq arg lambda-list-keywords)
            ;; non-standard lambda-list-keywords are errors.
            (unless (memq arg specialized-lambda-list-keywords)
@@ -262,6 +262,7 @@
              (values parameters
                      (cons arg lambda-list)
                      ()
+                     ()
                      ())))
           (supplied-keywords
            ;; After a lambda-list keyword there can be no specializers.
@@ -272,14 +273,16 @@
              (values (cons (if (listp arg) (car arg) arg) parameters)
                      (cons arg lambda-list)
                      ()
+                     ()
                      ())))
           (t
-           (multiple-value-bind (parameters lambda-list specializers required)
+           (multiple-value-bind (parameters lambda-list specializers required ignorable)
                (parse-specialized-lambda-list (cdr arglist))
              (values (cons (if (listp arg) (car arg) arg) parameters)
                      (cons (if (listp arg) (car arg) arg) lambda-list)
                      (cons (if (listp arg) (cadr arg) '=t=) specializers)
-                     (cons (if (listp arg) (car arg) arg) required)))))))
+                     (cons (if (listp arg) (car arg) arg) required)
+                     (if (listp arg) (cons (car arg) ignorable) ignorable)))))))
 
 (defun analyze-lambda-list (lambda-list)
   ;; Need to specify exactly what this function does -- is it analyzing

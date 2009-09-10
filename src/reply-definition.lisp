@@ -107,8 +107,7 @@
   (ensure-reply reader
                 :lambda-list '(sheep)
                 :participants (list sheep)
-                :function (eval (make-reply-lambda reader
-                                                   '(sheep)
+                :function (eval (make-reply-lambda reader '(sheep) ()
                                                    `((property-value sheep ',prop-name))))))
 
 (defun add-readers-to-sheep (readers prop-name sheep)
@@ -120,8 +119,7 @@
   (ensure-reply writer
                 :lambda-list '(new-value sheep)
                 :participants (list =t= sheep)
-                :function (eval (make-reply-lambda writer
-                                                   '(new-value sheep)
+                :function (compile (make-reply-lambda writer '(new-value sheep) ()
                                                    `((setf (property-value sheep ',prop-name)
                                                            new-value))))))
 
@@ -188,7 +186,7 @@
     `(%defreply-expander ,name ,qualifiers ,specialized-lambda-list ,docstring ,body)))
 
 (defmacro %defreply-expander (name qualifiers specialized-lambda-list docstring body)
-  (multiple-value-bind (parameters ll participants required)
+  (multiple-value-bind (parameters ll participants required ignorable)
       (parse-specialized-lambda-list specialized-lambda-list)
     (declare (ignore parameters required))
     `(ensure-reply
@@ -198,9 +196,9 @@
       :lambda-list ',ll
       :participants (list ,@participants)
       :documentation ,docstring
-      :function ,(make-reply-lambda name ll body))))
+      :function ,(make-reply-lambda name ll ignorable body))))
 
-(defun make-reply-lambda (name lambda-list body)
+(defun make-reply-lambda (name lambda-list ignorable body)
   (let* ((msg (find-message name nil))
          (key/restp (when msg (arg-info-key/rest-p (message-arg-info msg))))
          (ll (if (and key/restp (arg-info-keys (message-arg-info msg)))
@@ -219,7 +217,7 @@
                      (cadr name)
                      name)
            (apply
-            (lambda ,ll
+            (lambda ,ll (declare (ignorable ,@ignorable))
               ,@body) args))))))
 
 (defun parse-defreply (args)

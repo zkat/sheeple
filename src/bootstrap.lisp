@@ -17,15 +17,8 @@
   (setf (%sheep-metasheep =standard-metasheep=) =standard-metasheep=)
 
 ;; Since =T= and =STANDARD-SHEEP= have special rules about parents, we hand-craft them first.
-  (setf =t=
-        (let ((sheep (std-allocate-sheep =standard-metasheep=)))
-          (finalize-sheep-inheritance sheep)
-          sheep))
-
-  (setf =standard-sheep=
-        (let ((sheep (std-allocate-sheep =standard-metasheep=)))
-          (add-parent =t= sheep)
-          sheep))
+  (setf =t= (std-allocate-sheep =standard-metasheep=)
+        =standard-sheep= (add-parent =t= (std-allocate-sheep =standard-metasheep=)))
 
 ;; We can define some special messages now. It's not terribly important to do it in this
 ;; order for 3.0, since messages are just structs, but I'm keeping this layout for 3.1

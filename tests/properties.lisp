@@ -180,7 +180,7 @@
     (is (eq parent (property-owner child 'var)))
     (is (eq child (property-owner child 'child-var)))
     (is (null (property-owner parent 'some-other-property nil)))
-    (signals unbound-property (property-owner parent 'some-other-property))
+    (is (null (property-owner parent 'some-other-property)))
     (signals unbound-property (property-owner parent 'some-other-property t))))
 
 #+sheeple3.1

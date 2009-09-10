@@ -52,9 +52,10 @@
 
 ;;; Now we name all the built-in sheep like we're Adam in Eden.
 (mapc #'(setf sheep-nickname)
-      '(t standard-sheep standard-metasheep boxed-object symbol sequence array
-        number character function hash-table package pathname readtable stream
-        list null cons vector bit-vector string complex integer float)
+      '(=t= =standard-sheep= =standard-metasheep= =boxed-object= =symbol=
+        =sequence= =array= =number= =character= =function= =hash-table=
+        =package= =pathname= =readtable= =stream= =list= =null= =cons=
+        =vector= =bit-vector= =string= =complex= =integer= =float=)
       (list =t= =standard-sheep= =standard-metasheep= =boxed-object= =symbol=
             =sequence= =array= =number= =character= =function= =hash-table=
             =package= =pathname= =readtable= =stream= =list= =null= =cons=
@@ -67,7 +68,7 @@
 (defun std-print-sheep (stream sheep)
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Sheep~@[ AKA ~A~]"
-            (ignore-errors (property-value sheep *nickname-symbol*)))))
+            (ignore-errors (sheep-nickname sheep)))))
 ;;; BORKED!
 (defmessage print-sheep (sheep stream)
   (:documentation "Defines the expression print-object uses."))
@@ -78,6 +79,6 @@
 (defreply print-sheep ((sheep =boxed-object=) (stream =stream=))
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Boxed object~@[ AKA ~A~]"
-            (ignore-errors (property-value sheep *nickname-symbol*)))))
+            (ignore-errors (sheep-nickname sheep)))))
 ;;; Some sanity
 (set-pprint-dispatch 'sheep 'std-print-sheep)

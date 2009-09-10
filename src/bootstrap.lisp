@@ -31,18 +31,18 @@
   (defmessage shared-init (sheep &key &allow-other-keys)
     (:documentation "Primarily meant to fill SHEEP's properties during initialization when
 using certain macros (such as defsheep and defproto)."))
-  (defreply shared-init (sheep &key properties)
+  (defreply shared-init (sheep &key properties nickname)
     "DUMPIN' SUM PROPS!"
     (when properties
       (mapcar (fun (apply #'add-property sheep _))
               properties))
+    (when nickname
+      (setf (sheep-nickname sheep) nickname))
     sheep)
 
   (defmessage init-sheep (sheep &key &allow-other-keys))
-  (defreply init-sheep (sheep
-                        &key
-                        properties)
-    (shared-init sheep :properties properties)
+  (defreply init-sheep (sheep &key properties nickname)
+    (shared-init sheep :properties properties :nickname nickname)
     sheep)
 
   (defmessage reinit-sheep (sheep &key &allow-other-keys)

@@ -243,7 +243,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
   (let ((name (message-name message)))
     (when (and (fboundp name)
                (not (find-message name nil)))
-      (cerror "Replace definition." 'clobbering-function-definition :format-args (list name)))
+      (cerror "Replace definition." 'clobbering-function-definition :function name))
     (setf (fdefinition name) (lambda (&rest args) (apply-message message args)))))
 
 ;;; defmessage macro

@@ -132,7 +132,7 @@
                           (length (the vector (message-dispatch-cache message))))))
     (add-entry-to-message msg-cache message args maybe-index)
     msg-cache))
-
+#+nil
 (defun %find-applicable-replies (message args &key (errorp t))
   "Returns the most specific reply using MESSAGE and ARGS."
   (declare (list args))
@@ -179,7 +179,7 @@
                      "There are no applicable replies for message ~A when called with args:~%~S"
                      :format-args (list selector args)))))))
 
-(defun new-%find-applicable-replies  (message args &key (errorp t))
+(defun %find-applicable-replies  (message args &key (errorp t))
   "Returns the most specific reply using MESSAGE and ARGS."
   (if (null args) (message-replies message) ; this handles no-arg messages. Badly. -- sykopomp
       (let (discovered-replies contained-applicable-replies)

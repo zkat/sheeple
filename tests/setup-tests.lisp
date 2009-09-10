@@ -48,7 +48,7 @@
      (skip "Sheeple has not yet bootstrapped")))
 
 (defmacro postboot-test (name &body body)
-  `(test (,name :depends-on bootstrapped?) ,body))
+  `(test (,name :depends-on bootstrapped?) ,@body))
 
 ;;; Hooking into ASDF
 (defmethod asdf:perform ((o asdf:test-op) (c (eql (asdf:find-system :sheeple-tests))))

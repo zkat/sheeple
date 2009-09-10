@@ -41,10 +41,10 @@
           #-sheeple3.1 'other-prop))
     (is (null (%get-property-cons sheep property)))
     (%add-property-cons sheep property 'value)
-    (is (consp (%get-property-cons sheep property))))
+    (is (consp (%get-property-cons sheep property)))
     (is (null (%get-property-cons sheep other-property)))
     (is (eq property (car (%get-property-cons sheep property))))
-    (is (eq 'value (cdr (%get-property-cons sheep property)))))
+    (is (eq 'value (cdr (%get-property-cons sheep property))))))
 
 (postboot-test %remove-property-cons
   (let* ((sheep (spawn))

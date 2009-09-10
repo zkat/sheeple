@@ -191,10 +191,13 @@ direct property. Returns SHEEP."
 If the value is non-local (is delegated or does not exist in the hierarchy list),
 a condition of type UNBOUND-DIRECT-PROPERTY condition is signalled."
   ;;  (declare (inline %sheep-direct-properties %get-property-cons)) ;commented until after testing
-  (awhen (%sheep-direct-properties sheep)
-    (cdr (or (%get-property-cons sheep property-name)
-             (error 'unbound-property
-                    :sheep sheep :property-name property-name)))))
+  (if (%sheep-direct-properties sheep)
+      (aif (%get-property-cons sheep property-name)
+           (cdr it)
+           (error 'unbound-property
+                  :sheep sheep :property-name property-name))
+      (error 'unbound-property
+             :sheep sheep :property-name property-name)))
 
 (defun property-value (sheep property-name)
   "Returns a property-value that is not necessarily local to SHEEP."

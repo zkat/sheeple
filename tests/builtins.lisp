@@ -41,9 +41,9 @@
 
 (postboot-test box-object
   (signals error (box-object (spawn)))
-  (is (= 'foo (box-object 'foo)))
+  (is (sheepp (box-object 'foo)))
   (is (find-boxed-object 'foo))
-  (is (= 'foo (wrapped-object (find-boxed-object 'foo)))))
+  (is (eq 'foo (wrapped-object (find-boxed-object 'foo)))))
 
 (postboot-test find-boxed-object
   (box-object 'foo)

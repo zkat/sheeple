@@ -63,7 +63,7 @@
     (%find-applicable-replies message (subseq args 0 relevant-args-length) errorp)))
 
 (defun %find-applicable-replies  (message args &optional (errorp t))
-  "Returns the most specific reply using MESSAGE and ARGS."
+  "Returns the most specific replies using MESSAGE and ARGS."
   (if (null args) (message-replies message) ; this handles no-arg messages. Badly. -- zkat
       (let (discovered-replies contained-applicable-replies)
         (loop

@@ -9,59 +9,76 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(setf =t=
-      (let ((sheep (allocate-sheep)))
-        (setf (sheep-nickname sheep) '=t=)
-        (finalize-sheep sheep)
-        sheep))
+;;; Bootstrap time!
+;; using a progn should ensure that they're all called in this specific order..
+(progn
+;; before anything works, we need to make it so =standard-metasheep= exists...
+  (setf =standard-metasheep= (std-allocate-sheep =standard-metasheep=))
+  (setf (%sheep-metasheep =standard-metasheep=) =standard-metasheep=)
 
-(setf =dolly=
-      (let ((sheep (allocate-sheep)))
-        (setf (sheep-nickname sheep) '=dolly=)
-        (add-parent =t= sheep)
-        sheep))
+;; Since =T= and =STANDARD-SHEEP= have special rules about parents, we hand-craft them first.
+  (setf =t=
+        (let ((sheep (std-allocate-sheep =standard-metasheep=)))
+          (finalize-sheep-inheritance sheep)
+          sheep))
 
-(defmessage shared-init (sheep &key &allow-other-keys))
-(defreply shared-init (sheep &key properties)
-  (when properties
-    (mapcar (lambda (prop-spec)
-              (apply #'add-property sheep prop-spec))
-            properties))
-  sheep)
+  (setf =standard-sheep=
+        (let ((sheep (std-allocate-sheep =standard-metasheep=)))
+          (add-parent =t= sheep)
+          sheep))
 
-(defmessage init-sheep (sheep &key &allow-other-keys))
-(defreply init-sheep (sheep
-                      &key
-                      properties)
-  (shared-init sheep :properties properties)
-  sheep)
+;; We can define some special messages now. It's not terribly important to do it in this
+;; order for 3.0, since messages are just structs, but I'm keeping this layout for 3.1
+  (defmessage allocate-sheep (metasheep)
+    (:documentation "Allocates a sheep object based on METASHEEP."))
+  (defreply allocate-sheep ((sheep =standard-metasheep=))
+    (std-allocate-sheep sheep))
 
-(defmessage reinit-sheep (sheep &key &allow-other-keys)
-  (:documentation "Resets the sheep's parents and properties."))
-(defreply reinit-sheep (sheep &key new-parents
-                              documentation
-                              properties)
-  "If :NEW-PARENTS is  provided, those parents are used when reinitializing,
+  (defmessage shared-init (sheep &key &allow-other-keys)
+    (:documentation "Primarily meant to fill SHEEP's properties during initialization when
+using certain macros (such as defsheep and defproto)."))
+  (defreply shared-init (sheep &key properties)
+    "DUMPIN' SUM PROPS!"
+    (when properties
+      (mapcar (fun (apply #'add-property sheep _))
+              properties))
+    sheep)
+
+  (defmessage init-sheep (sheep &key &allow-other-keys))
+  (defreply init-sheep (sheep
+                        &key
+                        properties)
+    (shared-init sheep :properties properties)
+    sheep)
+
+  (defmessage reinit-sheep (sheep &key &allow-other-keys)
+    (:documentation "Resets the sheep's parents and properties."))
+  (defreply reinit-sheep (sheep &key new-parents
+                                documentation
+                                properties)
+    "If :NEW-PARENTS is  provided, those parents are used when reinitializing,
 so DOLLY doesn't end up on the list by default."
-  ;; CLOBBER TIME
-  (loop for parent in (sheep-parents sheep)
-     do (remove-parent parent sheep))
-  (remove-all-direct-properties sheep)
-  ;; MOAR PARENTS
-  (add-parents (if new-parents (sheepify-list new-parents) (list =dolly=))
-               sheep)
-  ;; set up some new properties.
-  (mapc (lambda (prop-spec)
-          (apply #'add-property sheep prop-spec))
-        properties)
-  ;; DOX PLOX
-  (when documentation
-    (setf (sheep-documentation sheep) documentation))
-  sheep)
+    ;; In order to reinitialize a sheep, we first remove -all- parents and properties.
+    (map nil (rcurry 'remove-parent sheep) (sheep-parents sheep))
+    (remove-all-direct-properties sheep)
+    ;; Once that's set, we can start over. We must remember to add =standard-sheep=
+    ;; as a last resort.
+    (add-parents (if new-parents (sheepify-list new-parents) (list =standard-sheep=))
+                 sheep)
+    ;; Now we can set up the properties all over again.
+    (mapc (fun (apply #'add-property sheep _)) properties)
+    ;; And finally, set the documentation. If none is provided, it's set to NIL.
+    ;; It's important to note that documenting a sheep will keep a reference to it...
+    ;; At the same time, REINIT-SHEEP is only meant for protos, so it should be fine.
+    (setf (documentation sheep 't) documentation)
+    sheep)
 
-(defproto =dolly= (=t=) ())
 
-;;; Boxed built-ins
+  (defproto =standard-sheep= (=t=) ())
+
+  ) ; basically bootstrapped!
+
+;; now we just define all the builtins, and we're good to go.
 (defproto =boxed-object= (=t=) ())
 (defproto =symbol= (=boxed-object=) ())
 (defproto =sequence= (=boxed-object=) ())

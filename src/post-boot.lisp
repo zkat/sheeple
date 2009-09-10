@@ -44,6 +44,12 @@
     ((metasheep =standard-metasheep=) sheep)
   (std-finalize-sheep-inheritance sheep))
 
+(defmessage remove-parent-using-metasheeple (parent-metasheep child-metasheep parent child))
+(defreply remove-parent-using-metasheeple ((parent-metasheep =standard-metasheep=)
+                                           (child-metasheep =standard-metasheep=)
+                                           parent child)
+  (std-remove-parent parent child))
+
 ;;;
 ;;; Printing sheep!
 ;;;

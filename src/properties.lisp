@@ -289,3 +289,20 @@ inherited ones."
                                      (direct-property-value sheep pname))))
                         (sheep-direct-properties sheep))))
 
+;;; Convenience
+(defmacro with-properties (properties sheep &body body)
+  (let ((sh (gensym)))
+    `(let ((,sh ,sheep))
+       (symbol-macrolet ,(mapcar (lambda (property-entry)
+                                   (let ((var-name
+                                          (if (symbolp property-entry)
+                                              property-entry
+                                              (car property-entry)))
+                                         (property-name
+                                          (if (symbolp property-entry)
+                                              property-entry
+                                              (cadr property-entry))))
+                                     `(,var-name
+                                       (property-value ,sh ',property-name))))
+                                 properties)
+         ,@body))))

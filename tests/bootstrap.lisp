@@ -32,9 +32,9 @@
       (is (eq 'val2 (property-value test-sheep 'prop2))))))
 
 (test reinit-sheep
-  (let ((test-sheep (clone))
-        (another (clone)))
-    (is (eql test-sheep (add-property test-sheep 'var "value" :make-accessor-p nil)))
+  (let ((test-sheep (spawn))
+        (another (spawn)))
+    (is (eql test-sheep (add-property test-sheep 'var "value" :accessor t)))
     (is (has-direct-property-p test-sheep 'var))
     (is (eql test-sheep (add-parent another test-sheep)))
     (is (parent-p another test-sheep))

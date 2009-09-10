@@ -71,10 +71,7 @@ of its descendants."
 ;;; The basics of allocating sheep objects
 (defun std-allocate-sheep (metasheep)
   "Creates a standard sheep object."
-  (let ((array (make-vector 6)))
-    (setf (svref array 0) metasheep
-          (svref array 4) (list array))
-    array))
+  (vector metasheep nil nil nil nil nil))
 
 (defun maybe-std-allocate-sheep (metasheep)
   (if (eq =standard-metasheep= metasheep)
@@ -352,7 +349,7 @@ to the front of the list)"
 allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
   (apply 'init-sheep
          (add-parent* (or parent* =standard-sheep=)
-                      (maybe-std-allocate-sheep metasheep))
+                      (finalize-sheep-inheritance (maybe-std-allocate-sheep metasheep)))
          all-keys))
 
 (defun spawn (&rest sheeple)

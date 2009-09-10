@@ -82,4 +82,4 @@ has not already been boxed."
 
 (defun sheepify-list (obj-list)
   "Converts OBJ-LIST to a list where each item is either a sheep or a boxed object."
-  (mapcar #'sheepify obj-list))
+  (mapcar 'sheepify obj-list))

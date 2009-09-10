@@ -11,14 +11,18 @@
 ;;;
 ;;; Reply objects
 ;;;
-(defstruct (reply (:predicate replyp))
+(defstruct (reply (:predicate replyp)
+                  (:print-object
+                   (lambda (reply stream)
+                     (print-unreadable-object (reply stream :identity t)
+                       (format stream "Reply: ~a" (reply-name reply))))))
   ;; Replies are the Sheeple equivalent of methods. Replies themselves are objects that hold
   ;; some basic information about what the reply does, what kind of reply it is, etc.
   ;; When reply objects are 'called', their reply-function is fetched directly. By using lambdas,
   ;; we're able to latch on to the lexical environment the reply was defined in (so they can be
   ;; closures)
   message qualifiers lambda-list
-  (function (lambda () nil)))
+  (function (constantly nil)))
 
 (defun reply-name (reply)
   (message-name (reply-message reply)))

@@ -28,17 +28,18 @@
   (with-sheep-hierarchy ((a) (b a))
     (is (equal '(:a-)
                (with-flag-stack
-                 (defreply tester ((x a) y)
+                 (defreply tester ((x a) (y =t=))
                    (flag :a-))
-                 (tester a nil))))
+                 (funcall 'tester a nil)
+                 (undefreply tester ((x a) y)))))
     (is (equal '(:b- :a-)
                (with-flag-stack
-                 (defreply tester ((x a) y)
+                 (defreply tester ((x a) (y =t=))
                    (flag :a-))
-                 (defreply tester ((x b) y)
+                 (defreply tester ((x b) (y =t=))
                    (flag :b-)
                    (call-next-reply))
-                 (tester b nil))))))
+                 (funcall 'tester b nil))))))
 
 (def-suite reply-dispatch :in messages)
 (in-suite reply-dispatch)

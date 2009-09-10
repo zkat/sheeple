@@ -95,15 +95,12 @@
                                                               :errorp errorp)))
                 (memoize-reply-dispatch message relevant-args new-msg-list)))))))
 
-(declaim (inline desired-cache-entry-p))
 (defun desired-cache-entry-p (args cache-entry relevant-args-length)
-  (declare (fixnum relevant-args-length) (list args))
   (when cache-entry
     (let ((vector-args (cache-entry-args cache-entry)))
-      (declare (simple-vector vector-args))
       (or (= 0 relevant-args-length)
           (when (= 1 relevant-args-length)
-            (eq (svref vector-args 0) (car args)))
+            (eq (elt vector-args 0) (car args)))
           (every 'equal args vector-args)))))
 
 (defun fetch-dispatch-cache-entry (message args relevant-args-length)
@@ -114,8 +111,7 @@
                                                       (box-type-of (car args))))))
                           (length dispatch-cache))))
     ;; I don't know how this could be any faster. My best choice is probably to avoid calling it.
-    (declare (vector dispatch-cache) (fixnum orig-index))
-    (let ((attempt (aref dispatch-cache orig-index)))
+    (let ((attempt (elt dispatch-cache orig-index)))
       (if (desired-cache-entry-p args attempt relevant-args-length)
           (cache-entry-replies attempt)
           (let ((entry (find (fun (desired-cache-entry-p args _ relevant-args-length))

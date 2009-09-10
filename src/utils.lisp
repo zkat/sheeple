@@ -150,3 +150,6 @@ will not be affected; otherwise, it will be bound to a recognizeable and unique 
 
 (defmacro define-bound-variables (&rest variables)
   `(progn ,@(mapcar (fun `(define-bound-variable ,@(ensure-list _))) variables)))
+
+(defmacro define-unbound-variables (&rest variables)
+  `(progn ,@(mapcar (fun `(defvar ,@(ensure-list _))) variables)))

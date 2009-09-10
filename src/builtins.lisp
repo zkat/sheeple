@@ -8,7 +8,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(define-bound-variables
+(define-unbound-variables
     =boxed-object= =symbol= =sequence= =array= =number= =character= =function=
     =hash-table= =package= =pathname= =readtable= =stream= =list= =null= =cons=
     =vector= =bit-vector= =string= =complex= =integer= =float=)

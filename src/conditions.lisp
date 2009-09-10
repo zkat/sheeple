@@ -28,8 +28,8 @@
          ,@(cdr (assoc :default-initargs condition-options)))
        ,@(remove :default-initargs condition-options :key #'car))))
 
-(define-sheeple-condition sheeple-warning sheeple-condition ())
-(define-sheeple-condition sheeple-error sheeple-condition ())
+(define-sheeple-condition sheeple-warning (sheeple-condition warning) ())
+(define-sheeple-condition sheeple-error (sheeple-condition error) ())
 
 ;;; Sheeple
 (define-sheeple-condition sheeple-hierarchy-error sheeple-error
@@ -53,7 +53,7 @@
 ;;; Messages
 
 (define-sheeple-condition clobbering-function-definition sheeple-warning
-  ("Clobbering regular function or generit function definition for ~A" function))
+  ("Clobbering regular function or generic function definition for ~A" function))
 
 (define-sheeple-condition sheeple-message-error sheeple-error ()
   (:documentation "Encompasses all that can go wrong with messages."))

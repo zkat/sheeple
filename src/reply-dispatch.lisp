@@ -130,7 +130,7 @@
                                                   (or (find-boxed-object (car args))
                                                       (box-type-of (car args))))))
                           (length (the vector (message-dispatch-cache message))))))
-    (add-entry-to-message msg-cache message args maybe-index)
+    (add-entry-to-message message msg-cache args maybe-index)
     msg-cache))
 
 (defun %find-applicable-replies  (message args &key (errorp t))

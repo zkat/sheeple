@@ -534,8 +534,7 @@
     (is (eql sheep (car (sheep-parents (make-sheep (list sheep))))))
     (is (eql =standard-metasheep= (sheep-metasheep sheep))))
   ;; properties arg
-  (let ((sheep (make-sheep nil
-                             :properties '((foo bar) (baz quux)))))
+  (let ((sheep (make-sheep nil :properties '((foo bar) (baz quux)))))
     (is (has-direct-property-p sheep 'foo))
     (is (has-direct-property-p sheep 'baz))
     (is (eql 'bar (direct-property-value sheep 'foo)))

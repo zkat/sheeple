@@ -133,7 +133,53 @@
     (add-entry-to-message msg-cache message args maybe-index)
     msg-cache))
 
-(defun %find-applicable-replies  (message args &key (errorp t))
+(defun %find-applicable-replies (message args &key (errorp t))
+  "Returns the most specific reply using MESSAGE and ARGS."
+  (declare (list args))
+  (if (null args)
+      (message-replies message)
+      (let ((selector (message-name message))
+            (n (length args))
+            (discovered-replies nil)
+            (contained-applicable-replies nil))
+        (declare (list discovered-replies contained-applicable-replies))
+        (loop
+           for arg in args
+           for index upto (1- n)
+           do (let* ((arg (if (sheep-p arg)
+                              arg
+                              (or (find-boxed-object arg)
+                                  (box-type-of arg))))
+                     (curr-sheep-list (sheep-hierarchy-list arg)))
+                (loop
+                   for curr-sheep in curr-sheep-list
+                   for hierarchy-position upto (1- (length curr-sheep-list))
+                   do (dolist (role (sheep-direct-roles curr-sheep))
+                        (when (and (equal selector (role-name role)) ;(eql message (role-message role))
+                                   (= (the fixnum index) (the fixnum (role-position role))))
+                          (let ((curr-reply (role-reply role)))
+                            (when (= n (length (the list (reply-specialized-portion curr-reply))))
+                              (when (not (member curr-reply
+                                                 discovered-replies
+                                                 :key #'reply-container-reply))
+                                (pushnew (the vector (contain-reply curr-reply))
+                                         discovered-replies))
+                              (let ((contained-reply (find curr-reply
+                                                           discovered-replies
+                                                           :key #'reply-container-reply)))
+                                (setf (elt (reply-container-rank contained-reply) index)
+                                      hierarchy-position)
+                                (when (fully-specified-p (reply-container-rank contained-reply))
+                                  (pushnew contained-reply contained-applicable-replies :test #'equalp))))))))))
+        (if contained-applicable-replies
+            (unbox-replies (sort-applicable-replies contained-applicable-replies))
+            (when errorp
+              (error 'no-applicable-replies
+                     :format-control
+                     "There are no applicable replies for message ~A when called with args:~%~S"
+                     :format-args (list selector args)))))))
+
+(defun new-%find-applicable-replies  (message args &key (errorp t))
   "Returns the most specific reply using MESSAGE and ARGS."
   (if (null args) (message-replies message) ; this handles no-arg messages. Badly. -- sykopomp
       (let (discovered-replies contained-applicable-replies)

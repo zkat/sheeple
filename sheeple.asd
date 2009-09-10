@@ -25,7 +25,6 @@
              (:file "reply-dispatch")
              (:file "bootstrap")
              ;; (:file "post-boot")
-             ;; (:file "glue") ;this file should go away.
              ))))
 
 (asdf:defsystem sheeple-tests

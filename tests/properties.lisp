@@ -35,13 +35,16 @@
   (let* ((sheep (spawn))
          (property
           #+sheeple3.1 (defsheep (=standard-property=) ((property-name 'test)))
-          #-sheeple3.1 'test))
-    (is (null (%get-property-cons sheep 'test)))
+          #-sheeple3.1 'test)
+         (other-property
+          #+sheeple3.1 (defsheep (=standard-property=) ((property-name 'other-prop)))
+          #-sheeple3.1 'other-prop))
+    (is (null (%get-property-cons sheep property)))
     (%add-property-cons sheep property 'value)
-    (is (consp (%get-property-cons sheep 'test))))
-    (is (null (%get-property-cons sheep 'something-else)))
-    (is (eq property (car (%get-property-cons sheep 'test))))
-    (is (eq 'value (cdr (%get-property-cons sheep 'test)))))
+    (is (consp (%get-property-cons sheep property))))
+    (is (null (%get-property-cons sheep other-property)))
+    (is (eq property (car (%get-property-cons sheep property))))
+    (is (eq 'value (cdr (%get-property-cons sheep property)))))
 
 (postboot-test %remove-property-cons
   (let* ((sheep (spawn))

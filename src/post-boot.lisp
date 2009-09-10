@@ -46,10 +46,10 @@
   (:documentation "Defines the expression print-object uses."))
 (defreply print-sheep (sheep (stream =stream=))
   (print-unreadable-object (sheep stream :identity t)
-    (format stream "Sheep~@[ AKA: ~a~]" (sheep-nickname sheep))))
+    (format stream "Sheep")))
 (defreply print-sheep ((sheep =boxed-object=) (stream =stream=))
   (print-unreadable-object (sheep stream :identity t)
-    (format stream "Boxed object~@[ AKA: ~a~]" (sheep-nickname sheep))))
+    (format stream "Boxed object")))
 
 ;; todo: convert this properly
 (defmethod print-object ((sheep standard-sheep) stream)

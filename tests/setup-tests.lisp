@@ -42,10 +42,7 @@
 
 (in-suite sheeple)
 
-(test bootstrapped?
- (if *bootstrappedp*
-     (pass "Sheeple has bootstrapped")
-     (skip "Sheeple has not yet bootstrapped")))
+(test bootstrapped? (pass "Sheeple has bootstrapped"))
 
 (defmacro postboot-test (name &body body)
   `(test (,name :depends-on bootstrapped?) ,@body))

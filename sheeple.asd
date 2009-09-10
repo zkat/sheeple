@@ -46,8 +46,7 @@
              (:file "messages")
              (:file "reply-definition")
              (:file "reply-dispatch")
-             (:file "bootstrap")
-             (:file "post-boot")))))
+             (:file "bootstrap")))))
 
 (defmethod asdf:perform ((o asdf:test-op) (c (eql (asdf:find-system :sheeple))))
   (format t "~&~%*******************~%~

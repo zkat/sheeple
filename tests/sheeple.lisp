@@ -576,12 +576,14 @@
 
 (postboot-test clone)
 
+#+nil
 (postboot-test sheep-nickname
   (let ((sheep (spawn)))
     (setf (sheep-nickname sheep) 'test)
     (is (eq 'test (sheep-nickname sheep)))
     (is (eq 'test (sheep-nickname (spawn sheep))))))
 
+#+nil
 (postboot-test sheep-documentation
   (let ((sheep (spawn)))
     (setf (sheep-documentation sheep) 'test)

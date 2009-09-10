@@ -25,31 +25,24 @@
 
 (defun apply-message (message args)
   (let ((replies (find-applicable-replies message args)))
-    (apply-replies replies args)))
+    (apply-replies message replies args)))
 
-(defparameter *caching-active-p* t)
-(defstruct (cache (:type vector))
-  message around primary before after replies)
+(defun apply-replies (message replies args)
+  (funcall (compute-effective-reply-function message replies) args))
 
-(defun apply-replies (cache args)
-  (funcall (compute-effective-reply-function cache) args))
-
-(defun compute-effective-reply-function (cache)
-  (let ((replies (cache-replies cache))
-        (around (car (cache-around cache)))
-        (primaries (cache-primary cache)))
+(defun compute-effective-reply-function (message replies)
+  (let ((around (car (remove-if-not 'around-reply-p replies)))
+        (primaries (remove-if-not 'primary-reply-p replies)))
     (when (null primaries)
-      (error 'no-primary-replies :message (message-name (cache-message cache))))
+      (error 'no-primary-replies :message (message-name message)))
     (if around
         (let ((next-erfun
-               (compute-effective-reply-function (create-reply-cache
-                                                    (cache-message cache)
-                                                    (remove around replies)))))
+               (compute-effective-reply-function message (remove around replies))))
           (lambda (args)
             (funcall (reply-function around) args next-erfun)))
         (let ((next-erfun (compute-primary-erfun (cdr primaries)))
-              (befores (cache-before cache))
-              (afters (cache-after cache)))
+              (befores (remove-if-not 'before-reply-p replies))
+              (afters (remove-if-not 'after-reply-p replies)))
           (lambda (args)
             (when befores
               (dolist (before befores)
@@ -63,73 +56,13 @@
 (defun compute-primary-erfun (replies)
   (when replies (rcurry (reply-function (car replies)) (compute-primary-erfun (cdr replies)))))
 
-(defun create-reply-cache (message replies)
-  (make-cache
-   :message message
-   :replies replies
-   :primary (remove-if-not #'primary-reply-p replies)
-   :around (remove-if-not #'around-reply-p replies)
-   :before (remove-if-not #'before-reply-p replies)
-   :after (reverse (remove-if-not #'after-reply-p replies))))
-
-(defun find-applicable-replies (message args &key (errorp t))
-  (declare (message message) (list args))
-  (let (;; This doesn't seem to be expensive at all..
-         (relevant-args-length (the fixnum (arg-info-number-required (message-arg-info message))))
-         ;; If I can avoid calling fetch-dispatch-cache-entry for singly-dispatched readers, that
-         ;; would be -lovely-. Not sure how to do that yet, though.
-        )
+(defun find-applicable-replies (message args &optional (errorp t))
+  (let ((relevant-args-length (arg-info-number-required (message-arg-info message))))
     (when (< (length args) relevant-args-length)
       (error 'insufficient-message-args :message message))
-    (if (= 0 relevant-args-length)
-        (let ((relevant-args (subseq args 0 relevant-args-length)))
-          (create-reply-cache message (%find-applicable-replies
-                                          message relevant-args
-                                          :errorp errorp)))
-        (let ((memo-entry (fetch-dispatch-cache-entry message args relevant-args-length)))
-          (or memo-entry
-              memo-entry
-              (let* ((relevant-args (subseq args 0 relevant-args-length))
-                     (new-msg-list (%find-applicable-replies message
-                                                              relevant-args
-                                                              :errorp errorp)))
-                (memoize-reply-dispatch message relevant-args new-msg-list)))))))
+    (%find-applicable-replies message (subseq args 0 relevant-args-length) errorp)))
 
-(defun desired-cache-entry-p (args cache-entry relevant-args-length)
-  (when cache-entry
-    (let ((vector-args (cache-entry-args cache-entry)))
-      (or (= 0 relevant-args-length)
-          (when (= 1 relevant-args-length)
-            (eq (elt vector-args 0) (car args)))
-          (every 'equal args vector-args)))))
-
-(defun fetch-dispatch-cache-entry (message args relevant-args-length)
-  (let* ((dispatch-cache (message-dispatch-cache message))
-         (orig-index (mod (the fixnum (sxhash (if (sheepp (car args))
-                                                  (car args)
-                                                  (or (find-boxed-object (car args))
-                                                      (box-type-of (car args))))))
-                          (length dispatch-cache))))
-    ;; I don't know how this could be any faster. My best choice is probably to avoid calling it.
-    (let ((attempt (elt dispatch-cache orig-index)))
-      (if (desired-cache-entry-p args attempt relevant-args-length)
-          (cache-entry-replies attempt)
-          (let ((entry (find (fun (desired-cache-entry-p args _ relevant-args-length))
-                             dispatch-cache)))
-            (when entry
-              (cache-entry-replies entry)))))))
-
-(defun memoize-reply-dispatch (message args msg-list)
-  (let ((msg-cache (create-reply-cache message msg-list))
-        (maybe-index (mod (the fixnum (sxhash (if (sheepp (car args))
-                                                  (car args)
-                                                  (or (find-boxed-object (car args))
-                                                      (box-type-of (car args))))))
-                          (length (the vector (message-dispatch-cache message))))))
-    (add-entry-to-message message msg-cache args maybe-index)
-    msg-cache))
-
-(defun %find-applicable-replies  (message args &key (errorp t))
+(defun %find-applicable-replies  (message args &optional (errorp t))
   "Returns the most specific reply using MESSAGE and ARGS."
   (if (null args) (message-replies message) ; this handles no-arg messages. Badly. -- sykopomp
       (let (discovered-replies contained-applicable-replies)

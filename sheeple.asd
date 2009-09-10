@@ -23,7 +23,7 @@
              (:file "messages")
              (:file "reply-definition")
              (:file "reply-dispatch")
-             (:file "bootstrap")
+             ;; (:file "bootstrap")
              ;; (:file "post-boot")
              ;; (:file "glue") ;this file should go away.
              ))))
@@ -48,7 +48,7 @@
              (:file "messages")
              (:file "reply-definition")
              (:file "reply-dispatch")
-             (:file "bootstrap")
+             ;; (:file "bootstrap")
              ;; (:file "post-boot")
              ))))
 

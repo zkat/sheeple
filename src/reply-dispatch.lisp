@@ -86,7 +86,7 @@
           (create-reply-cache message (%find-applicable-replies
                                           message relevant-args
                                           :errorp errorp)))
-        (let ((memo-entry (fetch-dispatch-cache-entry args message relevant-args-length)))
+        (let ((memo-entry (fetch-dispatch-cache-entry message args relevant-args-length)))
           (or memo-entry
               memo-entry
               (let* ((relevant-args (subseq args 0 relevant-args-length))
@@ -106,7 +106,7 @@
             (eq (svref vector-args 0) (car args)))
           (every 'equal args vector-args)))))
 
-(defun fetch-dispatch-cache-entry (args message relevant-args-length)
+(defun fetch-dispatch-cache-entry (message args relevant-args-length)
   (let* ((dispatch-cache (message-dispatch-cache message))
          (orig-index (mod (the fixnum (sxhash (if (sheepp (car args))
                                                   (car args)

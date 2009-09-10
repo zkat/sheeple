@@ -99,7 +99,7 @@
 (defun desired-cache-entry-p (args cache-entry relevant-args-length)
   (declare (fixnum relevant-args-length) (list args))
   (when cache-entry
-    (let ((vector-args (weak-pointer-value (cache-entry-args cache-entry))))
+    (let ((vector-args (cache-entry-args cache-entry)))
       (declare (simple-vector vector-args))
       (or (= 0 relevant-args-length)
           (when (= 1 relevant-args-length)

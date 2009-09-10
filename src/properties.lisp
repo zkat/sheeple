@@ -182,7 +182,8 @@ direct property. Returns SHEEP."
 
 (defun remove-all-direct-properties (sheep)
   "Wipes out all direct properties and their values from SHEEP."
-  (setf (%sheep-direct-properties sheep) nil))
+  (setf (%sheep-direct-properties sheep) nil)
+  sheep)
 
 ;;; Value
 (defun direct-property-value (sheep property-name)

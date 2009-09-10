@@ -103,7 +103,7 @@
       (declare (simple-vector vector-args))
       (or (= 0 relevant-args-length)
           (when (= 1 relevant-args-length)
-            (eq (car args) (car vector-args)))
+            (eq (svref vector-args 0) (car args)))
           (every 'equal args vector-args)))))
 
 (defun fetch-dispatch-cache-entry (args message relevant-args-length)

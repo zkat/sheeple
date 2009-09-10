@@ -153,7 +153,7 @@
                             (when (= (length args)
                                      (length (reply-specialized-portion curr-reply)))
                               (let ((contained-reply (contain-reply curr-reply)))
-                                (pushnew curr-reply discovered-replies
+                                (pushnew contained-reply discovered-replies
                                          :key 'reply-container-reply)
                                 (setf (elt (reply-container-rank contained-reply) index)
                                       hierarchy-position)

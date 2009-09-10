@@ -47,6 +47,11 @@
 (defun rolep (maybe-role)
   (typep maybe-role 'role))
 
+(defun pprint-role (stream role)
+  (print-unreadable-object (role stream :identity t)
+    (format stream "Role: ~A" (role-name role))))
+(set-pprint-dispatch 'role 'pprint-role 1)
+
 (defun role-message (role)
   (reply-message (role-reply role)))
 (defun role-name (role)

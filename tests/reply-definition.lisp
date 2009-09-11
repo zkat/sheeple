@@ -58,6 +58,14 @@
 (in-suite reply-definition)
 
 (test ensure-reply)
+
+(test reply-redefinition
+  (defmessage foo (bar))
+  (defreply foo (bar) 1)
+  (is (= 1 (foo 'x)))
+  (defreply foo (bar) 2)
+  (is (= 2 (foo 'x))))
+
 (test add-reply-to-message)
 (test add-reply-to-sheeple)
 (test available-replies)

@@ -82,7 +82,8 @@
             (has-direct-property-p sheep :nickname)
             (ignore-errors (sheep-nickname sheep)))))
 
-(set-pprint-dispatch 'sheep (lambda (stream sheep) (if (and (null (%sheep-parents sheep))
-                                                            (not (eq =t= sheep)))
-                                                       (std-print-sheep sheep stream)
-                                                       (print-sheep sheep stream))))
+(set-pprint-dispatch 'sheep (lambda (stream sheep) 
+                              (handler-case
+                                  (print-sheep sheep stream)
+                                (no-applicable-replies ()
+                                  (std-print-sheep sheep stream)))))

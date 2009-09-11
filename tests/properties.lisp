@@ -207,7 +207,7 @@
   (let* ((a (defsheep () ((var1 'val))))
          (b (defsheep (a) ((var2 'val))))
          (c (defsheep (b) ((var3 'val)))))
-    (is (= 3 (length (available-properties c))))
+    (is (= 4 (length (available-properties c))))
     (is (every #+sheeple3.1 #'property-metaobject-p
                #-sheeple3.1 #'symbolp (available-properties c)))))
 

@@ -82,7 +82,7 @@
             (has-direct-property-p sheep :nickname)
             (ignore-errors (sheep-nickname sheep)))))
 
-(set-pprint-dispatch 'sheep (lambda (stream sheep) 
+(set-pprint-dispatch 'sheep (lambda (stream sheep)
                               (handler-case
                                   (print-sheep sheep stream)
                                 (no-applicable-replies ()

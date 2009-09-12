@@ -17,6 +17,31 @@
   "X if X is a list, otherwise (list X)."
   (if (listp x) x (list x)))
 
+;;; This code is so optimized that the only useful declarations are (safety 0)
+;;; and (debug 0), the latter only on SBCL; on CLISP any declarations make no
+;;; difference at all, probably because it's all bytecode.
+(defun nunzip-alist (alist)
+  "Destructively unzips ALIST into two flat lists"
+  ;; Once we secure all call sites, (safety 0)? I think so. - Adlai
+  (let ((keys alist) (vals (car alist)))
+    (do* ((key-cons keys (cdr key-cons))
+          (val-cons vals (cdr val-cons)))
+         ((null (car key-cons)) (values keys vals))
+      (setf (car key-cons) (caar key-cons)
+            (car val-cons) (cdr  val-cons)
+            (cdr val-cons) (cadr key-cons)))))
+
+(defun parallel-delete (item list-1 list-2)
+  "Destructively removes ITEM from both lists, keeping them \"in sync\"
+by deleting items at the same position from both lists."
+  ;; This implementation could use some speed, but at least it doesn't cons.
+  (cond ((null list-1) (values nil nil))
+        ((or (eq item (car list-1)) (eq item (car list-2)))
+         (parallel-delete item (cdr list-1) (cdr list-2)))
+        (T (setf (values (cdr list-1) (cdr list-2))
+                 (parallel-delete item (cdr list-1) (cdr list-2)))
+           (values list-1 list-2))))
+
 (defun make-vector (size &key initial-element)
   "Constructs a vector of SIZE elements set to INITIAL-ELEMENT. See `make-list'."
   (make-array size :initial-element initial-element))

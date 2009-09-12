@@ -1,15 +1,14 @@
 # This file has been placed in the public domain.
 
-# The code here is heavily adapted from the Makefile
-# used to build the documentation for SLIME.
+# This code is adapted from the Makefile for the SLIME docs.
 
 THING = sheeple
 
-TEXI = $(THING).texinfo logo.png
+TEXI = $(THING).texinfo
 
-default: pdf htmldir
+default: pdf $(THING)/
 
-all: dvi ps info html htmldir tgz pdf
+all: dvi ps info html $(THING)/ tgz pdf
 
 dvi ps info html tgz pdf: %: $(THING).%
 
@@ -19,24 +18,24 @@ $(THING).dvi: $(TEXI) logo.eps
 $(THING).ps: $(THING).dvi
 	dvips -o $@ $<
 
-$(THING).info: $(TEXI)
+$(THING).info: $(TEXI) logo.png
 	makeinfo $<
 
-$(THING).html: $(TEXI)
+$(THING).html: $(TEXI) logo.svg
 	texi2html $<
 
-htmldir: $(TEXI)
-	makeinfo -o sheeple --html $<
-	cp logo.png sheeple
+$(THING)/: $(TEXI) logo.png
+	makeinfo -o $@ --html $<
+	cp logo.png $@
 
-$(THING).tgz: htmldir
-	tar -czf $@ sheeple
+$(THING).tgz: $(THING)/
+	tar -czf $@ $<
 
-$(THING).pdf: $(TEXI)
+$(THING).pdf: $(TEXI) logo.png
 	texi2pdf --build-dir=.pdf $<
 
-logo.eps: logo.png
-	convert logo.png logo.eps
+logo.png logo.eps: logo.svg
+	convert $< -trim $@
 
 clean:
-	rm -rf .{pdf,dvi} $(THING){,.{info,pdf,dvi,ps,html,tgz}} logo.eps
+	rm -rf .{pdf,dvi} $(THING){,.{info,pdf,dvi,ps,html,tgz}} logo.{eps,png}

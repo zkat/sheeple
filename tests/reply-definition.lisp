@@ -61,10 +61,10 @@
 
 (test reply-redefinition
   (defmessage foo (bar))
-  (defreply foo (bar) 1)
-  (is (= 1 (foo 'x)))
-  (defreply foo (bar) 2)
-  (is (= 2 (foo 'x))))
+  (defreply foo ((bar =t=)) 1)
+  (is (= 1 (funcall 'foo 'x)))
+  (defreply foo ((bar =t=)) 2)
+  (is (= 2 (funcall 'foo 'x))))
 
 (test add-reply-to-message)
 (test add-reply-to-sheeple)

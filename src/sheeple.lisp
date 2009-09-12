@@ -189,16 +189,13 @@ regards to the CONSTRAINTS. A future version will undo this change."
                  (error "Inconsistent precedence graph."))))
 
 (defun collect-ancestors (sheep)
-  "Recursively collects all of SHEEP's ancestors."
-  (labels ((all-parents-loop (seen parents)
-             (let ((to-be-processed (set-difference parents seen :test 'eq)))
-               (if (null to-be-processed)
-                   parents
-                   (let ((sheep-to-process (car to-be-processed)))
-                     (all-parents-loop (cons sheep-to-process seen)
-                                       (union (sheep-parents sheep-to-process)
-                                              parents :test 'eq)))))))
-    (all-parents-loop () (sheep-parents sheep))))
+  "Collects all of SHEEP's ancestors."
+  (do* ((checked nil (cons chosen-sheep checked))
+        (ancestors (sheep-parents sheep)
+                   (union (sheep-parents chosen-sheep) ancestors :test 'eq))
+        (chosen-sheep (car ancestors)
+                      (car (set-difference ancestors checked :test 'eq))))
+       ((not chosen-sheep) ancestors)))
 
 (defun local-precedence-ordering (sheep)
   "Calculates the local precedence ordering."

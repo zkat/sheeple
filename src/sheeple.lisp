@@ -191,10 +191,14 @@ regards to the CONSTRAINTS. A future version will undo this change."
 (defun collect-ancestors (sheep)
   "Collects all of SHEEP's ancestors."
   (do* ((checked nil (cons chosen-sheep checked))
-        (ancestors (sheep-parents sheep)
-                   (union (sheep-parents chosen-sheep) ancestors :test 'eq))
+        (ancestors (copy-list (%sheep-parents sheep))
+                   (dolist (parent (%sheep-parents chosen-sheep) ancestors)
+                     (unless (member parent ancestors)
+                       (push parent ancestors))))
         (chosen-sheep (car ancestors)
-                      (car (set-difference ancestors checked :test 'eq))))
+                      (dolist (ancestor ancestors)
+                        (unless (find ancestor checked :test 'eq)
+                          (return ancestor)))))
        ((not chosen-sheep) ancestors)))
 
 (defun local-precedence-ordering (sheep)

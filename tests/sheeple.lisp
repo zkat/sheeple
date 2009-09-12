@@ -224,14 +224,29 @@
 (defun compute-sheep-hierarchy-list-old (sheep)
   (handler-case
       ;; since collect-ancestors only collects the _ancestors_, we cons the sheep in front.
-      (let ((sheeple-to-order (cons sheep (collect-ancestors sheep))))
-        (topological-sort sheeple-to-order
-                          (remove-duplicates
-                           (mapappend #'local-precedence-ordering
-                                      sheeple-to-order))
-                          #'std-tie-breaker-rule-old))
+      (let ((sheeple-to-order (cons sheep (collect-ancestors-old sheep))))
+        (topological-sort-old sheeple-to-order
+                              (remove-duplicates
+                               (mapappend #'local-precedence-ordering-old
+                                          sheeple-to-order))
+                              #'std-tie-breaker-rule-old))
     (simple-error ()
       (error 'sheeple-hierarchy-error :sheep sheep))))
+
+(defun collect-ancestors-old (sheep)
+  "Recursively collects all of SHEEP's ancestors."
+  (labels ((all-parents-loop (seen parents)
+              (let ((to-be-processed
+                     (set-difference parents seen)))
+                (if (null to-be-processed)
+                    parents
+                    (let ((sheep-to-process
+                           (car to-be-processed)))
+                      (all-parents-loop
+                       (cons sheep-to-process seen)
+                       (union (sheep-parents sheep-to-process)
+                              parents)))))))
+    (all-parents-loop () (sheep-parents sheep))))
 
 (defun std-tie-breaker-rule-old (minimal-elements hl-so-far)
   (dolist (hl-constituent (reverse hl-so-far))

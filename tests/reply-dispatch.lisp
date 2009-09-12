@@ -23,23 +23,35 @@
   (is (equal '(1) (with-flag-stack (flag 1))))
   (is (equal '(1 2 3) (with-flag-stack (flag 1) (flag 2) (flag 3)))))
 
+(defmacro with-dummy-message (message-arglist &body body)
+  (let ((message-name (gensym)))
+    `(unwind-protect
+          (macrolet ((define-dummy-reply (qualifiers specializers &body body)
+                       `(defreply ,',message-name ,@qualifiers
+                          ,(mapcar 'list ',message-arglist specializers)
+                          ,@body)))
+            (flet ((call-dummy-message (,@message-arglist)
+                     (funcall ',message-name ,@message-arglist)))
+             (defmessage ,message-name ,message-arglist)
+              ,@body))
+       (forget-message ',message-name)
+       (fmakunbound ',message-name))))
+
+(defmacro test-dummy-dispatch (target-flags message-args final-call-args
+                               &rest reply-definitions)
+  `(is (equal ',target-flags
+              (with-dummy-message ,message-args
+                (with-flag-stack
+                  ,@(mapcar (curry 'cons 'define-dummy-reply) reply-definitions)
+                  (call-dummy-message ,@final-call-args))))))
+
 (postboot-test primary
-  (defmessage tester (x y))
   (with-sheep-hierarchy ((a) (b a))
-    (is (equal '(:a-)
-               (with-flag-stack
-                 (defreply tester ((x a) (y =t=))
-                   (flag :a-))
-                 (funcall 'tester a nil)
-                 (undefreply tester ((x a) y)))))
-    (is (equal '(:b- :a-)
-               (with-flag-stack
-                 (defreply tester ((x a) (y =t=))
-                   (flag :a-))
-                 (defreply tester ((x b) (y =t=))
-                   (flag :b-)
-                   (call-next-reply))
-                 (funcall 'tester b nil))))))
+    (test-dummy-dispatch (:a) (x y) (a nil)
+      (() (a =t=) (flag :a)))
+    (test-dummy-dispatch (:b :a) (x y) (b nil)
+      (() (a =t=) (flag :a))
+      (() (b =t=) (flag :b) (call-next-reply)))))
 
 (def-suite reply-dispatch :in messages)
 (in-suite reply-dispatch)

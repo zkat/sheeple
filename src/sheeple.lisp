@@ -156,25 +156,13 @@ of its descendants."
 
 ;;; This utility is useful for concisely setting up sheep hierarchies
 (defmacro with-sheep-hierarchy (sheep-and-parents &body body)
-  "This macro sets up a sheep hierarchy. The parent-child are expressend in a
- list passed as the first parameter. Each item in the list is either a variable,
- which will be bound to a fresh sheep, or a list of form (var &rest parents), in
- which case VAR will be bound to a fresh sheep with PARENTS as its parents.
-
-As an example, the following call:
-
-  (with-some-sheep-hierarchy (a (b a) (c a) (d b c))
-    ...)
-
-Would produce this familiar \"diamond\" hierarchy:
-
-   A
-  / \\
- B   C
-  \\ /
-   D"
+  "SHEEP-AND-PARENTS is a list, where each element is either a symbol or a list of
+the form (SHEEP &REST PARENTS), where SHEEP is a symbol and each of PARENTS is a form
+evaluating to produce a sheep object. Each SHEEP symbol is bound to a sheep with the
+corresponding PARENTS, and the nickname is set to the symbol to facilitate debugging."
   `(let* ,(mapcar (fun (destructuring-bind (sheep &rest parents) (ensure-list _)
-                         `(,sheep (spawn ,@parents))))
+                         `(,sheep (make-sheep ,(when parents ``(,,@parents))
+                                              :nickname ',sheep))))
                   sheep-and-parents)
      ,@body))
 

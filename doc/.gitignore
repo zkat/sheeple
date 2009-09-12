@@ -11,4 +11,4 @@ logo.*
 # However, we want the Texinfo source for the manual to be tracked, as
 # well as the original logo, so we un-ignore them here:
 !sheeple.texinfo
-!logo.png
+!logo.svg

@@ -126,7 +126,7 @@
    but it should definitely be implemented and *ready* by the time 3.1 is tagged -- sykopomp
 * TODO 3.0
   This is a rough sketch of The Road to Sheeple 3.0
-** TODO [#A] "Test all the fucking time."
+** TODO "Test all the fucking time."
    This is very important. Watch the entire thing, twice.
    http://rubyhoedown2008.confreaks.com/05-bryan-liles-lightning-talk-tatft-test-all-the-f-in-time.html
    Then watch this:
@@ -138,45 +138,28 @@
 *** TODO Improve tests for printing
     This might require CL-PPCRE.  Also, there should be better tests for the
     initialization of various *print-foobar* settings.
+*** TODO Update tests for FIND-MESSAGE vs %FIND-MESSAGE
+    All that remains to be done is to write a separate test for FIND-MESSAGE
 *** DONE Improve test for WITH-SHEEP-HIERARCHY
 *** DONE Convert tests to use WITH-SHEEP-HIERARCHY
-    We might as well use this macro, since it's so compact.
-*** TODO Update tests for FIND-MESSAGE vs %FIND-MESSAGE
-** DONE [#B] Fix Sheep Allocation
-   We need std-allocate-sheep, along with a MOP hook so that, for
-   example, you could allocate storage in a database in an :after reply.
 ** TODO Checking hierarchies
    #'ADD-PARENT shouldn't rely on the hierarchy list computation to
    check the validity of new hierarchy lists. In fact, the hierarchy
    checking as a whole needs to be revamped a bit.
-** DONE Instantiation
-   It could use some work. The defproto/defsheep/spawn triumverate needs a cleanup. Particularly,
-   it would be nice to merge spawn/defsheep into a simpler function/macro. Maybe it should just be
-   defsheep, in the end.
-   UPDATE: I think the interface is fine for now, thinking about it. --sykopomp
-** DONE Properties
-*** DONE Reimplement properties
-    Write a basic reimplementation of sheep properties.
-*** DONE TATFT
-*** DONE Improve the whole add-property interface.
-    This is partly done right now... add-property itself has been greatly simplified.
-    I think what needs to be done now is that a macro should be written to take care
-    of all the fancy features that add-property used to handle. Perhaps write a
-    defproperty macro?
-    UPDATE: I think the new interface for adding properties is pretty acceptable --sykopomp
-** DONE Messages, Replies
-   Update code so that these work again.
-   Update: Works!
 ** TODO "Sanely Bootstrappable"
    Let's not go insane between now and when (test bootstrapped?) passes.
-*** DONE Write proper print functions
-    It makes sense to me (Adlai) to do all printing through the pretty-printer
-    right now -- that way, we have a quick hook to examine raw sheep without
-    messing around with #'print-object.
 *** TODO #'std-remove-parent should make sure that the hierarchy list is still valid.
-*** DONE Once bootstrapped, update WITH-SHEEP-HIERARCHY to use SPAWN
 *** TODO Write VALIDATE-HIERARCHY-LIST
+*** DONE Once bootstrapped, update WITH-SHEEP-HIERARCHY to use SPAWN
+*** DONE Write proper print functions
 ** TODO Document everything in doc/sheeple.texinfo
+** DONE Fix Sheep Allocation
+** DONE Instantiation
+** DONE Properties
+*** DONE Reimplement properties
+*** DONE TATFT
+*** DONE Improve the whole add-property interface.
+** DONE Messages, Replies
 * DONE 2.2
 ** DONE [#A] Fix #'(setf property-value) Bug
    When a call to #'(setf property-value) requires a new direct property object

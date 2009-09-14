@@ -140,10 +140,11 @@
    #'ADD-PARENT shouldn't rely on the hierarchy list computation to
    check the validity of new hierarchy lists. In fact, the hierarchy
    checking as a whole needs to be revamped a bit.
-** TODO Instantiation
+** DONE Instantiation
    It could use some work. The defproto/defsheep/spawn triumverate needs a cleanup. Particularly,
    it would be nice to merge spawn/defsheep into a simpler function/macro. Maybe it should just be
    defsheep, in the end.
+   UPDATE: I think the interface is fine for now, thinking about it. --zkat
 ** TODO Properties
 *** DONE Reimplement properties
     Write a basic reimplementation of sheep properties.
@@ -153,8 +154,9 @@
     I think what needs to be done now is that a macro should be written to take care
     of all the fancy features that add-property used to handle. Perhaps write a
     defproperty macro?
-** TODO Messages, Replies
+** DONE Messages, Replies
    Update code so that these work again.
+   Update: Works!
 ** TODO "Sanely Bootstrappable"
    Let's not go insane between now and when (test bootstrapped?) passes.
 *** TODO Write proper print functions

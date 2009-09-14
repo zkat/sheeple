@@ -138,13 +138,10 @@
 *** TODO Improve tests for printing
     This might require CL-PPCRE.  Also, there should be better tests for the
     initialization of various *print-foobar* settings.
-*** TODO Improve test for WITH-SHEEP-HIERARCHY
-    It's too brittle right now -- the entire thing fails if something is wrong
-    in the implementation. Make the tests more modular.
-*** TODO Convert tests to use WITH-SHEEP-HIERARCHY
+*** DONE Improve test for WITH-SHEEP-HIERARCHY
+*** DONE Convert tests to use WITH-SHEEP-HIERARCHY
     We might as well use this macro, since it's so compact.
 *** TODO Update tests for FIND-MESSAGE vs %FIND-MESSAGE
-*** TODO Do #'std-c-s-h-l and #'c-s-h-l need separate tests?
 ** DONE [#B] Fix Sheep Allocation
    We need std-allocate-sheep, along with a MOP hook so that, for
    example, you could allocate storage in a database in an :after reply.
@@ -172,21 +169,12 @@
    Update: Works!
 ** TODO "Sanely Bootstrappable"
    Let's not go insane between now and when (test bootstrapped?) passes.
-*** TODO Write proper print functions
+*** DONE Write proper print functions
     It makes sense to me (Adlai) to do all printing through the pretty-printer
     right now -- that way, we have a quick hook to examine raw sheep without
-    messing around with #'print-object.  This is basically how it should look:
-**** TODO #'print-young-sheep with lowest priority
-     Specialized on type 'sheep, this function should print sheep that have
-     absolutely no info about them. It should use sheep-nickname of the sheep's
-     metasheep.
-**** TODO #'print-orphaned-sheep with second-lowest priority
-     For sheep that have no parents, but are otherwise functional. Ditto wrt the
-     metasheep nickname.
-**** TODO #'print-sheep with highest priority
-     A method, user-extensible and awesome.
+    messing around with #'print-object.
 *** TODO #'std-remove-parent should make sure that the hierarchy list is still valid.
-*** TODO Once bootstrapped, update WITH-SHEEP-HIERARCHY to use SPAWN
+*** DONE Once bootstrapped, update WITH-SHEEP-HIERARCHY to use SPAWN
 *** TODO Write VALIDATE-HIERARCHY-LIST
 ** TODO Document everything in doc/sheeple.texinfo
 * DONE 2.2

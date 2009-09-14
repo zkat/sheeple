@@ -145,15 +145,16 @@
    it would be nice to merge spawn/defsheep into a simpler function/macro. Maybe it should just be
    defsheep, in the end.
    UPDATE: I think the interface is fine for now, thinking about it. --sykopomp
-** TODO Properties
+** DONE Properties
 *** DONE Reimplement properties
     Write a basic reimplementation of sheep properties.
 *** DONE TATFT
-*** TODO Improve the whole add-property interface.
+*** DONE Improve the whole add-property interface.
     This is partly done right now... add-property itself has been greatly simplified.
     I think what needs to be done now is that a macro should be written to take care
     of all the fancy features that add-property used to handle. Perhaps write a
     defproperty macro?
+    UPDATE: I think the new interface for adding properties is pretty acceptable --sykopomp
 ** DONE Messages, Replies
    Update code so that these work again.
    Update: Works!

@@ -507,7 +507,7 @@
   (let ((sheep (make-sheep nil)))
     (is (sheepp sheep))
     (is (std-sheep-p sheep))
-    (is (eql =standard-sheep= (car (sheep-parents (make-sheep nil)))))
+    (is (eql =standard-sheep= (car (sheep-parents))))
     (is (eql sheep (car (sheep-parents (make-sheep (list sheep))))))
     (is (eql =standard-metasheep= (sheep-metasheep sheep))))
   ;; properties arg

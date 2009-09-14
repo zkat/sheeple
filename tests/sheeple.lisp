@@ -522,7 +522,7 @@
   (let ((sheep (make-sheep nil)))
     (is (sheepp sheep))
     (is (std-sheep-p sheep))
-    (is (eql =standard-sheep= (car (sheep-parents))))
+    (is (eql =standard-sheep= (car (sheep-parents sheep))))
     (is (eql sheep (car (sheep-parents (make-sheep (list sheep))))))
     (is (eql =standard-metasheep= (sheep-metasheep sheep))))
   ;; properties arg
@@ -532,7 +532,7 @@
     (is (eql 'bar (direct-property-value sheep 'foo)))
     (is (eql 'quux (direct-property-value sheep 'baz))))
   ;; other metasheep
-  (let* ((test-metasheep (make-sheep =standard-metasheep=))
+  (let* ((test-metasheep (make-sheep =standard-metasheep= :nickname 'test-metasheep))
          (sheep (make-sheep nil :metasheep test-metasheep)))
     ;; metasheep tests
     (is (sheepp test-metasheep))

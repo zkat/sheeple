@@ -1,18 +1,3 @@
-*NOTE* specific to this repository: I (Adlai) advise that you __not__ base work
- on any branch other than master or devel. I amend, delete, and rebase the other
- branches on a regular basis. If you do pull these branches, please let me know,
- and I will merge the relevant commits into devel, and then ask you to not do
- that again, thank you very much.
-
-* * *
-
-*NOTE*: Sheeple is currently undergoing heavy development, and the version
-marked as current in this repository is actually not usable!
-
-Check out the last stable version of Sheeple here: [Sheeple v2.2][0]
-
-* * *
-
 About Sheeple
 =============
 

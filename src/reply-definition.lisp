@@ -141,7 +141,7 @@
                         (find-applicable-replies ;defined in reply-dispatch.lisp
                          message participants nil))))
     (when (and reply
-               (every (rcurry 'participantp (reply-name reply)) participants))
+               (every (rcurry 'participantp reply) participants))
       (loop
          for sheep in participants
          for i from 0

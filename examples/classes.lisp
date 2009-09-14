@@ -7,27 +7,27 @@
 ;; over CLOS, but simply its ability to perform tasks in a similar way to CLOS.
 (in-package :sheeple-user)
 
-(defproto person ()
+(defproto =person= ()
   ((name  "NoName")
    (phone "NoPhone#")))
 
 (defvar *charles*
-  (defclone (#@person)
+  (defsheep (=person=)
       ((name "Charles"))))
 
-(defvar *jenny* (clone #@person))
+(defvar *jenny* (spawn =person=))
 
 (setf (name *jenny*) "Jenny")
 (setf (phone *jenny*) "543-867-5309")
 
 (defmessage greet (person)
   (:documentation "Greets a person"))
-(defreply greet ((person #@person))
+(defreply greet ((person =person=))
   (format t "Hello, ~a" (name person)))
 (defreply greet ((person *jenny*))
   (format t "Hullo, ~a!!!" (name person)))
 
-;; SHEEPLE-USER> (name #@person)
+;; SHEEPLE-USER> (name =person=)
 ;; "NoName"
 ;; SHEEPLE-USER> (name *charles*)
 ;; "Charles"
@@ -40,8 +40,8 @@
 ;; SHEEPLE-USER> (phone *charles*)
 ;; "NoPhone"
 ;; SHEEPLE-USER> (phone *jenny*)
-;; "543-543-5533"
+;; "543-867-5309"
 ;; SHEEPLE-USER> (setf (phone *charles*) "555-555-5555")
 ;; "555-555-5555"
-;; SHEEPLE-USER> (phone #@person)
+;; SHEEPLE-USER> (phone =person=)
 ;; "NoPhone#"

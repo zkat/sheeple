@@ -11,7 +11,7 @@
 ;;   INIT-SHEEP message.
 ;; * Message definition is on actual objects, not on classes.
 ;; * The hierarchy list for sheep works identically to CLOS's class precedence list (same sorting)
-(in-package :sheeple)
+(in-package :sheeple-user)
 
 (defvar *max-acc-num* 0)
 (defparameter *minimum-balance* 500)

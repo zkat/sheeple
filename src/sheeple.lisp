@@ -175,18 +175,18 @@ corresponding PARENTS, and the nickname is set to the symbol to facilitate debug
 on the TIE-BREAKER in the case of ambiguous constraints. On the assumption
 that they are freshly generated, this implementation is destructive with
 regards to the CONSTRAINTS. A future version will undo this change."
-  (loop
-     for minimal-elements = (remove-if (fun (member _ constraints :key 'cadr :test 'eq))
-                                       elements) :while minimal-elements
-     for choice = (if (null (cdr minimal-elements))
-                      (car minimal-elements)
-                      (funcall tie-breaker minimal-elements result))
-     do (deletef constraints choice :test 'member)
-     (setf elements (remove choice elements :test 'eq))
-     (push choice result) :with result
-     finally (if (null elements)
-                 (return-from topological-sort (nreverse result))
-                 (error "Inconsistent precedence graph."))))
+  (multiple-value-bind (befores afters) (nunzip-alist constraints)
+    (loop for minimal-elements = (remove-if (fun (memq _ afters)) elements)
+       while minimal-elements
+       for choice = (if (null (cdr minimal-elements))
+                        (car minimal-elements)
+                        (funcall tie-breaker minimal-elements result))
+       with result do (push choice result)
+         (setf elements (delete choice elements :test 'eq)
+               (values befores afters) (parallel-delete choice befores afters))
+       finally (if (null elements)
+                   (return-from topological-sort (nreverse result))
+                   (error "Inconsistent precedence graph.")))))
 
 (defun collect-ancestors (sheep)
   "Collects all of SHEEP's ancestors."
@@ -205,7 +205,7 @@ regards to the CONSTRAINTS. A future version will undo this change."
   "Calculates the local precedence ordering."
   (let ((parents (sheep-parents sheep)))
     ;; Since MAPCAR returns once any list is NIL, we only traverse the parent list once.
-    (mapcar 'list (cons sheep parents) parents)))
+    (mapcar 'cons (cons sheep parents) parents)))
 
 (defun std-tie-breaker-rule (minimal-elements chosen-elements)
   (dolist (candidate chosen-elements)

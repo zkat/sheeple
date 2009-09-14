@@ -332,9 +332,18 @@ to the front of the list)"
 ;;; Spawning
 ;;;
 (defun make-sheep (parent* &rest all-keys
-                     &key (metasheep =standard-metasheep=) &allow-other-keys)
+                   &key (metasheep =standard-metasheep=) &allow-other-keys)
   "Creates a new sheep with SHEEPLE as its parents. METASHEEP is used as the metasheep when
 allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
+  ;; Here's what's causing the current failure with MAKE-SHEEP:
+  ;; FINALIZE-SHEEP-INHERITANCE isn't dispatching correctly because the new sheep
+  ;; object created by maybe-std-allocate-sheep has no parents. Thus, the reply for
+  ;; F-S-I specialized on (=standard-metasheep= =T=) doesn't run. The metasheep itself is
+  ;; fine, but =T= isn't in the new object's hierarchy-list yet (and it won't be until
+  ;; ADD-PARENT, and then F-S-I both work. This is a serious issue with the MOP that we
+  ;; might possibly need an ugly hack to fix. For now, it's good to know that this is
+  ;; the reason that failure is happening, so we can rest assured that standard sheeple
+  ;; behavior is working fine and dandy. -- sykopomp
   (apply 'init-sheep
          (add-parent* (or parent* =standard-sheep=)
                       (finalize-sheep-inheritance (maybe-std-allocate-sheep metasheep)))

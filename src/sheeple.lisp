@@ -81,7 +81,8 @@ of its descendants."
 ;;; STD-SHEEP accessor definitions
 (defmacro define-internal-accessors (&body names-and-indexes)
   `(progn ,@(loop for (name index) on names-and-indexes by #'cddr
-               collect `(progn (defun ,name (sheep) (svref sheep ,index))
+               collect `(progn (declaim (inline ,name (setf ,name)))
+                               (defun ,name (sheep) (svref sheep ,index))
                                (defun (setf ,name) (new-value sheep)
                                  (setf (svref sheep ,index) new-value))))))
 
@@ -99,7 +100,6 @@ of its descendants."
   (%sheep-metasheep sheep))
 
 (defun sheep-parents (sheep)
-  (declare (inline %sheep-parents))
   (%sheep-parents sheep))
 
 ;;; children cache

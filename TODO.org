@@ -107,11 +107,23 @@
     I should've done this in the first place. A simpler version of the same
     system used to dispatch replies would do wonders for read performance,
     without seriously harming writer performance.
-* TODO 3.1
+* TODO 3.2
 ** TODO Metasheep Protocol
 *** TODO Property MOP
 *** TODO Extend sheep-creation MOP
 *** TODO Begin work on message/reply MOP (maybe)
+* TODO 3.1
+** TODO [#A] Implement 'maps'
+   Maps, in Self-speak, are sort of backend-classes used to represent the basic format
+   of a bunch of similar objects. Implementing these would mean a huge boost in performance
+   and a large reduction in memory usage, since all the "sheep-children" stuff could be held
+   by the backend-class implementation. Furthermore, it would remove the dependency on
+   trivial-garbage, and allow sheeple to run on lisps without user-accessible weak pointers.
+   Everything will just be awesome. Also, I'll get ponies. -- zkat
+** TODO [#B] Cache message dispatch
+   That's right, it's back, and it's comin' to an optimized sheeple near you. This should
+   definitely be done -after- maps are implemented, since it'll be a little nicer that way,
+   but it should definitely be implemented and *ready* by the time 3.1 is tagged -- zkat
 * TODO 3.0
   This is a rough sketch of The Road to Sheeple 3.0
 ** TODO [#A] "Test all the fucking time."

@@ -312,13 +312,11 @@ to the front of the list)"
 ;;; Inheritance predicates
 (defun parentp (maybe-parent child)
   "A parent is a sheep directly in CHILD's parent list."
-  (when (member maybe-parent (sheep-parents child))
-    t))
+  (member maybe-parent (sheep-parents child)))
 
 (defun ancestorp (maybe-ancestor descendant)
   "A parent is a sheep somewhere in CHILD's hierarchy list."
-  (when (member maybe-ancestor (cdr (sheep-hierarchy-list descendant)))
-    t))
+  (member maybe-ancestor (cdr (sheep-hierarchy-list descendant))))
 
 (defun childp (maybe-child parent)
   "A child is a sheep that has PARENT in its parent list."

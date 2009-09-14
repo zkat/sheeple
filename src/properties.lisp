@@ -163,10 +163,11 @@ would yield a value (i.e. not signal an unbound-property condition)."
     (when reader (add-reader-to-sheep reader property-name sheep))
     (when writer (add-writer-to-sheep writer property-name sheep))
     (when accessor
-      (unless (and readerp (null reader))
-        (add-reader-to-sheep accessor property-name sheep))
-      (unless (and writerp (null writer))
-        (add-writer-to-sheep `(setf ,accessor) property-name sheep)))))
+      (let ((accessor-name (if (eq t accessor) property-name accessor)))
+        (unless (and readerp (null reader))
+          (add-reader-to-sheep accessor-name property-name sheep))
+        (unless (and writerp (null writer))
+          (add-writer-to-sheep `(setf ,accessor-name) property-name sheep))))))
 
 ;; TODO - remove-property should look at the property metaobject and remove any replies for
 ;;        accessors that it points to. This will have to wait until reply-undefinition works

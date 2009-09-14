@@ -272,7 +272,7 @@
 
 (test local-precedence-ordering
   (with-sheep-hierarchy (a b c (d a b c))
-    (is (equal (list (list d a) (list a b) (list b c))
+    (is (equal (acons d a (acons a b (acons b c nil)))
                (local-precedence-ordering d)))))
 
 ;;; I'm gonna stop pretending as though I have a clue

@@ -72,28 +72,34 @@
    dividing up behavior are the same CLOS uses (you can read the rules here:
    http://www.lispworks.com/documentation/HyperSpec/Body/04_ce.htm).  The list of parents/delegates
    is dynamic. Parents can be added or removed at run time.  New sheeple are created by using the
-   the CLONE function, and the DEFCLONE and DEFPROTO macros.
+   the SPAWN function, and the DEFSHEEP and DEFPROTO macros.
 
-*** CLONE function
+   Note to users familiar with other Prototype-OO systems:
+   Sheeple differs from systems such as Slate and Self in that the default, preferred method of
+   creating objects is not creating shallow copies (clones), but instead to create a "fresh"
+   object, and delegate everything to a certain set of `parents'.
+
+*** SPAWN function
     Syntax:
-    clone &rest sheeple => new sheep
+    spawn &rest sheeple => new sheep
 
     Args and values:
     sheeple -- a list of lisp objects
     new sheep -- a new sheep object with sheeple is its parents
 
     Description:
-    CLONE creates a new STANDARD-SHEEP instance with SHEEPLE as its parents.
+    SPAWN creates a new STANDARD-SHEEP instance with SHEEPLE as its parents.
     Any non-sheep objects in SHEEPLE will be autoboxed and -those- objects will be added
     as parents.
     The new sheep's parents list will be ordered the same as they are given.
-    An empty parent list when using CLONE will automatically clone DOLLY
+    An empty parent list when using SPAWN will automatically set =STANDARD-SHEEP=
+    as the new object's sole parent.
 
     Examples:
 
-      (clone) => #<Sheep #x15007E06>
-      (sheep-parents (clone)) => (#<Sheep AKA: DOLLY #x14C8947E>)
-      (clone (clone)) => #<Sheep #x15007E06>
+      (spawn) => #<Sheep #x15007E06>
+      (sheep-parents (spawn)) => (#<Sheep =STANDARD-SHEEP= #x14C8947E>)
+      (spawn (spawn)) => #<Sheep [=STANDARD-SHEEP=] #x15007E06>
 
     Side effects: Parents are added using ADD-PARENT, which may have side-effects.
 

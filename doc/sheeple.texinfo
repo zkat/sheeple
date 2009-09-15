@@ -8,8 +8,12 @@
 @set EDITION 0.1
 @set VERSION v3.0
 @set UPDATED-MONTH September 2009
-@set UPDATED 6 @value{UPDATED-MONTH}
+@set UPDATED 15 @value{UPDATED-MONTH}
 @clear mop
+
+@macro CLOS
+@acronym{CLOS}
+@end macro
 
 @copying
 This is Edition @value{EDITION},
@@ -109,7 +113,7 @@ This manual is for Sheeple @value{VERSION}
 
 @node About Sheeple, Installing Sheeple, Overview, Overview
 @section About Sheeple
-@cindex Sheeple, general overview of
+@cindex general overview
 
 @menu
 * Vision::                      The Grand Plan for Sheeple
@@ -119,7 +123,7 @@ This manual is for Sheeple @value{VERSION}
 @node Vision, History, About Sheeple, About Sheeple
 @subsection Vision
 @cindex Vision
-Sheeple is a Dynamic, CLOS-like, Delegative Prototype-based Object-Oriented
+Sheeple is a Dynamic, @CLOS{}-like, Delegative Prototype-based Object-Oriented
 Programming Framework (or "POOP Framework") that strives to optimize application
 flexibility, minimize cost while increasing value, maximize programmer
 resources, and empower application implementers to better assist them in
@@ -129,7 +133,7 @@ Lisp. Sheeple is fully buzzword compliant.
 
 @node History,  , Vision, About Sheeple
 @subsection History
-@cindex history, of Sheeple
+@cindex history of Sheeple
 Sheeple was originally written as a persistent library for use with
 Sykosomatic. Because of a desire to use it in other applications, it was
 rewritten as a regular prototype object system and provided as a standalone
@@ -138,31 +142,33 @@ library meant for general-purpose OO hackery.
 Persistent Sheeple has not been abandoned, instead, it's being implemented as a
 separate library using Sheeple's reflection features.
 
+@cindex influences on Sheeple
 Sheeple is inspired by a number of Object-Oriented systems, mainly:
 @enumerate
 @item
-CLOS, the Common Lisp Object System.
-@cindex CLOS
+@acronym{CLOS, Common Lisp Object System}
+@cindex CLOS, influence of
 
 @item
 Slate, a Smalltalk-like language with Prototype Multiple Dispatch on which
 Sheeple bases its message dispatch system.
-@cindex Slate
-@cindex Smalltalk
-@cindex PMD
+@cindex Slate, influence of
+@cindex Smalltalk, influence of
 
 @item
 Self, another Smalltalk-like language with lots of papers written about it, and
 the concept of prototype OO.
+@cindex Self, influence of
 
 @item
 Io, a pure prototype-based language. Sheeple, like Io, implements differential
 inheritance.
+@cindex Io, influence of
 @end enumerate
 
-It was written with the purpose of providing a lot of the goodies of CLOS
+It was written with the purpose of providing a lot of the goodies of @CLOS{}
 programming in a completely prototype-based environment. As such, it shares a
-lot of features and syntax with CLOS. The most notable of these are multiple
+lot of features and syntax with @CLOS{}. The most notable of these are multiple
 inheritance and multiple dispatch of methods.
 
 @page
@@ -203,8 +209,8 @@ this writing, the latest tagged release is available as a tarball from
 
 @node Tracking the Git Repo, Informing ASDF, Tagged Release, Installation Procedure
 @unnumberedsubsubsec Tracking the Git Repo
-@cindex git, repository, tracking
-@cindex bleeding edge, tracking the
+@cindex git repository
+@cindex bleeding edge of development
 Since all new features are developed and tested carefully before
 inclusion in tagged releases, the best way to track the ``bleeding
 edge'' of Sheeple development is through @command{git}. @command{git}
@@ -214,33 +220,36 @@ scope of this section; those interested should refer to the
 @uref{http://www.kernel.org/pub/software/scm/git/docs/user-manual.html,
 Git Manual}.
 
-You can browse Sheeple's main git repository with a browser through
-@uref{http://github.com/sykopomp/sheeple}. This command will create a copy of
-the Sheeple repository on your local machine:
+For reference purposes, you can browse Sheeple's git repository online through
+@uref{http://github.com/sykopomp/sheeple}. If you wish to contribute to the
+project, this command will create a copy of the Sheeple repository on your local
+machine:
 
 @example
 git clone git://github.com/sykopomp/sheeple.git
 @end example
 
+@strong{Caution:} Even if you do not wish to contribute to Sheeple, the above
+command will still create a copy of the git repository on your local machine.
+
 @node Informing ASDF,  , Tracking the Git Repo, Installation Procedure
 @subsubsection Informing ASDF
 @cindex ASDF
 @cindex Windows
-Sheeple is organized using @acronym{@dfn{ASDF}, Another System
-Definition Facility}, the standard (at the time of this writing)
-system-definition facility for Common Lisp programs. For more
-information about @acronym{ASDF}, you should refer to the
-@uref{http://common-lisp.net/project/asdf/manual.html, @acronym{ASDF}
-Manual}; the rest of this section assumes that you are familiar with
-the basic concepts of @acronym{ASDF}, and have configured your
-implementation to use it.
+Sheeple is organized using @acronym{@dfn{ASDF}, Another System Definition
+Facility}, the standard (at the time of this writing) system-definition facility
+for Common Lisp programs. For more information about @acronym{ASDF}, you should
+refer to the @acronym{ASDF}
+@uref{http://common-lisp.net/project/asdf/manual.html, Manual}; the rest of this
+section assumes that you are familiar with the basic concepts of @acronym{ASDF},
+and have configured your implementation to use it.
 
 @strong{Please Notice} that if your implementation does not include
-ASDF, you will have to acquire it and load it separately. Up-to-date
+@acronym{ASDF}, you will have to acquire it and load it separately. Up-to-date
 information on installing @acronym{ASDF} should be available via the
-@acronym{ASDF} @uref{http://www.cliki.net/asdf, CLiki page}; The
-official @acronym{ASDF} @uref{http://common-lisp.net/project/asdf,
-Project webpage} should also have the relevant information.
+@acronym{ASDF} @uref{http://www.cliki.net/asdf, CLiki page}; The official
+@acronym{ASDF} @uref{http://common-lisp.net/project/asdf, Project webpage}
+should also have the relevant information.
 
 To complete a Sheeple installation, you must inform @acronym{ASDF} where it can
 find the file @file{sheeple.asd}. Substituting @var{registry} and @var{sheeple}
@@ -265,33 +274,30 @@ work on Windows.
 Confirmed to work (pass all tests):
 
 @enumerate
+@cindex Steel Bank Common Lisp
 @item
 SBCL
-@cindex SBCL
 
+@cindex Clozure Common Lisp
+@cindex OpenMCL
 @item
 Clozure CL
-@cindex Clozure CL
-@cindex OpenMCL
 
+@cindex GNU CLISP
 @item
 GNU CLISP
-@cindex CLISP
-@cindex GNU CLISP
 
+@cindex Scieneer Common Lisp
 @item
 Scieneer CL
-@cindex Scieneer CL
-@cindex SCL
 @end enumerate
 
 Sheeple doesn't use any OS-specific code (or threads), so it should be stable on
 all operating systems. OSX and Linux x86 have both been actually tested on the
 aforementioned platforms. In theory, it should work on any implementation that
-supports weap pointers and weak hash tables with key weakness through
-trivial-garbage. If you run the test suite on a platform not listed above, and
-all tests pass, please e-mail me and I'll add it to the list of supported
-platforms.
+supports hash tables with key weakness through the trivial-garbage portability
+layer. If you run the test suite on a platform not listed above, and all tests
+pass, please e-mail me and I'll add it to the list of supported platforms.
 
 @node Loading Sheeple,  , Supported Platforms, Installing Sheeple
 @subsection Loading Sheeple
@@ -321,10 +327,10 @@ tagged release.
 @node Concepts, Concept Index, Overview, Top
 @chapter Concepts
 
-Sheeple bears many resemblances to CLOS, yet also introduces new
+Sheeple bears many resemblances to @CLOS{}, yet also introduces new
 concepts. This section goes introduces the concepts critical to a full
 understanding of Sheeple. It should be read regardless of whether you
-have prior experience with CLOS.
+have prior experience with @CLOS{}@.
 
 @menu
 * Sheep Objects::               The Basic Data Structure of Sheeple
@@ -335,15 +341,12 @@ have prior experience with CLOS.
 
 @cindex sheep
 @cindex sheeple
-@cindex Sheeple
 A @dfn{sheep} is a single object within the object system. For the
 plural, sometimes the same word is used, and sometimes the word
 @dfn{sheeple} is employed instead. Note however that @dfn{sheeple}
 doubles both as the plural of sheep and, when used as the proper noun
 (i.e. ``Sheeple''), as the name of the project.
 
-@cindex sheeple, built-in
-@cindex built-in sheep objects
 Sheep objects have their behavior defined by three things, namely,
 their parents, properties, and any replies specialized upon
 them.

@@ -139,6 +139,7 @@
                               Providing T as the argument to :accessor automatically
                               creates an accessor for that property using the given
                               property name.
+
     nickname -- Set as the nickname for the new sheep during initialization
     documentation -- set as the docstring for the new sheep during initialization
 
@@ -169,10 +170,9 @@
     property-value ::= object
     property-option ::= {:reader {reader-message-name | nil}}* |
                         {:writer {writer-message-name | nil}}* |
-                        {:accessor {reader-message-name | nil}}*
-    message-name ::= {symbol | (setf symbol)}
-    property-option ::= (:metaclass {symbol | class}) |
-                        (:nickname lisp-object) |
+                        {:accessor {reader-message-name | t | nil}}*
+    message-name ::= {symbol | (quote (setf symbol))}
+    property-option ::= (:nickname lisp-object) |
                         (:documentation docstring)
 
     Args and values:
@@ -184,9 +184,11 @@
                               if there is another matching definition.
                               :accessor creates both a reader and a writer with
                               format (accessor-name sheep-object)
-                              (setf (accessor-name sheep-object) new-value)
-    metaclass -- Either a symbol or a class object, this class is used as the new sheep's
-                 metaobject class.
+                              (setf (accessor-name sheep-object) new-value).
+                              Providing T as the argument to :accessor automatically
+                              creates an accessor for that property using the given
+                              property name.
+
     nickname -- Set as the nickname for the new sheep during initialization
     documentation -- set as the docstring for the new sheep during initialization
 
@@ -208,7 +210,7 @@
 
     Examples:
 
-    (defproto =test-proto= () ()) => #<Sheep AKA: =TEST-PROTO= #x150712B6>
+    (defproto =test-proto= () ()) => #<Sheep =TEST-PROTO= #x150712B6>
 
     Notes:
     While there is nothing to programmatically enforce it, prototypes declared with DEFPROTO

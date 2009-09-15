@@ -276,9 +276,9 @@
        (childp parent child)) => NIL
        (chldp descendant parent) => NIL
 
-**** DESCENDANT-P
+**** DESCENDANTP
      Syntax:
-     descendant-p maybe-descendant ancestor => generalized-boolean
+     descendantp maybe-descendant ancestor => generalized-boolean
 
      Arguments and values:
      maybe-descendant -- a sheep that may or may not be a descendant
@@ -292,9 +292,9 @@
      (let* ((ancestor (clone))
             (descendant1 (clone ancestor))
             (descendant2 (clone descendant1)))
-       (descendant-p descendant1 ancestor)  => T
-       (descendant-p ancestor descendant1)  => NIL
-       (descendant-p descendant2 ancestor)) => T
+       (descendantp descendant1 ancestor)  => generalized truth
+       (descendantp ancestor descendant1)  => NIL
+       (descendantp descendant2 ancestor)) => generalized truth
 
 *** ADD-PARENT
     Syntax:

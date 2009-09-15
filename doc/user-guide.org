@@ -236,9 +236,9 @@
        (parentp parent child)  => Generalized truth value
        (parentp child parent)) => NIL
 
-**** ANCESTOR-P
+**** ANCESTORP
      Syntax:
-     ancestor-p maybe-ancestor descendant => generalized-boolean
+     ancestorp maybe-ancestor descendant => generalized-boolean
 
      Arguments and values:
      maybe-ancestor -- a sheep that may or may not be a ancestor
@@ -249,12 +249,12 @@
 
      Examples:
 
-     (let* ((ancestor (clone))
-            (descendant1 (clone ancestor))
-            (descendant2 (clone descendant1)))
-       (ancestor-p ancestor descendant1)  => T
-       (ancestor-p descendant1 ancestor)  => NIL
-       (ancestor-p ancestor descendant2)) => T
+     (let* ((ancestor (spawn))
+            (descendant1 (spawn ancestor))
+            (descendant2 (spawn descendant1)))
+       (ancestorp ancestor descendant1)  => generalized truth value
+       (ancestorp descendant1 ancestor)  => NIL
+       (ancestorp ancestor descendant2)) => generalized truth value
 
 **** CHILD-P
      Syntax:

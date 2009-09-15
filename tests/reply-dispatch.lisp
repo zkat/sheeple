@@ -45,7 +45,7 @@
                   ,@(mapcar (curry 'cons 'define-dummy-reply) reply-definitions)
                   (call-dummy-message ,@final-call-args))))))
 
-(postboot-test primary
+(test primary
   (with-sheep-hierarchy ((a) (b a))
     (test-dummy-dispatch (:a) (x y) (a nil)
       (() (a =t=) (flag :a)))

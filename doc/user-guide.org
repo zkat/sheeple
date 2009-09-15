@@ -17,7 +17,7 @@
 ** =T=
    the root object, ancestor of all sheep objects.
 
-** =DOLLY=
+** =STANDARD-SHEEP=
    Ancestor of all actual sheep (the ones that aren't built-ins).
 
 ** Hierarchy List
@@ -606,7 +606,7 @@
 
      (setf parent (clone)
            child1 (clone parent)
-           child2 (clone parent =dolly=))
+           child2 (clone parent =standard-sheep=))
 
      parent => #<Sheep #x30004135F9BD>
 

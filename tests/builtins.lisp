@@ -17,7 +17,7 @@
 (def-suite autoboxing :in builtins)
 (in-suite autoboxing)
 
-(postboot-test box-type-of
+(test box-type-of
   "Tests that the box-type-of function returns the right fleeced-wolf for each lisp type"
   ;; TODO - This could be a *lot* more thorough
   (is (eq =null= (box-type-of nil)))
@@ -39,30 +39,30 @@
   (is (eq =array= (box-type-of (make-array '(1 2)))))
   (is (eq =function= (box-type-of (lambda () nil)))))
 
-(postboot-test box-object
+(test box-object
   (signals error (box-object (spawn)))
   (is (sheepp (box-object 'foo)))
   (is (find-boxed-object 'foo))
   (is (eq 'foo (wrapped-object (find-boxed-object 'foo)))))
 
-(postboot-test find-boxed-object
+(test find-boxed-object
   (box-object 'foo)
   (is (find-boxed-object 'foo))
   (is (null (find-boxed-object 'something-else)))
   (signals error (find-boxed-object 'something-else t)))
 
-(postboot-test remove-boxed-object
+(test remove-boxed-object
   (box-object 'foo)
   (is (remove-boxed-object 'foo))
   (is (null (find-boxed-object 'foo nil))))
 
-(postboot-test sheepify
+(test sheepify
   (let ((sheep (spawn)))
     (is (eql sheep (sheepify sheep))))
   (is (sheepp (sheepify 'foo)))
   (is (find-boxed-object 'foo)))
 
-(postboot-test sheepify-list
+(test sheepify-list
   (is (every #'sheepp (sheepify-list '(1 "foo" 'bar 42)))))
 
 ;; TODO - implement CLOS autoboxing

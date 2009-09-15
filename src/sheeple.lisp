@@ -266,13 +266,11 @@ See `remove-parent-using-metasheeple'."
                                        parent sheep)))
 
 (defun std-remove-parent (parent child)
-  "Removes PARENT from SHEEP."
-  (if (member parent (sheep-parents child))
-      (prog1 child
-        (deletef (%sheep-parents child) parent)
-        (%remove-child child parent)
-        (finalize-sheep-inheritance child))
-      (error "~A is not a parent of ~A" parent child)))
+  "Removes PARENT from CHILD"
+  (assert (parentp parent child) () "~A is not a parent of ~A" parent child)
+  (deletef (%sheep-parents child) parent)
+  (%remove-child child parent)
+  (finalize-sheep-inheritance child))
 
 (defun add-parent (new-parent child)
   "Adds NEW-PARENT as a parent to CHILD, running a MOP hook along the way.

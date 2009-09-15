@@ -346,7 +346,19 @@ doubles both as the plural of sheep and, when used as the proper noun
 @cindex built-in sheep objects
 Sheep objects have their behavior defined by three things, namely,
 their parents, properties, and any replies specialized upon
-them. There are a few built-in sheeple, exported from the
+them.
+
+@menu
+* Built-In Sheeple::            Sheeple's Backbone Objects
+* Boxed-Object Hierarchy::      Interface to Native Lisp Types
+@end menu
+
+@node Built-In Sheeple, Boxed-Object Hierarchy, Sheep Objects, Sheep Objects
+@subsection Built-In Sheeple
+
+@cindex sheeple, built-in
+@cindex built-in sheep objects
+There are some built-in sheeple, exported from the
 @code{SHEEPLE} package, that play special roles in Sheeple. The
 consequences of modifying these sheeple from user code are undefined.
 
@@ -358,20 +370,43 @@ consequences of modifying these sheeple from user code are undefined.
 @end macro
 
 @table @code
-@sheeplebuiltin{=T=, t, An ancestor of every other sheep@comma{} and is
+@sheeplebuiltin{=T=,t, An ancestor of every other sheep@comma{} and is
 the only sheep with no parents. It is used for reply specialization.}
 
-@sheeplebuiltin{=STANDARD-SHEEP=, standard sheep, An ancestor of all
+@sheeplebuiltin{=STANDARD-SHEEP=,standard sheep, An ancestor of all
 normally-defined sheeple. It has @code{=T=} as its only parent. It is
 mostly used for reply specialization@comma{} and in termination cases
 for functions which recurse up the parent-child hierarchy.}
 
 @ifset mop
-@sheeplebuiltin{=STANDARD-METASHEEP=, standard metasheep, This sheep
+@sheeplebuiltin{=STANDARD-METASHEEP=,standard metasheep, This sheep
 is the metasheep of all normally-defined sheeple. It is the root of
 the MOP@comma{} and many MOP functions are specialized upon it or use
 it as a reference point. It has @code{=T=} as its only parent.}
 @end ifset
+@end table
+
+@node Boxed-Object Hierarchy,  , Built-In Sheeple, Sheep Objects
+@subsection Boxed-Object Hierarchy
+
+@table @code
+@sheeplebuiltin{=BOXED-OBJECT=,boxed object, The ancestor of all
+boxed objects@comma{} it has @code{=T=} as its only parent@comma{} and
+many children. Each newly-boxed object traces its lineage up through
+this sheep.}
+
+@sheeplebuiltin{=SYMBOL=,symbol, The boxed object for native Lisp
+symbols@comma{} this sheep has @code{=BOXED-OBJECT=} as its only
+parent. Each newly-boxed symbol has this sheep as a parent.}
+
+@sheeplebuiltin{=SEQUENCE=,sequence, The boxed object representing
+sequences@comma{} this sheep's job is primarily to be a parent for the
+boxed objects representing actual sequence types.}
+
+@sheeplebuiltin{=NULL=,null, The boxed object corresponding to the
+native Lisp type @code{NULL}@comma{} this sheep has @code{=SYMBOL=} and
+@code{=LIST=} as its two parents. The only native Lisp object which
+should box to this is the empty list itself.}
 @end table
 
 @node Concept Index, Variable Index, Concepts, Top

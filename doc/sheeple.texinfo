@@ -350,28 +350,27 @@ them. There are a few built-in sheeple, exported from the
 @code{SHEEPLE} package, that play special roles in Sheeple. The
 consequences of modifying these sheeple from user code are undefined.
 
-@table @code
-@cindex t
-@vindex =T=
-@item =T=
-An ancestor of every other sheep, and is the only sheep
-with no parents. It is primarily used for reply specialization.
+@macro sheeplebuiltin{name, concept, description}
+@cindex \concept\
+@vindex \name\
+@item \name\
+\description\
+@end macro
 
-@vindex =STANDARD-SHEEP=
-@cindex standard-sheep
-@item =STANDARD-SHEEP=
-An ancestor of all normally-defined sheeple. It has
-@code{=T=} as its only parent. It is also primarily used for reply
-specialization, and in termination cases for functions which recurse
-up the parent-child hierarchy.
+@table @code
+@sheeplebuiltin{=T=, t, An ancestor of every other sheep@comma{} and is
+the only sheep with no parents. It is used for reply specialization.}
+
+@sheeplebuiltin{=STANDARD-SHEEP=, standard sheep, An ancestor of all
+normally-defined sheeple. It has @code{=T=} as its only parent. It is
+mostly used for reply specialization@comma{} and in termination cases
+for functions which recurse up the parent-child hierarchy.}
 
 @ifset mop
-@vindex =STANDARD-METASHEEP=
-@cindex standard-metasheep
-@item =STANDARD-METASHEEP=
-The metasheep of all normally-defined sheeple. It is the root of the
-MOP, and many MOP functions are specialized upon it or use it
-as a reference point.
+@sheeplebuiltin{=STANDARD-METASHEEP=, standard metasheep, This sheep
+is the metasheep of all normally-defined sheeple. It is the root of
+the MOP@comma{} and many MOP functions are specialized upon it or use
+it as a reference point. It has @code{=T=} as its only parent.}
 @end ifset
 @end table
 

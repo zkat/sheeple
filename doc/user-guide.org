@@ -36,7 +36,7 @@
    sheep-parents list.
 
 ** Child
-   An object that directly clones another sheep.
+   An object that directly delegates to another sheep.
 
 ** Sibling
    Two sheeple that share the same hierarchy list are siblings
@@ -60,12 +60,12 @@
    properties, etc (they're just sheeple).
 
 ** boxed-object
-   All boxed objects are descendants of the prototype 'boxed-object, which is a clone of T (this is
-   important -- messages defined on dolly won't affect built-ins!!)
+   All boxed objects are descendants of the prototype 'boxed-object, which is a delegate of =T=
+   (this is important -- messages defined on dolly won't affect built-ins!!)
 
 * API Documentation
-** Sheep cloning
-   Sheeple does not have a concept of "classes". Instead, new objects are simply based on other
+** Sheep spawning
+   Sheeple does not have a concept of "classes". Instead, new objects are created based on other
    objects. For the purposes of maintaining what would usually be a class hierarchy, one can treat
    sheeple as "prototypes" for other sheeple -- it's common to simply define an object for the sole
    purpose of cloning it.  Sheeple can clone multiple objects at the same time, and the rules for

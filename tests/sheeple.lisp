@@ -89,7 +89,7 @@
     (is (null (svref sheep 4)))
     (is (null (svref sheep 5)))))
 
-(postboot-test allocate-sheep
+(test allocate-sheep
   (let ((sheep (allocate-sheep =standard-metasheep=)))
     (is (vectorp sheep))
     (is (= 6 (length sheep)))
@@ -114,7 +114,7 @@
     (setf (elt dummy 0) =standard-metasheep=)
     (is (not (std-sheep-p dummy)))))
 
-(postboot-test (sheepp :fixture (allocate-sheep =standard-metasheep=))
+(test (sheepp :fixture (allocate-sheep =standard-metasheep=))
   (is (sheepp sheep)))
 
 (test (equality-basic :fixture with-std-sheep)
@@ -517,7 +517,7 @@
 (def-suite spawn-general :in spawning)
 (in-suite spawn-general)
 
-(postboot-test make-sheep
+(test make-sheep
   ;; basic
   (let ((sheep (make-sheep nil)))
     (is (sheepp sheep))
@@ -544,7 +544,7 @@
     (is (eql test-metasheep (sheep-metasheep sheep)))
     (is (eql =standard-sheep= (car (sheep-parents sheep))))))
 
-(postboot-test spawn
+(test spawn
   (is (eql =standard-metasheep= (sheep-metasheep (spawn))))
   (is (sheepp (spawn)))
   (is (std-sheep-p (spawn)))
@@ -566,17 +566,17 @@
     (is (parentp o3 sheep))
     (is (parentp o4 sheep))))
 
-(postboot-test clone)
+(test clone)
 
 #+nil
-(postboot-test sheep-nickname
+(test sheep-nickname
   (let ((sheep (spawn)))
     (setf (sheep-nickname sheep) 'test)
     (is (eq 'test (sheep-nickname sheep)))
     (is (eq 'test (sheep-nickname (spawn sheep))))))
 
 #+nil
-(postboot-test sheep-documentation
+(test sheep-documentation
   (let ((sheep (spawn)))
     (setf (sheep-documentation sheep) 'test)
     (is (eq 'test (sheep-documentation sheep)))
@@ -616,7 +616,7 @@
   (is (equal '(:metasheep foo :other-option 'bar)
              (canonize-options '((:metasheep foo) (:other-option 'bar))))))
 
-(postboot-test defsheep
+(test defsheep
   (let* ((parent (spawn))
          (test-sheep (defsheep (parent) ((var "value")))))
     (is (sheepp test-sheep))
@@ -631,7 +631,7 @@
 (def-suite protos :in spawning)
 (in-suite protos)
 
-(postboot-test defproto
+(test defproto
   (let ((test-proto (defproto =test-proto= () ((var "value")))))
     (is (sheepp test-proto))
     (is (eql test-proto (symbol-value '=test-proto=)))

@@ -112,9 +112,9 @@
 
     Side effects: Parents are added using ADD-PARENT, which may have side-effects.
 
-*** DEFCLONE macro
+*** DEFSHEEP macro
     Syntax:
-    defclone ({parent-object}*) ({property-spec}*) option-spec* => new sheep
+    defsheep ({parent-object}*) ({property-spec}*) option-spec* => new sheep
 
     parent-object ::= a lisp object to be cloned.
     property-spec ::= (property-name property-value property-option*)
@@ -122,40 +122,40 @@
     property-value ::= object
     property-option ::= {:reader {reader-message-name | nil}}* |
                         {:writer {writer-message-name | nil}}* |
-                        {:accessor {reader-message-name | nil}}*
-    message-name ::= {symbol | (setf symbol)}
-    property-option ::= (:metaclass {symbol | class}) |
-                        (:nickname lisp-object) |
+                        {:accessor {reader-message-name | t | nil}}*
+    message-name ::= {symbol | (quote (setf symbol))}
+    property-option ::= (:nickname lisp-object) |
                         (:documentation docstring)
 
     Args and values:
-    property-name -- a non-keyword symbol
+    property-name -- a non-keyword symbol, unquoted.
     property-value -- any lisp object, used as the local value for this property
     reader/writer/accessor -- can be supplied more than once for each property.
                               if NIL is given for any of these, signals an error
                               if there is another matching definition.
                               :accessor creates both a reader and a writer with
                               format (accessor-name sheep-object)
-                              (setf (accessor-name sheep-object) new-value)
-    metaclass -- Either a symbol or a class object, this class is used as the new sheep's
-                 metaobject class.
+                              (setf (accessor-name sheep-object) new-value).
+                              Providing T as the argument to :accessor automatically
+                              creates an accessor for that property using the given
+                              property name.
     nickname -- Set as the nickname for the new sheep during initialization
     documentation -- set as the docstring for the new sheep during initialization
 
     Description:
-    DEFCLONE creates a new sheep object based on PARENT-OBJECT*. After the new object has
+    DEFSHEEP creates a new sheep object that delegates to PARENT-OBJECT*. After the new object has
     been initialized, direct-properties and readers/writers/accessors are added to the new
     object based on each property-spec.
 
     Examples:
 
-    (defclone () ((var "value"))) => #<Sheep #x1503119E>
-    (defclone (*) ()) => #<Sheep #x14FB626E>
-    (sheep-parents *) => (#<Sheep #x1503119E>)
-    (available-properties **) => (#<Property-Spec VAR #x1505A95E>)
+    (defsheep () ((var "value"))) => #<Sheep [=STANDARD-SHEEP=] #x1503119E>
+    (defsheep (*) ()) => #<Sheep [=STANDARD-SHEEP=] #x14FB626E>
+    (sheep-parents *) => (#<Sheep [=STANDARD-SHEEP=] #x1503119E>)
+    (available-properties **) => (VAR)
 
     Side-effects:
-    Add-property and add-parent are both called repeatedly for peach property-spec and
+    Add-property and add-parent are both called repeatedly for each property-spec and
     parent-object. Add-property destructively adds the new properties to the new sheep.
 
 *** DEFPROTO macro
@@ -195,7 +195,7 @@
     special variable called PROTO-NAME. After the new object has been
     initialized, direct-properties and readers/writers/accessors are added to the new object
     based on each property-spec.
-    Unlike DEFCLONE, DEFPROTO automatically defines accessors for each property-spec using
+    Unlike DEFSHEEP, DEFPROTO automatically defines accessors for each property-spec using
     its property-name, unless :reader, :writer, and/or :accessor are given (in which case only
     the provided option is used).
     Unless explicitly given a :nickname option, DEFPROTO uses PROTO-NAME as the new sheep's
@@ -515,7 +515,7 @@
         (synergize "Hey " "Jude") => "Hey Jude"
 
         ;; :before and :after
-        (defparameter *test-sheep* (defclone () ((var "value" :accessor var))))
+        (defparameter *test-sheep* (defsheep () ((var "value" :accessor var))))
         (var *test-sheep*) => "value"
 
         (defreply var :before ((sheep *test-sheep*))
@@ -615,7 +615,7 @@
 
      Description:
      Returns an ordered list of the sheep's direct parent objects, in the order that they were
-     provided to clone/defclone/defproto. In a sense, this is the inverse function of CLONE.
+     provided to clone/defsheep/defproto. In a sense, this is the inverse function of CLONE.
 
      Examples:
 
@@ -638,7 +638,7 @@
 
 **** SHEEP-DIRECT-PROPERTIES
      Returns an unordered set of PROPERTY-SPEC metaobjects that represent property definitions as
-     provided to (or built by) CLONE/DEFCLONE/DEFPROTO
+     provided to (or built by) CLONE/DEFSHEEP/DEFPROTO
 
            (sheep-direct-properties sheep) => (list of property-spec objects)
 
@@ -675,8 +675,8 @@
           (format stream "~a is the most specialest sheep ever!" sheep))
 
 *** INIT-SHEEP
-    This message is called by all sheep-creation functions (clone, defclone, defproto) after parents
-    have been added to the new object. In the case of DEFCLONE and DEFPROTO, this is called before
+    This message is called by all sheep-creation functions (clone, defsheep, defproto) after parents
+    have been added to the new object. In the case of DEFSHEEP and DEFPROTO, this is called before
     the properties specified in their property-specs are added.  No primary replies should be
     defined on this message, and :around replies MUST call-next-reply.
 

@@ -63,6 +63,15 @@
    All boxed objects are descendants of the prototype 'boxed-object, which is a delegate of =T=
    (this is important -- messages defined on dolly won't affect built-ins!!)
 
+** Delegation
+   Delegation is the act of not relying on an object's locally-stored characteristics (such as
+   roles and properties), and instead searching the sheep-hierarchy-list for appropriate data.
+   Delegation of properties, for example, involves searching the sheep-hierarchy-list for a bound
+   local property in one of the sheep's ancestors, even though the property might not be directly
+   bound in the sheep itself.
+** Cloning
+   Cloning involves a shallow copy of a sheep object that involves copying direct-properties,
+   parents, and roles into the new object.
 * API Documentation
 ** Sheep spawning
    Sheeple does not have a concept of "classes". Instead, new objects are created based on other

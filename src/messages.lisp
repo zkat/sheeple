@@ -59,9 +59,8 @@
 ;;; Message definition
 ;;;
 
-(defvar *message-table* (make-hash-table :test #'equal)
-  "Hashtable for storing message objects. Needs to :test #'equal because
-of setf methods, whose names are lists.")
+(defvar *message-table* (make-hash-table :test 'equal)
+  "Hashtable for storing message objects.") ; EQUAL test accomodates setf messages
 
 (defun message-table-p (table)
   ;; This is sort of stupid, but I'm sort of hoping it's going to help me make the interface more
@@ -69,6 +68,7 @@ of setf methods, whose names are lists.")
   (hash-table-p table))
 
 ;; We define these two as internal first, so we don't export (setf find-message)
+(declaim (inline %find-message))
 (defun %find-message (name)
   (values (gethash name *message-table*)))
 (defun (setf %find-message) (new-value name)
@@ -81,8 +81,8 @@ of setf methods, whose names are lists.")
   (clrhash *message-table*) t)
 
 (defun find-message (name &optional (errorp t))
-  "Finds a message object in `*message-table*', given its `name'.
-Raises an error if no message is found, unless `errorp' is set to NIL."
+  "Finds a message object named NAME in `*MESSAGE-TABLE*'.
+Raises an error if no message is found, unless ERRORP is NIL."
   (or (%find-message name)
       (when errorp (error 'no-such-message :message-name name))))
 

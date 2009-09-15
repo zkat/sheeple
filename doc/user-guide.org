@@ -218,9 +218,9 @@
 
 ** Sheep manipulation
 *** Sheep Inspection
-**** PARENT-P
+**** PARENTP
      Syntax:
-     parent-p maybe-parent child => generalized-boolean
+     parentp maybe-parent child => generalized-boolean
 
      Arguments and values:
      maybe-parent -- a sheep that may or may not be a parent
@@ -231,10 +231,10 @@
 
      Examples:
 
-     (let* ((parent (clone))
-            (child (clone parent)))
-       (parent-p parent child)  => T
-       (parent-p child parent)) => NIL
+     (let* ((parent (spawn))
+            (child (spawn parent)))
+       (parentp parent child)  => Generalized truth value
+       (parentp child parent)) => NIL
 
 **** ANCESTOR-P
      Syntax:

@@ -139,6 +139,17 @@ by deleting items at the same position from both lists."
   "This macro puts the FUN back in FUNCTION."
   `(lambda (&optional _) (declare (ignorable _)) ,@body))
 
+(define-modify-macro nconcf (&rest lists)
+  nconc
+  "Modify-macro for NCONC. Sets place designated by the first argument to
+the result of calling NCONC with the place and the LISTS.")
+
+;;; There's a fuller version of this that uses a tail-pointer, but we
+;;; only need this simple version here. - Adlai
+(defmacro pushend (value place)
+  "Destructively adds VALUE as the last element of the list PLACE."
+  `(nconcf ,place (list ,value)))
+
 ;; from alexandria:
 (declaim (inline delete/swapped-arguments))
 (defun delete/swapped-arguments (sequence item &rest keyword-arguments)

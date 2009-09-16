@@ -36,6 +36,7 @@
         (another (spawn)))
     (is (eql test-sheep (add-property test-sheep 'var "value" :accessor t)))
     (is (has-direct-property-p test-sheep 'var))
+    (remove-parent =standard-sheep= test-sheep) ; Avoids circular precedence graphs
     (is (eql test-sheep (add-parent another test-sheep)))
     (is (parentp another test-sheep))
     (is (eql test-sheep (reinit-sheep test-sheep)))

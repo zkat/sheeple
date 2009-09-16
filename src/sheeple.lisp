@@ -281,21 +281,19 @@ See `add-parent-using-metasheeple'."
 
 (defun std-add-parent (new-parent child)
   "Adds NEW-PARENT as a parent to CHILD."
-  (when (eq new-parent child) (error "Sheeple cannot be parents of themselves."))
-  (when (member new-parent (sheep-parents child) :test 'eq)
-    (error "~A is already a parent of ~A." new-parent child))
+  (error-when (eq new-parent child) "Sheeple cannot be parents of themselves.")
+  (error-when (member new-parent (sheep-parents child) :test 'eq)
+              "~A is already a parent of ~A." new-parent child)
   (handler-bind
       ((sheeple-hierarchy-error (fun (remove-parent new-parent child))))
-    (push new-parent (%sheep-parents child))
+    (pushend new-parent (%sheep-parents child))
     (finalize-sheep-inheritance child)
     child))
 
 (defun add-parents (parents sheep)
-  "Mostly a utility function for easily adding multiple parents. They will be added to
-the front of the sheep's parent list in reverse order (so they will basically be appended
-to the front of the list)"
-  (map nil (rcurry 'add-parent sheep) (reverse parents))
-  sheep)
+  "Adds multiple parents to the hierarchy list. The net effect of this function
+is that the parents are appended to the end of the list."
+  (prog1 sheep (mapc (rcurry 'add-parent sheep) parents)))
 
 (defun add-parent* (parent* sheep)
   "A utility/interface/laziness function, for adding parent(s) to a sheep."

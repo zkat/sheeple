@@ -8,12 +8,8 @@
 @set EDITION 0.1
 @set VERSION v3.0
 @set UPDATED-MONTH September 2009
-@set UPDATED 15 @value{UPDATED-MONTH}
+@set UPDATED 18 @value{UPDATED-MONTH}
 @clear mop
-
-@macro CLOS
-@acronym{CLOS}
-@end macro
 
 @copying
 This is Edition @value{EDITION},
@@ -123,7 +119,7 @@ This manual is for Sheeple @value{VERSION}
 @node Vision, History, About Sheeple, About Sheeple
 @subsection Vision
 @cindex Vision
-Sheeple is a Dynamic, @CLOS{}-like, Delegative Prototype-based Object-Oriented
+Sheeple is a Dynamic, @acronym{CLOS}-like, Delegative Prototype-based Object-Oriented
 Programming Framework (or "POOP Framework") that strives to optimize application
 flexibility, minimize cost while increasing value, maximize programmer
 resources, and empower application implementers to better assist them in
@@ -166,9 +162,9 @@ inheritance.
 @cindex Io, influence of
 @end enumerate
 
-It was written with the purpose of providing a lot of the goodies of @CLOS{}
+It was written with the purpose of providing a lot of the goodies of @acronym{CLOS}
 programming in a completely prototype-based environment. As such, it shares a
-lot of features and syntax with @CLOS{}. The most notable of these are multiple
+lot of features and syntax with @acronym{CLOS}. The most notable of these are multiple
 inheritance and multiple dispatch of methods.
 
 @page
@@ -199,7 +195,7 @@ Sheeple, you will need to follow the directions in @ref{Informing ASDF}.
 @end menu
 
 @node Tagged Release, Tracking the Git Repo, Installation Procedure, Installation Procedure
-@unnumberedsubsubsec Tagged Release
+@subsubsection Tagged Release
 @cindex release, latest
 @cindex downloading
 A tagged release is preferable for stability --- we test new features
@@ -208,7 +204,7 @@ this writing, the latest tagged release is available as a tarball from
 @uref{http://github.com/zkat/sheeple/tarball/@value{VERSION}}.
 
 @node Tracking the Git Repo, Informing ASDF, Tagged Release, Installation Procedure
-@unnumberedsubsubsec Tracking the Git Repo
+@subsubsection Tracking the Git Repo
 @cindex git repository
 @cindex bleeding edge of development
 Since all new features are developed and tested carefully before
@@ -244,12 +240,12 @@ refer to the @acronym{ASDF}
 section assumes that you are familiar with the basic concepts of @acronym{ASDF},
 and have configured your implementation to use it.
 
-@strong{Please Notice} that if your implementation does not include
-@acronym{ASDF}, you will have to acquire it and load it separately. Up-to-date
-information on installing @acronym{ASDF} should be available via the
-@acronym{ASDF} @uref{http://www.cliki.net/asdf, CLiki page}; The official
-@acronym{ASDF} @uref{http://common-lisp.net/project/asdf, Project webpage}
-should also have the relevant information.
+If your implementation does not include @acronym{ASDF}, you will have to acquire
+it and load it separately. Up-to-date information on installing @acronym{ASDF}
+should be available via the @acronym{ASDF} @uref{http://www.cliki.net/asdf,
+CLiki page}; The official @acronym{ASDF}
+@uref{http://common-lisp.net/project/asdf, Project webpage} should also have the
+relevant information.
 
 To complete a Sheeple installation, you must inform @acronym{ASDF} where it can
 find the file @file{sheeple.asd}. Substituting @var{registry} and @var{sheeple}
@@ -327,10 +323,10 @@ tagged release.
 @node Concepts, Concept Index, Overview, Top
 @chapter Concepts
 
-Sheeple bears many resemblances to @CLOS{}, yet also introduces new
+Sheeple bears many resemblances to @acronym{CLOS}, yet also introduces new
 concepts. This section goes introduces the concepts critical to a full
 understanding of Sheeple. It should be read regardless of whether you
-have prior experience with @CLOS{}@.
+have prior experience with @acronym{CLOS}@.
 
 @menu
 * Sheep Objects::               The Basic Data Structure of Sheeple
@@ -373,8 +369,9 @@ consequences of modifying these sheeple from user code are undefined.
 @end macro
 
 @table @code
-@sheeplebuiltin{=T=,t, An ancestor of every other sheep@comma{} and is
-the only sheep with no parents. It is used for reply specialization.}
+@sheeplebuiltin{=T=,ancestral sheep, An ancestor of every other
+sheep@comma{} and is the only sheep with no parents. It is used for
+reply specialization.}
 
 @sheeplebuiltin{=STANDARD-SHEEP=,standard sheep, An ancestor of all
 normally-defined sheeple. It has @code{=T=} as its only parent. It is
@@ -393,23 +390,88 @@ it as a reference point. It has @code{=T=} as its only parent.}
 @subsection Boxed-Object Hierarchy
 
 @table @code
-@sheeplebuiltin{=BOXED-OBJECT=,boxed object, The ancestor of all
+@sheeplebuiltin{=BOXED-OBJECT=,boxed objects, The ancestor of all
 boxed objects@comma{} it has @code{=T=} as its only parent@comma{} and
 many children. Each newly-boxed object traces its lineage up through
 this sheep.}
 
-@sheeplebuiltin{=SYMBOL=,symbol, The boxed object for native Lisp
-symbols@comma{} this sheep has @code{=BOXED-OBJECT=} as its only
-parent. Each newly-boxed symbol has this sheep as a parent.}
+@macro sheepleboxedin{name, concept, description}
+@sheeplebuiltin{\name\,\concept\, The boxed object representing
+\description\.}
+@end macro
 
-@sheeplebuiltin{=SEQUENCE=,sequence, The boxed object representing
-sequences@comma{} this sheep's job is primarily to be a parent for the
-boxed objects representing actual sequence types.}
+@sheepleboxedin{=SYMBOL=,symbol, native Lisp symbols@comma{} this
+sheep has @code{=BOXED-OBJECT=} as its only parent. Each newly-boxed
+symbol has this sheep as a parent}
 
-@sheeplebuiltin{=NULL=,null, The boxed object corresponding to the
-native Lisp type @code{NULL}@comma{} this sheep has @code{=SYMBOL=} and
+@sheepleboxedin{=SEQUENCE=,sequence, sequences@comma{} this sheep's
+job is primarily to be a parent for the boxed objects representing
+actual sequence types@comma{} and it has @code{=BOXED-OBJECT=} as its
+only parent}
+
+@sheepleboxedin{=ARRAY=,array, arrays of all dimensions@comma{} with
+@code{=BOXED-OBJECT=} as its only parent}
+
+@sheepleboxedin{=NUMBER=,number, all numerical types@comma{} similar
+to the native type @code{NUMBER}@. This sheep has
+@code{=BOXED-OBJECT=} as its only parent}
+
+@sheepleboxedin{=CHARACTER=,character, characters and glyphs@comma{}
+and has @code{=BOXED-OBJECT=} as its only parent}
+
+@sheepleboxedin{=FUNCTION=,function, functions@comma{} and has no
+children@comma{} and @code{=BOXED-OBJECT=} as its only parent}
+
+@sheepleboxedin{=HASH-TABLE=,hash table, hash tables@comma{} large
+mappings of key--value pairs used in Common Lisp as a replacement for
+large alists. It has @code{=BOXED-OBJECT=} as its only parent}
+
+@sheepleboxedin{=PACKAGE=,package, Common Lisp packages. This sheep
+has only one parent -- @code{=BOXED-OBJECT=}}
+
+@sheepleboxedin{=PATHNAME=,pathname, pathnames. It has
+@code{=BOXED-OBJECT=} as its only parent}
+
+@sheepleboxedin{=READTABLE=,readtable, tables of readmacros. While it
+is rare to deal with these programmatically@comma{} Sheeple still
+allows you to do so. This sheep has @code{=BOXED-OBJECT=} as its only
+parent}
+
+@sheepleboxedin{=STREAM=,stream, any one of the many stream
+classes. This sheep has @code{=BOXED-OBJECT=} as its only parent}
+
+@sheepleboxedin{=LIST=,list, Lisp's classic data structure@comma{} the
+linked list@comma{} this sheep has @code{=SEQUENCE=} as its only
+parent}
+
+@sheepleboxedin{=NULL=,null, The boxed object representing the native
+Lisp type @code{NULL}@comma{} this sheep has @code{=SYMBOL=} and
 @code{=LIST=} as its two parents. The only native Lisp object which
-should box to this is the empty list itself.}
+should box to this is the empty list itself}
+
+@sheepleboxedin{=CONS=,cons, Lisp's key low-level data type@comma{}
+and has @code{=LIST=} as its only parent}
+
+@sheepleboxedin{=VECTOR=,vector, the workhorse of efficient Common
+Lisp code -- one-dimensional arrays@comma{} known as vectors. This
+sheep has both @code{=ARRAY=} and @code{=SEQUENCE=} as parents}
+
+@sheepleboxedin{=BIT-VECTOR=,bit vector, bit vectors@comma{} a common
+subtype of vectors. This sheep has @code{=VECTOR=} as its only parent}
+
+@sheepleboxedin{=STRING=,string, strings of characters@comma{} also a
+very common data type in Common Lisp. It has @code{=VECTOR=} as its
+only parent}
+
+@sheepleboxedin{=COMPLEX=,complex numbers, complex numbers@comma{} one
+of the three main divisions of numeric types in Common Lisp. It has
+@code{=NUMBER=} as its only parent}
+
+@sheepleboxedin{=INTEGER=,integers, integers@comma{} both fixnums and
+bignums. It has @code{=NUMBER=} as its only parent}
+
+@sheepleboxedin{=FLOAT=,floating-point numbers, floating-point numbers
+of all kinds@comma{} and it has @code{=NUMBER=} as its only parent}
 @end table
 
 @node Concept Index, Variable Index, Concepts, Top
@@ -420,8 +482,10 @@ should box to this is the empty list itself.}
 @unnumbered Variable Index
 @printindex vr
 
+@ifnottex
 @node Copying,  , Variable Index, Top
 @appendix Copying
 @insertcopying
+@end ifnottex
 
 @bye

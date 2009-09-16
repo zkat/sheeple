@@ -443,7 +443,7 @@
   (let ((a (cons-std-sheep))
         (b (cons-std-sheep))
         (c (cons-std-sheep)))
-    (is (eql c (add-parents (list a b) c)))
+    (is (eq c (add-parents (list a b) c)))
     (is (equal (list a b) (sheep-parents c)))))
 
 (test sheep-hierarchy-list

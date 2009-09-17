@@ -227,9 +227,8 @@ regards to the CONSTRAINTS. A future version will undo this change."
        (simple-error () (error 'sheeple-hierarchy-error :sheep sheep))))
     ((car (%sheep-parents sheep))
      (let ((cache (%sheep-hierarchy-cache (car (%sheep-parents sheep)))))
-       (if (find sheep cache)
-           (error 'sheeple-hierarchy-error :sheep sheep)
-           (cons sheep cache))))
+       (error-when (find sheep cache) 'sheeple-hierarchy-error :sheep sheep)
+       (cons sheep cache)))
     (t (list sheep))))
 
 (defun compute-sheep-hierarchy-list (sheep)
@@ -267,7 +266,7 @@ See `remove-parent-using-metasheeple'."
 
 (defun std-remove-parent (parent child)
   "Removes PARENT from CHILD"
-  (assert (parentp parent child) () "~A is not a parent of ~A" parent child)
+  (error-when (not (parentp parent child)) "~A is not a parent of ~A" parent child)
   (deletef (%sheep-parents child) parent)
   (%remove-child child parent)
   (finalize-sheep-inheritance child))

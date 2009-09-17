@@ -32,7 +32,7 @@
     (:documentation "Primarily meant to fill SHEEP's properties during initialization when
 using certain macros (such as defsheep and defproto)."))
   (defreply shared-init (sheep &key properties nickname)
-    "DUMPIN' SUM PROPS!"
+    "Takes care of adding PROPERTIES and setting SHEEP's NICKNAME."
     (when properties
       (mapcar (fun (apply #'add-property sheep _))
               properties))
@@ -42,21 +42,17 @@ using certain macros (such as defsheep and defproto)."))
 
   (defmessage init-sheep (sheep &key &allow-other-keys))
   (defreply init-sheep (sheep &key properties nickname)
-    (shared-init sheep :properties properties :nickname nickname)
-    sheep)
+    (shared-init sheep :properties properties :nickname nickname))
 
   (defmessage reinit-sheep (sheep &key &allow-other-keys)
     (:documentation "Resets the sheep's parents and properties."))
-  (defreply reinit-sheep (sheep &key new-parents
-                                documentation
-                                properties)
+  (defreply reinit-sheep (sheep &key new-parents documentation properties)
     "If :NEW-PARENTS is  provided, those parents are used when reinitializing,
 so DOLLY doesn't end up on the list by default."
     ;; In order to reinitialize a sheep, we first remove -all- parents and properties.
     (map nil (rcurry 'remove-parent sheep) (sheep-parents sheep))
     (remove-all-direct-properties sheep)
-    ;; Once that's set, we can start over. We must remember to add =standard-sheep=
-    ;; as a last resort.
+    ;; Once that's set, we can start over. We add =standard-sheep= as a last resort.
     (add-parents (if new-parents (sheepify-list new-parents) (list =standard-sheep=))
                  sheep)
     ;; Now we can set up the properties all over again.

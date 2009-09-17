@@ -99,14 +99,7 @@ by deleting items at the same position from both lists."
                   macros))))
     `(macrolet ,macros (let* ,(nreverse binds) ,@body))))
 
-(defmacro once-only ((&rest names) &body body)
-  "Modified from a macro in Practical Common Lisp, by Peter Seibel."
-  (let ((gensyms (loop repeat (length names) collect (gensym))))
-    `(let (,@(loop for g in gensyms collect `(,g (gensym))))
-      `(let (,,@(loop for g in gensyms for n in names collect ``(,,g ,,n)))
-        ,(let (,@(loop for n in names for g in gensyms collect `(,n ,g)))
-           ,@body)))))
-
+(declaim (inline memq))
 (defun memq (item list)
   "Return tail of LIST beginning with first element EQ to ITEM."
   (do ((i list (cdr i)))

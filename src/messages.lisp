@@ -245,8 +245,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 ;; lambda that calls the top-level dispatch function on the message args.
 (defun finalize-message (message)
   (let ((name (message-name message)))
-    (when (and (fboundp name)
-               (not (find-message name nil)))
+    (when (and (fboundp name) (not (find-message name nil)))
       (cerror "Replace definition." 'clobbering-function-definition :function name))
     (setf (fdefinition name) (lambda (&rest args) (apply-message message args)))))
 

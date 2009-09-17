@@ -13,6 +13,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
+(declaim (inline error-when))
+(defun error-when (condition error-datum &rest error-args)
+  "Like `ASSERT', but with fewer bells and whistles."
+  (when condition (apply 'error error-datum error-args)))
+
 (defun ensure-list (x)
   "X if X is a list, otherwise (list X)."
   (if (listp x) x (list x)))
@@ -75,8 +80,8 @@ by deleting items at the same position from both lists."
   (let ((macros ())
         (binds ()))
     (dolist (spec collections)
-      (assert (proper-list-of-length-p spec 1 3) ()
-              "Malformed collection specifier: ~S" spec)
+      (error-when (not (proper-list-of-length-p spec 1 3))
+                  "Malformed collection specifier: ~S" spec)
       (let* ((name (first spec))
              (default (second spec))
              (kind (or (third spec) 'collect))

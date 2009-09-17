@@ -332,6 +332,7 @@ to the front of the list)"
                    &key (metasheep =standard-metasheep=) &allow-other-keys)
   "Creates a new sheep with SHEEPLE as its parents. METASHEEP is used as the metasheep when
 allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
+  (declare (dynamic-extent all-keys))
   ;; Here's what's causing the current failure with MAKE-SHEEP:
   ;; FINALIZE-SHEEP-INHERITANCE isn't dispatching correctly because the new sheep
   ;; object created by maybe-std-allocate-sheep has no parents. Thus, the reply for
@@ -348,6 +349,7 @@ allocating the new sheep object. ALL-KEYS is passed on to INIT-SHEEP."
 
 (defun spawn (&rest sheeple)
   "Creates a new standard-sheep object with SHEEPLE as its parents."
+  (declare (dynamic-extent sheeple))
   (make-sheep sheeple))
 
 ;; Feel free to change the exact interface if you don't like it. -- Adlai

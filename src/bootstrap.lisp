@@ -33,9 +33,9 @@
 using certain macros (such as defsheep and defproto)."))
   (defreply shared-init (sheep &key properties nickname)
     "Takes care of adding PROPERTIES and setting SHEEP's NICKNAME."
-    (when properties
-      (mapcar (fun (apply #'add-property sheep _))
-              properties))
+    (dolist (property-spec properties)
+      (destructuring-bind (name value &rest keys) property-spec
+        (apply 'add-property sheep name value keys)))
     (when nickname
       (setf (sheep-nickname sheep) nickname))
     sheep)
@@ -50,13 +50,17 @@ using certain macros (such as defsheep and defproto)."))
     "If :NEW-PARENTS is  provided, those parents are used when reinitializing,
 so DOLLY doesn't end up on the list by default."
     ;; In order to reinitialize a sheep, we first remove -all- parents and properties.
-    (map nil (rcurry 'remove-parent sheep) (sheep-parents sheep))
+    (dolist (parent (%sheep-parents sheep)) (remove-parent parent sheep))
     (remove-all-direct-properties sheep)
     ;; Once that's set, we can start over. We add =standard-sheep= as a last resort.
-    (add-parents (if new-parents (sheepify-list new-parents) (list =standard-sheep=))
+    (add-parent* (cond ((null new-parents) =standard-sheep=)
+                       ((every 'sheepp new-parents) new-parents)
+                       (t (sheepify-list new-parents)))
                  sheep)
     ;; Now we can set up the properties all over again.
-    (mapc (fun (apply #'add-property sheep _)) properties)
+    (dolist (property-spec properties)
+      (destructuring-bind (name value &rest keys) property-spec
+        (apply 'add-property sheep name value keys)))
     ;; And finally, set the documentation. If none is provided, it's set to NIL.
     ;; It's important to note that documenting a sheep will keep a reference to it...
     ;; At the same time, REINIT-SHEEP is only meant for protos, so it should be fine.

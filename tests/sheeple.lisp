@@ -29,27 +29,6 @@
 (def-suite early-printing :in sheep-objects)
 (in-suite early-printing)
 
-(test verify-print-settings
-  (let ((*print-pretty* *print-pretty*)
-        (*print-circle* *print-circle*))
-    (flet ((set-them (pretty circle)
-             (setf *print-pretty* pretty
-                   *print-circle* circle)))
-      (set-them nil nil)
-      (signals error (verify-print-settings))
-      (set-them nil t)
-      (signals warning (verify-print-settings))
-      (set-them t nil)
-      (5am:finishes (verify-print-settings))
-      (set-them t t)
-      (5am:finishes (verify-print-settings)))))
-
-(test print-pretty
-  (if *print-pretty*
-      (pass "*PRINT-PRETTY* is true.")
-      (fail "*PRINT-PRETTY* is false. This is such a transparent bit of code that
- the .asd is probably messed up if this test is failing.")))
-
 ;;; This test is pretty crude. The correct thing to do would be to
 ;;; parse the output, extract the implementation-dependant stuff,
 ;;; and verify the rest. This would be painful without CL-PPCRE.
@@ -77,42 +56,34 @@
 (in-suite std-allocate-sheep)
 
 (test (std-sheep-basic-structure :fixture with-std-sheep)
-  (is (vectorp sheep))
-  (is (= 6 (length sheep))))
+  (is (typep sheep 'structure-object))
+  (is (typep sheep 'sheep)))
 
-(test (std-sheep-initial-values :depends-on std-sheep-basic-structure)
+(test std-sheep-initial-values
   (let ((sheep (std-allocate-sheep =standard-metasheep=)))
-    (is (eql =standard-metasheep= (svref sheep 0)))
-    (is (null (svref sheep 1)))
-    (is (null (svref sheep 2)))
-    (is (null (svref sheep 3)))
-    (is (null (svref sheep 4)))
-    (is (null (svref sheep 5)))))
+    (is (eq =standard-metasheep= (%sheep-metasheep sheep)))
+    (is (eq nil (%sheep-parents sheep)))
+    (is (eq nil (%sheep-properties sheep)))
+    (is (eq nil (%sheep-roles sheep)))
+    (is (eq nil (%sheep-hierarchy-cache sheep)))
+    (is (eq nil (%sheep-children sheep)))))
 
 (test allocate-sheep
   (let ((sheep (allocate-sheep =standard-metasheep=)))
-    (is (vectorp sheep))
-    (is (= 6 (length sheep)))
-    (is (eql =standard-metasheep= (svref sheep 0)))
-    (is (null (svref sheep 1)))
-    (is (null (svref sheep 2)))
-    (is (null (svref sheep 3)))
-    (is (null (svref sheep 4)))
-    (is (null (svref sheep 5)))))
+    (is (eq =standard-metasheep= (%sheep-metasheep sheep)))
+    (is (eq nil (%sheep-parents sheep)))
+    (is (eq nil (%sheep-properties sheep)))
+    (is (eq nil (%sheep-roles sheep)))
+    (is (eq nil (%sheep-hierarchy-cache sheep)))
+    (is (eq nil (%sheep-children sheep)))))
 
 (in-suite allocation)
 
 (test std-sheep-p
-  (for-all ((sheep (gen-vector :length (constantly 6))))
-    (setf (elt sheep 0) =standard-metasheep=)
-    (is (std-sheep-p sheep)))
-  (for-all ((dummy (gen-vector)))
-    (is (not (std-sheep-p dummy))))
-  (for-all ((dummy (gen-vector)
-                   (and (/= 6 (length dummy))
-                        (not (zerop (length dummy))))))
-    (setf (elt dummy 0) =standard-metasheep=)
-    (is (not (std-sheep-p dummy)))))
+  (for-all ((sheep (fun (std-allocate-sheep (funcall (gen-integer))))))
+    (is (not (std-sheep-p sheep))))
+  (for-all ((sheep (fun (std-allocate-sheep =standard-metasheep=))))
+    (is (std-sheep-p sheep))))
 
 (test (sheepp :fixture (allocate-sheep =standard-metasheep=))
   (is (sheepp sheep)))
@@ -348,17 +319,14 @@
     (is (null (find child (%sheep-children sheep) :key #'maybe-weak-pointer-value)))))
 
 (test %map-children
-  (let ((parent (cons-std-sheep))
-        (child1 (cons-std-sheep))
-        (child2 (cons-std-sheep))
-        (child3 (cons-std-sheep)))
+  (let* ((parent (cons-std-sheep))
+         (child1 (cons-std-sheep))
+         (child2 (cons-std-sheep))
+         (list   (list child1 child2)))
     (%add-child child1 parent)
     (%add-child child2 parent)
-    (%add-child child3 parent)
-    (%map-children (fun (setf (elt _ 0) nil)) parent)
-    (is (null (elt child1 0)))
-    (is (null (elt child2 0)))
-    (is (null (elt child3 0)))))
+    (%map-children (fun (deletef list _)) parent)
+    (is (null list))))
 
 (test memoize-sheep-hierarchy-list
   (let ((sheep1 (cons-std-sheep))

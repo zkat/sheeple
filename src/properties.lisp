@@ -41,7 +41,7 @@
   "The ratio by which the property vector is expanded when full.")
 
 ;; this macrolet is for quite a bit of convenience for the following functions..
-(symbol-macrolet ((%properties (%sheep-direct-properties sheep)))
+(symbol-macrolet ((%properties (%sheep-properties sheep)))
 
   (defun %create-property-vector (sheep)
     "Sets SHEEP's property vector to a (simple-vector `*property-vector-initial-size*')."
@@ -183,7 +183,7 @@ direct property. Returns SHEEP."
 
 (defun remove-all-direct-properties (sheep)
   "Wipes out all direct properties and their values from SHEEP."
-  (setf (%sheep-direct-properties sheep) nil)
+  (setf (%sheep-properties sheep) nil)
   sheep)
 
 ;;; Value
@@ -191,8 +191,8 @@ direct property. Returns SHEEP."
   "Returns the property-value set locally in SHEEP for PROPERTY-NAME.
 If the value is non-local (is delegated or does not exist in the hierarchy list),
 a condition of type UNBOUND-DIRECT-PROPERTY condition is signalled."
-  ;;  (declare (inline %sheep-direct-properties %get-property-cons)) ;commented until after testing
-  (if (%sheep-direct-properties sheep)
+  ;;  (declare (inline %sheep-properties %get-property-cons)) ;commented until after testing
+  (if (%sheep-properties sheep)
       (aif (%get-property-cons sheep property-name)
            (cdr it)
            (error 'unbound-property
@@ -255,7 +255,7 @@ returned."
 (defun sheep-direct-properties (sheep)
   #-sheeple3.1 "Returns a set of direct property definition metaobjects."
   #+sheeple3.1 "Returns a set of direct property definition metaobjects."
-  (awhen (%sheep-direct-properties sheep)
+  (awhen (%sheep-properties sheep)
     (loop for prop across it when prop collect (car prop))))
 
 (defun available-properties (sheep)

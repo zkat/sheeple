@@ -63,12 +63,6 @@
 
 ;;;
 ;;; Printing sheep!
-;;;
-(defun std-print-sheep (sheep stream)
-  (print-unreadable-object (sheep stream :identity t)
-    (format stream "Sheep ~:[[~S]~;~S~]"
-            (has-direct-property-p sheep :nickname)
-            (ignore-errors (sheep-nickname sheep)))))
 
 (defmessage print-sheep (sheep stream)
   (:documentation "Defines the expression print-object uses."))
@@ -81,9 +75,3 @@
     (format stream "Boxed-object ~:[[~S]~;~S~]"
             (has-direct-property-p sheep :nickname)
             (ignore-errors (sheep-nickname sheep)))))
-
-(set-pprint-dispatch 'sheep (lambda (stream sheep)
-                              (handler-case
-                                  (print-sheep sheep stream)
-                                (no-applicable-replies ()
-                                  (std-print-sheep sheep stream)))))

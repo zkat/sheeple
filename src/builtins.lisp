@@ -52,7 +52,10 @@
 
 (defun box-object (object)
   "Wraps OBJECT with a sheep."
-  (assert (not (sheepp object)))
+  (restart-case (error-when (sheepp object) "~S is already a sheep." object)
+    (continue () :report (lambda (s) (format s "Box ~S anyways." object)))
+    (return-object () :report (lambda (s) (format s "Do not box ~S." object))
+                   (return-from box-object object)))
   (setf (gethash object *boxed-object-table*)
         (defsheep ((box-type-of object))
             ((wrapped-object object))

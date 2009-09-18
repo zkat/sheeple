@@ -139,12 +139,12 @@
   (is (equal '(bar foo) (push 'bar (%sheep-parents sheep))))
   (is (equal '(bar foo) (%sheep-parents sheep))))
 
-(test (%sheep-direct-properties :fixture with-std-sheep)
-  (is (null (%sheep-direct-properties sheep)))
-  (is (equal '(foo) (setf (%sheep-direct-properties sheep) '(foo))))
-  (is (equal '(foo) (%sheep-direct-properties sheep)))
-  (is (equal '(bar foo) (push 'bar (%sheep-direct-properties sheep))))
-  (is (equal '(bar foo) (%sheep-direct-properties sheep))))
+(test (%sheep-properties :fixture with-std-sheep)
+  (is (null (%sheep-properties sheep)))
+  (is (equal '(foo) (setf (%sheep-properties sheep) '(foo))))
+  (is (equal '(foo) (%sheep-properties sheep)))
+  (is (equal '(bar foo) (push 'bar (%sheep-properties sheep))))
+  (is (equal '(bar foo) (%sheep-properties sheep))))
 
 (test (%sheep-roles :fixture with-std-sheep)
   (is (null (%sheep-roles sheep)))

@@ -17,82 +17,37 @@
 ;;;
 ;;; Sheeple object
 ;;;
-(defun %std-sheep-p (obj)
-  "Tests whether OBJ is EQ to =STANDARD-METASHEEP= at run-time."
-  (eq (svref obj 0) =standard-metasheep=))
 
-(deftype std-sheep ()
-  "A standard sheep object is a 6-slot simple vector where the 0th element
-is =standard-metasheep=."
-  '(and (simple-vector 6) (satisfies %std-sheep-p)))
+(defstruct (sheep (:conc-name %sheep-) (:predicate sheepp)
+                  (:constructor std-allocate-sheep (metasheep))
+                  (:print-object print-sheep-wrapper))
+  metasheep parents direct-properties roles hierarchy-cache children)
 
-(deftype sheep ()
-  "A sheep is a 6-slot simple vector where the 0th element is =standard-metasheep= or one
-of its descendants."
-  '(satisfies sheepp))
+(declaim (inline %sheep-metasheep %sheep-parents %sheep-direct-properties
+                 %sheep-roles %sheep-hierarchy-cache %sheep-children))
 
-(defun std-sheep-p (sheep)
-  "Internal predicate for sheepdom."
-  (typep sheep 'std-sheep))
-
-(defun sheepp (sheep)
-  "Predicate for sheepdom."
-  (or (typep sheep 'std-sheep)
-      (and (typep sheep '(simple-vector 6))
-           (typep (elt sheep 0) 'std-sheep))))
-
-;;; The basics of printing sheep
-(defun verify-print-settings ()
-  (assert (or *print-pretty* *print-circle*)
-          (*print-pretty* *print-circle*)
-          (format nil "It is impossible to print sheep when both *PRINT-PRETTY* ~
-                       and *PRINT-CIRCLE* are~%disabled. Please enable at least ~
-                       one of them, and try again.~%Unless you are hacking ~
-                       Sheeple internals, it is highly recommended that you~@
-                       enable pretty-printing."))
-  (unless *print-pretty*
-    (warn "Pretty-printing is disabled. Sheep objects will be printed raw.")))
-
-;;; This form currently overrides the previous print settings. We should decide
-;;; whether we want to take this approach, or just get people to stick a form
-;;; in their Lisp's init file.
-(handler-case (verify-print-settings)
-  (condition ()
-    (setf *print-pretty* t
-          *print-circle* t)
-    (verify-print-settings)))
-
-(defun print-young-sheep (stream sheep)
-  (print-unreadable-object (sheep stream :identity t)
-    (format stream "Young Sheep")))
-
-(set-pprint-dispatch 'sheep 'print-young-sheep 0.1)
-
-;;; The basics of allocating sheep objects
-(defun std-allocate-sheep (metasheep)
-  "Creates a standard sheep object."
-  (vector metasheep nil nil nil nil nil))
+(defun std-sheep-p (x)
+  (ignore-errors (eq (%sheep-metasheep x) =standard-metasheep=)))
 
 (defun maybe-std-allocate-sheep (metasheep)
   (if (eq =standard-metasheep= metasheep)
       (std-allocate-sheep metasheep)
       (allocate-sheep metasheep)))
 
-;;; STD-SHEEP accessor definitions
-(defmacro define-internal-accessors (&body names-and-indexes)
-  `(progn ,@(loop for (name index) on names-and-indexes by #'cddr
-               collect `(progn (declaim (inline ,name (setf ,name)))
-                               (defun ,name (sheep) (svref sheep ,index))
-                               (defun (setf ,name) (new-value sheep)
-                                 (setf (svref sheep ,index) new-value))))))
+(declaim (inline print-sheep-wrapper))
+(defun print-sheep-wrapper (sheep stream)
+  (handler-bind ((no-applicable-replies (fun (return-from print-sheep-wrapper
+                                               (std-print-sheep sheep stream))))
+                 (unbound-function (fun (when (eq (cell-error-name _) 'print-sheep)
+                                          (return-from print-sheep-wrapper
+                                            (std-print-sheep sheep stream))))))
+    (print-sheep sheep stream)))
 
-(define-internal-accessors %sheep-metasheep 0
-                           %sheep-parents 1 ; actual parents
-                           %sheep-direct-properties 2 ; direct property vector
-                           %sheep-roles 3 ; direct roles
-                           ;; These last two are used internally, for hierarchy caching.
-                           %sheep-hierarchy-cache 4
-                           %sheep-children 5)
+(defun std-print-sheep (sheep stream)
+  (print-unreadable-object (sheep stream :identity t)
+    (format stream "Sheep ~:[[~S]~;~S~]"
+            (has-direct-property-p sheep :nickname)
+            (ignore-errors (sheep-nickname sheep)))))
 
 ;; If we didn't define these functions, Lisp's package system would
 ;; export the SETF version as well as the reader.
@@ -232,10 +187,10 @@ regards to the CONSTRAINTS. A future version will undo this change."
     (t (list sheep))))
 
 (defun compute-sheep-hierarchy-list (sheep)
-  (typecase sheep
-    (std-sheep (std-compute-sheep-hierarchy-list sheep))
-    (otherwise (compute-sheep-hierarchy-list-using-metasheep
-                (sheep-metasheep sheep) sheep))))
+  (if (std-sheep-p sheep)
+      (std-compute-sheep-hierarchy-list sheep)
+      (compute-sheep-hierarchy-list-using-metasheep
+       (sheep-metasheep sheep) sheep)))
 
 (defun memoize-sheep-hierarchy-list (sheep)
   (setf (%sheep-hierarchy-cache sheep) (compute-sheep-hierarchy-list sheep))
@@ -250,10 +205,10 @@ regards to the CONSTRAINTS. A future version will undo this change."
 (defun finalize-sheep-inheritance (sheep)
   "Memoizes SHEEP's hierarchy list, running a MOP hook along the way.
 See `finalize-sheep-inheritance-using-metasheep'."
-  (typecase sheep
-    (std-sheep (std-finalize-sheep-inheritance sheep))
-    (otherwise (finalize-sheep-inheritance-using-metasheep
-                (sheep-metasheep sheep) sheep))))
+  (if (std-sheep-p sheep)
+      (std-finalize-sheep-inheritance sheep)
+      (finalize-sheep-inheritance-using-metasheep
+       (sheep-metasheep sheep) sheep)))
 
 ;;; Add/remove parents
 (defun remove-parent (parent sheep)

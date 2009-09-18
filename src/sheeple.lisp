@@ -21,9 +21,9 @@
 (defstruct (sheep (:conc-name %sheep-) (:predicate sheepp)
                   (:constructor std-allocate-sheep (metasheep))
                   (:print-object print-sheep-wrapper))
-  metasheep parents direct-properties roles hierarchy-cache children)
+  metasheep parents properties roles hierarchy-cache children)
 
-(declaim (inline %sheep-metasheep %sheep-parents %sheep-direct-properties
+(declaim (inline %sheep-metasheep %sheep-parents %sheep-properties
                  %sheep-roles %sheep-hierarchy-cache %sheep-children))
 
 (defun std-sheep-p (x)

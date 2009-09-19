@@ -253,16 +253,6 @@
             docstring
             (nreverse body))))
 
-(defun extract-var-name (item)
-  (if (listp item)
-      `',(car item)
-      `(confirm-var-name ',item)))
-
-(defun confirm-var-name (var-name)
-  (if (symbolp var-name)
-      var-name
-      (error "Invalid var name.")))
-
 ;;; Undefinition
 (defmacro undefreply (&rest args)
   (multiple-value-bind (name qualifiers lambda-list)

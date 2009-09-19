@@ -43,5 +43,5 @@
     (is (parentp =standard-sheep= test-sheep))
     (is (not (has-direct-property-p test-sheep 'var)))
     (is (not (parentp another test-sheep)))
-    (is (eql test-sheep (reinit-sheep test-sheep :new-parents (list another))))
+    (is (eql test-sheep (reinit-sheep test-sheep :parents (list another))))
     (is (parentp another test-sheep))))

@@ -62,6 +62,17 @@
             =vector= =bit-vector= =string= =complex= =integer= =float=))
 
 ;;;
+;;; Sheep Documentation
+;;;
+
+(defmethod documentation ((x sheep) (doc-type (eql 't)))
+  (property-value x 'documentation))
+
+(defmethod (setf documentation) (new-value (x sheep) (doc-type (eql 't)))
+  (handler-bind ((unbound-property 'continue))
+    (setf (property-value x 'documentation) new-value)))
+
+;;;
 ;;; Printing sheep!
 ;;;
 

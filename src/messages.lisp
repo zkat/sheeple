@@ -49,11 +49,25 @@
                      (lambda (message stream)
                        (print-unreadable-object (message stream :identity t)
                          (format stream "Message: ~a" (message-name message))))))
-  (name nil)
-  (lambda-list nil)
-  (replies nil)
+  name lambda-list replies documentation
   (dispatch-cache (make-dispatch-cache))
   (arg-info (make-arg-info)))
+
+;;;
+;;; Message Documentation
+;;;
+
+(defmethod documentation ((x message) (doc-type (eql 't)))
+  (message-documentation x))
+
+(defmethod documentation ((x symbol) (doc-type (eql 'message)))
+  (documentation (find-message x nil) t))
+
+(defmethod (setf documentation) (new-value (x message) (doc-type (eql 't)))
+  (setf (message-documentation x) new-value))
+
+(defmethod (setf documentation) (new-value (x symbol) (doc-type (eql 'message)))
+  (setf (documentation (find-message x nil) t) new-value))
 
 ;;;
 ;;; Message definition

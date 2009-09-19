@@ -85,5 +85,5 @@
 (defreply print-sheep ((sheep =boxed-object=) (stream =stream=))
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Boxed-object ~:[[~S]~;~S~]"
-            (has-direct-property-p sheep :nickname)
+            (has-direct-property-p sheep 'nickname)
             (ignore-errors (sheep-nickname sheep)))))

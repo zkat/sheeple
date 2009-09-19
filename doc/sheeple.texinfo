@@ -1,4 +1,4 @@
-\input texinfo @c -*- texinfo -*-
+\input texinfo @c -*- Mode: texinfo; fill-column: 80 -*-
 @c %**start of header
 @setfilename sheeple.info
 @settitle Sheeple @value{VERSION} Manual
@@ -10,6 +10,7 @@
 @set UPDATED-MONTH September 2009
 @set UPDATED 18 @value{UPDATED-MONTH}
 @clear mop
+@syncodeindex fn vr
 
 @copying
 This is Edition @value{EDITION},
@@ -94,12 +95,13 @@ This manual is for Sheeple @value{VERSION}
 
 @menu
 * Overview::                    Non-Technical Overview of Sheeple
+* API Documentation::           Technical Overview of Sheeple
 * Concepts::                    Introduction to the Concepts of Sheeple
+* API Index::                   Index of the Sheeple API
 * Concept Index::               Index of General Concepts
-* Variable Index::              Index of Variables and Objects of Sheeple
 * Copying::                     Your rights and freedoms
 @end menu
-@node Overview, Concepts, Top, Top
+@node Overview, API Documentation, Top, Top
 @chapter Overview
 
 @menu
@@ -320,7 +322,179 @@ trying to get it to work on. The test suite depends on Fiveam. To run it:
 And watch the tests scroll by. All tests should pass as long as you're using a
 tagged release.
 
-@node Concepts, Concept Index, Overview, Top
+@node API Documentation, Concepts, Overview, Top
+@chapter API Documentation
+
+@menu
+* Spawning Sheep::              
+@end menu
+
+@node Spawning Sheep,  , API Documentation, API Documentation
+@section Spawning Sheep
+
+@defun {spawn} @{sheep@}
+=> new-sheep
+
+@strong{Arguments and Values:}
+
+@var{sheeple} --- A list of Lisp objects
+
+@var{new-sheep} --- A new sheep object with @var{sheeple} as its parents
+
+@strong{Description:}
+
+@code{SPAWN} creates a new instance
+@ifset mop
+of @code{=STANDARD-METASHEEP=}
+@end ifset
+with @var{sheeple} as its parents. Any non-sheep objects in @var{sheeple} will
+be autoboxed and @emph{those} objects will be added as parents. The new sheep's
+parents will be ordered as they are given. Passing an empty parent list will
+automatically set @code{=STANDARD-SHEEP=} as the new object's sole parent.
+
+@strong{Examples:}
+
+@verbatim
+(spawn) => #<Sheep [=STANDARD-SHEEP=] #x15007E06>
+(sheep-parents (spawn)) => (#<Sheep =STANDARD-SHEEP= #x14C8947E>)
+(spawn (spawn)) => #<Sheep [=STANDARD-SHEEP=] #x1500A391>
+@end verbatim
+
+@strong{Side Effects:}
+
+Parents are added using @code{ADD-PARENT}, which may have side effects.
+@end defun
+
+@defmac {defsheep} (@{parent-object@}*) (@{property-spec@}*) option-spec*
+=> new-sheep
+
+@smallformat
+@verbatim
+parent-object ::= a lisp object to be cloned.
+property-spec ::= (property-name property-value property-option*)
+property-name ::= symbol
+property-value ::= object
+property-option ::= {:reader {reader-message-name | nil}}* |
+                    {:writer {writer-message-name | nil}}* |
+                    {:accessor {reader-message-name | t | nil}}*
+message-name ::= {symbol | (quote (setf symbol))}
+property-option ::= (:nickname lisp-object) |
+                    (:documentation docstring)
+@end verbatim
+@end smallformat
+
+@strong{Arguments and Values:}
+
+@var{property-name} --- A symbol
+
+@var{property-value} --- Initial value for this property
+
+@var{reader/writer/accessor} --- can be supplied more than once for each
+property. If NIL is given for any of these, signals an error if there is another
+matching definition. :accessor creates both a reader and a writer with format
+(accessor-name sheep-object) (setf (accessor-name sheep-object) new-value).
+Providing T as the argument to :accessor automatically creates an accessor for
+that property using the given property name.
+
+@var{nickname} --- The nickname for the new sheep
+
+@var{documentation} --- The documentation string for the new sheep
+
+@strong{Description:}
+
+@code{DEFSHEEP} creates a new sheep with all the @var{parent-object}s as
+parents. After the new object has been initialized, @var{direct-properties},
+readers, writers, and accessors are added to the new object based on each
+@var{property-spec}.
+
+@strong{Examples:}
+
+@verbatim
+(defsheep () ((var "value"))) => #<Sheep [=STANDARD-SHEEP=] #x1503119E>
+(defsheep (*) ()) => #<Sheep [=STANDARD-SHEEP=] #x14FB626E>
+(sheep-parents *) => (#<Sheep [=STANDARD-SHEEP=] #x1503119E>)
+(available-properties **) => (VAR)
+@end verbatim
+
+@strong{Side Effects:}
+
+@code{add-property} and @code{add-parent} are both called for each
+@var{property-spec} and @var{parent-object}.
+@end defmac
+
+@defmac {defproto} (@{parent-object@}*) (@{property-spec@}*) option-spec*
+=> new sheep
+
+@smallformat
+@verbatim
+proto-name ::= symbol
+parent-object ::= a lisp object to be cloned.
+property-spec ::= (property-name property-value property-option*)
+property-name ::= symbol
+property-value ::= object
+property-option ::= {:reader {reader-message-name | nil}}* |
+                    {:writer {writer-message-name | nil}}* |
+                    {:accessor {reader-message-name | t | nil}}*
+message-name ::= {symbol | (quote (setf symbol))}
+property-option ::= (:nickname lisp-object) |
+                    (:documentation docstring)
+@end verbatim
+@end smallformat
+
+@strong{Arguments and Values:}
+
+@var{proto-name} --- A non-keyword symbol
+
+@var{property-name} --- A symbol
+
+@var{property-value} --- Initial value for this property
+
+@var{reader/writer/accessor} --- Can be supplied more than once for each
+property. If NIL is given for any of these, signals an error if there is another
+matching definition. :accessor creates both a reader and a writer with format
+(accessor-name sheep-object) (setf (accessor-name sheep-object)
+new-value). Providing T as the argument to :accessor automatically creates an
+accessor for that property using the given property name.
+
+@var{nickname} --- The nickname for the new sheep
+
+@var{documentation} --- The documentation string for the new sheep
+
+@strong{Description:}
+
+@code{DEFPROTO} creates a new sheep with all the @var{parent-object}s as
+parents, and creates a dynamic binding for the symbol @var{proto-name} to the
+sheep.
+
+After the sheep has been initialized, @var{direct-properties}, readers, writers,
+and accessors are added to the new object based on each @var{property-spec}.
+Unlike @code{DEFSHEEP}, @code{DEFPROTO} automatically defines accessors for each
+@var{property-spec} using its @var{property-name}. This behavior can be
+overridden by passing a :reader, :writer, and/or :accessor option.
+
+Unless given a :nickname option, @code{DEFPROTO} uses @var{proto-name} as the
+new sheep's nickname.
+
+If a @code{DEFPROTO} form is evaluated when the @var{proto-name} already points
+to an existing sheep, @code{REINIT-SHEEP} is called on the existing sheep to
+clear out the current parents and properties and set them according to the
+@var{parent-object}s and @var{property-spec}s in the call to @code{DEFPROTO}@.
+
+@strong{Examples:}
+
+@verbatim
+(defproto =test-proto= () ()) => #<Sheep =TEST-PROTO= #x150712B6>
+@end verbatim
+
+@strong{Notes:}
+
+It is customary to name prototype sheep with an equals-sign (@kbd{=}) at the
+beginning and end of the name. For example, @var{=foo=} is a good name for a
+prototype sheep. This naming convention is observed for all built-in sheep in
+Sheeple; however, programs are not required to adhere to it.
+@end defmac
+
+@node Concepts, API Index, API Documentation, Top
 @chapter Concepts
 
 Sheeple bears many resemblances to @acronym{CLOS}, yet also introduces new
@@ -474,16 +648,16 @@ bignums. It has @code{=NUMBER=} as its only parent}
 of all kinds@comma{} and it has @code{=NUMBER=} as its only parent}
 @end table
 
-@node Concept Index, Variable Index, Concepts, Top
+@node API Index, Concept Index, Concepts, Top
+@unnumbered API Index
+@printindex vr
+
+@node Concept Index, Copying, API Index, Top
 @unnumbered Concept Index
 @printindex cp
 
-@node Variable Index, Copying, Concept Index, Top
-@unnumbered Variable Index
-@printindex vr
-
 @ifnottex
-@node Copying,  , Variable Index, Top
+@node Copying,  , Concept Index, Top
 @appendix Copying
 @insertcopying
 @end ifnottex

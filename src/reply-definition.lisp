@@ -21,8 +21,18 @@
   ;; When reply objects are 'called', their reply-function is fetched directly. By using lambdas,
   ;; we're able to latch on to the lexical environment the reply was defined in (so they can be
   ;; closures)
-  message qualifiers lambda-list
+  message qualifiers lambda-list documentation
   (function (constantly nil)))
+
+;;;
+;;; Reply Documentation
+;;;
+
+(defmethod documentation ((x reply) (doc-type (eql 't)))
+  (reply-documentation x))
+
+(defmethod (setf documentation) (new-value (x reply) (doc-type (eql 't)))
+  (setf (reply-documentation x) new-value))
 
 (defun reply-name (reply)
   (message-name (reply-message reply)))

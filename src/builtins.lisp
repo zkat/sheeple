@@ -84,6 +84,9 @@ has not already been boxed."
              (values (box-object object) t)))
         (t (values object nil))))
 
-(defun sheepify-list (obj-list)
+(defun sheepify-list (list)
   "Converts OBJ-LIST to a list where each item is either a sheep or a boxed object."
-  (mapcar 'sheepify obj-list))
+  ;; Worst case scenario -- traverses a long list twice and conses up a complete copy
+  ;; of the CDR when only the CAR needed to be boxed.
+  ;; We could maybe make it better by sharing structure for an all-sheep tail. - Adlai
+  (if (every 'sheepp list) list (mapcar 'sheepify list)))

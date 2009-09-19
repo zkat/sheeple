@@ -142,7 +142,7 @@
 ;;;
 (defun undefine-reply (name &key qualifiers participants)
   (awhen (find-message name nil)
-    (remove-applicable-reply it qualifiers participants)
+    (remove-applicable-reply it qualifiers (sheepify-list participants))
     (clear-dispatch-cache it)
     t))
 

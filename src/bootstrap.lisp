@@ -44,15 +44,12 @@
 
   (defmessage reinit-sheep (sheep &key &allow-other-keys)
     (:documentation "Resets parents and properties without changing SHEEP's identity."))
-  (defreply reinit-sheep (sheep &key new-parents documentation properties)
+  (defreply reinit-sheep (sheep &key parents documentation properties)
     ;; In order to reinitialize a sheep, we first remove -all- parents and properties.
     (dolist (parent (%sheep-parents sheep)) (remove-parent parent sheep))
     (remove-all-direct-properties sheep)
     ;; Now we start over. This function boxes non-sheep parents.
-    (add-parent* (cond ((null new-parents) =standard-sheep=)
-                       ((every 'sheepp new-parents) new-parents)
-                       (t (sheepify-list new-parents)))
-                 sheep)
+    (add-parent* (if (null parents) =standard-sheep= (sheepify-list parents)) sheep)
     ;; Setting up the properties all over again.
     (dolist (property-spec properties)
       (destructuring-bind (name value &rest keys) property-spec

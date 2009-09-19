@@ -354,5 +354,5 @@ will be used instead of SHEEP's metasheep, but SHEEP itself remains unchanged."
 
 (defun ensure-sheep (maybe-sheep parents &rest options)
   (if maybe-sheep
-      (apply 'reinit-sheep maybe-sheep :new-parents parents options)
+      (apply 'reinit-sheep maybe-sheep :parents parents options)
       (apply 'make-sheep parents options)))

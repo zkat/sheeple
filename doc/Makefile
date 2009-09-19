@@ -38,4 +38,7 @@ logo.png logo.eps: logo.svg
 	convert $< -trim $@
 
 clean:
-	rm -rf .{pdf,dvi} $(THING){,.{info,pdf,dvi,ps,html,tgz}} logo.{eps,png}
+	rm -rf $(THING){,.{info,pdf,dvi,ps,html,tgz}} logo.{eps,png}
+
+fullclean: clean
+	rm -rf .{pdf,dvi}

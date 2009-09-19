@@ -327,9 +327,11 @@ tagged release.
 
 @menu
 * Spawning Sheep::              
+* Sheep Hierarchies::           
+* Properties::                  
 @end menu
 
-@node Spawning Sheep,  , API Documentation, API Documentation
+@node Spawning Sheep, Sheep Hierarchies, API Documentation, API Documentation
 @section Spawning Sheep
 
 @defun {spawn} @{sheep@}
@@ -354,11 +356,13 @@ automatically set @code{=STANDARD-SHEEP=} as the new object's sole parent.
 
 @strong{Examples:}
 
+@smallformat
 @verbatim
 (spawn) => #<Sheep [=STANDARD-SHEEP=] #x15007E06>
 (sheep-parents (spawn)) => (#<Sheep =STANDARD-SHEEP= #x14C8947E>)
 (spawn (spawn)) => #<Sheep [=STANDARD-SHEEP=] #x1500A391>
 @end verbatim
+@end smallformat
 
 @strong{Side Effects:}
 
@@ -409,12 +413,14 @@ readers, writers, and accessors are added to the new object based on each
 
 @strong{Examples:}
 
+@smallformat
 @verbatim
 (defsheep () ((var "value"))) => #<Sheep [=STANDARD-SHEEP=] #x1503119E>
 (defsheep (*) ()) => #<Sheep [=STANDARD-SHEEP=] #x14FB626E>
 (sheep-parents *) => (#<Sheep [=STANDARD-SHEEP=] #x1503119E>)
 (available-properties **) => (VAR)
 @end verbatim
+@end smallformat
 
 @strong{Side Effects:}
 
@@ -482,9 +488,11 @@ clear out the current parents and properties and set them according to the
 
 @strong{Examples:}
 
+@smallformat
 @verbatim
 (defproto =test-proto= () ()) => #<Sheep =TEST-PROTO= #x150712B6>
 @end verbatim
+@end smallformat
 
 @strong{Notes:}
 
@@ -493,6 +501,175 @@ beginning and end of the name. For example, @var{=foo=} is a good name for a
 prototype sheep. This naming convention is observed for all built-in sheep in
 Sheeple; however, programs are not required to adhere to it.
 @end defmac
+
+@node Sheep Hierarchies, Properties, Spawning Sheep, API Documentation
+@section Sheep Hierarchies
+
+@defun {parentp} maybe-parent child
+=> generalized-boolean
+
+@strong{Arguments and Values:}
+
+@var{maybe-parent} --- a sheep
+
+@var{child} --- a sheep
+
+@strong{Description:}
+
+Returns true if @var{maybe-parent} is a parent of @var{child}, false otherwise.
+
+@strong{Examples:}
+
+@smallformat
+@verbatim
+(parentp =T= =STANDARD-SHEEP=) => Generalized truth value
+(parentp =STANDARD-SHEEP= =T=) => NIL
+@end verbatim
+@end smallformat
+@end defun
+
+@defun {ancestorp} maybe-ancestor descendant
+=> generalized-boolean
+
+@strong{Arguments and Values:}
+
+@var{maybe-ancestor} --- a sheep
+
+@var{descendant} --- a sheep
+
+@strong{Description:}
+
+Returns true if @var{maybe-descendant} is an ancestor of @var{descendant}, false
+otherwise.
+
+@strong{Examples:}
+
+@smallformat
+@verbatim
+(ancestorp =STANDARD-SHEEP= (spawn (spawn))) => Generalized truth value
+@end verbatim
+@end smallformat
+@end defun
+
+@defun {childp} maybe-child parent
+=> generalized-boolean
+
+@strong{Arguments and Values:}
+
+@var{maybe-child} --- a sheep
+
+@var{parent} --- a sheep
+
+@strong{Description:}
+
+Returns true if @var{maybe-child} is a child of @var{parent}, false otherwise.
+
+@strong{Examples:}
+
+@smallformat
+@verbatim
+(childp (spawn) =STANDARD-SHEEP=) => Generalized truth value
+(childp (spawn) =T=) => NIL
+@end verbatim
+@end smallformat
+@end defun
+
+@defun {descendantp} maybe-descendant ancestor
+=> generalized-boolean
+
+@strong{Arguments and Values:}
+
+@var{maybe-descendant} --- a sheep
+
+@var{ancestor} --- a sheep
+
+@strong{Description:}
+
+Returns true if @var{maybe-descendant} is a descendant of @var{ancestor}, false
+otherwise.
+
+@strong{Examples:}
+
+@smallformat
+@verbatim
+(descendantp (spawn) =STANDARD-SHEEP=) => Generalized truth value
+(descendantp (spawn) =T=) => Generalized truth value
+@end verbatim
+@end smallformat
+@end defun
+
+@defun {add-parent} new-parent sheep
+=> modified-sheep
+
+@strong{Arguments and Values:}
+
+@var{new-parent} --- a sheep
+
+@var{sheep} --- a sheep
+
+@var{modified-sheep} --- the same sheep as @var{sheep}, with @var{new-parent}
+added as a new parent.
+
+@strong{Description:}
+
+@code{ADD-PARENT} adds @var{new-parent} to the end of @var{sheep}'s parent list.
+
+If @var{new-parent} is already a parent of @var{sheep}, a condition of type
+@code{SIMPLE-ERROR} is signalled. A condition of type @code{SIMPLE-ERROR} is
+also signalled if @var{new-parent} and @var{sheep} are the same sheep. If adding
+the parent would result in a cyclic hierarchy list, a condition of type
+@code{SHEEP-HIERARCHY-ERROR} is signalled, and @var{new-parent} is not added to
+@var{sheep}.
+
+@strong{Examples:}
+
+@smallformat
+@verbatim
+(defproto =foo= () ()) => #<Sheep =FOO= #x41891CFD>
+(defproto =bar= (=foo=) ()) => #<Sheep =BAR= #x418ED98D>
+(add-parent (defproto =baz= () ()) =bar=) => #<Sheep =BAR= #x418ED98D>
+(sheep-parents =bar=)
+  => (#<Sheep =FOO= #x4175EA7D> #<Sheep =BAZ= #x4197A5FD>)
+(add-parent (spawn =foo=) =bar=) => ERROR: SHEEP-HIERARCHY-ERROR
+@end verbatim
+@end smallformat
+
+@strong{Side Effects:}
+
+@var{sheep}'s parent list is modified to include @var{new-parent}.
+@end defun
+
+@defun {remove-parent} parent sheep
+=> modified-sheep
+
+@strong{Arguments and Values:}
+
+@var{parent} --- a sheep
+
+@var{sheep} --- a sheep
+
+@var{modified-sheep} --- the same sheep as @var{sheep}, with @var{new-parent}
+removed from its parent list.
+
+@strong{Description:}
+
+If @var{parent} is in @var{sheep}'s parent list, it is removed. Otherwise, a
+condition of type @code{SIMPLE-ERROR} is signalled.
+
+@strong{Examples:} (Continued from @code{add-parent}'s examples)
+
+@smallformat
+@verbatim
+(remove-parent =foo= =bar=) => #<Sheep =BAR= #x4176435D>
+(sheep-parents =bar=) => (#<Sheep =BAZ= #x4197A5FD>)
+(remove-parent =baz= =foo=) => ERROR: SIMPLE-ERROR
+@end verbatim
+@end smallformat
+
+@strong{Side Effects:}
+
+@var{new-parent} is no longer present in @var{sheep}'s parent list.
+@end defun
 
 @node Concepts, API Index, API Documentation, Top
 @chapter Concepts

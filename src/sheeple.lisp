@@ -46,7 +46,7 @@
 (defun std-print-sheep (sheep stream)
   (print-unreadable-object (sheep stream :identity t)
     (format stream "Sheep ~:[[~S]~;~S~]"
-            (has-direct-property-p sheep :nickname)
+            (has-direct-property-p sheep 'nickname)
             (ignore-errors (sheep-nickname sheep)))))
 
 ;; If we didn't define these functions, Lisp's package system would
@@ -348,7 +348,7 @@ will be used instead of SHEEP's metasheep, but SHEEP itself remains unchanged."
                    ,(canonize-sheeple sheeple)
                    :properties ,(canonize-properties properties t)
                    ,@(canonize-options options))))
-       (unless (or (not *bootstrappedp*) (has-direct-property-p sheep :nickname))
+       (unless (or (not *bootstrappedp*) (has-direct-property-p sheep 'nickname))
          (setf (sheep-nickname sheep) ',name))
        (setf (symbol-value ',name) sheep))))
 

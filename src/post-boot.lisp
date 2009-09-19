@@ -43,12 +43,12 @@
 ;;;
 (defun sheep-nickname (sheep)
   "Returns SHEEP's nickname"
-  (property-value sheep :nickname))
+  (property-value sheep 'nickname))
 
 (defun (setf sheep-nickname) (new-nickname sheep)
   "Sets SHEEP's nickname to NEW-NICKNAME"
   (handler-bind ((unbound-property 'continue))
-    (setf (property-value sheep :nickname) new-nickname)))
+    (setf (property-value sheep 'nickname) new-nickname)))
 
 ;;; Now we name all the built-in sheep like we're Adam in Eden.
 (mapc #'(setf sheep-nickname)
@@ -63,6 +63,7 @@
 
 ;;;
 ;;; Printing sheep!
+;;;
 
 (defmessage print-sheep (sheep stream)
   (:documentation "Defines the expression print-object uses."))

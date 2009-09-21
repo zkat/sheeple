@@ -683,6 +683,91 @@ condition of type @code{SIMPLE-ERROR} is signalled.
 @var{new-parent} is no longer present in @var{sheep}'s parent list.
 @end defun
 
+@node Properties,  , Sheep Hierarchies, API Documentation
+@section Properties
+
+@defmac {with-properties} (property-entry*) sheep-form declaration* form*
+=> result*
+
+@smallformat
+@verbatim
+property-entry ::= slot-name | (variable-name slot-name)
+@end verbatim
+@end smallformat
+
+@strong{Arguments and Values:}
+
+@var{property-name} --- a property name; not evaluated.
+
+@var{variable-name} --- a variable name; not evaluated.
+
+@var{sheep-form} --- a form; evaluated to produce @var{sheep}.
+
+@var{sheep} --- a sheep.
+
+@var{declaration} --- a declare expression; not evaluated.
+
+@var{forms} --- an implicit progn.
+
+@var{results} --- the values returned by the forms.
+
+@strong{Description:}
+
+@code{WITH-PROPERTIES} establishes a lexical environment for referring to the
+properties in @var{sheep} named by the given @var{property-name}s as though they
+were lexically bound variables.
+
+Within this context the value of each property can be specified by using its
+name, or the corresponding @var{variable-name}, if one was passed for that
+property. Both @code{setf} and @code{setq} can be used to set the value of the
+property.
+
+@code{WITH-PROPERTIES} translates an appearance of @var{property-name} or
+@var{variable-name} as a variable into a call to @code{PROPERTY-VALUE}.
+
+@strong{Examples:} None
+
+@strong{Exceptional Situations:}
+
+The consequences are undefined if any property is not present in @var{sheep}.
+
+@strong{Notes:}
+
+A @code{WITH-PROPERTIES} expression of the form:
+@smallformat
+@verbatim
+(with-properties (property-entry1 ... property-entryn) instance-form form1 ... formk)
+@end verbatim
+@end smallformat
+expands into the equivalent of
+@smallformat
+@verbatim
+(let ((in instance-form))
+  (symbol-macrolet (Q1 ... Qn) form1 ... formk))
+@end verbatim
+@end smallformat
+where @code{Qi} is
+@smallformat
+@verbatim
+(property-entryi () (property-value in 'property-entry))
+@end verbatim
+@end smallformat
+if @code{property-entryi} is a symbol, and is
+@smallformat
+@verbatim
+(variable-namei () (property-value in 'property-namei))
+@end verbatim
+@end smallformat
+if @code{property-entryi} is of the form
+@smallformat
+@verbatim
+(variable-namei 'property-namei)
+@end verbatim
+@end smallformat
+
+Also, note that the standard macro @code{WITH-ACCESSORS} works on Sheep too.
+@end defmac
+
 @node Concepts, API Index, API Documentation, Top
 @chapter Concepts
 

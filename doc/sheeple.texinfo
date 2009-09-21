@@ -338,12 +338,11 @@ tagged release.
 
 @strong{Arguments and Values:}
 
-@var{all-keys} --- A list of keyword args to be passed to INIT-OBJECT.
+@var{all-keys} --- a list of keyword args.
 
-@var{parents} --- A list of parents to give to @var{new-object}. Must be a list
-                  of objects
+@var{parents} --- a list of objects.
 
-@var{new-object} --- A new object with @var{parents} as its parents
+@var{new-object} --- a new object with @var{parents} as parents.
 
 @strong{Description:}
 
@@ -377,7 +376,6 @@ Parents are added using @code{ADD-PARENT}, which may have side effects.
 
 @smallformat
 @verbatim
-parent-object ::= a lisp object to be cloned.
 property-spec ::= (property-name property-value property-option*)
 property-name ::= symbol
 property-value ::= object
@@ -392,9 +390,12 @@ property-option ::= (:nickname lisp-object) |
 
 @strong{Arguments and Values:}
 
-@var{property-name} --- A symbol
+@var{parent-object} --- a sheep.
 
-@var{property-value} --- Initial value for this property
+@var{property-name} --- a symbol.
+
+@var{property-value} --- a form, evaluated to produce the value for property.
+@var{property-name}
 
 @var{reader/writer/accessor} --- can be supplied more than once for each
 property. If NIL is given for any of these, signals an error if there is another
@@ -403,9 +404,12 @@ matching definition. :accessor creates both a reader and a writer with format
 Providing T as the argument to :accessor automatically creates an accessor for
 that property using the given property name.
 
-@var{nickname} --- The nickname for the new sheep
+@var{nickname} --- a form, evaluated to produce the nickname for
+@var{new-sheep}, preferably a symbol.
 
-@var{documentation} --- The documentation string for the new sheep
+@var{documentation} --- a string of documentation for the new sheep.
+
+@var{new-sheep} --- a sheep object, constructed according to the arguments.
 
 @strong{Description:}
 
@@ -437,7 +441,6 @@ readers, writers, and accessors are added to the new object based on each
 @smallformat
 @verbatim
 proto-name ::= symbol
-parent-object ::= a lisp object to be cloned.
 property-spec ::= (property-name property-value property-option*)
 property-name ::= symbol
 property-value ::= object
@@ -452,22 +455,28 @@ property-option ::= (:nickname lisp-object) |
 
 @strong{Arguments and Values:}
 
-@var{proto-name} --- A non-keyword symbol
+@var{proto-name} --- a non-keyword symbol.
 
-@var{property-name} --- A symbol
+@var{parent-object} --- a sheep, to be added as a parent.
 
-@var{property-value} --- Initial value for this property
+@var{property-name} --- a symbol.
 
-@var{reader/writer/accessor} --- Can be supplied more than once for each
+@var{property-value} --- a form, evaluated to produce an initial value for the
+corresponding property @var{property-name}.
+
+@var{reader/writer/accessor} --- can be supplied more than once for each
 property. If NIL is given for any of these, signals an error if there is another
 matching definition. :accessor creates both a reader and a writer with format
 (accessor-name sheep-object) (setf (accessor-name sheep-object)
 new-value). Providing T as the argument to :accessor automatically creates an
 accessor for that property using the given property name.
 
-@var{nickname} --- The nickname for the new sheep
+@var{nickname} --- a form, evaluated to produce the nickname for
+@var{new-sheep}, preferably a symbol.
 
-@var{documentation} --- The documentation string for the new sheep
+@var{documentation} --- a string of documentation for the new sheep.
+
+@var{new-sheep} --- a sheep object, constructed according to the arguments.
 
 @strong{Description:}
 
@@ -513,9 +522,9 @@ Sheeple; however, programs are not required to adhere to it.
 
 @strong{Arguments and Values:}
 
-@var{maybe-parent} --- a sheep
+@var{maybe-parent} --- a sheep.
 
-@var{child} --- a sheep
+@var{child} --- a sheep.
 
 @strong{Description:}
 
@@ -536,9 +545,9 @@ Returns true if @var{maybe-parent} is a parent of @var{child}, false otherwise.
 
 @strong{Arguments and Values:}
 
-@var{maybe-ancestor} --- a sheep
+@var{maybe-ancestor} --- a sheep.
 
-@var{descendant} --- a sheep
+@var{descendant} --- a sheep.
 
 @strong{Description:}
 
@@ -559,9 +568,9 @@ otherwise.
 
 @strong{Arguments and Values:}
 
-@var{maybe-child} --- a sheep
+@var{maybe-child} --- a sheep.
 
-@var{parent} --- a sheep
+@var{parent} --- a sheep.
 
 @strong{Description:}
 
@@ -582,9 +591,9 @@ Returns true if @var{maybe-child} is a child of @var{parent}, false otherwise.
 
 @strong{Arguments and Values:}
 
-@var{maybe-descendant} --- a sheep
+@var{maybe-descendant} --- a sheep.
 
-@var{ancestor} --- a sheep
+@var{ancestor} --- a sheep.
 
 @strong{Description:}
 
@@ -606,9 +615,9 @@ otherwise.
 
 @strong{Arguments and Values:}
 
-@var{new-parent} --- a sheep
+@var{new-parent} --- a sheep.
 
-@var{sheep} --- a sheep
+@var{sheep} --- a sheep.
 
 @var{modified-sheep} --- the same sheep as @var{sheep}, with @var{new-parent}
 added as a new parent.
@@ -647,9 +656,9 @@ the parent would result in a cyclic hierarchy list, a condition of type
 
 @strong{Arguments and Values:}
 
-@var{parent} --- a sheep
+@var{parent} --- a sheep.
 
-@var{sheep} --- a sheep
+@var{sheep} --- a sheep.
 
 @var{modified-sheep} --- the same sheep as @var{sheep}, with @var{new-parent}
 removed from its parent list.

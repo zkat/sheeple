@@ -14,10 +14,10 @@
     =vector= =bit-vector= =string= =complex= =integer= =float=)
 
 (defun box-type-of (x)
-  "Maps the type of X to a built-in sheep."
-  (if (sheepp x)
+  "Maps the type of X to a built-in object."
+  (if (objectp x)
       (progn
-        (warn "This is already a sheep!")
+        (warn "This is already a object!")
         x)
       (typecase x
         (null                                          =null=)
@@ -45,19 +45,19 @@
 ;; be a weak hash table with both key *and* value weakness. For now, though, we hold on
 ;; to references until a solution is thought out.
 (defvar *boxed-object-table* (make-hash-table)
-  "Lisp objects boxed by Sheeple are stored in here.")
+  "Lisp objects boxed by Objects are stored in here.")
 
 (defun wrapped-object (box)
   (property-value box 'wrapped-object))
 
 (defun box-object (object)
-  "Wraps OBJECT with a sheep."
-  (restart-case (error-when (sheepp object) "~S is already a sheep." object)
+  "Wraps OBJECT with a object."
+  (restart-case (error-when (objectp object) "~S is already a object." object)
     (continue () :report (lambda (s) (format s "Box ~S anyways." object)))
     (return-object () :report (lambda (s) (format s "Do not box ~S." object))
                    (return-from box-object object)))
   (setf (gethash object *boxed-object-table*)
-        (defsheep ((box-type-of object))
+        (defobject ((box-type-of object))
             ((wrapped-object object))
           (:nickname object))))
 
@@ -67,26 +67,26 @@
 
 (defun find-boxed-object (object &optional (errorp nil))
   "Finds a previously-boxed object in the boxed object table.
-If ERRORP is T, this signals an error if OBJECT is a sheep, or if OBJECT
+If ERRORP is T, this signals an error if OBJECT is a object, or if OBJECT
 has not already been boxed."
-  (if (sheepp object)
-      (when errorp (error "~S seems to already be a sheep." object))
-      (multiple-value-bind (sheep hasp)
+  (if (objectp object)
+      (when errorp (error "~S seems to already be a object." object))
+      (multiple-value-bind (object hasp)
           (gethash object *boxed-object-table*)
-        (if hasp sheep
+        (if hasp object
             (when errorp (error "~S has not been boxed." object))))))
 
-(defun sheepify (object)
+(defun objectify (object)
   "Returns OBJECT or boxes it."
   (cond ((eq object t) =t=) ;optimization!
-        ((not (sheepp object))
+        ((not (objectp object))
          (or (find-boxed-object object)
              (values (box-object object) t)))
         (t (values object nil))))
 
-(defun sheepify-list (list)
-  "Converts OBJ-LIST to a list where each item is either a sheep or a boxed object."
+(defun objectify-list (list)
+  "Converts OBJ-LIST to a list where each item is either a object or a boxed object."
   ;; Worst case scenario -- traverses a long list twice and conses up a complete copy
   ;; of the CDR when only the CAR needed to be boxed.
-  ;; We could maybe make it better by sharing structure for an all-sheep tail. - Adlai
-  (if (every 'sheepp list) list (mapcar 'sheepify list)))
+  ;; We could maybe make it better by sharing structure for an all-object tail. - Adlai
+  (if (every 'objectp list) list (mapcar 'objectify list)))

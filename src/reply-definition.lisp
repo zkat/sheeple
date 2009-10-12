@@ -40,7 +40,7 @@
 ;;;
 ;;; Roles
 ;;;
-;;; - Roles encapsulate the idea of dispatch. Roles live in sheep objects themselves and represent
+;;; - Roles encapsulate the idea of dispatch. Roles live in object objects themselves and represent
 ;;;   the basic information about what 'role' that particular object has in dispatching on a
 ;;;   particular message. As it turns out, all the information roles have to hold is the position
 ;;;   in which it is supposed to be called, and the actual reply object it's associated with.
@@ -67,10 +67,10 @@
 (defun role-name (role)
   (reply-name (role-reply role)))
 
-(defun participantp (sheep reply)
-  "Checks if SHEEP is actually involved in dispatching REPLY"
+(defun participantp (object reply)
+  "Checks if OBJECT is actually involved in dispatching REPLY"
   (when (find-if (curry 'eq reply)
-                 (%sheep-roles sheep) :key 'role-reply)
+                 (%object-roles object) :key 'role-reply)
     t))
 
 ;;;
@@ -87,62 +87,62 @@
                             :lambda-list lambda-list
                             :qualifiers qualifiers
                             :function function))
-         (sheepified-participants (sheepify-list participants)))
+         (objectified-participants (objectify-list participants)))
     (setf (documentation reply 't) documentation) ; same as dox for CLOS methods
     (clear-dispatch-cache message)                ; because the dispatch landscape has changed
     ;; In order to replace existing replies, we must remove them before actually adding them again.
-    (remove-specific-reply message qualifiers sheepified-participants)
+    (remove-specific-reply message qualifiers objectified-participants)
     (add-reply-to-message reply message)
-    (add-reply-to-sheeple reply sheepified-participants)
+    (add-reply-to-objects reply objectified-participants)
     reply))
 
 (defun add-reply-to-message (reply message)
   (set-arg-info message :new-reply reply)
   (push reply (message-replies message)))
 
-(defun add-reply-to-sheeple (reply sheeple)
+(defun add-reply-to-objects (reply objects)
   (loop
-     for sheep in sheeple
+     for object in objects
      for i from 0
      do (push (make-role reply i)
-              (%sheep-roles sheep))))
+              (%object-roles object))))
 
-(defun available-replies (sheep)
+(defun available-replies (object)
   (delete-duplicates
-   (append (%sheep-roles sheep) (mapcan 'available-replies (sheep-parents sheep)))
+   (append (%object-roles object) (mapcan 'available-replies (object-parents object)))
    :test 'equal))
 
-(defun add-reader-to-sheep (reader prop-name sheep)
-  (ensure-message reader :lambda-list '(sheep))
+(defun add-reader-to-object (reader prop-name object)
+  (ensure-message reader :lambda-list '(object))
   (ensure-reply reader
-                :lambda-list '(sheep)
-                :participants (list sheep)
-                :function (eval (make-reply-lambda reader '(sheep) ()
-                                                   `((property-value sheep ',prop-name))))))
+                :lambda-list '(object)
+                :participants (list object)
+                :function (eval (make-reply-lambda reader '(object) ()
+                                                   `((property-value object ',prop-name))))))
 
-(defun add-readers-to-sheep (readers prop-name sheep)
-  (map nil (fun (add-reader-to-sheep _ prop-name sheep)) readers)
-  sheep)
+(defun add-readers-to-object (readers prop-name object)
+  (map nil (fun (add-reader-to-object _ prop-name object)) readers)
+  object)
 
-(defun add-writer-to-sheep (writer prop-name sheep)
-  (ensure-message writer :lambda-list '(new-value sheep))
+(defun add-writer-to-object (writer prop-name object)
+  (ensure-message writer :lambda-list '(new-value object))
   (ensure-reply writer
-                :lambda-list '(new-value sheep)
-                :participants (list =t= sheep)
-                :function (eval (make-reply-lambda writer '(new-value sheep) ()
-                                                   `((setf (property-value sheep ',prop-name)
+                :lambda-list '(new-value object)
+                :participants (list =t= object)
+                :function (eval (make-reply-lambda writer '(new-value object) ()
+                                                   `((setf (property-value object ',prop-name)
                                                            new-value))))))
 
-(defun add-writers-to-sheep (writers prop-name sheep)
-  (map nil (fun (add-writer-to-sheep _ prop-name sheep)) writers)
-  sheep)
+(defun add-writers-to-object (writers prop-name object)
+  (map nil (fun (add-writer-to-object _ prop-name object)) writers)
+  object)
 
 ;;;
 ;;; Reply undefinition
 ;;;
 (defun undefine-reply (name &key qualifiers participants)
   (awhen (find-message name nil)
-    (remove-applicable-reply it qualifiers (sheepify-list participants))
+    (remove-applicable-reply it qualifiers (objectify-list participants))
     (clear-dispatch-cache it)
     t))
 
@@ -153,12 +153,12 @@
     (when (and reply
                (every (rcurry 'participantp reply) participants))
       (loop
-         for sheep in participants
+         for object in participants
          for i from 0
          do (map nil (fun (when (and (eq reply (role-reply _))
                                      (= i (role-position _)))
-                            (delete-role _ sheep)))
-                 (%sheep-roles sheep)))
+                            (delete-role _ object)))
+                 (%object-roles object)))
       (delete-reply reply))))
 
 (defun remove-applicable-reply (message qualifiers participants)
@@ -167,20 +167,20 @@
                          message participants nil))))
     (when reply
       (loop
-         for sheep in participants
+         for object in participants
          for i from 0
          do (map nil (fun (when (and (eq reply (role-reply _))
                                      (= i (role-position _)))
-                            (delete-role _ sheep)))
-                 (%sheep-roles sheep)))
+                            (delete-role _ object)))
+                 (%object-roles object)))
       (delete-reply reply))))
 
 (defun delete-reply (reply)
   (deletef (message-replies (reply-message reply)) reply)
   (setf (documentation reply 't) nil))
 
-(defun delete-role (role sheep)
-  (deletef (%sheep-roles sheep) role))
+(defun delete-role (role object)
+  (deletef (%object-roles object) role))
 
 ;;;
 ;;; User interface

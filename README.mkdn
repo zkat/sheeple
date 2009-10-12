@@ -106,9 +106,6 @@ Features
 
 * (call-next-reply) and (next-reply-p)
 
-* A metaobject protocol (in CLOS) for inspecting sheeple and altering their
-  behavior through metaclasses. So far, instantiation, inheritance, and property
-  protocols have been implemented.
 
 Using Sheeple
 =============
@@ -125,22 +122,22 @@ lurk in #lisp@freenode (as zkat).
 Quick Example
 -------------
 
-This creates a standard sheep with only =STANDARD-SHEEP= as its parent
+This creates a standard object with only =STANDARD-OBJECT= as its parent
 
-        SHEEPLE-USER> (defparameter *my-sheep* (spawn))
-        *MY-SHEEP*
+        SHEEPLE-USER> (defparameter *my-object* (spawn))
+        *MY-OBJECT*
 
-We can add properties to a sheep object at any time. This particular call also
+We can add properties to an object at any time. This particular call also
 auto-generates an accessor based on the property name given.
 
-        SHEEPLE-USER> (add-property *my-sheep* 'var "value")
-        #<Sheep #x1579A04E>
-        SHEEPLE-USER> (var *my-sheep*)
+        SHEEPLE-USER> (add-property *my-object* 'var "value")
+        #<Object #x1579A04E>
+        SHEEPLE-USER> (var *my-object*)
         "value"
 
 Creating a new sheep object is as simple as spawning it.
 
-        SHEEPLE-USER> (defparameter *child* (spawn *my-sheep*))
+        SHEEPLE-USER> (defparameter *child* (spawn *my-object*))
         *CHILD*
 
 Sheeple does differential inheritance by default. This means that value lookup
@@ -149,12 +146,12 @@ value is set directly in a sheep.
 
         SHEEPLE-USER> (var *child*)
         "value"
-        SHEEPLE-USER> (setf (var *my-sheep*) "new-value")
+        SHEEPLE-USER> (setf (var *my-object*) "new-value")
         "new-value"
 
-We've changed *my-sheep*'s VAR value, so *child*'s VAR value will also change.
+We've changed *my-object*'s VAR value, so *child*'s VAR value will also change.
 
-        SHEEPLE-USER> (var *my-sheep*)
+        SHEEPLE-USER> (var *my-object*)
         "new-value"
         SHEEPLE-USER> (var *child*)
         "new-value"
@@ -178,14 +175,14 @@ prototypes.
 Replies are defined on sheep objects themselves. No need for eql-specialization,
 everything is an 'instance' in Sheeple.
 
-        SHEEPLE-USER> (defreply synergize ((a *my-sheep*) (b *my-sheep*)) (spawn a b))
+        SHEEPLE-USER> (defreply synergize ((a *my-object*) (b *my-object*)) (spawn a b))
         #<Reply: SYNERGIZE #x157C5596>
-        SHEEPLE-USER> (synergize *my-sheep* *child*)
+        SHEEPLE-USER> (synergize *my-object* *child*)
         ; ERROR - circular precedence graph
         ; Evaluation aborted.
-        SHEEPLE-USER> (synergize *child* *my-sheep*)
-        #<Sheep #x15787456>
-        SHEEPLE-USER> (var (synergize *child* *my-sheep*))
+        SHEEPLE-USER> (synergize *child* *my-object*)
+        #<Object #x15787456>
+        SHEEPLE-USER> (var (synergize *child* *my-object*))
         "new-value"
 
 [0]: http://github.com/zkat/sheeple/tree/v2.2

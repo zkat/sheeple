@@ -124,26 +124,22 @@
 **** TODO Check that entries are moved over
 **** TODO Check that errors are signalled if there is no child cache
 *** TODO Improve tests for printing
-    This might require CL-PPCRE.  Also, there should be better tests for the
-    initialization of various *print-foobar* settings.
+    This might require CL-PPCRE.
 *** TODO Update tests for FIND-MESSAGE vs %FIND-MESSAGE
     All that remains to be done is to write a separate test for FIND-MESSAGE
 *** DONE Improve test for WITH-SHEEP-HIERARCHY
 *** DONE Convert tests to use WITH-SHEEP-HIERARCHY
-** TODO Checking hierarchies
-   #'ADD-PARENT shouldn't rely on the hierarchy list computation to
-   check the validity of new hierarchy lists. In fact, the hierarchy
-   checking as a whole needs to be revamped a bit.
-** TODO "Sanely Bootstrappable"
-   Let's not go insane between now and when (test bootstrapped?) passes.
-*** TODO #'std-remove-parent should make sure that the hierarchy list is still valid.
-*** TODO Write VALIDATE-HIERARCHY-LIST
-*** DONE Once bootstrapped, update WITH-SHEEP-HIERARCHY to use SPAWN
-*** DONE Write proper print functions
+** TODO Parent/Hierarchy API
+*** TODO (setf sheep-parents)
+    Needs to deal correctly with bogus parent lists
+*** TODO compute-hierarchy-from-parent-list
+    Isolates the hierarchy algorithm, making it easier to write
+*** TODO validate-hierarchy-list
+    Do we even need this? It was in the TODO before... I guess now
+    it'd just be a handler-case around the above.
 ** TODO API
    Go over the whole API, clean stuff up, make it more Serious.
    Mainly, the object creation API could use a little cleanup.
-   It might be a good idea to only provide MAKE-OBJECT, and get rid of SPAWN.
 ** TODO Implement maps
    Maps, in Self-speak, are sort of backend-classes used to represent the basic format
    of a bunch of similar objects. Implementing these would mean a huge boost in performance

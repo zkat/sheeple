@@ -75,15 +75,15 @@
         (loop
            for arg in args
            for index upto (1- n)
-           do (let* ((arg (if (sheepp arg)
+           do (let* ((arg (if (objectp arg)
                               arg
                               (or (find-boxed-object arg)
                                   (box-type-of arg))))
-                     (curr-sheep-list (sheep-hierarchy-list arg)))
+                     (curr-object-list (object-hierarchy-list arg)))
                 (loop
-                   for curr-sheep in curr-sheep-list
-                   for hierarchy-position upto (1- (length curr-sheep-list))
-                   do (dolist (role (%sheep-roles curr-sheep))
+                   for curr-object in curr-object-list
+                   for hierarchy-position upto (1- (length curr-object-list))
+                   do (dolist (role (%object-roles curr-object))
                         (when (and (equal selector (message-name (role-message role))) ;(eql message (role-message role))
                                    (= (the fixnum index) (the fixnum (role-position role))))
                           (let ((curr-reply (role-reply role)))

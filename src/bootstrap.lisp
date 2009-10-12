@@ -12,57 +12,57 @@
 ;;; Bootstrap time!
 
 (unless *bootstrappedp*
-  ;; Before anything else happens, we need =STANDARD-METASHEEP= to exist:
-  (setf =standard-metasheep= (std-allocate-sheep =standard-metasheep=))
-  (setf (%sheep-metasheep =standard-metasheep=) =standard-metasheep=)
-  (finalize-sheep-inheritance =standard-metasheep=)
+  ;; Before anything else happens, we need =STANDARD-METAOBJECT= to exist:
+  (setf =standard-metaobject= (std-allocate-object =standard-metaobject=))
+  (setf (%object-metaobject =standard-metaobject=) =standard-metaobject=)
+  (finalize-object-inheritance =standard-metaobject=)
 
-  ;; =T= and =STANDARD-SHEEP= have special rules about parents.
-  (setf =t= (finalize-sheep-inheritance (std-allocate-sheep =standard-metasheep=))
-        =standard-sheep= (add-parent =t= (std-allocate-sheep =standard-metasheep=)))
+  ;; =T= and =STANDARD-OBJECT= have special rules about parents.
+  (setf =t= (finalize-object-inheritance (std-allocate-object =standard-metaobject=))
+        =standard-object= (add-parent =t= (std-allocate-object =standard-metaobject=)))
 
   ;; We can define special messages now.
-  (defmessage allocate-sheep (metasheep)
-    (:documentation "Allocates a sheep object based on METASHEEP."))
-  (defreply allocate-sheep ((sheep =standard-metasheep=))
-    (std-allocate-sheep sheep))
+  (defmessage allocate-object (metaobject)
+    (:documentation "Allocates a object object based on METAOBJECT."))
+  (defreply allocate-object ((object =standard-metaobject=))
+    (std-allocate-object object))
 
-  (defmessage shared-init (sheep &key &allow-other-keys)
-    (:documentation "Adds properties to SHEEP and performs general initialization tasks."))
-  (defreply shared-init (sheep &key properties nickname)
+  (defmessage shared-init (object &key &allow-other-keys)
+    (:documentation "Adds properties to OBJECT and performs general initialization tasks."))
+  (defreply shared-init (object &key properties nickname)
     (dolist (property-spec properties)
       (destructuring-bind (name value &rest keys) property-spec
-        (apply 'add-property sheep name value keys)))
+        (apply 'add-property object name value keys)))
     (when nickname
-      (setf (sheep-nickname sheep) nickname))
-    sheep)
+      (setf (object-nickname object) nickname))
+    object)
 
-  (defmessage init-sheep (sheep &key &allow-other-keys)
-    (:documentation "Performs 'once-only' initialization tasks on SHEEP."))
-  (defreply init-sheep (sheep &key properties nickname)
-    (shared-init sheep :properties properties :nickname nickname))
+  (defmessage init-object (object &key &allow-other-keys)
+    (:documentation "Performs 'once-only' initialization tasks on OBJECT."))
+  (defreply init-object (object &key properties nickname)
+    (shared-init object :properties properties :nickname nickname))
 
-  (defmessage reinit-sheep (sheep &key &allow-other-keys)
-    (:documentation "Resets parents and properties without changing SHEEP's identity."))
-  (defreply reinit-sheep (sheep &key parents documentation properties)
-    ;; In order to reinitialize a sheep, we first remove -all- parents and properties.
-    (dolist (parent (%sheep-parents sheep)) (remove-parent parent sheep))
-    (remove-all-direct-properties sheep)
-    ;; Now we start over. This function boxes non-sheep parents.
-    (add-parent* (if (null parents) =standard-sheep= (sheepify-list parents)) sheep)
+  (defmessage reinit-object (object &key &allow-other-keys)
+    (:documentation "Resets parents and properties without changing OBJECT's identity."))
+  (defreply reinit-object (object &key parents documentation properties)
+    ;; In order to reinitialize a object, we first remove -all- parents and properties.
+    (dolist (parent (%object-parents object)) (remove-parent parent object))
+    (remove-all-direct-properties object)
+    ;; Now we start over. This function boxes non-object parents.
+    (add-parent* (if (null parents) =standard-object= (objectify-list parents)) object)
     ;; Setting up the properties all over again.
     (dolist (property-spec properties)
       (destructuring-bind (name value &rest keys) property-spec
-        (apply 'add-property sheep name value keys)))
+        (apply 'add-property object name value keys)))
     ;; Finally, set the documentation. If none is provided, it's set to NIL.
-    ;; It's important to note that documenting a sheep will keep a reference to it...
-    ;; At the same time, REINIT-SHEEP is only meant for protos, so it should be fine.
-    (setf (documentation sheep 't) documentation)
-    sheep)
+    ;; It's important to note that documenting a object will keep a reference to it...
+    ;; At the same time, REINIT-OBJECT is only meant for protos, so it should be fine.
+    (setf (documentation object 't) documentation)
+    object)
 
-  ;; Now we redefine =standard-sheep= and =standard-metasheep= normally.
-  (defproto =standard-sheep= (=t=) ())
-  (add-parent =standard-sheep= =standard-metasheep=)
+  ;; Now we redefine =standard-object= and =standard-metaobject= normally.
+  (defproto =standard-object= (=t=) ())
+  (add-parent =standard-object= =standard-metaobject=)
 
   ;; Now we just define all the builtins, and we're good to go.
   (defproto =boxed-object= (=t=) ())

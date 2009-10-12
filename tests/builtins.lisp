@@ -10,7 +10,7 @@
 (in-package :sheeple)
 
 ;;;
-;;; Built-in sheeple objects
+;;; Built-in objects
 ;;;
 (def-suite builtins :in sheeple)
 
@@ -41,7 +41,7 @@
 
 (test box-object
   (signals error (box-object (spawn)))
-  (is (sheepp (box-object 'foo)))
+  (is (objectp (box-object 'foo)))
   (is (find-boxed-object 'foo))
   (is (eq 'foo (wrapped-object (find-boxed-object 'foo)))))
 
@@ -56,14 +56,14 @@
   (is (remove-boxed-object 'foo))
   (is (null (find-boxed-object 'foo nil))))
 
-(test sheepify
-  (let ((sheep (spawn)))
-    (is (eql sheep (sheepify sheep))))
-  (is (sheepp (sheepify 'foo)))
+(test objectify
+  (let ((object (spawn)))
+    (is (eql object (objectify object))))
+  (is (objectp (objectify 'foo)))
   (is (find-boxed-object 'foo)))
 
-(test sheepify-list
-  (is (every #'sheepp (sheepify-list '(1 "foo" 'bar 42)))))
+(test objectify-list
+  (is (every #'objectp (objectify-list '(1 "foo" 'bar 42)))))
 
 ;; TODO - implement CLOS autoboxing
 ;; (test clos-boxing)

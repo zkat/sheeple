@@ -2,9 +2,9 @@
 ;;;;
 ;;;; This file is part of Sheeple.
 
-;;;; tests/sheeple.lisp
+;;;; tests/objects.lisp
 ;;;;
-;;;; Unit tests for src/sheeple.lisp
+;;;; Unit tests for src/objects.lisp
 ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)

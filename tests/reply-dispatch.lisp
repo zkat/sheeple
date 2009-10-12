@@ -46,7 +46,7 @@
                   (call-dummy-message ,@final-call-args))))))
 
 (test primary
-  (with-sheep-hierarchy ((a) (b a))
+  (with-object-hierarchy ((a) (b a))
     (test-dummy-dispatch (:a) (x y) (a nil)
       (() (a =t=) (flag :a)))
     (test-dummy-dispatch (:b :a) (x y) (b nil)

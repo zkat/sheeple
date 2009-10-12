@@ -51,9 +51,9 @@
     (is (eq (message-name message) (role-name (make-role (make-reply :message message) 0))))))
 
 (test participantp
-  (for-all ((sheep (fun (cons-std-sheep))) (reply (fun (make-reply))) (position (gen-integer)))
-    (push (make-role reply position) (%sheep-roles sheep))
-    (is (not (null (participantp sheep reply))))))
+  (for-all ((object (fun (cons-std-object))) (reply (fun (make-reply))) (position (gen-integer)))
+    (push (make-role reply position) (%object-roles object))
+    (is (not (null (participantp object reply))))))
 
 (in-suite reply-definition)
 
@@ -67,12 +67,12 @@
   (is (= 2 (funcall 'foo 'x))))
 
 (test add-reply-to-message)
-(test add-reply-to-sheeple)
+(test add-reply-to-objects)
 (test available-replies)
-(test add-reader-to-sheep)
-(test add-readers-to-sheep)
-(test add-writer-to-sheep)
-(test add-writers-to-sheep)
+(test add-reader-to-object)
+(test add-readers-to-object)
+(test add-writer-to-object)
+(test add-writers-to-object)
 
 (def-suite reply-undefinition :in reply-definition)
 (in-suite reply-undefinition)

@@ -145,12 +145,12 @@
 (test defmessage)
 (test canonize-message-option
   (let ((o1 '(:documentation "foo"))
-        (o2 '(:metasheep "thesheep")))
+        (o2 '(:metaobject "theobject")))
     (is (equal (list :documentation "foo") (canonize-message-option o1)))
-    (is (equal (list :metasheep "thesheep") (canonize-message-option o2)))))
+    (is (equal (list :metaobject "theobject") (canonize-message-option o2)))))
 
 (test canonize-message-options
     (let ((o1 '(:documentation "foo"))
-          (o2 '(:metasheep "thesheep")))
-    (is (equal (list :documentation "foo" :metasheep "thesheep")
+          (o2 '(:metaobject "theobject")))
+    (is (equal (list :documentation "foo" :metaobject "theobject")
                (canonize-message-options (list o1 o2))))))

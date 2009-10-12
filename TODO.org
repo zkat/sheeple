@@ -89,13 +89,6 @@
      use of such a MOP feature could be a wrapper for mapping properties, such
      as the "channel-local" properties used in Sykobot, where accessors would
      take an additional argument used as a key in the mapping.
-*** TODO Messages/replies
-*** TODO Implement :message option for defmessage (like CLOS' :method option)
-   I don't care about this feature all that much, so I might just keep bumping it until someone
-   who -does- care asks for it.
-   UPDATE: I don't think I even want this. It makes the defmessage macro horribly bloated and
-   complex, and I don't even like the idea of stuffing everything into a message definition. Things
-   need to stay flexible, and this would be just plain ugly.
 ** TODO Optimization
 *** TODO Speed up accessors
    Accessors need to be fast. Really fast. Find ways to cheat that won't break everything.
@@ -107,23 +100,18 @@
     I should've done this in the first place. A simpler version of the same
     system used to dispatch replies would do wonders for read performance,
     without seriously harming writer performance.
-* TODO 3.2
+* TODO 3.1
 ** TODO Metasheep Protocol
 *** TODO Property MOP
-*** TODO Extend sheep-creation MOP
+*** TODO Object-creation MOP
 *** TODO Begin work on message/reply MOP (maybe)
-* TODO 3.1
-** TODO [#A] Implement 'maps'
-   Maps, in Self-speak, are sort of backend-classes used to represent the basic format
-   of a bunch of similar objects. Implementing these would mean a huge boost in performance
-   and a large reduction in memory usage, since all the "sheep-children" stuff could be held
-   by the backend-class implementation. Furthermore, it would remove the dependency on
-   trivial-garbage, and allow sheeple to run on lisps without user-accessible weak pointers.
-   Everything will just be awesome. Also, I'll get ponies. -- sykopomp
-** TODO [#B] Cache message dispatch
+* TODO 3.0.1
+** TODO Cache message dispatch
    That's right, it's back, and it's comin' to an optimized sheeple near you. This should
    definitely be done -after- maps are implemented, since it'll be a little nicer that way,
-   but it should definitely be implemented and *ready* by the time 3.1 is tagged -- sykopomp
+   but it should definitely be implemented and *ready* by the time 3.0.1 is tagged -- sykopomp
+** TODO Cache delegated property access
+   This is pretty important -- having maps -should- make it a little easier.
 * TODO 3.0
   This is a rough sketch of The Road to Sheeple 3.0
 ** TODO "Test all the fucking time."
@@ -152,14 +140,25 @@
 *** TODO Write VALIDATE-HIERARCHY-LIST
 *** DONE Once bootstrapped, update WITH-SHEEP-HIERARCHY to use SPAWN
 *** DONE Write proper print functions
-** TODO Document everything in doc/sheeple.texinfo
-** DONE Fix Sheep Allocation
-** DONE Instantiation
-** DONE Properties
+** TODO API
+   Go over the whole API, clean stuff up, make it more Serious.
+   Mainly, the object creation API could use a little cleanup.
+   It might be a good idea to only provide MAKE-OBJECT, and get rid of SPAWN.
+** TODO Implement maps
+   Maps, in Self-speak, are sort of backend-classes used to represent the basic format
+   of a bunch of similar objects. Implementing these would mean a huge boost in performance
+   and a large reduction in memory usage, since all the "sheep-children" stuff could be held
+   by the backend-class implementation. Furthermore, it would remove the dependency on
+   trivial-garbage, and allow sheeple to run on lisps without user-accessible weak pointers.
+   Everything will just be awesome. Also, I'll get ponies. -- sykopomp
+** TODO Properties
 *** DONE Reimplement properties
 *** DONE TATFT
 *** DONE Improve the whole add-property interface.
-** DONE Messages, Replies
+** TODO Messages
+*** TODO Check for correctness of lambda-list congruence
+*** TODO Add :reply option to defmessage.
+** TODO Document everything in doc/sheeple.texinfo
 * DONE 2.2
 ** DONE [#A] Fix #'(setf property-value) Bug
    When a call to #'(setf property-value) requires a new direct property object

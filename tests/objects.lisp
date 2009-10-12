@@ -153,7 +153,7 @@
   (is (equal '(bar foo) (object-parents object)))
   (is (null (fboundp '(setf object-parents)))))
 
-(def-suite inheritance :in object-objects)
+(def-suite inheritance :in objects)
 (def-suite inheritance-basic :in inheritance)
 (in-suite inheritance-basic)
 
@@ -480,7 +480,7 @@
 ;;;
 ;;; Spawning
 ;;;
-(def-suite spawning :in objectle)
+(def-suite spawning :in objects)
 
 (def-suite spawn-general :in spawning)
 (in-suite spawn-general)

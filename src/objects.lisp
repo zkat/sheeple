@@ -34,6 +34,12 @@
       (std-allocate-object metaobject)
       (allocate-object metaobject)))
 
+(defun std-print-sheeple-object (object stream)
+  (print-unreadable-object (object stream :identity t)
+    (format stream "Object ~:[[~S]~;~S~]"
+            (has-direct-property-p object 'nickname)
+            (ignore-errors (object-nickname object)))))
+
 (declaim (inline print-sheeple-object-wrapper))
 (defun print-sheeple-object-wrapper (object stream)
   (handler-bind ((no-applicable-replies (fun (return-from print-sheeple-object-wrapper
@@ -42,12 +48,6 @@
                                           (return-from print-sheeple-object-wrapper
                                             (std-print-sheeple-object object stream))))))
     (print-sheeple-object object stream)))
-
-(defun std-print-sheele-object (object stream)
-  (print-unreadable-object (object stream :identity t)
-    (format stream "Object ~:[[~S]~;~S~]"
-            (has-direct-property-p object 'nickname)
-            (ignore-errors (object-nickname object)))))
 
 ;; If we didn't define these functions, Lisp's package system would
 ;; export the SETF version as well as the reader.

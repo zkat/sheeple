@@ -76,13 +76,13 @@
 ;;; Printing object!
 ;;;
 
-(defmessage print-object (object stream)
+(defmessage print-sheeple-object (object stream)
   (:documentation "Defines the expression print-object uses."))
 
-(defreply print-object (object (stream =stream=))
-  (std-print-object object stream))
+(defreply print-sheeple-object (object (stream =stream=))
+  (std-print-sheeple-object object stream))
 
-(defreply print-object ((object =boxed-object=) (stream =stream=))
+(defreply print-sheeple-object ((object =boxed-object=) (stream =stream=))
   (print-unreadable-object (object stream :identity t)
     (format stream "Boxed-object ~:[[~S]~;~S~]"
             (has-direct-property-p object 'nickname)

@@ -20,7 +20,7 @@
 
 (defstruct (object (:conc-name %object-) (:predicate objectp)
                   (:constructor std-allocate-object (metaobject))
-                  (:print-object print-object-wrapper))
+                  (:print-object print-sheeple-object-wrapper))
   metaobject parents properties roles hierarchy-cache children)
 
 (declaim (inline %object-metaobject %object-parents %object-properties
@@ -34,16 +34,16 @@
       (std-allocate-object metaobject)
       (allocate-object metaobject)))
 
-(declaim (inline print-object-wrapper))
-(defun print-object-wrapper (object stream)
-  (handler-bind ((no-applicable-replies (fun (return-from print-object-wrapper
-                                               (std-print-object object stream))))
+(declaim (inline print-sheeple-object-wrapper))
+(defun print-sheeple-object-wrapper (object stream)
+  (handler-bind ((no-applicable-replies (fun (return-from print-sheeple-object-wrapper
+                                               (std-print-sheeple-object object stream))))
                  (unbound-function (fun (when (eq (cell-error-name _) 'print-object)
-                                          (return-from print-object-wrapper
-                                            (std-print-object object stream))))))
-    (print-object object stream)))
+                                          (return-from print-sheeple-object-wrapper
+                                            (std-print-sheeple-object object stream))))))
+    (print-sheeple-object object stream)))
 
-(defun std-print-object (object stream)
+(defun std-print-sheele-object (object stream)
   (print-unreadable-object (object stream :identity t)
     (format stream "Object ~:[[~S]~;~S~]"
             (has-direct-property-p object 'nickname)

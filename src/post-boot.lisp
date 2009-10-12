@@ -10,80 +10,80 @@
 (in-package :sheeple)
 
 ;;;
-;;; Sheep creation protocol
+;;; Object creation protocol
 ;;;
-(defmessage allocate-sheep (metasheep))
-(defreply allocate-sheep ((metasheep =standard-metasheep=))
-  (std-allocate-sheep metasheep))
+(defmessage allocate-object (metaobject))
+(defreply allocate-object ((metaobject =standard-metaobject=))
+  (std-allocate-object metaobject))
 
-(defmessage compute-sheep-hierarchy-list-using-metasheep (metasheep sheep))
-(defreply compute-sheep-hierarchy-list-using-metasheep
-    ((metasheep =standard-metasheep=) sheep)
-  (std-compute-sheep-hierarchy-list sheep))
+(defmessage compute-object-hierarchy-list-using-metaobject (metaobject object))
+(defreply compute-object-hierarchy-list-using-metaobject
+    ((metaobject =standard-metaobject=) object)
+  (std-compute-object-hierarchy-list object))
 
-(defmessage finalize-sheep-inheritance-using-metasheep (metasheep sheep))
-(defreply finalize-sheep-inheritance-using-metasheep
-    ((metasheep =standard-metasheep=) sheep)
-  (std-finalize-sheep-inheritance sheep))
+(defmessage finalize-object-inheritance-using-metaobject (metaobject object))
+(defreply finalize-object-inheritance-using-metaobject
+    ((metaobject =standard-metaobject=) object)
+  (std-finalize-object-inheritance object))
 
-(defmessage remove-parent-using-metasheeple (parent-metasheep child-metasheep parent child))
-(defreply remove-parent-using-metasheeple ((parent-metasheep =standard-metasheep=)
-                                           (child-metasheep =standard-metasheep=)
+(defmessage remove-parent-using-metaobjects (parent-metaobject child-metaobject parent child))
+(defreply remove-parent-using-metaobjects ((parent-metaobject =standard-metaobject=)
+                                           (child-metaobject =standard-metaobject=)
                                            parent child)
   (std-remove-parent parent child))
 
-(defmessage add-parent-using-metasheeple (parent-metasheep child-metasheep parent child))
-(defreply add-parent-using-metasheeple ((parent-metasheep =standard-metasheep=)
-                                        (child-metasheep =standard-metasheep=)
+(defmessage add-parent-using-metaobjects (parent-metaobject child-metaobject parent child))
+(defreply add-parent-using-metaobjects ((parent-metaobject =standard-metaobject=)
+                                        (child-metaobject =standard-metaobject=)
                                         parent child)
   (std-add-parent parent child))
 
 ;;;
 ;;; Nicknames
 ;;;
-(defun sheep-nickname (sheep)
-  "Returns SHEEP's nickname"
-  (property-value sheep 'nickname))
+(defun object-nickname (object)
+  "Returns OBJECT's nickname"
+  (property-value object 'nickname))
 
-(defun (setf sheep-nickname) (new-nickname sheep)
-  "Sets SHEEP's nickname to NEW-NICKNAME"
+(defun (setf object-nickname) (new-nickname object)
+  "Sets OBJECT's nickname to NEW-NICKNAME"
   (handler-bind ((unbound-property 'continue))
-    (setf (property-value sheep 'nickname) new-nickname)))
+    (setf (property-value object 'nickname) new-nickname)))
 
-;;; Now we name all the built-in sheep like we're Adam in Eden.
-(mapc #'(setf sheep-nickname)
-      '(=t= =standard-sheep= =standard-metasheep= =boxed-object= =symbol=
+;;; Now we name all the built-in object like we're Adam in Eden.
+(mapc #'(setf object-nickname)
+      '(=t= =standard-object= =standard-metaobject= =boxed-object= =symbol=
         =sequence= =array= =number= =character= =function= =hash-table=
         =package= =pathname= =readtable= =stream= =list= =null= =cons=
         =vector= =bit-vector= =string= =complex= =integer= =float=)
-      (list =t= =standard-sheep= =standard-metasheep= =boxed-object= =symbol=
+      (list =t= =standard-object= =standard-metaobject= =boxed-object= =symbol=
             =sequence= =array= =number= =character= =function= =hash-table=
             =package= =pathname= =readtable= =stream= =list= =null= =cons=
             =vector= =bit-vector= =string= =complex= =integer= =float=))
 
 ;;;
-;;; Sheep Documentation
+;;; Object Documentation
 ;;;
 
-(defmethod documentation ((x sheep) (doc-type (eql 't)))
+(defmethod documentation ((x object) (doc-type (eql 't)))
   (property-value x 'documentation))
 
-(defmethod (setf documentation) (new-value (x sheep) (doc-type (eql 't)))
+(defmethod (setf documentation) (new-value (x object) (doc-type (eql 't)))
   (handler-bind ((unbound-property 'continue))
     (setf (property-value x 'documentation) new-value)))
 
 ;;;
-;;; Printing sheep!
+;;; Printing object!
 ;;;
 
-(defmessage print-sheep (sheep stream)
+(defmessage print-object (object stream)
   (:documentation "Defines the expression print-object uses."))
 
-(defreply print-sheep (sheep (stream =stream=))
-  (std-print-sheep sheep stream))
+(defreply print-object (object (stream =stream=))
+  (std-print-object object stream))
 
-(defreply print-sheep ((sheep =boxed-object=) (stream =stream=))
-  (print-unreadable-object (sheep stream :identity t)
+(defreply print-object ((object =boxed-object=) (stream =stream=))
+  (print-unreadable-object (object stream :identity t)
     (format stream "Boxed-object ~:[[~S]~;~S~]"
-            (has-direct-property-p sheep 'nickname)
-            (ignore-errors (sheep-nickname sheep)))))
+            (has-direct-property-p object 'nickname)
+            (ignore-errors (object-nickname object)))))

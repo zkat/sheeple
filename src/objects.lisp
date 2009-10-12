@@ -179,10 +179,10 @@ regards to the CONSTRAINTS. A future version will undo this change."
            (topological-sort unordered
                              (delete-duplicates (mapcan 'local-precedence-ordering unordered))
                              'std-tie-breaker-rule))
-       (simple-error () (error 'objects-hierarchy-error :object object))))
+       (simple-error () (error 'object-hierarchy-error :object object))))
     ((car (%object-parents object))
      (let ((cache (%object-hierarchy-cache (car (%object-parents object)))))
-       (error-when (find object cache) 'objects-hierarchy-error :object object)
+       (error-when (find object cache) 'object-hierarchy-error :object object)
        (cons object cache)))
     (t (list object))))
 
@@ -240,7 +240,7 @@ See `add-parent-using-metaobjects'."
   (error-when (member new-parent (object-parents child) :test 'eq)
               "~A is already a parent of ~A." new-parent child)
   (handler-bind
-      ((objects-hierarchy-error (fun (remove-parent new-parent child))))
+      ((object-hierarchy-error (fun (remove-parent new-parent child))))
     (pushend new-parent (%object-parents child))
     (finalize-object-inheritance child)
     child))

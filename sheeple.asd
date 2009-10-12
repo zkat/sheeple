@@ -39,7 +39,7 @@
             :components
             ((:file "setup-tests")
              (:file "utils")
-             (:file "sheeple")
+             (:file "objects")
              (:file "properties")
              (:file "builtins")
              (:file "lambda-lists")

@@ -16,7 +16,7 @@
              (:file "functions")
              (:file "utils")
              (:file "conditions")
-             (:file "sheeple")
+             (:file "objects")
              (:file "properties")
              (:file "builtins")
              (:file "lambda-lists")

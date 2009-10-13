@@ -67,7 +67,7 @@
 (define-condition mold-condition ()
   ((format-control :initarg :format-control :reader mold-condition-format-control))
   (:report (lambda (condition stream)
-             (apply #'format stream (mold-condition-format-control condition)))))
+             (format stream (mold-condition-format-control condition)))))
 
 (defmacro define-mold-condition (name super (&optional string &rest args)
                                     &rest condition-options)

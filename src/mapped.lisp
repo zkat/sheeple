@@ -127,6 +127,18 @@ If a new link was created, FROM-MOLD is returned; otherwise, an error of type
   (aconsf (mold-transitions from-mold) property-name to-mold)
   from-mold)
 
+(defun find-mold-by-transition (start-mold goal-properties)
+  "Searches the transition tree from START-MOLD to find the mold containing
+GOAL-PROPERTIES, returning that mold if found, or NIL on failure."
+  (check-type start-mold mold)
+  (check-list-type goal-properties property-name)
+  ;; This algorithm is very concise, but it's not optimal AND it's unclear.
+  ;; Probably the first target for cleaning up. - Adlai
+  (let ((path (set-difference goal-properties (mold-properties start-mold))))
+    (if (null path) start-mold
+        (awhen (some (fun (find-transition start-mold _)) path)
+          (find-mold-by-transition it path)))))
+
 (defvar *maps* (make-hash-table :test 'equal))
 
 (defun tree-find-if (test tree &key (key #'identity))

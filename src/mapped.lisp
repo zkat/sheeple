@@ -27,12 +27,12 @@
   aconsf-helper
   "CONS is to PUSH as ACONS is to ACONSF; it pushes (cons KEY VALUE) to the PLACE.")
 
-(defmacro check-list-type (list typespec &optional string)
+(defmacro check-list-type (list typespec &optional (string nil string-supplied-p))
   "Calls CHECK-TYPE with each element of LIST, with TYPESPEC and STRING."
   (let ((var (gensym)))
     `(dolist (,var ,list)
        ;; Evaluates STRING multiple times, due to lazyness and spec ambiguity. - Adlai
-       (check-type ,var ,typespec ,@(when string `(,string))))))
+       (check-type ,var ,typespec ,@(when string-supplied-p `(,string))))))
 
 (defmacro define-print-object (((object class) &key (identity t) (type t)) &body body)
   (let ((stream (gensym)))

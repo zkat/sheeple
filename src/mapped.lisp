@@ -104,6 +104,29 @@
 If no such mold exists, returns NIL."
   (cdr (assoc property-name (mold-transitions mold) :test 'eq)))
 
+;;; TODO: ensure-transition-by-property  - Adlai
+
+(defun add-transition-by-property (from-mold property-name to-mold)
+  "Adds a link from FROM-MOLD to TO-MOLD, indexed by PROPERTY-NAME.
+If a new link was created, FROM-MOLD is returned; otherwise, an error of type
+`mold-collision' is signaled."
+  (check-type from-mold mold)
+  (check-type property-name property-name)
+  (check-type to-mold mold)
+  (assert (null (set-difference (mold-properties from-mold)
+                                (mold-properties to-mold))) ()
+          "~A does not contain all the properties of ~A, and is thus not a ~
+           valid transition to it." to-mold from-mold)
+  (assert (equal (list property-name)
+                 (set-difference (mold-properties to-mold)
+                                 (mold-properties from-mold)))
+          () "~A is not a unique property transition from ~A to ~A."
+          property-name from-mold to-mold)
+  (awhen (find property-name (mold-transitions from-mold) :key 'car)
+    (error 'mold-collision :new-mold to-mold :collision-mold (cdr it)))
+  (aconsf (mold-transitions from-mold) property-name to-mold)
+  from-mold)
+
 (defvar *maps* (make-hash-table :test 'equal))
 
 (defun tree-find-if (test tree &key (key #'identity))

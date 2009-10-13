@@ -9,7 +9,7 @@
 (define-condition sheeple-condition ()
   ((format-control :initarg :format-control :reader sheeple-condition-format-control))
   (:report (lambda (condition stream)
-             (apply #'format stream (sheeple-condition-format-control condition)))))
+             (format stream (sheeple-condition-format-control condition)))))
 
 (defmacro define-sheeple-condition (name super (&optional string &rest args)
                                     &rest condition-options)
@@ -21,9 +21,9 @@
            do (push reader reader-names))
        (:report
         (lambda (condition stream)
-          (funcall #'format stream (sheeple-condition-format-control condition)
-                   ,@(mapcar #'(lambda (reader) `(,reader condition))
-                             (nreverse reader-names)))))
+          (format stream (sheeple-condition-format-control condition)
+                  ,@(mapcar #'(lambda (reader) `(,reader condition))
+                            (nreverse reader-names)))))
        (:default-initargs :format-control ,string
          ,@(cdr (assoc :default-initargs condition-options)))
        ,@(remove :default-initargs condition-options :key #'car))))

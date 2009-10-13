@@ -80,8 +80,8 @@
        (:report
         (lambda (condition stream)
           (format stream (mold-condition-format-control condition)
-                   ,@(mapcar #'(lambda (reader) `(,reader condition))
-                             (nreverse reader-names)))))
+                  ,@(mapcar #'(lambda (reader) `(,reader condition))
+                            (nreverse reader-names)))))
        (:default-initargs :format-control ,string
          ,@(cdr (assoc :default-initargs condition-options)))
        ,@(remove :default-initargs condition-options :key #'car))))

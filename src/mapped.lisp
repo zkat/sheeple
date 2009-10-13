@@ -1,5 +1,45 @@
 (in-package :cl-user)
 
+;;; some utils copied from utils.lisp
+
+(defun ensure-list (x)
+  "X if X is a list, otherwise (list X)."
+  (if (listp x) x (list x)))
+
+(defmacro fun (&body body)
+  "This macro puts the FUN back in FUNCTION."
+  `(lambda (&optional _) (declare (ignorable _)) ,@body))
+
+(defmacro aif (test-form then-form &optional else-form)
+  `(let ((it ,test-form))
+     (if it ,then-form ,else-form)))
+
+(defmacro awhen (test-form &body body)
+  `(aif ,test-form (progn ,@body)))
+
+;;; and some new ones!
+
+(declaim (inline aconsf-helper))
+(defun aconsf-helper (alist key value)
+  (acons key value alist))
+
+(define-modify-macro aconsf (key value)
+  aconsf-helper
+  "CONS is to PUSH as ACONS is to ACONSF; it pushes (cons KEY VALUE) to the PLACE.")
+
+(defmacro check-list-type (list typespec &optional string)
+  "Calls CHECK-TYPE with each element of LIST, with TYPESPEC and STRING."
+  (let ((var (gensym)))
+    `(dolist (,var ,list)
+       ;; Evaluates STRING multiple times, due to lazyness and spec ambiguity. - Adlai
+       (check-type ,var ,typespec ,@(when string `(,string))))))
+
+(defmacro define-print-object (((object class) &key (identity t) (type t)) &body body)
+  (let ((stream (gensym)))
+    `(defmethod print-object ((,object ,class) ,stream)
+      (print-unreadable-object (,object ,stream :type ,type :identity ,identity)
+        (let ((*standard-output* ,stream)) ,@body)))))
+
 (defstruct (map (:conc-name   map-)
                 (:predicate   mapp)
                 (:constructor make-map)

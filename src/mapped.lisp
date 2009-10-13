@@ -119,7 +119,7 @@ If a new link was created, FROM-MOLD is returned; otherwise, an error of type
                                  (mold-properties from-mold)))
           () "~A is not a unique property transition from ~A to ~A."
           property-name from-mold to-mold)
-  (awhen (find property-name (mold-transitions from-mold) :key 'car)
+  (awhen (assoc property-name (mold-transitions from-mold))
     (error 'mold-collision :new-mold to-mold :collision-mold (cdr it)))
   (aconsf (mold-transitions from-mold) property-name to-mold)
   from-mold)

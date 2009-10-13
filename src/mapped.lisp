@@ -46,7 +46,8 @@
   "A valid name for an object's property"
   'symbol)
 
-(defstruct (mold (:predicate   moldp))
+(defstruct (mold (:predicate   moldp)
+                 (:constructor make-mold (parents properties)))
   (parents        nil :read-only t)
   (properties     nil :read-only t)
   (hierarchy-list nil)
@@ -57,7 +58,7 @@
 
 (defstruct (object (:conc-name   %object-)
                    (:predicate   objectp)
-                   (:constructor %make-object)
+                   (:constructor %make-object (mold property-values))
                    (:copier      %copy-object))
   mold property-values (roles nil))
 
@@ -157,9 +158,9 @@ of MOLD's properties, representing the inclusive upper bound for the new tree."
           bounds mold)
   (labels ((build-up-links (mold path)
              (if (null path) mold
-                 (let ((new-mold (make-mold :parents (mold-parents mold)
-                                            :properties (remove (car path)
-                                                                (mold-properties mold)))))
+                 (let ((new-mold (make-mold (mold-parents mold)
+                                            (remove (car path)
+                                                    (mold-properties mold)))))
                    (build-up-links (add-transition-by-property new-mold (car path) mold)
                                    (cdr path))))))
     (build-up-links mold (set-difference (mold-properties mold) bounds))))
@@ -176,8 +177,8 @@ if it successfully linked MOLD into the cache."
 
 (defun ensure-mold (parents properties)
   (or (find-mold parents properties)
-      (link-mold (make-mold :parents parents :properties properties))))
+      (link-mold (make-mold parents properties))))
 
 (defun make-object (parents properties)
-  (%make-object :mold (ensure-mold parents properties)
-                :property-values (make-array (length properties))))
+  (%make-object (ensure-mold parents properties)
+                (make-array (length properties))))

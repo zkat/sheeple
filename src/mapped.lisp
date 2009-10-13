@@ -40,22 +40,29 @@
       (print-unreadable-object (,object ,stream :type ,type :identity ,identity)
         (let ((*standard-output* ,stream)) ,@body)))))
 
-(defstruct (map (:conc-name   map-)
-                (:predicate   mapp)
-                (:constructor make-map)
-                (:copier      copy-map))
+;; Now for the code
+
+(deftype property-name ()
+  "A valid name for an object's property"
+  'symbol)
+
+(defstruct (mold (:conc-name   mold-)
+                 (:predicate   moldp)
+                 (:constructor make-mold)
+                 (:copier      copy-mold))
   (parents        nil :read-only t)
   (properties     nil :read-only t)
-  (roles          nil :read-only t)
   (hierarchy-list nil)
-  (submaps        nil)
+  (sub-molds      nil)
   (transitions    nil))
+
+(define-print-object ((mold mold)))
 
 (defstruct (object (:conc-name   %object-)
                    (:predicate   objectp)
                    (:constructor %make-object)
                    (:copier      %copy-object))
-  map property-values)
+  mold property-values roles)
 
 (defvar *maps* (make-hash-table :test 'equal))
 

@@ -149,6 +149,23 @@ returning that mold if found, or NIL on failure."
   (awhen (gethash parents *molds*)
     (find-mold-by-transition it properties)))
 
+(defun build-mold-transition-between (mold bounds)
+  "Returns a linear mold transition tree leading to MOLD. BOUNDS is a strict subset
+of MOLD's properties, representing the inclusive upper bound for the new tree."
+  (check-type mold mold)
+  (check-list-type bounds property-name)
+  (assert (and (subsetp bounds (mold-properties mold))
+               (not (subsetp (mold-properties mold) bounds)))
+          () "~A is not a strict subset of the properties of ~A"
+          bounds mold)
+  (labels ((build-up-links (mold path)
+             (if (null path) mold
+                 (let ((new-mold (make-mold :parents (mold-parents mold)
+                                            :properties (remove (car path)
+                                                                (mold-properties mold)))))
+                   (build-up-links (add-transition-by-property new-mold (car path) mold)
+                                   (cdr path))))))
+    (build-up-links mold (set-difference (mold-properties mold) bounds))))
 
 (defun make-object (parents properties)
   (let ((maybe-map (find-map parents properties)))

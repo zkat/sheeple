@@ -139,13 +139,35 @@ GOAL-PROPERTIES, returning that mold if found, or NIL on failure."
 
 (defvar *molds* (make-hash-table :test 'equal))
 
+(defun find-mold-tree (parents)
+  (check-list-type parents object)
+  (values (gethash parents *molds*)))
+
+(defun (setf find-mold-tree) (mold parents)
+  (check-list-type parents object)
+  (check-type mold mold)
+  (setf (gethash parents *molds*) mold))
+
 (defun find-mold (parents properties)
   "Searches the mold cache for one with parents PARENTS and properties PROPERTIES,
 returning that mold if found, or NIL on failure."
   (check-list-type parents object)
   (check-list-type properties property-name)
-  (awhen (gethash parents *molds*)
+  (awhen (find-mold-tree parents)
     (find-mold-by-transition it properties)))
+
+;;; Creating molds
+
+(defun ensure-mold-tree (parents)
+  "Returns the mold tree for PARENTS, creating and caching a new one if necessary."
+  (or (find-mold-tree parents)
+      (setf (find-mold-tree parents)
+            (make-mold parents nil))))
+
+;;; Deprecated
+(defun ensure-mold (parents properties)
+  (or (find-mold parents properties)
+      (link-mold (make-mold parents properties))))
 
 (defun build-mold-transition-between (mold bounds)
   "Returns a linear mold transition tree leading to MOLD. BOUNDS is a strict subset
@@ -186,10 +208,6 @@ if it successfully linked MOLD into the cache."
          (prog1 mold
            (setf (gethash parents *molds*)
                  (build-mold-transition-between mold nil))))))
-
-(defun ensure-mold (parents properties)
-  (or (find-mold parents properties)
-      (link-mold (make-mold parents properties))))
 
 (defun make-object (parents properties)
   (%make-object (ensure-mold parents properties)

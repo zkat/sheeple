@@ -180,5 +180,5 @@ if it successfully linked MOLD into the cache."
         (link-mold (make-mold :parents parents :properties properties)))))
 
 (defun make-object (parents properties)
-  (let ((mold (ensure-mold parents properties)))
-    (%make-object :mold mold :property-values (make-array (length properties)))))
+  (%make-object :mold (ensure-mold parents properties)
+                :property-values (make-array (length properties))))

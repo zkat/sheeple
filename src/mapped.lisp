@@ -79,7 +79,7 @@
            do (push reader reader-names))
        (:report
         (lambda (condition stream)
-          (funcall #'format stream (mold-condition-format-control condition)
+          (format stream (mold-condition-format-control condition)
                    ,@(mapcar #'(lambda (reader) `(,reader condition))
                              (nreverse reader-names)))))
        (:default-initargs :format-control ,string

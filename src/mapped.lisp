@@ -175,9 +175,8 @@ if it successfully linked MOLD into the cache."
         base))))
 
 (defun ensure-mold (parents properties)
-  (let ((maybe-mold (find-mold parents properties)))
-    (or maybe-mold
-        (link-mold (make-mold :parents parents :properties properties)))))
+  (or (find-mold parents properties)
+      (link-mold (make-mold :parents parents :properties properties))))
 
 (defun make-object (parents properties)
   (%make-object :mold (ensure-mold parents properties)

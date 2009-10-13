@@ -174,12 +174,11 @@ if it successfully linked MOLD into the cache."
                      thereis (find-mold parents props) until (null props))))
         base))))
 
-(defun make-object (parents properties)
+(defun ensure-mold (parents properties)
   (let ((maybe-mold (find-mold parents properties)))
-    (if (and maybe-mold
-             (every #'eq properties (mold-properties maybe-mold)))
-        (%make-object :mold maybe-mold
-                      :property-values (make-array (length (mold-properties mold))))
-        (%make-object :mold (make-mold :parents parents
-                                       :properties properties)
-                      :property-values (make-array (length properties))))))
+    (or maybe-mold
+        (link-mold (make-mold :parents parents :properties properties)))))
+
+(defun make-object (parents properties)
+  (let ((mold (ensure-mold parents properties)))
+    (%make-object :mold mold :property-values (make-array (length properties)))))

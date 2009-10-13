@@ -169,11 +169,23 @@ of MOLD's properties, representing the inclusive upper bound for the new tree."
   "Links MOLD into the mold cache, returning NIL if MOLD was already linked, or MOLD
 if it successfully linked MOLD into the cache."
   (check-type mold mold)
-  (let ((parents (mold-parents mold)) (props (mold-parents mold)) bounds)
-    (when (find-mold)
-      (let ((base (loop for props = (butlast (mold-properties mold)) then (butlast props)
-                     thereis (find-mold parents props) until (null props))))
-        base))))
+  (let ((parents (mold-parents mold)) (props (mold-properties mold)))
+    ;; Do we need to create a new tree in the mold cache?
+    (aif (find-mold parents nil)
+         ;; No; so we find the common base, and link the remaining tree to that.
+         (do* ((base it next-base)
+               (prop (car props) (car props-left))
+               (props-left (cdr props) (cdr props-left))
+               (next-base (find-transition base prop)
+                          (find-transition next-base prop)))
+              ((eq next-base mold))
+           (when (null next-base)
+             (add-transition-by-property
+              base prop (build-mold-transition-between mold (mold-properties base)))))
+         ;; Yes; so this builds an entire tree, from no props, to MOLD.
+         (prog1 mold
+           (setf (gethash parents *molds*)
+                 (build-mold-transition-between mold nil))))))
 
 (defun ensure-mold (parents properties)
   (or (find-mold parents properties)

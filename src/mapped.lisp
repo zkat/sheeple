@@ -99,6 +99,11 @@
 
 ;;; And now for some code:
 
+(defun find-transition (mold property-name)
+  "Returns the mold which adds a property named PROPERTY-NAME to MOLD.
+If no such mold exists, returns NIL."
+  (cdr (assoc property-name (mold-transitions mold) :test 'eq)))
+
 (defvar *maps* (make-hash-table :test 'equal))
 
 (defun tree-find-if (test tree &key (key #'identity))

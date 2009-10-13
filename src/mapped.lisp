@@ -139,19 +139,16 @@ GOAL-PROPERTIES, returning that mold if found, or NIL on failure."
         (awhen (some (fun (find-transition start-mold _)) path)
           (find-mold-by-transition it path)))))
 
-(defvar *maps* (make-hash-table :test 'equal))
+(defvar *molds* (make-hash-table :test 'equal))
 
-(defun tree-find-if (test tree &key (key #'identity))
-  (cond ((null tree) nil)
-        ((atom tree)
-         (when (funcall test (funcall key tree))
-           tree))
-        (t (or (tree-find-if test (car tree) :key key)
-               (tree-find-if test (cdr tree) :key key)))))
+(defun find-mold (parents properties)
+  "Searches the mold cache for one with parents PARENTS and properties PROPERTIES,
+returning that mold if found, or NIL on failure."
+  (check-list-type parents object)
+  (check-list-type properties property-name)
+  (awhen (gethash parents *molds*)
+    (find-mold-by-transition it properties)))
 
-(defun find-map (parents properties)
-  (tree-find-if (lambda (map) (equal properties (map-properties map)))
-                (gethash parents *maps*)))
 
 (defun make-object (parents properties)
   (let ((maybe-map (find-map parents properties)))

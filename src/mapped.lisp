@@ -46,10 +46,7 @@
   "A valid name for an object's property"
   'symbol)
 
-(defstruct (mold (:conc-name   mold-)
-                 (:predicate   moldp)
-                 (:constructor make-mold)
-                 (:copier      copy-mold))
+(defstruct (mold (:predicate   moldp))
   (parents        nil :read-only t)
   (properties     nil :read-only t)
   (hierarchy-list nil)
@@ -62,7 +59,7 @@
                    (:predicate   objectp)
                    (:constructor %make-object)
                    (:copier      %copy-object))
-  mold property-values roles)
+  mold property-values (roles nil))
 
 ;;; This condition framework is straight from conditions.lisp
 

@@ -167,12 +167,22 @@ of MOLD's properties, representing the inclusive upper bound for the new tree."
                                    (cdr path))))))
     (build-up-links mold (set-difference (mold-properties mold) bounds))))
 
+(defun link-mold (mold)
+  "Links MOLD into the mold cache, returning NIL if MOLD was already linked, or MOLD
+if it successfully linked MOLD into the cache."
+  (check-type mold mold)
+  (let ((parents (mold-parents mold)) (props (mold-parents mold)) bounds)
+    (when (find-mold)
+      (let ((base (loop for props = (butlast (mold-properties mold)) then (butlast props)
+                     thereis (find-mold parents props) until (null props))))
+        base))))
+
 (defun make-object (parents properties)
-  (let ((maybe-map (find-map parents properties)))
-    (if (and maybe-map 
-             (every #'eq properties (map-properties maybe-map)))
-        (%make-object :map maybe-map
-                      :property-values (make-array (length (map-properties map))))
-        (%make-object :map (make-map :parents parents 
-                                     :properties properties)
+  (let ((maybe-mold (find-mold parents properties)))
+    (if (and maybe-mold
+             (every #'eq properties (mold-properties maybe-mold)))
+        (%make-object :mold maybe-mold
+                      :property-values (make-array (length (mold-properties mold))))
+        (%make-object :mold (make-mold :parents parents
+                                       :properties properties)
                       :property-values (make-array (length properties))))))

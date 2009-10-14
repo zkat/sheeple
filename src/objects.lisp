@@ -185,10 +185,10 @@ if it successfully linked MOLD into the cache."
 ;;;
 ;;; Switching molds
 ;;;
-(defun change-transition (object new-transition)
-  "Creates a new property-value vector in OBJECT, according to NEW-TRANSITION's specification, and
+(defun change-node (object new-node)
+  "Creates a new property-value vector in OBJECT, according to NEW-NODE's specification, and
 automatically takes care of bringing the correct property-values over into the new vector, in the
-right order. Keep in mind that NEW-TRANSITION might specify some properties in a different order."
+right order. Keep in mind that NEW-NODE might specify some properties in a different order."
   ;; TODO
   )
 

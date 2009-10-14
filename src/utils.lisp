@@ -18,6 +18,13 @@
   "Like `ASSERT', but with fewer bells and whistles."
   (when condition (apply 'error error-datum error-args)))
 
+(defmacro check-list-type (list typespec &optional (string nil string-supplied-p))
+  "Calls CHECK-TYPE with each element of LIST, with TYPESPEC and STRING."
+  (let ((var (gensym)))
+    `(dolist (,var ,list)
+       ;; Evaluates STRING multiple times, due to lazyness and spec ambiguity. - Adlai
+       (check-type ,var ,typespec ,@(when string-supplied-p `(,string))))))
+
 (defun ensure-list (x)
   "X if X is a list, otherwise (list X)."
   (if (listp x) x (list x)))
@@ -138,6 +145,14 @@ by deleting items at the same position from both lists."
 (defmacro fun (&body body)
   "This macro puts the FUN back in FUNCTION."
   `(lambda (&optional _) (declare (ignorable _)) ,@body))
+
+(declaim (inline aconsf-helper))
+(defun aconsf-helper (alist key value)
+  (acons key value alist))
+
+(define-modify-macro aconsf (key value)
+  aconsf-helper
+  "CONS is to PUSH as ACONS is to ACONSF; it pushes (cons KEY VALUE) to the PLACE.")
 
 (define-modify-macro nconcf (&rest lists)
   nconc

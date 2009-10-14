@@ -53,28 +53,16 @@ empty [no properties] mold, called a 'toplevel mold'.")
 If no such mold exists, returns NIL."
   (cdr (assoc property-name (mold-transitions mold) :test 'eq)))
 
-;;; TODO: ensure-transition-by-property  - Adlai
-
-(defun add-transition-by-property (from-mold property-name to-mold)
-  "Adds a link from FROM-MOLD to TO-MOLD, indexed by PROPERTY-NAME.
-If a new link was created, FROM-MOLD is returned; otherwise, an error of type
-`mold-collision' is signaled."
-  (check-type from-mold mold)
+(defun ensure-transition (mold property-name)
+  "Returns the transition from MOLD indexed by PROPERTY-NAME, creating and
+linking a new one if necessary."
+  (check-type mold mold)
   (check-type property-name property-name)
-  (check-type to-mold mold)
-  (assert (null (set-difference (mold-properties from-mold)
-                                (mold-properties to-mold))) ()
-          "~A does not contain all the properties of ~A, and is thus not a ~
-           valid transition to it." to-mold from-mold)
-  (assert (equal (list property-name)
-                 (set-difference (mold-properties to-mold)
-                                 (mold-properties from-mold)))
-          () "~A is not a unique property transition from ~A to ~A."
-          property-name from-mold to-mold)
-  (awhen (assoc property-name (mold-transitions from-mold))
-    (error 'mold-collision :new-mold to-mold :collision-mold (cdr it)))
-  (aconsf (mold-transitions from-mold) property-name to-mold)
-  from-mold)
+  (or (find-transition mold property-name)
+      (aconsf (mold-transitions mold) property-name
+              (make-mold :parents (mold-parents mold)
+                         :properties (cons property-name
+                                           (mold-properties mold))))))
 
 (defun find-mold-by-transition (start-mold goal-properties)
   "Searches the transition tree from START-MOLD to find the mold containing

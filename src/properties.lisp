@@ -40,14 +40,15 @@ would yield a value (i.e. not signal an unbound-property condition)."
                      (writer nil writerp)
                      accessor)
   "Adds a property named PROPERTY-NAME to OBJECT, initialized with VALUE."
+  ;; TODO - this needs a solid transition thing
   (prog1 object
     (assert (symbolp property-name))
     (when (has-direct-property-p object property-name)
       (cerror "Remove existing property." "~A already has a direct property named ~A."
               object property-name)
       (remove-property object property-name))
-    (change-transition object (ensure-transition (%object-transition object)
-                                                 property-name))
+    (change-node object (ensure-transition (%object-mold object)
+                                           property-name))
     (when reader (add-reader-to-object reader property-name object))
     (when writer (add-writer-to-object writer property-name object))
     (when accessor
@@ -62,15 +63,16 @@ would yield a value (i.e. not signal an unbound-property condition)."
 direct property. Returns OBJECT."
   (if (has-direct-property-p object property-name)
       ;; TODO fuckit, something like this... -ish
-      (prog1 object (change-transition object
-                                       (ensure-mold (object-parents object)
-                                                    (remove property-name
-                                                            (object-direct-properties object)))))
+      (prog1 object (change-node object
+                                 (ensure-mold (object-parents object)
+                                              (remove property-name
+                                                      (object-direct-properties object)))))
       (error "Cannot remove property: ~A is not a direct property of ~A" property-name object)))
 
 (defun remove-all-direct-properties (object)
   "Wipes out all direct properties and their values from OBJECT."
-  (change-transition object (mold-transition (transition-mold (%object-transition object))))
+  ;; TODO - make sure this change-node thing is solid.
+  (change-node object (mold-transition (transition-mold (%object-transition object))))
   object)
 
 ;;; Value
@@ -105,7 +107,7 @@ is signaled."
   (cond ((has-direct-property-p object property-name)
          (setf (%direct-property-value object property-name) new-value))
         ((has-property-p object property-name)
-         (change-transition object property-name)
+         (change-node object property-name)
          (setf (%direct-property-value object property-name) new-value))
         (t (cerror "Add the property locally" 'unbound-property
                    :object object

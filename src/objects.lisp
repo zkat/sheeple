@@ -127,17 +127,16 @@ returning that mold if found, or NIL on failure."
               (setf (mold-initial-node it)
                     (make-node :mold it))))))
 
-(defun ensure-transition (mold property-name)
-  "Returns the transition from MOLD indexed by PROPERTY-NAME, creating and
+(defun ensure-transition (node property-name)
+  "Returns the transition from NODE indexed by PROPERTY-NAME, creating and
 linking a new one if necessary."
-  (check-type mold mold)
+  (check-type node node)
   (check-type property-name property-name)
-  (or (find-transition mold property-name)
-      (aconsf (mold-transitions mold) property-name
-              (make-mold :parents (mold-parents mold)
-                         :hierarchy (mold-hierarchy mold)
+  (or (find-transition node property-name)
+      (aconsf (node-transitions node) property-name
+              (make-node :mold (node-mold node)
                          :properties (cons property-name
-                                           (mold-properties mold))))))
+                                           (node-properties node))))))
 
 (defun ensure-mold (parents properties)
   (or (find-mold parents properties)

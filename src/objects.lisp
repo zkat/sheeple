@@ -375,23 +375,14 @@ is that the parents are appended to the end of the list."
 ;;; Spawning
 ;;;
 (defun make-object (parent* &rest all-keys
-                   &key (metaobject =standard-metaobject=) &allow-other-keys)
+                    &key (metaobject =standard-metaobject=) &allow-other-keys)
   "Creates a new object with OBJECTS as its parents. METAOBJECT is used as the metaobject when
 allocating the new object object. ALL-KEYS is passed on to INIT-OBJECT."
   (declare (dynamic-extent all-keys))
-  ;; Here's what's causing the current failure with MAKE-OBJECT:
-  ;; FINALIZE-OBJECT-INHERITANCE isn't dispatching correctly because the new object
-  ;; object created by maybe-std-allocate-object has no parents. Thus, the reply for
-  ;; F-S-I specialized on (=standard-metaobject= =T=) doesn't run. The metaobject itself is
-  ;; fine, but =T= isn't in the new object's hierarchy-list yet (and it won't be until
-  ;; ADD-PARENT, and then F-S-I both work. This is a serious issue with the MOP that we
-  ;; might possibly need an ugly hack to fix. For now, it's good to know that this is
-  ;; the reason that failure is happening, so we can rest assured that standard objects
-  ;; behavior is working fine and dandy. -- zkat
-  (apply 'init-object
-         (add-parent* (or parent* =standard-object=)
-                      (finalize-object-inheritance (maybe-std-allocate-object metaobject)))
-         all-keys))
+  (let ((mold (ensure-mold (ensure-list (or parent* =standard-object=)) nil))
+        (obj (maybe-std-allocate-object metaobject)))
+    (setf (%object-mold obj) mold)
+    (apply 'init-object obj all-keys)))
 
 (defun spawn (&rest objects)
   "Creates a new standard-object object with OBJECTS as its parents."

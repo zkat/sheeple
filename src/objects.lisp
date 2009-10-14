@@ -62,11 +62,9 @@ empty [no properties] mold, called a 'toplevel mold'.")
 ;; All other molds are listed as 'transitions' of these toplevel molds. See the transitions slot
 ;; on the mold struct. Each transition represents a new set of properties.
 
-(defun find-transition (mold property-name)
-  "Returns the mold which adds a property named PROPERTY-NAME to MOLD.
-If no such mold exists, returns NIL."
-  (cdr (assoc property-name (mold-transitions mold) :test 'eq)))
-
+;;;
+;;; Transitions
+;;;
 (defun ensure-transition (mold property-name)
   "Returns the transition from MOLD indexed by PROPERTY-NAME, creating and
 linking a new one if necessary."
@@ -78,6 +76,11 @@ linking a new one if necessary."
                          :hierarchy (mold-hierarchy mold)
                          :properties (cons property-name
                                            (mold-properties mold))))))
+
+(defun find-transition (mold property-name)
+  "Returns the mold which adds a property named PROPERTY-NAME to MOLD.
+If no such mold exists, returns NIL."
+  (cdr (assoc property-name (mold-transitions mold) :test 'eq)))
 
 (defun find-mold-by-transition (start-mold goal-properties)
   "Searches the transition tree from START-MOLD to find the mold containing
@@ -108,8 +111,9 @@ returning that mold if found, or NIL on failure."
   (awhen (find-mold-tree parents)
     (find-mold-by-transition it properties)))
 
+;;;
 ;;; Creating molds
-
+;;;
 (defun ensure-mold-tree (parents)
   "Returns the mold tree for PARENTS, creating and caching a new one if necessary."
   (or (find-mold-tree parents)

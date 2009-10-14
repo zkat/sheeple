@@ -99,6 +99,15 @@ node-transitions of a `node'."
   "Maps parent lists to their corresponding molds. This is the global entry
 point to Sheeple's backend class system.")
 
+(defun find-mold (parents)
+  (check-list-type parents object)
+  (values (gethash parents *molds*)))
+
+(defun (setf find-mold) (mold parents)
+  (check-list-type parents object)
+  (check-type mold mold)
+  (setf (gethash parents *molds*) mold))
+
 ;;;
 ;;; Transitions
 ;;;
@@ -121,15 +130,6 @@ GOAL-PROPERTIES, returning that node if found, or NIL on failure."
         (awhen (some (fun (find-transition start-node _)) path)
           (find-node-by-transitions it path)))))
 
-(defun find-mold (parents)
-  (check-list-type parents object)
-  (values (gethash parents *molds*)))
-
-(defun (setf find-mold) (mold parents)
-  (check-list-type parents object)
-  (check-type mold mold)
-  (setf (gethash parents *molds*) mold))
-
 (defun find-mold-node (parents properties)
   "Searches the mold cache for one with parents PARENTS and properties PROPERTIES,
 returning that mold if found, or NIL on failure."
@@ -139,16 +139,14 @@ returning that mold if found, or NIL on failure."
     (find-node-by-transitions it properties)))
 
 ;;;
-;;; Creating molds
+;;; Mold API -- Retrieval and Automatic Creation of Molds and Nodes
 ;;;
-(defun ensure-mold (parents)
+(defun ensure-toplevel-mold (parents)
   "Returns the mold for PARENTS, creating and caching a new one if necessary."
   (check-list-type parents object)
   (or (find-mold parents)
       (setf (find-mold parents)
-            (aprog1 (make-mold parents)
-              (setf (mold-initial-node it)
-                    (make-node :mold it))))))
+            (make-mold parents))))
 
 (defun ensure-transition (node property-name)
   "Returns the transition from NODE indexed by PROPERTY-NAME, creating and
@@ -156,10 +154,10 @@ linking a new one if necessary."
   (check-type node node)
   (check-type property-name property-name)
   (or (find-transition node property-name)
-      (aconsf (node-transitions node) property-name
-              (make-node :mold (node-mold node)
+      (aconsf (%node-transitions node) property-name
+              (make-node :mold (%node-mold node)
                          :properties (cons property-name
-                                           (node-properties node))))))
+                                           (%node-properties node))))))
 
 (defun ensure-mold (parents properties)
   (or (find-mold parents properties)

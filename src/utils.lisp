@@ -21,6 +21,13 @@
   `(let ,(mapcar (fun `(,_ (gensym ,(string _)))) names)
      ,@body))
 
+(defmacro once-only ((&rest names) &body body)
+  (let ((gensyms (mapcar (fun (gensym)) names)))
+    `(let (,@(loop for g in gensyms collect `(,g (gensym))))
+      `(let (,,@(loop for g in gensyms for n in names collect ``(,,g ,,n)))
+        ,(let (,@(loop for n in names for g in gensyms collect `(,n ,g)))
+           ,@body)))))
+
 (declaim (inline error-when))
 (defun error-when (condition error-datum &rest error-args)
   "Like `ASSERT', but with fewer bells and whistles."
@@ -152,11 +159,21 @@ by deleting items at the same position from both lists."
 
 (declaim (inline aconsf-helper))
 (defun aconsf-helper (alist key value)
-  (acons key value alist))
+  (acons key value alist)
+  value)
 
-(define-modify-macro aconsf (key value)
-  aconsf-helper
-  "CONS is to PUSH as ACONS is to ACONSF; it pushes (cons KEY VALUE) to the PLACE.")
+(defmacro aconsf (place key value &environment env)
+  "CONS is to PUSH as ACONS is to ACONSF; it pushes (cons KEY VALUE) to the PLACE."
+  (multiple-value-bind (temps vals stores set-value get-value)
+      (get-setf-expansion place env)
+    (unless (null (cdr stores))
+      (error "ACONSF can't store to this form: ~:_~S" place))
+    (once-only (key value)
+      `(let* (,@(mapcar 'list temps vals)
+              (,(car stores)
+               (acons ,key ,value ,get-value)))
+         ,set-value
+         ,value))))
 
 (define-modify-macro nconcf (&rest lists)
   nconc

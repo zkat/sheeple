@@ -289,10 +289,6 @@ regards to the CONSTRAINTS. A future version will undo this change."
       (compute-object-hierarchy-list-using-metaobject
        (object-metaobject object) object)))
 
-(defun memoize-object-hierarchy-list (object)
-  (setf (%object-hierarchy-cache object) (compute-object-hierarchy-list object))
-  (%map-children 'memoize-object-hierarchy-list object))
-
 (defun (setf object-parents) (new-parent-list object)
   ;; TODO - this needs some careful writing, validation of the hierarchy-list, new mold, etc.
   )

@@ -20,7 +20,7 @@
 ;;; - Molds act as a sort of "backend class" for objects. A mold is a separate concept from a
 ;;;   metaobject. Their purpose is to offload the stuff that a lot of objects would share into
 ;;;   a single object, and have many similar objects use the data stored in the mold.
-;;;   Right now, molds are used to hold the list of direct properties and list of parents.
+;;;   Right now, molds are used to keep track of direct properties and store the parents list.
 ;;;   One big win already possible with molds is that they allow us to cache the entire
 ;;;   hierarchy list for an object without having to worry about recalculating it every time
 ;;;   a new object is created.
@@ -40,32 +40,31 @@
 ;;;   Every time a mold is switched up, care must be taken that relevant properties are copied
 ;;;   over appropriately, and caches are reset. Additionally, when (setf object-parents) is called,
 ;;;   all sub-molds must be alerted (and they must alert -their- sub-molds), and each sub-mold must
-;;;   recalculate its hierarchy list. Fortunately(?!), sub-molds are a single shared data-structure
-;;;   shared between all molds in a particular tree (molds that share the same parent list).
+;;;   recalculate its hierarchy list.
 
-(defstruct (tree (:predicate treep))
-  subtrees)
-
-(defstruct (mold (:predicate moldp)
-                 (:include   tree))
+(defstruct (mold (:predicate moldp))
+  "Also known as 'backend classes', molds are hidden caches which enable
+Sheeple to use class-based optimizations and keep its dynamic power."
   (parents   nil :read-only t)
   (hierarchy nil)
-  (sub-molds nil))
+  (sub-molds nil)
+  transition)
 
-(defstruct (transition (:predicate transitionp)
-                       (:include tree))
-  (mold       nil :read-only t)
-  (properties nil :read-only t))
+(defstruct (transition (:predicate transitionp))
+  "Transitions are auxiliary data structures for molds, storing information
+about an object's direct properties. Objects keep a reference to their
+current transition as an entry point to the mold datastructure."
+  (mold        nil :read-only t :type mold)
+  (properties  nil :read-only t)
+  (transitions nil))
 
 (deftype property-name ()
-  "A valid name for an object's property"
+  "A valid name for an object's property."
   'symbol)
 
 (defvar *molds* (make-hash-table :test 'equal)
-  "Global mold registry. The hash table is indexed by parent-list, with each value being an
-empty [no properties] mold, called a 'toplevel mold'.")
-;; All other molds are listed as 'transitions' of these toplevel molds. See the transitions slot
-;; on the mold struct. Each transition represents a new set of properties.
+  "Maps parent lists to their corresponding molds. This is the global entry
+point to Sheeple's backend class system.")
 
 ;;;
 ;;; Transitions

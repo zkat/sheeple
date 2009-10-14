@@ -130,14 +130,6 @@ GOAL-PROPERTIES, returning that node if found, or NIL on failure."
         (awhen (some (fun (find-transition start-node _)) path)
           (find-node-by-transitions it path)))))
 
-(defun find-mold-node (parents properties)
-  "Searches the mold cache for one with parents PARENTS and properties PROPERTIES,
-returning that mold if found, or NIL on failure."
-  (check-list-type parents object)
-  (check-list-type properties property-name)
-  (awhen (find-mold parents)
-    (find-node-by-transitions it properties)))
-
 ;;;
 ;;; Mold API -- Retrieval and Automatic Creation of Molds and Nodes
 ;;;
@@ -160,48 +152,15 @@ linking a new one if necessary."
                                            (%node-properties node))))))
 
 (defun ensure-mold (parents properties)
-  (or (find-mold parents properties)
-      (link-mold (make-mold :parents parents :properties properties))))
-
-(defun build-mold-transition-between (mold bounds)
-  "Returns a linear mold transition tree leading to MOLD. BOUNDS is a strict subset
-of MOLD's properties, representing the inclusive upper bound for the new tree."
-  (check-type mold mold)
-  (check-list-type bounds property-name)
-  (assert (and (subsetp bounds (mold-properties mold))
-               (not (subsetp (mold-properties mold) bounds)))
-          () "~A is not a strict subset of the properties of ~A"
-          bounds mold)
-  (labels ((build-up-links (mold path)
-             (if (null path) mold
-                 (let ((new-mold (make-mold :parents (mold-parents mold)
-                                            :properties (remove (car path)
-                                                                (mold-properties mold)))))
-                   (build-up-links (add-transition-by-property new-mold (car path) mold)
-                                   (cdr path))))))
-    (build-up-links mold (set-difference (mold-properties mold) bounds))))
-
-(defun link-mold (mold)
-  "Links MOLD into the mold cache, returning NIL if MOLD was already linked, or MOLD
-if it successfully linked MOLD into the cache."
-  (check-type mold mold)
-  (let ((parents (mold-parents mold)) (props (mold-properties mold)))
-    ;; Do we need to create a new tree in the mold cache?
-    (aif (find-mold parents nil)
-         ;; No; so we find the common base, and link the remaining tree to that.
-         (do* ((base it next-base)
-               (prop (car props) (car props-left))
-               (props-left (cdr props) (cdr props-left))
-               (next-base (find-transition base prop)
-                          (find-transition next-base prop)))
-              ((eq next-base mold))
-           (when (null next-base)
-             (add-transition-by-property
-              base prop (build-mold-transition-between mold (mold-properties base)))))
-         ;; Yes; so this builds an entire tree, from no props, to MOLD.
-         (prog1 mold
-           (setf (gethash parents *molds*)
-                 (build-mold-transition-between mold nil))))))
+  "Returns the node with properties PROPERTIES of the mold for PARENTS,
+creating and linking a new one if necessary."
+  (check-list-type parents object)
+  (check-list-type properties property-name)
+  (let ((mold (ensure-toplevel-mold parents)))
+    (do* ((node (%mold-initial-node mold)
+                (ensure-transition node (car props-left)))
+          (props-left properties (cdr properties)))
+        ((null props-left) node))))
 
 ;;;
 ;;; Switching molds

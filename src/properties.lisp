@@ -71,8 +71,7 @@ direct property. Returns OBJECT."
 
 (defun remove-all-direct-properties (object)
   "Wipes out all direct properties and their values from OBJECT."
-  ;; TODO - make sure this change-node thing is solid.
-  (change-node object (mold-transition (transition-mold (%object-transition object))))
+  (change-node object (initial-node (node-mold (%object-mold object))))
   object)
 
 ;;; Value
@@ -99,7 +98,6 @@ a condition of type UNBOUND-PROPERTY condition is signalled."
   "Sets NEW-VALUE as the value of a direct-property belonging to OBJECT, named
 PROPERTY-NAME. If the property does not already exist anywhere in the hierarchy list, an error
 is signaled."
-  ;; TODO - This -also- needs to be involved in the mold-management process.
   (cond ((has-direct-property-p object property-name)
          (setf (%direct-property-value object property-name) new-value))
         ((has-property-p object property-name)

@@ -24,11 +24,25 @@
 ;;;   One big win already possible with molds is that they allow us to cache the entire
 ;;;   hierarchy list for an object without having to worry about recalculating it every time
 ;;;   a new object is created.
+;;;
 ;;;   A properties-related win is that since we hold information about *which* properties are
 ;;;   available in the mold, our actual object instances can simply carry a lightweight vector
 ;;;   whose slots are indexed into based on information held in the mold. This is identical to
 ;;;   what CLOS implementations often do. Meaning? Direct property access can be as fast as
 ;;;   CLOS' (once similar optimization strategies are implemented).
+;;;
+;;;   There are 4 situations where molds must be handled:
+;;;   1. A new object is created: in this case, find or create a new toplevel mold
+;;;   2. A property is added: find or create one new transition mold
+;;;   3. A property is -removed-: start from top of mold tree, find an acceptable mold
+;;;   4. (setf object-parents) is called: begin from the beginning. Object may have properties.
+;;;
+;;;   Every time a mold is switched up, care must be taken that relevant properties are copied
+;;;   over appropriately, and caches are reset. Additionally, when (setf object-parents) is called,
+;;;   all sub-molds must be alerted (and they must alert -their- sub-molds), and each sub-mold must
+;;;   recalculate its hierarchy list. Fortunately(?!), sub-molds are a single shared data-structure
+;;;   shared between all molds in a particular tree (molds that share the same parent list).
+;;;
 (defstruct (mold (:predicate   moldp))
   (parents     nil :read-only t) ;list of parents
   (properties  nil :read-only t) ;list of properties (later, property metaobjects)

@@ -324,7 +324,8 @@ allocating the new object object. ALL-KEYS is passed on to INIT-OBJECT."
   (let ((mold (ensure-mold (ensure-list (or parent* =standard-object=)) nil))
         (obj (maybe-std-allocate-object metaobject)))
     (setf (%object-mold obj) mold)
-    (apply 'init-object obj all-keys)))
+    (apply 'init-object obj all-keys)
+    obj))
 
 (defun spawn (&rest objects)
   "Creates a new standard-object object with OBJECTS as its parents."

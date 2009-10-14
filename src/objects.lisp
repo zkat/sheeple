@@ -288,37 +288,29 @@ regards to the CONSTRAINTS. A future version will undo this change."
              (awhen (find parent (the list minimal-elements) :test 'eq) (return it)))
       (return-from std-tie-breaker-rule it))))
 
-(defun std-compute-object-hierarchy-list (object)
-  "Lists OBJECT's ancestors, in precedence order."
-  (cond
-    ((cdr (object-parents object))
-     (handler-case
-         ;; since collect-ancestors only collects the _ancestors_, we cons the object in front.
-         ;; LOCAL-PRECEDENCE-ORDERING returns fresh conses, so we can be destructive.
-         (let ((unordered (cons object (collect-ancestors object))))
-           (topological-sort unordered
-                             (delete-duplicates (mapcan 'local-precedence-ordering unordered))
-                             'std-tie-breaker-rule))
-       (simple-error () (error 'object-hierarchy-error :object object))))
-    ((car (object-parents object))
-     (let ((cache (%object-hierarchy-cache (car (object-parents object)))))
-       (error-when (find object cache) 'object-hierarchy-error :object object)
-       (cons object cache)))
-    (t (list object))))
-
-(defun compute-object-hierarchy-list (object)
-  (if (std-object-p object)
-      (std-compute-object-hierarchy-list object)
-      (compute-object-hierarchy-list-using-metaobject
-       (object-metaobject object) object)))
-
-(defun (setf object-parents) (new-parent-list object)
-  ;; TODO - this needs some careful writing, validation of the hierarchy-list, new mold, etc.
-  )
+(defun compute-hierarchy (parents)
+  "Generates an abstract hierarchy out of PARENTS; this would be suitable as
+the CDR of the hierarchy-list of a standard object with PARENTS, in order, as
+its parents."
+  ;; This is VERY far from optimal; however, it's a quick prototype  - Adlai
+  (handler-case
+      (let ((unordered
+             (remove-duplicates (append parents (mapcan 'collect-ancestors parents)))))
+        (topological-sort
+         unordered
+         (remove-duplicates (append (mapcar 'cons parents (cdr parents))
+                                    (mapcan 'local-precedence-ordering unordered)))
+         'std-tie-breaker-rule))
+    (simple-error ()
+      (error "Bad juju in experimental code. This is a bug in Sheeple."))))
 
 (defun object-hierarchy-list (object)
   "Returns the full hierarchy-list for OBJECT"
   (cons object (mold-hierarchy (%object-mold object))))
+
+(defun (setf object-parents) (new-parent-list object)
+  ;; TODO - this needs some careful writing, validation of the hierarchy-list, new mold, etc.
+  )
 
 ;;; Inheritance predicates
 (defun parentp (maybe-parent child)

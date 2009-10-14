@@ -13,6 +13,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
+(defmacro fun (&body body)
+  "This macro puts the FUN back in FUNCTION."
+  `(lambda (&optional _) (declare (ignorable _)) ,@body))
+
+(defmacro with-gensyms (names &body body)
+  `(let ,(mapcar (fun `(,_ (gensym ,(string _)))) names)
+     ,@body))
+
 (declaim (inline error-when))
 (defun error-when (condition error-datum &rest error-args)
   "Like `ASSERT', but with fewer bells and whistles."
@@ -142,10 +150,6 @@ by deleting items at the same position from both lists."
 	((null (cdr args)) (car args))
 	(t `(aif ,(car args) (aand ,@(cdr args))))))
 
-(defmacro fun (&body body)
-  "This macro puts the FUN back in FUNCTION."
-  `(lambda (&optional _) (declare (ignorable _)) ,@body))
-
 (declaim (inline aconsf-helper))
 (defun aconsf-helper (alist key value)
   (acons key value alist))
@@ -202,3 +206,9 @@ will not be affected; otherwise, it will be bound to a recognizeable and unique 
 
 (defmacro define-unbound-variables (&rest variables)
   `(progn ,@(mapcar (fun `(defvar ,@(ensure-list _))) variables)))
+
+(defmacro define-print-object (((object class) &key (identity t) (type t)) &body body)
+  (with-gensyms (stream)
+    `(defmethod print-object ((,object ,class) ,stream)
+      (print-unreadable-object (,object ,stream :type ,type :identity ,identity)
+        (let ((*standard-output* ,stream)) ,@body)))))

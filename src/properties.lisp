@@ -40,14 +40,14 @@ would yield a value (i.e. not signal an unbound-property condition)."
                      (writer nil writerp)
                      accessor)
   "Adds a property named PROPERTY-NAME to OBJECT, initialized with VALUE."
-  ;; TODO - This is going to have to do some fancy stuff with molds.
   (prog1 object
     (assert (symbolp property-name))
     (when (has-direct-property-p object property-name)
       (cerror "Remove existing property." "~A already has a direct property named ~A."
               object property-name)
       (remove-property object property-name))
-    (%add-property-cons object property-name value)
+    (change-transition object (ensure-transition (%object-transition object)
+                                                 property-name))
     (when reader (add-reader-to-object reader property-name object))
     (when writer (add-writer-to-object writer property-name object))
     (when accessor

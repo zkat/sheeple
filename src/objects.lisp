@@ -188,17 +188,16 @@ if it successfully linked MOLD into the cache."
 (defun std-print-sheeple-object (object stream)
   (print-unreadable-object (object stream :identity t)
     (format stream "Object ~:[[~S]~;~S~]"
-            (has-direct-property-p object 'nickname)
+            (ignore-errors (has-direct-property-p object 'nickname))
             (ignore-errors (object-nickname object)))))
 
 (declaim (inline print-sheeple-object-wrapper))
 (defun print-sheeple-object-wrapper (object stream)
   (handler-bind ((no-applicable-replies (fun (return-from print-sheeple-object-wrapper
-                                               (std-print-sheeple-object object stream))))
-                 (unbound-function (fun (when (eq (cell-error-name _) 'print-object)
-                                          (return-from print-sheeple-object-wrapper
-                                            (std-print-sheeple-object object stream))))))
-    (print-sheeple-object object stream)))
+                                               (std-print-sheeple-object object stream)))))
+    (if (fboundp 'print-sheeple-object)
+        (print-sheeple-object object stream)
+        (std-print-sheeple-object object stream))))
 
 ;; The SETF version of this would require that something like CHANGE-METAOBJECT exists.
 (defun object-metaobject (object)

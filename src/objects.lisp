@@ -303,7 +303,7 @@ its parents."
 
 (defun (setf object-parents) (new-parent-list object)
   ;; TODO - this needs some careful writing, validation of the hierarchy-list, new mold, etc.
-  )
+  (change-node object (ensure-mold new-parent-list (mold-properties (%object-mold object)))))
 
 ;;; Inheritance predicates
 (defun parentp (maybe-parent child)

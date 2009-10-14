@@ -86,17 +86,17 @@ If no such node exists, returns NIL."
   (check-type property-name property-name)
   (cdr (assoc property-name (node-transitions node) :test 'eq)))
 
-(defun find-mold-by-transition (start-mold goal-properties)
-  "Searches the transition tree from START-MOLD to find the mold containing
-GOAL-PROPERTIES, returning that mold if found, or NIL on failure."
-  (check-type start-mold mold)
+(defun find-node-by-transitions (start-node goal-properties)
+  "Searches the transition tree from START-NODE to find the node containing
+GOAL-PROPERTIES, returning that node if found, or NIL on failure."
+  (check-type start-node node)
   (check-list-type goal-properties property-name)
   ;; This algorithm is very concise, but it's not optimal AND it's unclear.
   ;; Probably the first target for cleaning up. - Adlai
-  (let ((path (set-difference goal-properties (mold-properties start-mold))))
-    (if (null path) start-mold
-        (awhen (some (fun (find-transition start-mold _)) path)
-          (find-mold-by-transition it path)))))
+  (let ((path (set-difference goal-properties (node-properties start-node))))
+    (if (null path) start-node
+        (awhen (some (fun (find-transition start-node _)) path)
+          (find-node-by-transitions it path)))))
 
 (defun find-mold-tree (parents)
   (check-list-type parents object)

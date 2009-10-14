@@ -217,11 +217,11 @@ right order. Keep in mind that NEW-TRANSITION might specify some properties in a
 
 (declaim (inline print-sheeple-object-wrapper))
 (defun print-sheeple-object-wrapper (object stream)
-  (handler-bind ((no-applicable-replies (fun (return-from print-sheeple-object-wrapper
-                                               (std-print-sheeple-object object stream)))))
-    (if (fboundp 'print-sheeple-object)
-        (print-sheeple-object object stream)
-        (std-print-sheeple-object object stream))))
+  (handler-case
+      (if (fboundp 'print-sheeple-object)
+          (print-sheeple-object object stream)
+          (std-print-sheeple-object object stream))
+    (no-applicable-replies () (std-print-sheeple-object object stream))))
 
 ;; The SETF version of this would require that something like CHANGE-METAOBJECT exists.
 (defun object-metaobject (object)

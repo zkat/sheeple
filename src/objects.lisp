@@ -17,17 +17,29 @@
 ;;;
 ;;; Molds
 ;;;
+;;; - Molds act as a sort of "backend class" for objects. A mold is a separate concept from a
+;;;   metaobject. Their purpose is to offload the stuff that a lot of objects would share into
+;;;   a single object, and have many similar objects use the data stored in the mold.
+;;;   Right now, molds are used to hold the list of direct properties and list of parents.
+;;;   One big win already possible with molds is that they allow us to cache the entire
+;;;   hierarchy list for an object without having to worry about recalculating it every time
+;;;   a new object is created.
+;;;   A properties-related win is that since we hold information about *which* properties are
+;;;   available in the mold, our actual object instances can simply carry a lightweight vector
+;;;   whose slots are indexed into based on information held in the mold. This is identical to
+;;;   what CLOS implementations often do. Meaning? Direct property access can be as fast as
+;;;   CLOS' (once similar optimization strategies are implemented).
+(defstruct (mold (:predicate   moldp)
+                 (:constructor make-mold (parents properties)))
+  (parents        nil :read-only t) ;list of parents
+  (properties     nil :read-only t) ;list of properties (later, property metaobjects)
+  (hierarchy-list nil) ; cached hierarchy-list, topologically-sorted based on PARENTS
+  (sub-molds      nil) ; molds that this mold must report to when there are HL changes.
+  (transitions    nil)) ; transitions are new molds that are similar to this one, but add one property.
+
 (deftype property-name ()
   "A valid name for an object's property"
   'symbol)
-
-(defstruct (mold (:predicate   moldp)
-                 (:constructor make-mold (parents properties)))
-  (parents        nil :read-only t)
-  (properties     nil :read-only t)
-  (hierarchy-list nil)
-  (sub-molds      nil)
-  (transitions    nil))
 
 (define-print-object ((mold mold)))
 
@@ -147,8 +159,8 @@ if it successfully linked MOLD into the cache."
 ;;; Objects
 ;;;
 (defstruct (object (:conc-name %object-) (:predicate objectp)
-                  (:constructor std-allocate-object (metaobject))
-                  (:print-object print-sheeple-object-wrapper))
+                   (:constructor std-allocate-object (metaobject))
+                   (:print-object print-sheeple-object-wrapper))
   mold metaobject property-values roles)
 
 (declaim (inline %object-metaobject %object-parents %object-properties

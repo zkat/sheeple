@@ -42,9 +42,11 @@
 ;;;   all sub-molds must be alerted (and they must alert -their- sub-molds), and each sub-mold must
 ;;;   recalculate its hierarchy list.
 
-(defstruct (mold (:predicate moldp))
+(defstruct (mold (:predicate moldp)
+                 (:constructor
+                  make-mold (parents &aux (hierarchy (compute-hierarchy parents)))))
   "Also known as 'backend classes', molds are hidden caches which enable
-Sheeple to use class-based optimizations and keep its dynamic power."
+Sheeple to use class-based optimizations yet keep its dynamic power."
   (parents   nil :read-only t)
   (hierarchy nil)
   (sub-molds nil)

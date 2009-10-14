@@ -35,7 +35,7 @@ would yield a value (i.e. not signal an unbound-property condition)."
   (some (rcurry 'has-direct-property-p property-name)
         (object-hierarchy-list object)))
 
-(defun add-property (object property-name value 
+(defun add-property (object property-name value
                      &key (reader nil readerp)
                      (writer nil writerp)
                      accessor)

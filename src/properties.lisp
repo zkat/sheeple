@@ -91,6 +91,10 @@ a condition of type UNBOUND-PROPERTY condition is signalled."
 
 (declaim (inline property-value-with-hierarchy-list))
 (defun property-value-with-hierarchy-list (object property-name)
+  "Crawls OBJECT's hierarchy list until it finds an object in the hierarchy with PROPERTY-NAME
+as a direct property. When it finds one, it returns the direct-property-value of that property,
+called on that object. If no object is found in the hierarchy-list with a valid direct-property,
+a condition of type UNBOUND-PROPERTY is signaled."
   (aif (find-if (rcurry 'has-direct-property-p property-name) (object-hierarchy-list object))
        (direct-property-value it property-name)
        (error 'unbound-property :object object :property-name property-name)))

@@ -65,18 +65,6 @@ empty [no properties] mold, called a 'toplevel mold'.")
 ;;;
 ;;; Transitions
 ;;;
-(defun ensure-transition (mold property-name)
-  "Returns the transition from MOLD indexed by PROPERTY-NAME, creating and
-linking a new one if necessary."
-  (check-type mold mold)
-  (check-type property-name property-name)
-  (or (find-transition mold property-name)
-      (aconsf (mold-transitions mold) property-name
-              (make-mold :parents (mold-parents mold)
-                         :hierarchy (mold-hierarchy mold)
-                         :properties (cons property-name
-                                           (mold-properties mold))))))
-
 (defun find-transition (mold property-name)
   "Returns the mold which adds a property named PROPERTY-NAME to MOLD.
 If no such mold exists, returns NIL."
@@ -119,6 +107,18 @@ returning that mold if found, or NIL on failure."
   (or (find-mold-tree parents)
       (setf (find-mold-tree parents)
             (make-mold :parents parents))))
+
+(defun ensure-transition (mold property-name)
+  "Returns the transition from MOLD indexed by PROPERTY-NAME, creating and
+linking a new one if necessary."
+  (check-type mold mold)
+  (check-type property-name property-name)
+  (or (find-transition mold property-name)
+      (aconsf (mold-transitions mold) property-name
+              (make-mold :parents (mold-parents mold)
+                         :hierarchy (mold-hierarchy mold)
+                         :properties (cons property-name
+                                           (mold-properties mold))))))
 
 (defun ensure-mold (parents properties)
   (or (find-mold parents properties)

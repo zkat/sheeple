@@ -118,11 +118,14 @@ returning that mold if found, or NIL on failure."
 ;;;
 ;;; Creating molds
 ;;;
-(defun ensure-mold-tree (parents)
-  "Returns the mold tree for PARENTS, creating and caching a new one if necessary."
-  (or (find-mold-tree parents)
-      (setf (find-mold-tree parents)
-            (make-mold :parents parents))))
+(defun ensure-mold (parents)
+  "Returns the mold for PARENTS, creating and caching a new one if necessary."
+  (check-list-type parents object)
+  (or (find-mold parents)
+      (setf (find-mold parents)
+            (aprog1 (make-mold parents)
+              (setf (mold-initial-node it)
+                    (make-node :mold it))))))
 
 (defun ensure-transition (mold property-name)
   "Returns the transition from MOLD indexed by PROPERTY-NAME, creating and

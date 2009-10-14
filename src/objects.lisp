@@ -42,19 +42,24 @@
 ;;;   all sub-molds must be alerted (and they must alert -their- sub-molds), and each sub-mold must
 ;;;   recalculate its hierarchy list. Fortunately(?!), sub-molds are a single shared data-structure
 ;;;   shared between all molds in a particular tree (molds that share the same parent list).
-;;;
-(defstruct (mold (:predicate   moldp))
-  (parents     nil :read-only t) ;list of parents
-  (properties  nil :read-only t) ;list of properties (later, property metaobjects)
-  (hierarchy   nil) ; cached hierarchy list, topologically-sorted based on PARENTS
-  (sub-molds   nil) ; molds that this mold must report to when there are HL changes.
-  (transitions nil)) ; transitions are new molds that are similar to this one, but add one property.
+
+(defstruct (tree (:predicate treep))
+  subtrees)
+
+(defstruct (mold (:predicate moldp)
+                 (:include   tree))
+  (parents   nil :read-only t)
+  (hierarchy nil)
+  (sub-molds nil))
+
+(defstruct (transition (:predicate transitionp)
+                       (:include tree))
+  (mold       nil :read-only t)
+  (properties nil :read-only t))
 
 (deftype property-name ()
   "A valid name for an object's property"
   'symbol)
-
-(define-print-object ((mold mold)))
 
 (defvar *molds* (make-hash-table :test 'equal)
   "Global mold registry. The hash table is indexed by parent-list, with each value being an

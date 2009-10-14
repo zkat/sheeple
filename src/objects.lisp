@@ -29,8 +29,7 @@
 ;;;   whose slots are indexed into based on information held in the mold. This is identical to
 ;;;   what CLOS implementations often do. Meaning? Direct property access can be as fast as
 ;;;   CLOS' (once similar optimization strategies are implemented).
-(defstruct (mold (:predicate   moldp)
-                 (:constructor make-mold (parents properties)))
+(defstruct (mold (:predicate   moldp))
   (parents        nil :read-only t) ;list of parents
   (properties     nil :read-only t) ;list of properties (later, property metaobjects)
   (hierarchy-list nil) ; cached hierarchy-list, topologically-sorted based on PARENTS
@@ -112,12 +111,11 @@ returning that mold if found, or NIL on failure."
   "Returns the mold tree for PARENTS, creating and caching a new one if necessary."
   (or (find-mold-tree parents)
       (setf (find-mold-tree parents)
-            (make-mold parents nil))))
+            (make-mold :parents parents))))
 
-;;; Deprecated
 (defun ensure-mold (parents properties)
   (or (find-mold parents properties)
-      (link-mold (make-mold parents properties))))
+      (link-mold (make-mold :parents parents :properties properties))))
 
 (defun build-mold-transition-between (mold bounds)
   "Returns a linear mold transition tree leading to MOLD. BOUNDS is a strict subset
@@ -130,9 +128,9 @@ of MOLD's properties, representing the inclusive upper bound for the new tree."
           bounds mold)
   (labels ((build-up-links (mold path)
              (if (null path) mold
-                 (let ((new-mold (make-mold (mold-parents mold)
-                                            (remove (car path)
-                                                    (mold-properties mold)))))
+                 (let ((new-mold (make-mold :parents (mold-parents mold)
+                                            :properties (remove (car path)
+                                                                (mold-properties mold)))))
                    (build-up-links (add-transition-by-property new-mold (car path) mold)
                                    (cdr path))))))
     (build-up-links mold (set-difference (mold-properties mold) bounds))))

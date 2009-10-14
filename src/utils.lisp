@@ -147,6 +147,9 @@ by deleting items at the same position from both lists."
   `(aif ,test-form
 	(progn ,@body)))
 
+(defmacro aprog1 (valform &body body)
+  `(let ((it ,valform)) ,@body it))
+
 (defmacro awhen-prog1 (test-form &body body)
   "A combination of AWHEN and PROG1; always returns the result of TEST-FORM."
   `(aif ,test-form

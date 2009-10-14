@@ -229,6 +229,10 @@ corresponding PARENTS, and the nickname is set to the symbol to facilitate debug
 ;;;
 ;;; Inheritance
 ;;;
+(defun validate-parent (parent child)
+  ;; TODO
+  t)
+
 (defun topological-sort (elements constraints tie-breaker)
   "Sorts ELEMENTS such that they satisfy the CONSTRAINTS, falling back
 on the TIE-BREAKER in the case of ambiguous constraints. On the assumption

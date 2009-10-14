@@ -31,6 +31,16 @@
 (define-sheeple-condition sheeple-warning (sheeple-condition warning) ())
 (define-sheeple-condition sheeple-error (sheeple-condition error) ())
 
+;;; Molds
+
+(define-sheeple-condition mold-error sheeple-error
+  ("An error has occured in Sheeple's backend data structures -- this is a bug ~
+    in Sheeple itself."))
+
+(define-sheeple-condition mold-collision mold-error
+  ("Can't link ~A, because doing so would conflict with the already-linked ~A."
+   new-mold collision-mold))
+
 ;;; Objects
 (define-sheeple-condition object-hierarchy-error sheeple-error
     ("A circular precedence graph was generated for ~A." object)

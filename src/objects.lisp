@@ -30,11 +30,11 @@
 ;;;   what CLOS implementations often do. Meaning? Direct property access can be as fast as
 ;;;   CLOS' (once similar optimization strategies are implemented).
 (defstruct (mold (:predicate   moldp))
-  (parents        nil :read-only t) ;list of parents
-  (properties     nil :read-only t) ;list of properties (later, property metaobjects)
-  (hierarchy-list nil) ; cached hierarchy-list, topologically-sorted based on PARENTS
-  (sub-molds      nil) ; molds that this mold must report to when there are HL changes.
-  (transitions    nil)) ; transitions are new molds that are similar to this one, but add one property.
+  (parents     nil :read-only t) ;list of parents
+  (properties  nil :read-only t) ;list of properties (later, property metaobjects)
+  (hierarchy   nil) ; cached hierarchy list, topologically-sorted based on PARENTS
+  (sub-molds   nil) ; molds that this mold must report to when there are HL changes.
+  (transitions nil)) ; transitions are new molds that are similar to this one, but add one property.
 
 (deftype property-name ()
   "A valid name for an object's property"
@@ -61,6 +61,7 @@ linking a new one if necessary."
   (or (find-transition mold property-name)
       (aconsf (mold-transitions mold) property-name
               (make-mold :parents (mold-parents mold)
+                         :hierarchy (mold-hierarchy mold)
                          :properties (cons property-name
                                            (mold-properties mold))))))
 
@@ -280,7 +281,7 @@ regards to the CONSTRAINTS. A future version will undo this change."
 
 (defun object-hierarchy-list (object)
   "Returns the full hierarchy-list for OBJECT"
-  (mold-hierarchy-cache (%object-mold object)))
+  (cons object (mold-hierarchy (%object-mold object))))
 
 ;;; Inheritance predicates
 (defun parentp (maybe-parent child)

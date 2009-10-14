@@ -120,25 +120,24 @@ returned."
 
 (defun object-direct-properties (object)
   "Returns a set of direct property definition metaobjects."
-  (awhen (%object-properties object)
-    (loop for prop across it when prop collect (car prop))))
+  (when (%object-property-values object)
+    (mold-properties (%object-mold object))))
 
 (defun available-properties (object)
   "Returns a list of property objects describing all properties available to OBJECT, including
 inherited ones."
-  (delete-duplicates (append (object-direct-properties object)
-                             (mapcan 'available-properties (object-parents object)))))
+  (delete-duplicates (append (copy-list (object-direct-properties object))
+                             (mapcan 'available-properties (copy-list (object-parents object))))))
 
 (defun property-summary (object &optional (stream *standard-output*))
   "Provides a pretty-printed representation of OBJECT's available properties."
   (format stream
           "~&Object: ~A~%Properties:~% ~{~{~&~3TName: ~13T~A~%~3TValue: ~13T~S~%~
            ~3TOwner: ~13T~A~%~%~}~}"
-          object (mapcar (fun (let ((pname _))
-                               (list pname
-                                     (property-value object pname)
-                                     (property-owner object pname))))
-                        (available-properties object))))
+          object (mapcar (fun (list _
+                                    (property-value object _)
+                                    (property-owner object _)))
+                         (available-properties object))))
 
 (defun direct-property-summary (object &optional stream)
   "Provides a pretty-printed representation of OBJECT's direct properties."
@@ -146,10 +145,8 @@ inherited ones."
           "~&Object: ~A~%~
            Direct Properties: ~%~%~
            ~{~{~&~3TName: ~A~%~3TValue: ~S~%~%~}~}"
-          object (mapcar (fun (let ((pname _))
-                               (list pname
-                                     (direct-property-value object pname))))
-                        (object-direct-properties object))))
+          object (mapcar (fun (list _ (direct-property-value object _)))
+                         (object-direct-properties object))))
 
 ;;; Convenience
 (defmacro with-properties (properties object &body body)

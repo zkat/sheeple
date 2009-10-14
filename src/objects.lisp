@@ -403,7 +403,16 @@ allocating the new object object. ALL-KEYS is passed on to INIT-OBJECT."
 (defun clone (object &optional (metaobject (object-metaobject object)))
   "Creates a object with the same parents and metaobject as OBJECT. If supplied, METAOBJECT
 will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged."
-  (make-object (object-parents object) :metaobject metaobject))
+  ;; TODO!!! - is this good enough? - syko
+  (let ((new-obj (allocate-object metaobject)))
+    (setf (%object-mold new-obj)
+          (%object-mold object)
+          (%object-property-values new-obj)
+          (make-array (length (%object-property-values object))
+                      :initial-contents (%object-property-values object))
+          (%object-roles new-obj)
+          (copy-list (%object-roles object))) ;this won't break anything, right? - syko
+    new-obj))
 
 ;;;
 ;;; fancy macros

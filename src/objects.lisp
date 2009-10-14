@@ -43,6 +43,12 @@
 
 (define-print-object ((mold mold)))
 
+(defvar *molds* (make-hash-table :test 'equal)
+  "Global mold registry. The hash table is indexed by parent-list, with each value being an
+empty [no properties] mold, called a 'toplevel mold'.")
+;; All other molds are listed as 'transitions' of these toplevel molds. See the transitions slot
+;; on the mold struct. Each transition represents a new set of properties.
+
 (defun find-transition (mold property-name)
   "Returns the mold which adds a property named PROPERTY-NAME to MOLD.
 If no such mold exists, returns NIL."
@@ -82,8 +88,6 @@ GOAL-PROPERTIES, returning that mold if found, or NIL on failure."
     (if (null path) start-mold
         (awhen (some (fun (find-transition start-mold _)) path)
           (find-mold-by-transition it path)))))
-
-(defvar *molds* (make-hash-table :test 'equal))
 
 (defun find-mold-tree (parents)
   (check-list-type parents object)
@@ -161,10 +165,12 @@ if it successfully linked MOLD into the cache."
 (defstruct (object (:conc-name %object-) (:predicate objectp)
                    (:constructor std-allocate-object (metaobject))
                    (:print-object print-sheeple-object-wrapper))
-  mold metaobject property-values roles)
+  mold ; mold this object currently refers to
+  metaobject ; metaobject used by the MOP for doing various fancy things
+  (property-values nil) ; either NIL, or a vector holding direct property values
+  (roles nil)) ; a list of role objects belonging to this object.
 
-(declaim (inline %object-metaobject %object-parents %object-properties
-                 %object-roles %object-hierarchy-cache %object-children))
+(declaim (inline %object-mold %object-metaobject %object-property-values %object-roles))
 
 (defun std-object-p (x)
   (ignore-errors (eq (%object-metaobject x) =standard-metaobject=)))
@@ -195,59 +201,7 @@ if it successfully linked MOLD into the cache."
   (%object-metaobject object))
 
 (defun object-parents (object)
-  (%object-parents object))
-
-;;; children cache
-(defvar *child-cache-initial-size* 5
-  "The initial size for a object's child cache.")
-
-(defvar *child-cache-grow-ratio* 5
-  "The ratio by which the child-cache is expanded when full.")
-
-(symbol-macrolet ((%children (%object-children object)))
-
-  (defun %create-child-cache (object)
-    "Sets OBJECT's child cache to a blank (simple-vector `*child-cache-initial-size*')"
-    (setf %children (make-vector *child-cache-initial-size*)))
-
-  (defun %child-cache-full-p (object)
-    "A child cache is full if all its items are live weak pointers to other object."
-    (aand %children (every 'maybe-weak-pointer-value it)))
-
-  (defun %enlarge-child-cache (object)
-    "Enlarges OBJECT's child cache by the value of `*child-cache-grow-ratio*'."
-    (let* ((old-vector (%object-children object))
-           (new-vector (make-vector (* *child-cache-grow-ratio* (length old-vector)))))
-      (setf (%object-children object) (replace new-vector old-vector))
-      object))
-
-  (defun %add-child (child object)
-    "Registers CHILD in OBJECT's child cache."
-    (let ((children %children))
-      (if children
-          (when (%child-cache-full-p object)
-            (%enlarge-child-cache object)
-            (setf children %children))
-          (progn (%create-child-cache object)
-                 (setf children %children)))
-      (unless (find child children :key 'maybe-weak-pointer-value)
-        (dotimes (i (length children))
-          (unless (maybe-weak-pointer-value (aref children i))
-            (return (setf (aref children i) (make-weak-pointer child)))))))
-    object)
-
-  (defun %remove-child (child object)
-    "Takes CHILD out of OBJECT's child cache."
-    (awhen (position child %children :key 'maybe-weak-pointer-value)
-      (setf (svref %children it) nil))
-    object)
-
-  (defun %map-children (function object)
-    "Applies FUNCTION to each of OBJECT's children."
-    (awhen %children
-      (map nil (fun (awhen (maybe-weak-pointer-value _) (funcall function it))) it)))
-
-) ;end symbol-macrolet
+  (mold-parents (%object-mold object)))
 
 ;;; This utility is useful for concisely setting up object hierarchies
 (defmacro with-object-hierarchy (object-and-parents &body body)
@@ -286,8 +240,8 @@ regards to the CONSTRAINTS. A future version will undo this change."
 (defun collect-ancestors (object)
   "Collects all of OBJECT's ancestors."
   (do* ((checked nil (cons chosen-object checked))
-        (ancestors (copy-list (%object-parents object))
-                   (dolist (parent (%object-parents chosen-object) ancestors)
+        (ancestors (copy-list (object-parents object))
+                   (dolist (parent (object-parents chosen-object) ancestors)
                      (unless (member parent ancestors)
                        (push parent ancestors))))
         (chosen-object (car ancestors)
@@ -311,7 +265,7 @@ regards to the CONSTRAINTS. A future version will undo this change."
 (defun std-compute-object-hierarchy-list (object)
   "Lists OBJECT's ancestors, in precedence order."
   (cond
-    ((cdr (%object-parents object))
+    ((cdr (object-parents object))
      (handler-case
          ;; since collect-ancestors only collects the _ancestors_, we cons the object in front.
          ;; LOCAL-PRECEDENCE-ORDERING returns fresh conses, so we can be destructive.
@@ -320,8 +274,8 @@ regards to the CONSTRAINTS. A future version will undo this change."
                              (delete-duplicates (mapcan 'local-precedence-ordering unordered))
                              'std-tie-breaker-rule))
        (simple-error () (error 'object-hierarchy-error :object object))))
-    ((car (%object-parents object))
-     (let ((cache (%object-hierarchy-cache (car (%object-parents object)))))
+    ((car (object-parents object))
+     (let ((cache (%object-hierarchy-cache (car (object-parents object)))))
        (error-when (find object cache) 'object-hierarchy-error :object object)
        (cons object cache)))
     (t (list object))))

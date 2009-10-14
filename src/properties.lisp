@@ -63,10 +63,11 @@ would yield a value (i.e. not signal an unbound-property condition)."
 direct property. Returns OBJECT."
   (if (has-direct-property-p object property-name)
       ;; TODO fuckit, something like this... -ish
-      (prog1 object (change-node object
-                                 (ensure-mold (object-parents object)
-                                              (remove property-name
-                                                      (object-direct-properties object)))))
+      (prog1 object
+        (change-node object
+                     (ensure-mold (object-parents object)
+                                  (remove property-name
+                                          (object-direct-properties object)))))
       (error "Cannot remove property: ~A is not a direct property of ~A" property-name object)))
 
 (defun remove-all-direct-properties (object)

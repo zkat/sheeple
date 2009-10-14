@@ -48,9 +48,9 @@ Sheeple to use class-based optimizations and keep its dynamic power."
   (parents   nil :read-only t)
   (hierarchy nil)
   (sub-molds nil)
-  transition)
+  initial-node)
 
-(defstruct (transition (:predicate transitionp))
+(defstruct (node (:predicate nodep))
   "Transitions are auxiliary data structures for molds, storing information
 about an object's direct properties. Objects keep a reference to their
 current transition as an entry point to the mold datastructure."
@@ -62,6 +62,14 @@ current transition as an entry point to the mold datastructure."
   "A valid name for an object's property."
   'symbol)
 
+(deftype transition ()
+  "A link to a node which adds a certain property. Note that transitions
+are never dealt with directly -- instead, when a transition's property name
+matches a desired property during a search of a mold's transition graph,
+the corresponding node is examined next. Transitions are stored within the
+node-transitions of a `node'."
+  '(cons property-name node))
+
 (defvar *molds* (make-hash-table :test 'equal)
   "Maps parent lists to their corresponding molds. This is the global entry
 point to Sheeple's backend class system.")
@@ -69,10 +77,12 @@ point to Sheeple's backend class system.")
 ;;;
 ;;; Transitions
 ;;;
-(defun find-transition (mold property-name)
-  "Returns the mold which adds a property named PROPERTY-NAME to MOLD.
-If no such mold exists, returns NIL."
-  (cdr (assoc property-name (mold-transitions mold) :test 'eq)))
+(defun find-transition (node property-name)
+  "Returns the node which adds a property named PROPERTY-NAME to NODE.
+If no such node exists, returns NIL."
+  (check-type node node)
+  (check-type property-name property-name)
+  (cdr (assoc property-name (node-transitions node) :test 'eq)))
 
 (defun find-mold-by-transition (start-mold goal-properties)
   "Searches the transition tree from START-MOLD to find the mold containing

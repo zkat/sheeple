@@ -195,8 +195,7 @@ if it successfully linked MOLD into the cache."
                                             (std-print-sheeple-object object stream))))))
     (print-sheeple-object object stream)))
 
-;; If we didn't define these functions, Lisp's package system would
-;; export the SETF version as well as the reader.
+;; The SETF version of this would require that something like CHANGE-METAOBJECT exists.
 (defun object-metaobject (object)
   (%object-metaobject object))
 
@@ -218,7 +217,6 @@ corresponding PARENTS, and the nickname is set to the symbol to facilitate debug
 ;;;
 ;;; Inheritance
 ;;;
-
 (defun topological-sort (elements constraints tie-breaker)
   "Sorts ELEMENTS such that they satisfy the CONSTRAINTS, falling back
 on the TIE-BREAKER in the case of ambiguous constraints. On the assumption
@@ -290,69 +288,13 @@ regards to the CONSTRAINTS. A future version will undo this change."
   (setf (%object-hierarchy-cache object) (compute-object-hierarchy-list object))
   (%map-children 'memoize-object-hierarchy-list object))
 
-(defun std-finalize-object-inheritance (object)
-  "Memoizes OBJECT's hierarchy list."
-  (dolist (parent (object-parents object)) (%add-child object parent))
-  (memoize-object-hierarchy-list object)
-  object)
-
-(defun finalize-object-inheritance (object)
-  "Memoizes OBJECT's hierarchy list, running a MOP hook along the way.
-See `finalize-object-inheritance-using-metaobject'."
-  (if (std-object-p object)
-      (std-finalize-object-inheritance object)
-      (finalize-object-inheritance-using-metaobject
-       (object-metaobject object) object)))
-
-;;; Add/remove parents
-(defun remove-parent (parent object)
-  "Removes PARENT from OBJECT, running a MOP hook along the way.
-See `remove-parent-using-metaobjects'."
-  (if (and (std-object-p parent) (std-object-p object))
-      (std-remove-parent parent object)
-      (remove-parent-using-metaobjects (object-metaobject parent) (object-metaobject object)
-                                       parent object)))
-
-(defun std-remove-parent (parent child)
-  "Removes PARENT from CHILD"
-  (error-when (not (parentp parent child)) "~A is not a parent of ~A" parent child)
-  (deletef (%object-parents child) parent)
-  (%remove-child child parent)
-  (finalize-object-inheritance child))
-
-(defun add-parent (new-parent child)
-  "Adds NEW-PARENT as a parent to CHILD, running a MOP hook along the way.
-See `add-parent-using-metaobjects'."
-  (if (and (std-object-p new-parent) (std-object-p child))
-      (std-add-parent new-parent child)
-      (add-parent-using-metaobjects (object-metaobject new-parent) (object-metaobject child)
-                                    new-parent child)))
-
-(defun std-add-parent (new-parent child)
-  "Adds NEW-PARENT as a parent to CHILD."
-  (error-when (eq new-parent child) "Objects cannot be parents of themselves.")
-  (error-when (member new-parent (object-parents child) :test 'eq)
-              "~A is already a parent of ~A." new-parent child)
-  (handler-bind
-      ((object-hierarchy-error (fun (remove-parent new-parent child))))
-    (pushend new-parent (%object-parents child))
-    (finalize-object-inheritance child)
-    child))
-
-(defun add-parents (parents object)
-  "Adds multiple parents to the hierarchy list. The net effect of this function
-is that the parents are appended to the end of the list."
-  (prog1 object (mapc (rcurry 'add-parent object) parents)))
-
-(defun add-parent* (parent* object)
-  "A utility/interface/laziness function, for adding parent(s) to a object."
-  (ctypecase parent*
-    (object (add-parent parent* object))
-    (cons (add-parents parent* object))))
+(defun (setf object-parents) (new-parent-list object)
+  ;; TODO - this needs some careful writing, validation of the hierarchy-list, new mold, etc.
+  )
 
 (defun object-hierarchy-list (object)
   "Returns the full hierarchy-list for OBJECT"
-  (%object-hierarchy-cache object))
+  (mold-hierarchy-cache (%object-mold object)))
 
 ;;; Inheritance predicates
 (defun parentp (maybe-parent child)

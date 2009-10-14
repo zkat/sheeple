@@ -79,13 +79,9 @@ direct property. Returns OBJECT."
 (defun direct-property-value (object property-name)
   "Returns the property-value set locally in OBJECT for PROPERTY-NAME.
 If the value is non-local (is delegated or does not exist in the hierarchy list),
-a condition of type UNBOUND-DIRECT-PROPERTY condition is signalled."
-  ;; TODO - rewrite this shit
-  (if (%object-properties object)
-      (aif (%get-property-cons object property-name)
-           (cdr it)
-           (error 'unbound-property
-                  :object object :property-name property-name))
+a condition of type UNBOUND-PROPERTY condition is signalled."
+  (if (has-direct-property-p object property-name)
+      (%direct-property-value object property-name)
       (error 'unbound-property
              :object object :property-name property-name)))
 

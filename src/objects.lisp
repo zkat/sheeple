@@ -98,22 +98,22 @@ GOAL-PROPERTIES, returning that node if found, or NIL on failure."
         (awhen (some (fun (find-transition start-node _)) path)
           (find-node-by-transitions it path)))))
 
-(defun find-mold-tree (parents)
+(defun find-mold (parents)
   (check-list-type parents object)
   (values (gethash parents *molds*)))
 
-(defun (setf find-mold-tree) (mold parents)
+(defun (setf find-mold) (mold parents)
   (check-list-type parents object)
   (check-type mold mold)
   (setf (gethash parents *molds*) mold))
 
-(defun find-mold (parents properties)
+(defun find-mold-node (parents properties)
   "Searches the mold cache for one with parents PARENTS and properties PROPERTIES,
 returning that mold if found, or NIL on failure."
   (check-list-type parents object)
   (check-list-type properties property-name)
-  (awhen (find-mold-tree parents)
-    (find-mold-by-transition it properties)))
+  (awhen (find-mold parents)
+    (find-node-by-transitions it properties)))
 
 ;;;
 ;;; Creating molds

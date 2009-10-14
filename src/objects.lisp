@@ -42,9 +42,9 @@
 ;;;   all sub-molds must be alerted (and they must alert -their- sub-molds), and each sub-mold must
 ;;;   recalculate its hierarchy list.
 
-(defstruct (mold (:predicate moldp) (:conc-name %mold-)
-                 (:constructor
-                  %make-mold (parents &aux (hierarchy (compute-hierarchy parents)))))
+(defstruct (mold-top (:predicate moldp)
+                     (:constructor
+                      %make-mold (parents &aux (hierarchy (compute-hierarchy parents)))))
   "Also known as 'backend classes', molds are hidden caches which enable
 Sheeple to use class-based optimizations yet keep its dynamic power."
   (parents   nil :read-only t)
@@ -52,7 +52,7 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
   (sub-molds nil)
   initial-node)
 
-(defstruct (node (:predicate nodep) (:conc-name %node-))
+(defstruct (node (:predicate nodep))
   "Transitions are auxiliary data structures for molds, storing information
 about an object's direct properties. Objects keep a reference to their
 current transition as an entry point to the mold datastructure."
@@ -72,27 +72,32 @@ the corresponding node is examined next. Transitions are stored within the
 node-transitions of a `node'."
   '(cons property-name node))
 
+(deftype mold ()
+  "A union of NODE and MOLT-TOP, mainly here for convenience:
+  (typep (ensure-mold <parents> <properties>) 'mold) => T"
+  '(or node mold-top))
+
 (defun make-mold (parents)
   (aprog1 (%make-mold parents)
-    (setf (%mold-initial-node it)
+    (setf (mold-top-initial-node it)
           (make-node :mold it))))
 
 (macrolet ((define-node-mold-function (name inner docstring)
              `(defun ,name (mold) ,docstring
                 (etypecase mold
-                  (mold (,inner mold))
-                  (node (,name (%node-mold mold)))))))
-  (define-node-mold-function mold-parents %mold-parents
+                  (mold-top (,inner mold))
+                  (node (,name (node-mold mold)))))))
+  (define-node-mold-function mold-parents mold-top-parents
     "Returns the parents of MOLD, which can be either a `mold' or a `node'.")
-  (define-node-mold-function mold-hierarchy %mold-hierarchy
+  (define-node-mold-function mold-hierarchy mold-top-hierarchy
     "Returns the hierarchy list of MOLD, which can be either a `mold' or a `node'.")
-  (define-node-mold-function mold-sub-molds %mold-sub-molds
+  (define-node-mold-function mold-sub-molds mold-top-sub-molds
     "Returns the cached child molds of MOLD, which can be either a `mold' or a `node'."))
 
 (defun mold-properties (mold)
   "Returns the properties of MOLD, which should be a `node'."
   (if (typep mold 'node)
-      (%node-properties mold)
+      (node-properties mold)
       (error 'type-error :datum mold :expected-type 'node)))
 
 (defvar *molds* (make-hash-table :test 'equal)
@@ -105,7 +110,7 @@ point to Sheeple's backend class system.")
 
 (defun (setf find-mold) (mold parents)
   (check-list-type parents object)
-  (check-type mold mold)
+  (check-type mold mold-top)
   (setf (gethash parents *molds*) mold))
 
 ;;;
@@ -116,7 +121,7 @@ point to Sheeple's backend class system.")
 If no such node exists, returns NIL."
   (check-type node node)
   (check-type property-name property-name)
-  (cdr (assoc property-name (%node-transitions node) :test 'eq)))
+  (cdr (assoc property-name (node-transitions node) :test 'eq)))
 
 (defun find-node-by-transitions (start-node goal-properties)
   "Searches the transition tree from START-NODE to find the node containing
@@ -125,7 +130,7 @@ GOAL-PROPERTIES, returning that node if found, or NIL on failure."
   (check-list-type goal-properties property-name)
   ;; This algorithm is very concise, but it's not optimal AND it's unclear.
   ;; Probably the first target for cleaning up. - Adlai
-  (let ((path (set-difference goal-properties (%node-properties start-node))))
+  (let ((path (set-difference goal-properties (node-properties start-node))))
     (if (null path) start-node
         (awhen (some (fun (find-transition start-node _)) path)
           (find-node-by-transitions it path)))))
@@ -146,10 +151,10 @@ linking a new one if necessary."
   (check-type node node)
   (check-type property-name property-name)
   (or (find-transition node property-name)
-      (aconsf (%node-transitions node) property-name
-              (make-node :mold (%node-mold node)
+      (aconsf (node-transitions node) property-name
+              (make-node :mold (node-mold node)
                          :properties (cons property-name
-                                           (%node-properties node))))))
+                                           (node-properties node))))))
 
 (defun ensure-mold (parents properties)
   "Returns the node with properties PROPERTIES of the mold for PARENTS,
@@ -157,9 +162,9 @@ creating and linking a new one if necessary."
   (check-list-type parents object)
   (check-list-type properties property-name)
   (let ((mold (ensure-toplevel-mold parents)))
-    (do* ((node (%mold-initial-node mold)
+    (do* ((node (mold-top-initial-node mold)
                 (ensure-transition node (car props-left)))
-          (props-left properties (cdr properties)))
+          (props-left properties (cdr props-left)))
         ((null props-left) node))))
 
 ;;;

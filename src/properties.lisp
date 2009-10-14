@@ -60,15 +60,17 @@ would yield a value (i.e. not signal an unbound-property condition)."
 (defun remove-property (object property-name)
   "Removes OBJECT's direct property named PROPERTY-NAME. Signals an error if there is no such
 direct property. Returns OBJECT."
-  ;; TODO - This is also going to have to do fancy stuff with molds.
   (if (has-direct-property-p object property-name)
-      (prog1 object (%remove-property-cons object property-name))
+      ;; TODO fuckit, something like this... -ish
+      (prog1 object (change-transition object
+                                       (ensure-mold (object-parents object)
+                                                    (remove property-name
+                                                            (object-direct-properties object)))))
       (error "Cannot remove property: ~A is not a direct property of ~A" property-name object)))
 
 (defun remove-all-direct-properties (object)
   "Wipes out all direct properties and their values from OBJECT."
-  ;; TODO - Again, fancy stuff with molds
-  (setf (%object-properties object) nil)
+  (change-transition object (mold-transition (transition-mold (%object-transition object))))
   object)
 
 ;;; Value
@@ -103,12 +105,8 @@ is signaled."
   (cond ((has-direct-property-p object property-name)
          (setf (%direct-property-value object property-name) new-value))
         ((has-property-p object property-name)
-         ;; We place a restriction on the user that a property metaobject
-         ;; itself cannot be side-effected. That restriction allows us,
-         ;; in the common case of a property already existing in the hierarchy,
-         ;; to reuse the property metaobject by just adding a pointer to it locally.
-         (let ((owner-prop-mo property-name))
-           (%add-property-cons object owner-prop-mo new-value)))
+         (change-transition object property-name)
+         (setf (%direct-property-value object property-name) new-value))
         (t (cerror "Add the property locally" 'unbound-property
                    :object object
                    :property-name property-name)

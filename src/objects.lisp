@@ -165,6 +165,16 @@ if it successfully linked MOLD into the cache."
                  (build-mold-transition-between mold nil))))))
 
 ;;;
+;;; Switching molds
+;;;
+(defun change-mold (object new-mold)
+  "Creates a new property-value vector in OBJECT, according to NEW-MOLD's specification, and
+automatically takes care of bringing the correct property-values over into the new vector, in the
+right order. Keep in mind that NEW-MOLD might specify some properties in a different order."
+  ;; TODO
+  )
+
+;;;
 ;;; Objects
 ;;;
 (defstruct (object (:conc-name %object-) (:predicate objectp)

@@ -173,7 +173,7 @@ creating and linking a new one if necessary."
 (defstruct (object (:conc-name %object-) (:predicate objectp)
                    (:constructor std-allocate-object (metaobject))
                    (:print-object print-sheeple-object-wrapper))
-  mold ; mold this object currently refers to
+  (mold nil)                                ; mold this object currently refers to
   metaobject ; metaobject used by the MOP for doing various fancy things
   (property-values nil) ; either NIL, or a vector holding direct property values
   (roles nil)) ; a list of role objects belonging to this object.

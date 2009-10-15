@@ -10,18 +10,6 @@
 (in-package :sheeple)
 
 ;;;
-;;; Internals
-;;;
-(defun %direct-property-value (object property-name)
-  (let ((index (position property-name (mold-properties (%object-mold object)))))
-    (when index
-      (svref (%object-property-values object) (the fixnum index)))))
-
-(defun (setf %direct-property-value) (new-value object property-name)
-  (let ((index (position property-name (mold-properties (%object-mold object)))))
-    (setf (svref (%object-property-values object) index) new-value)))
-
-;;;
 ;;; Existential
 ;;;
 (defun has-direct-property-p (object property-name)

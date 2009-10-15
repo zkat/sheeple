@@ -154,6 +154,10 @@
 ** TODO Messages
 *** TODO Check for correctness of lambda-list congruence
 *** TODO Add :reply option to defmessage.
+** TODO DOCUMENTATION
+   Fix the fucking documentation bullshit -- something is probably not ANSI-compatible,
+   although I haven't looked at it too deeply. Either way, CLISP complains when
+   documentation is enabled.
 ** TODO Document everything in doc/sheeple.texinfo
 * DONE 2.2
 ** DONE [#A] Fix #'(setf property-value) Bug

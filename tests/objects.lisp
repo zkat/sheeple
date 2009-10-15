@@ -9,9 +9,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(defun cons-std-object ()
-  (finalize-object-inheritance (std-allocate-object =standard-metaobject=)))
-
 (def-fixture with-std-object ()
   (let ((object (cons-std-object)))
     (&body)))

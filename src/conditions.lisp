@@ -33,7 +33,7 @@
 
 ;;; Misc
 
-(define-sheeple-condition topologica-sort-conflict sheeple-error
+(define-sheeple-condition topological-sort-conflict sheeple-error
   ("A conflict arose during a topological sort. There's probably also a bug in
 Sheeple, because this condition should always get handled internally.
 Current sort status:

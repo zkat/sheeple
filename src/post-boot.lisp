@@ -21,22 +21,6 @@
     ((metaobject =standard-metaobject=) object)
   (std-compute-object-hierarchy-list object))
 
-(defmessage finalize-object-inheritance-using-metaobject (metaobject object))
-(defreply finalize-object-inheritance-using-metaobject
-    ((metaobject =standard-metaobject=) object)
-  (std-finalize-object-inheritance object))
-
-(defmessage remove-parent-using-metaobjects (parent-metaobject child-metaobject parent child))
-(defreply remove-parent-using-metaobjects ((parent-metaobject =standard-metaobject=)
-                                           (child-metaobject =standard-metaobject=)
-                                           parent child)
-  (std-remove-parent parent child))
-
-(defmessage add-parent-using-metaobjects (parent-metaobject child-metaobject parent child))
-(defreply add-parent-using-metaobjects ((parent-metaobject =standard-metaobject=)
-                                        (child-metaobject =standard-metaobject=)
-                                        parent child)
-  (std-add-parent parent child))
 
 ;;;
 ;;; Nicknames

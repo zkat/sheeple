@@ -85,9 +85,10 @@ a condition of type UNBOUND-PROPERTY condition is signalled."
 as a direct property. When it finds one, it returns the direct-property-value of that property,
 called on that object. If no object is found in the hierarchy-list with a valid direct-property,
 a condition of type UNBOUND-PROPERTY is signaled."
-  (aif (position property-name (object-hierarchy-list object)
-                 :test 'eq :key (fun (mold-properties (%object-mold _))))
-       (svref (the simple-vector (%object-property-values object)) (the fixnum it))
+  (aif (find property-name (object-hierarchy-list object)
+             :test 'eq :key (fun (mold-properties (%object-mold _))))
+       (let ((index (position property-name (mold-properties (%object-mold it)))))
+         (svref (the simple-vector (%object-property-values it)) (the fixnum index)))
        (error 'unbound-property :object object :property-name property-name)))
 
 (defun (setf property-value) (new-value object property-name)

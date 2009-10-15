@@ -70,7 +70,7 @@ direct property. Returns OBJECT."
   "Returns the property-value set locally in OBJECT for PROPERTY-NAME.
 If the value is non-local (is delegated or does not exist in the hierarchy list),
 a condition of type UNBOUND-PROPERTY condition is signalled."
-  (aif (position property-name (mold-properties (%object-mold object)))
+  (aif (position property-name (the list (mold-properties (%object-mold object))))
        (svref (the simple-vector (%object-property-values object)) (the fixnum it))
        (error 'unbound-property :object object :property-name property-name)))
 
@@ -84,12 +84,15 @@ a condition of type UNBOUND-PROPERTY condition is signalled."
 as a direct property. When it finds one, it returns the direct-property-value of that property,
 called on that object. If no object is found in the hierarchy-list with a valid direct-property,
 a condition of type UNBOUND-PROPERTY is signaled."
-  (aif (loop for ancestor in (object-hierarchy-list object)
-            when (find property-name (mold-properties (%object-mold ancestor)))
-            return ancestor)
-       (let ((index (position property-name (mold-properties (%object-mold it)))))
-         (svref (the simple-vector (%object-property-values it)) (the fixnum index)))
-       (error 'unbound-property :object object :property-name property-name)))
+  (acond ((position property-name
+                    (the list (mold-properties (%object-mold object))) :test 'eq)
+          (svref (the simple-vector (%object-property-values object)) (the fixnum it)))
+         ((find property-name (mold-hierarchy object)
+                :test 'eq :key (fun (mold-properties (%object-mold _))))
+          (let ((index (position property-name (mold-properties (%object-mold it)) :test 'eq)))
+            (declare (fixnum index))
+            (svref (the simple-vector (%object-property-values object)) index)))
+         (t (error 'unbound-property :object object :property-name property-name))))
 
 (defun (setf property-value) (new-value object property-name)
   "Sets NEW-VALUE as the value of a direct-property belonging to OBJECT, named
@@ -97,7 +100,7 @@ PROPERTY-NAME. If the property does not already exist anywhere in the hierarchy 
 is signaled."
   (acond ((position property-name (mold-properties (%object-mold object)) :test 'eq)
           (setf (svref (%object-property-values object) it) new-value))
-         ((find property-name (object-hierarchy-list object)
+         ((find property-name (mold-hierarchy object)
                 :test 'eq :key (fun (mold-properties (%object-mold _))))
           (change-node object property-name)
           (let ((index (position property-name (mold-properties (%object-mold it)) :test 'eq)))

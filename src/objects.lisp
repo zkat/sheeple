@@ -237,7 +237,10 @@ regards to the CONSTRAINTS. A future version will undo this change."
                (values befores afters) (parallel-delete choice befores afters))
        finally (if (null elements)
                    (return-from topological-sort (nreverse result))
-                   (error "Inconsistent precedence graph.")))))
+                   (error 'topologica-sort-conflict
+                          :conflicting-elements elements
+                          :sorted-elements (reverse result)
+                          :constraints (mapcar 'cons befores afters))))))
 
 (defun collect-ancestors (object)
   "Collects all of OBJECT's ancestors."
@@ -269,16 +272,13 @@ regards to the CONSTRAINTS. A future version will undo this change."
 the CDR of the hierarchy-list of a standard object with PARENTS, in order, as
 its parents."
   ;; This is VERY far from optimal; however, it's a quick prototype  - Adlai
-  (handler-case
-      (let ((unordered
-             (remove-duplicates (append parents (mapcan 'collect-ancestors parents)))))
-        (topological-sort
-         unordered
-         (remove-duplicates (append (mapcar 'cons parents (cdr parents))
-                                    (mapcan 'local-precedence-ordering unordered)))
-         'std-tie-breaker-rule))
-    (simple-error ()
-      (error "Bad juju in experimental code. This is a bug in Sheeple."))))
+  (let ((unordered
+         (remove-duplicates (append parents (mapcan 'collect-ancestors parents)))))
+    (topological-sort
+     unordered
+     (remove-duplicates (append (mapcar 'cons parents (cdr parents))
+                                (mapcan 'local-precedence-ordering unordered)))
+     'std-tie-breaker-rule)))
 
 (defun object-hierarchy-list (object)
   "Returns the full hierarchy-list for OBJECT"

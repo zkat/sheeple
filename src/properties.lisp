@@ -37,6 +37,9 @@ would yield a value (i.e. not signal an unbound-property condition)."
       (remove-property object property-name))
     (change-node object (ensure-transition (%object-mold object)
                                            property-name))
+    (let ((position (position property-name (mold-properties (%object-mold object)))))
+      (declare (fixnum position))
+      (setf (svref (the vector (%object-property-values object)) position) value))
     (when reader (add-reader-to-object reader property-name object))
     (when writer (add-writer-to-object writer property-name object))
     (when accessor

@@ -31,6 +31,17 @@
 (define-sheeple-condition sheeple-warning (sheeple-condition warning) ())
 (define-sheeple-condition sheeple-error (sheeple-condition error) ())
 
+;;; Misc
+
+(define-sheeple-condition topologica-sort-conflict sheeple-error
+  ("A conflict arose during a topological sort. There's probably also a bug in
+Sheeple, because this condition should always get handled internally.
+Current sort status:
+  Conflicting elements: ~A
+  Sorted elements: ~A
+  Conflicting constraints: ~A"
+   conflicting-elements sorted-elements constraints))
+
 ;;; Molds
 
 (define-sheeple-condition mold-error sheeple-error
@@ -42,8 +53,9 @@
    new-mold collision-mold))
 
 ;;; Objects
+
 (define-sheeple-condition object-hierarchy-error sheeple-error
-    ("A circular precedence graph was generated for ~A." object)
+  ("A circular precedence graph was generated for ~A." object)
   (:documentation "Signaled whenever there is a problem computing the hierarchy list."))
 
 ;;; Properties
@@ -52,10 +64,10 @@
   (:documentation "Encompasses all that can go wrong with properties."))
 
 (define-sheeple-condition unbound-direct-property object-property-error
-    ("Object ~A has no direct property named ~A" object property-name))
+  ("Object ~A has no direct property named ~A" object property-name))
 
 (define-sheeple-condition unbound-property object-property-error
-    ("Property ~A is unbound for object ~A" property-name object))
+  ("Property ~A is unbound for object ~A" property-name object))
 
 ;;; Looks like somebody's a long way from home. - Adlai
 ;;; (define-condition property-locked (sheeple-error) ())

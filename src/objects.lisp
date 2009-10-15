@@ -233,6 +233,14 @@ corresponding PARENTS, and the nickname is set to the symbol to facilitate debug
 on the TIE-BREAKER in the case of ambiguous constraints. On the assumption
 that they are freshly generated, this implementation is destructive with
 regards to the CONSTRAINTS. A future version will undo this change."
+  ;; TODO - fix this, it breaks under ECL with the following error:
+  ;; Compiling (DEFUN TOPOLOGICAL-SORT ...).
+  ;; Error: in file /home/sykopomp/hackery/lisp/sheeple/src/objects.lisp, position 9806, and form
+  ;;   (FSET 'TOPOLOGICAL-SORT #'(LAMBDA-BLOCK TOPOLOGICAL-SORT # ...))
+  ;; The macro form (LOOP FOR MINIMAL-ELEMENTS = (REMOVE-IF (FUN (MEMQ |_| AFTERS)) ELEMENTS) WHILE MINIMAL-ELEMENTS FOR CHOICE = (IF (NULL (CDR MINIMAL-ELEMENTS)) (CAR MINIMAL-ELEMENTS) (FUNCALL TIE-BREAKER MINIMAL-ELEMENTS RESULT)) WITH RESULT DO (PUSH CHOICE RESULT) (SETF ELEMENTS (DELETE CHOICE ELEMENTS :TEST 'EQ) (VALUES BEFORES AFTERS) (PARALLEL-DELETE CHOICE BEFORES AFTERS)) FINALLY (IF (NULL ELEMENTS) (RETURN-FROM TOPOLOGICAL-SORT (NREVERSE RESULT)) (ERROR "Inconsistent precedence graph."))) was not expanded successfully.
+  ;; Error detected:
+  ;; Iteration in LOOP follows body code.
+  ;; Current LOOP context: FOR CHOICE = (IF (NULL (CDR MINIMAL-ELEMENTS)) (CAR MINIMAL-ELEMENTS) (FUNCALL TIE-BREAKER MINIMAL-ELEMENTS RESULT)) WITH.
   (multiple-value-bind (befores afters) (nunzip-alist constraints)
     (loop for minimal-elements = (remove-if (fun (memq _ afters)) elements)
        while minimal-elements

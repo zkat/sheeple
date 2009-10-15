@@ -68,10 +68,10 @@ direct property. Returns OBJECT."
   "Returns the property-value set locally in OBJECT for PROPERTY-NAME.
 If the value is non-local (is delegated or does not exist in the hierarchy list),
 a condition of type UNBOUND-PROPERTY condition is signalled."
-  (if (has-direct-property-p object property-name)
-      (%direct-property-value object property-name)
-      (error 'unbound-property
-             :object object :property-name property-name)))
+  (aif (position property-name (mold-properties (%object-mold object)))
+       (svref (the simple-vector (%object-property-values object)) (the fixnum it))
+       (error 'unbound-property
+              :object object :property-name property-name)))
 
 (defun property-value (object property-name)
   "Returns a property-value that is not necessarily local to OBJECT."

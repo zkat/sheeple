@@ -145,7 +145,7 @@ by deleting items at the same position from both lists."
 
 (defmacro awhen (test-form &body body)
   `(aif ,test-form
-	(progn ,@body)))
+        (progn ,@body)))
 
 (defmacro aprog1 (valform &body body)
   `(let ((it ,valform)) ,@body it))
@@ -157,8 +157,25 @@ by deleting items at the same position from both lists."
 
 (defmacro aand (&rest args)
   (cond ((null args) t)
-	((null (cdr args)) (car args))
-	(t `(aif ,(car args) (aand ,@(cdr args))))))
+        ((null (cdr args)) (car args))
+        (t `(aif ,(car args) (aand ,@(cdr args))))))
+
+;;; from anaphora
+(defmacro anaphoric (op test &body body)
+  `(let ((it ,test))
+     (,op it ,@body)))
+
+(defmacro acond (&body clauses)
+  "Like COND, except result of each test-form is bound to IT (via LET) for the
+scope of the corresponding clause."
+  (labels ((rec (clauses)
+             (if clauses
+                 (destructuring-bind ((test &body body) . rest)  clauses
+                   (if body
+                       `(anaphoric if ,test (progn ,@body) ,(rec rest))
+                       `(anaphoric if ,test it ,(rec rest))))
+                 nil)))
+    (rec clauses)))
 
 (declaim (inline aconsf-helper))
 (defun aconsf-helper (alist key value)

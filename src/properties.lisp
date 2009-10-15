@@ -92,15 +92,16 @@ a condition of type UNBOUND-PROPERTY is signaled."
   "Sets NEW-VALUE as the value of a direct-property belonging to OBJECT, named
 PROPERTY-NAME. If the property does not already exist anywhere in the hierarchy list, an error
 is signaled."
-  (cond ((has-direct-property-p object property-name)
-         (setf (%direct-property-value object property-name) new-value))
-        ((has-property-p object property-name)
-         (change-node object property-name)
-         (setf (%direct-property-value object property-name) new-value))
-        (t (cerror "Add the property locally" 'unbound-property
-                   :object object
-                   :property-name property-name)
-           (add-property object property-name new-value)))
+  (acond ((position property-name (mold-properties (%object-mold object)) :test 'eq)
+          (setf (svref (%object-property-values object) it) new-value))
+         ((position property-name (object-hierarchy-list object)
+                    :test 'eq :key (fun (mold-properties (%object-mold _))))
+          (change-node object property-name)
+          (setf (svref (%object-property-values object) it) new-value))
+         (t (cerror "Add the property locally" 'unbound-property
+                    :object object
+                    :property-name property-name)
+            (add-property object property-name new-value)))
   new-value)
 
 ;;; Reflection API

@@ -64,7 +64,7 @@ mold-transitions of a `mold'."
   "Also known as 'backend classes', molds are hidden caches which enable
 Sheeple to use class-based optimizations yet keep its dynamic power."
   (lineage     nil :read-only t :type lineage)
-  (properties  nil :read-only t)
+  (properties  nil :read-only t :type simple-vector)
   (transitions nil :type '(list-of transition)))
 
 (defstruct (lineage
@@ -127,7 +127,7 @@ GOAL-PROPERTIES, returning that mold if found, or NIL on failure."
   (check-list-type parents object)
   (or (find-mold parents)
       (setf (find-mold parents)
-            (make-mold (make-lineage parents) nil))))
+            (make-mold (make-lineage parents) (vector)))))
 
 (defun ensure-transition (mold property-name)
   "Returns the transition from MOLD indexed by PROPERTY-NAME, creating and
@@ -137,7 +137,7 @@ linking a new one if necessary."
   (or (find-transition mold property-name)
       (aconsf (mold-transitions mold) property-name
               (make-mold (mold-lineage mold)
-                         (cons property-name (mold-properties mold))))))
+                         (vector-cons property-name (mold-properties mold))))))
 
 (defun ensure-mold (parents properties)
   "Returns the mold with properties PROPERTIES of the mold for PARENTS,

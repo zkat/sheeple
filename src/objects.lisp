@@ -42,63 +42,47 @@
 ;;;   all sub-molds must be alerted (and they must alert -their- sub-molds), and each sub-mold must
 ;;;   recalculate its hierarchy list.
 
-(defstruct (mold-top (:predicate moldp)
-                     (:constructor
-                      %make-mold (parents &aux (hierarchy (compute-hierarchy parents)))))
-  "Also known as 'backend classes', molds are hidden caches which enable
-Sheeple to use class-based optimizations yet keep its dynamic power."
-  (parents   nil :read-only t)
-  (hierarchy nil)
-  (sub-molds nil)
-  initial-node)
-
-(defstruct (node (:predicate nodep))
-  "Transitions are auxiliary data structures for molds, storing information
-about an object's direct properties. Objects keep a reference to their
-current transition as an entry point to the mold datastructure."
-  (mold        nil :read-only t :type mold)
-  (properties  nil :read-only t)
-  (transitions nil))
+(deftype list-of (type)
+  `(or null
+       (cons ,type list)))
 
 (deftype property-name ()
   "A valid name for an object's property."
   'symbol)
 
 (deftype transition ()
-  "A link to a node which adds a certain property. Note that transitions
+  "A link to a mold which adds a certain property. Note that transitions
 are never dealt with directly -- instead, when a transition's property name
 matches a desired property during a search of a mold's transition graph,
-the corresponding node is examined next. Transitions are stored within the
-node-transitions of a `node'."
-  '(cons property-name node))
+the corresponding mold is examined next. Transitions are stored within the
+mold-transitions of a `mold'."
+  '(cons property-name mold))
 
-(deftype mold ()
-  "A union of NODE and MOLT-TOP, mainly here for convenience:
-  (typep (ensure-mold <parents> <properties>) 'mold) => T"
-  '(or node mold-top))
+(defstruct (mold
+             (:predicate moldp)
+             (:constructor make-mold (lineage properties)))
+  "Also known as 'backend classes', molds are hidden caches which enable
+Sheeple to use class-based optimizations yet keep its dynamic power."
+  (lineage     nil :read-only t :type lineage)
+  (properties  nil :read-only t)
+  (transitions nil :type '(list-of transition)))
 
-(defun make-mold (parents)
-  (aprog1 (%make-mold parents)
-    (setf (mold-top-initial-node it)
-          (make-node :mold it))))
+(defstruct (lineage
+             (:predicate lineagep)
+             (:constructor make-lineage
+                           (parents &aux (hierarchy (compute-hierarchy parents)))))
+  "Information about an object's ancestors and descendants."
+  (parents   nil :read-only t)
+  (hierarchy nil)
+  (sub-molds nil))
 
-(macrolet ((define-node-mold-function (name inner docstring)
-             `(defun ,name (mold) ,docstring
-                (etypecase mold
-                  (mold-top (,inner mold))
-                  (node (,name (node-mold mold)))))))
-  (define-node-mold-function mold-parents mold-top-parents
-    "Returns the parents of MOLD, which can be either a `mold' or a `node'.")
-  (define-node-mold-function mold-hierarchy mold-top-hierarchy
-    "Returns the hierarchy list of MOLD, which can be either a `mold' or a `node'.")
-  (define-node-mold-function mold-sub-molds mold-top-sub-molds
-    "Returns the cached child molds of MOLD, which can be either a `mold' or a `node'."))
-
-(defun mold-properties (mold)
-  "Returns the properties of MOLD, which should be a `node'."
-  (if (typep mold 'node)
-      (node-properties mold)
-      (error 'type-error :datum mold :expected-type 'node)))
+(macrolet ((define-mold-accessor (name lineage-accessor)
+             `(progn
+                (defun ,name (mold)
+                  (,lineage-accessor (mold-lineage mold))))))
+  (define-mold-accessor mold-parents   lineage-parents)
+  (define-mold-accessor mold-hierarchy lineage-hierarchy)
+  (define-mold-accessor mold-sub-molds lineage-sub-molds))
 
 (defvar *molds* (make-hash-table :test 'equal)
   "Maps parent lists to their corresponding molds. This is the global entry
@@ -110,62 +94,60 @@ point to Sheeple's backend class system.")
 
 (defun (setf find-mold) (mold parents)
   (check-list-type parents object)
-  (check-type mold mold-top)
+  (check-type mold mold)
   (setf (gethash parents *molds*) mold))
 
 ;;;
 ;;; Transitions
 ;;;
-(defun find-transition (node property-name)
-  "Returns the node which adds a property named PROPERTY-NAME to NODE.
-If no such node exists, returns NIL."
-  (check-type node node)
+(defun find-transition (mold property-name)
+  "Returns the mold which adds a property named PROPERTY-NAME to MOLD.
+If no such mold exists, returns NIL."
+  (check-type mold mold)
   (check-type property-name property-name)
-  (cdr (assoc property-name (node-transitions node) :test 'eq)))
+  (cdr (assoc property-name (mold-transitions mold) :test 'eq)))
 
-(defun find-node-by-transitions (start-node goal-properties)
-  "Searches the transition tree from START-NODE to find the node containing
-GOAL-PROPERTIES, returning that node if found, or NIL on failure."
-  (check-type start-node node)
+(defun find-mold-by-transitions (start-mold goal-properties)
+  "Searches the transition tree from START-MOLD to find the mold containing
+GOAL-PROPERTIES, returning that mold if found, or NIL on failure."
+  (check-type start-mold mold)
   (check-list-type goal-properties property-name)
   ;; This algorithm is very concise, but it's not optimal AND it's unclear.
   ;; Probably the first target for cleaning up. - Adlai
-  (let ((path (set-difference goal-properties (node-properties start-node))))
-    (if (null path) start-node
-        (awhen (some (fun (find-transition start-node _)) path)
-          (find-node-by-transitions it path)))))
+  (let ((path (set-difference goal-properties (mold-properties start-mold))))
+    (if (null path) start-mold
+        (awhen (some (fun (find-transition start-mold _)) path)
+          (find-mold-by-transitions it path)))))
 
 ;;;
-;;; Mold API -- Retrieval and Automatic Creation of Molds and Nodes
+;;; Mold API -- Retrieval and Automatic Creation of Molds
 ;;;
 (defun ensure-toplevel-mold (parents)
   "Returns the mold for PARENTS, creating and caching a new one if necessary."
   (check-list-type parents object)
   (or (find-mold parents)
       (setf (find-mold parents)
-            (make-mold parents))))
+            (make-mold (make-lineage parents) nil))))
 
-(defun ensure-transition (node property-name)
-  "Returns the transition from NODE indexed by PROPERTY-NAME, creating and
+(defun ensure-transition (mold property-name)
+  "Returns the transition from MOLD indexed by PROPERTY-NAME, creating and
 linking a new one if necessary."
-  (check-type node node)
+  (check-type mold mold)
   (check-type property-name property-name)
-  (or (find-transition node property-name)
-      (aconsf (node-transitions node) property-name
-              (make-node :mold (node-mold node)
-                         :properties (cons property-name
-                                           (node-properties node))))))
+  (or (find-transition mold property-name)
+      (aconsf (mold-transitions mold) property-name
+              (make-mold (mold-lineage mold)
+                         (cons property-name (mold-properties mold))))))
 
 (defun ensure-mold (parents properties)
-  "Returns the node with properties PROPERTIES of the mold for PARENTS,
+  "Returns the mold with properties PROPERTIES of the mold for PARENTS,
 creating and linking a new one if necessary."
   (check-list-type parents object)
   (check-list-type properties property-name)
-  (let ((mold (ensure-toplevel-mold parents)))
-    (do* ((node (mold-top-initial-node mold)
-                (ensure-transition node (car props-left)))
+  (let ((top (ensure-toplevel-mold parents)))
+    (do* ((mold top (ensure-transition mold (car props-left)))
           (props-left properties (cdr props-left)))
-        ((null props-left) node))))
+        ((null props-left) mold))))
 
 ;;;
 ;;; Objects
@@ -305,7 +287,7 @@ its parents."
 (defun (setf object-parents) (new-parent-list object)
   ;; TODO - this needs some careful writing, validation of the hierarchy-list, new mold, etc.
   ;; TODO - This needs to alert all submolds of the parent change, correct? - zkat
-  (change-node object (ensure-mold new-parent-list (mold-properties (%object-mold object))))
+  (change-mold object (ensure-mold new-parent-list (mold-properties (%object-mold object))))
   new-parent-list)
 
 ;;; Inheritance predicates
@@ -362,24 +344,24 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
 ;;;
 ;;; Switching molds
 ;;;
-(defun change-node (object new-node)
-  "Creates a new property-value vector in OBJECT, according to NEW-NODE's specification, and
+(defun change-mold (object new-mold)
+  "Creates a new property-value vector in OBJECT, according to NEW-MOLD's specification, and
 automatically takes care of bringing the correct property-values over into the new vector, in the
-right order. Keep in mind that NEW-NODE might specify some properties in a different order."
+right order. Keep in mind that NEW-MOLD might specify some properties in a different order."
   (if (< 0 (length (%object-property-values object)))
-      (move-values-over object new-node)
+      (move-values-over object new-mold)
       (setf (%object-property-values object)
-            (make-array (length (mold-properties new-node)))
-            (%object-mold object) new-node))
+            (make-array (length (mold-properties new-mold)))
+            (%object-mold object) new-mold))
   object)
 
-(defun move-values-over (object new-node)
+(defun move-values-over (object new-mold)
   ;; TODO - check that this is correct...
-  (let* ((old-node (%object-mold object))
-         (old-properties (mold-properties old-node))
+  (let* ((old-mold (%object-mold object))
+         (old-properties (mold-properties old-mold))
          (old-values (%object-property-values object))
-         (new-properties (mold-properties new-node))
-         (new-values (make-array (length (mold-properties new-node)))))
+         (new-properties (mold-properties new-mold))
+         (new-values (make-array (length (mold-properties new-mold)))))
     (loop
        for old-prop in old-properties
        for i from 0
@@ -387,7 +369,7 @@ right order. Keep in mind that NEW-NODE might specify some properties in a diffe
        do (setf (svref new-values (position old-prop new-properties))
                 (svref old-values i)))
     (setf (%object-property-values object) new-values)
-    (setf (%object-mold object) new-node)))
+    (setf (%object-mold object) new-mold)))
 
 ;;;
 ;;; fancy macros

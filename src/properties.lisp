@@ -35,7 +35,7 @@ would yield a value (i.e. not signal an unbound-property condition)."
       (cerror "Remove existing property." "~A already has a direct property named ~A."
               object property-name)
       (remove-property object property-name))
-    (change-node object (ensure-transition (%object-mold object)
+    (change-mold object (ensure-transition (%object-mold object)
                                            property-name))
     (let ((position (position property-name (mold-properties (%object-mold object)))))
       (setf (svref (%object-property-values object) position) value))
@@ -54,7 +54,7 @@ direct property. Returns OBJECT."
   (if (has-direct-property-p object property-name)
       ;; TODO fuckit, something like this... -ish
       (prog1 object
-        (change-node object
+        (change-mold object
                      (ensure-mold (object-parents object)
                                   (remove property-name
                                           (object-direct-properties object)))))
@@ -62,7 +62,7 @@ direct property. Returns OBJECT."
 
 (defun remove-all-direct-properties (object)
   "Wipes out all direct properties and their values from OBJECT."
-  (change-node object (mold-top-initial-node (node-mold (%object-mold object))))
+  (change-mold object (ensure-mold (object-parents object) nil))
   object)
 
 ;;; Value
@@ -101,7 +101,7 @@ is signaled."
          ((loop for ancestor in (mold-hierarchy (%object-mold object))
              when (find property-name (mold-properties (%object-mold ancestor)))
              return ancestor)
-          (change-node object (ensure-transition (%object-mold object) property-name))
+          (change-mold object (ensure-transition (%object-mold object) property-name))
           (let ((index (position property-name (mold-properties (%object-mold object)) :test 'eq)))
             (setf (svref (%object-property-values object) index) new-value)))
          (t (cerror "Add the property locally" 'unbound-property

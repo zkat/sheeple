@@ -237,7 +237,7 @@ regards to the CONSTRAINTS. A future version will undo this change."
                (values befores afters) (parallel-delete choice befores afters))
        finally (if (null elements)
                    (return-from topological-sort (nreverse result))
-                   (error 'topologica-sort-conflict
+                   (error 'topological-sort-conflict
                           :conflicting-elements elements
                           :sorted-elements (reverse result)
                           :constraints (mapcar 'cons befores afters))))))

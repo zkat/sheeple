@@ -29,10 +29,11 @@
 ;;; This test is pretty crude. The correct thing to do would be to
 ;;; parse the output, extract the implementation-dependant stuff,
 ;;; and verify the rest. This would be painful without CL-PPCRE.
+#+nil
 (test object-printing
   (with-output-to-string (*standard-output*)
-    (5am:finishes (print (cons-std-object)))
-    (5am:finishes (print (add-parent (cons-std-object) (cons-std-object))))))
+    (5am:finishes (print (std-allocate-object =standard-metaobject=)))
+    (5am:finishes (print (add-parent (std-allocate-object =standard-metaobject=) (std-allocate-object =standard-metaobject=))))))
 
 ;;;
 ;;; Allocation
@@ -100,14 +101,6 @@
   (is (null (%object-metaobject object))))
 
 #+nil
-(test (%object-parents :fixture with-std-object)
-  (is (null (%object-parents object)))
-  (is (equal '(foo) (setf (%object-parents object) '(foo))))
-  (is (equal '(foo) (%object-parents object)))
-  (is (equal '(bar foo) (push 'bar (%object-parents object))))
-  (is (equal '(bar foo) (%object-parents object))))
-
-#+nil
 (test (%object-properties :fixture with-std-object)
   (is (null (%object-properties object)))
   (is (equal '(foo) (setf (%object-properties object) '(foo))))
@@ -122,37 +115,12 @@
   (is (equal '(bar foo) (push 'bar (%object-roles object))))
   (is (equal '(bar foo) (%object-roles object))))
 
-#+nil
-(test (%object-hierarchy-cache :fixture with-std-object)
-  (is (equal (list object) (%object-hierarchy-cache object)))
-  (is (equal '(foo) (setf (%object-hierarchy-cache object) '(foo))))
-  (is (equal '(foo) (%object-hierarchy-cache object)))
-  (is (equal '(bar foo) (push 'bar (%object-hierarchy-cache object))))
-  (is (equal '(bar foo) (%object-hierarchy-cache object))))
-
-#+nil
-(test (%object-children :fixture with-std-object)
-  (is (null (%object-children object)))
-  (is (equal '(foo) (setf (%object-children object) '(foo))))
-  (is (equal '(foo) (%object-children object)))
-  (is (equal '(bar foo) (push 'bar (%object-children object))))
-  (is (equal '(bar foo) (%object-children object))))
-
 (def-suite interface-accessors :in objects)
 (in-suite interface-accessors)
 
 (test (object-metaobject :fixture with-std-object)
   (is (eql =standard-metaobject= (object-metaobject object)))
   (is (null (fboundp '(setf object-metaobject)))))
-
-#+nil
-(test (object-parents :fixture with-std-object)
-  (is (null (object-parents object)))
-  (setf (%object-parents object) '(foo))
-  (is (equal '(foo) (object-parents object)))
-  (push 'bar (%object-parents object))
-  (is (equal '(bar foo) (object-parents object)))
-  (is (null (fboundp '(setf object-parents)))))
 
 (def-suite inheritance :in objects)
 (def-suite inheritance-basic :in inheritance)
@@ -277,9 +245,9 @@
 )
 
 (test object-hierarchy-list
-  (let ((a (cons-std-object))
-        (b (cons-std-object))
-        (c (cons-std-object)))
+  (let ((a (std-allocate-object =standard-metaobject=))
+        (b (std-allocate-object =standard-metaobject=))
+        (c (std-allocate-object =standard-metaobject=)))
     (is (eql a (add-parent b a)))
     (is (eql b (add-parent c b)))
     (is (equal (list a b c) (object-hierarchy-list a)))))
@@ -288,9 +256,9 @@
 (in-suite inheritance-predicates)
 
 (test parentp
-  (let ((a (cons-std-object))
-        (b (cons-std-object))
-        (c (cons-std-object)))
+  (let ((a (std-allocate-object =standard-metaobject=))
+        (b (std-allocate-object =standard-metaobject=))
+        (c (std-allocate-object =standard-metaobject=)))
     (add-parent a b)
     (add-parent b c)
     (is (parentp a b))
@@ -301,9 +269,9 @@
     (is (not (parentp c b)))))
 
 (test childp
-  (let ((a (cons-std-object))
-        (b (cons-std-object))
-        (c (cons-std-object)))
+  (let ((a (std-allocate-object =standard-metaobject=))
+        (b (std-allocate-object =standard-metaobject=))
+        (c (std-allocate-object =standard-metaobject=)))
     (add-parent a b)
     (add-parent b c)
     (is (childp b a))
@@ -314,9 +282,9 @@
     (is (not (childp b c)))))
 
 (test ancestorp
-  (let ((a (cons-std-object))
-        (b (cons-std-object))
-        (c (cons-std-object)))
+  (let ((a (std-allocate-object =standard-metaobject=))
+        (b (std-allocate-object =standard-metaobject=))
+        (c (std-allocate-object =standard-metaobject=)))
     (add-parent a b)
     (add-parent b c)
     (is (ancestorp a b))
@@ -327,9 +295,9 @@
     (is (not (ancestorp c b)))))
 
 (test descendantp
-  (let ((a (cons-std-object))
-        (b (cons-std-object))
-        (c (cons-std-object)))
+  (let ((a (std-allocate-object =standard-metaobject=))
+        (b (std-allocate-object =standard-metaobject=))
+        (c (std-allocate-object =standard-metaobject=)))
     (add-parent a b)
     (add-parent b c)
     (is (descendantp b a))

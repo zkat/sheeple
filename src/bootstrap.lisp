@@ -16,18 +16,18 @@
   (setf =standard-metaobject= (std-allocate-object =standard-metaobject=))
   (setf (%object-metaobject =standard-metaobject=) =standard-metaobject=
         (%object-mold =standard-metaobject=) (ensure-mold nil nil))
-  
+
   ;; =T= and =STANDARD-OBJECT= have special rules about parents.
-  (setf =t= 
+  (setf =t=
         (let ((obj (std-allocate-object =standard-metaobject=)))
           (setf (%object-mold obj) (ensure-mold nil nil))
           obj)
-        =standard-object= 
+        =standard-object=
         (let ((obj (std-allocate-object =standard-metaobject=)))
           (setf (%object-mold obj)
                 (ensure-mold (list =t=) nil))
           obj))
-  
+
   ;; We can define special messages now.
   (defmessage allocate-object (metaobject)
     (:documentation "Allocates a object object based on METAOBJECT."))
@@ -53,7 +53,7 @@
     (:documentation "Resets parents and properties without changing OBJECT's identity."))
   (defreply reinit-object (object &key parents documentation properties)
     ;; first, reset the mold
-    (change-node object (ensure-mold (if (null parents)
+    (change-mold object (ensure-mold (if (null parents)
                                          (list =standard-object=)
                                          (objectify-list parents))
                                      nil))
@@ -69,9 +69,8 @@
 
   ;; Now we redefine =standard-object= and =standard-metaobject= normally.
   (defproto =standard-object= (=t=) ())
-  (change-node =standard-metaobject=
+  (change-mold =standard-metaobject=
                (ensure-mold (list =t=) nil))
-  
 
   ;; Now we just define all the builtins, and we're good to go.
   (defproto =boxed-object= (=t=) ())
@@ -98,4 +97,3 @@
 
   ;; Make sure that we don't bootstrap the same image twice.
   (setf *bootstrappedp* t))
-

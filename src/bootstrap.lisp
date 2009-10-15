@@ -14,13 +14,20 @@
 (unless *bootstrappedp*
   ;; Before anything else happens, we need =STANDARD-METAOBJECT= to exist:
   (setf =standard-metaobject= (std-allocate-object =standard-metaobject=))
-  (setf (%object-metaobject =standard-metaobject=) =standard-metaobject=)
-  (finalize-object-inheritance =standard-metaobject=)
-
+  (setf (%object-metaobject =standard-metaobject=) =standard-metaobject=
+        (%object-mold =standard-metaobject=) (ensure-mold nil nil))
+  
   ;; =T= and =STANDARD-OBJECT= have special rules about parents.
-  (setf =t= (finalize-object-inheritance (std-allocate-object =standard-metaobject=))
-        =standard-object= (add-parent =t= (std-allocate-object =standard-metaobject=)))
-
+  (setf =t= 
+        (let ((obj (std-allocate-object =standard-metaobject=)))
+          (setf (%object-mold obj) (ensure-mold nil nil))
+          obj)
+        =standard-object= 
+        (let ((obj (std-allocate-object =standard-metaobject=)))
+          (setf (%object-mold obj)
+                (ensure-mold (list =t=) nil))
+          obj))
+  
   ;; We can define special messages now.
   (defmessage allocate-object (metaobject)
     (:documentation "Allocates a object object based on METAOBJECT."))
@@ -45,11 +52,11 @@
   (defmessage reinit-object (object &key &allow-other-keys)
     (:documentation "Resets parents and properties without changing OBJECT's identity."))
   (defreply reinit-object (object &key parents documentation properties)
-    ;; In order to reinitialize a object, we first remove -all- parents and properties.
-    (dolist (parent (%object-parents object)) (remove-parent parent object))
-    (remove-all-direct-properties object)
-    ;; Now we start over. This function boxes non-object parents.
-    (add-parent* (if (null parents) =standard-object= (objectify-list parents)) object)
+    ;; first, reset the mold
+    (change-node object (ensure-mold (if (null parents)
+                                         (list =standard-object=)
+                                         (objectify-list parents))
+                                     nil))
     ;; Setting up the properties all over again.
     (dolist (property-spec properties)
       (destructuring-bind (name value &rest keys) property-spec
@@ -62,7 +69,9 @@
 
   ;; Now we redefine =standard-object= and =standard-metaobject= normally.
   (defproto =standard-object= (=t=) ())
-  (add-parent =standard-object= =standard-metaobject=)
+  (change-node =standard-metaobject=
+               (ensure-mold (list =t=) nil))
+  
 
   ;; Now we just define all the builtins, and we're good to go.
   (defproto =boxed-object= (=t=) ())
@@ -89,3 +98,4 @@
 
   ;; Make sure that we don't bootstrap the same image twice.
   (setf *bootstrappedp* t))
+

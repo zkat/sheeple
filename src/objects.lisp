@@ -175,7 +175,14 @@ creating and linking a new one if necessary."
 automatically takes care of bringing the correct property-values over into the new vector, in the
 right order. Keep in mind that NEW-NODE might specify some properties in a different order."
   ;; TODO
-  )
+  (let* ((old-node (%object-mold object))
+         (old-properties (mold-properties old-node))
+         (old-values (%object-property-values object)))
+    (if old-values
+        :move-values-over
+        (setf (%object-property-values object)
+              (make-array (length (mold-properties new-node)))
+              (%object-mold object) new-node))))
 
 ;;;
 ;;; Objects
@@ -343,7 +350,6 @@ allocating the new object object. ALL-KEYS is passed on to INIT-OBJECT."
   (make-object objects))
 
 ;; Feel free to change the exact interface if you don't like it. -- Adlai
-;; TODO: this should actually copy OBJECT's roles and properties locally. -- sykopomp
 (defun clone (object &optional (metaobject (object-metaobject object)))
   "Creates a object with the same parents and metaobject as OBJECT. If supplied, METAOBJECT
 will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged."

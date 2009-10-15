@@ -355,16 +355,28 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
   "Creates a new property-value vector in OBJECT, according to NEW-NODE's specification, and
 automatically takes care of bringing the correct property-values over into the new vector, in the
 right order. Keep in mind that NEW-NODE might specify some properties in a different order."
-  ;; TODO
+  (if (< 0 (length (%object-property-values object)))
+      (move-values-over object new-node)
+      (setf (%object-property-values object)
+            (make-array (length (mold-properties new-node)))
+            (%object-mold object) new-node))
+  object)
+
+(defun move-values-over (object new-node)
+  ;; TODO - check that this is correct...
   (let* ((old-node (%object-mold object))
          (old-properties (mold-properties old-node))
-         (old-values (%object-property-values object)))
-    (if (< 0 (length old-values))
-        :move-values-over
-        (setf (%object-property-values object)
-              (make-array (length (mold-properties new-node)))
-              (%object-mold object) new-node))
-    object))
+         (old-values (%object-property-values object))
+         (new-properties (mold-properties new-node))
+         (new-values (make-array (length (mold-properties new-node)))))
+    (loop
+       for old-prop in old-properties
+       for i from 0
+       when (find old-prop new-properties)
+       do (setf (svref new-values (position old-prop new-properties))
+                (svref old-values i)))
+    (setf (%object-property-values object) new-values)
+    (setf (%object-mold object) new-node)))
 
 ;;;
 ;;; fancy macros

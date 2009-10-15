@@ -38,7 +38,6 @@ would yield a value (i.e. not signal an unbound-property condition)."
     (change-node object (ensure-transition (%object-mold object)
                                            property-name))
     (let ((position (position property-name (mold-properties (%object-mold object)))))
-      (declare (fixnum position))
       (setf (svref (the vector (%object-property-values object)) position) value))
     (when reader (add-reader-to-object reader property-name object))
     (when writer (add-writer-to-object writer property-name object))
@@ -63,7 +62,7 @@ direct property. Returns OBJECT."
 
 (defun remove-all-direct-properties (object)
   "Wipes out all direct properties and their values from OBJECT."
-  (change-node object (initial-node (node-mold (%object-mold object))))
+  (change-node object (mold-top-initial-node (node-mold (%object-mold object))))
   object)
 
 ;;; Value
@@ -85,8 +84,9 @@ a condition of type UNBOUND-PROPERTY condition is signalled."
 as a direct property. When it finds one, it returns the direct-property-value of that property,
 called on that object. If no object is found in the hierarchy-list with a valid direct-property,
 a condition of type UNBOUND-PROPERTY is signaled."
-  (aif (find property-name (object-hierarchy-list object)
-             :test 'eq :key (fun (mold-properties (%object-mold _))))
+  (aif (loop for ancestor in (object-hierarchy-list object)
+            when (find property-name (mold-properties (%object-mold ancestor)))
+            return ancestor)
        (let ((index (position property-name (mold-properties (%object-mold it)))))
          (svref (the simple-vector (%object-property-values it)) (the fixnum index)))
        (error 'unbound-property :object object :property-name property-name)))

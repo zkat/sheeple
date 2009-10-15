@@ -168,23 +168,6 @@ creating and linking a new one if necessary."
         ((null props-left) node))))
 
 ;;;
-;;; Switching molds
-;;;
-(defun change-node (object new-node)
-  "Creates a new property-value vector in OBJECT, according to NEW-NODE's specification, and
-automatically takes care of bringing the correct property-values over into the new vector, in the
-right order. Keep in mind that NEW-NODE might specify some properties in a different order."
-  ;; TODO
-  (let* ((old-node (%object-mold object))
-         (old-properties (mold-properties old-node))
-         (old-values (%object-property-values object)))
-    (if old-values
-        :move-values-over
-        (setf (%object-property-values object)
-              (make-array (length (mold-properties new-node)))
-              (%object-mold object) new-node))))
-
-;;;
 ;;; Objects
 ;;;
 (defstruct (object (:conc-name %object-) (:predicate objectp)
@@ -363,6 +346,24 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
           (%object-roles new-obj)
           (copy-list (%object-roles object))) ;this won't break anything, right? - syko
     new-obj))
+
+;;;
+;;; Switching molds
+;;;
+(defun change-node (object new-node)
+  "Creates a new property-value vector in OBJECT, according to NEW-NODE's specification, and
+automatically takes care of bringing the correct property-values over into the new vector, in the
+right order. Keep in mind that NEW-NODE might specify some properties in a different order."
+  ;; TODO
+  (let* ((old-node (%object-mold object))
+         (old-properties (mold-properties old-node))
+         (old-values (%object-property-values object)))
+    (if (< 0 (length old-values))
+        :move-values-over
+        (setf (%object-property-values object)
+              (make-array (length (mold-properties new-node)))
+              (%object-mold object) new-node))
+    object))
 
 ;;;
 ;;; fancy macros

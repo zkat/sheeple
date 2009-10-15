@@ -96,10 +96,12 @@ PROPERTY-NAME. If the property does not already exist anywhere in the hierarchy 
 is signaled."
   (acond ((position property-name (mold-properties (%object-mold object)) :test 'eq)
           (setf (svref (%object-property-values object) it) new-value))
-         ((position property-name (object-hierarchy-list object)
-                    :test 'eq :key (fun (mold-properties (%object-mold _))))
+         ((find property-name (object-hierarchy-list object)
+                :test 'eq :key (fun (mold-properties (%object-mold _))))
           (change-node object property-name)
-          (setf (svref (%object-property-values object) it) new-value))
+          (let ((index (position property-name (mold-properties (%object-mold it)) :test 'eq)))
+            (declare (fixnum index))
+            (setf (svref (%object-property-values object) index) new-value)))
          (t (cerror "Add the property locally" 'unbound-property
                     :object object
                     :property-name property-name)

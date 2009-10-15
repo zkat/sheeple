@@ -10,7 +10,7 @@
 (in-package :sheeple)
 
 (def-fixture with-std-object ()
-  (let ((object (cons-std-object)))
+  (let ((object (std-allocate-object =standard-metaobject=)))
     (&body)))
 
 (def-fixture allocate-object (metaobject)
@@ -59,12 +59,11 @@
 (test std-object-initial-values
   (let ((object (std-allocate-object =standard-metaobject=)))
     (is (eq =standard-metaobject= (%object-metaobject object)))
-    (is (eq nil (%object-parents object)))
-    (is (eq nil (%object-properties object)))
-    (is (eq nil (%object-roles object)))
-    (is (eq nil (%object-hierarchy-cache object)))
-    (is (eq nil (%object-children object)))))
+    (is (null (%object-mold object)))
+    (is (null (%object-property-values object)))
+    (is (null (%object-roles object)))))
 
+#+nil
 (test allocate-object
   (let ((object (allocate-object =standard-metaobject=)))
     (is (eq =standard-metaobject= (%object-metaobject object)))
@@ -100,6 +99,7 @@
   (is (null (setf (%object-metaobject object) nil)))
   (is (null (%object-metaobject object))))
 
+#+nil
 (test (%object-parents :fixture with-std-object)
   (is (null (%object-parents object)))
   (is (equal '(foo) (setf (%object-parents object) '(foo))))
@@ -107,6 +107,7 @@
   (is (equal '(bar foo) (push 'bar (%object-parents object))))
   (is (equal '(bar foo) (%object-parents object))))
 
+#+nil
 (test (%object-properties :fixture with-std-object)
   (is (null (%object-properties object)))
   (is (equal '(foo) (setf (%object-properties object) '(foo))))
@@ -121,6 +122,7 @@
   (is (equal '(bar foo) (push 'bar (%object-roles object))))
   (is (equal '(bar foo) (%object-roles object))))
 
+#+nil
 (test (%object-hierarchy-cache :fixture with-std-object)
   (is (equal (list object) (%object-hierarchy-cache object)))
   (is (equal '(foo) (setf (%object-hierarchy-cache object) '(foo))))
@@ -128,6 +130,7 @@
   (is (equal '(bar foo) (push 'bar (%object-hierarchy-cache object))))
   (is (equal '(bar foo) (%object-hierarchy-cache object))))
 
+#+nil
 (test (%object-children :fixture with-std-object)
   (is (null (%object-children object)))
   (is (equal '(foo) (setf (%object-children object) '(foo))))
@@ -142,6 +145,7 @@
   (is (eql =standard-metaobject= (object-metaobject object)))
   (is (null (fboundp '(setf object-metaobject)))))
 
+#+nil
 (test (object-parents :fixture with-std-object)
   (is (null (object-parents object)))
   (setf (%object-parents object) '(foo))

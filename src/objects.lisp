@@ -276,6 +276,7 @@ regards to the CONSTRAINTS. A future version will undo this change."
 the CDR of the hierarchy-list of a standard object with PARENTS, in order, as
 its parents."
   ;; This is VERY far from optimal; however, it's a quick prototype  - Adlai
+  ;; It also seems to be horribly broken: (spawn (spawn (spawn))) to see - zkat
   (handler-case
       (let ((unordered
              (remove-duplicates (append parents (mapcan 'collect-ancestors parents)))))

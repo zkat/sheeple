@@ -102,7 +102,7 @@ is signaled."
              when (find property-name (mold-properties (%object-mold ancestor)))
              return ancestor)
           (change-node object (ensure-transition (%object-mold object) property-name))
-          (let ((index (position property-name (mold-properties (%object-mold it)) :test 'eq)))
+          (let ((index (position property-name (mold-properties (%object-mold object)) :test 'eq)))
             (setf (svref (%object-property-values object) index) new-value)))
          (t (cerror "Add the property locally" 'unbound-property
                     :object object

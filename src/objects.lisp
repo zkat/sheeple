@@ -241,6 +241,9 @@ regards to the CONSTRAINTS. A future version will undo this change."
   ;; Error detected:
   ;; Iteration in LOOP follows body code.
   ;; Current LOOP context: FOR CHOICE = (IF (NULL (CDR MINIMAL-ELEMENTS)) (CAR MINIMAL-ELEMENTS) (FUNCALL TIE-BREAKER MINIMAL-ELEMENTS RESULT)) WITH.
+  ;;
+  ;; Additionally, and (probably) more importantly...
+  ;; It also seems to be horribly broken: (spawn (spawn (spawn))) to see - sykopomp
   (multiple-value-bind (befores afters) (nunzip-alist constraints)
     (loop for minimal-elements = (remove-if (fun (memq _ afters)) elements)
        while minimal-elements
@@ -284,7 +287,6 @@ regards to the CONSTRAINTS. A future version will undo this change."
 the CDR of the hierarchy-list of a standard object with PARENTS, in order, as
 its parents."
   ;; This is VERY far from optimal; however, it's a quick prototype  - Adlai
-  ;; It also seems to be horribly broken: (spawn (spawn (spawn))) to see - sykopomp
   (handler-case
       (let ((unordered
              (remove-duplicates (append parents (mapcan 'collect-ancestors parents)))))

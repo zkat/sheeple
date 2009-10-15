@@ -240,27 +240,19 @@
     (with-object-hierarchy (a (b a) (c b) (d a c))
       (declare (ignore d)))))
 
-(test finalize-object-inheritance
-  ;; todo - write tests for this once bootstrapping is set...
-)
-
 (test object-hierarchy-list
-  (let ((a (std-allocate-object =standard-metaobject=))
-        (b (std-allocate-object =standard-metaobject=))
-        (c (std-allocate-object =standard-metaobject=)))
-    (is (eql a (add-parent b a)))
-    (is (eql b (add-parent c b)))
+  (let* ((a (spawn))
+         (b (spawn a))
+         (c (spawn b)))
     (is (equal (list a b c) (object-hierarchy-list a)))))
 
 (def-suite inheritance-predicates :in inheritance)
 (in-suite inheritance-predicates)
 
 (test parentp
-  (let ((a (std-allocate-object =standard-metaobject=))
-        (b (std-allocate-object =standard-metaobject=))
-        (c (std-allocate-object =standard-metaobject=)))
-    (add-parent a b)
-    (add-parent b c)
+  (let* ((a (spawn))
+         (b (spawn a))
+         (c (spawn b)))
     (is (parentp a b))
     (is (parentp b c))
     (is (not (parentp a c)))
@@ -269,11 +261,9 @@
     (is (not (parentp c b)))))
 
 (test childp
-  (let ((a (std-allocate-object =standard-metaobject=))
-        (b (std-allocate-object =standard-metaobject=))
-        (c (std-allocate-object =standard-metaobject=)))
-    (add-parent a b)
-    (add-parent b c)
+  (let* ((a (spawn))
+         (b (spawn a))
+         (c (spawn b)))
     (is (childp b a))
     (is (childp c b))
     (is (not (childp c a)))
@@ -282,11 +272,9 @@
     (is (not (childp b c)))))
 
 (test ancestorp
-  (let ((a (std-allocate-object =standard-metaobject=))
-        (b (std-allocate-object =standard-metaobject=))
-        (c (std-allocate-object =standard-metaobject=)))
-    (add-parent a b)
-    (add-parent b c)
+  (let* ((a (spawn))
+         (b (spawn a))
+         (c (spawn b)))
     (is (ancestorp a b))
     (is (ancestorp b c))
     (is (ancestorp a c))
@@ -295,11 +283,9 @@
     (is (not (ancestorp c b)))))
 
 (test descendantp
-  (let ((a (std-allocate-object =standard-metaobject=))
-        (b (std-allocate-object =standard-metaobject=))
-        (c (std-allocate-object =standard-metaobject=)))
-    (add-parent a b)
-    (add-parent b c)
+  (let* ((a (spawn))
+         (b (spawn a))
+         (c (spawn b)))
     (is (descendantp b a))
     (is (descendantp c b))
     (is (descendantp c a))

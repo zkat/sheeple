@@ -51,7 +51,8 @@
     (is (eq (message-name message) (role-name (make-role (make-reply :message message) 0))))))
 
 (test participantp
-  (for-all ((object (fun (cons-std-object))) (reply (fun (make-reply))) (position (gen-integer)))
+  (for-all ((object (fun (std-allocate-object =standard-metaobject=)))
+            (reply (fun (make-reply))) (position (gen-integer)))
     (push (make-role reply position) (%object-roles object))
     (is (not (null (participantp object reply))))))
 

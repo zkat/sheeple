@@ -87,7 +87,7 @@ a condition of type UNBOUND-PROPERTY is signaled."
   (acond ((position property-name
                     (the list (mold-properties (%object-mold object))) :test 'eq)
           (svref (the simple-vector (%object-property-values object)) (the fixnum it)))
-         ((find property-name (mold-hierarchy object)
+         ((find property-name (mold-hierarchy (%object-mold object))
                 :test 'eq :key (fun (mold-properties (%object-mold _))))
           (let ((index (position property-name (mold-properties (%object-mold it)) :test 'eq)))
             (declare (fixnum index))
@@ -100,7 +100,7 @@ PROPERTY-NAME. If the property does not already exist anywhere in the hierarchy 
 is signaled."
   (acond ((position property-name (mold-properties (%object-mold object)) :test 'eq)
           (setf (svref (%object-property-values object) it) new-value))
-         ((find property-name (mold-hierarchy object)
+         ((find property-name (mold-hierarchy (%object-mold object))
                 :test 'eq :key (fun (mold-properties (%object-mold _))))
           (change-node object property-name)
           (let ((index (position property-name (mold-properties (%object-mold it)) :test 'eq)))

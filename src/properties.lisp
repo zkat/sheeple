@@ -38,7 +38,7 @@ would yield a value (i.e. not signal an unbound-property condition)."
     (change-node object (ensure-transition (%object-mold object)
                                            property-name))
     (let ((position (position property-name (mold-properties (%object-mold object)))))
-      (setf (svref (the vector (%object-property-values object)) position) value))
+      (setf (svref (%object-property-values object) position) value))
     (when reader (add-reader-to-object reader property-name object))
     (when writer (add-writer-to-object writer property-name object))
     (when accessor
@@ -70,8 +70,8 @@ direct property. Returns OBJECT."
   "Returns the property-value set locally in OBJECT for PROPERTY-NAME.
 If the value is non-local (is delegated or does not exist in the hierarchy list),
 a condition of type UNBOUND-PROPERTY condition is signalled."
-  (aif (position property-name (the list (mold-properties (%object-mold object))))
-       (svref (the simple-vector (%object-property-values object)) (the fixnum it))
+  (aif (position property-name (mold-properties (%object-mold object)))
+       (svref (%object-property-values object) it)
        (error 'unbound-property :object object :property-name property-name)))
 
 (defun property-value (object property-name)
@@ -83,20 +83,13 @@ a condition of type UNBOUND-PROPERTY condition is signalled."
 as a direct property. When it finds one, it returns the direct-property-value of that property,
 called on that object. If no object is found in the hierarchy-list with a valid direct-property,
 a condition of type UNBOUND-PROPERTY is signaled."
-  ;; This function is rapidly devolving into unreadability -- but holy shit, it's fast.
-  (acond ((position property-name
-                    (the list (mold-properties (%object-mold object))) :test 'eq)
-          (svref (the simple-vector (%object-property-values object)) (the fixnum it)))
-         ((loop
-             for ancestor in (the list (mold-hierarchy (%object-mold object)))
-             for index = (the (or fixnum nil)
-                           (position property-name
-                                     (the list (mold-properties
-                                                (%object-mold ancestor))) :test 'eq))
-             when index
-             do (return-from property-value-with-hierarchy-list
-                  (svref (the simple-vector (%object-property-values ancestor)) (the fixnum index))))
-          it)
+  (acond ((position property-name (mold-properties (%object-mold object)) :test 'eq)
+          (svref (%object-property-values object) it))
+         ((loop for ancestor in (mold-hierarchy (%object-mold object))
+               when (find property-name (mold-properties (%object-mold ancestor)) :test 'eq)
+               return ancestor)
+          (let ((index (position property-name (mold-properties (%object-mold it)) :test 'eq)))
+            (svref (%object-property-values it) index)))
          (t (error 'unbound-property :object object :property-name property-name))))
 
 (defun (setf property-value) (new-value object property-name)
@@ -105,13 +98,11 @@ PROPERTY-NAME. If the property does not already exist anywhere in the hierarchy 
 is signaled."
   (acond ((position property-name (mold-properties (%object-mold object)) :test 'eq)
           (setf (svref (%object-property-values object) it) new-value))
-         ((loop for ancestor in (the list (mold-hierarchy (%object-mold object)))
+         ((loop for ancestor in (mold-hierarchy (%object-mold object))
              when (find property-name (mold-properties (%object-mold ancestor)))
              return ancestor)
-          (change-node object (ensure-transition (%object-mold object)
-                                                 property-name))
+          (change-node object (ensure-transition (%object-mold object) property-name))
           (let ((index (position property-name (mold-properties (%object-mold it)) :test 'eq)))
-            (declare (fixnum index))
             (setf (svref (%object-property-values object) index) new-value)))
          (t (cerror "Add the property locally" 'unbound-property
                     :object object

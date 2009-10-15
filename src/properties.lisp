@@ -78,21 +78,25 @@ a condition of type UNBOUND-PROPERTY condition is signalled."
   "Returns a property-value that is not necessarily local to OBJECT."
   (property-value-with-hierarchy-list object property-name))
 
-(declaim (inline property-value-with-hierarchy-list))
 (defun property-value-with-hierarchy-list (object property-name)
   "Crawls OBJECT's hierarchy list until it finds an object in the hierarchy with PROPERTY-NAME
 as a direct property. When it finds one, it returns the direct-property-value of that property,
 called on that object. If no object is found in the hierarchy-list with a valid direct-property,
 a condition of type UNBOUND-PROPERTY is signaled."
+  ;; This function is rapidly devolving into unreadability -- but holy shit, it's fast.
   (acond ((position property-name
                     (the list (mold-properties (%object-mold object))) :test 'eq)
           (svref (the simple-vector (%object-property-values object)) (the fixnum it)))
-         ((loop for ancestor in (the list (mold-hierarchy (%object-mold object)))
-             when (find property-name (mold-properties (%object-mold ancestor)))
-             return ancestor)
-          (let ((index (position property-name (mold-properties (%object-mold it)) :test 'eq)))
-            (declare (fixnum index))
-            (svref (the simple-vector (%object-property-values it)) index)))
+         ((loop
+             for ancestor in (the list (mold-hierarchy (%object-mold object)))
+             for index = (the (or fixnum nil)
+                           (position property-name
+                                     (the list (mold-properties
+                                                (%object-mold ancestor))) :test 'eq))
+             when index
+             do (return-from property-value-with-hierarchy-list
+                  (svref (the simple-vector (%object-property-values ancestor)) (the fixnum index))))
+          it)
          (t (error 'unbound-property :object object :property-name property-name))))
 
 (defun (setf property-value) (new-value object property-name)

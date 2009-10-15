@@ -44,6 +44,19 @@
   "X if X is a list, otherwise (list X)."
   (if (listp x) x (list x)))
 
+(macrolet ((fixnum+ (&rest values) `(the fixnum (+ ,@values))))
+  (defun vector-cons (x vector)
+    (declare (simple-vector vector)
+             (optimize speed (safety 0) (debug 0))) ; --omg-optimized
+    (let* ((index (fixnum+ 1 (length vector)))
+           (result (make-array index)))
+      (declare (fixnum index) (simple-vector result))
+      (tagbody (go test)
+       loop (setf (svref result index) (svref vector (fixnum+ -1 index)))
+       test (setf index (fixnum+ -1 index)) (unless (zerop index) (go loop)))
+      (setf (svref result 0) x)
+      result)))
+
 ;;; This code is so optimized that the only useful declarations are (safety 0)
 ;;; and (debug 0), the latter only on SBCL; on CLISP any declarations make no
 ;;; difference at all, probably because it's all bytecode.

@@ -276,60 +276,6 @@
   ;; todo - write tests for this once bootstrapping is set...
 )
 
-(def-suite add/remove-parents :in inheritance)
-(in-suite add/remove-parents)
-
-(test remove-parent
-  (let ((object1 (cons-std-object))
-        (object2 (cons-std-object)))
-    (add-parent object2 object1)
-    (is (eql object2 (car (object-parents object1))))
-    (signals error (remove-parent object1 object1))
-    (is (eql object1 (remove-parent object2 object1)))
-    (is (null (object-parents object1)))
-    (signals error (remove-parent object2 object1))
-    (signals error (remove-parent object1 object1)))
-  ;; todo - more thorough tests, post-bootstrap
-)
-
-(test std-remove-parent
-  (let ((object1 (cons-std-object))
-        (object2 (cons-std-object)))
-    (std-add-parent object2 object1)
-    (is (eql object2 (car (%object-parents object1))))
-    (signals error (std-remove-parent object1 object1))
-    (is (eql object1 (std-remove-parent object2 object1)))
-    (is (null (object-parents object1)))
-    (signals error (std-remove-parent object2 object1))
-    (signals error (std-remove-parent object1 object1))))
-
-(test std-add-parent
-  (let ((object1 (cons-std-object))
-        (object2 (cons-std-object)))
-    (is (eql object1 (std-add-parent object2 object1)))
-    (is (eql object2 (car (object-parents object1))))
-    (signals error (std-add-parent object1 object1))
-    (signals error (std-add-parent object2 object1))
-    (signals object-hierarchy-error (std-add-parent object1 object2))))
-
-(test add-parent
-  (let ((object1 (cons-std-object))
-        (object2 (cons-std-object)))
-    (is (eql object1 (add-parent object2 object1)))
-    (is (eql object2 (car (object-parents object1))))
-    (signals error (add-parent object1 object1))
-    (signals error (add-parent object2 object1))
-    (signals object-hierarchy-error (add-parent object1 object2)))
-  ;; todo - more thorough tests post-bootstrap
-  )
-
-(test add-parents
-  (let ((a (cons-std-object))
-        (b (cons-std-object))
-        (c (cons-std-object)))
-    (is (eq c (add-parents (list a b) c)))
-    (is (equal (list a b) (object-parents c)))))
-
 (test object-hierarchy-list
   (let ((a (cons-std-object))
         (b (cons-std-object))

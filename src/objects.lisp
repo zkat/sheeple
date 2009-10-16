@@ -271,7 +271,9 @@ its parents."
 
 (defun object-hierarchy-list (object)
   "Returns the full hierarchy-list for OBJECT"
-  (cons object (mold-hierarchy (%object-mold object))))
+  (if (eq =standard-metaobject= (%object-metaobject object))
+      (cons object (mold-hierarchy (%object-mold object)))
+      (compute-object-hierarchy-list-using-metaobject )))
 
 (defun (setf object-parents) (new-parent-list object)
   ;; TODO - this needs some careful writing, validation of the hierarchy-list, new mold, etc.

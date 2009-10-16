@@ -19,7 +19,7 @@
 (defmessage compute-object-hierarchy-list-using-metaobject (metaobject object))
 (defreply compute-object-hierarchy-list-using-metaobject
     ((metaobject =standard-metaobject=) object)
-  (cons object (mold-hierarchy (%object-mold object))))
+  (std-compute-object-hierarchy-list object))
 
 
 ;;;

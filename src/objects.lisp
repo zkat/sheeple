@@ -107,18 +107,6 @@ If no such mold exists, returns NIL."
   (check-type property-name property-name)
   (cdr (assoc property-name (mold-transitions mold) :test 'eq)))
 
-(defun find-mold-by-transitions (start-mold goal-properties)
-  "Searches the transition tree from START-MOLD to find the mold containing
-GOAL-PROPERTIES, returning that mold if found, or NIL on failure."
-  (check-type start-mold mold)
-  (check-list-type goal-properties property-name)
-  ;; This algorithm is very concise, but it's not optimal AND it's unclear.
-  ;; Probably the first target for cleaning up. - Adlai
-  (let ((path (set-difference goal-properties (mold-properties start-mold))))
-    (if (null path) start-mold
-        (awhen (some (fun (find-transition start-mold _)) path)
-          (find-mold-by-transitions it path)))))
-
 ;;;
 ;;; Mold API -- Retrieval and Automatic Creation of Molds
 ;;;
@@ -363,7 +351,7 @@ right order. Keep in mind that NEW-MOLD might specify some properties in a diffe
          (new-properties (mold-properties new-mold))
          (new-values (make-array (length (mold-properties new-mold)))))
     (loop
-       for old-prop in old-properties
+       for old-prop across old-properties
        for i from 0
        when (find old-prop new-properties)
        do (setf (svref new-values (position old-prop new-properties))

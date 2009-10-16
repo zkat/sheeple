@@ -219,13 +219,16 @@
 ;;; how to test what this actually SHOULD do
 (test std-tie-breaker-rule)
 
-(test compute-object-hierarchy-list
+(test object-hierarchy-list
   (with-object-hierarchy (parent (child parent))
     (is (equal (list child parent =standard-object= =t=)
-               (compute-object-hierarchy-list child))))
+               (object-hierarchy-list child))))
+  (with-object-hierarchy (a (b a) (c b))
+    (is (equal (list c b a =standard-object= =t=)
+               (object-hierarchy-list c))))
   (with-object-hierarchy (a b (c a) (d a) (e b c) (f d) (g c f) (h g e))
     (is (equal (list h g e b c f d a =standard-object= =t=)
-               (compute-object-hierarchy-list h)))))
+               (object-hierarchy-list h)))))
 
 ;;; Testing the utility...
 (in-suite objects)
@@ -239,11 +242,6 @@
   (signals object-hierarchy-error
     (with-object-hierarchy (a (b a) (c b) (d a c))
       (declare (ignore d)))))
-
-(test object-hierarchy-list
-  (with-object-hierarchy (a (b a) (c b))
-    (is (equal (list c b a =standard-object= =t=)
-               (object-hierarchy-list c)))))
 
 (def-suite inheritance-predicates :in inheritance)
 (in-suite inheritance-predicates)

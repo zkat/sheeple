@@ -33,7 +33,6 @@
 
 (test reinit-object
   ;; TODO
-  (let ((test-object (spawn))
-        (another (spawn)))
+  (let ((test-object (spawn)))
     (is (eql test-object (add-property test-object 'var "value" :accessor t)))
     (is (has-direct-property-p test-object 'var))))

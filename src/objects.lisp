@@ -305,15 +305,17 @@ its parents."
 ;;; Spawning
 ;;;
 (defun make-object (parent* &rest all-keys
-                    &key (metaobject =standard-metaobject=) &allow-other-keys)
-  "Creates a new object with OBJECTS as its parents. METAOBJECT is used as the metaobject when
+                    &key (metaobject =standard-metaobject=) &allow-other-keys
+                    &aux (object (maybe-std-allocate-object metaobject))
+                         (parents (ensure-list (or parent* =standard-object=))))
+  "Returns a new object with OBJECTS as its parents. METAOBJECT is used as the metaobject when
 allocating the new object object. ALL-KEYS is passed on to INIT-OBJECT."
   (declare (dynamic-extent all-keys))
-  (let ((mold (ensure-mold (ensure-list (or parent* =standard-object=)) nil))
-        (obj (maybe-std-allocate-object metaobject)))
-    (setf (%object-mold obj) mold)
-    (apply 'init-object obj all-keys)
-    obj))
+  (handler-case
+      (setf (%object-mold object) (ensure-mold parents nil))
+    (topological-sort-conflict (conflict)
+      (error 'object-hierarchy-error :object object :conflict conflict)))
+  (apply 'init-object object all-keys))
 
 (defun spawn (&rest objects)
   "Creates a new standard-object object with OBJECTS as its parents."

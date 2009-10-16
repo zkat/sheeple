@@ -65,7 +65,7 @@ mold-transitions of a `mold'."
 Sheeple to use class-based optimizations yet keep its dynamic power."
   (lineage     nil :read-only t :type lineage)
   (properties  nil :read-only t :type simple-vector)
-  (transitions nil :type '(list-of transition)))
+  (transitions nil :type (list-of transition)))
 
 (defstruct (lineage
              (:predicate lineagep)

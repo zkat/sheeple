@@ -241,10 +241,9 @@
       (declare (ignore d)))))
 
 (test object-hierarchy-list
-  (let* ((a (spawn))
-         (b (spawn a))
-         (c (spawn b)))
-    (is (equal (list a b c) (object-hierarchy-list a)))))
+  (with-object-hierarchy (a (b a) (c b))
+    (is (equal (list a b c =standard-object= =t=)
+               (object-hierarchy-list c)))))
 
 (def-suite inheritance-predicates :in inheritance)
 (in-suite inheritance-predicates)

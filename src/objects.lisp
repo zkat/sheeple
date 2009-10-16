@@ -195,8 +195,9 @@ corresponding PARENTS, and the nickname is set to the symbol to facilitate debug
 ;;; Inheritance
 ;;;
 (defun validate-parent (parent child)
-  ;; TODO
-  t)
+  (handler-case
+      (compute-hierarchy (cons parent (coerce (object-parents child) 'list)))
+    (topological-sort-conflict ())))
 
 (defun topological-sort (elements constraints tie-breaker)
   "Sorts ELEMENTS such that they satisfy the CONSTRAINTS, falling back

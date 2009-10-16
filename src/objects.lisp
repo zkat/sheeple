@@ -314,7 +314,9 @@ allocating the new object object. ALL-KEYS is passed on to INIT-OBJECT."
 
 (defun spawn (&rest objects)
   "Creates a new standard-object object with OBJECTS as its parents."
-  (declare (dynamic-extent objects))
+  ;; This causes a memory leak. IMO, the correct way to deal with this would be pragmatic --
+  ;; parents should be stored as a vector within molds, to save space.
+  ;; (declare (dynamic-extent objects))
   (make-object objects))
 
 ;; Feel free to change the exact interface if you don't like it. -- Adlai

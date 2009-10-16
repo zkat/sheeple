@@ -61,13 +61,17 @@
   (message-documentation x))
 
 (defmethod documentation ((x symbol) (doc-type (eql 'message)))
-  (documentation (find-message x nil) t))
+  (handler-case
+      (documentation (find-message x) t)
+    (no-such-message ())))
 
 (defmethod (setf documentation) (new-value (x message) (doc-type (eql 't)))
   (setf (message-documentation x) new-value))
 
 (defmethod (setf documentation) (new-value (x symbol) (doc-type (eql 'message)))
-  (setf (documentation (find-message x nil) t) new-value))
+  (handler-case
+      (setf (documentation (find-message x) t) new-value)
+    (no-such-message ())))
 
 ;;;
 ;;; Message definition
@@ -253,7 +257,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
     (set-arg-info message :lambda-list lambda-list)
     (finalize-message message)
     ;; Documenting documentation out until we've gotten it to work
-    #+nil(setf (documentation message 'message) documentation)
+    (setf (documentation message t) documentation)
     message))
 
 ;; Finalizing a message sets the function definition of the message to a

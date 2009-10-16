@@ -252,12 +252,13 @@ more entries the cache will be able to hold, but the slower lookup will be.")
             (apply 'make-message :name name :lambda-list lambda-list all-keys))))
 
 ;; This handles actual setup of the message object (and finalization)
-(defun make-message (&key name lambda-list (documentation ""))
+(defun make-message (&key name lambda-list documentation)
   (let ((message (%make-message :name name :lambda-list lambda-list)))
     (set-arg-info message :lambda-list lambda-list)
     (finalize-message message)
     ;; Documenting documentation out until we've gotten it to work
-    (setf (documentation message t) documentation)
+    #-clisp(setf (documentation message t) documentation)
+    #+clisp(when documentation (warn "Documentation is not supported in CLISP."))
     message))
 
 ;; Finalizing a message sets the function definition of the message to a

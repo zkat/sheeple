@@ -24,9 +24,7 @@ would yield a value (i.e. not signal an unbound-property condition)."
         (object-hierarchy-list object)))
 
 (defun add-property (object property-name value
-                     &key (reader nil readerp)
-                     (writer nil writerp)
-                     accessor)
+                     &key (reader nil readerp) (writer nil writerp) accessor)
   "Adds a property named PROPERTY-NAME to OBJECT, initialized with VALUE."
   ;; TODO - this needs a solid transition thing
   (prog1 object
@@ -35,8 +33,7 @@ would yield a value (i.e. not signal an unbound-property condition)."
       (cerror "Remove existing property." "~A already has a direct property named ~A."
               object property-name)
       (remove-property object property-name))
-    (change-mold object (ensure-transition (%object-mold object)
-                                           property-name))
+    (change-mold object (ensure-transition (%object-mold object) property-name))
     (let ((position (position property-name (mold-properties (%object-mold object)))))
       (setf (svref (%object-property-values object) position) value))
     (when reader (add-reader-to-object reader property-name object))
@@ -119,15 +116,15 @@ returned."
       (when errorp (error 'unbound-property :object object :property-name property-name))))
 
 (defun object-direct-properties (object)
-  "Returns a set of direct property definition metaobjects."
-  (when (%object-property-values object)
-    (mold-properties (%object-mold object))))
+  "Returns a list of the names of OBJECT's direct properties -- ie, only ones which have been
+set directly in OBJECT using (setf property-value). The consequences of side-effecting this
+returned list are undefined."
+  (coerce (mold-properties (%object-mold object)) 'list))
 
 (defun available-properties (object)
-  "Returns a list of property objects describing all properties available to OBJECT, including
-inherited ones."
-  (delete-duplicates (append (copy-list (object-direct-properties object))
-                             (mapcan 'available-properties (copy-list (object-parents object))))))
+  "Returns a list of the names of all properties available to OBJECT, including inherited ones."
+  (delete-duplicates (nconc (coerce (object-direct-properties object) 'list)
+                            (mapcan 'available-properties (object-parents object)))))
 
 (defun property-summary (object &optional (stream *standard-output*))
   "Provides a pretty-printed representation of OBJECT's available properties."

@@ -269,10 +269,13 @@ its parents."
                                 (mapcan 'local-precedence-ordering unordered)))
      'std-tie-breaker-rule)))
 
+(defun std-compute-object-hierarchy-list (object)
+  (cons object (mold-hierarchy (%object-mold object))))
+
 (defun object-hierarchy-list (object)
   "Returns the full hierarchy-list for OBJECT"
   (if (eq =standard-metaobject= (%object-metaobject object))
-      (cons object (mold-hierarchy (%object-mold object)))
+      (std-compute-object-hierarchy-list object)
       (compute-object-hierarchy-list-using-metaobject )))
 
 (defun (setf object-parents) (new-parent-list object)

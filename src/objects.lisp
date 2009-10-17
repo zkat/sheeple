@@ -318,7 +318,8 @@ This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER 
   (check-type object object)
   (check-list-type new-parents object)
   (change-mold object (ensure-mold new-parents
-                                   (coerce (mold-properties (%object-mold object)) 'list))))
+                                   (coerce (mold-properties (%object-mold object)) 'list)))
+  (map 'nil 'trigger-hierarchy-recalculation (%object-children object)))
 
 (defun (setf object-parents) (new-parents object)
   (check-type object object)

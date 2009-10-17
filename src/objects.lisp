@@ -15,37 +15,40 @@
 (defvar *bootstrappedp* nil)
 
 ;;;
-;;; Molds
+;;; Mold Overview
 ;;;
-;;; - Molds act as a sort of "backend class" for objects. A mold is a separate concept from a
-;;;   metaobject. Their purpose is to offload the stuff that a lot of objects would share into
-;;;   a single object, and have many similar objects use the data stored in the mold.
-;;;   Right now, molds are used to keep track of direct properties and store the parents list.
-;;;   One big win already possible with molds is that they allow us to cache the entire
-;;;   hierarchy list for an object without having to worry about recalculating it every time
-;;;   a new object is created.
+;;; Molds act as a sort of "backend class" for objects. A mold is a separate concept from a
+;;; metaobject. Their purpose is to offload the stuff that a lot of objects would share into
+;;; a single object, and have many similar objects use the data stored in the mold.
+;;; Right now, molds are used to keep track of direct properties and store the parents list.
+;;; One big win already possible with molds is that they allow us to cache the entire
+;;; hierarchy list for an object without having to worry about recalculating it every time
+;;; a new object is created.
 ;;;
-;;;   A properties-related win is that since we hold information about *which* properties are
-;;;   available in the mold, our actual object instances can simply carry a lightweight vector
-;;;   whose slots are indexed into based on information held in the mold. This is identical to
-;;;   what CLOS implementations often do. Meaning? Direct property access can be as fast as
-;;;   CLOS' (once similar optimization strategies are implemented).
+;;; In fact, there are two levels of caching going on; molds have their own shared data
+;;; storage for 'lineages'. Lineages cache shared parent and hierarchy lists, and are also
+;;; cached by objects, so that changes in hierarchy lists get propagated to children.
 ;;;
-;;;   There are 4 situations where molds must be handled:
-;;;   1. A new object is created: in this case, find or create a new toplevel mold
-;;;   2. A property is added: find or create one new transition mold
-;;;   3. A property is -removed-: start from top of mold tree, find an acceptable mold
-;;;   4. (setf object-parents) is called: begin from the beginning. Object may have properties.
+;;; A properties-related win is that since we hold information about *which* properties are
+;;; available in the mold, our actual object instances can simply carry a lightweight vector
+;;; whose slots are indexed into based on information held in the mold. This is identical to
+;;; what CLOS implementations often do. Meaning? Direct property access can be as fast as
+;;; CLOS' (once similar optimization strategies are implemented).
 ;;;
-;;;   Every time a mold is switched up, care must be taken that relevant properties are copied
-;;;   over appropriately, and caches are reset. Additionally, when (setf object-parents) is called,
-;;;   all sub-molds must be alerted (and they must alert -their- sub-molds), and each sub-mold must
-;;;   recalculate its hierarchy list.
+;;; There are 4 situations where molds must be handled:
+;;; 1. A new object is created: in this case, find or create a new toplevel mold
+;;; 2. A property is added: find or create one new transition mold
+;;; 3. A property is -removed-: start from top of mold tree, find an acceptable mold
+;;; 4. (setf object-parents) is called: begin from the beginning. Object may have properties.
+;;;
+;;; Every time a mold is switched up, care must be taken that relevant properties are copied
+;;; over appropriately, and caches are reset. Additionally, when (setf object-parents) is called,
+;;; all sub-molds must be alerted (and they must alert -their- sub-molds), and each sub-mold must
+;;; recalculate its hierarchy list.
 
-(deftype list-of (type)
-  `(or null
-       (cons ,type list)))
-
+;;;
+;;; Data definitions
+;;;
 (deftype property-name ()
   "A valid name for an object's property."
   'symbol)
@@ -63,27 +66,40 @@ mold-transitions of a `mold'."
              (:constructor make-mold (lineage properties)))
   "Also known as 'backend classes', molds are hidden caches which enable
 Sheeple to use class-based optimizations yet keep its dynamic power."
-  (lineage     nil :read-only t :type lineage)
-  (properties  nil :read-only t :type simple-vector)
-  (transitions nil :type (list-of transition)))
+  (lineage     nil :read-only t :type lineage) ; A common cache of parent stuff
+  (properties  nil :read-only t :type simple-vector) ; Direct properties
+  (transitions nil :type (list-of transition))) ; V8-like links to other molds
 
 (defstruct (lineage
              (:predicate lineagep)
              (:constructor make-lineage
                            (parents &aux (hierarchy (compute-hierarchy parents)))))
   "Information about an object's ancestors and descendants."
-  (parents   nil :read-only t)
-  (hierarchy nil)
-  (sub-molds nil))
+  (parents   nil :read-only t) ; A set of objects
+  (hierarchy nil)) ; A precedence list of all the lineage's ancestors
 
 (macrolet ((define-mold-accessor (name lineage-accessor)
              `(progn
                 (defun ,name (mold)
                   (,lineage-accessor (mold-lineage mold))))))
   (define-mold-accessor mold-parents   lineage-parents)
-  (define-mold-accessor mold-hierarchy lineage-hierarchy)
-  (define-mold-accessor mold-sub-molds lineage-sub-molds))
+  (define-mold-accessor mold-hierarchy lineage-hierarchy))
 
+(defstruct (object (:conc-name %object-) (:predicate objectp)
+                   (:constructor std-allocate-object (metaobject))
+                   (:print-object print-sheeple-object-wrapper))
+  (descendants nil)     ; A cache of the object's child lineages
+  (mold nil)            ; mold this object currently refers to
+  metaobject            ; metaobject used by the MOP for doing various fancy things
+  (property-values nil) ; either NIL, or a vector holding direct property values
+  (roles nil))          ; a list of role objects belonging to this object.
+
+(declaim (inline %object-descendants %object-mold %object-metaobject
+                 %object-property-values %object-roles))
+
+;;;
+;;; Molds
+;;;
 (defvar *molds* (make-hash-table :test 'equal)
   "Maps parent lists to their corresponding molds. This is the global entry
 point to Sheeple's backend class system.")
@@ -115,7 +131,10 @@ If no such mold exists, returns NIL."
   (check-list-type parents object)
   (or (find-mold parents)
       (setf (find-mold parents)
-            (make-mold (make-lineage parents) (vector)))))
+            (make-mold (aprog1 (make-lineage parents)
+                         (dolist (parent parents)
+                           (push it (%object-descendants parent))))
+                       (vector)))))
 
 (defun ensure-transition (mold property-name)
   "Returns the transition from MOLD indexed by PROPERTY-NAME, creating and
@@ -140,16 +159,6 @@ creating and linking a new one if necessary."
 ;;;
 ;;; Objects
 ;;;
-(defstruct (object (:conc-name %object-) (:predicate objectp)
-                   (:constructor std-allocate-object (metaobject))
-                   (:print-object print-sheeple-object-wrapper))
-  (mold nil)                                ; mold this object currently refers to
-  metaobject ; metaobject used by the MOP for doing various fancy things
-  (property-values nil) ; either NIL, or a vector holding direct property values
-  (roles nil)) ; a list of role objects belonging to this object.
-
-(declaim (inline %object-mold %object-metaobject %object-property-values %object-roles))
-
 (defun std-object-p (x)
   (ignore-errors (eq (%object-metaobject x) =standard-metaobject=)))
 

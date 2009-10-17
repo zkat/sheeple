@@ -55,8 +55,8 @@ Current sort status:
 ;;; Objects
 
 (define-sheeple-condition object-hierarchy-error sheeple-error
-  ("A circular precedence graph was generated for ~A.
-The topological sort conflict information was:~%~A"
+  ("A conflict was encountered while generating a hierarchy list for ~A.
+The conflict information was:~%~A"
    object conflict)
   (:documentation "Signaled whenever there is a problem computing the hierarchy list."))
 

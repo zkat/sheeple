@@ -40,7 +40,7 @@
   (is (eq =function= (box-type-of (lambda () nil)))))
 
 (test box-object
-  (signals error (box-object (spawn)))
+  (signals error (box-object (object)))
   (is (objectp (box-object 'foo)))
   (is (find-boxed-object 'foo))
   (is (eq 'foo (wrapped-object (find-boxed-object 'foo)))))
@@ -57,7 +57,7 @@
   (is (null (find-boxed-object 'foo nil))))
 
 (test objectify
-  (let ((object (spawn)))
+  (let ((object (object)))
     (is (eql object (objectify object))))
   (is (objectp (objectify 'foo)))
   (is (find-boxed-object 'foo)))

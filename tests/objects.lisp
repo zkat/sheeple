@@ -295,9 +295,9 @@
 (in-suite inheritance-predicates)
 
 (test parentp
-  (let* ((a (spawn))
-         (b (spawn a))
-         (c (spawn b)))
+  (let* ((a (object))
+         (b (object :parents (list a)))
+         (c (object :parents (list b))))
     (is (parentp a b))
     (is (parentp b c))
     (is (not (parentp a c)))
@@ -306,9 +306,9 @@
     (is (not (parentp c b)))))
 
 (test childp
-  (let* ((a (spawn))
-         (b (spawn a))
-         (c (spawn b)))
+  (let* ((a (object))
+         (b (object :parents (list a)))
+         (c (object :parents (list b))))
     (is (childp b a))
     (is (childp c b))
     (is (not (childp c a)))
@@ -317,9 +317,9 @@
     (is (not (childp b c)))))
 
 (test ancestorp
-  (let* ((a (spawn))
-         (b (spawn a))
-         (c (spawn b)))
+  (let* ((a (object))
+         (b (object :parents (list a)))
+         (c (object :parents (list b))))
     (is (ancestorp a b))
     (is (ancestorp b c))
     (is (ancestorp a c))
@@ -328,9 +328,9 @@
     (is (not (ancestorp c b)))))
 
 (test descendantp
-  (let* ((a (spawn))
-         (b (spawn a))
-         (c (spawn b)))
+  (let* ((a (object))
+         (b (object :parents (list a)))
+         (c (object :parents (list b))))
     (is (descendantp b a))
     (is (descendantp c b))
     (is (descendantp c a))
@@ -346,23 +346,23 @@
 (def-suite spawn-general :in spawning)
 (in-suite spawn-general)
 
-(test make-object
+(test object
   ;; basic
-  (let ((object (make-object nil)))
+  (let ((object (object)))
     (is (objectp object))
     (is (std-object-p object))
     (is (eql =standard-object= (car (object-parents object))))
-    (is (eql object (car (object-parents (make-object (list object))))))
+    (is (eql object (car (object-parents (object :parents (list object))))))
     (is (eql =standard-metaobject= (object-metaobject object))))
   ;; properties arg
-  (let ((object (make-object nil :properties '((foo bar) (baz quux)))))
+  (let ((object (object :properties '((foo bar) (baz quux)))))
     (is (has-direct-property-p object 'foo))
     (is (has-direct-property-p object 'baz))
     (is (eql 'bar (direct-property-value object 'foo)))
     (is (eql 'quux (direct-property-value object 'baz))))
   #+ (or) ;; other metaobject -- Expected failure, left out of v3.0
-  (let* ((test-metaobject (make-object =standard-metaobject= :nickname 'test-metaobject))
-         (object (make-object nil :metaobject test-metaobject)))
+  (let* ((test-metaobject (object :parents (list =standard-metaobject=) :nickname 'test-metaobject))
+         (object (object :metaobject test-metaobject)))
     ;; metaobject tests
     (is (objectp test-metaobject))
     (is (std-object-p test-metaobject))
@@ -373,43 +373,21 @@
     (is (eql test-metaobject (object-metaobject object)))
     (is (eql =standard-object= (car (object-parents object))))))
 
-(test spawn
-  (is (eql =standard-metaobject= (object-metaobject (spawn))))
-  (is (objectp (spawn)))
-  (is (std-object-p (spawn)))
-  (is (eql =standard-object= (car (object-parents (spawn)))))
-  (let ((obj1 (spawn)))
-    (is (eql obj1
-             (car (object-parents (spawn obj1))))))
-  (let* ((obj1 (spawn))
-         (obj2 (spawn obj1)))
-    (is (eql obj1
-             (car (object-parents obj2)))))
-  (let* ((o1 (spawn))
-         (o2 (spawn))
-         (o3 (spawn))
-         (o4 (spawn))
-         (object (spawn o1 o2 o3 o4)))
-    (is (parentp o1 object))
-    (is (parentp o2 object))
-    (is (parentp o3 object))
-    (is (parentp o4 object))))
-
 (test clone)
 
 #+nil
 (test object-nickname
-  (let ((object (spawn)))
+  (let ((object (object)))
     (setf (object-nickname object) 'test)
     (is (eq 'test (object-nickname object)))
-    (is (eq 'test (object-nickname (spawn object))))))
+    (is (eq 'test (object-nickname (object :parents (list object)))))))
 
 #+nil
 (test object-documentation
-  (let ((object (spawn)))
+  (let ((object (object)))
     (setf (object-documentation object) 'test)
     (is (eq 'test (object-documentation object)))
-    (is (eq 'test (object-documentation (spawn object))))))
+    (is (eq 'test (object-documentation (object :parents (list object)))))))
 
 ;;;
 ;;; DEFOBJECT
@@ -446,7 +424,7 @@
              (canonize-options '((:metaobject foo) (:other-option 'bar))))))
 
 (test defobject
-  (let* ((parent (spawn))
+  (let* ((parent (object))
          (test-object (defobject (parent) ((var "value")))))
     (is (objectp test-object))
     (is (parentp parent test-object))

@@ -42,7 +42,7 @@
             (funcall (reply-function around) args next-erfun)))
         (let ((next-erfun (compute-primary-erfun (cdr primaries)))
               (befores (remove-if-not 'before-reply-p replies))
-              (afters (reverse (remove-if-not 'after-reply-p replies))))
+              (afters (remove-if-not 'after-reply-p replies)))
           (lambda (args)
             (when befores
               (dolist (before befores)
@@ -50,7 +50,7 @@
             (multiple-value-prog1
                 (funcall (reply-function (car primaries)) args next-erfun)
               (when afters
-                (dolist (after afters)
+                (dolist (after (reverse afters))
                   (funcall (reply-function after) args nil)))))))))
 
 (defun compute-primary-erfun (replies)

@@ -211,8 +211,8 @@ the form (OBJECT &REST PARENTS), where OBJECT is a symbol and each of PARENTS is
 evaluating to produce a object object. Each OBJECT symbol is bound to a object with the
 corresponding PARENTS, and the nickname is set to the symbol to facilitate debugging."
   `(let* ,(mapcar (fun (destructuring-bind (object &rest parents) (ensure-list _)
-                         `(,object (make-object ,(when parents ``(,,@parents))
-                                              :nickname ',object))))
+                         `(,object (object :parents ,(when parents ``(,,@parents))
+                                           :nickname ',object))))
                   object-and-parents)
      ,@body))
 
@@ -358,11 +358,12 @@ This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER 
 ;;;
 ;;; Spawning
 ;;;
-(defun make-object (parent* &rest all-keys
-                    &key (metaobject =standard-metaobject=) &allow-other-keys
-                    &aux (object (maybe-std-allocate-object metaobject))
-                         (parents (ensure-list (or parent* =standard-object=))))
-  "Returns a new object with OBJECTS as its parents. METAOBJECT is used as the metaobject when
+(defun object (&rest all-keys
+               &key (parents (list =standard-object=))
+               (metaobject =standard-metaobject=) &allow-other-keys
+               &aux (object (maybe-std-allocate-object metaobject))
+               (parents (if (listp parents) parents (list =standard-object=))))
+  "Returns a new object with PARENTS as its parents. METAOBJECT is used as the metaobject when
 allocating the new object object. ALL-KEYS is passed on to INIT-OBJECT."
   (declare (dynamic-extent all-keys))
   (handler-case
@@ -371,13 +372,6 @@ allocating the new object object. ALL-KEYS is passed on to INIT-OBJECT."
       (error 'object-hierarchy-error :object object :conflict conflict)))
   (setf (%object-children object) nil)
   (apply 'init-object object all-keys))
-
-(defun spawn (&rest objects)
-  "Creates a new standard-object object with OBJECTS as its parents."
-  ;; This causes a memory leak. IMO, the correct way to deal with this would be pragmatic --
-  ;; parents should be stored as a vector within molds, to save space.
-  ;; (declare (dynamic-extent objects))
-  (make-object objects))
 
 ;; Feel free to change the exact interface if you don't like it. -- Adlai
 (defun clone (object &optional (metaobject (object-metaobject object)))
@@ -417,8 +411,8 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
 
 (defmacro defobject (objects properties &rest options)
   "Standard object-generation macro. This variant auto-generates accessors."
-  `(make-object
-    ,(canonize-objects objects)
+  `(object
+    :parents ,(canonize-objects objects)
     :properties ,(canonize-properties properties)
     ,@(canonize-options options)))
 
@@ -438,4 +432,4 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
 (defun ensure-object (maybe-object parents &rest options)
   (if maybe-object
       (apply 'reinit-object maybe-object :parents parents options)
-      (apply 'make-object parents options)))
+      (apply 'object :parents parents options)))

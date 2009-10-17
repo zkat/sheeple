@@ -137,13 +137,14 @@ returned list are undefined."
 
 (defmethod describe-object ((object object) stream)
   (format stream
-          "~&Object: ~A~%~
-           Parents: ~A~%~
+          "~&Object: ~A~@
+           Parents: ~A~@
            Properties: ~%~{~A~%~}"
           object (object-parents object)
-          (mapcar (fun (format nil "~A: ~S ~:[(Delegated to: ~A)~;~]"
-                             (car _) (second _)
-                             (eq object (third _)) (third _)))
+          (mapcar (fun (format nil "~A: ~S~@[ (Delegated to: ~A)~]"
+                               (car _) (second _)
+                               (unless (eq object (third _))
+                                 (third _))))
                   (mapcar (fun (list  _ (property-value object _) (property-owner object _)))
                           (available-properties object)))))
 

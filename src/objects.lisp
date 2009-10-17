@@ -224,10 +224,10 @@ regards to the CONSTRAINTS. A future version will undo this change."
            (values befores afters) (parallel-delete choice befores afters))
      (push choice result) (go top)
      end (if (null elements) (return (nreverse result))
-         (error 'topological-sort-conflict
-                :conflicting-elements elements
-                :sorted-elements (reverse result)
-                :constraints (mapcar 'cons befores afters))))))
+             (error 'topological-sort-conflict
+                    :conflicting-elements elements
+                    :sorted-elements (reverse result)
+                    :constraints (mapcar 'cons befores afters))))))
 
 (defun collect-ancestors (object)
   "Collects all of OBJECT's ancestors."

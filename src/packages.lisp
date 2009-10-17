@@ -20,8 +20,8 @@
    :clone
    :defclone
    :defproto
-   :sheepp
-   :sheep-parents
+   :objectp
+   :object-parents
    :add-parent
    :remove-parent
    :ancestorp
@@ -31,7 +31,7 @@
    :sheeple-hierarchy-error ;something went wrong with the hierarchy list!
    :sheeple-error                       ;general error
    :sheeple-warning                     ;general warning
-   :sheep-metasheep
+   :object-metaobject
 
    ;; ;; Property access
    ;; :unbound-property                    ;error
@@ -64,7 +64,7 @@
    ;; :specialized-lambda-list-error       ;error
 
    ;; Protos
-   :=standard-sheep=
+   :=standard-object=
    :=t=
    :=null=
    :=symbol=

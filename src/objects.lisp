@@ -204,9 +204,15 @@ corresponding PARENTS, and the nickname is set to the symbol to facilitate debug
 ;;;
 ;;; Inheritance
 ;;;
-(defun validate-parent (parent child)
+(defun validate-parent (child parent)
   (handler-case
       (compute-hierarchy (cons parent (coerce (object-parents child) 'list)))
+    (topological-sort-conflict ())))
+
+(defun validate-parent-list (child &rest parents)
+  (declare (dynamic-extent parents))
+  (handler-case
+      (not (find child (compute-hierarchy parents)))
     (topological-sort-conflict ())))
 
 (defun topological-sort (elements constraints tie-breaker)

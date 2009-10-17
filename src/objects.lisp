@@ -346,28 +346,21 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
   "Creates a new property-value vector in OBJECT, according to NEW-MOLD's specification, and
 automatically takes care of bringing the correct property-values over into the new vector, in the
 right order. Keep in mind that NEW-MOLD might specify some properties in a different order."
-  (if (< 0 (length (%object-property-values object)))
-      (move-values-over object new-mold)
-      (setf (%object-property-values object)
-            (make-array (length (mold-properties new-mold)))
-            (%object-mold object) new-mold))
+  (let* ((new-properties (mold-properties new-mold))
+         (new-values (make-array (length new-properties)))
+         (old-values (%object-property-values object)))
+    (unless (zerop (length old-values))
+      (let ((old-properties (mold-properties (%object-mold object))))
+        (dotimes (index (length old-values))
+          (awhen (position (svref old-properties index) new-properties)
+            (setf (svref new-values it) (svref old-values index))))))
+    (unless (eq (mold-lineage new-mold)
+                (mold-lineage (%object-mold object)))
+      (remhash object (lineage-members (mold-lineage (%object-mold object))))
+      (setf (gethash object (lineage-members (mold-lineage new-mold))) t))
+    (setf (%object-mold object) new-mold
+          (%object-property-values object) new-values))
   object)
-
-(defun move-values-over (object new-mold)
-  ;; TODO - check that this is correct...
-  (let* ((old-mold (%object-mold object))
-         (old-properties (mold-properties old-mold))
-         (old-values (%object-property-values object))
-         (new-properties (mold-properties new-mold))
-         (new-values (make-array (length (mold-properties new-mold)))))
-    (loop
-       for old-prop across old-properties
-       for i from 0
-       when (find old-prop new-properties)
-       do (setf (svref new-values (position old-prop new-properties))
-                (svref old-values i)))
-    (setf (%object-property-values object) new-values)
-    (setf (%object-mold object) new-mold)))
 
 ;;;
 ;;; fancy macros

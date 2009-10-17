@@ -38,20 +38,37 @@
        (fmakunbound ',message-name))))
 
 (defmacro test-dummy-dispatch (target-flags message-args final-call-args
-                               &rest reply-definitions)
+                               &body reply-definitions)
   `(is (equal ',target-flags
               (with-dummy-message ,message-args
                 (with-flag-stack
                   ,@(mapcar (curry 'cons 'define-dummy-reply) reply-definitions)
                   (call-dummy-message ,@final-call-args))))))
 
-(test primary
-  (with-object-hierarchy ((a) (b a))
+(test standard-combination-primary
+  (with-object-hierarchy (a (b a))
     (test-dummy-dispatch (:a) (x y) (a nil)
       (() (a =t=) (flag :a)))
     (test-dummy-dispatch (:b :a) (x y) (b nil)
       (() (a =t=) (flag :a))
       (() (b =t=) (flag :b) (call-next-reply)))))
+
+(test standard-combination-before
+  (with-object-hierarchy (a (b a))
+    (test-dummy-dispatch (:a-before :a) (x) (a)
+      ((:before) (a) (flag :a-before))
+      (() (a) (flag :a)))
+    (test-dummy-dispatch (:b-before :a) (x) (b)
+      ((:before) (b) (flag :b-before))
+      (() (a) (flag :a)))
+    (test-dummy-dispatch (:b-before :a-before :a) (x) (b)
+      ((:before) (b) (flag :b-before))
+      ((:before) (a) (flag :a-before))
+      (() (a) (flag :a)))
+    (test-dummy-dispatch (:a-before :a) (x) (a)
+      ((:before) (b) (flag :b-before))
+      ((:before) (a) (flag :a-before))
+      (() (a) (flag :a)))))
 
 (def-suite reply-dispatch :in messages)
 (in-suite reply-dispatch)

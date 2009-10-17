@@ -87,6 +87,15 @@
       ((:after) (a) (flag :a-after))
       (() (a) (flag :a)))))
 
+(test standard-combination-around
+  (with-object-hierarchy (a (b a))
+    (test-dummy-dispatch (:around-entry :a :around-exit) (x) (a)
+      ((:around) (a) (flag :around-entry) (call-next-reply) (flag :around-exit))
+      (() (a) (flag :a)))
+    (test-dummy-dispatch (:a) (x) (a)
+      ((:around) (b) (flag :poop))
+      (() (a) (flag :a)))))
+
 (def-suite reply-dispatch :in messages)
 (in-suite reply-dispatch)
 

@@ -79,12 +79,11 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
   (parents   nil :read-only t) ; A set of objects
   (hierarchy nil)) ; A precedence list of all the lineage's ancestors
 
-(macrolet ((define-mold-accessor (name lineage-accessor)
-             `(progn
-                (defun ,name (mold)
-                  (,lineage-accessor (mold-lineage mold))))))
-  (define-mold-accessor mold-parents   lineage-parents)
-  (define-mold-accessor mold-hierarchy lineage-hierarchy))
+(macrolet ((define-mold-reader (name lineage-reader)
+             `(defun ,name (mold)
+               (,lineage-reader (mold-lineage mold)))))
+  (define-mold-reader mold-parents   lineage-parents)
+  (define-mold-reader mold-hierarchy lineage-hierarchy))
 
 (defstruct (object (:conc-name %object-) (:predicate objectp)
                    (:constructor std-allocate-object (metaobject))

@@ -256,9 +256,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
   (let ((message (%make-message :name name :lambda-list lambda-list)))
     (set-arg-info message :lambda-list lambda-list)
     (finalize-message message)
-    ;; Documenting documentation out until we've gotten it to work
-    #-clisp(setf (documentation message t) documentation)
-    #+clisp(when documentation (warn "Documentation is not supported in CLISP."))
+    (setf (documentation message t) documentation)
     message))
 
 ;; Finalizing a message sets the function definition of the message to a

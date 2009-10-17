@@ -99,14 +99,19 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
 (defstruct (object (:conc-name %object-) (:predicate objectp)
                    (:constructor std-allocate-object (metaobject))
                    (:print-object print-sheeple-object-wrapper))
-  (children nil)        ; A cache of the object's child lineages
-  (mold nil)            ; mold this object currently refers to
+ (mold nil)            ; mold this object currently refers to
   metaobject            ; metaobject used by the MOP for doing various fancy things
   (property-values nil) ; either NIL, or a vector holding direct property values
   (roles nil))          ; a list of role objects belonging to this object.
 
-(declaim (inline %object-descendants %object-mold %object-metaobject
-                 %object-property-values %object-roles))
+(declaim (inline %object-mold %object-metaobject %object-property-values %object-roles))
+
+(defun %object-children (object)
+  (gethash object (lineage-members (mold-lineage (%object-mold object)))))
+
+(defun (setf %object-children) (new-kids object)
+  (setf (gethash object (lineage-members (mold-lineage (%object-mold object))))
+        new-kids))
 
 ;;;
 ;;; Molds
@@ -306,8 +311,9 @@ right order. Keep in mind that NEW-MOLD might specify some properties in a diffe
             (setf (svref new-values it) (svref old-values index))))))
     (unless (eq (mold-lineage new-mold)
                 (mold-lineage (%object-mold object)))
-      (remhash object (lineage-members (mold-lineage (%object-mold object))))
-      (setf (gethash object (lineage-members (mold-lineage new-mold))) t))
+      (setf (gethash object (lineage-members (mold-lineage new-mold)))
+            (%object-children object))
+      (remhash object (lineage-members (mold-lineage (%object-mold object)))))
     (setf (%object-mold object) new-mold
           (%object-property-values object) new-values))
   object)
@@ -363,7 +369,7 @@ allocating the new object object. ALL-KEYS is passed on to INIT-OBJECT."
       (setf (%object-mold object) (ensure-mold parents nil))
     (topological-sort-conflict (conflict)
       (error 'object-hierarchy-error :object object :conflict conflict)))
-  (setf (gethash object (lineage-members (mold-lineage (%object-mold object)))) t)
+  (setf (%object-children object) nil)
   (apply 'init-object object all-keys))
 
 (defun spawn (&rest objects)

@@ -36,32 +36,29 @@
 ;; When SPAWN isn't enough, there's DEFSHEEP, which works just like DEFPROTO except the sheep
 ;; it creates is 'anonymous'. It also does not automatically create new accessors. You must
 ;; explicitly pass it the :accessor option in order to do that.
-(defvar *edmond* (defsheep (=human=)
+(defvar *edmond* (defobject (=human=)
                      ((name "Edmond"))
                    (:nickname "Eddy"))) ; Nicknames are displayed when the sheep object is printed.
 
-(defvar *princess-rena* (defsheep (=elf=)
-                            ((name "Rena")
+(defvar *princess-renee* (defobject (=elf=)
+                            ((name "Renee")
                              (title "Princess"))
                           (:nickname "Reni")))
 
 ;; Let's give the child a name so it doesn't just end up taking its parent's name.
-(defreply mate :around ((a *edmond*) (b *princess-rena*))
+(defreply mate :around ((a *edmond*) (b *princess-renee*))
   ;; note that the second item in the specialized LL entry
   ;; can be any object. It doesn't have to be something defined with defproto.
   (let ((the-child (call-next-message)))
-    (setf (name the-child)
-          "Eddie")
-    (setf (title the-child)
-          "Little")
+    (setf (title the-child) "Little")
     the-child))
 
-;; Princess Rena actually has a title. Maybe we want to be able to access the full name of an entity.
+;; Princess Renee actually has a title. Maybe we want to be able to access the full name of an entity.
 (defmessage full-name (entity))
 (defreply full-name ((entity =entity=))
   (name entity))
 ;; We might be tempted to do something like this, but maybe that's not the right thing to express...
-;; (defreply full-name ((royalty *princess-rena*))
+;; (defreply full-name ((royalty *princess-renee*))
 ;;   (format nil "~a ~a" (title royalty) (name royalty)))
 ;; So let's do this instead...
 (defproto =royalty= (=entity=) ())
@@ -69,8 +66,8 @@
   (format nil "~A ~A" (title entity) (name entity)))
 ;; A mixin?! BRILLIANT!
 ;; And we know how to use mixins, don't we kids? Except these guys work on instances :)
-(add-parent =royalty= *princess-rena*)
+(setf (object-parents *princess-renee*) (list =elf= =royalty=))
 
 ;; But it's a love that simply cannot be...
-(defreply mate ((a *edmond*) (b *princess-rena*))
+(defreply mate ((a *edmond*) (b *princess-renee*))
   (error "NO! YOUR LOVE IS FORBIDDEN!!!11one"))

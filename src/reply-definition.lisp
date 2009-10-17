@@ -190,7 +190,8 @@
 (defmacro defreply (&rest args)
   (multiple-value-bind (name qualifiers specialized-lambda-list docstring body)
       (parse-defreply args)
-    `(%defreply-expander ,name ,qualifiers ,specialized-lambda-list ,docstring ,body)))
+    `(progn
+       (%defreply-expander ,name ,qualifiers ,specialized-lambda-list ,docstring ,body))))
 
 (defmacro %defreply-expander (name qualifiers specialized-lambda-list docstring body)
   (multiple-value-bind (parameters ll participants required ignorable)

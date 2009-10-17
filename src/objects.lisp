@@ -307,9 +307,12 @@ This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER 
                                    (coerce (mold-properties (%object-mold object)) 'list))))
 
 (defun (setf object-parents) (new-parent-list object)
-  ;; TODO - this needs some careful writing, validation of the hierarchy-list, new mold, etc.
-  ;; TODO - This needs to alert all submolds of the parent change, correct? - zkat
-  (change-mold object (ensure-mold new-parent-list (mold-properties (%object-mold object))))
+  (flet ((lose (reason) (error 'object-hierarchy-error :object object :conflict reason)))
+    (let ((hierarchy (handler-case (compute-hierarchy new-parent-list)
+                       (topological-sort-conflict (conflict) (lose conflict)))))
+      (cond ((null hierarchy) (lose "Hierarchy list is empty"))
+            ((find object hierarchy) (lose "Object appears multiple times in hierarchy"))
+            (t (change-parents object new-parent-list)))))
   new-parent-list)
 
 ;;; Inheritance predicates

@@ -120,45 +120,43 @@
    Then watch this:
    http://www.vimeo.com/1534976?pg=embed&sec=1534976
    Then go write some tests, and test all the fucking time.
-*** TODO %enlarge-child-cache
-**** TODO Check that entries are moved over
-**** TODO Check that errors are signalled if there is no child cache
-*** TODO Improve tests for printing
-    This might require CL-PPCRE.
 *** TODO Update tests for FIND-MESSAGE vs %FIND-MESSAGE
     All that remains to be done is to write a separate test for FIND-MESSAGE
 *** DONE Improve test for WITH-SHEEP-HIERARCHY
 *** DONE Convert tests to use WITH-SHEEP-HIERARCHY
-** TODO Parent/Hierarchy API
-*** TODO (setf sheep-parents)
+** DONE Parent/Hierarchy API
+*** DONE (setf object-parents)
     Needs to deal correctly with bogus parent lists
-*** TODO compute-hierarchy-from-parent-list
+*** DONE compute-hierarchy
     Isolates the hierarchy algorithm, making it easier to write
-*** TODO validate-hierarchy-list
+*** DONE validate-hierarchy-list
     Do we even need this? It was in the TODO before... I guess now
     it'd just be a handler-case around the above.
 ** TODO API
    Go over the whole API, clean stuff up, make it more Serious.
    Mainly, the object creation API could use a little cleanup.
-** TODO Implement maps
+** DONE Implement maps
    Maps, in Self-speak, are sort of backend-classes used to represent the basic format
    of a bunch of similar objects. Implementing these would mean a huge boost in performance
    and a large reduction in memory usage, since all the "sheep-children" stuff could be held
    by the backend-class implementation. Furthermore, it would remove the dependency on
    trivial-garbage, and allow sheeple to run on lisps without user-accessible weak pointers.
    Everything will just be awesome. Also, I'll get ponies. -- zkat
-** TODO Properties
+** DONE Properties
 *** DONE Reimplement properties
 *** DONE TATFT
 *** DONE Improve the whole add-property interface.
 ** TODO Messages
 *** TODO Check for correctness of lambda-list congruence
 *** TODO Add :reply option to defmessage.
-** TODO DOCUMENTATION
+** DONE DOCUMENTATION
    Fix the fucking documentation bullshit -- something is probably not ANSI-compatible,
    although I haven't looked at it too deeply. Either way, CLISP complains when
    documentation is enabled.
 ** TODO Document everything in doc/sheeple.texinfo
+** TODO Package
+   Check that all the necessary symbols are exported by the SHEEPLE package, get rid of
+   deprecated stuff, etc. This should actually get inspected thoroughly before tagging.
 * DONE 2.2
 ** DONE [#A] Fix #'(setf property-value) Bug
    When a call to #'(setf property-value) requires a new direct property object

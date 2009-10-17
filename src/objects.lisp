@@ -277,6 +277,29 @@ its parents."
       (compute-object-hierarchy-list-using-metaobject
        (%object-metaobject object) object)))
 
+;;;
+;;; Modifying mold-level stuff
+;;;
+(defun change-mold (object new-mold)
+  "Creates a new property-value vector in OBJECT, according to NEW-MOLD's specification, and
+automatically takes care of bringing the correct property-values over into the new vector, in the
+right order. Keep in mind that NEW-MOLD might specify some properties in a different order."
+  (let* ((new-properties (mold-properties new-mold))
+         (new-values (make-array (length new-properties)))
+         (old-values (%object-property-values object)))
+    (unless (zerop (length old-values))
+      (let ((old-properties (mold-properties (%object-mold object))))
+        (dotimes (index (length old-values))
+          (awhen (position (svref old-properties index) new-properties)
+            (setf (svref new-values it) (svref old-values index))))))
+    (unless (eq (mold-lineage new-mold)
+                (mold-lineage (%object-mold object)))
+      (remhash object (lineage-members (mold-lineage (%object-mold object))))
+      (setf (gethash object (lineage-members (mold-lineage new-mold))) t))
+    (setf (%object-mold object) new-mold
+          (%object-property-values object) new-values))
+  object)
+
 (defun (setf object-parents) (new-parent-list object)
   ;; TODO - this needs some careful writing, validation of the hierarchy-list, new mold, etc.
   ;; TODO - This needs to alert all submolds of the parent change, correct? - zkat
@@ -340,30 +363,7 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
     new-obj))
 
 ;;;
-;;; Switching molds
-;;;
-(defun change-mold (object new-mold)
-  "Creates a new property-value vector in OBJECT, according to NEW-MOLD's specification, and
-automatically takes care of bringing the correct property-values over into the new vector, in the
-right order. Keep in mind that NEW-MOLD might specify some properties in a different order."
-  (let* ((new-properties (mold-properties new-mold))
-         (new-values (make-array (length new-properties)))
-         (old-values (%object-property-values object)))
-    (unless (zerop (length old-values))
-      (let ((old-properties (mold-properties (%object-mold object))))
-        (dotimes (index (length old-values))
-          (awhen (position (svref old-properties index) new-properties)
-            (setf (svref new-values it) (svref old-values index))))))
-    (unless (eq (mold-lineage new-mold)
-                (mold-lineage (%object-mold object)))
-      (remhash object (lineage-members (mold-lineage (%object-mold object))))
-      (setf (gethash object (lineage-members (mold-lineage new-mold))) t))
-    (setf (%object-mold object) new-mold
-          (%object-property-values object) new-values))
-  object)
-
-;;;
-;;; fancy macros
+;;; Fancy Macros
 ;;;
 (defun canonize-objects (objects)
   `(list ,@objects))

@@ -258,6 +258,20 @@
     (is (equal (list a c b =standard-object= =t=)
                (object-hierarchy-list a)))))
 
+(test cache-update-moderate
+  (with-object-hierarchy (a (b a) (c a) (d b) (e c) x)
+    (push x (object-parents a))
+    (is (equal (list a x =standard-object= =t=)
+               (object-hierarchy-list a)))
+    (is (equal (list b a x =standard-object= =t=)
+               (object-hierarchy-list b)))
+    (is (equal (list c a x =standard-object= =t=)
+               (object-hierarchy-list c)))
+    (is (equal (list d b a x =standard-object= =t=)
+               (object-hierarchy-list d)))
+    (is (equal (list e c a x =standard-object= =t=)
+               (object-hierarchy-list e)))))
+
 (def-suite inheritance-predicates :in inheritance)
 (in-suite inheritance-predicates)
 

@@ -196,6 +196,8 @@
 ** TODO Package
    Check that all the necessary symbols are exported by the SHEEPLE package, get rid of
    deprecated stuff, etc. This should actually get inspected thoroughly before tagging.
+   UPDATE: I've updated the list of symbols. It should be thoroughly double-checked
+   before tagging 3.0, anyways. I may have missed some symbols. -- zkat
 * DONE 2.2
 ** DONE [#A] Fix #'(setf property-value) Bug
    When a call to #'(setf property-value) requires a new direct property object

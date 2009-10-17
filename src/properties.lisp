@@ -26,7 +26,6 @@ would yield a value (i.e. not signal an unbound-property condition)."
 (defun add-property (object property-name value
                      &key (reader nil readerp) (writer nil writerp) accessor)
   "Adds a property named PROPERTY-NAME to OBJECT, initialized with VALUE."
-  ;; TODO - this needs a solid transition thing
   (prog1 object
     (assert (symbolp property-name))
     (when (has-direct-property-p object property-name)
@@ -49,7 +48,6 @@ would yield a value (i.e. not signal an unbound-property condition)."
   "Removes OBJECT's direct property named PROPERTY-NAME. Signals an error if there is no such
 direct property. Returns OBJECT."
   (if (has-direct-property-p object property-name)
-      ;; TODO fuckit, something like this... -ish
       (prog1 object
         (change-mold object
                      (ensure-mold (object-parents object)

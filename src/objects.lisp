@@ -75,6 +75,7 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
              (:constructor make-lineage
                            (parents &aux (hierarchy (compute-hierarchy parents)))))
   "Information about an object's ancestors and descendants."
+  (members (make-weak-hash-table :weakness :key :test 'eq)) ; The lineage's members
   (parents   nil :read-only t) ; A set of objects
   (hierarchy nil)) ; A precedence list of all the lineage's ancestors
 
@@ -88,7 +89,7 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
 (defstruct (object (:conc-name %object-) (:predicate objectp)
                    (:constructor std-allocate-object (metaobject))
                    (:print-object print-sheeple-object-wrapper))
-  (descendants nil)     ; A cache of the object's child lineages
+  (children nil)        ; A cache of the object's child lineages
   (mold nil)            ; mold this object currently refers to
   metaobject            ; metaobject used by the MOP for doing various fancy things
   (property-values nil) ; either NIL, or a vector holding direct property values
@@ -133,7 +134,7 @@ If no such mold exists, returns NIL."
       (setf (find-mold parents)
             (make-mold (aprog1 (make-lineage parents)
                          (dolist (parent parents)
-                           (push it (%object-descendants parent))))
+                           (push it (%object-children parent))))
                        (vector)))))
 
 (defun ensure-transition (mold property-name)
@@ -313,6 +314,7 @@ allocating the new object object. ALL-KEYS is passed on to INIT-OBJECT."
       (setf (%object-mold object) (ensure-mold parents nil))
     (topological-sort-conflict (conflict)
       (error 'object-hierarchy-error :object object :conflict conflict)))
+  (setf (gethash object (lineage-members (mold-lineage (%object-mold object)))) t)
   (apply 'init-object object all-keys))
 
 (defun spawn (&rest objects)

@@ -64,9 +64,8 @@
     ;; Finally, set the documentation. If none is provided, it's set to NIL.
     ;; It's important to note that documenting a object will keep a reference to it...
     ;; At the same time, REINIT-OBJECT is only meant for protos, so it should be fine.
-    #-clisp(setf (documentation object t) documentation)
-    #+clisp (when documentation
-              (warn "Documentation is not supported in CLISP."))
+    (when documentation
+      (setf (documentation object t) documentation))
     object)
 
   ;; Now we redefine =standard-object= and =standard-metaobject= normally.

@@ -243,6 +243,15 @@
     (with-object-hierarchy (a (b a) (c b) (d a c))
       (declare (ignore d)))))
 
+(def-suite child-caching :in sheeple)
+(in-suite child-caching)
+
+(test cache-update-basic
+  (with-object-hierarchy (a b (c a))
+    (push b (object-parents a))
+    (is (equal (list c a b =standard-object= =t=)
+               (object-hierarchy-list c)))))
+
 (def-suite inheritance-predicates :in inheritance)
 (in-suite inheritance-predicates)
 

@@ -135,6 +135,16 @@
 ** TODO API
    Go over the whole API, clean stuff up, make it more Serious.
    Mainly, the object creation API could use a little cleanup.
+*** TODO Object creation
+**** TODO SPAWN/MAKE-OBJECT
+     SPAWN is dead. MAKE-OBJECT has changed. Is OBJECT an acceptable replacement?
+**** TODO DEFOBJECT
+     Is this a good name? Perhaps DEFOBJECT (and DEFPROTO) should accept unspecialized
+     property definitions that initialize properties to NIL.
+**** TODO DEFPROTO
+     Good name? Good API? Again, perhaps properties could be initialized to NIL by default.
+*** TODO Messages
+    Having :reply would be nice, I think.
 ** DONE Implement maps
    Maps, in Self-speak, are sort of backend-classes used to represent the basic format
    of a bunch of similar objects. Implementing these would mean a huge boost in performance
@@ -148,7 +158,36 @@
 *** DONE Improve the whole add-property interface.
 ** TODO Messages
 *** TODO Check for correctness of lambda-list congruence
+    As per CLHS 7.6.4
+**** TODO num-required
+     Each lambda list must have the same number of required parameters.
+**** TODO num-optional
+     Each lambda list must have the same number of optional parameters. Each reply
+     can supply its own default for an optional parameter.
+**** TODO key/restp
+     If any lambda list mentions &rest or &key, each lambda-list must mention one
+     or both of them.
+**** TODO &key and &aok
+     If the message lambda list mentions &key, each reply must accept all of the keyword
+     names mentioned after &key, either by accepting them explicitly, by specifying &aok,
+     or by specifying &rest but not &key. Each reply can accept additional keyword arguments
+     of its own. The checking of the validity of keyword names is done in the message, not
+     in each reply. A reply is invoked as if the keyword argument pair whose name is
+     :allow-other-keys and whose value is true were supplied, though no such argument pair
+     will be passed.
+**** TODO &aok consistency
+     The use of &allow-other-keys need not be consistent across lambda lists. If
+     &allow-other-keys is mentioned in the lambda list of any applicable reply or of
+     the message, any keyword arguments may be mentioned in the call to the message.
+**** TODO &aux
+     The use of &aux need not be consistent across replies.
+**** TODO Write unit tests that confirm this behavior is correct.
 *** TODO Add :reply option to defmessage.
+** TODO Replies
+*** TODO Clean up dispatch code
+    Don't try to optimize yet. Just try and reorganize the algorithm into something more
+    reasonable. This'll make it easier to optimize dispatch later on.
+*** TODO Detailed dispatch unit tests
 ** DONE DOCUMENTATION
    Fix the fucking documentation bullshit -- something is probably not ANSI-compatible,
    although I haven't looked at it too deeply. Either way, CLISP complains when

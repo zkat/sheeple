@@ -215,7 +215,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
                                                   (create-msg-lambda-list lambda-list))
               (arg-info-number-required arg-info) nreq
               (arg-info-number-optional arg-info) nopt
-              (arg-info-key/rest-p arg-info) (not (null (or keysp restp)))
+              (arg-info-key/rest-p arg-info) (or keysp restp)
               (arg-info-keys arg-info) (if lambda-list-p
                                            (if allow-other-keys-p t keywords)
                                            (arg-info-key/rest-p arg-info)))))

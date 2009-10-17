@@ -277,9 +277,11 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 ;; This pair just pretties up the options during macro expansion
 (defmacro defmessage (name lambda-list &rest options)
   `(progn
-     (check-message-lambda-list ',lambda-list)
-     (ensure-message ',name :lambda-list ',lambda-list
-                     ,@(canonize-message-options options))))
+     (eval-when (:compile-toplevel :execute)
+       (check-message-lambda-list ',lambda-list))
+     (eval-when (:compile-toplevel :load-toplevel :execute)
+       (ensure-message ',name :lambda-list ',lambda-list
+                       ,@(canonize-message-options options)))))
 
 (defun canonize-message-option (option)
   `(,(car option) ,(cadr option)))

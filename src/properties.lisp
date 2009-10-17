@@ -137,24 +137,17 @@ returned list are undefined."
   (delete-duplicates (nconc (coerce (object-direct-properties object) 'list)
                             (mapcan 'available-properties (object-parents object)))))
 
-(defun property-summary (object &optional (stream *standard-output*))
-  "Provides a pretty-printed representation of OBJECT's available properties."
-  (format stream
-          "~&Object: ~A~%Properties:~% ~{~{~&~3TName: ~13T~A~%~3TValue: ~13T~S~%~
-           ~3TOwner: ~13T~A~%~%~}~}"
-          object (mapcar (fun (list _
-                                    (property-value object _)
-                                    (property-owner object _)))
-                         (available-properties object))))
-
-(defun direct-property-summary (object &optional stream)
-  "Provides a pretty-printed representation of OBJECT's direct properties."
+(defmethod describe-object ((object object) stream)
   (format stream
           "~&Object: ~A~%~
-           Direct Properties: ~%~%~
-           ~{~{~&~3TName: ~A~%~3TValue: ~S~%~%~}~}"
-          object (mapcar (fun (list _ (direct-property-value object _)))
-                         (object-direct-properties object))))
+           Parents: ~A~%~
+           Properties: ~%~{~A~%~}"
+          object (object-parents object)
+          (mapcar (fun (format nil "~A: ~S ~:[(Delegated to: ~A)~;~]"
+                             (car _) (second _)
+                             (eq object (third _)) (third _)))
+                  (mapcar (fun (list  _ (property-value object _) (property-owner object _)))
+                          (available-properties object)))))
 
 ;;; Convenience
 (defmacro with-properties (properties object &body body)

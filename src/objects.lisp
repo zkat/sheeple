@@ -300,6 +300,12 @@ right order. Keep in mind that NEW-MOLD might specify some properties in a diffe
           (%object-property-values object) new-values))
   object)
 
+(defun change-parents (object new-parents)
+  "Wraps around `change-mold' to give OBJECT a mold with the requested NEW-PARENTS.
+This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER CODE."
+  (change-mold object (ensure-mold new-parents
+                                   (coerce (mold-properties (%object-mold object)) 'list))))
+
 (defun (setf object-parents) (new-parent-list object)
   ;; TODO - this needs some careful writing, validation of the hierarchy-list, new mold, etc.
   ;; TODO - This needs to alert all submolds of the parent change, correct? - zkat

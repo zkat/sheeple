@@ -269,11 +269,13 @@ its parents."
 (defun std-compute-object-hierarchy-list (object)
   (cons object (mold-hierarchy (%object-mold object))))
 
+(declaim (function compute-object-hierarchy-list-using-metaobject))
 (defun object-hierarchy-list (object)
   "Returns the full hierarchy-list for OBJECT"
   (if (eq =standard-metaobject= (%object-metaobject object))
       (std-compute-object-hierarchy-list object)
-      (compute-object-hierarchy-list-using-metaobject )))
+      (compute-object-hierarchy-list-using-metaobject
+       (%object-metaobject object) object)))
 
 (defun (setf object-parents) (new-parent-list object)
   ;; TODO - this needs some careful writing, validation of the hierarchy-list, new mold, etc.

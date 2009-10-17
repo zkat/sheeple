@@ -272,6 +272,15 @@
     (is (equal (list e c a x =standard-object= =t=)
                (object-hierarchy-list e)))))
 
+(test cache-update-extensive
+  (with-object-hierarchy (a b c d e f g h)
+    (mapcar (lambda (parent object)
+              (push parent (object-parents object)))
+            (list g f e c d b a c a)
+            (list h g h g f e c e d))
+    (is (equal (list h e g c f d a b =standard-object= =t=)
+               (object-hierarchy-list h)))))
+
 (def-suite inheritance-predicates :in inheritance)
 (in-suite inheritance-predicates)
 

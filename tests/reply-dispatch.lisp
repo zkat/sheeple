@@ -70,6 +70,23 @@
       ((:before) (a) (flag :a-before))
       (() (a) (flag :a)))))
 
+(test standard-combination-after
+  (with-object-hierarchy (a (b a))
+    (test-dummy-dispatch (:a :a-after) (x) (a)
+      ((:after) (a) (flag :a-after))
+      (() (a) (flag :a)))
+    (test-dummy-dispatch (:a :b-after) (x) (b)
+      ((:after) (b) (flag :b-after))
+      (() (a) (flag :a)))
+    (test-dummy-dispatch (:a :a-after :b-after) (x) (b)
+      ((:after) (b) (flag :b-after))
+      ((:after) (a) (flag :a-after))
+      (() (a) (flag :a)))
+    (test-dummy-dispatch (:a :a-after) (x) (a)
+      ((:after) (b) (flag :b-after))
+      ((:after) (a) (flag :a-after))
+      (() (a) (flag :a)))))
+
 (def-suite reply-dispatch :in messages)
 (in-suite reply-dispatch)
 

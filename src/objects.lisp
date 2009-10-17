@@ -176,7 +176,8 @@ creating and linking a new one if necessary."
 ;;; Objects
 ;;;
 (defun std-object-p (x)
-  (ignore-errors (eq (%object-metaobject x) =standard-metaobject=)))
+  (when (objectp x)
+    (eq (%object-metaobject x) =standard-metaobject=)))
 
 (defun maybe-std-allocate-object (metaobject)
   (if (eq =standard-metaobject= metaobject)

@@ -269,7 +269,6 @@ its parents."
 (defun std-compute-object-hierarchy-list (object)
   (cons object (mold-hierarchy (%object-mold object))))
 
-(declaim (function compute-object-hierarchy-list-using-metaobject))
 (defun object-hierarchy-list (object)
   "Returns the full hierarchy-list for OBJECT"
   (if (eq =standard-metaobject= (%object-metaobject object))

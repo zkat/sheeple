@@ -107,6 +107,17 @@ is signaled."
             (add-property object property-name new-value)))
   new-value)
 
+;;;
+;;; Object Documentation
+;;;
+
+(defmethod documentation ((x object) (doc-type (eql 't)))
+  (property-value x 'documentation))
+
+(defmethod (setf documentation) (new-value (x object) (doc-type (eql 't)))
+  (handler-bind ((unbound-property 'continue))
+    (setf (property-value x 'documentation) new-value)))
+
 ;;; Reflection API
 (defun property-owner (object property-name &optional errorp)
   "Returns the object object with a direct-property called PROPERTY-NAME from which OBJECT inherits

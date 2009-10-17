@@ -283,6 +283,8 @@ its parents."
   "Creates a new property-value vector in OBJECT, according to NEW-MOLD's specification, and
 automatically takes care of bringing the correct property-values over into the new vector, in the
 right order. Keep in mind that NEW-MOLD might specify some properties in a different order."
+  (check-type object object)
+  (check-type new-mold mold)
   (let* ((new-properties (mold-properties new-mold))
          (new-values (make-array (length new-properties)))
          (old-values (%object-property-values object)))
@@ -302,17 +304,21 @@ right order. Keep in mind that NEW-MOLD might specify some properties in a diffe
 (defun change-parents (object new-parents)
   "Wraps around `change-mold' to give OBJECT a mold with the requested NEW-PARENTS.
 This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER CODE."
+  (check-type object object)
+  (check-list-type new-parents object)
   (change-mold object (ensure-mold new-parents
                                    (coerce (mold-properties (%object-mold object)) 'list))))
 
-(defun (setf object-parents) (new-parent-list object)
+(defun (setf object-parents) (new-parents object)
+  (check-type object object)
+  (check-list-type new-parents object)
   (flet ((lose (reason) (error 'object-hierarchy-error :object object :conflict reason)))
-    (let ((hierarchy (handler-case (compute-hierarchy new-parent-list)
+    (let ((hierarchy (handler-case (compute-hierarchy new-parents)
                        (topological-sort-conflict (conflict) (lose conflict)))))
       (cond ((null hierarchy) (lose "Hierarchy list is empty"))
             ((find object hierarchy) (lose "Object appears multiple times in hierarchy"))
-            (t (change-parents object new-parent-list)))))
-  new-parent-list)
+            (t (change-parents object new-parents)))))
+  new-parents)
 
 ;;; Inheritance predicates
 (defun parentp (maybe-parent child)

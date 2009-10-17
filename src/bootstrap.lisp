@@ -46,7 +46,7 @@
 
   (defmessage init-object (object &key &allow-other-keys)
     (:documentation "Performs 'once-only' initialization tasks on OBJECT."))
-  (defreply init-object (object &key properties nickname)
+  (defreply init-object (object &key parents properties nickname)
     (shared-init object :properties properties :nickname nickname))
 
   (defmessage reinit-object (object &key &allow-other-keys)

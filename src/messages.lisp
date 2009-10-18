@@ -276,10 +276,20 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 ;; then expands to a call to ensure-message
 ;; This pair just pretties up the options during macro expansion
 (defmacro defmessage (name lambda-list &rest options)
-  `(progn
-     (check-message-lambda-list ',lambda-list)
-     (ensure-message ',name :lambda-list ',lambda-list
-                     ,@(canonize-message-options options))))
+  (let (replies)
+    (loop for (option . args) in options when (eq option :message)
+       do (setf options (remove option options :test 'eq :key 'car)
+                replies replies))
+    `(eval-when (:compile-toplevel :load-toplevel :execute)
+       (check-message-lambda-list ',lambda-list)
+       (eval-when (:load-toplevel :execute)
+         (ensure-message ',name :lambda-list ',lambda-list
+                         ,@(canonize-message-options options))
+         ,@ (when replies
+              (mapcar (fun (destructuring-bind (quals lambda-l dox body)
+                               (parse-defreply _)
+                             (%defreply name quals lambda-l dox body)))
+                      replies))))))
 
 (defun canonize-message-option (option)
   `(,(car option) ,(cadr option)))

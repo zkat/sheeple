@@ -15,17 +15,17 @@
    ;; Before anything else happens, we need =STANDARD-METAOBJECT= to exist:
    (setf =standard-metaobject= (std-allocate-object =standard-metaobject=))
    (setf (%object-metaobject =standard-metaobject=) =standard-metaobject=
-         (%object-mold =standard-metaobject=) (ensure-mold nil nil))
+         (%object-mold =standard-metaobject=) (ensure-mold nil #()))
 
    ;; =T= and =STANDARD-OBJECT= have special rules about parents.
    (setf =t=
          (let ((obj (std-allocate-object =standard-metaobject=)))
-           (setf (%object-mold obj) (ensure-mold nil nil))
+           (setf (%object-mold obj) (ensure-mold nil #()))
            obj)
          =standard-object=
          (let ((obj (std-allocate-object =standard-metaobject=)))
            (setf (%object-mold obj)
-                 (ensure-mold (list =t=) nil))
+                 (ensure-mold (list =t=) #()))
            obj))))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
@@ -57,7 +57,7 @@
     (change-mold object (ensure-mold (if (null parents)
                                          (list =standard-object=)
                                          (objectify-list parents))
-                                     nil))
+                                     #()))
     ;; Setting up the properties all over again.
     (dolist (property-spec properties)
       (destructuring-bind (name value &rest keys) property-spec
@@ -72,7 +72,7 @@
 (unless *bootstrappedp*
   (defproto =standard-object= (=t=) ())
   (change-mold =standard-metaobject=
-               (ensure-mold (list =t=) nil))
+               (ensure-mold (list =t=) #()))
 
   ;; Now we just define all the builtins, and we're good to go.
   (defproto =boxed-object= (=t=) ())

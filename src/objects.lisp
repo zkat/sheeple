@@ -67,7 +67,8 @@ mold-transitions of a `mold'."
   "Also known as 'backend classes', molds are hidden caches which enable
 Sheeple to use class-based optimizations yet keep its dynamic power."
   (lineage     nil :read-only t :type lineage) ; A common cache of parent stuff
-  (properties  nil :read-only t :type simple-vector) ; Direct properties
+  (properties  nil :read-only t
+               :type (or simple-vector hash-table)) ; Direct properties
   (transitions nil :type (list-of transition))) ; V8-like links to other molds
 
 (define-print-object ((object mold) :identity nil)
@@ -169,16 +170,16 @@ linking a new one if necessary."
   (or (find-transition mold property-name)
       (aconsf (mold-transitions mold) property-name
               (make-mold (mold-lineage mold)
-                         (vector-cons property-name (mold-properties mold))))))
+                         (hv-cons property-name (mold-properties mold))))))
 
 (defun ensure-mold (parents properties)
   "Returns the mold with properties PROPERTIES of the mold for PARENTS,
 creating and linking a new one if necessary."
   (check-list-type parents object)
-  (check-list-type properties property-name)
+  (check-type properties hash-vector)
   (let ((top (ensure-toplevel-mold parents)))
     (do* ((mold top (ensure-transition mold (car props-left)))
-          (props-left properties (cdr props-left)))
+          (props-left (hv-elements properties) (cdr props-left)))
         ((null props-left) mold))))
 
 ;;;
@@ -312,13 +313,12 @@ right order. Keep in mind that NEW-MOLD might specify some properties in a diffe
   (check-type object object)
   (check-type new-mold mold)
   (let* ((new-properties (mold-properties new-mold))
-         (new-values (make-array (length new-properties)))
+         (new-values (make-array (hv-length new-properties)))
          (old-values (%object-property-values object)))
     (unless (zerop (length old-values))
-      (let ((old-properties (mold-properties (%object-mold object))))
-        (dotimes (index (length old-values))
-          (awhen (position (svref old-properties index) new-properties)
-            (setf (svref new-values it) (svref old-values index))))))
+      (do-hash-vector (pname position (mold-properties (%object-mold object)))
+        (awhen (hv-position new-properties pname)
+          (setf (svref new-values it) (svref old-values position)))))
     (unless (eq (mold-lineage new-mold)
                 (mold-lineage (%object-mold object)))
       (setf (gethash object (lineage-members (mold-lineage new-mold)))
@@ -333,8 +333,7 @@ right order. Keep in mind that NEW-MOLD might specify some properties in a diffe
 This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER CODE."
   (check-type object object)
   (check-list-type new-parents object)
-  (change-mold object (ensure-mold new-parents
-                                   (coerce (mold-properties (%object-mold object)) 'list)))
+  (change-mold object (ensure-mold new-parents (mold-properties (%object-mold object))))
   (map 'nil 'trigger-hierarchy-recalculation (%object-children object)))
 
 (defun (setf object-parents) (new-parents object)
@@ -377,7 +376,7 @@ This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER 
 allocating the new object object. ALL-KEYS is passed on to INIT-OBJECT."
   (declare (dynamic-extent all-keys))
   (handler-case
-      (setf (%object-mold object) (ensure-mold parents nil))
+      (setf (%object-mold object) (ensure-mold parents #()))
     (topological-sort-conflict (conflict)
       (error 'object-hierarchy-error :object object :conflict conflict)))
   (setf (%object-children object) nil)

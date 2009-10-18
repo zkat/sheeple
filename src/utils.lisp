@@ -278,7 +278,7 @@ will not be affected; otherwise, it will be bound to a recognizeable and unique 
       (length (the simple-vector hash-vector))
       (hash-table-count hash-vector)))
 
-(defun hv-position (hash-vector key)
+(defun hv-position (key hash-vector)
   (if (simple-vector-p hash-vector)
       (position key (the simple-vector hash-vector) :test #'eq)
       (gethash key hash-vector)))

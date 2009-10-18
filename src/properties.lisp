@@ -10,12 +10,20 @@
 (in-package :sheeple)
 
 ;;;
+;;; Utility
+;;;
+;;; This is here because it's very property-specific, even though it's a util.
+
+(defun property-position (property-name object)
+  (hv-position property-name (mold-properties (%object-mold object))))
+
+;;;
 ;;; Existential
 ;;;
 (defun has-direct-property-p (object property-name)
   "Returns T if OBJECT has a property called PROPERTY-NAME as a direct property.
 NIL otherwise."
-  (when (hv-position (mold-properties (%object-mold object)) property-name) t))
+  (when (property-position property-name object) t))
 
 (defun has-property-p (object property-name)
   "Returns T if calling PROPERTY-VALUE on OBJECT using the same property-name
@@ -33,7 +41,7 @@ would yield a value (i.e. not signal an unbound-property condition)."
               object property-name)
       (remove-property object property-name))
     (change-mold object (ensure-transition (%object-mold object) property-name))
-    (let ((position (hv-position (mold-properties (%object-mold object)) property-name)))
+    (let ((position (property-position property-name object)))
       (setf (svref (%object-property-values object) position) value))
     (when reader (add-reader-to-object reader property-name object))
     (when writer (add-writer-to-object writer property-name object))
@@ -65,7 +73,7 @@ direct property. Returns OBJECT."
   "Returns the property-value set locally in OBJECT for PROPERTY-NAME.
 If the value is non-local (is delegated or does not exist in the hierarchy list),
 a condition of type UNBOUND-PROPERTY condition is signalled."
-  (aif (hv-position (mold-properties (%object-mold object)) property-name)
+  (aif (property-position property-name object)
        (svref (%object-property-values object) it)
        (error 'unbound-property :object object :property-name property-name)))
 
@@ -78,12 +86,12 @@ a condition of type UNBOUND-PROPERTY condition is signalled."
 as a direct property. When it finds one, it returns the direct-property-value of that property,
 called on that object. If no object is found in the hierarchy-list with a valid direct-property,
 a condition of type UNBOUND-PROPERTY is signaled."
-  (acond ((hv-position (mold-properties (%object-mold object)) property-name)
+  (acond ((property-position property-name object)
           (svref (%object-property-values object) it))
          ((loop for ancestor in (mold-hierarchy (%object-mold object))
-             when (hv-position (mold-properties (%object-mold ancestor)) property-name)
+             when (property-position property-name ancestor)
              return ancestor)
-          (let ((index (hv-position (mold-properties (%object-mold it)) property-name)))
+          (let ((index (property-position property-name it)))
             (svref (%object-property-values it) index)))
          (t (error 'unbound-property :object object :property-name property-name))))
 
@@ -91,13 +99,13 @@ a condition of type UNBOUND-PROPERTY is signaled."
   "Sets NEW-VALUE as the value of a direct-property belonging to OBJECT, named
 PROPERTY-NAME. If the property does not already exist anywhere in the hierarchy list, an error
 is signaled."
-  (acond ((hv-position (mold-properties (%object-mold object)) property-name)
+  (acond ((property-position property-name object)
           (setf (svref (%object-property-values object) it) new-value))
          ((loop for ancestor in (mold-hierarchy (%object-mold object))
-             when (hv-position (mold-properties (%object-mold ancestor)) property-name)
+             when (property-position property-name ancestor)
              return ancestor)
           (change-mold object (ensure-transition (%object-mold object) property-name))
-          (let ((index (hv-position (mold-properties (%object-mold object)) property-name)))
+          (let ((index (property-position property-name object)))
             (setf (svref (%object-property-values object) index) new-value)))
          (t (cerror "Add the property locally" 'unbound-property
                     :object object

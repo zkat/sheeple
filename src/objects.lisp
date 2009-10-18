@@ -399,10 +399,13 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
   `(list ,@(mapcar (rcurry 'canonize-property accessors-by-default) properties)))
 
 (defun canonize-property (property &optional (accessors-by-default nil))
-  `(list ',(car property) ,@(cdr property)
-         ,@(when (and (not (find :accessor (cddr property)))
-                      accessors-by-default)
-                 `(:accessor ',(car property)))))
+  (let* ((property-name (if (consp property) (car property) property))
+         (property-value (when (consp property) (cadr property)))
+         (rest-of-property (when (consp property) (cddr property)))
+         (add-accessor-p (and (if (consp property) (not (find :accessor (cddr property))) t)
+                              accessors-by-default)))
+    `(list ',property-name ,property-value ,@rest-of-property
+           ,@(when add-accessor-p `(:accessor ',property-name)))))
 
 (defun canonize-options (options)
   (mapcan 'canonize-option options))

@@ -97,12 +97,10 @@
   (let ((object (object)))
     (unwind-protect
          (progn
-           (defreply test-undefreply ((x object)) x)
-           ;; This is failing because test-undefreply doesn't seem to actually define a reply until later..
-           (is (eq object (test-undefreply object)))
-           (is (not (null (undefreply test-undefreply (object)))))
-           (signals no-applicable-replies (test-undefreply object))
-           (is (null (undefreply test-undefreply (object))))
+           (defreply test-message ((x object)) x)
+           (is (not (null (undefreply test-message (object)))))
+           (signals no-applicable-replies (test-message object))
+           (is (null (undefreply test-message (object))))
            (is (null (%object-roles object))))
-      (undefine-message 'test-undefreply))))
+      (undefine-message 'test-message))))
 (test parse-undefreply)

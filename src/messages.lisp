@@ -293,3 +293,6 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 (defun undefine-message (name)
   (forget-message name)
   (fmakunbound name))
+
+(defmacro undefmessage (name)
+  `(undefine-message ',name))

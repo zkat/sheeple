@@ -135,16 +135,15 @@
 ** TODO API
    Go over the whole API, clean stuff up, make it more Serious.
    Mainly, the object creation API could use a little cleanup.
-*** TODO Object creation
-**** TODO SPAWN/MAKE-OBJECT
-     SPAWN is dead. MAKE-OBJECT has changed. Is OBJECT an acceptable replacement?
-**** TODO DEFOBJECT
+*** DONE Object creation
+**** DONE SPAWN/MAKE-OBJECT
+     SPAWN is dead. MAKE-OBJECT has changed. Is OBJECT an acceptable replacement? (I think so)
+**** DONE DEFOBJECT
      Is this a good name? Perhaps DEFOBJECT (and DEFPROTO) should accept unspecialized
      property definitions that initialize properties to NIL.
-**** TODO DEFPROTO
+**** DONE DEFPROTO
      Good name? Good API? Again, perhaps properties could be initialized to NIL by default.
-*** TODO Messages
-    Having :reply would be nice, I think.
+*** TODO Go over the whole API again.
 ** DONE Implement maps
    Maps, in Self-speak, are sort of backend-classes used to represent the basic format
    of a bunch of similar objects. Implementing these would mean a huge boost in performance
@@ -187,6 +186,7 @@
 *** TODO Clean up dispatch code
     Don't try to optimize yet. Just try and reorganize the algorithm into something more
     reasonable. This'll make it easier to optimize dispatch later on.
+*** TODO Detailed reply-(un)definition unit tests
 *** TODO Detailed dispatch unit tests
 ** DONE DOCUMENTATION
    Fix the fucking documentation bullshit -- something is probably not ANSI-compatible,
@@ -198,6 +198,11 @@
    deprecated stuff, etc. This should actually get inspected thoroughly before tagging.
    UPDATE: I've updated the list of symbols. It should be thoroughly double-checked
    before tagging 3.0, anyways. I may have missed some symbols. -- sykopomp
+** TODO Compile-time crap
+   Something is going on. There seem to be some compile-time side-effects we don't want that are
+   causing weird conflicts. For example, bootstrap.lisp requires some special juggling involving
+   eval-when in order to function, and I don't understand why. I don't really see what's going on,
+   whether it can be fixed, and/or whether it should even BE fixed.
 * DONE 2.2
 ** DONE [#A] Fix #'(setf property-value) Bug
    When a call to #'(setf property-value) requires a new direct property object

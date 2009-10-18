@@ -206,7 +206,7 @@
 (defun make-reply-lambda (name lambda-list ignorable body)
   (let* ((msg (find-message name nil))
          (key/restp (when msg (arg-info-key/rest-p (message-arg-info msg))))
-         (ll (if (and key/restp (arg-info-keys (message-arg-info msg)))
+         (ll (if (and key/restp (not (find '&allow-other-keys lambda-list)))
                  (append lambda-list '(&allow-other-keys))
                  lambda-list)))
     `(lambda (args next-erfun)

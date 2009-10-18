@@ -187,12 +187,7 @@
 ;;;
 
 ;;; Definition
-(defmacro defreply (name &rest defreply-args)
-  (multiple-value-bind (qualifiers specialized-lambda-list docstring body)
-      (parse-defreply defreply-args)
-    `(ensure-reply-wrapper ,name ,qualifiers ,specialized-lambda-list ,docstring ,body)))
-
-(defun defreply-expansion (name qualifiers specialized-lambda-list docstring body)
+(defun %defreply (name qualifiers specialized-lambda-list docstring body)
   (multiple-value-bind (parameters lambda-list participants required ignorable)
       (parse-specialized-lambda-list specialized-lambda-list)
     (declare (ignore parameters required))
@@ -203,17 +198,13 @@
                     ,(make-reply-lambda name lambda-list ignorable body)
                     ,docstring)))
 
-
-(defmacro ensure-reply-wrapper (name qualifiers specialized-lambda-list docstring body)
-  (multiple-value-bind (parameters ll participants required ignorable)
-      (parse-specialized-lambda-list specialized-lambda-list)
-    (declare (ignore parameters required))
-    `(ensure-reply ',name
-                   :qualifiers ',qualifiers
-                   :lambda-list ',ll
-                   :participants (list ,@participants)
-                   :documentation ,docstring
-                   :function ,(make-reply-lambda name ll ignorable body))))
+(defmacro defreply (name &rest defreply-args)
+  (multiple-value-bind (qualifiers reply-ll docstring body)
+      (parse-defreply defreply-args)
+    `(progn
+       (eval-when (:compile-toplevel :load-toplevel :execute)
+         (ensure-message ',name :lambda-list ',(create-msg-lambda-list reply-ll)))
+       ,(%defreply name qualifiers reply-ll docstring body))))
 
 (defun make-reply-lambda (name lambda-list ignorable body)
   (let* ((msg (find-message name nil))

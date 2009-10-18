@@ -284,3 +284,9 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 
 (defun canonize-message-options (options)
   (mapcan 'canonize-message-option options))
+
+;;;
+;;; Undefinition
+;;;
+(defun undefine-message (name)
+  (fmakunbound name))

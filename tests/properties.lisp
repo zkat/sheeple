@@ -112,6 +112,24 @@
     (is (eq 'foo (property-value b 'test)))
     (is (eq 'new-value (property-value a 'test)))))
 
+(test hashprops
+  (let ((properties (loop repeat 20 collect (list (gensym) (gensym))))
+        (object (object)))
+    (symbol-macrolet ((verify-properties
+                       (loop for (pname value) in properties do
+                            (is (eq value (property-value object pname))))))
+      (mapcar (curry 'apply 'add-property object)
+              properties)
+      verify-properties
+      (loop for new-name = (gensym) and pair in properties do
+           (setf (property-value object (car pair)) new-name
+                 (cadr pair) new-name))
+      verify-properties
+      (loop repeat 10 for (pname nil) in properties do
+           (remove-property object pname)
+           (pop properties))
+      verify-properties)))
+
 (def-suite reflection :in properties)
 (in-suite reflection)
 

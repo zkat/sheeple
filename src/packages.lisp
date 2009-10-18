@@ -24,7 +24,7 @@
    ;; Property access
    #:add-property #:property-value #:direct-property-value #:available-properties
    #:remove-property #:remove-all-direct-properties #:property-owner #:has-property-p
-   #:has-direct-property-p #:with-properties
+   #:has-direct-property-p #:with-properties #:object-direct-properties
 
    ;; Messages
    #:defmessage #:defreply #:available-replies #:undefmessage #:undefreply #:participantp
@@ -39,9 +39,12 @@
    #:box-type-of #:find-boxed-object #:objectify
 
    ;; Conditions
-   #:object-hierarchy-error #:sheeple-error #:sheeple-warning #:unbound-property
-   #:clobbering-function-definition #:message-lambda-list-error #:no-applicable-replies
-   #:no-most-specific-reply #:no-primary-replies #:specialized-lambda-list-error
+   #:sheeple-error #:sheeple-warning #:topological-sort-conflict #:object-hierarchy-error
+   #:object-property-error #:unbound-property #:unbound-direct-property
+   #:clobbering-function-definition #:sheeple-message-error #:insufficient-message-args
+   #:no-such-message #:message-lambda-list-error #:sheeple-reply-error #:reply-argument-conflict
+   #:automatic-message-creation #:reply-lambda-list-conflict #:no-applicable-replies
+   #:no-primary-replies #:specialized-lambda-list-error
    ))
 
 (defpackage #:sheeple-user

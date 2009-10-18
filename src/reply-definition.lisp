@@ -187,23 +187,21 @@
 ;;;
 
 ;;; Definition
-(defmacro defreply (&rest args)
-  (multiple-value-bind (name qualifiers specialized-lambda-list docstring body)
-      (parse-defreply args)
-    `(%defreply-expander ,name ,qualifiers ,specialized-lambda-list ,docstring ,body)))
+(defmacro defreply (name &rest defreply-args)
+  (multiple-value-bind (qualifiers specialized-lambda-list docstring body)
+      (parse-defreply defreply-args)
+    `(ensure-reply-wrapper ,name ,qualifiers ,specialized-lambda-list ,docstring ,body)))
 
-(defmacro %defreply-expander (name qualifiers specialized-lambda-list docstring body)
+(defmacro ensure-reply-wrapper (name qualifiers specialized-lambda-list docstring body)
   (multiple-value-bind (parameters ll participants required ignorable)
       (parse-specialized-lambda-list specialized-lambda-list)
     (declare (ignore parameters required))
-    `(ensure-reply
-      ',name
-      :qualifiers ',qualifiers
-      ;; TODO - use the new stuff
-      :lambda-list ',ll
-      :participants (list ,@participants)
-      :documentation ,docstring
-      :function ,(make-reply-lambda name ll ignorable body))))
+    `(ensure-reply ',name
+                   :qualifiers ',qualifiers
+                   :lambda-list ',ll
+                   :participants (list ,@participants)
+                   :documentation ,docstring
+                   :function ,(make-reply-lambda name ll ignorable body))))
 
 (defun make-reply-lambda (name lambda-list ignorable body)
   (let* ((msg (find-message name nil))
@@ -228,13 +226,12 @@
               ,@body) args))))))
 
 (defun parse-defreply (args)
-  (let ((name (car args))
-        (qualifiers nil)
+  (let ((qualifiers nil)
         (lambda-list nil)
         (docstring nil)
         (body nil)
         (parse-state :qualifiers))
-    (dolist (arg (cdr args))
+    (dolist (arg args)
       (ecase parse-state
         (:qualifiers
          (if (and (atom arg) (not (null arg)))
@@ -247,11 +244,7 @@
              (push arg body))
          (setf parse-state :body))
         (:body (push arg body))))
-    (values name
-            qualifiers
-            lambda-list
-            docstring
-            (nreverse body))))
+    (values qualifiers lambda-list docstring (nreverse body))))
 
 ;;; Undefinition
 (defmacro undefreply (name &rest args)

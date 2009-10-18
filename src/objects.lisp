@@ -70,6 +70,9 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
   (properties  nil :read-only t :type simple-vector) ; Direct properties
   (transitions nil :type (list-of transition))) ; V8-like links to other molds
 
+(define-print-object ((object mold) :identity nil)
+  (format t "on ~A" (mold-lineage object)))
+
 (defstruct (lineage
              (:predicate lineagep)
              (:constructor make-lineage

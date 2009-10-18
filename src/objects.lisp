@@ -83,7 +83,10 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
   (hierarchy nil)) ; A precedence list of all the lineage's ancestors
 
 (define-print-object ((object lineage) :identity nil)
-  (format t "from ~{~A~#[~; and ~:;, ~]~}" (lineage-parents object)))
+  (format t "from ~{~{~:[[~A]~;~A~]~}~#[~; and ~:;, ~]~}"
+          (mapcar (fun (list (has-direct-property-p _ 'nickname)
+                             (object-nickname _)))
+                  (lineage-parents object))))
 
 (defun trigger-hierarchy-recalculation (lineage)
   "Updates LINEAGE's hierarchy list, and propagates down the members."

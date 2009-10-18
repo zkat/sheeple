@@ -317,7 +317,7 @@ right order. Keep in mind that NEW-MOLD might specify some properties in a diffe
          (old-values (%object-property-values object)))
     (unless (zerop (length old-values))
       (do-hash-vector (pname position (mold-properties (%object-mold object)))
-        (awhen (hv-position new-properties pname)
+        (awhen (hv-position pname new-properties)
           (setf (svref new-values it) (svref old-values position)))))
     (unless (eq (mold-lineage new-mold)
                 (mold-lineage (%object-mold object)))

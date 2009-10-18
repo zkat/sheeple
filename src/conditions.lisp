@@ -102,9 +102,6 @@ The conflict information was:~%~A"
 (define-sheeple-condition no-applicable-replies sheeple-reply-error
   ("No applicable replies for message ~A when called with args:~%~S" message args))
 
-;;; Another lonely leftover. - Adlai
-;;; (define-condition no-most-specific-reply (sheeple-error) ())
-
 (define-sheeple-condition no-primary-replies sheeple-reply-error
   ("There are no primary replies for message ~A." message))
 

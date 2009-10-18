@@ -106,12 +106,22 @@
 *** TODO Object-creation MOP
 *** TODO Begin work on message/reply MOP (maybe)
 * TODO 3.0.1
-** TODO Cache message dispatch
-   That's right, it's back, and it's comin' to an optimized sheeple near you. This should
-   definitely be done -after- maps are implemented, since it'll be a little nicer that way,
-   but it should definitely be implemented and *ready* by the time 3.0.1 is tagged -- sykopomp
-** TODO Cache delegated property access
-   This is pretty important -- having maps -should- make it a little easier.
+** TODO Document everything in doc/sheeple.texinfo
+** TODO Add :reply option to defmessage.
+** TODO Compile-time crap
+   Something is going on. There seem to be some compile-time side-effects we don't want that are
+   causing weird conflicts. For example, bootstrap.lisp requires some special juggling involving
+   eval-when in order to function, and I don't understand why. I don't really see what's going on,
+   whether it can be fixed, and/or whether it should even BE fixed.
+** TODO Clean up and speed up raw dispatch code
+** TODO Optimize
+*** TODO Property access
+    Tests should be written by now, so let's start taking measures to optimize property access.
+*** TODO Object creation
+    Creating objects could be faster, and it would be nice to make it cons (a lot) less.
+*** TODO Message dispatch
+    The biggest gain in general will be from just the caching, but it would be nice to have a
+    cleaner, faster raw algorithm. The caching itself can get filled up with declarations, too.
 * TODO 3.0
   This is a rough sketch of The Road to Sheeple 3.0
 ** TODO "Test all the fucking time."
@@ -181,7 +191,7 @@
 **** TODO &aux
      The use of &aux need not be consistent across replies.
 **** TODO Write unit tests that confirm this behavior is correct.
-*** TODO Add :reply option to defmessage.
+*** DONE Cache message dispatch
 ** TODO Replies
 *** TODO Clean up dispatch code
     Don't try to optimize yet. Just try and reorganize the algorithm into something more
@@ -192,17 +202,12 @@
    Fix the fucking documentation bullshit -- something is probably not ANSI-compatible,
    although I haven't looked at it too deeply. Either way, CLISP complains when
    documentation is enabled.
-** TODO Document everything in doc/sheeple.texinfo
+
 ** DONE Package
    Check that all the necessary symbols are exported by the SHEEPLE package, get rid of
    deprecated stuff, etc. This should actually get inspected thoroughly before tagging.
    UPDATE: I've updated the list of symbols. It should be thoroughly double-checked
    before tagging 3.0, anyways. I may have missed some symbols. -- sykopomp
-** TODO Compile-time crap
-   Something is going on. There seem to be some compile-time side-effects we don't want that are
-   causing weird conflicts. For example, bootstrap.lisp requires some special juggling involving
-   eval-when in order to function, and I don't understand why. I don't really see what's going on,
-   whether it can be fixed, and/or whether it should even BE fixed.
 * DONE 2.2
 ** DONE [#A] Fix #'(setf property-value) Bug
    When a call to #'(setf property-value) requires a new direct property object

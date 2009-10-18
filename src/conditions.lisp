@@ -65,11 +65,11 @@ The conflict information was:~%~A"
 (define-sheeple-condition object-property-error sheeple-error ()
   (:documentation "Encompasses all that can go wrong with properties."))
 
-(define-sheeple-condition unbound-direct-property object-property-error
-  ("Object ~A has no direct property named ~A" object property-name))
-
 (define-sheeple-condition unbound-property object-property-error
   ("Property ~A is unbound for object ~A" property-name object))
+
+(define-sheeple-condition unbound-direct-property unbound-property
+  ("Object ~A has no direct property named ~A" object property-name))
 
 ;;; Looks like somebody's a long way from home. - Adlai
 ;;; (define-condition property-locked (sheeple-error) ())

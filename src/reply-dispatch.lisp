@@ -24,8 +24,11 @@
   (find :around (reply-qualifiers reply)))
 
 (defun apply-message (message args)
-  (let ((replies (find-applicable-replies message args)))
-    (apply-replies message replies args)))
+  (let ((relevant-args-length (arg-info-number-required (message-arg-info message))))
+    (assert (>= (length args) relevant-args-length)
+            () 'insufficient-message-args :message message)
+    (let ((replies (find-applicable-replies message (subseq args 0 relevant-args-length))))
+      (apply-replies message replies args))))
 
 (defun apply-replies (message replies args)
   (funcall (compute-effective-reply-function message replies) args))
@@ -57,12 +60,6 @@
   (when replies (rcurry (reply-function (car replies)) (compute-primary-erfun (cdr replies)))))
 
 (defun find-applicable-replies (message args &optional (errorp t))
-  (let ((relevant-args-length (arg-info-number-required (message-arg-info message))))
-    (when (< (length args) relevant-args-length)
-      (error 'insufficient-message-args :message message))
-    (%find-applicable-replies message (subseq args 0 relevant-args-length) errorp)))
-
-(defun %find-applicable-replies (message args &optional (errorp t))
   "Returns the most specific reply using MESSAGE and ARGS."
   (declare (list args))
   (if (null args)

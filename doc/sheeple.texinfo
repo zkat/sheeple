@@ -333,25 +333,29 @@ tagged release.
 @node Creating Objects, Object Hierarchies, API Documentation, API Documentation
 @section Creating Objects
 
-@defun {spawn} @{sheep@}
-=> new-sheep
+@defun {object} &rest all-keys &key (parents (list =standard-object=)) &allow-other-keys
+=> new-object
 
 @strong{Arguments and Values:}
 
-@var{sheeple} --- A list of Lisp objects
+@var{all-keys} --- A list of keyword args to be passed to INIT-OBJECT.
 
-@var{new-sheep} --- A new sheep object with @var{sheeple} as its parents
+@var{parents} --- A list of parents to give to @var{new-object}. Must be a list
+                  of objects
+
+@var{new-object} --- A new object with @var{parents} as its parents
 
 @strong{Description:}
 
-@code{SPAWN} creates a new instance
+@code{OBJECT} creates a new instance
 @ifset mop
-of @code{=STANDARD-METASHEEP=}
+of @code{=STANDARD-METAOBJECT=}
 @end ifset
-with @var{sheeple} as its parents. Any non-sheep objects in @var{sheeple} will
-be autoboxed and @emph{those} objects will be added as parents. The new sheep's
-parents will be ordered as they are given. Passing an empty parent list will
-automatically set @code{=STANDARD-SHEEP=} as the new object's sole parent.
+with @var{parents} as its parents. Any non-sheep objects in @var{parents} will
+be autoboxed and @emph{those} objects will be added as parents. The new object's
+parents will be ordered as they are given. Passing an empty parent list or
+failing to pass one will automatically set @code{=STANDARD-OBJECT=} as the new
+object's sole parent.
 
 @strong{Examples:}
 

@@ -130,10 +130,19 @@
    Then watch this:
    http://www.vimeo.com/1534976?pg=embed&sec=1534976
    Then go write some tests, and test all the fucking time.
-*** TODO Update tests for FIND-MESSAGE vs %FIND-MESSAGE
-    All that remains to be done is to write a separate test for FIND-MESSAGE
 *** DONE Improve test for WITH-SHEEP-HIERARCHY
 *** DONE Convert tests to use WITH-SHEEP-HIERARCHY
+*** TODO Make sure all files have mostly-complete tests
+**** TODO utils.lisp
+**** TODO objects.lisp
+**** TODO properties.lisp
+**** TODO builtins.lisp
+**** TODO lambda-lists.lisp
+**** TODO messages.lisp
+**** TODO reply-definition.lisp
+**** TODO reply-dispatch.lisp
+**** TODO bootstrap.lisp
+**** TODO post-boot.lisp
 ** DONE Parent/Hierarchy API
 *** DONE (setf object-parents)
     Needs to deal correctly with bogus parent lists

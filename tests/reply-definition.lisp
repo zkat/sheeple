@@ -93,5 +93,13 @@
 (test parse-defreply)
 (test extract-var-name)
 (test confirm-var-name)
-(test undefreply)
+(test undefreply
+  (let ((object (object)))
+    (defreply test-undefreply (x) x)
+    ;; This is failing because test-undefreply doesn't seem to actually define a function until later.
+    (is (eq 'foo (test-undefreply 'foo)))
+    (is (undefreply test-undefreply (object)))
+    (signals no-most-specific-reply (test-undefreply object))
+    (is (null (undefreply test-undefreply (object))))
+    (is (null (%object-replies object)))))
 (test parse-undefreply)

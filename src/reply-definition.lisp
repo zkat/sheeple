@@ -77,17 +77,17 @@
 ;;; Reply definition
 ;;;
 (defun ensure-reply (name &key qualifiers lambda-list participants function (documentation ""))
-  ;; shouldn't this just be a plain call to ensure-message? -- syko
-  ;; maybe not. Look into it more -- syko
-  (let* ((message (or (find-message name nil)
-                      (progn (warn 'automatic-message-creation :message-name name)
-                             (ensure-message name :lambda-list
-                                             (create-msg-lambda-list lambda-list)))))
-         (reply (make-reply :message (find-message name)
-                            :lambda-list lambda-list
-                            :qualifiers qualifiers
-                            :function function))
-         (objectified-participants (objectify-list participants)))
+  (%ensure-reply (or (find-message name nil)
+                     (warn 'automatic-message-creation :message-name name) ; Returns NIL
+                     (ensure-message name :lambda-list (create-msg-lambda-list lambda-list)))
+                 qualifiers lambda-list participants function documentation))
+
+(defun %ensure-reply (message qualifiers lambda-list participants function documentation)
+  (let ((reply (make-reply :message message
+                           :lambda-list lambda-list
+                           :qualifiers qualifiers
+                           :function function))
+        (objectified-participants (objectify-list participants)))
     (setf (documentation reply 't) documentation) ; same as dox for CLOS methods
     (clear-dispatch-cache message)                ; because the dispatch landscape has changed
     ;; In order to replace existing replies, we must remove them before actually adding them again.

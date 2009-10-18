@@ -95,11 +95,12 @@
 (test confirm-var-name)
 (test undefreply
   (let ((object (object)))
-    (defreply test-undefreply (x) x)
+    (defreply test-undefreply ((x object)) x)
     ;; This is failing because test-undefreply doesn't seem to actually define a reply until later..
-    (is (eq 'foo (test-undefreply 'foo)))
+    (is (eq object (test-undefreply object)))
     (is (undefreply test-undefreply (object)))
     (signals no-most-specific-reply (test-undefreply object))
     (is (null (undefreply test-undefreply (object))))
-    (is (null (%object-replies object)))))
+    (is (null (%object-replies object)))
+    (undefine-message 'test-undefreply)))
 (test parse-undefreply)

@@ -31,6 +31,13 @@
            (erf (compute-effective-reply-function message replies)))
       (funcall erf args))))
 
+(defun find-cached-reply (relevant-args)
+  ;; todo
+  )
+(defun cache-effective-reply-function (relevant-args function)
+  ;; todo
+  )
+
 (defun compute-effective-reply-function (message replies)
   (let ((around (car (remove-if-not 'around-reply-p replies)))
         (primaries (remove-if-not 'primary-reply-p replies)))

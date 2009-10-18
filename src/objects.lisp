@@ -369,7 +369,7 @@ This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER 
                &key (parents (list =standard-object=))
                (metaobject =standard-metaobject=) &allow-other-keys
                &aux (object (maybe-std-allocate-object metaobject))
-               (parents (if (and parents (listp parents)) parents (list =standard-object=))))
+                    (parents (or (ensure-list parents) (list =standard-object=))))
   "Returns a new object with PARENTS as its parents. METAOBJECT is used as the metaobject when
 allocating the new object object. ALL-KEYS is passed on to INIT-OBJECT."
   (declare (dynamic-extent all-keys))

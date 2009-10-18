@@ -79,6 +79,9 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
   (parents   nil :read-only t) ; A set of objects
   (hierarchy nil)) ; A precedence list of all the lineage's ancestors
 
+(define-print-object ((object lineage) :identity nil)
+  (format t "from ~{~A~#[~; and ~:;, ~]~}" (lineage-parents object)))
+
 (defun trigger-hierarchy-recalculation (lineage)
   "Updates LINEAGE's hierarchy list, and propagates down the members."
   (with-accessors ((hierarchy lineage-hierarchy)

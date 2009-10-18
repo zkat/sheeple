@@ -167,9 +167,8 @@ more entries the cache will be able to hold, but the slower lookup will be.")
   (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)
       (analyze-lambda-list (reply-lambda-list reply))
     (flet ((lose (string &rest args)
-             (error 'sheeple-error
-                    :format-control "The reply ~S can't be added to the message ~S because ~?"
-                    :format-args (list reply msg string args)))
+             (error 'reply-argument-conflict
+                    :reply reply :message msg :reason (apply 'format nil string args)))
            (comparison-description (x y)
              (if (> x y) "more" "fewer")))
       (with-accessors ((msg-nreq       arg-info-number-required)
@@ -184,13 +183,11 @@ more entries the cache will be able to hold, but the slower lookup will be.")
                (lose "the reply has ~A optional arguments than the message."
                      (comparison-description nopt msg-nopt)))
               ((not (eq (or keysp restp) msg-key/rest-p))
-               (lose "the reply and message differ in whether they accept~_~
-                      &REST or &KEY arguments."))
+               (lose "the reply and message differ in whether they accept &REST or &KEY arguments."))
               ((and (consp msg-keywords)
                     (not (or (and restp (not keysp)) allow-other-keys-p
                              (every (rcurry 'memq keywords) msg-keywords))))
-               (lose "the reply does not accept each of the &KEY arguments~2I~_~S."
-                     msg-keywords))
+               (lose "the reply does not accept each of the &KEY arguments ~S." msg-keywords))
               (t t))))))
 
 (defun set-arg-info (message &key new-reply (lambda-list nil lambda-list-p))

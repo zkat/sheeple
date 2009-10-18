@@ -93,11 +93,15 @@ The conflict information was:~%~A"
 
 ;;; Replies
 
-(define-sheeple-condition automatic-message-creation (sheeple-warning style-warning)
-  ("Automatically creating message ~A from a DEFREPLY form." message-name))
-
 (define-sheeple-condition sheeple-reply-error sheeple-message-error ()
   (:documentation "Encompasses all that can go wrong with replies."))
+
+(define-sheeple-condition reply-argument-conflict sheeple-reply-error
+  ("The reply ~S~%can't be added to the message ~S~%because ~A"
+   reply message reason))
+
+(define-sheeple-condition automatic-message-creation (sheeple-warning style-warning)
+  ("Automatically creating message ~A from a DEFREPLY form." message-name))
 
 (define-sheeple-condition reply-lambda-list-conflict sheeple-reply-error
   ("The lambda list ~S conflicts with that of ~S" lambda-list message))

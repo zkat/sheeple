@@ -119,27 +119,32 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 (defun dispatch-cache-p (x)
   (vectorp x))
 
-(defun make-dispatch-cache-entry (args replies)
+(defun make-dispatch-cache-entry (args erf)
   ;; Since args points to actual arguments for a message, we wrap it in a weak pointer to make sure
   ;; the args can be GCd. Otherwise, calling any message on a number of arguments will make those
   ;; arguments stick around indefinitely.
-  (cons (make-weak-pointer args) replies))
+  (cons (make-weak-pointer args) erf))
 (defun dispatch-cache-entry-p (x)
-  (and (consp x) (weak-pointer-p (car x)) (listp (cdr x))))
+  (and (consp x) (weak-pointer-p (car x)) (functionp (cdr x))))
 
 (defun cache-entry-args (entry)
   (weak-pointer-value (car entry)))
-(defun cache-entry-replies (entry)
+(defun cache-entry-erf (entry)
   (cdr entry))
 
-(defun add-entry-to-message (message applicable-replies args index-if-full)
+(defun cache-effective-reply-function (message args erf)
   (let ((dispatch-cache (message-dispatch-cache message))
-        (entry (make-dispatch-cache-entry args applicable-replies)))
-    ;; We first try to make sure a cache is filled up. If it is, we insert the new entry
-    ;; into INDEX-IF-FULL. This is a bit leaky, and should probably be improved.
+        (entry (make-dispatch-cache-entry args erf)))
     (aif (position 0 dispatch-cache)
          (setf (svref dispatch-cache it) entry)
-         (setf (svref dispatch-cache index-if-full) entry))))
+         (setf (svref dispatch-cache (mod (sxhash args) (length dispatch-cache))) entry))))
+
+(defun find-cached-erf (message args)
+  (let* ((dispatch-cache (message-dispatch-cache message))
+         (maybe-index (mod (sxhash args) (length dispatch-cache)))
+         (maybe-entry (svref dispatch-cache maybe-index)))
+    (when (equal (cache-entry-args maybe-entry) args)
+      (cache-entry-erf maybe-entry))))
 
 (defun clear-dispatch-cache (message)
   (setf (message-dispatch-cache message) (make-dispatch-cache)))

@@ -193,7 +193,7 @@
    although I haven't looked at it too deeply. Either way, CLISP complains when
    documentation is enabled.
 ** TODO Document everything in doc/sheeple.texinfo
-** TODO Package
+** DONE Package
    Check that all the necessary symbols are exported by the SHEEPLE package, get rid of
    deprecated stuff, etc. This should actually get inspected thoroughly before tagging.
    UPDATE: I've updated the list of symbols. It should be thoroughly double-checked

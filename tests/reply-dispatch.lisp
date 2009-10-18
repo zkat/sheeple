@@ -15,7 +15,9 @@
 (defmacro with-flag-stack (&body body)
   (let ((stack (gensym)))
     `(let (,stack)
-       (flet ((flag (tag) (push tag ,stack))) ,@body)
+       (flet ((flag (tag) (push tag ,stack)))
+         (declare (ignorable (function flag)))
+         ,@body)
        (nreverse ,stack))))
 
 (test reply-stack

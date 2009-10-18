@@ -154,13 +154,13 @@ Sheeple bases its message dispatch system.
 @cindex Smalltalk, influence of
 
 @item
-Self, another Smalltalk-like language with lots of papers written about it, and
-the concept of prototype OO.
+Self, another Smalltalk-like language with lots of papers written about it,
+the concept of prototype OO, and ways to implement similar languages efficiently.
 @cindex Self, influence of
 
 @item
 Io, a pure prototype-based language. Sheeple, like Io, implements differential
-inheritance.
+inheritance as an important component of the language.
 @cindex Io, influence of
 @end enumerate
 
@@ -305,12 +305,11 @@ Procedure}), loading Sheeple into a Lisp image is as simple as:
 
 @lisp
 (asdf:oos 'asdf:load-op 'sheeple)
-(in-package sheeple-user)
+(in-package :sheeple-user)
 @end lisp
 
-Sheeple should work on most Lisp implementations that support weak pointers and
-hash tables with key weakness, although it's mainly written and tested in SBCL
-and Clozure CL on Linux x86.
+Sheeple should work on most Lisp implementations that support weak tables with key weakness,
+although it's mainly written and tested in SBCL and Clozure CL on Linux x86(-64).
 
 Sheeple also includes a suite of tests you can run on whatever platform you're
 trying to get it to work on. The test suite depends on Fiveam. To run it:
@@ -326,13 +325,13 @@ tagged release.
 @chapter API Documentation
 
 @menu
-* Spawning Sheep::              
-* Sheep Hierarchies::           
-* Properties::                  
+* Creating Objects::
+* Object Hierarchies::
+* Properties::
 @end menu
 
-@node Spawning Sheep, Sheep Hierarchies, API Documentation, API Documentation
-@section Spawning Sheep
+@node Creating Objects, Object Hierarchies, API Documentation, API Documentation
+@section Creating Objects
 
 @defun {spawn} @{sheep@}
 => new-sheep

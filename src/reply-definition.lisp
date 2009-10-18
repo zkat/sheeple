@@ -173,7 +173,8 @@
                                      (= i (role-position _)))
                             (delete-role _ object)))
                  (%object-roles object)))
-      (delete-reply reply))))
+      (delete-reply reply)
+      t)))
 
 (defun delete-reply (reply)
   (deletef (message-replies (reply-message reply)) reply)
@@ -254,21 +255,18 @@
             (nreverse body))))
 
 ;;; Undefinition
-(defmacro undefreply (&rest args)
-  (multiple-value-bind (name qualifiers lambda-list)
+(defmacro undefreply (name &rest args)
+  (multiple-value-bind (qualifiers lambda-list)
       (parse-undefreply args)
     `(undefine-reply
       ',name :qualifiers ',qualifiers
-      :participants `(,,@(nth-value 2 (parse-specialized-lambda-list lambda-list))))))
+      :participants `(,,@(nth-value 3 (parse-specialized-lambda-list lambda-list))))))
 
 (defun parse-undefreply (args)
-  (let ((name (car args))
-        (qualifiers nil)
+  (let ((qualifiers nil)
         (lambda-list nil))
-    (dolist (arg (cdr args))
+    (dolist (arg args)
       (if (and (atom arg) (not (null arg)))
           (push arg qualifiers)
           (setf lambda-list arg)))
-    (values name
-            qualifiers
-            lambda-list)))
+    (values qualifiers lambda-list)))

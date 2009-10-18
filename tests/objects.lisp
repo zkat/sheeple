@@ -452,8 +452,10 @@
     (is (equal "another-one" (funcall 'something-else (symbol-value '=test-proto=))))
     (is (equal "another-one" (funcall 'something-else test-proto)))
     ;; TODO - check that options work properly
-    (undefreply var ((object test-proto)))
-    (undefreply something-else ((object test-proto)))
+    (undefreply var (test-proto))
+    (undefreply something-else (test-proto))
+    (undefine-message 'var)
+    (undefine-message 'something-else)
     (makunbound '=test-proto=)
     ))
 (test ensure-object)

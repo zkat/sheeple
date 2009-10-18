@@ -61,11 +61,13 @@
 (test ensure-reply)
 
 (test reply-redefinition
-  (defmessage foo (bar))
-  (defreply foo ((bar =t=)) 1)
-  (is (= 1 (funcall 'foo 'x)))
-  (defreply foo ((bar =t=)) 2)
-  (is (= 2 (funcall 'foo 'x))))
+  (unwind-protect
+       (progn (defmessage foo (bar))
+              (defreply foo ((bar =t=)) 1)
+              (is (= 1 (funcall 'foo 'x)))
+              (defreply foo ((bar =t=)) 2)
+              (is (= 2 (funcall 'foo 'x))))
+    (undefmessage foo)))
 
 (test add-reply-to-message)
 (test add-reply-to-objects)

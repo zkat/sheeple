@@ -168,8 +168,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
       (analyze-lambda-list (reply-lambda-list reply))
     (flet ((lose (string &rest args)
              (error 'sheeple-error
-                    :format-control "~@<The reply~2I~_~S~I~_ can't be added~
-                                     to the message~2I~_~S;~I~_ because ~?~:>"
+                    :format-control "The reply ~S can't be added to the message ~S because ~?"
                     :format-args (list reply msg string args)))
            (comparison-description (x y)
              (if (> x y) "more" "fewer")))

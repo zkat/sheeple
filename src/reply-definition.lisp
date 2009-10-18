@@ -192,6 +192,18 @@
       (parse-defreply defreply-args)
     `(ensure-reply-wrapper ,name ,qualifiers ,specialized-lambda-list ,docstring ,body)))
 
+(defun defreply-expansion (name qualifiers specialized-lambda-list docstring body)
+  (multiple-value-bind (parameters lambda-list participants required ignorable)
+      (parse-specialized-lambda-list specialized-lambda-list)
+    (declare (ignore parameters required))
+    `(%ensure-reply (find-message ',name)
+                    ',qualifiers
+                    ',lambda-list
+                    (list ,@participants)
+                    ,(make-reply-lambda name lambda-list ignorable body)
+                    ,docstring)))
+
+
 (defmacro ensure-reply-wrapper (name qualifiers specialized-lambda-list docstring body)
   (multiple-value-bind (parameters ll participants required ignorable)
       (parse-specialized-lambda-list specialized-lambda-list)

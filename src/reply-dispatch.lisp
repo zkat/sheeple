@@ -27,11 +27,9 @@
   (let ((relevant-args-length (arg-info-number-required (message-arg-info message))))
     (assert (>= (length args) relevant-args-length)
             () 'insufficient-message-args :message message)
-    (let ((replies (find-applicable-replies message (subseq args 0 relevant-args-length))))
-      (apply-replies message replies args))))
-
-(defun apply-replies (message replies args)
-  (funcall (compute-effective-reply-function message replies) args))
+    (let* ((replies (find-applicable-replies message (subseq args 0 relevant-args-length)))
+           (erf (compute-effective-reply-function message replies)))
+      (funcall erf args))))
 
 (defun compute-effective-reply-function (message replies)
   (let ((around (car (remove-if-not 'around-reply-p replies)))

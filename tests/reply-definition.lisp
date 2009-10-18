@@ -94,14 +94,13 @@
 (test extract-var-name)
 (test confirm-var-name)
 (test undefreply
-  (let ((object (object)))
-    (unwind-protect
-         (progn
-           (handler-bind ((automatic-message-creation (fun (muffle-warning _))))
-             (defreply test-message ((x object)) x))
-           (is (not (null (undefreply test-message (object)))))
-           (signals no-applicable-replies (funcall 'test-message object))
-           (is (null (undefreply test-message (object))))
-           (is (null (%object-roles object))))
-      (undefine-message 'test-message))))
+  (unwind-protect
+       (let ((object (object)))
+         (handler-bind ((automatic-message-creation (fun (muffle-warning _))))
+           (defreply test-message ((x object)) x))
+         (is (not (null (undefreply test-message (object)))))
+         (signals no-applicable-replies (funcall 'test-message object))
+         (is (null (undefreply test-message (object))))
+         (is (null (%object-roles object))))
+    (undefine-message 'test-message)))
 (test parse-undefreply)

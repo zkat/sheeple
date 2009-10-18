@@ -177,15 +177,15 @@
 ** TODO Messages
 *** TODO Check for correctness of lambda-list congruence
     As per CLHS 7.6.4
-**** TODO num-required
+**** DONE num-required
      Each lambda list must have the same number of required parameters.
-**** TODO num-optional
+**** DONE num-optional
      Each lambda list must have the same number of optional parameters. Each reply
      can supply its own default for an optional parameter.
-**** TODO key/restp
+**** DONE key/restp
      If any lambda list mentions &rest or &key, each lambda-list must mention one
      or both of them.
-**** TODO &key and &aok
+**** DONE &key and &aok
      If the message lambda list mentions &key, each reply must accept all of the keyword
      names mentioned after &key, either by accepting them explicitly, by specifying &aok,
      or by specifying &rest but not &key. Each reply can accept additional keyword arguments
@@ -193,11 +193,11 @@
      in each reply. A reply is invoked as if the keyword argument pair whose name is
      :allow-other-keys and whose value is true were supplied, though no such argument pair
      will be passed.
-**** TODO &aok consistency
+**** DONE &aok consistency
      The use of &allow-other-keys need not be consistent across lambda lists. If
      &allow-other-keys is mentioned in the lambda list of any applicable reply or of
      the message, any keyword arguments may be mentioned in the call to the message.
-**** TODO &aux
+**** DONE &aux
      The use of &aux need not be consistent across replies.
 **** TODO Write unit tests that confirm this behavior is correct.
 *** DONE Cache message dispatch

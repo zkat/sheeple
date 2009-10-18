@@ -142,9 +142,8 @@
 ;;;
 (defun undefine-reply (name &key qualifiers participants)
   (awhen (find-message name nil)
-    (remove-applicable-reply it qualifiers (objectify-list participants))
     (clear-dispatch-cache it)
-    t))
+    (remove-applicable-reply it qualifiers (objectify-list participants))))
 
 (defun remove-specific-reply (message qualifiers participants)
   (let ((reply (find-if (fun (equal qualifiers (reply-qualifiers _)))

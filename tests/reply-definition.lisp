@@ -100,7 +100,7 @@
            (handler-bind ((automatic-message-creation (fun (muffle-warning _))))
              (defreply test-message ((x object)) x))
            (is (not (null (undefreply test-message (object)))))
-           (signals no-applicable-replies (test-message object))
+           (signals no-applicable-replies (funcall 'test-message object))
            (is (null (undefreply test-message (object))))
            (is (null (%object-roles object))))
       (undefine-message 'test-message))))

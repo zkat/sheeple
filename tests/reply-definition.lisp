@@ -96,7 +96,7 @@
 (test undefreply
   (let ((object (object)))
     (defreply test-undefreply (x) x)
-    ;; This is failing because test-undefreply doesn't seem to actually define a function until later.
+    ;; This is failing because test-undefreply doesn't seem to actually define a reply until later..
     (is (eq 'foo (test-undefreply 'foo)))
     (is (undefreply test-undefreply (object)))
     (signals no-most-specific-reply (test-undefreply object))

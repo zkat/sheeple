@@ -289,4 +289,5 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 ;;; Undefinition
 ;;;
 (defun undefine-message (name)
+  (forget-message name)
   (fmakunbound name))

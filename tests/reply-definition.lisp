@@ -95,12 +95,14 @@
 (test confirm-var-name)
 (test undefreply
   (let ((object (object)))
-    (defreply test-undefreply ((x object)) x)
-    ;; This is failing because test-undefreply doesn't seem to actually define a reply until later..
-    (is (eq object (test-undefreply object)))
-    (is (not (null (undefreply test-undefreply (object)))))
-    (signals no-most-specific-reply (test-undefreply object))
-    (is (null (undefreply test-undefreply (object))))
-    (is (null (%object-replies object)))
-    (undefine-message 'test-undefreply)))
+    (unwind-protect
+         (progn
+           (defreply test-undefreply ((x object)) x)
+           ;; This is failing because test-undefreply doesn't seem to actually define a reply until later..
+           (is (eq object (test-undefreply object)))
+           (is (not (null (undefreply test-undefreply (object)))))
+           (signals no-applicable-replies (test-undefreply object))
+           (is (null (undefreply test-undefreply (object))))
+           (is (null (%object-roles object))))
+      (undefine-message 'test-undefreply))))
 (test parse-undefreply)

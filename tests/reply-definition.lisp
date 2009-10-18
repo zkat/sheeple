@@ -97,7 +97,8 @@
   (let ((object (object)))
     (unwind-protect
          (progn
-           (defreply test-message ((x object)) x)
+           (handler-bind ((automatic-message-creation (fun (muffle-warning _))))
+             (defreply test-message ((x object)) x))
            (is (not (null (undefreply test-message (object)))))
            (signals no-applicable-replies (test-message object))
            (is (null (undefreply test-message (object))))

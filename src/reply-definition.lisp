@@ -80,7 +80,7 @@
   ;; shouldn't this just be a plain call to ensure-message? -- syko
   ;; maybe not. Look into it more -- syko
   (let* ((message (or (find-message name nil)
-                      (progn (warn 'style-warning) ; this warning could be -much- better -- syko
+                      (progn (warn 'automatic-message-creation :message-name name)
                              (ensure-message name :lambda-list
                                              (create-msg-lambda-list lambda-list)))))
          (reply (make-reply :message (find-message name)

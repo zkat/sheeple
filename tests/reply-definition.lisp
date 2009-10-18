@@ -98,7 +98,7 @@
     (defreply test-undefreply ((x object)) x)
     ;; This is failing because test-undefreply doesn't seem to actually define a reply until later..
     (is (eq object (test-undefreply object)))
-    (is (undefreply test-undefreply (object)))
+    (is (not (null (undefreply test-undefreply (object)))))
     (signals no-most-specific-reply (test-undefreply object))
     (is (null (undefreply test-undefreply (object))))
     (is (null (%object-replies object)))

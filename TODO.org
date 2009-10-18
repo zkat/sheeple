@@ -142,7 +142,7 @@
 *** DONE validate-hierarchy-list
     Do we even need this? It was in the TODO before... I guess now
     it'd just be a handler-case around the above.
-** TODO API
+** DONE API
    Go over the whole API, clean stuff up, make it more Serious.
    Mainly, the object creation API could use a little cleanup.
 *** DONE Object creation
@@ -153,7 +153,7 @@
      property definitions that initialize properties to NIL.
 **** DONE DEFPROTO
      Good name? Good API? Again, perhaps properties could be initialized to NIL by default.
-*** TODO Go over the whole API again.
+*** DONE Go over the whole API again.
 ** DONE Implement maps
    Maps, in Self-speak, are sort of backend-classes used to represent the basic format
    of a bunch of similar objects. Implementing these would mean a huge boost in performance

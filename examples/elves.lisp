@@ -25,15 +25,15 @@
   ;; is also an =entity=. Otherwise, it will signal an error.
   (when (eql a b)
     (error "Can't mate two of the exact same entity!"))
-  ;; SPAWN and DEFPROTO return the same kind of object (a sheep)
+  ;; OBJECT and DEFPROTO return the same kind of object (a sheep)
   ;; The difference is that defproto forms can be re-evaluated to 'redefine' a prototype
   ;; while maintaining its identity.
-  (spawn a b)
+  (object :parents (list a b))
   ;; You might notice that clone only really accepts sheep objects, so you can't define properties
   ;; and options in one go....
   )
 
-;; When SPAWN isn't enough, there's DEFSHEEP, which works just like DEFPROTO except the sheep
+;; When OBJECT isn't enough, there's DEFSHEEP, which works just like DEFPROTO except the sheep
 ;; it creates is 'anonymous'. It also does not automatically create new accessors. You must
 ;; explicitly pass it the :accessor option in order to do that.
 (defvar *edmond* (defobject (=human=)

@@ -138,11 +138,6 @@ by deleting items at the same position from both lists."
     (when (eq (car i) item)
       (return i))))
 
-(declaim (inline maybe-weak-pointer-value))
-(defun maybe-weak-pointer-value (x)
-  (when (weak-pointer-p x)
-    (weak-pointer-value x)))
-
 (defmacro aif (test-form then-form &optional else-form)
   `(let ((it ,test-form))
      (if it ,then-form ,else-form)))

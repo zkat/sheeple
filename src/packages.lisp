@@ -3,10 +3,12 @@
 (defpackage #:%sheeple-garbage
   (:use :cl)
   (:shadow :make-hash-table)
-  (:export :gc
+  (:export #:gc #:weak-pointer
            #:make-weak-pointer
            #:weak-pointer-value
            #:weak-pointer-p
+           #:maybe-make-weak-pointer
+           #:maybe-weak-pointer-value
            #:make-weak-hash-table
            #:hash-table-weakness
            #:finalize

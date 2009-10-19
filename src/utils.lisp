@@ -323,6 +323,6 @@ will not be affected; otherwise, it will be bound to a recognizeable and unique 
   (if (simple-vector-p hash-vector)
       (remove key (the simple-vector hash-vector) :test 'eq)
       (aprog1 (make-hash-table :test 'eq :size (1- (hash-table-count hash-vector)))
-        (do-hash-vector (k v hash-vector)
-          (unless (eq k key)
-            (setf (gethash k it) v))))))
+        (loop for k being the hash-keys of hash-vector using (hash-value v)
+           unless (eq k key) do
+             (setf (gethash k it) v)))))

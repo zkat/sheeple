@@ -194,7 +194,7 @@ creating and linking a new one if necessary."
 (defun maybe-std-allocate-object (metaobject)
   (if (eq =standard-metaobject= metaobject)
       (std-allocate-object metaobject)
-      (allocate-object metaobject)))
+      (funcall 'allocate-object metaobject)))
 
 (defun std-print-sheeple-object (object stream)
   (print-unreadable-object (object stream :identity t)
@@ -206,7 +206,7 @@ creating and linking a new one if necessary."
 (defun print-sheeple-object-wrapper (object stream)
   (handler-case
       (if (fboundp 'print-sheeple-object)
-          (print-sheeple-object object stream)
+          (funcall 'print-sheeple-object object stream)
           (std-print-sheeple-object object stream))
     (no-applicable-replies () (std-print-sheeple-object object stream))))
 
@@ -302,8 +302,8 @@ its parents."
   "Returns the full hierarchy-list for OBJECT"
   (if (eq =standard-metaobject= (%object-metaobject object))
       (std-compute-object-hierarchy-list object)
-      (compute-object-hierarchy-list-using-metaobject
-       (%object-metaobject object) object)))
+      (funcall 'compute-object-hierarchy-list-using-metaobject
+               (%object-metaobject object) object)))
 
 ;;;
 ;;; Modifying mold-level stuff
@@ -389,7 +389,7 @@ allocating the new object object. ALL-KEYS is passed on to INIT-OBJECT."
   "Creates a object with the same parents and metaobject as OBJECT. If supplied, METAOBJECT
 will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged."
   ;; TODO!!! - is this good enough? - syko
-  (let ((new-obj (allocate-object metaobject)))
+  (let ((new-obj (maybe-std-allocate-object metaobject)))
     (setf (%object-mold new-obj)
           (%object-mold object)
           (%object-property-values new-obj)

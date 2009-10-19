@@ -96,6 +96,8 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
                    (members   lineage-members)) lineage
     (setf hierarchy (compute-hierarchy parents))
     (maphash (lambda (member children)
+               (dolist (role (%object-roles member))
+                 (clear-dispatch-cache (role-message role)))
                (mapcar 'trigger-hierarchy-recalculation children))
              members)))
 

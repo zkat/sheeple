@@ -242,14 +242,7 @@
     (is (not (descendantp a b)))
     (is (not (descendantp b c)))))
 
-;;;
-;;; Spawning
-;;;
-(def-suite spawning :in objects)
-
-(def-suite spawn-general :in spawning)
-(in-suite spawn-general)
-
+(in-suite creation)
 (test object
   ;; basic
   (let ((object (object)))
@@ -277,26 +270,16 @@
     (is (eql test-metaobject (object-metaobject object)))
     (is (eql =standard-object= (car (object-parents object))))))
 
-(test clone)
-
-#+nil
 (test object-nickname
   (let ((object (object)))
     (setf (object-nickname object) 'test)
     (is (eq 'test (object-nickname object)))
     (is (eq 'test (object-nickname (object :parents (list object)))))))
 
-#+nil
-(test object-documentation
-  (let ((object (object)))
-    (setf (object-documentation object) 'test)
-    (is (eq 'test (object-documentation object)))
-    (is (eq 'test (object-documentation (object :parents (list object)))))))
-
 ;;;
 ;;; DEFOBJECT
 ;;;
-(def-suite defobject :in spawning)
+(def-suite defobject :in creation)
 (in-suite defobject)
 
 ;;; macro processing
@@ -339,7 +322,7 @@
 ;;;
 ;;; Protos
 ;;;
-(def-suite protos :in spawning)
+(def-suite protos :in creation)
 (in-suite protos)
 
 (test defproto

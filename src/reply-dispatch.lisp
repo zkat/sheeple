@@ -24,13 +24,17 @@
   (find :around (reply-qualifiers reply)))
 
 (defun apply-message (message args)
-  (let* ((relevant-args-length (arg-info-number-required (message-arg-info message)))
+  (declare (list args))
+  (let* ((relevant-args-length (the fixnum (arg-info-number-required (message-arg-info message))))
          (relevant-args (subseq args 0 relevant-args-length)))
     (error-when (< (length args) relevant-args-length)
                 'insufficient-message-args :message message)
-    (funcall (compute-effective-reply-function
-              message (find-applicable-replies message relevant-args))
-             args)))
+    (aif (and *caching-enabled* (find-cached-erf message relevant-args))
+         (funcall it args)
+         (let* ((replies (find-applicable-replies message relevant-args))
+                (erf (compute-effective-reply-function message replies)))
+           (cache-effective-reply-function message relevant-args erf)
+           (funcall erf args)))))
 
 (defun compute-effective-reply-function (message replies)
   (let ((around (car (remove-if-not 'around-reply-p replies)))

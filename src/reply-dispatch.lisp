@@ -67,39 +67,34 @@
   (declare (list args))
   (if (null args)
       (message-replies message)
-      (let ((selector (message-name message))
-            (n (length args))
-            (discovered-replies nil)
-            (contained-applicable-replies nil))
+      (let ((n (length args))
+            discovered-replies
+            contained-applicable-replies)
         (declare (list discovered-replies contained-applicable-replies))
         (loop
            for arg in args
-           for index upto (1- n)
-           do (let* ((arg (if (objectp arg)
-                              arg
-                              (or (find-boxed-object arg)
-                                  (box-type-of arg))))
+           for index below n
+           do (let* ((arg (if (objectp arg) arg (or (find-boxed-object arg) (box-type-of arg))))
                      (curr-object-list (object-hierarchy-list arg)))
                 (loop
                    for curr-object in curr-object-list
-                   for hierarchy-position upto (1- (length curr-object-list))
+                   for hierarchy-position below (length curr-object-list)
                    do (dolist (role (%object-roles curr-object))
-                        (when (and (equal selector (message-name (role-message role))) ;(eql message (role-message role))
-                                   (= (the fixnum index) (the fixnum (role-position role))))
+                        (when (and (eq message (role-message role))
+                                   (= index (role-position role)))
                           (let ((curr-reply (role-reply role)))
-                            (when (= n (length (the list (reply-specialized-portion curr-reply))))
-                              (when (not (member curr-reply
-                                                 discovered-replies
-                                                 :key #'reply-container-reply))
-                                (pushnew (the vector (contain-reply curr-reply))
-                                         discovered-replies))
-                              (let ((contained-reply (find curr-reply
-                                                           discovered-replies
-                                                           :key #'reply-container-reply)))
-                                (setf (elt (reply-container-rank contained-reply) index)
-                                      hierarchy-position)
-                                (when (fully-specified-p (reply-container-rank contained-reply))
-                                  (pushnew contained-reply contained-applicable-replies :test #'equalp))))))))))
+                            (unless (member curr-reply
+                                            discovered-replies
+                                            :key #'reply-container-reply)
+                              (push (contain-reply curr-reply)
+                                    discovered-replies))
+                            (let ((contained-reply (find curr-reply
+                                                         discovered-replies
+                                                         :key #'reply-container-reply)))
+                              (setf (elt (reply-container-rank contained-reply) index)
+                                    hierarchy-position)
+                              (when (fully-specified-p (reply-container-rank contained-reply))
+                                (push contained-reply contained-applicable-replies)))))))))
         (if contained-applicable-replies
             (unbox-replies (sort-applicable-replies contained-applicable-replies))
             (when errorp

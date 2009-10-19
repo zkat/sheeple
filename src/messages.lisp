@@ -283,7 +283,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
        (eval-when (:load-toplevel :execute)
          (aprog1 (ensure-message ',name :lambda-list ',lambda-list
                                  ,@(canonize-message-options options))
-           ,@ (when replies
+           ,@ (when replies ; That space is there to help SLIME indent ,@
                 (mapcar (fun (multiple-value-bind (quals lambda-l dox body)
                                  (parse-defreply (cdr _))
                                (%defreply name quals lambda-l dox body)))

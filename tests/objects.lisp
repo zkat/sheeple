@@ -18,35 +18,15 @@
     (&body)))
 
 (def-suite objects :in sheeple)
-
-;;;
-;;; Early printing
-;;;
-
-(def-suite early-printing :in objects)
-(in-suite early-printing)
-
-;;; This test is pretty crude. The correct thing to do would be to
-;;; parse the output, extract the implementation-dependant stuff,
-;;; and verify the rest. This would be painful without CL-PPCRE.
-#+nil
-(test object-printing
-  (with-output-to-string (*standard-output*)
-    (5am:finishes (print (std-allocate-object =standard-metaobject=)))
-    (5am:finishes (print (add-parent (std-allocate-object =standard-metaobject=) (std-allocate-object =standard-metaobject=))))))
-
 ;;;
 ;;; Allocation
 ;;;
 ;;; new structure for sheep objects:
-;;; #(metaobject parents properties roles %hierarchy-cache %children)
-;;; parents := proper list of parents, in order of precedence.
-;;; properties := property*
-;;; property := (property-metaobject . property-value)
+;;; #(mold metaobject properties-values roles)
+;;; mold := pointer to the appropriate mold for this object
+;;; metaobject := pointer to the appropriate metaobject
+;;; property-values := vector of direct property values
 ;;; roles := proper list of direct roles
-;;; %hierarchy-cache := list that holds a cached version of the object's entire hierarchy-list
-;;; %children := a vector of weak pointers that points to all of this object's children
-
 (def-suite creation :in objects)
 (def-suite allocation :in creation)
 
@@ -100,20 +80,20 @@
   (is (null (setf (%object-metaobject object) nil)))
   (is (null (%object-metaobject object))))
 
-#+nil
-(test (%object-properties :fixture with-std-object)
-  (is (null (%object-properties object)))
-  (is (equal '(foo) (setf (%object-properties object) '(foo))))
-  (is (equal '(foo) (%object-properties object)))
-  (is (equal '(bar foo) (push 'bar (%object-properties object))))
-  (is (equal '(bar foo) (%object-properties object))))
+(test (%object-mold :fixture with-std-object)
+  (is (null (%object-mold object)))
+  (is (eq 'foo (setf (%object-metaobject object) 'foo)))
+  (is (eq 'foo (%object-metaobject object))))
+
+(test (%object-property-values :fixture with-std-object)
+  (is (null (%object-property-values object)))
+  (is (equal 'test (setf (%object-property-values object) 'test)))
+  (is (equal 'test (%object-property-values object))))
 
 (test (%object-roles :fixture with-std-object)
   (is (null (%object-roles object)))
   (is (equal '(foo) (setf (%object-roles object) '(foo))))
-  (is (equal '(foo) (%object-roles object)))
-  (is (equal '(bar foo) (push 'bar (%object-roles object))))
-  (is (equal '(bar foo) (%object-roles object))))
+  (is (equal '(foo) (%object-roles object))))
 
 (def-suite interface-accessors :in objects)
 (in-suite interface-accessors)

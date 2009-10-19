@@ -43,6 +43,13 @@
 ;;;   'registry' of replies: All existing replies can be listed for the user, an obvious interface
 ;;;   can be defined, and the message object can be used as an obvious place to store the cached
 ;;;   dispatch information.
+
+(deftype dispatch-cache (&optional size)
+  `(simple-vector ,size))
+
+(deftype dispatch-cache-entry ()
+  `(cons list function))
+
 (defstruct (message (:constructor %make-message)
                     (:predicate messagep)
                     (:print-object
@@ -50,7 +57,7 @@
                        (print-unreadable-object (message stream :identity t)
                          (format stream "Message: ~a" (message-name message))))))
   name lambda-list replies documentation
-  (dispatch-cache (make-dispatch-cache))
+  (dispatch-cache (make-dispatch-cache) :type dispatch-cache)
   (arg-info (make-arg-info)))
 
 ;;;
@@ -118,49 +125,41 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 
 (defvar *caching-enabled* t)
 
-(defun make-dispatch-cache ()
-  (make-vector *dispatch-cache-size*))
-(defun dispatch-cache-p (x)
-  (vectorp x))
+(defun make-dispatch-cache (&optional (size *dispatch-cache-size*))
+  (make-vector size))
 
 (defun make-dispatch-cache-entry (args erf)
   (cons (mapcar 'maybe-make-weak-pointer args) erf))
-(defun maybe-make-weak-pointer (x)
-  (when x (make-weak-pointer x)))
-(defun maybe-weak-pointer-value (x)
-  (when x (weak-pointer-value x)))
 
-(defun dispatch-cache-entry-p (x)
-  (and (consp x) (every 'nil-or-weak-pointer-p (car x)) (functionp (cdr x))))
-(defun nil-or-weak-pointer-p (x)
-  (or (null x) (weak-pointer-p x)))
-
+;;; There's a certain uglyness here. Too bad this crap is concise. - Adlai
+(declaim (inline cache-entry-args cache-entry-erf))
 (defun cache-entry-args (entry)
   (car entry))
 (defun cache-entry-erf (entry)
   (cdr entry))
 
 (defun cache-effective-reply-function (message args erf)
-  (declare (list args))
   (let* ((dispatch-cache (message-dispatch-cache message))
-         (entry (the cons (make-dispatch-cache-entry args erf)))
+         (entry (make-dispatch-cache-entry args erf))
          (possible-index (mod (sxhash args) (length dispatch-cache))))
-    (declare (simple-vector dispatch-cache))
-    (acond ((numberp (svref dispatch-cache possible-index))
+    (declare (dispatch-cache dispatch-cache) (fixnum possible-index))
+    (acond ((typep (svref dispatch-cache possible-index) 'fixnum)
             (setf (svref dispatch-cache possible-index) entry))
-           ((position 0 dispatch-cache)
-            (setf (svref dispatch-cache (the fixnum it)) entry))
+           ((position-if #'atom dispatch-cache)
+            (setf (svref dispatch-cache it) entry))
            (t (setf (svref dispatch-cache possible-index) entry)))))
 
 (defun find-cached-erf (message args)
-  (declare (list args))
-  (let* ((dispatch-cache (the simple-vector (message-dispatch-cache message)))
-         (maybe-index (mod (the fixnum (sxhash args)) (the fixnum (length dispatch-cache))))
-         (maybe-entry (svref dispatch-cache (the fixnum maybe-index))))
-    (acond ((and (not (numberp maybe-entry))
+  (let* ((dispatch-cache (message-dispatch-cache message))
+         (maybe-index (mod (sxhash args) (length dispatch-cache)))
+         (maybe-entry (svref dispatch-cache maybe-index)))
+    (declare (dispatch-cache dispatch-cache))
+    (acond ((and (not (typep maybe-entry 'fixnum))
                  (desired-entry-p maybe-entry args))
             (cache-entry-erf maybe-entry))
-           ((find-if (rcurry 'desired-entry-p args) dispatch-cache)
+           ((dotimes (index (length dispatch-cache))
+              (awhen (desired-entry-p (svref dispatch-cache index) args)
+                (return it)))
             (cache-entry-erf it))
            (t nil))))
 

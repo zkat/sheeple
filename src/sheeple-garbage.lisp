@@ -85,6 +85,11 @@
   #+corman (ccl:weak-pointer-obj weak-pointer)
   #+lispworks (svref (weak-pointer-pointer weak-pointer) 0))
 
+(defun maybe-make-weak-pointer (x)
+  (when x (make-weak-pointer x)))
+(defun maybe-weak-pointer-value (x)
+  (when x (weak-pointer-value x)))
+
 ;;;; Weak Hash-tables
 
 ;;; Allegro can apparently create weak hash-tables with both weak keys

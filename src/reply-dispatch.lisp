@@ -94,7 +94,8 @@
                               (setf (elt (reply-container-rank contained-reply) index)
                                     hierarchy-position)
                               (when (fully-specified-p (reply-container-rank contained-reply))
-                                (push contained-reply contained-applicable-replies)))))))))
+                                (pushnew contained-reply contained-applicable-replies
+                                         :key #'reply-container-reply)))))))))
         (if contained-applicable-replies
             (unbox-replies (sort-applicable-replies contained-applicable-replies))
             (when errorp

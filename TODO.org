@@ -200,7 +200,7 @@
      The use of &aux need not be consistent across replies.
 **** TODO Write unit tests that confirm this behavior is correct.
 *** DONE Cache message dispatch
-*** TODO Add :reply option to defmessage.
+*** DONE Add :reply option to defmessage.
 ** TODO Replies
 *** TODO Clean up dispatch code
     Don't try to optimize yet. Just try and reorganize the algorithm into something more

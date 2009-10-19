@@ -42,14 +42,14 @@
 
 (defvar *princess-renee* (defobject (=elf=)
                             ((name "Renee")
-                             (title "Princess"))
+                             (title "Princess" :accessor 'title))
                           (:nickname "Reni")))
 
 ;; Let's give the child a name so it doesn't just end up taking its parent's name.
 (defreply mate :around ((a *edmond*) (b *princess-renee*))
   ;; note that the second item in the specialized LL entry
   ;; can be any object. It doesn't have to be something defined with defproto.
-  (let ((the-child (call-next-message)))
+  (let ((the-child (call-next-reply)))
     (setf (title the-child) "Little")
     the-child))
 

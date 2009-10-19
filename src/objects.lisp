@@ -45,6 +45,11 @@
 ;;; over appropriately, and caches are reset. Additionally, when (setf object-parents) is called,
 ;;; all sub-molds must be alerted (and they must alert -their- sub-molds), and each sub-mold must
 ;;; recalculate its hierarchy list.
+;;;
+;;; One significant problem with the current transition model is that it does not try to reuse
+;;; potentially similar transitions. For example, if there are two molds, A and B, an object
+;;; that adds property b to mold A will transition to mold AB, whereas adding property a to
+;;; mold B will transition to mold BA. Later on, this should (and -will-) be resolved.
 
 ;;;
 ;;; Data definitions

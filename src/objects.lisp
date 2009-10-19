@@ -95,9 +95,8 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
                    (parents   lineage-parents)
                    (members   lineage-members)) lineage
     (setf hierarchy (compute-hierarchy parents))
-    (maphash (lambda (member crap)
-               (declare (ignore crap))
-               (mapcar 'trigger-hierarchy-recalculation (%object-children member)))
+    (maphash (lambda (member children)
+               (mapcar 'trigger-hierarchy-recalculation children))
              members)))
 
 (macrolet ((define-mold-reader (name lineage-reader)

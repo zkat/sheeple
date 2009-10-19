@@ -203,6 +203,8 @@
       (parse-defreply defreply-args)
     `(progn
        (eval-when (:compile-toplevel :load-toplevel :execute)
+         (unless (find-message ',name nil)
+           (warn 'automatic-message-creation :message-name ',name))
          (ensure-message ',name :lambda-list ',(create-msg-lambda-list reply-ll)))
        ,(%defreply name qualifiers reply-ll docstring body))))
 

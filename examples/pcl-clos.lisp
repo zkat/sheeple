@@ -28,7 +28,7 @@
    (account-number 0 :reader 'account-number)
    (account-type :bronze)))
 
-(defreply init-sheep :after ((account =bank-account=) &key)
+(defreply init-object :after ((account =bank-account=) &key)
   (setf (property-value account 'account-number) (incf *max-acc-num*)))
 
 ;; SHEEPLE-USER> (property-value =bank-account= 'customer-name) => "NoName"
@@ -43,22 +43,20 @@
 
 (defproto =money-market-account= (=checking-account= =savings-account=) ())
 
-;; defsheep provides similar facilities to defproto, but without automatic accessor generation,
+;; defobject provides similar facilities to defproto, but without automatic accessor generation,
 ;; and the objects remain anonymous.
 (defvar *account-of-bank-president*
-  (defsheep (=bank-account=)
+  (defobject (=bank-account=)
       ((customer-name "The Prez Man")
        (balance 9001))))
 
 (defvar *janes-account*
-  (defsheep (=bank-account=)
+  (defobject (=bank-account=)
       ((customer-name "Jane Doe")
        (balance 1000))))
 
-;; SPAWN is the most minimalist of the 3 creation methods: it only accepts a list of prototypes.
-;; The two advantages of using SPAWN are that A. it's a function, you can apply it. B. It's simple.
 (defvar *lots-of-accounts*
-  (loop repeat 1000 collect (spawn =bank-account=)))
+  (loop repeat 1000 collect (object :parents =bank-account=)))
 
 ;; you can add or remove direct properties from an object at any time, too...
 
@@ -68,42 +66,26 @@
 
 ;; You can also inspect objects and their internals at the REPL...
 ;;
-;; SHEEPLE-USER> (property-summary *janes-account*)
-;; Sheep: #<Sheep [=BANK-ACCOUNT=] #x1501FDF6>
+;; SHEEPLE-USER> (describe *janes-account*)
+;; Object: #<Object [=BANK-ACCOUNT=] #x30004140808D>
+;; Parents: (#<Object =BANK-ACCOUNT= #x3000413AFF7D>)
 ;; Properties:
+;; ACCOUNT-TYPE: :BRONZE (Delegated to: #<Object =BANK-ACCOUNT= #x3000413AFF7D>)
+;; ACCOUNT-NUMBER: 6
+;; BALANCE: 1000
+;; CUSTOMER-NAME: "Jane Doe"
+;; NICKNAME: =BANK-ACCOUNT= (Delegated to: #<Object =BANK-ACCOUNT= #x3000413AFF7D>)
 
-;;    Name:     CUSTOMER-NAME
-;;    Value:    "Jane Doe"
-;;    Owner:    #<Sheep [=BANK-ACCOUNT=] #x1501FDF6>
-
-;;    Name:     BALANCE
-;;    Value:    1000
-;;    Owner:    #<Sheep [=BANK-ACCOUNT=] #x1501FDF6>
-
-;;    Name:     ACCOUNT-NUMBER
-;;    Value:    6
-;;    Owner:    #<Sheep [=BANK-ACCOUNT=] #x1501FDF6>
-
-;;    Name:     ACCOUNT-TYPE
-;;    Value:    :BRONZE
-;;    Owner:    #<Sheep =BANK-ACCOUNT= #x14FBC12E>
-
-;;    Name:     NICKNAME
-;;    Value:    =BANK-ACCOUNT=
-;;    Owner:    #<Sheep =BANK-ACCOUNT= #x14FBC12E>
-
-;; NIL
-;; SHEEPLE-USER>
 ;; the [=foo=] name means that the object is inheriting the :nickname property, whereas
 ;; the same without [] means the object's nickname is set locally.
 
 (defmessage withdraw (account amount)
   (:documentation "Withdraw the specified amount from the account.
-Signal an error if the current balance is less than AMOUNT."))
-(defreply withdraw ((account =bank-account=) amount)
-  (when (< (balance account) amount)
-    (error "Account overdrawn."))
-  (decf (balance account) amount))
+Signal an error if the current balance is less than AMOUNT.")
+  (:reply ((account =bank-account=) amount)
+    (when (< (balance account) amount)
+      (error "Account overdrawn."))
+    (decf (balance account) amount)))
 
 (defreply withdraw :before ((account =checking-account=) amount)
   (let ((overdraft (- amount (balance account))))
@@ -114,10 +96,10 @@ Signal an error if the current balance is less than AMOUNT."))
 (defreply withdraw ((proxy =proxy-account=) amount)
   (withdraw (proxied-account proxy) amount))
 
-(defreply withdraw :before ((account *account-of-bank-president*) amount)
-  (let ((overdraft (- amount (balance account))))
-    (when (plusp overdraft)
-      (incf (balance account) (embezzle *bank* overdraft)))))
+(defreply withdraw :before ((account *account-of-bank-president*) amount
+                            &aux (overdraft (- amount (balance account))))
+  (when (plusp overdraft)
+    (incf (balance account) (embezzle *bank* overdraft))))
 
 (defreply assess-low-balance-penalty ((account =bank-account=))
   (with-properties ((bal balance)) account

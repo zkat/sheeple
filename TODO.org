@@ -148,6 +148,7 @@
     cleaner, faster raw algorithm. The caching itself can get filled up with declarations, too.
 * TODO 3.0
   This is a rough sketch of The Road to Sheeple 3.0
+** TODO Update README
 ** DONE Parent/Hierarchy API
 *** DONE (setf object-parents)
     Needs to deal correctly with bogus parent lists

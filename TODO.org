@@ -107,7 +107,6 @@
 *** TODO Begin work on message/reply MOP (maybe)
 * TODO 3.0.1
 ** TODO Document everything in doc/sheeple.texinfo
-** TODO Add :reply option to defmessage.
 ** TODO Compile-time crap
    Something is going on. There seem to be some compile-time side-effects we don't want that are
    causing weird conflicts. For example, bootstrap.lisp requires some special juggling involving
@@ -201,6 +200,7 @@
      The use of &aux need not be consistent across replies.
 **** TODO Write unit tests that confirm this behavior is correct.
 *** DONE Cache message dispatch
+*** TODO Add :reply option to defmessage.
 ** TODO Replies
 *** TODO Clean up dispatch code
     Don't try to optimize yet. Just try and reorganize the algorithm into something more

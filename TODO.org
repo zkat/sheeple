@@ -135,7 +135,7 @@
 **** TODO utils.lisp
 **** TODO objects.lisp
 **** TODO properties.lisp
-**** TODO builtins.lisp
+**** DONE builtins.lisp
 **** TODO lambda-lists.lisp
 **** TODO messages.lisp
 **** TODO reply-definition.lisp
@@ -202,7 +202,7 @@
 *** DONE Cache message dispatch
 *** DONE Add :reply option to defmessage.
 ** TODO Replies
-*** TODO Clean up dispatch code
+*** DONE Clean up dispatch code
     Don't try to optimize yet. Just try and reorganize the algorithm into something more
     reasonable. This'll make it easier to optimize dispatch later on.
 *** TODO Detailed reply-(un)definition unit tests

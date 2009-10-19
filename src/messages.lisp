@@ -50,7 +50,7 @@
                        (print-unreadable-object (message stream :identity t)
                          (format stream "Message: ~a" (message-name message))))))
   name lambda-list replies documentation
-  (dispatch-cache (make-dispatch-cache))
+  ; (dispatch-cache (make-dispatch-cache)) See below
   (arg-info (make-arg-info)))
 
 ;;;
@@ -107,51 +107,53 @@ Raises an error if no message is found, unless ERRORP is NIL."
 ;;;
 ;;; Global dispatch cache
 ;;;
+;;; Currently disabled due to a nuisance with weak pointers
+;;;
 ;;; - We hold a global cache for each message, which is filled as different objects are dispatched on.
 ;;;   This allows fairly quick lookup of applicable replies when a particular message is called over
 ;;;   and over on the same arguments.
-(defparameter *dispatch-cache-size* 40
-  "This variable determines the size of messages' dispatch caches. The bigger the number, the
-more entries the cache will be able to hold, but the slower lookup will be.")
+;; (defparameter *dispatch-cache-size* 40
+;;   "This variable determines the size of messages' dispatch caches. The bigger the number, the
+;; more entries the cache will be able to hold, but the slower lookup will be.")
 
-(defun make-dispatch-cache ()
-  (make-vector *dispatch-cache-size*))
-(defun dispatch-cache-p (x)
-  (vectorp x))
+;; (defun make-dispatch-cache ()
+;;   (make-vector *dispatch-cache-size*))
+;; (defun dispatch-cache-p (x)
+;;   (vectorp x))
 
-(defun make-dispatch-cache-entry (args erf)
-  ;; Since args points to actual arguments for a message, we wrap it in a weak pointer to make sure
-  ;; the args can be GCd. Otherwise, calling any message on a number of arguments will make those
-  ;; arguments stick around indefinitely.
-  (cons (make-weak-pointer args) erf))
-(defun dispatch-cache-entry-p (x)
-  (and (consp x) (weak-pointer-p (car x)) (functionp (cdr x))))
+;; (defun make-dispatch-cache-entry (args erf)
+;;   ;; Since args points to actual arguments for a message, we wrap it in a weak pointer to make sure
+;;   ;; the args can be GCd. Otherwise, calling any message on a number of arguments will make those
+;;   ;; arguments stick around indefinitely.
+;;   (cons (make-weak-pointer args) erf))
+;; (defun dispatch-cache-entry-p (x)
+;;   (and (consp x) (weak-pointer-p (car x)) (functionp (cdr x))))
 
-(defun cache-entry-args (entry)
-  (weak-pointer-value (car entry)))
-(defun cache-entry-erf (entry)
-  (cdr entry))
+;; (defun cache-entry-args (entry)
+;;   (weak-pointer-value (car entry)))
+;; (defun cache-entry-erf (entry)
+;;   (cdr entry))
 
-(defun cache-effective-reply-function (message args erf)
-  (let ((dispatch-cache (message-dispatch-cache message))
-        (entry (make-dispatch-cache-entry args erf)))
-    (aif (position 0 dispatch-cache)
-         (setf (svref dispatch-cache it) entry)
-         (setf (svref dispatch-cache (mod (sxhash args) (length dispatch-cache))) entry))))
+;; (defun cache-effective-reply-function (message args erf)
+;;   (let ((dispatch-cache (message-dispatch-cache message))
+;;         (entry (make-dispatch-cache-entry args erf)))
+;;     (aif (position 0 dispatch-cache)
+;;          (setf (svref dispatch-cache it) entry)
+;;          (setf (svref dispatch-cache (mod (sxhash args) (length dispatch-cache))) entry))))
 
-(defun find-cached-erf (message args)
-  (let* ((dispatch-cache (message-dispatch-cache message))
-         (maybe-index (mod (sxhash args) (length dispatch-cache)))
-         (maybe-entry (svref dispatch-cache maybe-index)))
-    (when (and (dispatch-cache-entry-p maybe-entry)
-               (equal (cache-entry-args maybe-entry) args))
-      (cache-entry-erf maybe-entry))))
+;; (defun find-cached-erf (message args)
+;;   (let* ((dispatch-cache (message-dispatch-cache message))
+;;          (maybe-index (mod (sxhash args) (length dispatch-cache)))
+;;          (maybe-entry (svref dispatch-cache maybe-index)))
+;;     (when (and (dispatch-cache-entry-p maybe-entry)
+;;                (equal (cache-entry-args maybe-entry) args))
+;;       (cache-entry-erf maybe-entry))))
 
-(defun clear-dispatch-cache (message)
-  (setf (message-dispatch-cache message) (make-dispatch-cache)))
+;; (defun clear-dispatch-cache (message)
+;;   (setf (message-dispatch-cache message) (make-dispatch-cache)))
 
-(defun clear-all-message-caches ()
-  (maphash-values 'clear-memo-table *message-table*))
+;; (defun clear-all-message-caches ()
+;;   (maphash-values 'clear-memo-table *message-table*))
 
 ;;;
 ;;; Arg info

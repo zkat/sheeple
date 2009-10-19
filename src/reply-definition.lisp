@@ -89,7 +89,7 @@
                            :function function))
         (objectified-participants (objectify-list participants)))
     (setf (documentation reply 't) documentation) ; same as dox for CLOS methods
-    (clear-dispatch-cache message)                ; because the dispatch landscape has changed
+    ; (clear-dispatch-cache message)
     ;; In order to replace existing replies, we must remove them before actually adding them again.
     (remove-specific-reply message qualifiers objectified-participants)
     (add-reply-to-message reply message)
@@ -142,7 +142,7 @@
 ;;;
 (defun undefine-reply (name &key qualifiers participants)
   (awhen (find-message name nil)
-    (clear-dispatch-cache it)
+    ;; (clear-dispatch-cache it)
     (remove-applicable-reply it qualifiers (objectify-list participants))))
 
 (defun remove-specific-reply (message qualifiers participants)

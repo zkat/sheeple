@@ -105,24 +105,8 @@
 *** TODO Property MOP
 *** TODO Object-creation MOP
 *** TODO Begin work on message/reply MOP (maybe)
-* TODO 3.0.1
-** TODO Document everything in doc/sheeple.texinfo
-** TODO Compile-time crap
-   Something is going on. There seem to be some compile-time side-effects we don't want that are
-   causing weird conflicts. For example, bootstrap.lisp requires some special juggling involving
-   eval-when in order to function, and I don't understand why. I don't really see what's going on,
-   whether it can be fixed, and/or whether it should even BE fixed.
-** TODO Clean up and speed up raw dispatch code
-** TODO Optimize
-*** TODO Property access
-    Tests should be written by now, so let's start taking measures to optimize property access.
-*** TODO Object creation
-    Creating objects could be faster, and it would be nice to make it cons (a lot) less.
-*** TODO Message dispatch
-    The biggest gain in general will be from just the caching, but it would be nice to have a
-    cleaner, faster raw algorithm. The caching itself can get filled up with declarations, too.
-* TODO 3.0
-  This is a rough sketch of The Road to Sheeple 3.0
+* TODO 3.0.2
+  Testing time!
 ** TODO "Test all the fucking time."
    This is very important. Watch the entire thing, twice.
    http://rubyhoedown2008.confreaks.com/05-bryan-liles-lightning-talk-tatft-test-all-the-f-in-time.html
@@ -142,6 +126,28 @@
 **** TODO reply-dispatch.lisp
 **** TODO bootstrap.lisp
 **** TODO post-boot.lisp
+** TODO Write unit tests that confirm lambda-list congruence is correct
+** TODO Detailed reply-(un)definition unit tests
+** TODO Detailed dispatch unit tests
+
+* TODO 3.0.1
+** TODO Document everything in doc/sheeple.texinfo
+** TODO Compile-time crap
+   Something is going on. There seem to be some compile-time side-effects we don't want that are
+   causing weird conflicts. For example, bootstrap.lisp requires some special juggling involving
+   eval-when in order to function, and I don't understand why. I don't really see what's going on,
+   whether it can be fixed, and/or whether it should even BE fixed.
+** TODO Clean up and speed up raw dispatch code
+** TODO Optimize
+*** TODO Property access
+    Tests should be written by now, so let's start taking measures to optimize property access.
+*** TODO Object creation
+    Creating objects could be faster, and it would be nice to make it cons (a lot) less.
+*** TODO Message dispatch
+    The biggest gain in general will be from just the caching, but it would be nice to have a
+    cleaner, faster raw algorithm. The caching itself can get filled up with declarations, too.
+* TODO 3.0
+  This is a rough sketch of The Road to Sheeple 3.0
 ** DONE Parent/Hierarchy API
 *** DONE (setf object-parents)
     Needs to deal correctly with bogus parent lists
@@ -173,8 +179,8 @@
 *** DONE Reimplement properties
 *** DONE TATFT
 *** DONE Improve the whole add-property interface.
-** TODO Messages
-*** TODO Check for correctness of lambda-list congruence
+** DONE Messages
+*** DONE Check for correctness of lambda-list congruence
     As per CLHS 7.6.4
 **** DONE num-required
      Each lambda list must have the same number of required parameters.
@@ -198,20 +204,17 @@
      the message, any keyword arguments may be mentioned in the call to the message.
 **** DONE &aux
      The use of &aux need not be consistent across replies.
-**** TODO Write unit tests that confirm this behavior is correct.
+
 *** DONE Cache message dispatch
 *** DONE Add :reply option to defmessage.
-** TODO Replies
+** DONE Replies
 *** DONE Clean up dispatch code
     Don't try to optimize yet. Just try and reorganize the algorithm into something more
     reasonable. This'll make it easier to optimize dispatch later on.
-*** TODO Detailed reply-(un)definition unit tests
-*** TODO Detailed dispatch unit tests
 ** DONE DOCUMENTATION
    Fix the fucking documentation bullshit -- something is probably not ANSI-compatible,
    although I haven't looked at it too deeply. Either way, CLISP complains when
    documentation is enabled.
-
 ** DONE Package
    Check that all the necessary symbols are exported by the SHEEPLE package, get rid of
    deprecated stuff, etc. This should actually get inspected thoroughly before tagging.

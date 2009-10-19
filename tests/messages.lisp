@@ -18,32 +18,32 @@
   (let ((test-message (%make-message :name 'name
                                      :lambda-list 'lambda-list
                                      :replies 'replies
-                                     :dispatch-cache 'cache
+                                     ;; :dispatch-cache 'cache
                                      :arg-info 'arg-info)))
     (is (messagep test-message))
     (with-accessors ((name           message-name)
                      (lambda-list    message-lambda-list)
                      (replies        message-replies)
-                     (dispatch-cache message-dispatch-cache)
+                     ;; (dispatch-cache message-dispatch-cache)
                      (arg-info       message-arg-info))
         test-message
       (is (eq 'name        name))
       (is (eq 'lambda-list lambda-list))
       (is (eq 'replies     replies))
-      (is (eq 'cache       dispatch-cache))
+      ;; (is (eq 'cache       dispatch-cache))
       (is (eq 'arg-info    arg-info))))
   (let ((test-message (%make-message)))
     (is (messagep test-message))
     (with-accessors ((name           message-name)
                      (lambda-list    message-lambda-list)
                      (replies        message-replies)
-                     (dispatch-cache message-dispatch-cache)
+                     ;; (dispatch-cache message-dispatch-cache)
                      (arg-info       message-arg-info))
         test-message
       (is (null name))
       (is (null lambda-list))
       (is (null replies))
-      (is (dispatch-cache-p dispatch-cache))
+      ;; (is (dispatch-cache-p dispatch-cache))
       (is (arg-info-p arg-info)))))
 
 (test *message-table*
@@ -72,42 +72,42 @@
     (is (null (%find-message 'name)))
     (is (null (forget-message 'test)))))
 
-(def-suite dispatch-cache :in messages)
-(in-suite dispatch-cache)
+;; (def-suite dispatch-cache :in messages)
+;; (in-suite dispatch-cache)
 
-(test *dispatch-cache-size*
-  (is (integerp *dispatch-cache-size*)))
+;; (test *dispatch-cache-size*
+;;   (is (integerp *dispatch-cache-size*)))
 
-(test make-dispatch-cache
-  (let ((cache (make-dispatch-cache)))
-    (is (dispatch-cache-p cache))
-    (is (= *dispatch-cache-size* (length cache)))))
+;; (test make-dispatch-cache
+;;   (let ((cache (make-dispatch-cache)))
+;;     (is (dispatch-cache-p cache))
+;;     (is (= *dispatch-cache-size* (length cache)))))
 
-(test dispatch-cache-p
-  (let ((cache (make-dispatch-cache)))
-    (is (dispatch-cache-p cache))))
+;; (test dispatch-cache-p
+;;   (let ((cache (make-dispatch-cache)))
+;;     (is (dispatch-cache-p cache))))
 
-#+nil ;;outdated
-(test make-dispatch-cache-entry
-  (let ((entry (make-dispatch-cache-entry '(a b) '(c d))))
-    (is (dispatch-cache-entry-p entry))
-    (is (equal '(a b) (cache-entry-args entry)))
-    (is (equal '(c d) (cache-entry-replies entry)))))
+;; #+nil ;;outdated
+;; (test make-dispatch-cache-entry
+;;   (let ((entry (make-dispatch-cache-entry '(a b) '(c d))))
+;;     (is (dispatch-cache-entry-p entry))
+;;     (is (equal '(a b) (cache-entry-args entry)))
+;;     (is (equal '(c d) (cache-entry-replies entry)))))
 
-(test cache-entry-args
-  (let ((entry (make-dispatch-cache-entry '(a b) '(c d))))
-    (is (equal '(a b) (cache-entry-args entry)))
-    (is (not (fboundp '(setf cache-entry-args))))))
+;; (test cache-entry-args
+;;   (let ((entry (make-dispatch-cache-entry '(a b) '(c d))))
+;;     (is (equal '(a b) (cache-entry-args entry)))
+;;     (is (not (fboundp '(setf cache-entry-args))))))
 
-#+nil ;; needs update
-(test cache-entry-erf
-  (let ((entry (make-dispatch-cache-entry '(a b) '(c d))))
-    (is (equal '(c d) (cache-entry-replies entry)))
-    (is (not (fboundp '(setf cache-entry-replies))))))
+;; #+nil ;; needs update
+;; (test cache-entry-erf
+;;   (let ((entry (make-dispatch-cache-entry '(a b) '(c d))))
+;;     (is (equal '(c d) (cache-entry-replies entry)))
+;;     (is (not (fboundp '(setf cache-entry-replies))))))
 
-(test add-entry-to-message)
-(test clear-dispatch-cache)
-(test clear-all-message-caches)
+;; (test add-entry-to-message)
+;; (test clear-dispatch-cache)
+;; (test clear-all-message-caches)
 
 (def-suite arg-info :in messages)
 (in-suite arg-info)

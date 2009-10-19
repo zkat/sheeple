@@ -97,9 +97,14 @@
 (test confirm-var-name)
 (test undefreply
   (unwind-protect
-       (let ((object (object)))
-         (handler-bind ((automatic-message-creation (fun (muffle-warning _))))
+       (let ((object (object)) warned)
+         (handler-bind
+             ((automatic-message-creation (fun
+                                            (pass "Warned correctly.")
+                                            (setf warned t)
+                                            (muffle-warning _))))
            (defreply test-message ((x object)) x))
+         (unless warned (fail "Didn't warn for automatic message creation."))
          (is (not (null (undefreply test-message (object)))))
          (signals no-applicable-replies (funcall 'test-message object))
          (is (null (undefreply test-message (object))))

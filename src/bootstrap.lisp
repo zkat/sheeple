@@ -33,38 +33,35 @@
 (defreply allocate-object ((object =standard-metaobject=))
   (std-allocate-object object))
 
-(defmessage shared-init (object &key &allow-other-keys)
+(defmessage shared-init (object &rest initargs &key &allow-other-keys)
   (:documentation "Adds properties to OBJECT and performs general initialization tasks."))
-(defreply shared-init (object &key properties nickname)
+(defreply shared-init (object &key properties
+                              (nickname nil nicknamep)
+                              (documentation nil doxp))
   (dolist (property-spec properties)
     (destructuring-bind (name value &rest keys) property-spec
       (apply 'add-property object name value keys)))
-  (when nickname
+  (when nicknamep
     (setf (object-nickname object) nickname))
+  (when doxp
+    (setf (documentation object t) documentation))
   object)
 
-(defmessage init-object (object &key &allow-other-keys)
+(defmessage init-object (object &rest initargs &key &allow-other-keys)
   (:documentation "Performs 'once-only' initialization tasks on OBJECT."))
-(defreply init-object (object &key properties nickname)
-  (shared-init object :properties properties :nickname nickname))
+(defreply init-object (object &rest initargs &key &allow-other-keys)
+  (apply #'shared-init object initargs))
 
-(defmessage reinit-object (object &key &allow-other-keys)
+(defmessage reinit-object (object &rest initargs &key &allow-other-keys)
   (:documentation "Resets parents and properties without changing OBJECT's identity."))
-(defreply reinit-object (object &key parents documentation properties)
-  ;; first, reset the mold
+(defreply reinit-object (object &rest initargs
+                                &key parents
+                                &allow-other-keys)
   (change-mold object (ensure-mold (if (null parents)
                                        (list =standard-object=)
                                        (objectify-list parents))
                                    #()))
-  ;; Setting up the properties all over again.
-  (dolist (property-spec properties)
-    (destructuring-bind (name value &rest keys) property-spec
-      (apply 'add-property object name value keys)))
-  ;; Finally, set the documentation. If none is provided, it's set to NIL.
-  ;; It's important to note that documenting a object will keep a reference to it...
-  ;; At the same time, REINIT-OBJECT is only meant for protos, so it should be fine.
-  (when documentation
-    (setf (documentation object t) documentation))
+  (apply #'shared-init object initargs)
   object)
 
 (unless *bootstrappedp*
@@ -94,5 +91,5 @@
   (defproto =complex= (=number=) ())
   (defproto =integer= (=number=) ())
   (defproto =float= (=number=) ())
-    
+
   (setf *bootstrappedp* t))

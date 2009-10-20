@@ -64,15 +64,11 @@
 
 (defmessage reinit-object (object &rest initargs &key &allow-other-keys)
   (:documentation "Resets parents and properties without changing OBJECT's identity."))
-(defreply reinit-object (object &rest initargs
-                                &key parents
-                                &allow-other-keys)
-  (change-mold object (ensure-mold (if (null parents)
-                                       (list =standard-object=)
-                                       (objectify-list parents))
-                                   #()))
-  (apply #'shared-init object initargs)
-  object)
+(defreply reinit-object (object &rest initargs &key parents &allow-other-keys)
+  (when (null parents)                  ; Guard against funny business
+    (push =standard-object= parents))
+  (change-mold object (ensure-mold (objectify-list parents) #()))
+  (apply #'shared-init object initargs))
 
 (defproto =boxed-object= =t= ())
 (defproto =symbol= =boxed-object= ())

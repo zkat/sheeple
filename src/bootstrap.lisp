@@ -27,7 +27,13 @@
         (aprog1 (std-allocate-object =standard-metaobject=)
           (setf (%object-mold it) (ensure-mold (list =t=) #()))
           ;; This could help, in case the boot fails before the DEFPROTO
-          (add-property it 'nickname '=standard-object=))))
+          (add-property it 'nickname '=standard-object=)))
+
+  ;; Adding the missing link in the holy trinity
+  (push =t= (object-parents =standard-metaobject=))
+
+  ;; ... and we're done!
+  (setf *bootstrappedp* t))
 
 (defmessage shared-init (object &rest initargs &key &allow-other-keys)
   (:documentation "Adds properties to OBJECT and performs general initialization tasks."))
@@ -60,32 +66,24 @@
   (apply #'shared-init object initargs)
   object)
 
-(unless *bootstrappedp*
-  (defproto =standard-object= =t= ())
-  (change-mold =standard-metaobject=
-               (ensure-mold (list =t=) #()))
-
-  ;; Now we just define all the builtins, and we're good to go.
-  (defproto =boxed-object= =t= ())
-  (defproto =symbol= =boxed-object= ())
-  (defproto =sequence= =boxed-object= ())
-  (defproto =array= =boxed-object= ())
-  (defproto =number= =boxed-object= ())
-  (defproto =character= =boxed-object= ())
-  (defproto =function= =boxed-object= ())
-  (defproto =hash-table= =boxed-object= ())
-  (defproto =package= =boxed-object= ())
-  (defproto =pathname= =boxed-object= ())
-  (defproto =readtable= =boxed-object= ())
-  (defproto =stream= =boxed-object= ())
-  (defproto =list= =sequence= ())
-  (defproto =null= (=symbol= =list=) ())
-  (defproto =cons= =list= ())
-  (defproto =vector= (=array= =sequence=) ())
-  (defproto =bit-vector= =vector= ())
-  (defproto =string= =vector= ())
-  (defproto =complex= =number= ())
-  (defproto =integer= =number= ())
-  (defproto =float= =number= ())
-
-  (setf *bootstrappedp* t))
+(defproto =boxed-object= =t= ())
+(defproto =symbol= =boxed-object= ())
+(defproto =sequence= =boxed-object= ())
+(defproto =array= =boxed-object= ())
+(defproto =number= =boxed-object= ())
+(defproto =character= =boxed-object= ())
+(defproto =function= =boxed-object= ())
+(defproto =hash-table= =boxed-object= ())
+(defproto =package= =boxed-object= ())
+(defproto =pathname= =boxed-object= ())
+(defproto =readtable= =boxed-object= ())
+(defproto =stream= =boxed-object= ())
+(defproto =list= =sequence= ())
+(defproto =null= (=symbol= =list=) ())
+(defproto =cons= =list= ())
+(defproto =vector= (=array= =sequence=) ())
+(defproto =bit-vector= =vector= ())
+(defproto =string= =vector= ())
+(defproto =complex= =number= ())
+(defproto =integer= =number= ())
+(defproto =float= =number= ())

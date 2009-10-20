@@ -16,6 +16,7 @@
   (setf =standard-metaobject= (std-allocate-object =standard-metaobject=)
         (%object-metaobject =standard-metaobject=) =standard-metaobject=
         (%object-mold =standard-metaobject=) (ensure-mold nil #()))
+  (add-property =standard-metaobject= 'nickname '=standard-metaobject=)
 
   ;; =T= and =STANDARD-OBJECT= have special rules about parents.
   (setf =t=

@@ -113,12 +113,12 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
   (define-mold-reader mold-hierarchy lineage-hierarchy))
 
 (defstruct (object (:conc-name %object-) (:predicate objectp)
-                   (:constructor std-allocate-object (metaobject))
+                   (:constructor std-allocate-object (&optional metaobject))
                    (:print-object print-sheeple-object-wrapper))
- (mold nil)            ; mold this object currently refers to
-  metaobject            ; metaobject used by the MOP for doing various fancy things
-  (property-values nil) ; either NIL, or a vector holding direct property values
-  (roles nil))          ; a list of role objects belonging to this object.
+  (mold (ensure-mold nil #()) :type mold)
+  (metaobject =standard-metaobject=)
+  (property-values nil)
+  (roles nil :type list)) ; Roles are used in dispatch -- see reply-foo.lisp
 
 (declaim (inline %object-mold %object-metaobject %object-property-values %object-roles))
 

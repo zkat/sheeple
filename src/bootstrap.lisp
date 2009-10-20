@@ -66,7 +66,7 @@
 (defreply reinit-object (object &rest initargs &key parents &allow-other-keys)
   (when (null parents)                  ; Guard against funny business
     (push =standard-object= parents))
-  (change-mold object (ensure-mold (objectify-list parents) #()))
+  (change-mold object (ensure-mold (objectify-list parents)))
   (apply #'shared-init object initargs))
 
 ;;; And, we need to mirror the CL type system:
@@ -74,7 +74,7 @@
 
 (macrolet ((define-boxed-objects (&body names)
              `(progn ,@(loop for (name . parents) in (mapcar 'ensure-list names)
-                          collect `(defproto ,name ,(or parents =boxed-object=))))))
+                          collect `(defproto ,name ,(or parents '=boxed-object=) ())))))
   (define-boxed-objects
     =character= =function= =hash-table= =package= =pathname= =readtable= =stream=
       =sequence= =symbol= (=list= =sequence=) (=null= =symbol= =list=) (=cons= =list=)

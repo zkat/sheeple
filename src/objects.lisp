@@ -115,7 +115,7 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
 (defstruct (object (:conc-name %object-) (:predicate objectp)
                    (:constructor std-allocate-object (&optional metaobject))
                    (:print-object print-sheeple-object-wrapper))
-  (mold (ensure-mold nil #()) :type mold)
+  (mold (ensure-mold nil) :type mold)
   (metaobject =standard-metaobject=)
   (property-values nil)
   (roles nil :type list)) ; Roles are used in dispatch -- see reply-foo.lisp
@@ -178,7 +178,7 @@ linking a new one if necessary."
               (make-mold (mold-lineage mold)
                          (hv-cons property-name (mold-properties mold))))))
 
-(defun ensure-mold (parents properties)
+(defun ensure-mold (parents &optional (properties #()))
   "Returns the mold with properties PROPERTIES of the mold for PARENTS,
 creating and linking a new one if necessary."
   (check-list-type parents object)
@@ -382,7 +382,7 @@ This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER 
 allocating the new object object. ALL-KEYS is passed on to INIT-OBJECT."
   (declare (dynamic-extent all-keys))
   (handler-case
-      (setf (%object-mold object) (ensure-mold parents #()))
+      (setf (%object-mold object) (ensure-mold parents))
     (topological-sort-conflict (conflict)
       (error 'object-hierarchy-error :object object :conflict conflict)))
   (setf (%object-children object) nil)

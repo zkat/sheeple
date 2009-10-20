@@ -13,8 +13,8 @@
 
 (unless *bootstrappedp*
   ;; Before anything else happens, we need =STANDARD-METAOBJECT= to exist:
-  (setf =standard-metaobject= (std-allocate-object =standard-metaobject=))
-  (setf (%object-metaobject =standard-metaobject=) =standard-metaobject=
+  (setf =standard-metaobject= (std-allocate-object =standard-metaobject=)
+        (%object-metaobject =standard-metaobject=) =standard-metaobject=
         (%object-mold =standard-metaobject=) (ensure-mold nil #()))
 
   ;; =T= and =STANDARD-OBJECT= have special rules about parents.
@@ -23,10 +23,10 @@
           (setf (%object-mold it) (ensure-mold nil #()))
           (add-property it 'nickname '=t=))
         =standard-object=
-        (let ((obj (std-allocate-object =standard-metaobject=)))
-          (setf (%object-mold obj)
-                (ensure-mold (list =t=) #()))
-          obj)))
+        (aprog1 (std-allocate-object =standard-metaobject=)
+          (setf (%object-mold it) (ensure-mold (list =t=) #()))
+          ;; This could help, in case the boot fails before the DEFPROTO
+          (add-property it 'nickname '=standard-object=))))
 
 (defmessage shared-init (object &rest initargs &key &allow-other-keys)
   (:documentation "Adds properties to OBJECT and performs general initialization tasks."))
@@ -60,31 +60,31 @@
   object)
 
 (unless *bootstrappedp*
-  (defproto =standard-object= (=t=) ())
+  (defproto =standard-object= =t= ())
   (change-mold =standard-metaobject=
                (ensure-mold (list =t=) #()))
 
   ;; Now we just define all the builtins, and we're good to go.
-  (defproto =boxed-object= (=t=) ())
-  (defproto =symbol= (=boxed-object=) ())
-  (defproto =sequence= (=boxed-object=) ())
-  (defproto =array= (=boxed-object=) ())
-  (defproto =number= (=boxed-object=) ())
-  (defproto =character= (=boxed-object=) ())
-  (defproto =function= (=boxed-object=) ())
-  (defproto =hash-table= (=boxed-object=) ())
-  (defproto =package= (=boxed-object=) ())
-  (defproto =pathname= (=boxed-object=) ())
-  (defproto =readtable= (=boxed-object=) ())
-  (defproto =stream= (=boxed-object=) ())
-  (defproto =list= (=sequence=) ())
+  (defproto =boxed-object= =t= ())
+  (defproto =symbol= =boxed-object= ())
+  (defproto =sequence= =boxed-object= ())
+  (defproto =array= =boxed-object= ())
+  (defproto =number= =boxed-object= ())
+  (defproto =character= =boxed-object= ())
+  (defproto =function= =boxed-object= ())
+  (defproto =hash-table= =boxed-object= ())
+  (defproto =package= =boxed-object= ())
+  (defproto =pathname= =boxed-object= ())
+  (defproto =readtable= =boxed-object= ())
+  (defproto =stream= =boxed-object= ())
+  (defproto =list= =sequence= ())
   (defproto =null= (=symbol= =list=) ())
-  (defproto =cons= (=list=) ())
+  (defproto =cons= =list= ())
   (defproto =vector= (=array= =sequence=) ())
-  (defproto =bit-vector= (=vector=) ())
-  (defproto =string= (=vector=) ())
-  (defproto =complex= (=number=) ())
-  (defproto =integer= (=number=) ())
-  (defproto =float= (=number=) ())
+  (defproto =bit-vector= =vector= ())
+  (defproto =string= =vector= ())
+  (defproto =complex= =number= ())
+  (defproto =integer= =number= ())
+  (defproto =float= =number= ())
 
   (setf *bootstrappedp* t))

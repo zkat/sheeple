@@ -35,13 +35,15 @@
 
 (defmessage shared-init (object &rest initargs &key &allow-other-keys)
   (:documentation "Adds properties to OBJECT and performs general initialization tasks."))
-(defreply shared-init (object &key properties documentation nickname)
+(defreply shared-init (object &key properties
+                              (documentation nil doxp)
+                              (nickname nil nicknamep))
   (dolist (property-spec properties)
     (destructuring-bind (name value &rest keys) property-spec
       (apply 'add-property object name value keys)))
-  (when (symbolp nickname)
+  (when nicknamep
     (setf (object-nickname object) nickname))
-  (when (stringp documentation)
+  (when doxp
     (setf (documentation object t) documentation))
   object)
 
@@ -59,9 +61,6 @@
                                        (list =standard-object=)
                                        (objectify-list parents))
                                    #()))
-  (setf (documentation object t) nil)
-  (when (has-direct-property-p object 'nickname)
-    (remove-property object 'nickname))
   (apply #'shared-init object initargs)
   object)
 

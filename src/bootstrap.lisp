@@ -45,6 +45,8 @@
   ;; ... and we're done!
   (setf *bootstrappedp* t))
 
+;;; Well, not really. We still need some messages to create objects:
+
 (defmessage shared-init (object &rest initargs &key &allow-other-keys)
   (:documentation "Adds properties to OBJECT and performs general initialization tasks."))
 (defreply shared-init (object &key properties (documentation nil doxp) (nickname nil nickp))
@@ -67,6 +69,8 @@
     (push =standard-object= parents))
   (change-mold object (ensure-mold (objectify-list parents) #()))
   (apply #'shared-init object initargs))
+
+;;; And, we need to mirror the CL type system:
 
 (defproto =boxed-object= =t= ())
 (defproto =symbol= =boxed-object= ())

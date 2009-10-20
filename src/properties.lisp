@@ -117,7 +117,7 @@ is signaled."
 (defmethod documentation ((x object) (doc-type (eql 't)))
   (property-value x 'documentation))
 
-(defmethod (setf documentation) (new-value (x object) (doc-type (eql 't)))
+(defmethod (setf documentation) ((new-value string) (x object) (doc-type (eql 't)))
   (handler-bind ((unbound-property 'continue))
     (setf (property-value x 'documentation) new-value)))
 

@@ -40,7 +40,7 @@
 (test std-object-initial-values
   (let ((object (std-allocate-object =standard-metaobject=)))
     (is (eq =standard-metaobject= (%object-metaobject object)))
-    (is (eq (ensure-mold nil #())  (%object-mold object)))
+    (is (eq (ensure-mold nil)  (%object-mold object)))
     (is (null (%object-property-values object)))
     (is (null (%object-roles object)))))
 
@@ -81,7 +81,7 @@
   (is (null (%object-metaobject object))))
 
 (test (%object-mold :fixture with-std-object)
-  (is (eq (ensure-mold nil #()) (%object-mold object)))
+  (is (eq (ensure-mold nil) (%object-mold object)))
   (let ((mold (ensure-mold nil #(nickname))))
     (is (eq mold (setf (%object-mold object) mold)))
     (is (eq mold (%object-mold object)))))

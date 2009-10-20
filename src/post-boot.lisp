@@ -21,32 +21,8 @@
     ((metaobject =standard-metaobject=) object)
   (std-compute-object-hierarchy-list object))
 
-
 ;;;
-;;; Nicknames
-;;;
-(defun object-nickname (object)
-  "Returns OBJECT's nickname"
-  (property-value object 'nickname))
-
-(defun (setf object-nickname) (new-nickname object)
-  "Sets OBJECT's nickname to NEW-NICKNAME"
-  (handler-bind ((unbound-property 'continue))
-    (setf (property-value object 'nickname) new-nickname)))
-
-;;; Now we name all the built-in object like we're Adam in Eden.
-(mapc #'(setf object-nickname)
-      '(=t= =standard-object= =standard-metaobject= =boxed-object= =symbol=
-        =sequence= =array= =number= =character= =function= =hash-table=
-        =package= =pathname= =readtable= =stream= =list= =null= =cons=
-        =vector= =bit-vector= =string= =complex= =integer= =float=)
-      (list =t= =standard-object= =standard-metaobject= =boxed-object= =symbol=
-            =sequence= =array= =number= =character= =function= =hash-table=
-            =package= =pathname= =readtable= =stream= =list= =null= =cons=
-            =vector= =bit-vector= =string= =complex= =integer= =float=))
-
-;;;
-;;; Printing object!
+;;; Printing objects!
 ;;;
 
 (defmessage print-sheeple-object (object stream)

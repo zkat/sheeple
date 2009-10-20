@@ -61,6 +61,9 @@
                                        (list =standard-object=)
                                        (objectify-list parents))
                                    #()))
+  (setf (documentation object t) nil)
+  (when (has-direct-property-p object 'nickname)
+    (remove-property object 'nickname))
   (apply #'shared-init object initargs)
   object)
 

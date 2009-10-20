@@ -186,7 +186,7 @@ creating and linking a new one if necessary."
   (let ((top (ensure-toplevel-mold parents)))
     (do* ((mold top (ensure-transition mold (car props-left)))
           (props-left (hv-elements properties) (cdr props-left)))
-        ((null props-left) mold))))
+         ((null props-left) mold))))
 
 ;;;
 ;;; Objects

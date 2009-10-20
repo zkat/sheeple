@@ -406,6 +406,9 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
 ;;;
 ;;; Fancy Macros
 ;;;
+(defun canonize-parents (parents)
+  `(list ,@(ensure-list parents)))
+
 (defun canonize-properties (properties &optional (accessors-by-default nil))
   `(list ,@(mapcar (rcurry 'canonize-property accessors-by-default) properties)))
 
@@ -426,7 +429,7 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
 
 (defmacro defobject (objects properties &rest options)
   "Standard object-generation macro. This variant auto-generates accessors."
-  `(object :parents (list ,@(ensure-list objects))
+  `(object :parents ,(canonize-parents objects)
            :properties ,(canonize-properties properties)
            ,@(canonize-options options)))
 

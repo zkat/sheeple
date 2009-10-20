@@ -66,7 +66,7 @@
   (format nil "~A ~A" (title entity) (name entity)))
 ;; A mixin?! BRILLIANT!
 ;; And we know how to use mixins, don't we kids? Except these guys work on instances :)
-(setf (object-parents *princess-renee*) (list =elf= =royalty=))
+(push =royalty= (object-parents *princess-renee*))
 
 ;; But it's a love that simply cannot be...
 (defreply mate ((a *edmond*) (b *princess-renee*))

@@ -28,11 +28,6 @@
                 (ensure-mold (list =t=) #()))
           obj)))
 
-(defmessage allocate-object (metaobject)
-  (:documentation "Allocates a object object based on METAOBJECT."))
-(defreply allocate-object ((object =standard-metaobject=))
-  (std-allocate-object object))
-
 (defmessage shared-init (object &rest initargs &key &allow-other-keys)
   (:documentation "Adds properties to OBJECT and performs general initialization tasks."))
 (defreply shared-init (object &key properties

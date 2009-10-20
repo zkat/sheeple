@@ -283,9 +283,10 @@
 (in-suite defobject)
 
 ;;; macro processing
-(test canonize-objects
-  (is (equal '(list foo bar baz) (canonize-objects '(foo bar baz))))
-  (is (equal '(list) (canonize-objects '()))))
+(test canonize-parents
+  (is (equal '(list foo bar baz) (canonize-parents '(foo bar baz))))
+  (is (equal '(list) (canonize-parents '())))
+  (is (equal '(list foo) (canonize-parents 'foo))))
 
 (test canonize-property
   (is (equal '(list 'VAR "value") (canonize-property '(var "value"))))

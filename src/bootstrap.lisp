@@ -47,15 +47,13 @@
 
 (defmessage shared-init (object &rest initargs &key &allow-other-keys)
   (:documentation "Adds properties to OBJECT and performs general initialization tasks."))
-(defreply shared-init (object &key properties
-                              (documentation nil doxp)
-                              (nickname nil nicknamep))
+(defreply shared-init (object &key properties documentation nickname)
   (dolist (property-spec properties)
     (destructuring-bind (name value &rest keys) property-spec
       (apply 'add-property object name value keys)))
-  (when nicknamep
+  (when (and (not (null nickname)) (symbolp nickname)) ; NIL isn't a valid nickname
     (setf (object-nickname object) nickname))
-  (when doxp
+  (when (stringp documentation)
     (setf (documentation object t) documentation))
   object)
 

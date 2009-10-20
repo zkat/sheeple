@@ -437,14 +437,13 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
   "Words cannot express how useful this is."
   `(progn
      (declaim (special ,name))
-     (let ((object (ensure-object
-                    (when (boundp ',name) (symbol-value ',name))
-                    (list ,@(ensure-list objects))
-                    :properties ,(canonize-properties properties t)
-                    ,@(canonize-options options))))
-       (unless (or (not *bootstrappedp*) (has-direct-property-p object 'nickname))
-         (setf (object-nickname object) ',name))
-       (setf (symbol-value ',name) object))))
+     (setf (symbol-value ',name)
+           (ensure-object (when (boundp ',name)
+                            (symbol-value ',name))
+                          ,(canonize-parents objects)
+                          :properties ,(canonize-properties properties t)
+                          ,@(canonize-options options)
+                          :nickname ',name))))
 
 (defun ensure-object (maybe-object parents &rest options)
   (if maybe-object

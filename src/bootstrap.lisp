@@ -9,9 +9,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-;;; Bootstrap time!
+;;; Bootstrap time! Watch closely, it's very simple.
 
+;;; We need to construct the following objects:
+
+;;;          Object        |      Metaobject       |    Parents
+;;; -----------------------+-----------------------+---------------
+;;;           =T=          | =STANDARD-METAOBJECT= |     NIL
+;;;    =STANDARD-OBJECT=   | =STANDARD-METAOBJECT= |    (=T=)
+;;;  =STANDARD-METAOBJECT= | =STANDARD-METAOBJECT= |    (=T=)
+
+;;; We only want to bootstrap an image once, so we perform a little check:
 (unless *bootstrappedp*
+
   ;; Before anything else happens, we need =STANDARD-METAOBJECT= to exist:
   (setf =standard-metaobject= (std-allocate-object =standard-metaobject=)
         (%object-metaobject =standard-metaobject=) =standard-metaobject=

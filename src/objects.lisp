@@ -406,9 +406,6 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
 ;;;
 ;;; Fancy Macros
 ;;;
-(defun canonize-objects (objects)
-  `(list ,@objects))
-
 (defun canonize-properties (properties &optional (accessors-by-default nil))
   `(list ,@(mapcar (rcurry 'canonize-property accessors-by-default) properties)))
 
@@ -429,20 +426,19 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
 
 (defmacro defobject (objects properties &rest options)
   "Standard object-generation macro. This variant auto-generates accessors."
-  `(object
-    :parents ,(canonize-objects objects)
-    :properties ,(canonize-properties properties)
-    ,@(canonize-options options)))
+  `(object :parents (list ,@(ensure-list objects))
+           :properties ,(canonize-properties properties)
+           ,@(canonize-options options)))
 
 (defmacro defproto (name objects properties &rest options)
   "Words cannot express how useful this is."
   `(progn
      (declaim (special ,name))
      (let ((object (ensure-object
-                   (when (boundp ',name) (symbol-value ',name))
-                   ,(canonize-objects objects)
-                   :properties ,(canonize-properties properties t)
-                   ,@(canonize-options options))))
+                    (when (boundp ',name) (symbol-value ',name))
+                    (list ,@(ensure-list objects))
+                    :properties ,(canonize-properties properties t)
+                    ,@(canonize-options options))))
        (unless (or (not *bootstrappedp*) (has-direct-property-p object 'nickname))
          (setf (object-nickname object) ',name))
        (setf (symbol-value ',name) object))))

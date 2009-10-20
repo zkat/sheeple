@@ -113,16 +113,23 @@ is signaled."
             (add-property object property-name new-value)))
   new-value)
 
-;;;
 ;;; Object Documentation
-;;;
-
 (defmethod documentation ((x object) (doc-type (eql 't)))
   (property-value x 'documentation))
 
 (defmethod (setf documentation) (new-value (x object) (doc-type (eql 't)))
   (handler-bind ((unbound-property 'continue))
     (setf (property-value x 'documentation) new-value)))
+
+;;; Nicknames
+(defun object-nickname (object)
+  "Returns OBJECT's nickname"
+  (property-value object 'nickname))
+
+(defun (setf object-nickname) (new-nickname object)
+  "Sets OBJECT's nickname to NEW-NICKNAME"
+  (handler-bind ((unbound-property 'continue))
+    (setf (property-value object 'nickname) new-nickname)))
 
 ;;; Reflection API
 (defun property-owner (object property-name &optional errorp)

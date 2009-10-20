@@ -19,9 +19,9 @@
 
   ;; =T= and =STANDARD-OBJECT= have special rules about parents.
   (setf =t=
-        (let ((obj (std-allocate-object =standard-metaobject=)))
-          (setf (%object-mold obj) (ensure-mold nil #()))
-          obj)
+        (aprog1 (std-allocate-object =standard-metaobject=)
+          (setf (%object-mold it) (ensure-mold nil #()))
+          (add-property it 'nickname '=t=))
         =standard-object=
         (let ((obj (std-allocate-object =standard-metaobject=)))
           (setf (%object-mold obj)

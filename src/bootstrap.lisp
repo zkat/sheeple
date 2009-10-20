@@ -22,31 +22,26 @@
 ;;; We only want to bootstrap an image once, so we perform a little check:
 (unless *bootstrappedp*
 
-  ;; Before anything else happens, we need =STANDARD-METAOBJECT= to exist:
-  (setf =standard-metaobject= (std-allocate-object =standard-metaobject=)
-        (%object-metaobject =standard-metaobject=) =standard-metaobject=
-        (%object-mold =standard-metaobject=) (ensure-mold nil #()))
-  (add-property =standard-metaobject= 'nickname '=standard-metaobject=)
+  ;; First, let's just get our objects:
+  (setf =standard-metaobject= (std-allocate-object)
+          =standard-object=   (std-allocate-object)
+                 =t=          (std-allocate-object))
 
-  ;; =T= and =STANDARD-OBJECT= have special rules about parents.
-  (setf =t=
-        (aprog1 (std-allocate-object =standard-metaobject=)
-          (setf (%object-mold it) (ensure-mold nil #()))
-          (add-property it 'nickname '=t=))
-        =standard-object=
-        (aprog1 (std-allocate-object =standard-metaobject=)
-          (setf (%object-mold it) (ensure-mold (list =t=) #()))
-          ;; This could help, in case the boot fails before the DEFPROTO
-          (add-property it 'nickname '=standard-object=)))
+  ;; Now, we have a circular link to take care of:
+  (setf (%object-metaobject =standard-metaobject=) =standard-metaobject=)
 
-  ;; Adding the missing link in the holy trinity
+  ;; Focus on the family!
+  (push =t= (object-parents =standard-object=))
   (push =t= (object-parents =standard-metaobject=))
 
-  ;; ... and we're done!
+  ;; Break the ice by playing the name game:
+  (dolist (name '(=t= =standard-object= =standard-metaobject=))
+    (add-property (symbol-value name) 'nickname name))
+
+  ;; Don't you love symbolic programming?
   (setf *bootstrappedp* t))
 
 ;;; Well, not really. We still need some messages to create objects:
-
 (defmessage shared-init (object &rest initargs &key &allow-other-keys)
   (:documentation "Adds properties to OBJECT and performs general initialization tasks."))
 (defreply shared-init (object &key properties
@@ -75,25 +70,13 @@
   (apply #'shared-init object initargs))
 
 ;;; And, we need to mirror the CL type system:
-
 (defproto =boxed-object= =t= ())
-(defproto =symbol= =boxed-object= ())
-(defproto =sequence= =boxed-object= ())
-(defproto =array= =boxed-object= ())
-(defproto =number= =boxed-object= ())
-(defproto =character= =boxed-object= ())
-(defproto =function= =boxed-object= ())
-(defproto =hash-table= =boxed-object= ())
-(defproto =package= =boxed-object= ())
-(defproto =pathname= =boxed-object= ())
-(defproto =readtable= =boxed-object= ())
-(defproto =stream= =boxed-object= ())
-(defproto =list= =sequence= ())
-(defproto =null= (=symbol= =list=) ())
-(defproto =cons= =list= ())
-(defproto =vector= (=array= =sequence=) ())
-(defproto =bit-vector= =vector= ())
-(defproto =string= =vector= ())
-(defproto =complex= =number= ())
-(defproto =integer= =number= ())
-(defproto =float= =number= ())
+
+(macrolet ((define-boxed-objects (&body names)
+             `(progn ,@(loop for (name . parents) in (mapcar 'ensure-list names)
+                          collect `(defproto ,name ,(or parents =boxed-object=))))))
+  (define-boxed-objects
+    =character= =function= =hash-table= =package= =pathname= =readtable= =stream=
+      =sequence= =symbol= (=list= =sequence=) (=null= =symbol= =list=) (=cons= =list=)
+    =array= (=vector= =array= =sequence=) (=bit-vector= =vector=) (=string= =vector=)
+    =number= (=complex= =number=) (=integer= =number=) (=float= =number=)))

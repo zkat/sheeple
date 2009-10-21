@@ -132,7 +132,7 @@
 
 * TODO 3.0.1
 ** TODO Document everything in doc/sheeple.texinfo
-** TODO Compile-time crap
+** DONE Compile-time crap
    Something is going on. There seem to be some compile-time side-effects we don't want that are
    causing weird conflicts. For example, bootstrap.lisp requires some special juggling involving
    eval-when in order to function, and I don't understand why. I don't really see what's going on,
@@ -146,9 +146,9 @@
 *** TODO Message dispatch
     The biggest gain in general will be from just the caching, but it would be nice to have a
     cleaner, faster raw algorithm. The caching itself can get filled up with declarations, too.
-* TODO 3.0
+* DONE 3.0
   This is a rough sketch of The Road to Sheeple 3.0
-** TODO Update README
+** DONE Update README
 ** DONE Parent/Hierarchy API
 *** DONE (setf object-parents)
     Needs to deal correctly with bogus parent lists

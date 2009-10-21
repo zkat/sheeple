@@ -57,7 +57,11 @@
                 (funcall (reply-function after) args nil))))))))
 
 (defun compute-primary-erfun (replies)
-  (when replies (rcurry (reply-function (car replies)) (compute-primary-erfun (cdr replies)))))
+  ;; Base case for the recursion -- are there any replies left?
+  (when replies
+    ;; Stitch together the next reply & erfun
+    (rcurry (reply-function (car replies))
+            (compute-primary-erfun (cdr replies)))))
 
 (defun find-applicable-replies (message args &optional (errorp t))
   "Returns the most specific reply using MESSAGE and ARGS."

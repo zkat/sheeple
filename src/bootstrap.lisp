@@ -20,7 +20,7 @@
 ;;;  =STANDARD-METAOBJECT= | =STANDARD-METAOBJECT= |    (=T=)
 
 ;;; We only want to bootstrap an image once, so we perform a little check:
-(unless *bootstrappedp*
+(unless (objectp =standard-metaobject=)
 
   ;; First, let's just get our objects:
   (setf =standard-metaobject= (std-allocate-object)
@@ -36,10 +36,7 @@
 
   ;; Break the ice by playing the name game:
   (dolist (name '(=t= =standard-object= =standard-metaobject=))
-    (add-property (symbol-value name) 'nickname name))
-
-  ;; Don't you love symbolic programming?
-  (setf *bootstrappedp* t))
+    (add-property (symbol-value name) 'nickname name)))
 
 ;;; Well, not really. We still need some messages to create objects:
 (defmessage shared-init (object &rest initargs &key &allow-other-keys)

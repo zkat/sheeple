@@ -19,7 +19,7 @@
   (:export
 
    ;; Objects
-   #:object #:defobject #:defproto #:objectp #:object-parents #:ancestorp #:parentp
+   #:object #:defobject #:defproto #:clone #:objectp #:object-parents #:ancestorp #:parentp
    #:descendantp #:childp #:init-object #:shared-init #:reinit-object #:print-sheeple-object
    #:object-nickname #:object-hierarchy-list
 

@@ -387,16 +387,15 @@ allocating the new object object. ALL-KEYS is passed on to INIT-OBJECT."
   (setf (%object-children object) nil)
   (apply 'init-object object all-keys))
 
-(defun clone (object &optional (metaobject (%object-metaobject object))
-              &aux (clone (maybe-std-allocate-object metaobject)))
+(defun clone (object &optional (metaobject (%object-metaobject object)))
   "Creates a object with the same parents and metaobject as OBJECT. If supplied, METAOBJECT
 will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged."
-  (change-mold clone (%object-mold object))
-  (with-accessors ((roles %object-roles)
-                   (props %object-property-values)) object
-    (setf (%object-roles clone)           (copy-list          roles)
-          (%object-property-values clone) (copy-simple-vector props)))
-  clone)
+  (aprog1 (maybe-std-allocate-object metaobject)
+    (change-mold it (%object-mold object))
+    (with-accessors ((roles %object-roles)
+                     (props %object-property-values)) object
+      (setf (%object-roles it)           (copy-list          roles)
+            (%object-property-values it) (copy-simple-vector props)))))
 
 ;;;
 ;;; Fancy Macros

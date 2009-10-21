@@ -249,6 +249,14 @@ will not be affected; otherwise, it will be bound to a recognizeable and unique 
       (print-unreadable-object (,object ,stream :type ,type :identity ,identity)
         (let ((*standard-output* ,stream)) ,@body)))))
 
+;;; I thought about Alexandria's COPY-ARRAY, but that's too general.
+;;; Use with caution.
+(declaim (inline copy-simple-vector))
+(defun copy-simple-vector (vector)
+  "Creates a new simple-vector with the same elements as VECTOR."
+  (declare (simple-vector vector) (optimize speed (safety 0) (debug 0)))
+  (make-array (length vector) :initial-contents vector))
+
 ;;; Hash-Vectors
 
 (deftype hash-vector (&optional size)

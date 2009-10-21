@@ -49,14 +49,12 @@
               (befores (remove-if-not 'before-reply-p replies))
               (afters (remove-if-not 'after-reply-p replies)))
           (lambda (args)
-            (when befores
-              (dolist (before befores)
-                (funcall (reply-function before) args nil)))
+            (dolist (before befores)
+              (funcall (reply-function before) args nil))
             (multiple-value-prog1
                 (funcall (reply-function (car primaries)) args next-erfun)
-              (when afters
-                (dolist (after (reverse afters))
-                  (funcall (reply-function after) args nil)))))))))
+              (dolist (after (reverse afters))
+                (funcall (reply-function after) args nil))))))))
 
 (defun compute-primary-erfun (replies)
   (when replies (rcurry (reply-function (car replies)) (compute-primary-erfun (cdr replies)))))

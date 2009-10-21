@@ -388,19 +388,17 @@ allocating the new object object. ALL-KEYS is passed on to INIT-OBJECT."
   (apply 'init-object object all-keys))
 
 ;; Feel free to change the exact interface if you don't like it. -- Adlai
-(defun clone (object &optional (metaobject (object-metaobject object)))
+(defun clone (object &optional (metaobject (%object-metaobject object))
+              &aux (clone (maybe-std-allocate-object metaobject)))
   "Creates a object with the same parents and metaobject as OBJECT. If supplied, METAOBJECT
 will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged."
   ;; TODO!!! - is this good enough? - syko
-  (let ((new-obj (maybe-std-allocate-object metaobject)))
-    (setf (%object-mold new-obj)
-          (%object-mold object)
-          (%object-property-values new-obj)
-          (make-array (length (%object-property-values object))
-                      :initial-contents (%object-property-values object))
-          (%object-roles new-obj)
-          (copy-list (%object-roles object))) ;this won't break anything, right? - syko
-    new-obj))
+  (change-mold clone (%object-mold object))
+  (with-accessors ((roles %object-roles)
+                   (props %object-property-values)) object
+    (setf (%object-roles clone)           (copy-list          roles)
+          (%object-property-values clone) (copy-simple-vector props)))
+  clone)
 
 ;;;
 ;;; Fancy Macros

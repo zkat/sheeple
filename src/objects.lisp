@@ -193,6 +193,7 @@ creating and linking a new one if necessary."
   (when (objectp x)
     (eq (%object-metaobject x) =standard-metaobject=)))
 
+(declaim (inline maybe-std-allocate-object))
 (defun maybe-std-allocate-object (metaobject)
   (if (eq =standard-metaobject= metaobject)
       (std-allocate-object metaobject)

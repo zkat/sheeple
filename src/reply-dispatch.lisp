@@ -11,16 +11,23 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(defstruct (reply-container (:type vector))
-  reply rank)
+(deftype ranked-reply ()
+  'simple-vector)
 
+(declaim (inline unbox-ranked-reply))
+(defun unbox-ranked-reply (ranked-reply)
+  (declare (ranked-reply ranked-reply) (optimize speed (safety 0)))
+  (svref ranked-reply 0))
+
+(declaim (inline reply-specialized-length))
 (defun reply-specialized-length (reply)
   (count-required-parameters (reply-lambda-list reply)))
 
-(defun contain-reply (reply)
-  (make-reply-container
-   :reply reply
-   :rank (make-vector (reply-specialized-length reply))))
+(defun box-reply (reply)                ; For lack of a better name
+  (declare (reply reply) (optimize speed (safety 0)))
+  (aprog1 (make-array (the fixnum (1+ (the fixnum (reply-specialized-length reply))))
+                      :initial-element nil)
+    (setf (svref it 0) reply)))
 
 (defun nunbox-replies (replies)
   "Unbox in-place each of the contained REPLIES."
@@ -29,29 +36,29 @@
   (do ((tail replies (cdr tail)))
       ((null tail) replies)
     (declare (list tail))
-    (setf (car tail) (reply-container-reply (car tail)))))
+    (setf (car tail) (unbox-ranked-reply (car tail)))))
 
-(defun calculate-rank-score (rank)
+(defun score-ranked-reply (ranked-reply)
   ;; All hell breaks loose if you don't give this a simple-vector
-  (declare (simple-vector rank) (optimize speed (safety 0)))
-  (loop for i fixnum downfrom (1- (length rank))
-     for elt = (svref rank i) with total fixnum = 0
+  (declare (ranked-reply ranked-reply) (optimize speed (safety 0)))
+  (loop for i fixnum downfrom (1- (length ranked-reply))
+     for elt = (svref ranked-reply i) with total fixnum = 0
+     when (zerop i) return total
      unless (null elt) do
-       (setf total (the fixnum (+ total (the fixnum elt))))
-     when (zerop i) return total))
+       (setf total (the fixnum (+ total (the fixnum elt))))))
 
-(defun fully-specified-p (rank)
+(defun fully-specified-p (ranked-reply)
   ;; Same here, and all the elements better be (or fixnum null)
-  (declare (simple-vector rank) (optimize speed (safety 0)))
-  (loop for i fixnum downfrom (1- (length rank))
-     unless (svref rank i) return nil
-     when (zerop i) return t))
+  (declare (ranked-reply ranked-reply) (optimize speed (safety 0)))
+  (loop for i fixnum downfrom (1- (length ranked-reply))
+     when (zerop i) return t
+     unless (svref ranked-reply i) return nil))
 
 (defun sort-applicable-replies (reply-list)
   ;; Most lisps compile this as a tail call, so this function ends up being a
   ;; macro around SORT, and there's no harm in the (safety 0)
   (declare (optimize speed (safety 0)) (list reply-list))
-  (sort reply-list #'< :key (fun (calculate-rank-score (reply-container-rank _)))))
+  (sort reply-list #'< :key 'score-ranked-reply))
 
 (defun apply-message (message args)
   (let ((relevant-args-length (arg-info-number-required (message-arg-info message))))
@@ -110,10 +117,12 @@
             (compute-primary-erfun (cdr replies)))))
 
 (defun find-applicable-replies (message args &optional (errorp t))
-  "Returns the most specific reply using MESSAGE and ARGS."
+  "Returns a sorted list of replies on MESSAGE for which appropriate roles
+are present in ARGS. If no such replies are found and ERRORP is true, a
+condition of type `no-applicable-replies' is signaled."
   (if (null args)
       (message-replies message)
-      (loop with discovered-replies list and contained-applicable-replies list
+      (loop with discovered-replies list and boxed-applicable-replies list
          for arg in args and index fixnum upfrom 0 do
            (loop
               for hierarchy-object in
@@ -126,20 +135,18 @@
                   (declare (role role))
                   (when (and (eq message (role-message role))
                              (= index (the fixnum (role-position role))))
-                    (let ((reply (role-reply role)) contained-reply)
+                    (let ((reply (role-reply role)) boxed-reply)
                       (aif (find reply discovered-replies
-                                 :key #'reply-container-reply :test #'eq)
-                           (setf contained-reply it)
-                           (push (setf contained-reply (contain-reply reply))
-                                 discovered-replies))
-                      (setf (elt (reply-container-rank contained-reply) index)
-                            hierarchy-position)
-                      (when (fully-specified-p (reply-container-rank contained-reply))
-                        (unless (find reply contained-applicable-replies
-                                      :key #'reply-container-reply :test #'eq)
-                          (push contained-reply contained-applicable-replies)))))))
+                                 :key #'unbox-ranked-reply :test #'eq)
+                           (setf boxed-reply it)
+                           (push (setf boxed-reply (box-reply reply)) discovered-replies))
+                      (setf (svref boxed-reply (the fixnum (1+ index))) hierarchy-position)
+                      (when (fully-specified-p boxed-reply)
+                        (unless (find reply boxed-applicable-replies
+                                      :key #'unbox-ranked-reply :test #'eq)
+                          (push boxed-reply boxed-applicable-replies)))))))
          finally
-           (if contained-applicable-replies
-               (return (nunbox-replies (sort-applicable-replies contained-applicable-replies)))
+           (if boxed-applicable-replies
+               (return (nunbox-replies (sort-applicable-replies boxed-applicable-replies)))
                (when errorp
                  (error 'no-applicable-replies :message (message-name message) :args args))))))

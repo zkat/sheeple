@@ -121,7 +121,11 @@
   rank)
 
 (defun fully-specified-p (rank)
-  (notany 'null rank))
+  ;; All hell breaks loose if you don't give this a simple-vector
+  (declare (simple-vector rank) (optimize speed (safety 0)))
+  (loop for i fixnum downfrom (1- (length rank))
+     unless (svref rank i) return nil
+     when (zerop i) return t))
 
 (defun calculate-rank-score (rank)
   (declare (simple-array rank))

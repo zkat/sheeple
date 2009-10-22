@@ -32,10 +32,9 @@
         ,(let (,@(loop for n in names for g in gensyms collect `(,n ,g)))
            ,@body)))))
 
-(declaim (inline error-when))
-(defun error-when (condition error-datum &rest error-args)
+(defmacro error-when (condition error-datum &rest error-args)
   "Like `ASSERT', but with fewer bells and whistles."
-  (when condition (apply 'error error-datum error-args)))
+  `(when ,condition (error ',error-datum ,@error-args)))
 
 (defmacro check-list-type (list typespec &optional (string nil string-supplied-p))
   "Calls CHECK-TYPE with each element of LIST, with TYPESPEC and STRING."

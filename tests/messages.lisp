@@ -115,8 +115,8 @@
 (test arg-info-struct
   (let ((arg-info (make-arg-info)))
     (is (eq :no-lambda-list (arg-info-lambda-list arg-info)))
-    (is (null (arg-info-number-required arg-info)))
-    (is (null (arg-info-number-optional arg-info)))
+    (is (= 0 (arg-info-number-required arg-info)))
+    (is (= 0 (arg-info-number-optional arg-info)))
     (is (null (arg-info-key/rest-p arg-info)))
     (is (null (arg-info-keys arg-info)))
     (is (equal '(a b c) (setf (arg-info-lambda-list arg-info) '(a b c))))

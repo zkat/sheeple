@@ -114,7 +114,7 @@
 (defun contain-reply (reply)
   (make-reply-container
    :reply reply
-   :rank (make-vector (length (reply-specialized-portion reply)))))
+   :rank (make-vector (reply-specialized-length reply))))
 
 (defstruct (reply-container (:type vector))
   reply
@@ -136,5 +136,5 @@
        (setf total (the fixnum (+ total (the fixnum elt))))
      when (zerop i) return total))
 
-(defun reply-specialized-portion (msg)
-  (parse-lambda-list (reply-lambda-list msg)))
+(defun reply-specialized-length (reply)
+  (count-required-parameters (reply-lambda-list reply)))

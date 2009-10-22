@@ -1,7 +1,7 @@
 ;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
-
+;;;;
 ;;;; This file is part of Sheeple
-
+;;;;
 ;;;; reply-dispatch.lisp
 ;;;;
 ;;;; Reply execution and dispatch
@@ -24,17 +24,21 @@
   (find :around (reply-qualifiers reply)))
 
 (defun apply-message (message args)
-  (declare (list args))
-  (let* ((relevant-args-length (the fixnum (arg-info-number-required (message-arg-info message))))
-         (relevant-args (subseq args 0 relevant-args-length)))
-    (error-when (< (length args) relevant-args-length)
-                'insufficient-message-args :message message)
-    (aif (and *caching-enabled* (find-cached-erfun message relevant-args))
-         (funcall it args)
-         (let* ((replies (find-applicable-replies message relevant-args))
-                (erfun (compute-erfun message replies)))
-           (cache-erfun message relevant-args erfun)
-           (funcall erfun args)))))
+  (let ((relevant-args-length (arg-info-number-required (message-arg-info message))))
+    (error-when (< (the fixnum (length args))
+                   (the fixnum relevant-args-length))
+                insufficient-message-args :message message)
+    (let ((relevant-args (subseq args 0 relevant-args-length)))
+      (flet ((compute-erfun () ; This local function avoids code duplication
+               (compute-erfun message (find-applicable-replies message relevant-args))))
+        (declare (dynamic-extent (function compute-erfun)))
+        (if *caching-enabled*
+            (aif (find-cached-erfun message relevant-args)
+                 (funcall it args)
+                 (let ((erfun (compute-erfun)))
+                   (cache-erfun message relevant-args erfun)
+                   (funcall erfun args)))
+            (funcall (compute-erfun) args))))))
 
 (defun compute-erfun (message replies)
   (let ((around (car (remove-if-not 'around-reply-p replies)))

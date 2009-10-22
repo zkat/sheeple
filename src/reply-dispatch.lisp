@@ -71,13 +71,10 @@
   "Returns the most specific reply using MESSAGE and ARGS."
   (if (null args)
       (message-replies message)
-      (let ((n (length args))
-            discovered-replies
-            contained-applicable-replies)
+      (let (discovered-replies contained-applicable-replies)
         (declare (list discovered-replies contained-applicable-replies))
         (loop
-           for arg in args
-           for index below n
+           for arg in args and index upfrom 0
            do (let* ((arg (if (objectp arg) arg (or (find-boxed-object arg) (box-type-of arg))))
                      (curr-object-list (object-hierarchy-list arg)))
                 (loop

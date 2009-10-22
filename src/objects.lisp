@@ -280,7 +280,8 @@ regards to the CONSTRAINTS. A future version will undo this change."
     (mapcar 'cons (cons object parents) parents)))
 
 (defun std-tie-breaker-rule (minimal-elements chosen-elements)
-  (dolist (candidate chosen-elements)
+  ;; Pick the one with a direct leftmost in the hierarchy list computed so far
+  (dolist (candidate (reverse chosen-elements))
     (awhen (dolist (parent (object-parents candidate))
              (awhen (find parent (the list minimal-elements) :test 'eq) (return it)))
       (return-from std-tie-breaker-rule it))))

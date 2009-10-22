@@ -193,7 +193,7 @@
                (object-hierarchy-list f)))
     (is (equal (list g c f d a =standard-object= =t=)
                (object-hierarchy-list g)))
-    (is (equal (list h e g c f d a b =standard-object= =t=)
+    (is (equal (list h e g c b f d a =standard-object= =t=)
                (object-hierarchy-list h)))))
 
 (def-suite inheritance-predicates :in inheritance)

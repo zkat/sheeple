@@ -163,16 +163,18 @@ more entries the cache will be able to hold, but the slower lookup will be.")
             (cache-entry-erfun it))
            (t nil))))
 
-(defun desired-entry-p (entry args)
+(defun desired-entry-p (entry target-args)
+  (declare (optimize speed (safety 0)))
   (let ((entry-args (cache-entry-args entry)))
-    (declare (list args) (list entry-args))
-    (when (= (length entry-args) (length args))
-      (loop
-         for pointer in entry-args
-         for arg in args
-         unless (eq (maybe-weak-pointer-value pointer) arg)
-         do (return nil)
-         finally (return entry)))))
+    (do ((pointers entry-args (cdr pointers))
+         (pointer (car entry-args) (car pointers))
+         (args target-args (cdr args))
+         (arg (car target-args) (car args)))
+        ((or (null pointers) (null args))
+         (when (and (null pointers) (null args))
+           entry))
+      (unless (eq (maybe-weak-pointer-value pointer) arg)
+        (return nil)))))
 
 (defun clear-dispatch-cache (message)
   (setf (message-dispatch-cache message) (make-dispatch-cache)))

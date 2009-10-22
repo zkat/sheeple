@@ -90,6 +90,8 @@
 (defun maybe-weak-pointer-value (x)
   (when x (weak-pointer-value x)))
 
+(declaim (inline maybe-make-weak-pointer maybe-weak-pointer-value))
+
 ;;;; Weak Hash-tables
 
 ;;; Allegro can apparently create weak hash-tables with both weak keys

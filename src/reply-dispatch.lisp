@@ -81,13 +81,13 @@
   (null (reply-qualifiers reply)))
 
 (defun before-reply-p (reply)
-  (find :before (reply-qualifiers reply) :test #'eq))
+  (eq :before (car (reply-qualifiers reply))))
 
 (defun after-reply-p (reply)
-  (find :after (reply-qualifiers reply) :test #'eq))
+  (eq :after (car (reply-qualifiers reply))))
 
 (defun around-reply-p (reply)
-  (find :around (reply-qualifiers reply) :test #'eq))
+  (eq :around (car (reply-qualifiers reply))))
 
 (defun compute-erfun (message replies)
   (let ((around (find-if 'around-reply-p replies))

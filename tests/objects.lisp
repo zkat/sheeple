@@ -277,6 +277,20 @@
     (is (eq 'test (object-nickname object)))
     (is (eq 'test (object-nickname (object :parents (list object)))))))
 
+(test clone
+  (let ((obj (object)))
+    (is (objectp (clone obj)))
+    (is (null (%object-property-values (clone obj))))
+    (is (null (%object-roles (clone obj))))
+    (is (equal (list =standard-object=) (object-parents (clone obj))))
+    (add-property obj 'test 'test)
+    (is (objectp (clone obj)))
+    (has-direct-property-p (clone obj) 'test)
+    (is (eq 'test (direct-property-value (clone obj) 'test)))
+    (defreply clone-test ((test obj)) test)
+    (let ((clone (clone obj)))
+      (is (eq clone (clone-test clone))))))
+
 ;;;
 ;;; DEFOBJECT
 ;;;

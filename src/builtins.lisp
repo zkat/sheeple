@@ -11,34 +11,32 @@
 (define-unbound-variables
     =boxed-object= =symbol= =sequence= =array= =number= =character= =function=
     =hash-table= =package= =pathname= =readtable= =stream= =list= =null= =cons=
-    =vector= =bit-vector= =string= =complex= =integer= =float=)
+    =vector= =bit-vector= =string= =complex= =integer= =float= =boolean=)
 
 (defun box-type-of (x)
   "Maps the type of X to a built-in object."
-  (if (objectp x)
-      (progn
-        (warn "This is already a object!")
-        x)
-      (typecase x
-        (null                                          =null=)
-        ((and symbol (not null))                       =symbol=)
-        ((complex *)                                   =complex=)
-        ((integer * *)                                 =integer=)
-        ((float * *)                                   =float=)
-        (cons                                          =cons=)
-        (character                                     =character=)
-        (hash-table                                    =hash-table=)
-        (package                                       =package=)
-        (pathname                                      =pathname=)
-        (readtable                                     =readtable=)
-        (stream                                        =stream=)
-        ((and number (not (or integer complex float))) =number=)
-        ((string *)                                    =string=)
-        ((bit-vector *)                                =bit-vector=)
-        ((and vector (not string))                     =vector=)
-        ((and array (not vector))                      =array=)
-        (function                                      =function=)
-        (t                                             =boxed-object=))))
+  (typecase x
+    (object (warn "This is already an object!")    x)
+    (null                                          =null=)
+    (boolean                                       =boolean=)
+    ((and symbol (not null))                       =symbol=)
+    ((complex *)                                   =complex=)
+    ((integer * *)                                 =integer=)
+    ((float * *)                                   =float=)
+    (cons                                          =cons=)
+    (character                                     =character=)
+    (hash-table                                    =hash-table=)
+    (package                                       =package=)
+    (pathname                                      =pathname=)
+    (readtable                                     =readtable=)
+    (stream                                        =stream=)
+    ((and number (not (or integer complex float))) =number=)
+    ((string *)                                    =string=)
+    ((bit-vector *)                                =bit-vector=)
+    ((and vector (not string))                     =vector=)
+    ((and array (not vector))                      =array=)
+    (function                                      =function=)
+    (t                                             =boxed-object=)))
 
 ;; This thing is a bit problematic. We don't necessarily want to keep references around to
 ;; objects that have been autoboxed, right? I'm tempted to say that the ideal here would
@@ -77,8 +75,12 @@ has not already been boxed."
             (when errorp (error "~S has not been boxed." object))))))
 
 (defun objectify (object)
-  "Returns OBJECT or boxes it."
-  (cond ((eq object t) =t=) ;optimization!
+  "Returns two values: OBJECT or a boxed object representing it, and a boolean
+specifying whether boxing took place."
+  ;; I'm not sure that this is the right way to treat T... imo, it should box
+  ;; to =boolean=; =T= isn't a boxed object.   - Adlai
+  (cond ((eq object t)
+         (values =t= nil))
         ((not (objectp object))
          (or (find-boxed-object object)
              (values (box-object object) t)))

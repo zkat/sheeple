@@ -50,7 +50,7 @@ the original object is simply copied. All properties and roles are (shallow-)cop
 ;;                   |
 ;;       =standard-object=
 ;;         /   /
-;;    *mixin  /
+;;    *mixin* /
 ;;       \   /  
 ;;       *obj*
 ;;         |

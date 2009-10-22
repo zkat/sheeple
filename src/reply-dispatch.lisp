@@ -90,7 +90,7 @@
   (find :around (reply-qualifiers reply)))
 
 (defun compute-erfun (message replies)
-  (let ((around (car (remove-if-not 'around-reply-p replies)))
+  (let ((around (find-if 'around-reply-p replies))
         (primaries (remove-if-not 'primary-reply-p replies)))
     (when (null primaries)
       (error 'no-primary-replies :message (message-name message)))

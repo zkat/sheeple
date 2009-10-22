@@ -47,9 +47,6 @@
   "X if X is a list, otherwise (list X)."
   (if (listp x) x (list x)))
 
-;;; This code is so optimized that the only useful declarations are (safety 0)
-;;; and (debug 0), the latter only on SBCL; on CLISP any declarations make no
-;;; difference at all, probably because it's all bytecode.
 (defun nunzip-alist (alist)
   "Destructively unzips ALIST into two flat lists"
   (declare (list alist) (optimize speed (safety 0)))
@@ -57,7 +54,6 @@
     (do* ((key-cons keys (cdr key-cons))
           (val-cons vals (cdr val-cons)))
          ((null (car key-cons)) (values keys vals))
-      (declare (list key-cons val-cons))
       (setf (car key-cons) (caar key-cons)
             (car val-cons) (cdr  val-cons)
             (cdr val-cons) (cadr key-cons)))))

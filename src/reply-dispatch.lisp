@@ -81,15 +81,14 @@
                          (box-type-of arg))))
               and hierarchy-position fixnum upfrom 0 do
                 (dolist (role (%object-roles hierarchy-object))
+                  (declare (role role))
                   (when (and (eq message (role-message role))
-                             (= index (role-position role)))
-                    (let ((curr-reply (role-reply role)))
-                      (unless (member curr-reply
-                                      discovered-replies
-                                      :key #'reply-container-reply)
-                        (push (contain-reply curr-reply)
-                              discovered-replies))
-                      (let ((contained-reply (find curr-reply discovered-replies
+                             (= index (the fixnum (role-position role))))
+                    (let ((reply (role-reply role)))
+                      (unless (find reply discovered-replies
+                                    :key #'reply-container-reply :test #'eq)
+                        (push (contain-reply reply) discovered-replies))
+                      (let ((contained-reply (find reply discovered-replies
                                                    :key #'reply-container-reply :test #'eq)))
                         (setf (elt (reply-container-rank contained-reply) index)
                               hierarchy-position)

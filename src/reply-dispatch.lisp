@@ -11,17 +11,47 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(defun primary-reply-p (reply)
-  (null (reply-qualifiers reply)))
+(defstruct (reply-container (:type vector))
+  reply rank)
 
-(defun before-reply-p (reply)
-  (find :before (reply-qualifiers reply)))
+(defun reply-specialized-length (reply)
+  (count-required-parameters (reply-lambda-list reply)))
 
-(defun after-reply-p (reply)
-  (find :after (reply-qualifiers reply)))
+(defun contain-reply (reply)
+  (make-reply-container
+   :reply reply
+   :rank (make-vector (reply-specialized-length reply))))
 
-(defun around-reply-p (reply)
-  (find :around (reply-qualifiers reply)))
+(defun nunbox-replies (replies)
+  "Unbox in-place each of the contained REPLIES."
+  ;; This has a mean disassembly that's worth every dead kitten of the (safety 0)
+  (declare (optimize speed (safety 0)))
+  (do ((tail replies (cdr tail)))
+      ((null tail) replies)
+    (declare (list tail))
+    (setf (car tail) (reply-container-reply (car tail)))))
+
+(defun calculate-rank-score (rank)
+  ;; All hell breaks loose if you don't give this a simple-vector
+  (declare (simple-vector rank) (optimize speed (safety 0)))
+  (loop for i fixnum downfrom (1- (length rank))
+     for elt = (svref rank i) with total fixnum = 0
+     unless (null elt) do
+       (setf total (the fixnum (+ total (the fixnum elt))))
+     when (zerop i) return total))
+
+(defun fully-specified-p (rank)
+  ;; Same here, and all the elements better be (or fixnum null)
+  (declare (simple-vector rank) (optimize speed (safety 0)))
+  (loop for i fixnum downfrom (1- (length rank))
+     unless (svref rank i) return nil
+     when (zerop i) return t))
+
+(defun sort-applicable-replies (reply-list)
+  ;; Most lisps compile this as a tail call, so this function ends up being a
+  ;; macro around SORT, and there's no harm in the (safety 0)
+  (declare (optimize speed (safety 0)) (list reply-list))
+  (sort reply-list #'< :key (fun (calculate-rank-score (reply-container-rank _)))))
 
 (defun apply-message (message args)
   (let ((relevant-args-length (arg-info-number-required (message-arg-info message))))
@@ -39,6 +69,18 @@
                    (cache-erfun message relevant-args erfun)
                    (funcall erfun args)))
             (funcall (compute-erfun) args))))))
+
+(defun primary-reply-p (reply)
+  (null (reply-qualifiers reply)))
+
+(defun before-reply-p (reply)
+  (find :before (reply-qualifiers reply)))
+
+(defun after-reply-p (reply)
+  (find :after (reply-qualifiers reply)))
+
+(defun around-reply-p (reply)
+  (find :around (reply-qualifiers reply)))
 
 (defun compute-erfun (message replies)
   (let ((around (car (remove-if-not 'around-reply-p replies)))
@@ -101,46 +143,3 @@
                (return (nunbox-replies (sort-applicable-replies contained-applicable-replies)))
                (when errorp
                  (error 'no-applicable-replies :message (message-name message) :args args))))))
-
-(defun nunbox-replies (replies)
-  "Unbox in-place each of the contained REPLIES."
-  ;; This has a mean disassembly that's worth every dead kitten of the (safety 0)
-  (declare (optimize speed (safety 0)))
-  (do ((tail replies (cdr tail)))
-      ((null tail) replies)
-    (declare (list tail))
-    (setf (car tail) (reply-container-reply (car tail)))))
-
-(defun sort-applicable-replies (reply-list)
-  ;; Most lisps compile this as a tail call, so this function ends up being a
-  ;; macro around SORT, and there's no harm in the (safety 0)
-  (declare (optimize speed (safety 0)) (list reply-list))
-  (sort reply-list #'< :key (fun (calculate-rank-score (reply-container-rank _)))))
-
-(defun contain-reply (reply)
-  (make-reply-container
-   :reply reply
-   :rank (make-vector (reply-specialized-length reply))))
-
-(defstruct (reply-container (:type vector))
-  reply
-  rank)
-
-(defun fully-specified-p (rank)
-  ;; All hell breaks loose if you don't give this a simple-vector
-  (declare (simple-vector rank) (optimize speed (safety 0)))
-  (loop for i fixnum downfrom (1- (length rank))
-     unless (svref rank i) return nil
-     when (zerop i) return t))
-
-(defun calculate-rank-score (rank)
-  ;; Same here, and all the elements better be (or fixnum null)
-  (declare (simple-vector rank) (optimize speed (safety 0)))
-  (loop for i fixnum downfrom (1- (length rank))
-     for elt = (svref rank i) with total fixnum = 0
-     unless (null elt) do
-       (setf total (the fixnum (+ total (the fixnum elt))))
-     when (zerop i) return total))
-
-(defun reply-specialized-length (reply)
-  (count-required-parameters (reply-lambda-list reply)))

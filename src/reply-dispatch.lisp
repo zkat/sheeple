@@ -98,12 +98,18 @@
                           (push contained-reply contained-applicable-replies)))))))
          finally
            (if contained-applicable-replies
-               (return (unbox-replies (sort-applicable-replies contained-applicable-replies)))
+               (return (nunbox-replies (sort-applicable-replies contained-applicable-replies)))
                (when errorp
                  (error 'no-applicable-replies :message (message-name message) :args args))))))
 
-(defun unbox-replies (replies)
-  (mapcar #'reply-container-reply replies))
+(defun nunbox-replies (replies)
+  "Unbox in-place each of the contained REPLIES."
+  ;; This has a mean disassembly that's worth every dead kitten of the (safety 0)
+  (declare (optimize speed (safety 0)))
+  (do ((tail replies (cdr tail)))
+      ((null tail) replies)
+    (declare (list tail))
+    (setf (car tail) (reply-container-reply (car tail)))))
 
 (defun sort-applicable-replies (reply-list)
   ;; Most lisps compile this as a tail call, so this function ends up being a

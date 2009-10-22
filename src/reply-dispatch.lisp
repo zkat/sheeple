@@ -105,9 +105,11 @@
 (defun unbox-replies (replies)
   (mapcar #'reply-container-reply replies))
 
-(defun sort-applicable-replies (reply-list &key (rank-key #'<))
-  (sort reply-list rank-key
-        :key (compose 'calculate-rank-score 'reply-container-rank)))
+(defun sort-applicable-replies (reply-list)
+  ;; Most lisps compile this as a tail call, so this function ends up being a
+  ;; macro around SORT, and there's no harm in the (safety 0)
+  (declare (optimize speed (safety 0)) (list reply-list))
+  (sort reply-list #'< :key (fun (calculate-rank-score (reply-container-rank _)))))
 
 (defun contain-reply (reply)
   (make-reply-container

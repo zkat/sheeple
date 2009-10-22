@@ -110,11 +110,9 @@
                 (funcall (reply-function after) args nil))))))))
 
 (defun compute-primary-erfun (replies)
-  ;; Base case for the recursion -- are there any replies left?
-  (when replies
-    ;; Stitch together the next reply & erfun
-    (rcurry (reply-function (car replies))
-            (compute-primary-erfun (cdr replies)))))
+  (reduce (lambda (erfun reply)
+            (fun (funcall (reply-function reply) _ erfun)))
+          replies :initial-value nil))
 
 (defun find-applicable-replies (message args &optional (errorp t))
   "Returns a sorted list of replies on MESSAGE for which appropriate roles

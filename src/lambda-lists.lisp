@@ -184,6 +184,17 @@
     ;; Voila.
     (values required optional restp rest keyp keys allowp auxp aux)))
 
+(defun count-required-parameters (lambda-list)
+  ;; Count the required parameters, without consing or safety checks
+  ;; This is for reply dispatch, and should be given the axe once an even
+  ;; marginally better dispatch scheme comes along.
+  (declare (optimize speed (safety 0)))
+  (do* ((n   0           (1+ n))
+        (ll  lambda-list (cdr ll))
+        (arg (car ll)    (car ll)))
+       ((or (null ll) (memq arg '(&optional &rest &key &aux))) n)
+    (declare (fixnum n))))
+
 (defun parse-specialized-lambda-list
     (arglist
      &optional supplied-keywords (allowed-keywords '(&optional &rest &key &aux))

@@ -173,6 +173,8 @@ the original object is simply copied. All properties and roles are (shallow-)cop
   (format t "The total is ~A.~%" total)
   total)
 
+(synergize 8 3)
+
 ;;;
 ;;; Beyond the basics: Going the extra mile
 ;;;

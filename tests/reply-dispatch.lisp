@@ -18,18 +18,11 @@
        (declare (ignorable ,stack))
        (flet ((flag (tag)
                 (nconcf ,stack (list tag)))
-              (check (&rest stack)
-                (is (equal stack ,stack))
+              (check (reason &rest stack)
+                (is (equal stack ,stack) reason)
                 (setf ,stack nil)))
          (declare (ignorable (function flag) (function check)))
          ,@body))))
-
-(test reply-stack
-  (with-flag-stack
-    (flag 1)
-    (check 1)
-    (flag 2) (flag 3)
-    (check 2 3)))
 
 (defmacro with-dummy-message (message-arglist &body body)
   (let ((message-name (gensym)))
@@ -51,13 +44,13 @@
       (with-flag-stack
         (define-dummy-reply nil (a =t=) (flag :a))
         (call-dummy-message a nil)
-        (check :a)))
+        (check "Single reply" :a)))
     (with-dummy-message (x y)
       (with-flag-stack
         (define-dummy-reply nil (a =t=) (flag :a))
         (define-dummy-reply nil (b =t=) (flag :b) (call-next-reply))
         (call-dummy-message b nil)
-        (check :b :a)))))
+        (check "Two replies, linked with CALL-NEXT-REPLY" :b :a)))))
 
 (test standard-combination-before
   (with-object-hierarchy (a (b a))
@@ -68,7 +61,7 @@
         (define-dummy-reply nil (a)
           (flag :a))
         (call-dummy-message a)
-        (check :a-before :a)))
+        (check "One primary, one :before, specialized on the same object" :a-before :a)))
     (with-dummy-message (x)
       (with-flag-stack
         (define-dummy-reply (:before) (b)
@@ -76,7 +69,7 @@
         (define-dummy-reply nil (a)
           (flag :a))
         (call-dummy-message b)
-        (check :b-before :a)))
+        (check "One primary and one :before specialized on a child" :b-before :a)))
     (with-dummy-message (x)
       (with-flag-stack
         (define-dummy-reply (:before) (b)
@@ -86,7 +79,8 @@
         (define-dummy-reply nil (a)
           (flag :a))
         (call-dummy-message b)
-        (check :b-before :a-before :a)))
+        (check "One primary, one :before specialized on the same object, and ~@
+                one :before specialized on its child" :b-before :a-before :a)))
     (with-dummy-message (x)
       (with-flag-stack
         (define-dummy-reply (:before) (b)
@@ -96,7 +90,8 @@
         (define-dummy-reply nil (a)
           (flag :a))
         (call-dummy-message a)
-        (check :a-before :a)))))
+        (check "One primary, one :before specialized on the same object, and ~@
+                one :before which shouldn't be running" :a-before :a)))))
 
 (test standard-combination-after
   (with-object-hierarchy (a (b a))
@@ -107,7 +102,7 @@
         (define-dummy-reply nil (a)
           (flag :a))
         (call-dummy-message a)
-        (check :a :a-after)))
+        (check "One primary, one :after, specialized on the same object" :a :a-after)))
     (with-dummy-message (x)
       (with-flag-stack
         (define-dummy-reply (:after) (b)
@@ -115,7 +110,7 @@
         (define-dummy-reply nil (a)
           (flag :a))
         (call-dummy-message b)
-        (check :a :b-after)))
+        (check "One primary and one :after specialized on a child" :a :b-after)))
     (with-dummy-message (x)
       (with-flag-stack
         (define-dummy-reply (:after) (b)
@@ -125,7 +120,8 @@
         (define-dummy-reply nil (a)
           (flag :a))
         (call-dummy-message b)
-        (check :a :a-after :b-after)))
+        (check "One primary, one :after specialized on the same object, and ~@
+                one :after specialized on its child" :a :a-after :b-after)))
     (with-dummy-message (x)
       (with-flag-stack
         (define-dummy-reply (:after) (b)
@@ -135,7 +131,8 @@
         (define-dummy-reply nil (a)
           (flag :a))
         (call-dummy-message a)
-        (check :a :a-after)))))
+        (check "One primary, one :after specialized on the same object, and ~@
+                one :after which shouldn't be running" :a :a-after)))))
 
 (test standard-combination-around
   (with-object-hierarchy (a (b a))
@@ -148,7 +145,7 @@
         (define-dummy-reply nil (a)
           (flag :a))
         (call-dummy-message a)
-        (check :around-entry :a :around-exit)))
+        (check "One primary, and one :around wrapping it" :around-entry :a :around-exit)))
     (with-dummy-message (x)
       (with-flag-stack
         (define-dummy-reply (:around) (b)
@@ -156,7 +153,7 @@
         (define-dummy-reply nil (a)
           (flag :a))
         (call-dummy-message a)
-        (check :a)))))
+        (check "One primary, and an :around which shouldn't be running" :a)))))
 
 (def-suite reply-dispatch :in messages)
 (in-suite reply-dispatch)

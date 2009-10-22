@@ -255,13 +255,9 @@ regards to the CONSTRAINTS. A future version will undo this change."
              elements (delete choice elements :test 'eq)
              (values befores afters) (parallel-delete choice befores afters))
        (unless result (go create-tail))
-       (setf (cdr result-tail) (list choice)
-             result-tail (cdr result-tail))
-       (go top)
-       create-tail
-       (setf result-tail (list choice)
-             result result-tail)
-       (go top)
+       (setf (cdr result-tail) (list choice))
+       (pop result-tail) (go top) create-tail
+       (setf result-tail (list choice) result result-tail) (go top)
        end (if (null elements) (return result)
                (error 'topological-sort-conflict
                       :conflicting-elements elements

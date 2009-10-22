@@ -246,19 +246,27 @@ on the TIE-BREAKER in the case of ambiguous constraints. On the assumption
 that they are freshly generated, this implementation is destructive with
 regards to the CONSTRAINTS. A future version will undo this change."
   (multiple-value-bind (befores afters) (nunzip-alist constraints)
-    (prog (minimal-elements choice result)
-     top (setf minimal-elements (remove-if (fun (memq _ afters)) elements))
-     (when (null minimal-elements) (go end))
-     (setf choice (if (null (cdr minimal-elements)) (car minimal-elements)
-                      (funcall tie-breaker minimal-elements result))
-           elements (delete choice elements :test 'eq)
-           (values befores afters) (parallel-delete choice befores afters))
-     (push choice result) (go top)
-     end (if (null elements) (return (nreverse result))
-             (error 'topological-sort-conflict
-                    :conflicting-elements elements
-                    :sorted-elements (reverse result)
-                    :constraints (mapcar 'cons befores afters))))))
+    (prog (minimal-elements choice result result-tail)
+       (declare (list minimal-elements result result-tail))
+       top (setf minimal-elements (remove-if (fun (memq _ afters)) elements))
+       (when (null minimal-elements) (go end))
+       (setf choice (if (null (cdr minimal-elements)) (car minimal-elements)
+                        (funcall tie-breaker minimal-elements result))
+             elements (delete choice elements :test 'eq)
+             (values befores afters) (parallel-delete choice befores afters))
+       (unless result (go create-tail))
+       (setf (cdr result-tail) (list choice)
+             result-tail (cdr result-tail))
+       (go top)
+       create-tail
+       (setf result-tail (list choice)
+             result result-tail)
+       (go top)
+       end (if (null elements) (return result)
+               (error 'topological-sort-conflict
+                      :conflicting-elements elements
+                      :sorted-elements result
+                      :constraints (mapcar 'cons befores afters))))))
 
 (defun collect-ancestors (object)
   "Collects all of OBJECT's ancestors."
@@ -281,7 +289,7 @@ regards to the CONSTRAINTS. A future version will undo this change."
 
 (defun std-tie-breaker-rule (minimal-elements chosen-elements)
   ;; Pick the one with a direct leftmost in the hierarchy list computed so far
-  (dolist (candidate (reverse chosen-elements))
+  (dolist (candidate chosen-elements)
     (awhen (dolist (parent (object-parents candidate))
              (awhen (find parent (the list minimal-elements) :test 'eq) (return it)))
       (return-from std-tie-breaker-rule it))))

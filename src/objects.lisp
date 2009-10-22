@@ -395,7 +395,7 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
     (with-accessors ((roles %object-roles)
                      (props %object-property-values)) object
       (setf (%object-roles it)           (copy-list          roles)
-            (%object-property-values it) (copy-simple-vector props)))))
+            (%object-property-values it) (when props (copy-simple-vector props))))))
 
 ;;;
 ;;; Fancy Macros

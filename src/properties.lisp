@@ -159,7 +159,7 @@ returned list are undefined."
            Parents: ~A~@
            Properties: ~%~{~A~%~}"
           object (object-parents object)
-          (mapcar (fun (format nil "~A: ~S~@[ (Delegated to: ~A)~]"
+          (mapcar (fun (format nil "~S: ~S~@[ (Delegated to: ~A)~]"
                                (car _) (second _)
                                (unless (eq object (third _))
                                  (third _))))

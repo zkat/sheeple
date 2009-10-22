@@ -105,7 +105,7 @@
 *** TODO Property MOP
 *** TODO Object-creation MOP
 *** TODO Begin work on message/reply MOP (maybe)
-* TODO 3.0.2
+* TODO 3.0.3
   Testing time!
 ** TODO "Test all the fucking time."
    This is very important. Watch the entire thing, twice.
@@ -130,13 +130,8 @@
 ** TODO Detailed reply-(un)definition unit tests
 ** TODO Detailed dispatch unit tests
 
-* TODO 3.0.1
+* TODO 3.0.2
 ** TODO Document everything in doc/sheeple.texinfo
-** DONE Compile-time crap
-   Something is going on. There seem to be some compile-time side-effects we don't want that are
-   causing weird conflicts. For example, bootstrap.lisp requires some special juggling involving
-   eval-when in order to function, and I don't understand why. I don't really see what's going on,
-   whether it can be fixed, and/or whether it should even BE fixed.
 ** TODO Clean up and speed up raw dispatch code
 ** TODO Optimize
 *** TODO Property access
@@ -146,6 +141,13 @@
 *** TODO Message dispatch
     The biggest gain in general will be from just the caching, but it would be nice to have a
     cleaner, faster raw algorithm. The caching itself can get filled up with declarations, too.
+* DONE 3.0.1
+** DONE Compile-time crap
+   Something is going on. There seem to be some compile-time side-effects we don't want that are
+   causing weird conflicts. For example, bootstrap.lisp requires some special juggling involving
+   eval-when in order to function, and I don't understand why. I don't really see what's going on,
+   whether it can be fixed, and/or whether it should even BE fixed.
+** DONE Clean up INIT trio
 * DONE 3.0
   This is a rough sketch of The Road to Sheeple 3.0
 ** DONE Update README

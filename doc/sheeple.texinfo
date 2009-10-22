@@ -284,10 +284,6 @@ Clozure CL
 @cindex GNU CLISP
 @item
 GNU CLISP
-
-@cindex Scieneer Common Lisp
-@item
-Scieneer CL
 @end enumerate
 
 Sheeple doesn't use any OS-specific code (or threads), so it should be stable on

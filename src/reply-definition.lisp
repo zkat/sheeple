@@ -260,17 +260,16 @@
 
 ;;; Undefinition
 (defmacro undefreply (name &rest args)
-  (multiple-value-bind (qualifiers lambda-list)
+  (multiple-value-bind (qualifiers specializers)
       (parse-undefreply args)
     `(undefine-reply
       ',name :qualifiers ',qualifiers
-      :participants `(,,@(nth-value 3 (parse-specialized-lambda-list lambda-list))))))
+      :participants `(,,@specializers))))
 
 (defun parse-undefreply (args)
-  (let ((qualifiers nil)
-        (lambda-list nil))
+  (let (qualifiers specializers)
     (dolist (arg args)
       (if (and (atom arg) (not (null arg)))
           (push arg qualifiers)
-          (setf lambda-list arg)))
-    (values qualifiers lambda-list)))
+          (setf specializers arg)))
+    (values qualifiers specializers)))

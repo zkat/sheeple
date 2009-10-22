@@ -69,7 +69,6 @@
 
 (defun find-applicable-replies (message args &optional (errorp t))
   "Returns the most specific reply using MESSAGE and ARGS."
-  (declare (list args))
   (if (null args)
       (message-replies message)
       (let ((n (length args))
@@ -93,9 +92,8 @@
                                             :key #'reply-container-reply)
                               (push (contain-reply curr-reply)
                                     discovered-replies))
-                            (let ((contained-reply (find curr-reply
-                                                         discovered-replies
-                                                         :key #'reply-container-reply)))
+                            (let ((contained-reply (find curr-reply discovered-replies
+                                                         :key #'reply-container-reply :test #'eq)))
                               (setf (elt (reply-container-rank contained-reply) index)
                                     hierarchy-position)
                               (when (fully-specified-p (reply-container-rank contained-reply))

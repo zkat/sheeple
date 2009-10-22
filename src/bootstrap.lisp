@@ -73,7 +73,8 @@
              `(progn ,@(loop for (name . parents) in (mapcar 'ensure-list names)
                           collect `(defproto ,name ,(or parents '=boxed-object=) ())))))
   (define-boxed-objects
-    =character= =function= =hash-table= =package= =pathname= =readtable= =stream=
-      =sequence= =symbol= (=list= =sequence=) (=null= =symbol= =list=) (=cons= =list=)
-    =array= (=vector= =array= =sequence=) (=bit-vector= =vector=) (=string= =vector=)
-    =number= (=complex= =number=) (=integer= =number=) (=float= =number=)))
+    =character= =function= =hash-table= =package= =pathname= =readtable=
+    =stream= =sequence= =symbol= (=boolean= =symbol=) (=list= =sequence=)
+    (=null= =symbol= =list=) (=cons= =list=) =array= (=vector= =array= =sequence=)
+    (=bit-vector= =vector=) (=string= =vector=) =number= (=complex= =number=)
+    (=integer= =number=) (=float= =number=)))

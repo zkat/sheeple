@@ -1,3 +1,11 @@
+* 3.0.1
+** Features
+*** Improved INIT trio of messages with a better API
+*** Exported CLONE as part of the API
+*** Improved examples
+*** Lots of internal cleanups
+** Bugfixes
+   Minor bugfixes here and there, apart from init-trio stuff.
 * 3.0
 ** Features
 *** Complete reimplementation

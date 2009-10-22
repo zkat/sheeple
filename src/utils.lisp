@@ -52,11 +52,12 @@
 ;;; difference at all, probably because it's all bytecode.
 (defun nunzip-alist (alist)
   "Destructively unzips ALIST into two flat lists"
-  ;; Once we secure all call sites, (safety 0)? I think so. - Adlai
+  (declare (list alist) (optimize speed (safety 0)))
   (let ((keys alist) (vals (car alist)))
     (do* ((key-cons keys (cdr key-cons))
           (val-cons vals (cdr val-cons)))
          ((null (car key-cons)) (values keys vals))
+      (declare (list key-cons val-cons))
       (setf (car key-cons) (caar key-cons)
             (car val-cons) (cdr  val-cons)
             (cdr val-cons) (cadr key-cons)))))

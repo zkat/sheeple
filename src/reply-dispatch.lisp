@@ -128,13 +128,13 @@
      when (zerop i) return t))
 
 (defun calculate-rank-score (rank)
-  (declare (simple-array rank))
-  (let ((total 0))
-    (declare (fixnum total))
-    (loop for item across rank
-       do (when (numberp item)
-            (incf (the fixnum total) (the fixnum item))))
-    total))
+  ;; Same here, and all the elements better be (or fixnum null)
+  (declare (simple-vector rank) (optimize speed (safety 0)))
+  (loop for i fixnum downfrom (1- (length rank))
+     for elt = (svref rank i) with total fixnum = 0
+     unless (null elt) do
+       (setf total (the fixnum (+ total (the fixnum elt))))
+     when (zerop i) return total))
 
 (defun reply-specialized-portion (msg)
   (parse-lambda-list (reply-lambda-list msg)))

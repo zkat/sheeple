@@ -81,13 +81,13 @@
   (null (reply-qualifiers reply)))
 
 (defun before-reply-p (reply)
-  (find :before (reply-qualifiers reply)))
+  (find :before (reply-qualifiers reply) :test #'eq))
 
 (defun after-reply-p (reply)
-  (find :after (reply-qualifiers reply)))
+  (find :after (reply-qualifiers reply) :test #'eq))
 
 (defun around-reply-p (reply)
-  (find :around (reply-qualifiers reply)))
+  (find :around (reply-qualifiers reply) :test #'eq))
 
 (defun compute-erfun (message replies)
   (let ((around (find-if 'around-reply-p replies))
@@ -98,16 +98,18 @@
         (let ((next-erfun (compute-erfun message (remove around replies))))
           (lambda (args)
             (funcall (reply-function around) args next-erfun)))
-        (let ((next-erfun (compute-primary-erfun (cdr primaries)))
-              (befores (remove-if-not 'before-reply-p replies))
-              (afters (remove-if-not 'after-reply-p replies)))
-          (lambda (args)
-            (dolist (before befores)
-              (funcall (reply-function before) args nil))
-            (multiple-value-prog1
-                (funcall (reply-function (car primaries)) args next-erfun)
-              (dolist (after (reverse afters))
-                (funcall (reply-function after) args nil))))))))
+        (lambda (args)
+          (dolist (reply replies)
+            (when (before-reply-p reply)
+              (funcall (reply-function reply) args nil)))
+          (multiple-value-prog1
+              (funcall (reply-function (car primaries)) args
+                       (compute-primary-erfun (cdr primaries)))
+            (let ((reversed (reverse replies)))
+              (declare (dynamic-extent reversed)) ; Needs more cowbell!
+              (dolist (reply reversed)
+                (when (after-reply-p reply)
+                  (funcall (reply-function reply) args nil)))))))))
 
 (defun compute-primary-erfun (replies)
   (reduce (lambda (erfun reply)

@@ -278,11 +278,14 @@
           (t
            (multiple-value-bind (parameters lambda-list specializers required ignorable)
                (parse-specialized-lambda-list (cdr arglist))
-             (values (cons (if (listp arg) (car arg) arg) parameters)
-                     (cons (if (listp arg) (car arg) arg) lambda-list)
-                     (cons (if (listp arg) (cadr arg) '=t=) specializers)
-                     (cons (if (listp arg) (car arg) arg) required)
-                     (if (listp arg) (cons (car arg) ignorable) ignorable)))))))
+             (let ((symbol (if (listp arg) (car arg) arg)))
+               (unless (symbolp symbol)
+                 (error "Specializer argument is not a symbol: ~S" symbol))
+               (values (cons symbol parameters)
+                       (cons symbol lambda-list)
+                       (cons (if (listp arg) (cadr arg) '=t=) specializers)
+                       (cons symbol required)
+                       (if (listp arg) (cons (car arg) ignorable) ignorable))))))))
 
 (defun analyze-lambda-list (lambda-list)
   ;; Need to specify exactly what this function does -- is it analyzing

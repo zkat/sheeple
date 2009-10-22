@@ -52,6 +52,10 @@
 (defun role-position (role)
   (cdr role))
 
+(declaim (ftype (function (role) reply) role-reply)
+         (ftype (function (role) fixnum) role-position)
+         (inline make-role role-reply role-position))
+
 (deftype role ()
   '(cons reply fixnum))
 (defun rolep (maybe-role)
@@ -66,6 +70,9 @@
   (reply-message (role-reply role)))
 (defun role-name (role)
   (reply-name (role-reply role)))
+
+(declaim (inline role-message role-name)
+         (ftype (function (role) message) role-message))
 
 (defun participantp (object reply)
   "Checks if OBJECT is actually involved in dispatching REPLY"

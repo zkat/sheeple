@@ -45,7 +45,7 @@
                               (documentation nil doxp)
                               (nickname nil nicknamep))
   (dolist (property-spec properties)
-    (destructuring-bind (name value &rest keys) property-spec
+    (destructuring-bind (name &optional value &rest keys) (ensure-list property-spec)
       (apply 'add-property object name value keys)))
   (when nicknamep
     (setf (object-nickname object) nickname))

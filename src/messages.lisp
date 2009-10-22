@@ -190,11 +190,13 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 ;;;   -sykopomp
 (defstruct arg-info
   (lambda-list :no-lambda-list)
-  number-required number-optional key/rest-p
+  (number-required 0 :type fixnum)
+  (number-optional 0 :type fixnum)
+  (key/rest-p nil)
   ;; nil: no &KEY or &REST allowed
   ;; (k1 k2 ..): Each reply must accept these &KEY arguments.
   ;; T: must have &KEY or &REST
-  keys)
+  (keys nil))
 
 (defun check-reply-arg-info (msg arg-info reply)
   (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)

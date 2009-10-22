@@ -48,7 +48,9 @@ the original object is simply copied. All properties and roles are (shallow-)cop
 ;; The hierarchy, now:
 ;;                  =T=
 ;;                   |
-;; *mixin* - =standard-object=
+;;       =standard-object=
+;;         /   /
+;;    *mixin  /
 ;;       \   /  
 ;;       *obj*
 ;;         |

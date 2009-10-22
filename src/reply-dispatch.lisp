@@ -84,17 +84,17 @@
                   (declare (role role))
                   (when (and (eq message (role-message role))
                              (= index (the fixnum (role-position role))))
-                    (let ((reply (role-reply role)))
-                      (unless (find reply discovered-replies
-                                    :key #'reply-container-reply :test #'eq)
-                        (push (contain-reply reply) discovered-replies))
-                      (let ((contained-reply (find reply discovered-replies
-                                                   :key #'reply-container-reply :test #'eq)))
-                        (setf (elt (reply-container-rank contained-reply) index)
-                              hierarchy-position)
-                        (when (fully-specified-p (reply-container-rank contained-reply))
-                          (pushnew contained-reply contained-applicable-replies
-                                   :key #'reply-container-reply)))))))
+                    (let ((reply (role-reply role)) contained-reply)
+                      (aif (find reply discovered-replies
+                                 :key #'reply-container-reply :test #'eq)
+                           (setf contained-reply it)
+                           (push (setf contained-reply (contain-reply reply))
+                                 discovered-replies))
+                      (setf (elt (reply-container-rank contained-reply) index)
+                            hierarchy-position)
+                      (when (fully-specified-p (reply-container-rank contained-reply))
+                        (pushnew contained-reply contained-applicable-replies
+                                 :key #'reply-container-reply))))))
          finally
            (if contained-applicable-replies
                (return (unbox-replies (sort-applicable-replies contained-applicable-replies)))

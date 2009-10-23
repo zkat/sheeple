@@ -34,5 +34,5 @@
 (test reinit-object
   ;; TODO
   (let ((test-object (object)))
-    (is (eql test-object (add-property test-object 'var "value" :accessor t)))
+    (is (string= "value" (setf (property-value  test-object 'var :accessor t) "value")))
     (is (has-direct-property-p test-object 'var))))

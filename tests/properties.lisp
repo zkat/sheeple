@@ -20,24 +20,25 @@
 (test has-direct-property-p
   (let* ((object (object))
          (property 'test))
-    (add-property object property 'value)
+    (setf (property-value object property) 'value)
     (is (has-direct-property-p object 'test))
     (is (not (has-direct-property-p object 'something-else))))
   (let* ((a (object))
          (b (object :parents (list a))))
-    (add-property a 'test 'value)
+    (setf (property-value a 'test) 'value)
     (is (has-direct-property-p a 'test))
     (is (not (has-direct-property-p b 'test)))))
 
 (test has-property-p
   (let* ((a (object))
          (b (object :parents (list a))))
-    (add-property a 'test 'value)
+    (setf (property-value a 'test) 'value)
     (is (has-direct-property-p a 'test))
     (is (not (has-direct-property-p a 'something-else)))
     (is (not (has-direct-property-p b 'test)))
     (is (not (has-direct-property-p b 'something-else)))))
 
+#+nil
 (test add-property
   (let ((object (object)))
     (is (eq object (add-property object 'test 'value)))
@@ -51,16 +52,16 @@
 (test remove-property
   (let ((object (object)))
     (signals error (remove-property object 'something))
-    (add-property object 'test 'value)
+    (setf (property-value object 'test) 'value)
     (is (eq object (remove-property object 'test)))
     (is (not (has-direct-property-p object 'test)))
     (signals error (remove-property object 'test))))
 
 (test remove-all-direct-properties
   (let ((object (object)))
-    (add-property object 'test1 'value)
-    (add-property object 'test2 'value)
-    (add-property object 'test3 'value)
+    (setf (property-value object 'test1) 'value)
+    (setf (property-value object 'test2) 'value)
+    (setf (property-value object 'test3) 'value)
     (is (eq object (remove-all-direct-properties object)))
     (is (not (or (has-direct-property-p object 'test1)
                  (has-direct-property-p object 'test2)
@@ -75,7 +76,7 @@
 (test direct-property-value
   (let* ((a (object))
          (b (object :parents (list a))))
-    (add-property a 'test 'value)
+    (setf (property-value a 'test) 'value)
     (is (eq 'value (direct-property-value a 'test)))
     (signals unbound-property (direct-property-value a 'something-else))
     (signals unbound-property (direct-property-value b 'test))))
@@ -84,7 +85,7 @@
   (let* ((a (object))
          (b (object :parents (list a)))
          (c (object)))
-    (add-property a 'test 'value)
+    (setf (property-value a 'test) 'value)
     (is (eq 'value (property-value a 'test)))
     (is (eq 'value (property-value b 'test)))
     (signals unbound-property (property-value a 'something-else))
@@ -94,17 +95,18 @@
   (let* ((a (object))
          (b (object :parents (list a)))
          (c (object)))
-    (add-property a 'test 'value)
+    (setf (property-value a 'test) 'value)
     (is (eq 'value (property-value-with-hierarchy-list a 'test)))
     (is (eq 'value (property-value-with-hierarchy-list b 'test)))
     (signals unbound-property (property-value-with-hierarchy-list a 'something-else))
     (signals unbound-property (property-value-with-hierarchy-list c 'test))))
 
 (test setf-property-value
+  ;; (setf property-value) should add the property directly if it does not already exist,
+  ;; then it should set the value. It will add the property regardless of whether it already
+  ;; exists in the hierarchy list or not.
   (let* ((a (object))
          (b (object :parents (list a))))
-    (signals unbound-property (setf (property-value a 'test) 'new-val))
-    (add-property a 'test 'value)
     (is (eq 'new-value (setf (property-value a 'test) 'new-value)))
     (is (eq 'new-value (direct-property-value a 'test)))
     (is (eq 'new-value (property-value b 'test)))
@@ -118,8 +120,8 @@
     (symbol-macrolet ((verify-properties
                        (loop for (pname value) in properties do
                             (is (eq value (property-value object pname))))))
-      (mapcar (curry 'apply 'add-property object)
-              properties)
+      (loop for (var value) in properties
+         do (setf (property-value object var) value))
       verify-properties
       (loop for new-name = (gensym) and pair in properties do
            (setf (property-value object (car pair)) new-name

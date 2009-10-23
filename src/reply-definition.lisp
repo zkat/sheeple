@@ -225,17 +225,15 @@
        (declare (ignorable next-erfun))
        (flet ((next-reply-p ()
                 (not (null next-erfun)))
-              (call-next-reply (&rest cnm-args)
+              (call-next-reply (&rest cnr-args)
                 (if (null next-erfun)
                     (error "No next reply")
-                    (funcall next-erfun (or cnm-args args)))))
+                    (funcall next-erfun (or cnr-args args)))))
          (declare (ignorable #'next-reply-p #'call-next-reply))
-         (block ,(if (listp name)
-                     (cadr name)
-                     name)
-           (apply
-            (lambda ,ll (declare (ignorable ,@ignorable))
-              ,@body) args))))))
+         (block ,(if (listp name) (cadr name) name)
+           (destructuring-bind ,ll args
+             (declare (ignorable ,@ignorable))
+             ,@body))))))
 
 (defun parse-defreply (args)
   (let ((qualifiers nil)

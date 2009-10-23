@@ -95,9 +95,9 @@
     (when (null primaries)
       (error 'no-primary-replies :message (message-name message)))
     (if around
-        (let ((next-erfun (compute-erfun message (remove around replies))))
-          (lambda (args)
-            (funcall (reply-function around) args next-erfun)))
+        (lambda (args)
+          (funcall (reply-function around) args
+                   (compute-erfun message (remove around replies))))
         (lambda (args)
           (dolist (reply replies)
             (when (before-reply-p reply)

@@ -284,7 +284,7 @@
       (is (null (%object-property-values clone)))
       (is (null (%object-roles clone)))
       (is (equal (list =standard-object=) (object-parents clone)))
-      (add-property obj 'test 'test)
+      (setf (property-value obj 'test) 'test)
       (let ((clone2 (clone obj)))
         (is (objectp clone2))
         (is (null (has-direct-property-p clone 'test)))

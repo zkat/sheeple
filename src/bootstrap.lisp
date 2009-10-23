@@ -36,7 +36,7 @@
 
   ;; Break the ice by playing the name game:
   (dolist (name '(=t= =standard-object= =standard-metaobject=))
-    (add-property (symbol-value name) 'nickname name)))
+    (setf (property-value (symbol-value name) 'nickname) name)))
 
 ;;; Well, not really. We still need some messages to create objects:
 (defmessage shared-init (object &rest initargs &key &allow-other-keys)
@@ -46,7 +46,7 @@
                               (nickname nil nicknamep))
   (dolist (property-spec properties)
     (destructuring-bind (name &optional value &rest keys) (ensure-list property-spec)
-      (apply 'add-property object name value keys)))
+      (apply #'(setf property-value) value object name keys)))
   (when nicknamep
     (setf (object-nickname object) nickname))
   (when doxp

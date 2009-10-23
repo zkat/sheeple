@@ -1,0 +1,22 @@
+* Instantiation
+** Bare instantiation
+   No parents, no properties.
+*** With dispatch caching
+**** Average time: 19.2 microseconds
+**** Average allocation: 816 bytes
+**** Expected allocation: 608 bytes
+*** Without caching:
+**** Average time: 6.2 microseconds
+**** Average allocation: 576 bytes
+**** Expected allocation: 512 bytes
+** Instantiation with delegation #1
+   One parent, no properties.
+   Test to an already-inherited-from parent.
+*** With dispatch caching
+**** Average time: 19.6 microseconds
+**** Average allocation: 864 bytes
+**** Expected allocation: 672 bytes
+*** Without caching:
+**** Average time: 6.6 microseconds
+**** Average allocation: 640
+**** Expected allocation: 576 bytes

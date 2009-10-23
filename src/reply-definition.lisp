@@ -262,14 +262,12 @@
 (defmacro undefreply (name &rest args)
   (multiple-value-bind (qualifiers specializers)
       (parse-undefreply args)
-    `(undefine-reply
-      ',name :qualifiers ',qualifiers
-      :participants `(,,@specializers))))
+    `(undefine-reply ',name :qualifiers ',qualifiers
+                     :participants `(,,@specializers))))
 
 (defun parse-undefreply (args)
   (let (qualifiers specializers)
-    (dolist (arg args)
+    (dolist (arg args (values qualifiers specializers))
       (if (and (atom arg) (not (null arg)))
           (push arg qualifiers)
-          (setf specializers arg)))
-    (values qualifiers specializers)))
+          (setf specializers arg)))))

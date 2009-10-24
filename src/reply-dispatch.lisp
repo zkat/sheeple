@@ -64,9 +64,8 @@
            (multiple-value-prog1
                (funcall (reply-function (car primaries))
                         args (compute-primary-erfun (cdr primaries)))
-             (let ((reversed (reverse replies)))
-               (declare (dynamic-extent reversed)) ; Needs more cowbell!
-               (dolist (reply reversed)
+             (do-reversed (afters replies) ; Has more cowbell!
+               (dolist (reply afters)
                  (when (after-reply-p reply)
                    (funcall (reply-function reply) args nil)))))))))
 

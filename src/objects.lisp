@@ -398,6 +398,8 @@ allocating the new object object. ALL-KEYS is passed on to INIT-OBJECT."
 (defun clone (object &optional (metaobject (%object-metaobject object)))
   "Creates a object with the same parents and metaobject as OBJECT. If supplied, METAOBJECT
 will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged."
+  (when (eq =t= object)
+    (error 'fuck-off :format-control "You ain't allowed to clone =T=. Shoo."))
   (aprog1 (maybe-std-allocate-object metaobject)
     (change-mold it (%object-mold object))
     (with-accessors ((roles %object-roles)

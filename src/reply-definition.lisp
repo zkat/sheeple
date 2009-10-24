@@ -12,6 +12,12 @@
 ;;; Reply objects
 ;;;
 (defstruct (reply (:predicate replyp)
+                  (:constructor
+                   make-reply (message lambda-list qualifiers function
+                                       &aux (rank-vector
+                                             (make-array 
+                                              (arg-info-number-required 
+                                               (message-arg-info message))))))
                   (:print-object
                    (lambda (reply stream)
                      (print-unreadable-object (reply stream :identity t)
@@ -21,7 +27,7 @@
   ;; When reply objects are 'called', their reply-function is fetched directly. By using lambdas,
   ;; we're able to latch on to the lexical environment the reply was defined in (so they can be
   ;; closures)
-  message qualifiers lambda-list documentation
+  message qualifiers lambda-list documentation rank-vector
   (function (constantly nil)))
 
 ;;;
@@ -90,10 +96,7 @@
                  qualifiers lambda-list participants function documentation))
 
 (defun %ensure-reply (message qualifiers lambda-list participants function documentation)
-  (let ((reply (make-reply :message message
-                           :lambda-list lambda-list
-                           :qualifiers qualifiers
-                           :function function))
+  (let ((reply (make-reply message lambda-list qualifiers function))
         (objectified-participants (objectify-list participants)))
     (setf (documentation reply 't) documentation) ; same as dox for CLOS methods
     (clear-dispatch-cache message)

@@ -16,8 +16,8 @@
                    make-reply (message qualifiers lambda-list function
                                        &aux (rank-vector
                                              (when message
-                                               (make-array 
-                                                (arg-info-number-required 
+                                               (make-array
+                                                (arg-info-number-required
                                                  (message-arg-info message)))))))
                   (:print-object
                    (lambda (reply stream)

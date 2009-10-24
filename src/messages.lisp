@@ -58,6 +58,7 @@
                          (format stream "Message: ~a" (message-name message))))))
   name lambda-list replies documentation
   (dispatch-cache (make-dispatch-cache) :type dispatch-cache)
+  (erfun-cache (make-hash-table :test #'equal))
   (arg-info (make-arg-info)))
 
 ;;;
@@ -126,19 +127,19 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 (defun make-dispatch-cache (&optional (size *dispatch-cache-size*))
   (make-vector size))
 
-(defun make-dispatch-cache-entry (args erf)
-  (cons (mapcar 'maybe-make-weak-pointer args) erf))
+(defun make-dispatch-cache-entry (args replies)
+  (cons (mapcar 'maybe-make-weak-pointer args) replies))
 
 ;;; There's a certain uglyness here. Too bad this crap is concise. - Adlai
-(declaim (inline cache-entry-args cache-entry-erf))
+(declaim (inline cache-entry-args cache-entry-replies))
 (defun cache-entry-args (entry)
   (car entry))
-(defun cache-entry-erfun (entry)
+(defun cache-entry-replies (entry)
   (cdr entry))
 
-(defun cache-erfun (message args erfun)
+(defun cache-replies (message args replies)
   (let* ((dispatch-cache (message-dispatch-cache message))
-         (entry (make-dispatch-cache-entry args erfun))
+         (entry (make-dispatch-cache-entry args replies))
          (possible-index (mod (sxhash args) (length dispatch-cache))))
     (declare (dispatch-cache dispatch-cache) (fixnum possible-index))
     (acond ((typep (svref dispatch-cache possible-index) 'fixnum)
@@ -147,18 +148,18 @@ more entries the cache will be able to hold, but the slower lookup will be.")
             (setf (svref dispatch-cache it) entry))
            (t (setf (svref dispatch-cache possible-index) entry)))))
 
-(defun find-cached-erfun (message args)
+(defun find-cached-replies (message args)
   (let* ((dispatch-cache (message-dispatch-cache message))
          (maybe-index (mod (sxhash args) (length dispatch-cache)))
          (maybe-entry (svref dispatch-cache maybe-index)))
     (declare (dispatch-cache dispatch-cache))
     (acond ((and (not (typep maybe-entry 'fixnum))
                  (desired-entry-p maybe-entry args))
-            (cache-entry-erfun maybe-entry))
+            (cache-entry-replies maybe-entry))
            ((dotimes (index (length dispatch-cache))
               (awhen (desired-entry-p (svref dispatch-cache index) args)
                 (return it)))
-            (cache-entry-erfun it))
+            (cache-entry-replies it))
            (t nil))))
 
 (defun desired-entry-p (entry target-args)
@@ -175,10 +176,18 @@ more entries the cache will be able to hold, but the slower lookup will be.")
         (return nil)))))
 
 (defun clear-dispatch-cache (message)
-  (setf (message-dispatch-cache message) (make-dispatch-cache)))
+  (setf (message-dispatch-cache message) (make-dispatch-cache))
+  (clrhash (message-erfun-cache message))
+  t)
 
 (defun clear-all-message-caches ()
-  (maphash-values 'clear-memo-table *message-table*))
+  (maphash-values 'clear-dispatch-cache *message-table*))
+
+(defun find-cached-erfun (message replies)
+  (gethash replies (message-erfun-cache message)))
+
+(defun cache-erfun (message replies erfun)
+  (setf (gethash replies (message-erfun-cache message)) erfun))
 
 ;;;
 ;;; Arg info

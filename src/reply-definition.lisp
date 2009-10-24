@@ -13,11 +13,12 @@
 ;;;
 (defstruct (reply (:predicate replyp)
                   (:constructor
-                   make-reply (message lambda-list qualifiers function
+                   make-reply (message qualifiers lambda-list function
                                        &aux (rank-vector
-                                             (make-array 
-                                              (arg-info-number-required 
-                                               (message-arg-info message))))))
+                                             (when message
+                                               (make-array 
+                                                (arg-info-number-required 
+                                                 (message-arg-info message)))))))
                   (:print-object
                    (lambda (reply stream)
                      (print-unreadable-object (reply stream :identity t)
@@ -96,7 +97,7 @@
                  qualifiers lambda-list participants function documentation))
 
 (defun %ensure-reply (message qualifiers lambda-list participants function documentation)
-  (let ((reply (make-reply message lambda-list qualifiers function))
+  (let ((reply (make-reply message qualifiers lambda-list function))
         (objectified-participants (objectify-list participants)))
     (setf (documentation reply 't) documentation) ; same as dox for CLOS methods
     (clear-dispatch-cache message)

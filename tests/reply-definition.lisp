@@ -14,18 +14,21 @@
 (def-suite reply-objects :in reply-definition)
 (in-suite reply-objects)
 
+(defun %%make-reply (&key message qualifiers lambda-list function)
+  (make-reply message qualifiers lambda-list function))
+
 (test make-reply
-  (let ((test-reply (make-reply :message 0 :qualifiers 1 :lambda-list 2 :function 3)))
+  (let ((test-reply (make-reply nil 1 2 3)))
     (is (replyp test-reply))
     (is (eq 'reply (type-of test-reply)))
-    (is (= 0 (reply-message     test-reply)))
+    (is (null (reply-message     test-reply)))
     (is (= 1 (reply-qualifiers  test-reply)))
     (is (= 2 (reply-lambda-list test-reply)))
     (is (= 3 (reply-function    test-reply)))))
 
 (test reply-name
   (let* ((message (%make-message :name (gensym)))
-         (reply   (make-reply :message message)))
+         (reply   (make-reply message 1 2 3)))
     (is (eq (message-name message) (reply-name reply)))))
 
 (def-suite role-objects :in reply-definition)
@@ -38,21 +41,21 @@
       (is (eq dummy-position (role-position role))))))
 
 (test role-type
-  (for-all ((reply (fun (make-reply))) (position (gen-integer)))
+  (for-all ((reply (fun (make-reply nil 1 2 3))) (position (gen-integer)))
     (is (typep (make-role reply position) 'role))
     (is (rolep (make-role reply position)))))
 
 (test role-message
   (for-all ((message (fun (%make-message))))
-    (is (eq message (role-message (make-role (make-reply :message message) 0))))))
+    (is (eq message (role-message (make-role (make-reply message 1 2 3) 0))))))
 
 (test role-name
   (for-all ((message (fun (%make-message :name (gensym)))))
-    (is (eq (message-name message) (role-name (make-role (make-reply :message message) 0))))))
+    (is (eq (message-name message) (role-name (make-role (make-reply message 1 2 3) 0))))))
 
 (test participantp
   (for-all ((object (fun (std-allocate-object =standard-metaobject=)))
-            (reply (fun (make-reply))) (position (gen-integer)))
+            (reply (fun (make-reply nil 1 2 3))) (position (gen-integer)))
     (push (make-role reply position) (%object-roles object))
     (is (not (null (participantp object reply))))))
 

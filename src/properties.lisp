@@ -52,12 +52,14 @@ direct property. Returns OBJECT."
   "Returns the property-value set locally in OBJECT for PROPERTY-NAME.
 If the value is non-local (is delegated or does not exist in the hierarchy list),
 a condition of type UNBOUND-PROPERTY condition is signalled."
+  (check-type property-name symbol)
   (aif (property-position property-name object)
        (svref (%object-property-values object) it)
        (error 'unbound-property :object object :property-name property-name)))
 
 (defun property-value (object property-name)
   "Returns a property-value that is not necessarily local to OBJECT."
+  (check-type property-name symbol)
   (property-value-with-hierarchy-list object property-name))
 
 (defun property-value-with-hierarchy-list (object property-name)

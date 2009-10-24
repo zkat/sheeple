@@ -12,10 +12,12 @@
 (in-package :sheeple)
 
 (defun score-reply (reply)
-  (reduce '+ (the simple-vector (reply-rank-vector reply))))
+  (loop for rank fixnum across (the simple-vector (reply-rank-vector reply))
+     with total fixnum = 0 do (setf total (the fixnum (+ total rank)))))
 
 (defun fully-specified-p (reply)
-  (every 'numberp (the simple-vector (reply-rank-vector reply))))
+  (loop for rank across (the simple-vector (reply-rank-vector reply))
+     always (typep rank 'fixnum)))
 
 (defun sort-applicable-replies (reply-list)
   (sort (the list reply-list) #'< :key 'score-reply))

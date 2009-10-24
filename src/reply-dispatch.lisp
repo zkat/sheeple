@@ -106,6 +106,7 @@ condition of type `no-applicable-replies' is signaled."
                          (setf (svref (reply-rank-vector reply) index) hposition)
                          (when (fully-specified-p reply)
                            (pushnew reply applicable-replies :test #'eq)))))))
+          (declare (dynamic-extent #'ensure-obj #'relevant-role-p #'find-and-rank-roles))
           (loop for arg in args
              for index fixnum upfrom 0
              for obj = (ensure-obj arg)

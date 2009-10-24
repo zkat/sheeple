@@ -325,3 +325,15 @@ will not be affected; otherwise, it will be bound to a recognizeable and unique 
         (loop for k being the hash-keys of hash-vector using (hash-value v)
            unless (eq k key) do
              (setf (gethash k it) v)))))
+
+;;; Dynamic allocation
+
+(defmacro do-reversed ((name listform) &body body)
+  (with-gensyms (label tail)
+    `(labels ((,label (,tail &rest ,name)
+                (declare (dynamic-extent ,name))
+                (if (endp ,tail)
+                    (progn ,@body)
+                    (apply #',label (cdr ,tail) (car ,tail) ,name))))
+       (declare (dynamic-extent #',label))
+       (,label ,listform))))

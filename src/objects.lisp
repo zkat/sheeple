@@ -390,7 +390,8 @@ allocating the new object object. ALL-KEYS is passed on to INIT-OBJECT."
     (topological-sort-conflict (conflict)
       (error 'object-hierarchy-error :object object :conflict conflict)))
   (setf (%object-children object) nil)
-  (apply 'init-object object all-keys))
+  (let ((*caching-enabled* nil))
+    (apply 'init-object object all-keys)))
 
 (defun clone (object &optional (metaobject (%object-metaobject object)))
   "Creates a object with the same parents and metaobject as OBJECT. If supplied, METAOBJECT

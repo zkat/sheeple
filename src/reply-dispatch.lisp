@@ -90,20 +90,20 @@
   (eq :around (car (reply-qualifiers reply))))
 
 (defun compute-erfun (message replies)
-  (let ((primaries (remove-if-not 'primary-reply-p replies)))
-    (when (null primaries)
-      (error 'no-primary-replies :message (message-name message)))
-    (aif (find-if 'around-reply-p replies)
-         (lambda (args)
-           (funcall (reply-function it) args
-                    (compute-erfun message (remove it replies))))
-         (lambda (args)
+  (aif (find-if 'around-reply-p replies)
+       (lambda (args)
+         (funcall (reply-function it) args
+                  (compute-erfun message (remove it replies))))
+       (lambda (args)
+         (let ((primaries (member-if 'primary-reply-p replies)))
+           (when (null primaries)
+             (error 'no-primary-replies :message (message-name message)))
            (dolist (reply replies)
              (when (before-reply-p reply)
                (funcall (reply-function reply) args nil)))
            (multiple-value-prog1
-               (funcall (reply-function (car primaries)) args
-                        (compute-primary-erfun (cdr primaries)))
+               (funcall (reply-function (car primaries))
+                        args (compute-primary-erfun (cdr primaries)))
              (let ((reversed (reverse replies)))
                (declare (dynamic-extent reversed)) ; Needs more cowbell!
                (dolist (reply reversed)
@@ -112,7 +112,9 @@
 
 (defun compute-primary-erfun (replies)
   (reduce (lambda (erfun reply)
-            (fun (funcall (reply-function reply) _ erfun)))
+            (if (primary-reply-p reply)
+                (fun (funcall (reply-function reply) _ erfun))
+                erfun))
           replies :initial-value nil))
 
 (defun find-applicable-replies (message args &optional (errorp t))

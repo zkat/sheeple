@@ -83,6 +83,12 @@
                 erfun))
           replies :initial-value nil))
 
+(declaim (inline relevant-role-p))
+(defun relevant-role-p (role message index)
+  (declare (fixnum index))
+  (and (eq message (role-message role))
+       (= index (the fixnum (role-position role)))))
+
 (defun find-applicable-replies (message args &optional (errorp t))
   "Returns a sorted list of replies on MESSAGE for which appropriate roles
 are present in ARGS. If no such replies are found and ERRORP is true, a
@@ -93,9 +99,9 @@ condition of type `no-applicable-replies' is signaled."
       (let (discovered-replies applicable-replies)
         (declare (list discovered-replies applicable-replies))
         (flet ((find-and-rank-roles (object hposition index)
-                 "Given an object, and a specified place in the hierarchy,
-                  find the roles we want for a lambda-list position, and
-                  rank the respective replies."
+                 ;; Given an object, and a specified place in the hierarchy,
+                 ;; find the roles we want for a lambda-list position, and
+                 ;; rank the respective replies.
                  (declare (fixnum hposition index))
                  (dolist (role (%object-roles object))
                    (when (relevant-role-p role message index)
@@ -109,7 +115,7 @@ condition of type `no-applicable-replies' is signaled."
           (declare (dynamic-extent #'find-and-rank-roles))
           (loop for arg in args
              for index fixnum upfrom 0
-             for obj = (ensure-obj arg)
+             for obj = (ensure-dispatch-object arg)
              ;; To avoid consing, we call f-a-r-r on the root object first
              do (find-and-rank-roles obj 0 index)
              ;; Then we iterate over its ordered ancestors
@@ -121,17 +127,6 @@ condition of type `no-applicable-replies' is signaled."
                  (return (sort-applicable-replies applicable-replies))
                  (when errorp
                    (error 'no-applicable-replies :message (message-name message) :args args))))))))
-
-(declaim (inline relevant-role-p ensure-obj))
-(defun relevant-role-p (role message index)
-  (declare (fixnum index))
-  (and (eq message (role-message role))
-       (= index (role-position role))))
-
-(defun ensure-obj (obj)
-  (if (objectp obj) obj
-      (or (find-boxed-object obj)
-          (box-type-of obj))))
 
 (defun clear-reply-rank (reply &aux (vector (reply-rank-vector reply)))
   (declare (simple-vector vector))

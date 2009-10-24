@@ -11,25 +11,29 @@
 ;;;
 ;;; Reply objects
 ;;;
+;;; Replies are the Sheeple equivalent of methods. Replies themselves are objects that hold
+;;; some basic information about what the reply does, what kind of reply it is, etc.
+;;; When reply objects are 'called', their reply-function is fetched directly. By using lambdas,
+;;; we're able to latch on to the lexical environment the reply was defined in (so they can be
+;;; closures)
 (defstruct (reply (:predicate replyp)
                   (:constructor
                    make-reply (message qualifiers lambda-list function
-                                       &aux (rank-vector
-                                             (when message
-                                               (make-array
-                                                (arg-info-number-required
-                                                 (message-arg-info message)))))))
-                  (:print-object
-                   (lambda (reply stream)
-                     (print-unreadable-object (reply stream :identity t)
-                       (format stream "Reply: ~a" (reply-name reply))))))
-  ;; Replies are the Sheeple equivalent of methods. Replies themselves are objects that hold
-  ;; some basic information about what the reply does, what kind of reply it is, etc.
-  ;; When reply objects are 'called', their reply-function is fetched directly. By using lambdas,
-  ;; we're able to latch on to the lexical environment the reply was defined in (so they can be
-  ;; closures)
-  message qualifiers lambda-list documentation rank-vector
-  (function (constantly nil)))
+                                       &aux (rank-vector ; This dies if MESSAGE is not a
+                                             (make-array ; message -- as it should!
+                                              (arg-info-number-required
+                                               (message-arg-info message)))))))
+  ;; These are set permanently when the reply is created
+  (message (error "Must supply a message") :type message :read-only t)
+  (qualifiers (error "Must supply qualifiers") :type list :read-only t)
+  (lambda-list (error "Must supply lambda-list") :type list :read-only t)
+  (function (error "Must supply a function") :type function :read-only t)
+  ;; This can be changed dynamically, but must be (or string nil) -- clhs documentation
+  (documentation nil :type (or string null))
+  ;; This is set at creation, and is frobbed in FIND-APPLICABLE-REPLIES
+  (rank-vector (error "Bug in Sheeple") :type simple-vector :read-only t))
+
+(define-print-object ((reply reply)) (format t "~S" (reply-name reply)))
 
 ;;;
 ;;; Reply Documentation

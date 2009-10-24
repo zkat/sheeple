@@ -27,15 +27,19 @@
                    (the fixnum relevant-args-length))
                 insufficient-message-args :message message)
     (let ((relevant-args (subseq args 0 relevant-args-length)))
-      (symbol-macrolet ((%compute-erfun
-                         (compute-erfun message (find-applicable-replies message relevant-args))))
-        (if *caching-enabled*
-            (aif (find-cached-erfun message relevant-args)
-                 (funcall it args)
-                 (let ((erfun %compute-erfun))
-                   (cache-erfun message relevant-args erfun)
-                   (funcall erfun args)))
-            (funcall %compute-erfun args))))))
+      (aif (and *caching-enabled* (find-cached-replies message relevant-args))
+           (funcall (find-cached-erfun message it) args)
+           (let ((replies (find-applicable-replies message relevant-args)))
+             (aif (find-cached-erfun message replies)
+                  (progn
+                    (when *caching-enabled*
+                      (cache-replies message relevant-args replies))
+                    (funcall it args))
+                  (let ((erfun (compute-erfun message replies)))
+                    (when *caching-enabled*
+                      (cache-replies message relevant-args replies))
+                    (cache-erfun message replies erfun)
+                    (funcall erfun args))))))))
 
 (defun primary-reply-p (reply)
   (null (reply-qualifiers reply)))
@@ -85,8 +89,7 @@ condition of type `no-applicable-replies' is signaled."
   (if (null args)
       (message-replies message)
       (let (discovered-replies applicable-replies)
-        (declare (list discovered-replies applicable-replies)
-                 (inline relevant-role-p ensure-obj))
+        (declare (list discovered-replies applicable-replies))
         (flet ((find-and-rank-roles (object hposition index)
                  "Given an object, and a specified place in the hierarchy,
                   find the roles we want for a lambda-list position, and
@@ -117,6 +120,7 @@ condition of type `no-applicable-replies' is signaled."
                  (when errorp
                    (error 'no-applicable-replies :message (message-name message) :args args))))))))
 
+(declaim (inline relevant-role-p ensure-obj))
 (defun relevant-role-p (role message index)
   (declare (fixnum index))
   (and (eq message (role-message role))

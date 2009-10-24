@@ -3,20 +3,20 @@
    No parents, no properties.
 *** With dispatch caching
 **** Average time: 26.6 microseconds
-**** Average allocation: 704 bytes
-**** Expected allocation: 512 bytes
+**** Average allocation: 688 bytes
+**** Expected allocation: 480 bytes
 *** Without caching:
-**** Average time: 7.4 microseconds
-**** Average allocation: 496 bytes
-**** Expected allocation: 416 bytes
+**** Average time: 7.3 microseconds
+**** Average allocation: 512 bytes
+**** Expected allocation: 384 bytes
 ** Instantiation with delegation #1
    One parent, no properties.
    Test to an already-inherited-from parent.
 *** With dispatch caching
-**** Average time: 26.9 microseconds
-**** Average allocation: 766 bytes
-**** Expected allocation: 576 bytes
+**** Average time: 28.3 microseconds
+**** Average allocation: 768 bytes
+**** Expected allocation: 544 bytes
 *** Without caching:
 **** Average time: 7.3 microseconds
-**** Average allocation: 544
-**** Expected allocation: 480 bytes
+**** Average allocation: 512
+**** Expected allocation: 448 bytes

@@ -109,8 +109,7 @@ condition of type `no-applicable-replies' is signaled."
              (when errorp
                (error 'no-applicable-replies :message (message-name message) :args args))))))
 
-(defun clear-reply-rank (reply)
-  (let ((vector (reply-rank-vector reply)))
-    (declare (simple-vector vector))
-    (loop for i below (length vector)
-       do (setf (svref vector i) nil))))
+(defun clear-reply-rank (reply &aux (vector (reply-rank-vector reply)))
+  (declare (simple-vector vector))
+  (loop for i below (length vector)
+     do (setf (svref vector i) nil)))

@@ -11,13 +11,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
+(defun fixnump (maybe-num)
+  (typep maybe-num 'fixnum))
+
 (defun score-reply (reply)
-  (loop for rank fixnum across (the simple-vector (reply-rank-vector reply))
-     with total fixnum = 0 do (setf total (the fixnum (+ total rank)))))
+  (reduce '+ (the simple-vector (reply-rank-vector reply))))
 
 (defun fully-specified-p (reply)
-  (loop for rank across (the simple-vector (reply-rank-vector reply))
-     always (typep rank 'fixnum)))
+  (every 'fixnump (the simple-vector (reply-rank-vector reply))))
 
 (defun sort-applicable-replies (reply-list)
   (sort (the list reply-list) #'< :key 'score-reply))
@@ -84,31 +85,41 @@ are present in ARGS. If no such replies are found and ERRORP is true, a
 condition of type `no-applicable-replies' is signaled."
   (if (null args)
       (message-replies message)
-      (loop with discovered-replies list and applicable-replies list
-         for arg in args and index fixnum upfrom 0 do
-         (loop
-            for hierarchy-object in
-            (object-hierarchy-list
-             (if (objectp arg) arg
-                 (or (find-boxed-object arg)
-                     (box-type-of arg))))
-            and hierarchy-position fixnum upfrom 0 do
-            (dolist (role (%object-roles hierarchy-object))
-              (declare (role role))
-              (when (and (eq message (role-message role))
-                         (= index (the fixnum (role-position role))))
-                (let ((reply (role-reply role)))
-                  (unless (find reply discovered-replies :test #'eq)
-                    (clear-reply-rank reply)
-                    (push reply discovered-replies))
-                  (setf (svref (reply-rank-vector reply) (the fixnum index)) hierarchy-position)
-                  (when (fully-specified-p reply)
-                    (pushnew reply applicable-replies :test #'eq))))))
-         finally
-         (if applicable-replies
-             (return (sort-applicable-replies applicable-replies))
-             (when errorp
-               (error 'no-applicable-replies :message (message-name message) :args args))))))
+      (let (discovered-replies applicable-replies)
+        (declare (list discovered-replies applicable-replies))
+        (labels ((ensure-obj (obj) (if (objectp obj) obj
+                                       (or (find-boxed-object obj)
+                                           (box-type-of obj))))
+                 (relevant-role-p (role index)
+                   (and (eq message (role-message role))
+                        (= index (role-position role))))
+                 (find-and-rank-roles (object hposition index)
+                   "Given an object, and a specified place in the hierarchy,
+                  find the roles we want for a lambda-list position, and
+                  rank the respective replies."
+                   (dolist (role (%object-roles object))
+                     (when (relevant-role-p role index)
+                       (let ((reply (role-reply role)))
+                         (unless (find reply discovered-replies :test #'eq)
+                           (clear-reply-rank reply)
+                           (push reply discovered-replies))
+                         (setf (svref (reply-rank-vector reply) index) hposition)
+                         (when (fully-specified-p reply)
+                           (pushnew reply applicable-replies :test #'eq)))))))
+          (loop for arg in args
+             for index fixnum upfrom 0
+             for obj = (ensure-obj arg)
+             ;; To avoid consing, we call f-a-r-r on the root object first
+             do (find-and-rank-roles obj 0 index)
+             ;; Then we iterate over its ordered ancestors
+             (loop for hierarchy-object in (mold-hierarchy (%object-mold obj))
+                for hierarchy-position fixnum from 1
+                do (find-and-rank-roles hierarchy-object hierarchy-position index))
+             finally
+             (if applicable-replies
+                 (return (sort-applicable-replies applicable-replies))
+                 (when errorp
+                   (error 'no-applicable-replies :message (message-name message) :args args))))))))
 
 (defun clear-reply-rank (reply &aux (vector (reply-rank-vector reply)))
   (declare (simple-vector vector))

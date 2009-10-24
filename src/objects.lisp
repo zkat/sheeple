@@ -9,6 +9,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
+(defvar *caching-enabled* t)
+
 ;; We declare these base vars here so that bootstrapping won't complain.
 (define-bound-variables =t= =standard-object= =standard-metaobject=)
 

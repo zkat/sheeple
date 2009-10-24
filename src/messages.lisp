@@ -123,8 +123,6 @@ Raises an error if no message is found, unless ERRORP is NIL."
   "This variable determines the size of messages' dispatch caches. The bigger the number, the
 more entries the cache will be able to hold, but the slower lookup will be.")
 
-(defvar *caching-enabled* t)
-
 (defun make-dispatch-cache (&optional (size *dispatch-cache-size*))
   (make-vector size))
 

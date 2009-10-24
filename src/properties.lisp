@@ -82,7 +82,7 @@ a condition of type UNBOUND-PROPERTY is signaled."
                               &key (reader nil readerp) (writer nil writerp) accessor)
   "Sets NEW-VALUE as the value of a direct-property belonging to OBJECT, named
 PROPERTY-NAME."
-  (assert (symbolp property-name))
+  (check-type property-name symbol)
   (aif (property-position property-name object)
        (setf (svref (%object-property-values object) it) new-value)
        (progn

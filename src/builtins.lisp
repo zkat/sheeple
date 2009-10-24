@@ -74,6 +74,13 @@ has not already been boxed."
         (if hasp object
             (when errorp (error "~S has not been boxed." object))))))
 
+(declaim (inline ensure-dispatch-object))
+(defun ensure-dispatch-object (object)
+  "Ensures that OBJECT is a valid object for reply dispatch."
+  (if (objectp object) object
+      (or (find-boxed-object object)
+          (box-type-of object))))
+
 (defun objectify (object)
   "Returns two values: OBJECT or a boxed object representing it, and a boolean
 specifying whether boxing took place."

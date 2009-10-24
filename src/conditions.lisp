@@ -113,3 +113,6 @@ The conflict information was:~%~A"
   ("There are no primary replies for message ~A." message))
 
 (define-condition specialized-lambda-list-error (sheeple-error) ())
+
+;;; For special occasions
+(define-sheeple-condition fuck-off sheeple-error ())

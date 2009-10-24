@@ -11,34 +11,31 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(defun fixnump (maybe-num)
-  (typep maybe-num 'fixnum))
-
 (defun score-reply (reply)
   (reduce '+ (the simple-vector (reply-rank-vector reply))))
 
 (defun fully-specified-p (reply)
-  (every 'fixnump (the simple-vector (reply-rank-vector reply))))
+  (every 'identity (the simple-vector (reply-rank-vector reply))))
 
 (defun sort-applicable-replies (reply-list)
   (sort (the list reply-list) #'< :key 'score-reply))
 
 (defun apply-message (message args)
+  (declare (list args))
   (let ((relevant-args-length (arg-info-number-required (message-arg-info message))))
     (error-when (< (the fixnum (length args))
                    (the fixnum relevant-args-length))
                 insufficient-message-args :message message)
     (let ((relevant-args (subseq args 0 relevant-args-length)))
-      (flet ((compute-erfun () ; This local function avoids code duplication
-               (compute-erfun message (find-applicable-replies message relevant-args))))
-        (declare (dynamic-extent (function compute-erfun)))
+      (symbol-macrolet ((%compute-erfun
+                         (compute-erfun message (find-applicable-replies message relevant-args))))
         (if *caching-enabled*
             (aif (find-cached-erfun message relevant-args)
                  (funcall it args)
-                 (let ((erfun (compute-erfun)))
+                 (let ((erfun %compute-erfun))
                    (cache-erfun message relevant-args erfun)
                    (funcall erfun args)))
-            (funcall (compute-erfun) args))))))
+            (funcall %compute-erfun args))))))
 
 (defun primary-reply-p (reply)
   (null (reply-qualifiers reply)))
@@ -53,6 +50,7 @@
   (eq :around (car (reply-qualifiers reply))))
 
 (defun compute-erfun (message replies)
+  (declare (list replies))
   (aif (find-if 'around-reply-p replies)
        (lambda (args)
          (funcall (reply-function it) args

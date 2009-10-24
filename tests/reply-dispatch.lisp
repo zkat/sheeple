@@ -210,5 +210,3 @@
 (test fully-specified-p)
 (test calculate-rank-score)
 (test reply-specialized-portion)
-
-

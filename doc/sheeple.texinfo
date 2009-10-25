@@ -645,7 +645,7 @@ list returned by @code{OBJECT-PARENTS}.
 
 @end defun
 
-@node Properties, Object Hierarchies, API Documentation
+@node Properties, Messages, Object Hierarchies, API Documentation
 @section Properties
 
 @defun {property-value} object property-name
@@ -932,7 +932,7 @@ if @code{property-entryi} is of the form
 Also, note that the standard macro @code{WITH-ACCESSORS} works on objects too.
 @end defmac
 
-@node Messages, Messages, API Documentation, API Documentation
+@node Messages,  , Properties, API Documentation
 @section Messages
 
 @defmac {defmessage} name lambda-list {option}*
@@ -985,7 +985,7 @@ understanding of Sheeple. It should be read regardless of whether you
 have prior experience with @acronym{CLOS}@.
 
 @menu
-* Objects::               The Basic Data Structure of Sheeple
+* Objects::                     The Basic Data Structure of Sheeple
 @end menu
 
 @node Objects,  , Concepts, Concepts
@@ -1003,7 +1003,7 @@ and any replies specialized upon them.
 * Boxed-Object Hierarchy::      Interface to Native Lisp Types
 @end menu
 
-@node Built-In Objects, ,Boxed-Object Hierarchy, Objects
+@node Built-In Objects, Boxed-Object Hierarchy, Objects, Objects
 @subsection Built-In Objects
 
 @cindex objects, built-in
@@ -1037,7 +1037,7 @@ it as a reference point. It has @code{=T=} as its only parent.}
 @end ifset
 @end table
 
-@node Boxed-Object Hierarchy,  , Built-In Objects, Objects, Objects
+@node Boxed-Object Hierarchy,  , Built-In Objects, Objects
 @subsection Boxed-Object Hierarchy
 
 @table @code

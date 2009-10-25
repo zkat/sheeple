@@ -809,7 +809,7 @@ any way.
 @strong{Description:}
 
 Returns a list of symbols representing all property-names for
-which @code{PROPERTY-VALUE} would return a value.
+which @code{PROPERTY-VALUE} would return a value when called on @var{object}.
 
 @end defun
 

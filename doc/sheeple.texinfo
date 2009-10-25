@@ -726,7 +726,8 @@ that property that have been set in @var{object}'s hierarchy list.
 @code{REMOVE-PROPERTY} will remove only a @strong{direct} property
 from @var{object}. This will make the property unbound (only directly).
 
-If @var{errorp} is true (the default), @code{REMOVE-PROPERTY} will signal an error.
+If @var{errorp} is true (the default), @code{REMOVE-PROPERTY} will signal an
+error of type @code{UNBOUND-PROPERTY}.
 
 @end defun
 

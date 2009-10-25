@@ -733,7 +733,12 @@ If @var{errorp} is true (the default), @code{REMOVE-PROPERTY} will signal an err
 @defun {remove-all-direct-properties} object 
        => object
 @strong{Arguments and Values:}
+
+@var{object} --- An object.
+
 @strong{Description:}
+This function will remove any and all direct-properties currently stored in @var{object}.
+
 @end defun
 
 @defun {property-owner} object property-name &optional errorp

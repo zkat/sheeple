@@ -631,6 +631,97 @@ list returned by @code{OBJECT-PARENTS}.
 @node Properties, Object Hierarchies, API Documentation
 @section Properties
 
+@defun {property-value} object property-name => value
+
+@strong{Arguments and Values:}
+
+@var{object} --- an object.
+
+@var{property-name} --- a symbol, representing the name of the property to be accessed.
+
+@var{value} --- The value of the property.
+
+@strong{Description:}
+
+@code{PROPERTY-VALUE} searches @var{object}'s hierarchy-list for the first
+object with a direct property named by @var{property-name}.
+
+If no ancestors hold a direct property by that name, a condition of
+type @code{UNBOUND-PROPERTY} is signaled.
+
+@end defun
+
+@defun {direct-property-value} object property-name => value
+
+@strong{Arguments and Values:}
+
+@var{object} --- an object.
+
+@var{property-name} --- a symbol, representing the name of the property to be accessed.
+
+@var{value} --- The value of the property.
+
+@strong{Description:}
+
+@code{DIRECT-PROPERTY-VALUE} looks for a direct property of @var{object} named
+by @var{property-name}. It does not search @var{object}'s hierarchy-list.
+
+If @var{object} does not hold a direct property by that name, a condition of
+type @code{UNBOUND-PROPERTY} is signaled.
+
+@end defun
+
+@defun {(setf property-value)} new-value object property-name &key reader writer accessor
+=> new-value
+
+@strong{Arguments and Values:}
+
+@var{new-value}
+@var{object}
+@var{property-name}
+@var{reader}
+@var{writer}
+@var{accessor}
+
+@strong{Description:}
+
+@end defun
+
+@defun {remove-property} object property-name => object
+@strong{Arguments and Values:}
+@strong{Description:}
+@end defun
+
+@defun {remove-all-direct-properties} object => object
+@strong{Arguments and Values:}
+@strong{Description:}
+@end defun
+
+@defun {property-owner} object property-name &optional errorp
+@strong{Arguments and Values:}
+@strong{Description:}
+@end defun
+
+@defun {object-direct-properties} object => direct-properties
+@strong{Arguments and Values:}
+@strong{Description:}
+@end defun
+
+@defun {available-properties} object => available properties
+@strong{Arguments and Values:}
+@strong{Description:}
+@end defun
+
+@defun {has-direct-property-p} object property-name => generalized boolean
+@strong{Arguments and Values:}
+@strong{Description:}
+@end defun
+
+@defun {has-property-p} object property-name => generalized boolean
+@strong{Arguments and Values:}
+@strong{Description:}
+@end defun
+
 @defmac {with-properties} (property-entry*) object-form declaration* form*
 => result*
 

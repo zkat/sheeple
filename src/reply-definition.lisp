@@ -101,16 +101,15 @@
                      (ensure-message name :lambda-list (create-msg-lambda-list lambda-list)))
                  qualifiers lambda-list participants function documentation))
 
-(defun %ensure-reply (message qualifiers lambda-list participants function documentation)
-  (let ((reply (make-reply message qualifiers lambda-list function))
-        (objectified-participants (objectify-list participants)))
-    (setf (documentation reply 't) documentation) ; same as dox for CLOS methods
+(defun %ensure-reply (message qualifiers lambda-list participants function documentation
+                      &aux (objectified-participants (objectify-list participants)))
+  (aprog1 (make-reply message qualifiers lambda-list function)
+    (setf (documentation it 't) documentation) ; same as dox for CLOS methods
     (clear-dispatch-cache message)
     ;; In order to replace existing replies, we must remove them before actually adding them again.
     (remove-specific-reply message qualifiers objectified-participants)
-    (add-reply-to-message reply message)
-    (add-reply-to-objects reply objectified-participants)
-    reply))
+    (add-reply-to-message it message)
+    (add-reply-to-objects it objectified-participants)))
 
 (defun add-reply-to-message (reply message)
   (set-arg-info message :new-reply reply)

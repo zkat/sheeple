@@ -24,7 +24,7 @@
 
 (defun apply-message (message args)
   (declare (list args))
-  (let ((relevant-args-length (arg-info-number-required (message-arg-info message))))
+  (let ((relevant-args-length (message-number-required message)))
     (error-when (< (the fixnum (length args))
                    (the fixnum relevant-args-length))
                 insufficient-message-args :message message)

@@ -742,8 +742,26 @@ This function will remove any and all direct-properties currently stored in @var
 @end defun
 
 @defun {property-owner} object property-name &optional errorp
+       => owner
+
 @strong{Arguments and Values:}
-@strong{Description:}
+
+@var{object} --- An object.
+@var{property-name} --- Symbol naming the property of interest.
+@var{errorp} --- A generalized boolean.
+@var{owner} --- An object.
+
+@strong{Description:} 
+
+This function searches @var{object}'s hierarchy-list for the first ancestor that
+has a direct property named @var{property-name}, and returns
+that @var{owner}. The @var{owner} will be @var{object} itself if the property is
+direct.
+
+If @var{errorp} is true (the default), @code{PROPERTY-OWNER} will signal a
+condition of type @code{UNBOUND-PROPERTY} if it fails to find any ancestor with
+a direct property value for @var{property-name}.
+
 @end defun
 
 @defun {object-direct-properties} object => direct-properties

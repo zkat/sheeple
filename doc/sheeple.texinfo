@@ -689,7 +689,7 @@ type @code{UNBOUND-PROPERTY} is signaled.
 
 @end defun
 
-@defun {(setf property-value)} new-value object property-name 
+@defun {(setf property-value)} new-value object property-name
            &key reader writer accessor
 => new-value
 
@@ -731,7 +731,7 @@ error of type @code{UNBOUND-PROPERTY}.
 
 @end defun
 
-@defun {remove-all-direct-properties} object 
+@defun {remove-all-direct-properties} object
        => object
 @strong{Arguments and Values:}
 
@@ -752,7 +752,7 @@ This function will remove any and all direct-properties currently stored in @var
 @var{errorp} --- A generalized boolean.
 @var{owner} --- An object.
 
-@strong{Description:} 
+@strong{Description:}
 
 This function searches @var{object}'s hierarchy-list for the first ancestor that
 has a direct property named @var{property-name}, and returns
@@ -765,9 +765,22 @@ a direct property value for @var{property-name}.
 
 @end defun
 
-@defun {object-direct-properties} object => direct-properties
+@defun {object-direct-properties} object
+       => direct-properties
+
 @strong{Arguments and Values:}
+
+@var{object} --- An object.
+
+@var{direct-properties} --- A list of symbols.
+
 @strong{Description:}
+Returns a list of symbols naming @var{object}'s direct properties.
+
+@strong{Exceptional Situations:}
+The consequences are undefined if @var{direct-properties} is side-effected in
+any way.
+
 @end defun
 
 @defun {available-properties} object => available properties

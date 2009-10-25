@@ -28,7 +28,7 @@
   (qualifiers (error "Must supply qualifiers") :type list :read-only t)
   (lambda-list (error "Must supply lambda-list") :type list :read-only t)
   (function (error "Must supply a function") :type function :read-only t)
-  ;; This can be changed dynamically, but must be (or string nil) -- clhs documentation
+  ;; This can be changed dynamically, but must be (or string null) -- clhs documentation
   (documentation nil :type (or string null))
   ;; This is set at creation, and is frobbed in FIND-APPLICABLE-REPLIES
   (rank-vector (error "Bug in Sheeple") :type simple-vector :read-only t))
@@ -56,34 +56,35 @@
 ;;;   particular message. As it turns out, all the information roles have to hold is the position
 ;;;   in which it is supposed to be called, and the actual reply object it's associated with.
 ;;;   The algorithm takes care of putting everything else together.
+(deftype role ()
+  '(cons reply fixnum))
+(defun rolep (maybe-role)
+  (typep maybe-role 'role))
+
 (defun make-role (reply position)
   (cons reply position))
-(defun role-reply (role)
-  (car role))
-(defun role-position (role)
-  (cdr role))
 
 (declaim (ftype (function (role) reply) role-reply)
          (ftype (function (role) fixnum) role-position)
          (inline make-role role-reply role-position))
 
-(deftype role ()
-  '(cons reply fixnum))
-(defun rolep (maybe-role)
-  (typep maybe-role 'role))
+(defun role-reply (role)
+  (car role))
+(defun role-position (role)
+  (cdr role))
 
 (defun pprint-role (stream role)
   (print-unreadable-object (role stream :identity t)
     (format stream "Role: ~A" (role-name role))))
 (set-pprint-dispatch 'role 'pprint-role 1)
 
+(declaim (inline role-message role-name)
+         (ftype (function (role) message) role-message))
+
 (defun role-message (role)
   (reply-message (role-reply role)))
 (defun role-name (role)
   (reply-name (role-reply role)))
-
-(declaim (inline role-message role-name)
-         (ftype (function (role) message) role-message))
 
 (defun participantp (object reply)
   "Checks if OBJECT is actually involved in dispatching REPLY"

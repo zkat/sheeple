@@ -231,19 +231,14 @@ more entries the cache will be able to hold, but the slower lookup will be.")
                (lose "the reply does not accept each of the &KEY arguments ~S." msg-keywords))
               (t (values)))))))
 
-(defun set-arg-info (message &key new-reply (lambda-list nil lambda-list-p))
-  (when lambda-list-p
-    (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)
-        (analyze-lambda-list lambda-list)
-      (setf (message-lambda-list message) (if lambda-list-p lambda-list
-                                              (create-msg-lambda-list lambda-list))
-            (message-number-required message) nreq
-            (message-number-optional message) nopt
-            (message-key/rest-p message) (or keysp restp)
-            (message-keys message) (if lambda-list-p
-                                       (if allow-other-keys-p t keywords)
-                                       (message-key/rest-p message)))))
-  (when new-reply (check-reply-arg-info message new-reply))
+(defun set-arg-info (message lambda-list)
+  (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)
+      (analyze-lambda-list lambda-list)
+    (setf (message-lambda-list message) lambda-list
+          (message-number-required message) nreq
+          (message-number-optional message) nopt
+          (message-key/rest-p message) (or keysp restp)
+          (message-keys message) (if allow-other-keys-p t keywords)))
   (values))
 
 ;;;
@@ -254,14 +249,14 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 ;; its args, checking lamda-list, etc.)
 (defun ensure-message (name &rest all-keys &key lambda-list &allow-other-keys)
   (or (awhen-prog1 (find-message name nil)
-        (set-arg-info it :lambda-list lambda-list))
+        (set-arg-info it lambda-list))
       (setf (%find-message name)
             (apply 'make-message :name name :lambda-list lambda-list all-keys))))
 
 ;; This handles actual setup of the message object (and finalization)
 (defun make-message (&key name lambda-list documentation)
   (let ((message (%make-message :name name :lambda-list lambda-list)))
-    (set-arg-info message :lambda-list lambda-list)
+    (set-arg-info message lambda-list)
     (finalize-message message)
     (setf (documentation message t) documentation)
     message))

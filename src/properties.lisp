@@ -31,7 +31,7 @@ would yield a value (i.e. not signal an unbound-property condition)."
   (some (rcurry 'has-direct-property-p property-name)
         (object-hierarchy-list object)))
 
-(defun remove-property (object property-name)
+(defun remove-property (object property-name &optional (errorp t))
   "Removes OBJECT's direct property named PROPERTY-NAME. Signals an error if there is no such
 direct property. Returns OBJECT."
   (if (has-direct-property-p object property-name)
@@ -40,7 +40,8 @@ direct property. Returns OBJECT."
                      (ensure-mold (object-parents object)
                                   (hv-remove property-name
                                              (mold-properties (%object-mold object))))))
-      (error "Cannot remove property: ~A is not a direct property of ~A" property-name object)))
+      (when errorp
+        (error "Cannot remove property: ~A is not a direct property of ~A" property-name object))))
 
 (defun remove-all-direct-properties (object)
   "Wipes out all direct properties and their values from OBJECT."

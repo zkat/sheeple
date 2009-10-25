@@ -324,6 +324,7 @@ tagged release.
 * Creating Objects::
 * Object Hierarchies::
 * Properties::
+* Messages::
 @end menu
 
 @node Creating Objects, Object Hierarchies, API Documentation, API Documentation
@@ -931,6 +932,50 @@ if @code{property-entryi} is of the form
 Also, note that the standard macro @code{WITH-ACCESSORS} works on objects too.
 @end defmac
 
+@node Messages, Messages, API Documentation, API Documentation
+@section Messages
+
+@defmac {defmessage} name lambda-list {option}*
+
+@strong{Arguments and Values:}
+
+@var{name} --- A valid function name.
+
+@var{lambda-list} --- A message lambda-list.
+
+@var{option} --- A message option.
+
+@strong{Description:}
+
+Like CLOS' @code{DEFGENERIC}, @code{DEFMESSAGE} declares the basic blueprint for dispatch.
+
+@end defmac
+
+@defmac {defreply} name {qualifier}* specialized-lambda-list [[declaration* | documentation]] form*
+        => new-reply
+
+@strong{Arguments and Values:}
+
+@var{name} --- A valid message name.
+
+@var{qualifier} --- A reply qualifier.
+
+@var{specialized-lambda-list} --- A specialized reply lambda-list.
+
+@var{declaration} --- Function declarations.
+
+@var{documentation} --- A string, to be extracted as documentation.
+
+@var{form} --- A lisp form.
+
+@strong{Description:}
+
+Like CLOS' @code{DEFMETHOD}, @code{DEFREPLY} creates a method-like object,
+specialized on the objects given in @var{specialized-lambda-list}. The code
+in @var{form}* will dispatch when given an appropriate set of arguments.
+
+@end defmac
+
 @node Concepts, API Index, API Documentation, Top
 @chapter Concepts
 
@@ -992,7 +1037,7 @@ it as a reference point. It has @code{=T=} as its only parent.}
 @end ifset
 @end table
 
-@node Boxed-Object Hierarchy,  , Built-In Objects, Objects
+@node Boxed-Object Hierarchy,  , Built-In Objects, Objects, Objects
 @subsection Boxed-Object Hierarchy
 
 @table @code

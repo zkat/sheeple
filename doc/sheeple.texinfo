@@ -336,17 +336,17 @@ tagged release.
 
 @var{all-keys} --- a list of keyword args.
 
-@var{parents} --- a list of objects.
+@var{parents} --- One object, or a list of objects.
 
 @var{new-object} --- a new object with @var{parents} as parents.
 
 @strong{Description:}
 
-@code{OBJECT} creates a new instance
+@code{OBJECT} creates a new object.
 @ifset mop
 of @code{=STANDARD-METAOBJECT=}
 @end ifset
-with @var{parents} as its parents. Any non-sheep objects in @var{parents} will
+with @var{parents} as its parents. Any non-sheeple objects in @var{parents} will
 be autoboxed and @emph{those} objects will be added as parents. The new object's
 parents will be ordered as they are given. Passing an empty parent list or
 failing to pass one will automatically set @code{=STANDARD-OBJECT=} as the new
@@ -356,19 +356,19 @@ object's sole parent.
 
 @smallformat
 @verbatim
-(spawn) => #<Sheep [=STANDARD-SHEEP=] #x15007E06>
-(sheep-parents (spawn)) => (#<Sheep =STANDARD-SHEEP= #x14C8947E>)
-(spawn (spawn)) => #<Sheep [=STANDARD-SHEEP=] #x1500A391>
+(object) => #<Object [=STANDARD-OBJECT=] #x30004166BF6D>
+(object-parents (object)) => (#<Object =STANDARD-OBJECT= #x3000414A317D>)
+(object :parents (object)) => #<Object [=STANDARD-OBJECT=] #x3000414EBBED>
 @end verbatim
 @end smallformat
 
 @strong{Side Effects:}
 
-Parents are added using @code{ADD-PARENT}, which may have side effects.
+None
 @end defun
 
-@defmac {defsheep} (@{parent-object@}*) (@{property-spec@}*) option-spec*
-=> new-sheep
+@defmac {defobject} (@{parent-object@}*) (@{property-spec@}*) option-spec*
+=> new-object
 
 @smallformat
 @verbatim
@@ -386,12 +386,11 @@ property-option ::= (:nickname lisp-object) |
 
 @strong{Arguments and Values:}
 
-@var{parent-object} --- a sheep.
+@var{parent-object} --- an object.
 
-@var{property-name} --- a symbol.
+@var{property-name} --- a symbol, not evaluated.
 
 @var{property-value} --- a form, evaluated to produce the value for property.
-@var{property-name}
 
 @var{reader/writer/accessor} --- can be supplied more than once for each
 property. If NIL is given for any of these, signals an error if there is another
@@ -401,38 +400,35 @@ Providing T as the argument to :accessor automatically creates an accessor for
 that property using the given property name.
 
 @var{nickname} --- a form, evaluated to produce the nickname for
-@var{new-sheep}, preferably a symbol.
+@var{new-object}, preferably a symbol.
 
 @var{documentation} --- a string of documentation for the new sheep.
 
-@var{new-sheep} --- a sheep object, constructed according to the arguments.
+@var{new-object} --- an object, constructed according to the arguments.
 
 @strong{Description:}
 
-@code{DEFSHEEP} creates a new sheep with all the @var{parent-object}s as
-parents. After the new object has been initialized, @var{direct-properties},
-readers, writers, and accessors are added to the new object based on each
-@var{property-spec}.
+@code{DEFOBJECT} creates a new object with all the @var{parent-object}s as
+parents. After the new object has been initialized, @var{direct-properties}
+are added to it during SHARED-INIT, using (SETF PROPERTY-VALUE), based on @var{property-spec}.
 
 @strong{Examples:}
 
 @smallformat
 @verbatim
-(defsheep () ((var "value"))) => #<Sheep [=STANDARD-SHEEP=] #x1503119E>
-(defsheep (*) ()) => #<Sheep [=STANDARD-SHEEP=] #x14FB626E>
-(sheep-parents *) => (#<Sheep [=STANDARD-SHEEP=] #x1503119E>)
-(available-properties **) => (VAR)
+(defobject () ((var "value"))) => #<Object [=STANDARD-OBJECT=] #x30004157569D>
+(defobject (*) ()) => #<Object [=STANDARD-OBJECT=] #x30004158008D>
+(object-parents *) => (#<Object [=STANDARD-OBJECT=] #x30004157569D>)
+(available-properties **) => (VAR NICKNAME)
 @end verbatim
 @end smallformat
 
 @strong{Side Effects:}
 
-@code{add-property} and @code{add-parent} are both called for each
-@var{property-spec} and @var{parent-object}.
 @end defmac
 
-@defmac {defproto} (@{parent-object@}*) (@{property-spec@}*) option-spec*
-=> new sheep
+@defmac {defproto} proto-name (@{parent-object@}*) (@{property-spec@}*) option-spec*
+=> new-object
 
 @smallformat
 @verbatim
@@ -453,9 +449,9 @@ property-option ::= (:nickname lisp-object) |
 
 @var{proto-name} --- a non-keyword symbol.
 
-@var{parent-object} --- a sheep, to be added as a parent.
+@var{parent-object} --- an object, to be added as a parent.
 
-@var{property-name} --- a symbol.
+@var{property-name} --- a symbol, not evaluated.
 
 @var{property-value} --- a form, evaluated to produce an initial value for the
 corresponding property @var{property-name}.
@@ -463,34 +459,34 @@ corresponding property @var{property-name}.
 @var{reader/writer/accessor} --- can be supplied more than once for each
 property. If NIL is given for any of these, signals an error if there is another
 matching definition. :accessor creates both a reader and a writer with format
-(accessor-name sheep-object) (setf (accessor-name sheep-object)
+(accessor-name object) (setf (accessor-name object)
 new-value). Providing T as the argument to :accessor automatically creates an
 accessor for that property using the given property name.
 
 @var{nickname} --- a form, evaluated to produce the nickname for
-@var{new-sheep}, preferably a symbol.
+@var{new-object}, preferably a symbol.
 
-@var{documentation} --- a string of documentation for the new sheep.
+@var{documentation} --- a string of documentation for the new object.
 
-@var{new-sheep} --- a sheep object, constructed according to the arguments.
+@var{new-object} --- an object, constructed according to the arguments.
 
 @strong{Description:}
 
-@code{DEFPROTO} creates a new sheep with all the @var{parent-object}s as
+@code{DEFPROTO} creates a new object with all the @var{parent-object}s as
 parents, and creates a dynamic binding for the symbol @var{proto-name} to the
-sheep.
+object.
 
-After the sheep has been initialized, @var{direct-properties}, readers, writers,
+After the object has been initialized, @var{direct-properties}, readers, writers,
 and accessors are added to the new object based on each @var{property-spec}.
-Unlike @code{DEFSHEEP}, @code{DEFPROTO} automatically defines accessors for each
+Unlike @code{DEFOBJECT}, @code{DEFPROTO} automatically defines accessors for each
 @var{property-spec} using its @var{property-name}. This behavior can be
 overridden by passing a :reader, :writer, and/or :accessor option.
 
 Unless given a :nickname option, @code{DEFPROTO} uses @var{proto-name} as the
-new sheep's nickname.
+new object's nickname.
 
 If a @code{DEFPROTO} form is evaluated when the @var{proto-name} already points
-to an existing sheep, @code{REINIT-SHEEP} is called on the existing sheep to
+to an existing sheep, @code{REINIT-OBJECT} is called on the existing object to
 clear out the current parents and properties and set them according to the
 @var{parent-object}s and @var{property-spec}s in the call to @code{DEFPROTO}@.
 
@@ -498,29 +494,34 @@ clear out the current parents and properties and set them according to the
 
 @smallformat
 @verbatim
-(defproto =test-proto= () ()) => #<Sheep =TEST-PROTO= #x150712B6>
+(defproto =test-proto= () ()) => #<Object =TEST-PROTO= #x300041602BFD>
+(defproto =test-proto= () ((var "value"))) => #<Object =TEST-PROTO=#x300041602BFD>
+;; Identity is maintained, but =test-proto= now has a new property. Removing it
+;; in the form will remove it from the object:
+(defproto =test-proto= () ()) => #<Object =TEST-PROTO= #x300041602BFD>
+(available-properties *) => (NICKNAME)
 @end verbatim
 @end smallformat
 
 @strong{Notes:}
 
-It is customary to name prototype sheep with an equals-sign (@kbd{=}) at the
+It is customary to name prototype objects with an equals-sign (@kbd{=}) at the
 beginning and end of the name. For example, @var{=foo=} is a good name for a
-prototype sheep. This naming convention is observed for all built-in sheep in
-Sheeple; however, programs are not required to adhere to it.
+prototype. This naming convention is observed for all included objects in
+the Sheeple library; however, programs are not required to adhere to it.
 @end defmac
 
-@node Sheep Hierarchies, Properties, Spawning Sheep, API Documentation
-@section Sheep Hierarchies
+@node Object Hierarchies, Properties, Creating Objects, API Documentation
+@section Object Hierarchies
 
 @defun {parentp} maybe-parent child
 => generalized-boolean
 
 @strong{Arguments and Values:}
 
-@var{maybe-parent} --- a sheep.
+@var{maybe-parent} --- an object.
 
-@var{child} --- a sheep.
+@var{child} --- an object.
 
 @strong{Description:}
 
@@ -530,8 +531,8 @@ Returns true if @var{maybe-parent} is a parent of @var{child}, false otherwise.
 
 @smallformat
 @verbatim
-(parentp =T= =STANDARD-SHEEP=) => Generalized truth value
-(parentp =STANDARD-SHEEP= =T=) => NIL
+(parentp =T= =STANDARD-OBJECT=) => Generalized truth value
+(parentp =STANDARD-OBJECT= =T=) => NIL
 @end verbatim
 @end smallformat
 @end defun
@@ -541,9 +542,9 @@ Returns true if @var{maybe-parent} is a parent of @var{child}, false otherwise.
 
 @strong{Arguments and Values:}
 
-@var{maybe-ancestor} --- a sheep.
+@var{maybe-ancestor} --- an object.
 
-@var{descendant} --- a sheep.
+@var{descendant} --- an object.
 
 @strong{Description:}
 
@@ -554,7 +555,7 @@ otherwise.
 
 @smallformat
 @verbatim
-(ancestorp =STANDARD-SHEEP= (spawn (spawn))) => Generalized truth value
+(ancestorp =STANDARD-SHEEP= (object :parents (object))) => Generalized truth value
 @end verbatim
 @end smallformat
 @end defun
@@ -564,9 +565,9 @@ otherwise.
 
 @strong{Arguments and Values:}
 
-@var{maybe-child} --- a sheep.
+@var{maybe-child} --- an object.
 
-@var{parent} --- a sheep.
+@var{parent} --- an object.
 
 @strong{Description:}
 
@@ -576,8 +577,8 @@ Returns true if @var{maybe-child} is a child of @var{parent}, false otherwise.
 
 @smallformat
 @verbatim
-(childp (spawn) =STANDARD-SHEEP=) => Generalized truth value
-(childp (spawn) =T=) => NIL
+(childp (object) =STANDARD-OBJECT=) => Generalized truth value
+(childp (object) =T=) => NIL
 @end verbatim
 @end smallformat
 @end defun
@@ -587,9 +588,9 @@ Returns true if @var{maybe-child} is a child of @var{parent}, false otherwise.
 
 @strong{Arguments and Values:}
 
-@var{maybe-descendant} --- a sheep.
+@var{maybe-descendant} --- an object.
 
-@var{ancestor} --- a sheep.
+@var{ancestor} --- an object.
 
 @strong{Description:}
 
@@ -600,94 +601,42 @@ otherwise.
 
 @smallformat
 @verbatim
-(descendantp (spawn) =STANDARD-SHEEP=) => Generalized truth value
-(descendantp (spawn) =T=) => Generalized truth value
+(descendantp (object) =STANDARD-OBJECT=) => Generalized truth value
+(descendantp (object) =T=) => Generalized truth value
 @end verbatim
 @end smallformat
 @end defun
 
-@defun {add-parent} new-parent sheep
-=> modified-sheep
+@defun {object-parents} object => parents
 
 @strong{Arguments and Values:}
 
-@var{new-parent} --- a sheep.
+@var{object} --- an object.
 
-@var{sheep} --- a sheep.
-
-@var{modified-sheep} --- the same sheep as @var{sheep}, with @var{new-parent}
-added as a new parent.
+@var{parents} --- A list of objects
 
 @strong{Description:}
 
-@code{ADD-PARENT} adds @var{new-parent} to the end of @var{sheep}'s parent list.
+Returns a list of objects representing @var{object}'s parents.
 
-If @var{new-parent} is already a parent of @var{sheep}, a condition of type
-@code{SIMPLE-ERROR} is signalled. A condition of type @code{SIMPLE-ERROR} is
-also signalled if @var{new-parent} and @var{sheep} are the same sheep. If adding
-the parent would result in a cyclic hierarchy list, a condition of type
-@code{SHEEP-HIERARCHY-ERROR} is signalled, and @var{new-parent} is not added to
-@var{sheep}.
+The macro @code{SETF} may be used to set a new list as @var{object}'s list of parents.
 
-@strong{Examples:}
+@strong{Exceptional Situations:}
 
-@smallformat
-@verbatim
-(defproto =foo= () ()) => #<Sheep =FOO= #x41891CFD>
-(defproto =bar= (=foo=) ()) => #<Sheep =BAR= #x418ED98D>
-(add-parent (defproto =baz= () ()) =bar=) => #<Sheep =BAR= #x418ED98D>
-(sheep-parents =bar=)
-  => (#<Sheep =FOO= #x4175EA7D> #<Sheep =BAZ= #x4197A5FD>)
-(add-parent (spawn =foo=) =bar=) => ERROR: SHEEP-HIERARCHY-ERROR
-@end verbatim
-@end smallformat
+The consequences are undefined if destructive operations are performed on the
+list returned by @code{OBJECT-PARENTS}.
 
-@strong{Side Effects:}
-
-@var{sheep}'s parent list is modified to include @var{new-parent}.
 @end defun
 
-@defun {remove-parent} parent sheep
-=> modified-sheep
-
-@strong{Arguments and Values:}
-
-@var{parent} --- a sheep.
-
-@var{sheep} --- a sheep.
-
-@var{modified-sheep} --- the same sheep as @var{sheep}, with @var{new-parent}
-removed from its parent list.
-
-@strong{Description:}
-
-If @var{parent} is in @var{sheep}'s parent list, it is removed. Otherwise, a
-condition of type @code{SIMPLE-ERROR} is signalled.
-
-@strong{Examples:} (Continued from @code{add-parent}'s examples)
-
-@smallformat
-@verbatim
-(remove-parent =foo= =bar=) => #<Sheep =BAR= #x4176435D>
-(sheep-parents =bar=) => (#<Sheep =BAZ= #x4197A5FD>)
-(remove-parent =baz= =foo=) => ERROR: SIMPLE-ERROR
-@end verbatim
-@end smallformat
-
-@strong{Side Effects:}
-
-@var{new-parent} is no longer present in @var{sheep}'s parent list.
-@end defun
-
-@node Properties,  , Sheep Hierarchies, API Documentation
+@node Properties, Object Hierarchies, API Documentation
 @section Properties
 
-@defmac {with-properties} (property-entry*) sheep-form declaration* form*
+@defmac {with-properties} (property-entry*) object-form declaration* form*
 => result*
 
 @smallformat
 @verbatim
-property-entry ::= slot-name | (variable-name slot-name)
+property-entry ::= property-name | (variable-name porperty-name)
 @end verbatim
 @end smallformat
 
@@ -697,9 +646,9 @@ property-entry ::= slot-name | (variable-name slot-name)
 
 @var{variable-name} --- a variable name; not evaluated.
 
-@var{sheep-form} --- a form; evaluated to produce @var{sheep}.
+@var{object-form} --- a form; evaluated to produce @var{object}.
 
-@var{sheep} --- a sheep.
+@var{object} --- an object.
 
 @var{declaration} --- a declare expression; not evaluated.
 
@@ -710,7 +659,7 @@ property-entry ::= slot-name | (variable-name slot-name)
 @strong{Description:}
 
 @code{WITH-PROPERTIES} establishes a lexical environment for referring to the
-properties in @var{sheep} named by the given @var{property-name}s as though they
+properties in @var{object} named by the given @var{property-name}s as though they
 were lexically bound variables.
 
 Within this context the value of each property can be specified by using its
@@ -725,7 +674,7 @@ property.
 
 @strong{Exceptional Situations:}
 
-The consequences are undefined if any property is not present in @var{sheep}.
+The consequences are undefined if any property is not present in @var{object}.
 
 @strong{Notes:}
 
@@ -761,7 +710,7 @@ if @code{property-entryi} is of the form
 @end verbatim
 @end smallformat
 
-Also, note that the standard macro @code{WITH-ACCESSORS} works on Sheep too.
+Also, note that the standard macro @code{WITH-ACCESSORS} works on objects too.
 @end defmac
 
 @node Concepts, API Index, API Documentation, Top

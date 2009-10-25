@@ -1,3 +1,12 @@
+* 3.0.2
+** Features
+*** ADD-PROPERTY removed. Replaced by (SETF PROPERTY-VALUE)
+    This means property-setting semantics have changed a bit. Refer to the documentation.
+*** Optimization
+    Lots of stuff has been sped up. Particularly, object creation and reply dispatch.
+*** Documentation
+    The manual has been updated.
+** Bugfixes
 * 3.0.1
 ** Features
 *** Improved INIT trio of messages with a better API

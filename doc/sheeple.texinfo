@@ -8,7 +8,7 @@
 @set EDITION 0.1
 @set VERSION v3.0.2
 @set UPDATED-MONTH October 2009
-@set UPDATED 24 @value{UPDATED-MONTH}
+@set UPDATED 25 @value{UPDATED-MONTH}
 @clear mop
 @syncodeindex fn vr
 
@@ -696,13 +696,19 @@ type @code{UNBOUND-PROPERTY} is signaled.
 @strong{Arguments and Values:}
 
 @var{new-value} --- A value to set the property to.
+
 @var{object} --- An object.
+
 @var{property-name} --- A symbol which names the property to set.
+
 @var{reader} --- A symbol, T, or NIL
+
 @var{writer} --- A symbol, T, or NIL
+
 @var{accessor} --- A symbol, T, or NIL
 
 @strong{Description:}
+
 @code{(SETF PROPERTY-VALUE)} will set @var{new-value} as one of @var{object}'s
 direct properties. If @var{property-name} names an existing direct property, the
 value is changed. If @var{property-name} is not already a direct property
@@ -723,6 +729,7 @@ that property that have been set in @var{object}'s hierarchy list.
 @var{errorp} --- A generalized boolean.
 
 @strong{Description:}
+
 @code{REMOVE-PROPERTY} will remove only a @strong{direct} property
 from @var{object}. This will make the property unbound (only directly).
 
@@ -733,11 +740,13 @@ error of type @code{UNBOUND-PROPERTY}.
 
 @defun {remove-all-direct-properties} object
        => object
+
 @strong{Arguments and Values:}
 
 @var{object} --- An object.
 
 @strong{Description:}
+
 This function will remove any and all direct-properties currently stored in @var{object}.
 
 @end defun
@@ -748,8 +757,11 @@ This function will remove any and all direct-properties currently stored in @var
 @strong{Arguments and Values:}
 
 @var{object} --- An object.
+
 @var{property-name} --- Symbol naming the property of interest.
+
 @var{errorp} --- A generalized boolean.
+
 @var{owner} --- An object.
 
 @strong{Description:}
@@ -775,9 +787,11 @@ a direct property value for @var{property-name}.
 @var{direct-properties} --- A list of symbols.
 
 @strong{Description:}
+
 Returns a list of symbols naming @var{object}'s direct properties.
 
 @strong{Exceptional Situations:}
+
 The consequences are undefined if @var{direct-properties} is side-effected in
 any way.
 

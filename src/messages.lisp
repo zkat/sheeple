@@ -262,23 +262,6 @@ more entries the cache will be able to hold, but the slower lookup will be.")
     (when new-reply (check-reply-arg-info message arg-info new-reply))
     arg-info))
 
-(defun check-message-lambda-list (lambda-list)
-  (flet ((check-no-defaults (list)
-           (awhen (find-if (complement (rcurry 'typep '(or symbol (cons * null)))) list)
-             (error 'message-lambda-list-error :arg it :lambda-list lambda-list))))
-    (multiple-value-bind (required optional restp rest keyp keys aok auxp)
-        (parse-lambda-list lambda-list)
-      (declare (ignore required restp rest keyp aok))
-      (check-no-defaults optional)
-      (check-no-defaults keys)
-      (when auxp (error 'message-lambda-list-error :arg '&aux :lambda-list lambda-list)))))
-
-(defun create-msg-lambda-list (lambda-list)
-  "Create a message lambda list from a reply's lambda list"
-  (loop for x in lambda-list
-     collect (if (consp x) (car x) x)
-     if (eq x '&key) do (loop-finish)))
-
 ;;;
 ;;; Message definition (finally!)
 ;;;

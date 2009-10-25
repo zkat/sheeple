@@ -275,6 +275,23 @@
                        (cons symbol required)
                        (if (listp arg) (cons (car arg) ignorable) ignorable))))))))
 
+(defun check-message-lambda-list (lambda-list)
+  (flet ((check-no-defaults (list)
+           (awhen (find-if (complement (rcurry 'typep '(or symbol (cons * null)))) list)
+             (error 'message-lambda-list-error :arg it :lambda-list lambda-list))))
+    (multiple-value-bind (required optional restp rest keyp keys aok auxp)
+        (parse-lambda-list lambda-list)
+      (declare (ignore required restp rest keyp aok))
+      (check-no-defaults optional)
+      (check-no-defaults keys)
+      (when auxp (error 'message-lambda-list-error :arg '&aux :lambda-list lambda-list)))))
+
+(defun create-msg-lambda-list (lambda-list)
+  "Create a message lambda list from a reply's lambda list"
+  (loop for x in lambda-list
+     collect (if (consp x) (car x) x)
+     if (eq x '&key) do (loop-finish)))
+
 (defun analyze-lambda-list (lambda-list)
   ;; Need to specify exactly what this function does -- is it analyzing
   ;; any lambda-list, or defmessage lambda-lists? Should it do error

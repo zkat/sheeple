@@ -797,9 +797,20 @@ any way.
 
 @end defun
 
-@defun {available-properties} object => available properties
+@defun {available-properties} object
+        => available properties
+
 @strong{Arguments and Values:}
+
+@var{object} --- An object.
+
+@var{available properties} --- A list of symbols.
+
 @strong{Description:}
+
+Returns a list of symbols representing all property-names for
+which @code{PROPERTY-VALUE} would return a value.
+
 @end defun
 
 @defun {has-direct-property-p} object property-name => generalized boolean

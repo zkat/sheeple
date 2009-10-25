@@ -6,9 +6,9 @@
 @c %**end of header
 
 @set EDITION 0.1
-@set VERSION v3.0
-@set UPDATED-MONTH September 2009
-@set UPDATED 18 @value{UPDATED-MONTH}
+@set VERSION v3.0.2
+@set UPDATED-MONTH October 2009
+@set UPDATED 24 @value{UPDATED-MONTH}
 @clear mop
 @syncodeindex fn vr
 
@@ -722,37 +722,32 @@ understanding of Sheeple. It should be read regardless of whether you
 have prior experience with @acronym{CLOS}@.
 
 @menu
-* Sheep Objects::               The Basic Data Structure of Sheeple
+* Objects::               The Basic Data Structure of Sheeple
 @end menu
 
-@node Sheep Objects,  , Concepts, Concepts
-@section Sheep Objects
+@node Objects,  , Concepts, Concepts
+@section Objects
 
-@cindex sheep
+@cindex object
 @cindex sheeple
-A @dfn{sheep} is a single object within the object system. For the
-plural, sometimes the same word is used, and sometimes the word
-@dfn{sheeple} is employed instead. Note however that @dfn{sheeple}
-doubles both as the plural of sheep and, when used as the proper noun
-(i.e. ``Sheeple''), as the name of the project.
+An @dfn{object} is a single object within the Sheeple object system.
 
-Sheep objects have their behavior defined by three things, namely,
-their parents, properties, and any replies specialized upon
-them.
+Objects have their behavior defined by three things: their parents, properties,
+and any replies specialized upon them.
 
 @menu
-* Built-In Sheeple::            Sheeple's Backbone Objects
+* Built-In Objects::            Sheeple's Backbone Objects
 * Boxed-Object Hierarchy::      Interface to Native Lisp Types
 @end menu
 
-@node Built-In Sheeple, Boxed-Object Hierarchy, Sheep Objects, Sheep Objects
-@subsection Built-In Sheeple
+@node Built-In Objects, Boxed-Object Hierarchy, Objects
+@subsection Built-In Objects
 
-@cindex sheeple, built-in
-@cindex built-in sheep objects
-There are some built-in sheeple, exported from the
+@cindex objects, built-in
+@cindex built-in objects
+There are some built-in objects, exported from the
 @code{SHEEPLE} package, that play special roles in Sheeple. The
-consequences of modifying these sheeple from user code are undefined.
+consequences of modifying these objects from user code are undefined.
 
 @macro sheeplebuiltin{name, concept, description}
 @cindex \concept\
@@ -762,31 +757,31 @@ consequences of modifying these sheeple from user code are undefined.
 @end macro
 
 @table @code
-@sheeplebuiltin{=T=,ancestral sheep, An ancestor of every other
-sheep@comma{} and is the only sheep with no parents. It is used for
-reply specialization.}
+@sheeplebuiltin{=T=,ancestral object, An ancestor of every other
+object@comma{} and is the only object with no parents. It sits at the obsolute
+top of all object hierarchies, acting important.}
 
-@sheeplebuiltin{=STANDARD-SHEEP=,standard sheep, An ancestor of all
-normally-defined sheeple. It has @code{=T=} as its only parent. It is
+@sheeplebuiltin{=STANDARD-OBJECT=,standard object, An ancestor of all
+normally-defined objects. It has @code{=T=} as its only parent. It is
 mostly used for reply specialization@comma{} and in termination cases
 for functions which recurse up the parent-child hierarchy.}
 
 @ifset mop
-@sheeplebuiltin{=STANDARD-METASHEEP=,standard metasheep, This sheep
-is the metasheep of all normally-defined sheeple. It is the root of
+@sheeplebuiltin{=STANDARD-METAOBJECT=,standard metaobject, This object
+is the metaobject of all normally-defined objects. It is the root of
 the MOP@comma{} and many MOP functions are specialized upon it or use
 it as a reference point. It has @code{=T=} as its only parent.}
 @end ifset
 @end table
 
-@node Boxed-Object Hierarchy,  , Built-In Sheeple, Sheep Objects
+@node Boxed-Object Hierarchy,  , Built-In Objects, Objects
 @subsection Boxed-Object Hierarchy
 
 @table @code
 @sheeplebuiltin{=BOXED-OBJECT=,boxed objects, The ancestor of all
 boxed objects@comma{} it has @code{=T=} as its only parent@comma{} and
 many children. Each newly-boxed object traces its lineage up through
-this sheep.}
+this object.}
 
 @macro sheepleboxedin{name, concept, description}
 @sheeplebuiltin{\name\,\concept\, The boxed object representing
@@ -794,10 +789,10 @@ this sheep.}
 @end macro
 
 @sheepleboxedin{=SYMBOL=,symbol, native Lisp symbols@comma{} this
-sheep has @code{=BOXED-OBJECT=} as its only parent. Each newly-boxed
-symbol has this sheep as a parent}
+object has @code{=BOXED-OBJECT=} as its only parent. Each newly-boxed
+symbol has this object as a parent}
 
-@sheepleboxedin{=SEQUENCE=,sequence, sequences@comma{} this sheep's
+@sheepleboxedin{=SEQUENCE=,sequence, sequences@comma{} this object's
 job is primarily to be a parent for the boxed objects representing
 actual sequence types@comma{} and it has @code{=BOXED-OBJECT=} as its
 only parent}
@@ -806,7 +801,7 @@ only parent}
 @code{=BOXED-OBJECT=} as its only parent}
 
 @sheepleboxedin{=NUMBER=,number, all numerical types@comma{} similar
-to the native type @code{NUMBER}@. This sheep has
+to the native type @code{NUMBER}@. This object has
 @code{=BOXED-OBJECT=} as its only parent}
 
 @sheepleboxedin{=CHARACTER=,character, characters and glyphs@comma{}
@@ -819,7 +814,7 @@ children@comma{} and @code{=BOXED-OBJECT=} as its only parent}
 mappings of key--value pairs used in Common Lisp as a replacement for
 large alists. It has @code{=BOXED-OBJECT=} as its only parent}
 
-@sheepleboxedin{=PACKAGE=,package, Common Lisp packages. This sheep
+@sheepleboxedin{=PACKAGE=,package, Common Lisp packages. This object
 has only one parent -- @code{=BOXED-OBJECT=}}
 
 @sheepleboxedin{=PATHNAME=,pathname, pathnames. It has
@@ -827,18 +822,18 @@ has only one parent -- @code{=BOXED-OBJECT=}}
 
 @sheepleboxedin{=READTABLE=,readtable, tables of readmacros. While it
 is rare to deal with these programmatically@comma{} Sheeple still
-allows you to do so. This sheep has @code{=BOXED-OBJECT=} as its only
+allows you to do so. This object has @code{=BOXED-OBJECT=} as its only
 parent}
 
 @sheepleboxedin{=STREAM=,stream, any one of the many stream
-classes. This sheep has @code{=BOXED-OBJECT=} as its only parent}
+classes. This object has @code{=BOXED-OBJECT=} as its only parent}
 
 @sheepleboxedin{=LIST=,list, Lisp's classic data structure@comma{} the
-linked list@comma{} this sheep has @code{=SEQUENCE=} as its only
+linked list@comma{} this object has @code{=SEQUENCE=} as its only
 parent}
 
 @sheepleboxedin{=NULL=,null, The boxed object representing the native
-Lisp type @code{NULL}@comma{} this sheep has @code{=SYMBOL=} and
+Lisp type @code{NULL}@comma{} this object has @code{=SYMBOL=} and
 @code{=LIST=} as its two parents. The only native Lisp object which
 should box to this is the empty list itself}
 
@@ -847,10 +842,10 @@ and has @code{=LIST=} as its only parent}
 
 @sheepleboxedin{=VECTOR=,vector, the workhorse of efficient Common
 Lisp code -- one-dimensional arrays@comma{} known as vectors. This
-sheep has both @code{=ARRAY=} and @code{=SEQUENCE=} as parents}
+object has both @code{=ARRAY=} and @code{=SEQUENCE=} as parents}
 
 @sheepleboxedin{=BIT-VECTOR=,bit vector, bit vectors@comma{} a common
-subtype of vectors. This sheep has @code{=VECTOR=} as its only parent}
+subtype of vectors. This object has @code{=VECTOR=} as its only parent}
 
 @sheepleboxedin{=STRING=,string, strings of characters@comma{} also a
 very common data type in Common Lisp. It has @code{=VECTOR=} as its

@@ -114,7 +114,7 @@
     (add-reply-to-objects it objectified-participants)))
 
 (defun add-reply-to-message (reply message)
-  (set-arg-info message :new-reply reply)
+  (check-reply-arg-info message reply)
   (push reply (message-replies message)))
 
 (defun add-reply-to-objects (reply objects)

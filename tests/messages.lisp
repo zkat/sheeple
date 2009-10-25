@@ -19,32 +19,32 @@
                                      :lambda-list 'lambda-list
                                      :replies 'replies
                                      ;; :dispatch-cache 'cache
-                                     :arg-info 'arg-info)))
+                                     )))
     (is (messagep test-message))
     (with-accessors ((name           message-name)
                      (lambda-list    message-lambda-list)
                      (replies        message-replies)
                      ;; (dispatch-cache message-dispatch-cache)
-                     (arg-info       message-arg-info))
+                     )
         test-message
       (is (eq 'name        name))
       (is (eq 'lambda-list lambda-list))
       (is (eq 'replies     replies))
       ;; (is (eq 'cache       dispatch-cache))
-      (is (eq 'arg-info    arg-info))))
+      ))
   (let ((test-message (%make-message)))
     (is (messagep test-message))
     (with-accessors ((name           message-name)
                      (lambda-list    message-lambda-list)
                      (replies        message-replies)
                      ;; (dispatch-cache message-dispatch-cache)
-                     (arg-info       message-arg-info))
+                     )
         test-message
       (is (null name))
       (is (null lambda-list))
       (is (null replies))
       ;; (is (dispatch-cache-p dispatch-cache))
-      (is (arg-info-p arg-info)))))
+      )))
 
 (test *message-table*
   (is (message-table-p *message-table*))
@@ -111,24 +111,6 @@
 
 (def-suite arg-info :in messages)
 (in-suite arg-info)
-
-(test arg-info-struct
-  (let ((arg-info (make-arg-info)))
-    (is (eq :no-lambda-list (arg-info-lambda-list arg-info)))
-    (is (= 0 (arg-info-number-required arg-info)))
-    (is (= 0 (arg-info-number-optional arg-info)))
-    (is (null (arg-info-key/rest-p arg-info)))
-    (is (null (arg-info-keys arg-info)))
-    (is (equal '(a b c) (setf (arg-info-lambda-list arg-info) '(a b c))))
-    (is (= 3  (setf (arg-info-number-required arg-info) 3)))
-    (is (= 0 (setf (arg-info-number-optional arg-info)0)))
-    (is (eq t (setf (arg-info-key/rest-p arg-info) t)))
-    (is (equal '(foo) (setf (arg-info-keys arg-info) '(foo))))
-    (is (equal '(a b c) (arg-info-lambda-list arg-info)))
-    (is (= 3 (arg-info-number-required arg-info)))
-    (is (= 0 (arg-info-number-optional arg-info)))
-    (is (eq t (arg-info-key/rest-p arg-info)))
-    (is (equal '(foo) (arg-info-keys arg-info)))))
 
 (test set-arg-info)
 (test check-reply-arg-info)

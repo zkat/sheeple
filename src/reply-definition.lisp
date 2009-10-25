@@ -96,10 +96,13 @@
 ;;; Reply definition
 ;;;
 (defun ensure-reply (name &key qualifiers lambda-list participants function (documentation ""))
-  (%ensure-reply (or (find-message name nil)
+  (let ((message (or (find-message name nil)
                      (warn 'automatic-message-creation :message-name name) ; Returns NIL
-                     (ensure-message name :lambda-list (create-msg-lambda-list lambda-list)))
-                 qualifiers lambda-list participants function documentation))
+                     (ensure-message name :lambda-list (create-msg-lambda-list lambda-list)))))
+    (error-when (/= (length participants) (count-required-parameters lambda-list))
+                "~&The number of participants conflicts with the lambda list.~@
+                 Participants: ~S~%Lambda List: ~S~%" participants lambda-list)
+    (%ensure-reply message qualifiers lambda-list participants function documentation)))
 
 (defun %ensure-reply (message qualifiers lambda-list participants function documentation
                       &aux (objectified-participants (objectify-list participants)))

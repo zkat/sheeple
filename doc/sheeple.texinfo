@@ -813,14 +813,40 @@ which @code{PROPERTY-VALUE} would return a value when called on @var{object}.
 
 @end defun
 
-@defun {has-direct-property-p} object property-name => generalized boolean
+@defun {has-direct-property-p} object property-name
+        => boolean
+
 @strong{Arguments and Values:}
+
+@var{object} --- An object.
+
+@var{property-name} --- A symbol naming a property.
+
+@var{boolean} --- A generalized boolean.
+
 @strong{Description:}
+
+This function evaluates to true if @var{object} has a direct property
+named @var{property-name}, false otherwise.
+
 @end defun
 
-@defun {has-property-p} object property-name => generalized boolean
+@defun {has-property-p} object property-name
+        => boolean
+
 @strong{Arguments and Values:}
+
+@var{object} --- An object.
+
+@var{property-name} --- A symbol naming a property.
+
+@var{boolean} --- A generalized boolean.
+
 @strong{Description:}
+
+This function evaluates to true if either @var{object} or one of its ancestors
+has a direct property named @var{property-name}. False otherwise.
+
 @end defun
 
 @defmac {with-properties} (property-entry*) object-form declaration* form*

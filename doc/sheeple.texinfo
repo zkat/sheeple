@@ -647,7 +647,8 @@ list returned by @code{OBJECT-PARENTS}.
 @node Properties, Object Hierarchies, API Documentation
 @section Properties
 
-@defun {property-value} object property-name => value
+@defun {property-value} object property-name
+        => value
 
 @strong{Arguments and Values:}
 
@@ -667,7 +668,8 @@ type @code{UNBOUND-PROPERTY} is signaled.
 
 @end defun
 
-@defun {direct-property-value} object property-name => value
+@defun {direct-property-value} object property-name
+        => value
 
 @strong{Arguments and Values:}
 
@@ -687,28 +689,37 @@ type @code{UNBOUND-PROPERTY} is signaled.
 
 @end defun
 
-@defun {(setf property-value)} new-value object property-name &key reader writer accessor
+@defun {(setf property-value)} new-value object property-name 
+           &key reader writer accessor
 => new-value
 
 @strong{Arguments and Values:}
 
-@var{new-value}
-@var{object}
-@var{property-name}
-@var{reader}
-@var{writer}
-@var{accessor}
+@var{new-value} --- A value to set the property to.
+@var{object} --- An object.
+@var{property-name} --- A symbol which names the property to set.
+@var{reader} --- A symbol, T, or NIL
+@var{writer} --- A symbol, T, or NIL
+@var{accessor} --- A symbol, T, or NIL
 
 @strong{Description:}
+@code{(SETF PROPERTY-VALUE)} will set @var{new-value} as one of @var{object}'s
+direct properties. If @var{property-name} names an existing direct property, the
+value is changed. If @var{property-name} is not already a direct property
+of @var{object}, the new value is set locally, and will shadow any values for
+that property that have been set in @var{object}'s hierarchy list.
 
 @end defun
 
-@defun {remove-property} object property-name => object
+@defun {remove-property} object property-name 
+       => object
+
 @strong{Arguments and Values:}
 @strong{Description:}
 @end defun
 
-@defun {remove-all-direct-properties} object => object
+@defun {remove-all-direct-properties} object 
+       => object
 @strong{Arguments and Values:}
 @strong{Description:}
 @end defun
@@ -847,7 +858,7 @@ and any replies specialized upon them.
 * Boxed-Object Hierarchy::      Interface to Native Lisp Types
 @end menu
 
-@node Built-In Objects, Boxed-Object Hierarchy, Objects
+@node Built-In Objects, ,Boxed-Object Hierarchy, Objects
 @subsection Built-In Objects
 
 @cindex objects, built-in
@@ -866,7 +877,7 @@ consequences of modifying these objects from user code are undefined.
 @table @code
 @sheeplebuiltin{=T=,ancestral object, An ancestor of every other
 object@comma{} and is the only object with no parents. It sits at the obsolute
-top of all object hierarchies, acting important.}
+top of all object hierarchies acting important.}
 
 @sheeplebuiltin{=STANDARD-OBJECT=,standard object, An ancestor of all
 normally-defined objects. It has @code{=T=} as its only parent. It is

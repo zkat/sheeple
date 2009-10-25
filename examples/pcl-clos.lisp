@@ -61,7 +61,7 @@
 ;; you can add or remove direct properties from an object at any time, too...
 
 ;; this auto-generates accessors:
-(add-property (car *lots-of-accounts*) 'unique "I'm a unique butterfly!" :accessor t)
+(setf (property-value (car *lots-of-accounts*) 'unique :accessor t) "I'm a unique butterfly!")
 (remove-property (car *lots-of-accounts*) 'unique) ;poof. Accessors stay, though!
 
 ;; You can also inspect objects and their internals at the REPL...

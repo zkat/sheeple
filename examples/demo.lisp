@@ -18,7 +18,7 @@ the original object is simply copied. All properties and roles are (shallow-)cop
 ;; What's the difference?
 
 ;; *clone* won't be affected by changes to *obj*. *child* will:
-(add-property *obj* 'var "value")
+(setf (property-value *obj* 'var) "value")
 
 (describe *obj*)
 (describe *child*)
@@ -94,23 +94,20 @@ the original object is simply copied. All properties and roles are (shallow-)cop
 ;;;
 ;; Properties can be either direct (present locally), or delegated (present in hierarchy list)
 
-;; Two functions for creating direct properties:
-;; ADD-PROPERTY - Adds a new property unless it is already a direct property.
-;; (SETF PROPERTY-VALUE) - Sets a direct property value, as long as it exists somewhere in the HL.
-(add-property *mixin* 'mixed-in "Mixin's VAR value" :accessor t) ; generates accessors
+;; Simply SETFing the property you want to add will add it. You can optionally generate accessors.
+(setf (property-value *mixin* 'mixed-in :accessor t) "Mixin's VAR value")
 
 (describe *obj*)
-;; (setf (property-value *obj* 'something) 'test) => continuable error (option to add property)
 
 ;; Property values are retrieved with PROPERTY-VALUE
 (property-value *obj* 'mixed-in) ; *obj* delegates to *mixin*
 
-;; But add-property created an accessor. Let's just use that:
+;; But (SETF PROPERTY-VALUE) created an accessor. Let's just use that:
 (mixed-in *obj*) ; just like property-value. This is a place.
 
 ;; Delegated properties are retrieved according to the hierarchy list's precedence:
-(add-property *mixin* 'foo "mixin's value" :accessor t)
-(add-property *super-obj* 'foo "*super-obj*'s value")
+(setf (property-value *mixin* 'foo :accessor t) "mixin's value")
+(setf (property-value *super-obj* 'foo) "*super-obj*'s value")
 
 ;; *mixin* defined an accessor, so *obj* can use it.
 (foo *obj*)

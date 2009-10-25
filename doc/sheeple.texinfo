@@ -367,6 +367,22 @@ object's sole parent.
 None
 @end defun
 
+@defun {clone} object => new object
+
+@strong{Arguments and Values:}
+
+@var{object} --- an object.
+
+@var{new object} --- a new object; a clone of @var{object}
+
+@strong{Description:}
+
+@code{CLONE} creates a new object that is a sibling of @var{object}. This new
+object is a shallow-copy of @var{object} with the same parents, properties, and
+roles at the time @code{CLONE} was called.
+
+@end defun
+
 @defmac {defobject} (@{parent-object@}*) (@{property-spec@}*) option-spec*
 => new-object
 

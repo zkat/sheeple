@@ -41,7 +41,7 @@ direct property. Returns OBJECT."
                                   (hv-remove property-name
                                              (mold-properties (%object-mold object))))))
       (when errorp
-        (error "Cannot remove property: ~A is not a direct property of ~A" property-name object))))
+        (error 'unbound-property :object object :property-name property-name))))
 
 (defun remove-all-direct-properties (object)
   "Wipes out all direct properties and their values from OBJECT."

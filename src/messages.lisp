@@ -229,31 +229,22 @@ more entries the cache will be able to hold, but the slower lookup will be.")
                     (not (or (and restp (not keysp)) allow-other-keys-p
                              (every (rcurry 'memq keywords) msg-keywords))))
                (lose "the reply does not accept each of the &KEY arguments ~S." msg-keywords))
-              (t t))))))
+              (t (values)))))))
 
 (defun set-arg-info (message &key new-reply (lambda-list nil lambda-list-p))
-  (let* ((replies (message-replies message))
-         (firstp (and new-reply (null replies))))
-    (when (and (not lambda-list-p) replies)
-      (setf lambda-list (message-lambda-list message)))
-    (when lambda-list-p
-      (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)
-          (analyze-lambda-list lambda-list)
-        (unless (or (not replies) firstp
-                    (and (= nreq (message-number-required message))
-                         (= nopt (message-number-optional message))
-                         (eq (or keysp restp) (message-key/rest-p message))))
-          (error 'reply-lambda-list-conflict :lambda-list lambda-list :message message))
-        (setf (message-lambda-list message) (if lambda-list-p lambda-list
-                                                (create-msg-lambda-list lambda-list))
-              (message-number-required message) nreq
-              (message-number-optional message) nopt
-              (message-key/rest-p message) (or keysp restp)
-              (message-keys message) (if lambda-list-p
-                                         (if allow-other-keys-p t keywords)
-                                         (message-key/rest-p message)))))
-    (when new-reply (check-reply-arg-info message new-reply))
-    message))
+  (when lambda-list-p
+    (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)
+        (analyze-lambda-list lambda-list)
+      (setf (message-lambda-list message) (if lambda-list-p lambda-list
+                                              (create-msg-lambda-list lambda-list))
+            (message-number-required message) nreq
+            (message-number-optional message) nopt
+            (message-key/rest-p message) (or keysp restp)
+            (message-keys message) (if lambda-list-p
+                                       (if allow-other-keys-p t keywords)
+                                       (message-key/rest-p message)))))
+  (when new-reply (check-reply-arg-info message new-reply))
+  (values))
 
 ;;;
 ;;; Message definition (finally!)

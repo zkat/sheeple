@@ -56,10 +56,17 @@
                      (lambda (message stream)
                        (print-unreadable-object (message stream :identity t)
                          (format stream "Message: ~a" (message-name message))))))
-  name lambda-list replies documentation
+  name
+  lambda-list
+  replies
+  documentation
   (dispatch-cache (make-dispatch-cache) :type dispatch-cache)
   (erfun-cache (make-hash-table :test #'equal))
-  (arg-info (make-arg-info)))
+  ;; These are for argument info
+  (number-required 0 :type fixnum)
+  (number-optional 0 :type fixnum)
+  (key/rest-p nil)
+  (keys nil))
 
 ;;;
 ;;; Message Documentation
@@ -197,29 +204,19 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 ;;;
 ;;; Most of this code is taken from SBCL, and I really don't understand exactly how it works yet.
 ;;;   -zkat
-(defstruct arg-info
-  (lambda-list :no-lambda-list)
-  (number-required 0 :type fixnum)
-  (number-optional 0 :type fixnum)
-  (key/rest-p nil)
-  ;; nil: no &KEY or &REST allowed
-  ;; (k1 k2 ..): Each reply must accept these &KEY arguments.
-  ;; T: must have &KEY or &REST
-  (keys nil))
 
-(defun check-reply-arg-info (msg arg-info reply)
+(defun check-reply-arg-info (message reply)
   (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)
       (analyze-lambda-list (reply-lambda-list reply))
     (flet ((lose (string &rest args)
              (error 'reply-argument-conflict
-                    :reply reply :message msg :reason (apply 'format nil string args)))
+                    :reply reply :message message :reason (apply 'format nil string args)))
            (comparison-description (x y)
              (if (> x y) "more" "fewer")))
-      (with-accessors ((msg-nreq       arg-info-number-required)
-                       (msg-nopt       arg-info-number-optional)
-                       (msg-key/rest-p arg-info-key/rest-p)
-                       (msg-keywords   arg-info-keys))
-          arg-info
+      (with-accessors ((msg-nreq       message-number-required)
+                       (msg-nopt       message-number-optional)
+                       (msg-key/rest-p message-key/rest-p)
+                       (msg-keywords   message-keys)) message
         (cond ((not (= nreq msg-nreq))
                (lose "the reply has ~A required arguments than the message."
                      (comparison-description nreq msg-nreq)))
@@ -235,32 +232,28 @@ more entries the cache will be able to hold, but the slower lookup will be.")
               (t t))))))
 
 (defun set-arg-info (message &key new-reply (lambda-list nil lambda-list-p))
-  (let* ((arg-info (message-arg-info message))
-         (replies (message-replies message))
-         (firstp (and new-reply (null (cdr replies)))))
+  (let* ((replies (message-replies message))
+         (firstp (and new-reply (null replies))))
     (when (and (not lambda-list-p) replies)
       (setf lambda-list (message-lambda-list message)))
-    (when (or lambda-list-p
-              (and firstp
-                   (eq (arg-info-lambda-list arg-info) :no-lambda-list)))
+    (when lambda-list-p
       (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)
           (analyze-lambda-list lambda-list)
         (unless (or (not replies) firstp
-                    (and (= nreq (arg-info-number-required arg-info))
-                         (= nopt (arg-info-number-optional arg-info))
-                         (eq (or keysp restp) (arg-info-key/rest-p arg-info))))
+                    (and (= nreq (message-number-required message))
+                         (= nopt (message-number-optional message))
+                         (eq (or keysp restp) (message-key/rest-p message))))
           (error 'reply-lambda-list-conflict :lambda-list lambda-list :message message))
-        (setf (arg-info-lambda-list arg-info) (if lambda-list-p
-                                                  lambda-list
-                                                  (create-msg-lambda-list lambda-list))
-              (arg-info-number-required arg-info) nreq
-              (arg-info-number-optional arg-info) nopt
-              (arg-info-key/rest-p arg-info) (or keysp restp)
-              (arg-info-keys arg-info) (if lambda-list-p
-                                           (if allow-other-keys-p t keywords)
-                                           (arg-info-key/rest-p arg-info)))))
-    (when new-reply (check-reply-arg-info message arg-info new-reply))
-    arg-info))
+        (setf (message-lambda-list message) (if lambda-list-p lambda-list
+                                                (create-msg-lambda-list lambda-list))
+              (message-number-required message) nreq
+              (message-number-optional message) nopt
+              (message-key/rest-p message) (or keysp restp)
+              (message-keys message) (if lambda-list-p
+                                         (if allow-other-keys-p t keywords)
+                                         (message-key/rest-p message)))))
+    (when new-reply (check-reply-arg-info message new-reply))
+    message))
 
 ;;;
 ;;; Message definition (finally!)

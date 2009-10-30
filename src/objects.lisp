@@ -439,7 +439,7 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
 
 (defmacro defproto (name objects properties &rest options)
   "Words cannot express how useful this is."
-  `(progn
+  `(eval-when (:compile-toplevel :load-toplevel :execute)
      (declaim (special ,name))
      (setf (symbol-value ',name)
            (ensure-object (when (boundp ',name)

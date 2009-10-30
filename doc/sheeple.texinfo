@@ -327,9 +327,20 @@ tagged release.
 * Messages::
 @end menu
 
-@node Creating Objects, Object Hierarchies, API Documentation, API Documentation
-@section Creating Objects
+@node Objects, Properties, API Documentation, API Documentation
+@section Objects
 
+@subsection Introduction to Objects
+TODO
+@subsection Delegation: Creating relationships
+TODO
+@subsection Prototypes
+TODO
+@subsection Autoboxing
+TODO
+@subsection Built-in Objects
+TODO
+@subsection Objects Dictionary
 @defun {object} &rest all-keys &key (parents (list =standard-object=)) &allow-other-keys
 => new-object
 
@@ -528,9 +539,6 @@ prototype. This naming convention is observed for all included objects in
 the Sheeple library; however, programs are not required to adhere to it.
 @end defmac
 
-@node Object Hierarchies, Properties, Creating Objects, API Documentation
-@section Object Hierarchies
-
 @defun {parentp} maybe-parent child
 => generalized-boolean
 
@@ -645,9 +653,13 @@ list returned by @code{OBJECT-PARENTS}.
 
 @end defun
 
-@node Properties, Messages, Object Hierarchies, API Documentation
+@node Properties, Messages, Objects, API Documentation
 @section Properties
-
+@subsection Introduction to Properties
+TODO
+@subsection Dynamic property management
+TODO
+@subsection Properties Dictionary
 @defun {property-value} object property-name
         => value
 
@@ -934,7 +946,13 @@ Also, note that the standard macro @code{WITH-ACCESSORS} works on objects too.
 
 @node Messages,  , Properties, API Documentation
 @section Messages
-
+@subsection Introduction to Messages
+TODO
+@subsection Messages
+TODO
+@subsection Replies
+TODO
+@subsection Messages Dictionary
 @defmac {defmessage} name lambda-list {option}*
 
 @strong{Arguments and Values:}

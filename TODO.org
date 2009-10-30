@@ -126,19 +126,26 @@
 **** TODO reply-dispatch.lisp
 **** TODO bootstrap.lisp
 **** TODO post-boot.lisp
+** TODO Fix lambda-lists again
+   The following should work:
+
+   (defmessage foo (bar &key))
+   (defreply foo (bar &rest all-stuff) ... )
+
+   Whenever &key is present, &aok should be appended to the end of the method function's ll.
 ** TODO Write unit tests that confirm lambda-list congruence is correct
 ** TODO Detailed reply-(un)definition unit tests
 ** TODO Detailed dispatch unit tests
 
-* TODO 3.0.2
-** TODO Document everything in doc/sheeple.texinfo
-** TODO Clean up and speed up raw dispatch code
-** TODO Optimize
-*** TODO Property access
+* DONE 3.0.2
+** DONE Document everything in doc/sheeple.texinfo
+** DONE Clean up and speed up raw dispatch code
+** DONE Optimize
+*** DONE Property access
     Tests should be written by now, so let's start taking measures to optimize property access.
-*** TODO Object creation
+*** DONE Object creation
     Creating objects could be faster, and it would be nice to make it cons (a lot) less.
-*** TODO Message dispatch
+*** DONE Message dispatch
     The biggest gain in general will be from just the caching, but it would be nice to have a
     cleaner, faster raw algorithm. The caching itself can get filled up with declarations, too.
 * DONE 3.0.1

@@ -439,28 +439,30 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
 
 (defmacro defproto (name objects properties &rest options)
   "Words cannot express how useful this is."
-  (let ((pspecs (canonize-properties properties t))
-        writers readers)
-    (dolist (property-spec (cdr pspecs))
+  (let (messages)
+    (dolist (property-spec (cdr (canonize-properties properties t)))
       (pop property-spec)
-      (loop
+      (loop named inner do
          (multiple-value-bind (type name tail)
              (get-properties property-spec '(:accessor :reader :writer))
-           (if name
+           (when (not type)
+             (return-from inner))
+           (when name
+             (flet ((add-reader (name)
+                      (push `(ensure-message ,name :lambda-list '(object)) messages))
+                    (add-writer (name)
+                      (push `(ensure-message ,name :lambda-list '(new-value object)) messages)))
                (case type
-                 (:accessor (push name readers)
-                            (push `(setf ,name) writers))
-                 (:reader (push name readers))
-                 (:writer (push name writers)))
-               (return))
+                 (:accessor (add-reader name)
+                            (add-writer `(setf ,name)))
+                 (:reader (add-reader name))
+                 (:writer (add-writer name))))
+             (return))
            (setf property-spec (cddr tail)))))
     `(progn
        (declaim (special ,name))
-       (eval-when (:compile-toplevel)
-         ,@(mapcar (fun `(ensure-message ,_ :lambda-list '(object)))
-                   readers)
-         ,@(mapcar (fun `(ensure-message ,_ :lambda-list '(new-value object)))
-                   writers))
+       ,@ (when messages ; Space necessary for indentation... :(
+            `((eval-when (:compile-toplevel) ,@messages)))
        (setf (symbol-value ',name)
              (ensure-object (when (boundp ',name)
                               (symbol-value ',name))

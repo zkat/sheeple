@@ -441,22 +441,20 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
   "Words cannot express how useful this is."
   (let (messages)
     (dolist (property-spec (mapcar 'cdr (cdr (canonize-properties properties t))))
-      (loop named inner do
-           (multiple-value-bind (type name tail)
-               (get-properties property-spec '(:accessor :reader :writer))
-             (when (not type)
-               (return-from inner))
-             (when name
-               (flet ((add-reader (name)
-                        (push `(ensure-message ,name :lambda-list '(object)) messages))
-                      (add-writer (name)
-                        (push `(ensure-message ,name :lambda-list '(new-value object)) messages)))
-                 (case type
-                   (:accessor (add-reader name)
-                              (add-writer ``(setf ,,name)))
-                   (:reader (add-reader name))
-                   (:writer (add-writer name)))))
-             (setf property-spec (cddr tail)))))
+      (loop with type and name do
+           (setf (values type name property-spec)
+                 (get-properties property-spec '(:accessor :reader :writer)))
+           (setf property-spec (cddr property-spec))
+         while type when name do
+           (flet ((add-reader (name)
+                    (push `(ensure-message ,name :lambda-list '(object)) messages))
+                  (add-writer (name)
+                    (push `(ensure-message ,name :lambda-list '(new-value object)) messages)))
+             (case type
+               (:accessor (add-reader name)
+                          (add-writer ``(setf ,,name)))
+               (:reader (add-reader name))
+               (:writer (add-writer name))))))
     `(progn
        (declaim (special ,name))
        ,@ (when messages ; Space necessary for indentation... :(

@@ -133,6 +133,7 @@
    (defreply foo (bar &rest all-stuff) ... )
 
    Whenever &key is present, &aok should be appended to the end of the method function's ll.
+   Conversely, if &key is not present but &rest is, &aok should NOT be appended.
 ** TODO Write unit tests that confirm lambda-list congruence is correct
 ** TODO Detailed reply-(un)definition unit tests
 ** TODO Detailed dispatch unit tests

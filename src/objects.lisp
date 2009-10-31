@@ -440,25 +440,23 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
 (defmacro defproto (name objects properties &rest options)
   "Words cannot express how useful this is."
   (let (messages)
-    (dolist (property-spec (cdr (canonize-properties properties t)))
-      (pop property-spec)
+    (dolist (property-spec (mapcar 'cdr (cdr (canonize-properties properties t))))
       (loop named inner do
-         (multiple-value-bind (type name tail)
-             (get-properties property-spec '(:accessor :reader :writer))
-           (when (not type)
-             (return-from inner))
-           (when name
-             (flet ((add-reader (name)
-                      (push `(ensure-message ,name :lambda-list '(object)) messages))
-                    (add-writer (name)
-                      (push `(ensure-message ,name :lambda-list '(new-value object)) messages)))
-               (case type
-                 (:accessor (add-reader name)
-                            (add-writer `(setf ,name)))
-                 (:reader (add-reader name))
-                 (:writer (add-writer name))))
-             (return))
-           (setf property-spec (cddr tail)))))
+           (multiple-value-bind (type name tail)
+               (get-properties property-spec '(:accessor :reader :writer))
+             (when (not type)
+               (return-from inner))
+             (when name
+               (flet ((add-reader (name)
+                        (push `(ensure-message ,name :lambda-list '(object)) messages))
+                      (add-writer (name)
+                        (push `(ensure-message ,name :lambda-list '(new-value object)) messages)))
+                 (case type
+                   (:accessor (add-reader name)
+                              (add-writer ``(setf ,,name)))
+                   (:reader (add-reader name))
+                   (:writer (add-writer name)))))
+             (setf property-spec (cddr tail)))))
     `(progn
        (declaim (special ,name))
        ,@ (when messages ; Space necessary for indentation... :(

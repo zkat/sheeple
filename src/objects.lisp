@@ -432,22 +432,42 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
   (list (car option) (cadr option)))
 
 (defmacro defobject (objects properties &rest options)
-  "Standard object-generation macro. This variant auto-generates accessors."
+  "Standard object-generation macro."
   `(object :parents ,(canonize-parents objects)
            :properties ,(canonize-properties properties)
            ,@(canonize-options options)))
 
 (defmacro defproto (name objects properties &rest options)
   "Words cannot express how useful this is."
-  `(progn
-     (declaim (special ,name))
-     (setf (symbol-value ',name)
-           (ensure-object (when (boundp ',name)
-                            (symbol-value ',name))
-                          ,(canonize-parents objects)
-                          :properties ,(canonize-properties properties t)
-                          ,@(canonize-options options)
-                          :nickname ',name))))
+  (let ((pspecs (canonize-properties properties t))
+        writers readers)
+    (dolist (property-spec (cdr pspecs))
+      (pop property-spec)
+      (loop
+         (multiple-value-bind (type name tail)
+             (get-properties property-spec '(:accessor :reader :writer))
+           (if name
+               (case type
+                 (:accessor (push name readers)
+                            (push `(setf ,name) writers))
+                 (:reader (push name readers))
+                 (:writer (push name writers)))
+               (return))
+           (setf property-spec (cddr tail)))))
+    `(progn
+       (declaim (special ,name))
+       (eval-when (:compile-toplevel)
+         ,@(mapcar (fun `(ensure-message ,_ :lambda-list '(object)))
+                   readers)
+         ,@(mapcar (fun `(ensure-message ,_ :lambda-list '(new-value object)))
+                   writers))
+       (setf (symbol-value ',name)
+             (ensure-object (when (boundp ',name)
+                              (symbol-value ',name))
+                            ,(canonize-parents objects)
+                            :properties ,(canonize-properties properties t)
+                            ,@(canonize-options options)
+                            :nickname ',name)))))
 
 (defun ensure-object (maybe-object parents &rest options)
   (if maybe-object

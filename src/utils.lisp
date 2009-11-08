@@ -47,6 +47,12 @@
   "X if X is a list, otherwise (list X)."
   (if (listp x) x (list x)))
 
+(defun plist-to-wide-alist (plist)
+  "Builds a fresh alist corresponding to the elements of PLIST. The alist
+is \"wide\", ie, each pair is (key value) rather than (key . value)"
+  ;; I could go nuts with DO, like I do below... or I could LOOP   - Adlai
+  (loop for (key value) on plist by #'cddr collect (list key value)))
+
 (defun nunzip-alist (alist)
   "Destructively unzips ALIST into two flat lists"
   (declare (list alist) (optimize speed (safety 0)))

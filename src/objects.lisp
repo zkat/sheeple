@@ -9,7 +9,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(defvar *caching-enabled* t)
+(defvar *caching-enabled* nil)
 
 ;; We declare these base vars here so that bootstrapping won't complain.
 (define-bound-variables =t= =standard-object= =standard-metaobject=)
@@ -392,8 +392,7 @@ allocating the new object object. ALL-KEYS is passed on to INIT-OBJECT."
     (topological-sort-conflict (conflict)
       (error 'object-hierarchy-error :object object :conflict conflict)))
   (setf (%object-children object) nil)
-  (let ((*caching-enabled* nil))
-    (apply 'init-object object all-keys)))
+  (apply 'init-object object all-keys))
 
 (defun clone (object &optional (metaobject (%object-metaobject object)))
   "Creates a object with the same parents and metaobject as OBJECT. If supplied, METAOBJECT

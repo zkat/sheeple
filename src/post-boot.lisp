@@ -22,6 +22,16 @@
   (std-compute-object-hierarchy-list object))
 
 ;;;
+;;; Extensible Object Creation
+;;;
+(defmessage create (proto &key)
+  (:documentation "Creates a PROTO. Intended for customization.")
+  (:reply ((proto =standard-object=) &rest properties &key) ; FIXME &aok bug
+    (object :parents proto :properties
+            (loop for (name value) on properties by #'cddr
+               collect (list name value)))))
+
+;;;
 ;;; Printing objects!
 ;;;
 

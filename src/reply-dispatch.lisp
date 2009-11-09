@@ -39,8 +39,8 @@
                     (funcall it args))
                   (let ((erfun (compute-erfun message replies)))
                     (when *caching-enabled*
-                      (cache-replies message relevant-args replies))
-                    (cache-erfun message replies erfun)
+                      (cache-replies message relevant-args replies)
+                      (cache-erfun message replies erfun))
                     (funcall erfun args))))))))
 
 (defun primary-reply-p (reply)

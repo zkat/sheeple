@@ -40,7 +40,7 @@
 (in-suite role-objects)
 
 (test role-implementation
-  (for-all ((dummy-reply (gen-integer)) (dummy-position (gen-integer)))
+  (for-all ((dummy-reply '%%make-reply) (dummy-position (gen-integer)))
     (let ((role (make-role dummy-reply dummy-position)))
       (is (eq dummy-reply (role-reply role)))
       (is (eq dummy-position (role-position role))))))

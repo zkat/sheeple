@@ -456,8 +456,8 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
                (:writer (add-writer name))))))
     `(progn
        (declaim (special ,name))
-       ,@ (when messages ; Space necessary for indentation... :(
-            `((eval-when (:compile-toplevel) ,@messages)))
+       ,@(when messages
+           `((eval-when (:compile-toplevel) ,@messages)))
        (setf (symbol-value ',name)
              (ensure-object (when (boundp ',name)
                               (symbol-value ',name))

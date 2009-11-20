@@ -20,21 +20,21 @@
 ;;;
 ;;; Existential
 ;;;
-(defun has-direct-property-p (object property-name)
+(defun direct-property-p (object property-name)
   "Returns T if OBJECT has a property called PROPERTY-NAME as a direct property.
 NIL otherwise."
   (when (property-position property-name object) t))
 
-(defun has-property-p (object property-name)
+(defun available-property-p (object property-name)
   "Returns T if calling PROPERTY-VALUE on OBJECT using the same property-name
 would yield a value (i.e. not signal an unbound-property condition)."
-  (some (rcurry 'has-direct-property-p property-name)
+  (some (rcurry 'direct-property-p property-name)
         (object-hierarchy-list object)))
 
 (defun remove-property (object property-name &optional (errorp t))
   "Removes OBJECT's direct property named PROPERTY-NAME. Signals an error if there is no such
 direct property. Returns OBJECT."
-  (if (has-direct-property-p object property-name)
+  (if (direct-property-p object property-name)
       (prog1 object
         (change-mold object
                      (ensure-mold (object-parents object)
@@ -123,7 +123,7 @@ PROPERTY-NAME."
   "Returns the object object with a direct-property called PROPERTY-NAME from which OBJECT inherits
 its value. If ERRORP is T, an error is signaled if the property is unbound. Otherwise, NIL is
 returned."
-  (or (find-if (rcurry 'has-direct-property-p property-name) (object-hierarchy-list object))
+  (or (find-if (rcurry 'direct-property-p property-name) (object-hierarchy-list object))
       (when errorp (error 'unbound-property :object object :property-name property-name))))
 
 (defun object-direct-properties (object)

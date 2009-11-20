@@ -826,7 +826,7 @@ which @code{PROPERTY-VALUE} would return a value when called on @var{object}.
 
 @end defun
 
-@defun {has-direct-property-p} object property-name
+@defun {direct-property-p} object property-name
         => boolean
 
 @strong{Arguments and Values:}
@@ -844,7 +844,7 @@ named @var{property-name}, false otherwise.
 
 @end defun
 
-@defun {has-property-p} object property-name
+@defun {available-property-p} object property-name
         => boolean
 
 @strong{Arguments and Values:}

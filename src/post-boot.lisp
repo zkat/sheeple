@@ -42,5 +42,5 @@
 (defreply print-sheeple-object ((object =boxed-object=) (stream =stream=))
   (print-unreadable-object (object stream :identity t)
     (format stream "Boxed-object ~:[[~S]~;~S~]"
-            (has-direct-property-p object 'nickname)
+            (direct-property-p object 'nickname)
             (ignore-errors (object-nickname object)))))

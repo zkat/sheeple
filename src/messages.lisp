@@ -51,22 +51,20 @@
   `(cons list function))
 
 (defstruct (message (:constructor %make-message)
-                    (:predicate messagep)
-                    (:print-object
-                     (lambda (message stream)
-                       (print-unreadable-object (message stream :identity t)
-                         (format stream "Message: ~a" (message-name message))))))
-  name
-  lambda-list
-  replies
-  documentation
+                    (:predicate messagep))
+  (name (error "Must supply a name") :type symbol :read-only t)
+  (lambda-list (error "Mult supply a lambda-list") :type list)
+  (replies nil :type list)
+  (documentation nil :type (or string null))
   (dispatch-cache (make-dispatch-cache) :type dispatch-cache)
-  (erfun-cache (make-hash-table :test #'equal))
+  (erfun-cache (make-hash-table :test #'equal) :type hash-table)
   ;; These are for argument info
   (number-required 0 :type fixnum)
   (number-optional 0 :type fixnum)
-  (key/rest-p nil)
-  (keys nil))
+  (key/rest-p nil :type boolean)
+  (keys nil :type boolean))
+
+(define-print-object ((message message)) (format t "~S" (message-name message)))
 
 ;;;
 ;;; Message Documentation
@@ -201,8 +199,9 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 ;;; - Arg info objects and the operations on them are meant to check that Message/Reply lambda-lists
 ;;;   comply with http://www.lispworks.com/documentation/HyperSpec/Body/07_fd.htm
 ;;;
-;;; Most of this code is taken from SBCL, and I really don't understand exactly how it works yet.
-;;;   -sykopomp
+;;; - These are based on code from SBCL, but have been judiciously frobbed
+;;;
+;;; - Note that Sheeple doesn't follow CLHS 7.6.4 to the letter.
 
 (defun check-reply-arg-info (message reply)
   (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)

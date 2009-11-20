@@ -14,12 +14,12 @@
 (def-suite message-basics :in messages)
 (in-suite message-basics)
 
+(defun %%make-message (&key (name 'name) (lambda-list '(lambda the ultimate list)))
+  "Just for testing purposes!"
+  (%make-message name lambda-list))
+
 (test message-struct
-  (let ((test-message (%make-message :name 'name
-                                     :lambda-list 'lambda-list
-                                     :replies 'replies
-                                     ;; :dispatch-cache 'cache
-                                     )))
+  (let ((test-message (%%make-message)))
     (is (messagep test-message))
     (with-accessors ((name           message-name)
                      (lambda-list    message-lambda-list)
@@ -27,30 +27,15 @@
                      ;; (dispatch-cache message-dispatch-cache)
                      )
         test-message
-      (is (eq 'name        name))
-      (is (eq 'lambda-list lambda-list))
-      (is (eq 'replies     replies))
-      ;; (is (eq 'cache       dispatch-cache))
-      ))
-  (let ((test-message (%make-message)))
-    (is (messagep test-message))
-    (with-accessors ((name           message-name)
-                     (lambda-list    message-lambda-list)
-                     (replies        message-replies)
-                     ;; (dispatch-cache message-dispatch-cache)
-                     )
-        test-message
-      (is (null name))
-      (is (null lambda-list))
+      (is (eq 'name name))
+      (is (equal '(lambda the ultimate list) lambda-list))
       (is (null replies))
-      ;; (is (dispatch-cache-p dispatch-cache))
+      ;; (is (null dispatch-cache))
       )))
 
 (test *message-table*
   (is (message-table-p *message-table*))
-  (let ((test-message (%make-message :name 'name
-                                     :lambda-list 'lambda-list
-                                     :replies 'replies)))
+  (let ((test-message (%%make-message)))
     (setf (%find-message 'name) test-message)
     (is (eq test-message (%find-message 'name)))
     (forget-message 'name)
@@ -58,7 +43,7 @@
     (signals no-such-message (find-message 'name))))
 
 (test %find-message
-  (let ((test-message (%make-message)))
+  (let ((test-message (%%make-message)))
     (is (eq test-message (setf (%find-message 'name) test-message)))
     (is (eq test-message (%find-message 'name)))
     (forget-message 'name)
@@ -66,7 +51,7 @@
     (signals no-such-message (find-message 'name))))
 
 (test forget-message
-  (let ((test-message (%make-message)))
+  (let ((test-message (%%make-message)))
     (setf (%find-message 'test) test-message)
     (is (forget-message 'test))
     (is (null (%find-message 'name)))

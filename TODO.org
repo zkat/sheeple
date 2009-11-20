@@ -138,15 +138,15 @@
 ** TODO Detailed reply-(un)definition unit tests
 ** TODO Detailed dispatch unit tests
 
-* DONE 3.0.2
-** DONE Document everything in doc/sheeple.texinfo
-** DONE Clean up and speed up raw dispatch code
-** DONE Optimize
-*** DONE Property access
+* TODO 3.0.2
+** TODO Document everything in doc/sheeple.texinfo
+** TODO Clean up and speed up raw dispatch code
+** TODO Optimize
+*** TODO Property access
     Tests should be written by now, so let's start taking measures to optimize property access.
-*** DONE Object creation
+*** TODO Object creation
     Creating objects could be faster, and it would be nice to make it cons (a lot) less.
-*** DONE Message dispatch
+*** TODO Message dispatch
     The biggest gain in general will be from just the caching, but it would be nice to have a
     cleaner, faster raw algorithm. The caching itself can get filled up with declarations, too.
 * DONE 3.0.1

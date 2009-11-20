@@ -373,17 +373,17 @@
 
         (setf (property-value *sample-sheep* 'foo) 'bar)
 
-*** HAS-DIRECT-PROPERTY-P
-    The function HAS-DIRECT-PROPERTY-P returns T if a direct property was set on sheep, and NIL
+*** DIRECT-PROPERTY-P
+    The function DIRECT-PROPERTY-P returns T if a direct property was set on sheep, and NIL
     otherwise.
 
-        (has-direct-property-p *sample-sheep* 'foo) => T
+        (direct-property-p *sample-sheep* 'foo) => T
 
-*** HAS-PROPERTY-P
-    The function HAS-PROPERTY-P returns T if the property is available to sheep, whether it's direct
+*** AVAILABLE-PROPERTY-P
+    The function AVAILABLE-PROPERTY-P returns T if the property is available to sheep, whether it's direct
     or indirect.
 
-        (has-property-p *sample-sheep* 'foo) => T
+        (available-property-p *sample-sheep* 'foo) => T
 
 *** REMOVE-PROPERTY
     The function REMOVE-PROPERTY receives a sheep and a property-name, and removes a *direct*

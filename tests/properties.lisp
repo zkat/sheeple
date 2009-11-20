@@ -17,35 +17,35 @@
 (def-suite existential :in properties)
 (in-suite existential)
 
-(test has-direct-property-p
+(test direct-property-p
   (let* ((object (object))
          (property 'test))
     (setf (property-value object property) 'value)
-    (is (has-direct-property-p object 'test))
-    (is (not (has-direct-property-p object 'something-else))))
+    (is (direct-property-p object 'test))
+    (is (not (direct-property-p object 'something-else))))
   (let* ((a (object))
          (b (object :parents (list a))))
     (setf (property-value a 'test) 'value)
-    (is (has-direct-property-p a 'test))
-    (is (not (has-direct-property-p b 'test)))))
+    (is (direct-property-p a 'test))
+    (is (not (direct-property-p b 'test)))))
 
-(test has-property-p
+(test available-property-p
   (let* ((a (object))
          (b (object :parents (list a))))
     (setf (property-value a 'test) 'value)
-    (is (has-direct-property-p a 'test))
-    (is (not (has-direct-property-p a 'something-else)))
-    (is (not (has-direct-property-p b 'test)))
-    (is (not (has-direct-property-p b 'something-else)))))
+    (is (direct-property-p a 'test))
+    (is (not (direct-property-p a 'something-else)))
+    (is (not (direct-property-p b 'test)))
+    (is (not (direct-property-p b 'something-else)))))
 
 #+nil
 (test add-property
   (let ((object (object)))
     (is (eq object (add-property object 'test 'value)))
-    (is (has-direct-property-p object 'test))
+    (is (direct-property-p object 'test))
     (is (eq 'value (direct-property-value object 'test)))
     (signals error (add-property object "foo" "uh oh"))
-    (is (not (has-direct-property-p object "foo")))
+    (is (not (direct-property-p object "foo")))
     ;; todo - check that the restart works properly.
     ))
 
@@ -54,7 +54,7 @@
     (signals error (remove-property object 'something))
     (setf (property-value object 'test) 'value)
     (is (eq object (remove-property object 'test)))
-    (is (not (has-direct-property-p object 'test)))
+    (is (not (direct-property-p object 'test)))
     (signals error (remove-property object 'test))))
 
 (test remove-all-direct-properties
@@ -63,9 +63,9 @@
     (setf (property-value object 'test2) 'value)
     (setf (property-value object 'test3) 'value)
     (is (eq object (remove-all-direct-properties object)))
-    (is (not (or (has-direct-property-p object 'test1)
-                 (has-direct-property-p object 'test2)
-                 (has-direct-property-p object 'test3))))
+    (is (not (or (direct-property-p object 'test1)
+                 (direct-property-p object 'test2)
+                 (direct-property-p object 'test3))))
     (signals unbound-property (property-value object 'test1))
     (signals unbound-property (property-value object 'test2))
     (signals unbound-property (property-value object 'test3))))

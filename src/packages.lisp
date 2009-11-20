@@ -24,9 +24,9 @@
    #:object-nickname #:object-hierarchy-list
 
    ;; Property access
-   #:add-property #:property-value #:direct-property-value #:available-properties
-   #:remove-property #:remove-all-direct-properties #:property-owner #:has-property-p
-   #:has-direct-property-p #:with-properties #:object-direct-properties
+   #:property-value #:direct-property-value #:available-properties
+   #:remove-property #:remove-all-direct-properties #:property-owner #:available-property-p
+   #:direct-property-p #:with-properties #:object-direct-properties
 
    ;; Messages
    #:defmessage #:defreply #:available-replies #:undefmessage #:undefreply #:participantp

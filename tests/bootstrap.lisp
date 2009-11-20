@@ -14,13 +14,13 @@
 (test init-object
   (let ((parent (object :properties '((prop1 NIL)))))
     (defreply init-object :before ((object parent) &key)
-      (is (has-property-p object 'prop1))
+      (is (available-property-p object 'prop1))
       (is (eq NIL (property-value object 'prop1)))
-      (is (not (has-property-p object 'prop2))))
+      (is (not (available-property-p object 'prop2))))
     (defreply init-object :after ((object parent) &key)
-      (is (has-property-p object 'prop1))
+      (is (available-property-p object 'prop1))
       (is (eq 'val1 (property-value object 'prop1)))
-      (is (has-property-p object 'prop2))
+      (is (available-property-p object 'prop2))
       (is (eq 'val2 (property-value object 'prop2))))
     (defreply init-object :around ((object parent) &key)
       (is (eq NIL (property-value object 'prop1)))
@@ -35,4 +35,4 @@
   ;; TODO
   (let ((test-object (object)))
     (is (string= "value" (setf (property-value  test-object 'var :accessor t) "value")))
-    (is (has-direct-property-p test-object 'var))))
+    (is (direct-property-p test-object 'var))))

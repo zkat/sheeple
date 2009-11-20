@@ -254,8 +254,8 @@
     (is (eql =standard-metaobject= (object-metaobject object))))
   ;; properties arg
   (let ((object (object :properties '((foo bar) (baz quux)))))
-    (is (has-direct-property-p object 'foo))
-    (is (has-direct-property-p object 'baz))
+    (is (direct-property-p object 'foo))
+    (is (direct-property-p object 'baz))
     (is (eql 'bar (direct-property-value object 'foo)))
     (is (eql 'quux (direct-property-value object 'baz))))
   #+ (or) ;; other metaobject -- Expected failure, left out of v3.0
@@ -287,8 +287,8 @@
       (setf (property-value obj 'test) 'test)
       (let ((clone2 (clone obj)))
         (is (objectp clone2))
-        (is (null (has-direct-property-p clone 'test)))
-        (is (not (null (has-direct-property-p clone2 'test))))
+        (is (null (direct-property-p clone 'test)))
+        (is (not (null (direct-property-p clone2 'test))))
         (is (eq 'test (direct-property-value clone2 'test))))
       (unwind-protect
            (progn
@@ -339,7 +339,7 @@
          (test-object (defobject (parent) ((var "value")))))
     (is (objectp test-object))
     (is (parentp parent test-object))
-    (is (has-direct-property-p test-object 'var))
+    (is (direct-property-p test-object 'var))
     ;; TODO - this should also check that reader/writer/accessor combinations are properly added
     ))
 

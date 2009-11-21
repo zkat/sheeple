@@ -878,9 +878,46 @@ object. Using DESCRIBE on the object provides a more helpful interactive
 interface to inspecting properties, as well.
 
 @subsection Property delegation
-TODO
+One unique aspect of Sheeple's approach to object orientation is the concept of
+differential inheritance, sometimes called ``delegation''. Property delegation
+involves the dynamic lookup of property values by searching an object's
+hierarchy list for an ancestor with a valid property value for a property when
+direct property lookup on that object fails. In Sheeple, this lookup is
+triggered by @code{PROPERTY-VALUE}, but not by @code{DIRECT-PROPERTY-VALUE}.
+
+This sort of ``inheritance'' for values is a characteristic usually limited to
+so-called prototype-based programming languages, and conceptually extends the
+concept of forwarding messages to superclasses, into the world of objects and
+values, instead of only behavior.
+
+Sheeple distinguishes between two types of properties: direct properties, and
+available properties. The first is any property that is available directly from
+an object. The value for a direct property is not delegated to any ancestor. An
+available property, on the other hand, is a property that is either direct, or
+that is being delegated to some ancestor in the object's hierarchy list. From
+these two concepts, a delegated property can be identified by determining
+whether a particular property is available, but not direct.
+
+While a particular object may have the possibility of having multiple available
+properties if multiple ancestors define that property, there is only ever one
+available property-value for any given property, with a property available at
+a more specific ancestor will take precedence over all other ancestors',
+determined by the object's hierarchy list, and direct-properties taking
+precedence over all others. Simply put, a more specific property value shadows
+all other possibly available values. A property is considered to be unbound for
+an object if and only if there is no direct property by that name defined for
+the object either directly, or for any of its ancestors.
+
+It is important to note that @code{(SETF PROPERTY-VALUE)} is only able to assign
+direct property values only, and @code{REMOVE-PROPERTY} is only able to remove
+direct properties. Thus, it is not possible to change an ancestor's direct
+property through the child (unless the value itself is side-effected), nor is it
+possible for a property to be unbound in a descendant with an ancestor that
+holds a direct value for that property.
+
 @subsection Dynamic property management
 TODO
+@subsection Special included properties
 @subsection Properties Dictionary
 @defun {property-value} object property-name
         => value

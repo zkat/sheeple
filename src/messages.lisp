@@ -62,7 +62,7 @@
   (number-required 0 :type fixnum)
   (number-optional 0 :type fixnum)
   (key/rest-p nil :type boolean)
-  (keys nil :type boolean))
+  (keys nil :type (or list boolean)))
 
 (define-print-object ((message message)) (format t "~S" (message-name message)))
 

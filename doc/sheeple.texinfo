@@ -7,8 +7,8 @@
 
 @set EDITION 0.1
 @set VERSION v3.0.2
-@set UPDATED-MONTH October 2009
-@set UPDATED 25 @value{UPDATED-MONTH}
+@set UPDATED-MONTH November 2009
+@set UPDATED 21 @value{UPDATED-MONTH}
 @clear mop
 @syncodeindex fn vr
 

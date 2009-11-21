@@ -96,7 +96,6 @@ This manual is for Sheeple @value{VERSION}
 @menu
 * Overview::                    Non-Technical Overview of Sheeple
 * API Documentation::           Technical Overview of Sheeple
-* Concepts::                    Introduction to the Concepts of Sheeple
 * API Index::                   Index of the Sheeple API
 * Concept Index::               Index of General Concepts
 * Copying::                     Your rights and freedoms
@@ -317,7 +316,7 @@ trying to get it to work on. The test suite depends on Fiveam. To run it:
 And watch the tests scroll by. All tests should pass as long as you're using a
 tagged release.
 
-@node API Documentation, Concepts, Overview, Top
+@node API Documentation, API Index, Overview, Top
 @chapter API Documentation
 
 @menu
@@ -329,6 +328,17 @@ tagged release.
 @node Objects, Properties, API Documentation, API Documentation
 @section Objects
 
+@menu
+* Objects Introduction::
+* Delegation::
+* Prototypes::
+* Autoboxing::
+* Built-in Objects::
+* Boxed-Object Hierarchy::
+* Objects Dictionary::
+@end menu
+
+@node Objects Introduction, Delegation, Objects, Objects
 @subsection Introduction to Objects
 Sheeple is an object system completely oriented around objects. Unlike most
 other object-oriented systems, Sheeple does not have a separate concept of a
@@ -348,7 +358,8 @@ Beyond @code{OBJECT} and @code{CLONE}, operators like @code{CREATE} and
 @code{DEFPROTO} provide more advanced creation facilities on top of
 @code{OBJECT} and @code{CLONE}, but are strictly for convenience.
 
-@subsection Delegation: Creating relationships
+@node Delegation, Prototypes, Objects Introduction, Objects
+@subsection Delegation
 Sheeple supports the runtime sharing of data and behavior. Instead of a
 fine-grained system where data is shared on a per-property basis, both data and
 behavior are shared as a whole by establishing parent/child relationships
@@ -384,6 +395,8 @@ A convenient way of inspecting a Sheeple object and its characteristics while
 working interactively is to use the DESCRIBE lisp function. This will pretty
 print several useful bits of information about the object, such as its list of
 parents.
+
+@node Prototypes, Autoboxing, Delegation, Objects
 @subsection Prototypes
 As mentioned before, Sheeple does not have a distinct concept of classes as type
 definitions. Nevertheless, it is often the case while writing an object-oriented
@@ -408,12 +421,14 @@ By convention, prototypes in Sheeple use a naming scheme where the name of the
 prototype is wrapped in = signs (``=FOO=''). This is purely a naming convention,
 and all built-in prototypes in the Sheeple system are named in this way.
 
+@node Autoboxing, Built-in Objects, Prototypes, Objects
 @subsection Autoboxing
 Sheeple autoboxes a limited number of lisp types, and lisp objects of those
 type. This allows certain limited behaviors to be performed by Sheeple's message
 system, such as dispatching on non-sheeple objects. The method by which these
 objects are boxed and kept track of, though, is still in flux.
 
+@node Built-in Objects, Boxed-Object Hierarchy, Autoboxing, Objects
 @subsection Built-in Objects
 On top of providing facilities for creating objects and managing them, Sheeple
 also includes a series of built-in objects.  These built-in objects, exported
@@ -445,11 +460,7 @@ it as a reference point. It has @code{=T=} as its only parent.}
 @end ifset
 @end table
 
-@menu
-* Boxed-Object Hierarchy::
-@end menu
-
-@node Boxed-Object Hierarchy,  , Objects, Objects
+@node Boxed-Object Hierarchy, Objects Dictionary, Built-in Objects, Objects
 @subsection Boxed-Object Hierarchy
 
 @table @code
@@ -537,6 +548,7 @@ bignums. It has @code{=NUMBER=} as its only parent}
 of all kinds@comma{} and it has @code{=NUMBER=} as its only parent}
 @end table
 
+@node Objects Dictionary,  , Boxed-Object Hierarchy, Objects
 @subsection Objects Dictionary
 @defun {object} &rest all-keys &key (parents (list =standard-object=)) &allow-other-keys
 => new-object
@@ -852,6 +864,15 @@ list returned by @code{OBJECT-PARENTS}.
 
 @node Properties, Messages, Objects, API Documentation
 @section Properties
+
+@menu
+* Properties Introduction::
+* Property Delegation::
+* Special Properties::
+* Properties Dictionary::
+@end menu
+
+@node Properties Introduction, Property Delegation, Properties, Properties
 @subsection Introduction to Properties
 A Sheeple object can have zero or more ``properties''. Properties index data
 held by an object with a symbol. They can be added, removed, and changed at any
@@ -880,6 +901,7 @@ be used to retrieve a list of names associated with the properties of an
 object. Using DESCRIBE on the object provides a more helpful interactive
 interface to inspecting properties, as well.
 
+@node Property Delegation, Special Properties, Properties Introduction, Properties
 @subsection Property delegation
 One unique aspect of Sheeple's approach to object orientation is the concept of
 differential inheritance, sometimes called ``delegation''. Property delegation
@@ -918,7 +940,8 @@ property through the child (unless the value itself is side-effected), nor is it
 possible for a property to be unbound in a descendant with an ancestor that
 holds a direct value for that property.
 
-@subsection Special included properties
+@node Special Properties, Properties Dictionary, Property Delegation, Properties
+@subsection Special Properties
 There are two special properties that all Sheeple objects have access to:
 @code{DOCUMENTATION} and @code{NICKNAME}. Both are relatively internal
 properties, and are not meant to be accessed through @code{PROPERTY-VALUE}.
@@ -936,6 +959,7 @@ option is provided in the @code{DEFPROTO} form.
 
 Both of these properties will be delegated, like any regular Sheeple property.
 
+@node Properties Dictionary,  , Special Properties, Properties
 @subsection Properties Dictionary
 @defun {property-value} object property-name
         => value
@@ -1236,12 +1260,21 @@ Also, note that the standard macro @code{WITH-ACCESSORS} works on objects too.
 
 @node Messages,  , Properties, API Documentation
 @section Messages
-@subsection Introduction to Messages
-TODO
-@subsection Messages
-TODO
-@subsection Replies
-TODO
+
+@menu
+* Messages Dictionary::
+@end menu
+
+@c @subsection Introduction to Messages
+@c TODO
+
+@c @subsection Messages
+@c TODO
+
+@c @subsection Replies
+@c TODO
+
+@node Messages Dictionary,  , Messages, Messages
 @subsection Messages Dictionary
 @defmac {defmessage} name lambda-list {option}*
 
@@ -1284,29 +1317,7 @@ in @var{form}* will dispatch when given an appropriate set of arguments.
 
 @end defmac
 
-@node Concepts, API Index, API Documentation, Top
-@chapter Concepts
-
-Sheeple bears many resemblances to @acronym{CLOS}, yet also introduces new
-concepts. This section goes introduces the concepts critical to a full
-understanding of Sheeple. It should be read regardless of whether you
-have prior experience with @acronym{CLOS}@.
-
-@menu
-* Built-In Objects::
-@end menu
-
-@menu
-* Built-In Objects::            Sheeple's Backbone Objects
-* Boxed-Object Hierarchy::      Interface to Native Lisp Types
-@end menu
-
-@node Built-In Objects,  , Concepts, Concepts
-@subsection Built-In Objects
-
-@cindex objects, built-in
-@cindex built-in objects
-@node API Index, Concept Index, Concepts, Top
+@node API Index, Concept Index, API Documentation, Top
 @unnumbered API Index
 @printindex vr
 

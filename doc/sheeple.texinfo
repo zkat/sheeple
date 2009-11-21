@@ -850,6 +850,33 @@ list returned by @code{OBJECT-PARENTS}.
 @node Properties, Messages, Objects, API Documentation
 @section Properties
 @subsection Introduction to Properties
+A Sheeple object can have zero or more ``properties''. Properties index data
+held by an object with a symbol. They can be added, removed, and changed at any
+time for standard Sheeple objects. Additionally, descendants can access
+properties available somewhere in their hierarchy-list.
+
+Available properties can be accessed in a number of ways. The core method of
+doing so is the @code{PROPERTY-VALUE} function, which returns a property value
+indexed by an index. @code{DIRECT-PROPERTY-VALUE} may also be used, and it will
+not trigger delegation.
+
+A property may be added to an existing Sheeple object by simply setting it with
+@code{(SETF PROPERTY-VALUE)}. This function will change the value of an existing
+property, or add a brand new property to the object and set the value if it did
+not already exist.
+
+A property existing directly on a Sheeple object may be removed by using
+@code{REMOVE-PROPERTY}, or all direct properties may be removed using
+@code{REMOVE-ALL-DIRECT-PROPERTIES}.
+
+Finally, Sheeple provides some convenient mechanisms for inspecting and
+exploring the properties of an object, and information about those
+properties. @code{OBJECT-DIRECT-PROPERTIES} and @code{AVAILABLE-PROPERTIES} may
+be used to retrieve a list of names associated with the properties of an
+object. Using DESCRIBE on the object provides a more helpful interactive
+interface to inspecting properties, as well.
+
+@subsection Property delegation
 TODO
 @subsection Dynamic property management
 TODO

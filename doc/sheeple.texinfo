@@ -872,7 +872,7 @@ A property existing directly on a Sheeple object may be removed by using
 
 Finally, Sheeple provides some convenient mechanisms for inspecting and
 exploring the properties of an object, and information about those
-properties. @code{OBJECT-DIRECT-PROPERTIES} and @code{AVAILABLE-PROPERTIES} may
+properties. @code{DIRECT-PROPERTIES} and @code{AVAILABLE-PROPERTIES} may
 be used to retrieve a list of names associated with the properties of an
 object. Using DESCRIBE on the object provides a more helpful interactive
 interface to inspecting properties, as well.
@@ -1064,7 +1064,7 @@ a direct property value for @var{property-name}.
 
 @end defun
 
-@defun {object-direct-properties} object
+@defun {direct-properties} object
        => direct-properties
 
 @strong{Arguments and Values:}

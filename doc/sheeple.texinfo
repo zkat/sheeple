@@ -858,7 +858,8 @@ properties available somewhere in their hierarchy-list.
 Available properties can be accessed in a number of ways. The core method of
 doing so is the @code{PROPERTY-VALUE} function, which returns a property value
 indexed by an index. @code{DIRECT-PROPERTY-VALUE} may also be used, and it will
-not trigger delegation.
+not trigger delegation. If a property is accessed with either of these, but it
+is not available, an error of type UNBOUND-PROPERTY is signaled.
 
 A property may be added to an existing Sheeple object by simply setting it with
 @code{(SETF PROPERTY-VALUE)}. This function will change the value of an existing

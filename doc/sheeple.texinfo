@@ -331,7 +331,24 @@ tagged release.
 @section Objects
 
 @subsection Introduction to Objects
-TODO
+Sheeple is an object system completely oriented around objects. Unlike most
+other object-oriented systems, Sheeple does not have a separate concept of a
+class as a type definition mechanism that 'instances' are then created from.
+
+Instead, Sheeple uses objects, and only objects, to define the behavior of
+systems programmed with it. Programs are shaped by defining properties on
+objects, establishing relationships between objects, copying objects, and
+defining how objects participate together in messages, which define behavior.
+
+There are various ways to create new objects in Sheeple. The two core
+object-creation facilities are @code{OBJECT}, which creates a new empty object
+by default, and @code{CLONE}, which shallow-copies an existing object's
+characteristics.
+
+Beyond @code{OBJECT} and @code{CLONE}, operators like @code{CREATE} and
+@code{DEFPROTO} provide more advanced creation facilities on top of
+@code{OBJECT} and @code{CLONE}, but are strictly for convenience.
+
 @subsection Delegation: Creating relationships
 TODO
 @subsection Prototypes

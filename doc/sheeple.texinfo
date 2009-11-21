@@ -1136,6 +1136,19 @@ has a direct property named @var{property-name}. False otherwise.
 
 @end defun
 
+@defun {object-nickname} object
+=> nickname
+
+@var{object} --- An object.
+@var{object} --- A nickname (can be any lisp object, but preferably either a
+string or a symbol).
+
+@strong{Description:}
+
+This function returns the object's nickname. It is automatically set by
+@code{DEFPROTO}, and can be manually set by setting this place with SETF.
+
+@end defun
 @defmac {with-properties} (property-entry*) object-form declaration* form*
 => result*
 

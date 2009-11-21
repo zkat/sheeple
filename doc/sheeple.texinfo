@@ -328,17 +328,6 @@ tagged release.
 @node Objects, Properties, API Documentation, API Documentation
 @section Objects
 
-@menu
-* Objects Introduction::
-* Delegation::
-* Prototypes::
-* Autoboxing::
-* Built-in Objects::
-* Boxed-Object Hierarchy::
-* Objects Dictionary::
-@end menu
-
-@node Objects Introduction, Delegation, Objects, Objects
 @subsection Introduction to Objects
 Sheeple is an object system completely oriented around objects. Unlike most
 other object-oriented systems, Sheeple does not have a separate concept of a
@@ -358,7 +347,16 @@ Beyond @code{OBJECT} and @code{CLONE}, operators like @code{CREATE} and
 @code{DEFPROTO} provide more advanced creation facilities on top of
 @code{OBJECT} and @code{CLONE}, but are strictly for convenience.
 
-@node Delegation, Prototypes, Objects Introduction, Objects
+@menu
+* Delegation::
+* Prototypes::
+* Autoboxing::
+* Built-in Objects::
+* Boxed-Object Hierarchy::
+* Objects Dictionary::
+@end menu
+
+@node Delegation, Prototypes, Objects, Objects
 @subsection Delegation
 Sheeple supports the runtime sharing of data and behavior. Instead of a
 fine-grained system where data is shared on a per-property basis, both data and
@@ -865,14 +863,6 @@ list returned by @code{OBJECT-PARENTS}.
 @node Properties, Messages, Objects, API Documentation
 @section Properties
 
-@menu
-* Properties Introduction::
-* Property Delegation::
-* Special Properties::
-* Properties Dictionary::
-@end menu
-
-@node Properties Introduction, Property Delegation, Properties, Properties
 @subsection Introduction to Properties
 A Sheeple object can have zero or more ``properties''. Properties index data
 held by an object with a symbol. They can be added, removed, and changed at any
@@ -901,7 +891,13 @@ be used to retrieve a list of names associated with the properties of an
 object. Using DESCRIBE on the object provides a more helpful interactive
 interface to inspecting properties, as well.
 
-@node Property Delegation, Special Properties, Properties Introduction, Properties
+@menu
+* Property Delegation::
+* Special Properties::
+* Properties Dictionary::
+@end menu
+
+@node Property Delegation, Special Properties, Properties, Properties
 @subsection Property delegation
 One unique aspect of Sheeple's approach to object orientation is the concept of
 differential inheritance, sometimes called ``delegation''. Property delegation
@@ -1261,10 +1257,6 @@ Also, note that the standard macro @code{WITH-ACCESSORS} works on objects too.
 @node Messages,  , Properties, API Documentation
 @section Messages
 
-@menu
-* Messages Dictionary::
-@end menu
-
 @c @subsection Introduction to Messages
 @c TODO
 
@@ -1273,6 +1265,10 @@ Also, note that the standard macro @code{WITH-ACCESSORS} works on objects too.
 
 @c @subsection Replies
 @c TODO
+
+@menu
+* Messages Dictionary::
+@end menu
 
 @node Messages Dictionary,  , Messages, Messages
 @subsection Messages Dictionary

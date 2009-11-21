@@ -126,7 +126,7 @@ returned."
   (or (find-if (rcurry 'direct-property-p property-name) (object-hierarchy-list object))
       (when errorp (error 'unbound-property :object object :property-name property-name))))
 
-(defun object-direct-properties (object)
+(defun direct-properties (object)
   "Returns a list of the names of OBJECT's direct properties -- ie, only ones which have been
 set directly in OBJECT using (setf property-value). The consequences of side-effecting this
 returned list are undefined."
@@ -137,7 +137,7 @@ returned list are undefined."
 
 (defun available-properties (object)
   "Returns a list of the names of all properties available to OBJECT, including inherited ones."
-  (delete-duplicates (nconc (coerce (object-direct-properties object) 'list)
+  (delete-duplicates (nconc (coerce (direct-properties object) 'list)
                             (mapcan 'available-properties (object-parents object)))))
 
 (defmethod describe-object ((object object) stream)

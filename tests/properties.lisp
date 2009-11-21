@@ -145,10 +145,10 @@
     (is (null (property-owner parent 'some-other-property)))
     (signals unbound-property (property-owner parent 'some-other-property t))))
 
-(test object-direct-properties
+(test direct-properties
   (let ((object (defobject () ((var1 'val) (var2 'val) (var3 'val)))))
-    (is (= 3 (length (object-direct-properties object))))
-    (is (every 'symbolp (object-direct-properties object)))))
+    (is (= 3 (length (direct-properties object))))
+    (is (every 'symbolp (direct-properties object)))))
 
 (test available-properties
   (let* ((a (defobject () ((var1 'val))))

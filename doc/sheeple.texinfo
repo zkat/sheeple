@@ -876,7 +876,7 @@ will not trigger delegation. If a property is accessed with either of these, but
 it is not available, an error of type @code{UNBOUND-PROPERTY} is signaled.
 
 A property may be added to an existing Sheeple object by simply setting it with
-@ref{(SETF PROPERTY-VALUE),setf property-value}. This function will change the
+@ref{setf property-value,(setf property-value)}. This function will change the
 value of an existing property, or add a brand new property to the object and set
 the value if it did not already exist.
 

@@ -21,12 +21,12 @@
    ;; Objects
    #:object #:defobject #:defproto #:clone #:objectp #:object-parents #:ancestorp #:parentp
    #:descendantp #:childp #:init-object #:shared-init #:reinit-object #:print-sheeple-object
-   #:object-nickname #:object-hierarchy-list
+   #:object-nickname #:object-hierarchy-list #:create
 
    ;; Property access
    #:property-value #:direct-property-value #:available-properties
    #:remove-property #:remove-all-direct-properties #:property-owner #:available-property-p
-   #:direct-property-p #:with-properties #:object-direct-properties
+   #:direct-property-p #:with-properties #:direct-properties
 
    ;; Messages
    #:defmessage #:defreply #:available-replies #:undefmessage #:undefreply #:participantp

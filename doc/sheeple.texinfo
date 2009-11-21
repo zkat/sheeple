@@ -321,8 +321,7 @@ tagged release.
 @chapter API Documentation
 
 @menu
-* Creating Objects::
-* Object Hierarchies::
+* Objects::
 * Properties::
 * Messages::
 @end menu
@@ -446,7 +445,11 @@ it as a reference point. It has @code{=T=} as its only parent.}
 @end ifset
 @end table
 
-@node Boxed-Object Hierarchy,  , Built-In Objects, Objects
+@menu
+* Boxed-Object Hierarchy::
+@end menu
+
+@node Boxed-Object Hierarchy,  , Objects, Objects
 @subsection Boxed-Object Hierarchy
 
 @table @code
@@ -1290,7 +1293,7 @@ understanding of Sheeple. It should be read regardless of whether you
 have prior experience with @acronym{CLOS}@.
 
 @menu
-* Objects::                     The Basic Data Structure of Sheeple
+* Built-In Objects::
 @end menu
 
 @menu
@@ -1298,7 +1301,7 @@ have prior experience with @acronym{CLOS}@.
 * Boxed-Object Hierarchy::      Interface to Native Lisp Types
 @end menu
 
-@node Built-In Objects, Boxed-Object Hierarchy, Objects, Objects
+@node Built-In Objects,  , Concepts, Concepts
 @subsection Built-In Objects
 
 @cindex objects, built-in

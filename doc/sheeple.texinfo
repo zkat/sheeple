@@ -870,23 +870,23 @@ time for standard Sheeple objects. Additionally, descendants can access
 properties available somewhere in their hierarchy-list.
 
 Available properties can be accessed in a number of ways. The core method of
-doing so is the @code{PROPERTY-VALUE} function, which returns a property value
-indexed by an index. @code{DIRECT-PROPERTY-VALUE} may also be used, and it will
-not trigger delegation. If a property is accessed with either of these, but it
-is not available, an error of type UNBOUND-PROPERTY is signaled.
+doing so is the ``@ref{property-value}'' function, which returns a property
+value indexed by an index. @ref{direct-property-value} may also be used, and it
+will not trigger delegation. If a property is accessed with either of these, but
+it is not available, an error of type @code{UNBOUND-PROPERTY} is signaled.
 
 A property may be added to an existing Sheeple object by simply setting it with
-@code{(SETF PROPERTY-VALUE)}. This function will change the value of an existing
-property, or add a brand new property to the object and set the value if it did
-not already exist.
+@ref{(SETF PROPERTY-VALUE),setf property-value}. This function will change the
+value of an existing property, or add a brand new property to the object and set
+the value if it did not already exist.
 
 A property existing directly on a Sheeple object may be removed by using
-@code{REMOVE-PROPERTY}, or all direct properties may be removed using
-@code{REMOVE-ALL-DIRECT-PROPERTIES}.
+@ref{remove-property}, or all direct properties may be removed using
+@ref{remove-all-direct-properties}.
 
 Finally, Sheeple provides some convenient mechanisms for inspecting and
 exploring the properties of an object, and information about those
-properties. @code{DIRECT-PROPERTIES} and @code{AVAILABLE-PROPERTIES} may
+properties. @ref{direct-properties} and @ref{available-properties} may
 be used to retrieve a list of names associated with the properties of an
 object. Using DESCRIBE on the object provides a more helpful interactive
 interface to inspecting properties, as well.
@@ -957,6 +957,24 @@ Both of these properties will be delegated, like any regular Sheeple property.
 
 @node Properties Dictionary,  , Special Properties, Properties
 @subsection Properties Dictionary
+
+@menu
+* property-value::
+* direct-property-value::
+* setf property-value::
+* remove-property::
+* remove-all-direct-properties::
+* property-owner::
+* direct-properties::
+* available-properties::
+* direct-property-p::
+* available-property-p::
+* object-nickname::
+* with-properties::
+@end menu
+
+@node property-value, direct-property-value, Properties Dictionary, Properties Dictionary
+@unnumberedsubsubsec property-value
 @defun {property-value} object property-name
         => value
 
@@ -978,6 +996,8 @@ type @code{UNBOUND-PROPERTY} is signaled.
 
 @end defun
 
+@node direct-property-value, setf property-value, property-value, Properties Dictionary
+@unnumberedsubsubsec direct-property-value
 @defun {direct-property-value} object property-name
         => value
 
@@ -999,6 +1019,8 @@ type @code{UNBOUND-PROPERTY} is signaled.
 
 @end defun
 
+@node setf property-value, remove-property, direct-property-value, Properties Dictionary
+@unnumberedsubsubsec (setf property-value)
 @defun {(setf property-value)} new-value object property-name
            &key reader writer accessor
 => new-value
@@ -1027,6 +1049,8 @@ that property that have been set in @var{object}'s hierarchy list.
 
 @end defun
 
+@node remove-property, remove-all-direct-properties, setf property-value, Properties Dictionary
+@unnumberedsubsubsec remove-property
 @defun {remove-property} object property-name &optional (errorp t)
        => object
 
@@ -1048,6 +1072,8 @@ error of type @code{UNBOUND-PROPERTY}.
 
 @end defun
 
+@node remove-all-direct-properties, property-owner, remove-property, Properties Dictionary
+@unnumberedsubsubsec remove-all-direct-properties
 @defun {remove-all-direct-properties} object
        => object
 
@@ -1061,6 +1087,8 @@ This function will remove any and all direct-properties currently stored in @var
 
 @end defun
 
+@node property-owner, direct-properties, remove-all-direct-properties, Properties Dictionary
+@unnumberedsubsubsec property-owner
 @defun {property-owner} object property-name &optional errorp
        => owner
 
@@ -1087,6 +1115,8 @@ a direct property value for @var{property-name}.
 
 @end defun
 
+@node direct-properties, available-properties, property-owner, Properties Dictionary
+@unnumberedsubsubsec direct-properties
 @defun {direct-properties} object
        => direct-properties
 
@@ -1107,6 +1137,8 @@ any way.
 
 @end defun
 
+@node available-properties, direct-property-p, direct-properties, Properties Dictionary
+@unnumberedsubsubsec available-properties
 @defun {available-properties} object
         => available properties
 
@@ -1123,6 +1155,8 @@ which @code{PROPERTY-VALUE} would return a value when called on @var{object}.
 
 @end defun
 
+@node direct-property-p, available-property-p, available-properties, Properties Dictionary
+@unnumberedsubsubsec direct-property-p
 @defun {direct-property-p} object property-name
         => boolean
 
@@ -1141,6 +1175,8 @@ named @var{property-name}, false otherwise.
 
 @end defun
 
+@node available-property-p, object-nickname, direct-property-p, Properties Dictionary
+@unnumberedsubsubsec available-property-p
 @defun {available-property-p} object property-name
         => boolean
 
@@ -1159,6 +1195,8 @@ has a direct property named @var{property-name}. False otherwise.
 
 @end defun
 
+@node object-nickname, with-properties, available-property-p, Properties Dictionary
+@unnumberedsubsubsec object-nickname
 @defun {object-nickname} object
 => nickname
 
@@ -1172,6 +1210,9 @@ This function returns the object's nickname. It is automatically set by
 @code{DEFPROTO}, and can be manually set by setting this place with SETF.
 
 @end defun
+
+@node with-properties,  , object-nickname, Properties Dictionary
+@unnumberedsubsubsec with-properties
 @defmac {with-properties} (property-entry*) object-form declaration* form*
 => result*
 

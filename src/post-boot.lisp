@@ -25,9 +25,9 @@
 ;;; Extensible Object Creation
 ;;;
 (defmessage create (proto &key)
-  (:documentation "Creates a PROTO. Intended for customization.")
-  (:reply ((proto =standard-object=) &rest properties &key) ; FIXME &aok bug
-    (object :parents proto :properties (plist-to-wide-alist properties))))
+  (:documentation "Creates a PROTO. Intended for customization."))
+(defreply create ((proto =standard-object=) &rest properties &key) ; FIXME &aok bug
+  (object :parents proto :properties (plist-to-wide-alist properties)))
 
 ;;;
 ;;; Printing objects!

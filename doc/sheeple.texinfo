@@ -915,9 +915,24 @@ property through the child (unless the value itself is side-effected), nor is it
 possible for a property to be unbound in a descendant with an ancestor that
 holds a direct value for that property.
 
-@subsection Dynamic property management
-TODO
 @subsection Special included properties
+There are two special properties that all Sheeple objects have access to:
+@code{DOCUMENTATION} and @code{NICKNAME}. Both are relatively internal
+properties, and are not meant to be accessed through @code{PROPERTY-VALUE}.
+
+The first holds documentation data (preferably a string). It can be accesed
+through Lisp's own @code{DOCUMENTATION} generic function, and set in that
+place.
+
+@code{NICKNAME} is a special property that can be set if it is convenient to
+give a particular object a visible ``name'' that can be used as a more
+convenient identifier than simply an identity printout. It can be accessed and
+set through @code{OBJECT-NICKNAME}. All objects defined by @code{DEFPROTO}
+automatically receive the prototype name as their nickname unless a :nickname
+option is provided in the @code{DEFPROTO} form.
+
+Both of these properties will be delegated, like any regular Sheeple property.
+
 @subsection Properties Dictionary
 @defun {property-value} object property-name
         => value

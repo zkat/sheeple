@@ -614,8 +614,8 @@ property-option ::= {:reader {reader-message-name | nil}}* |
                     {:writer {writer-message-name | nil}}* |
                     {:accessor {reader-message-name | t | nil}}*
 message-name ::= {symbol | (quote (setf symbol))}
-property-option ::= (:nickname lisp-object) |
-                    (:documentation docstring)
+option-spec ::= (:nickname lisp-object) |
+                (:documentation docstring)
 @end verbatim
 @end smallformat
 
@@ -675,8 +675,8 @@ property-option ::= {:reader {reader-message-name | nil}}* |
                     {:writer {writer-message-name | nil}}* |
                     {:accessor {reader-message-name | t | nil}}*
 message-name ::= {symbol | (quote (setf symbol))}
-property-option ::= (:nickname lisp-object) |
-                    (:documentation docstring)
+option-spec ::= (:nickname lisp-object) |
+                (:documentation docstring)
 @end verbatim
 @end smallformat
 

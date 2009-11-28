@@ -178,11 +178,6 @@ scope of the corresponding clause."
                  nil)))
     (rec clauses)))
 
-(declaim (inline aconsf-helper))
-(defun aconsf-helper (alist key value)
-  (acons key value alist)
-  value)
-
 (defmacro aconsf (place key value &environment env)
   "CONS is to PUSH as ACONS is to ACONSF; it pushes (cons KEY VALUE) to the PLACE."
   (multiple-value-bind (temps vals stores set-value get-value)

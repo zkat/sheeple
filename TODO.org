@@ -141,6 +141,7 @@
 * TODO 3.0.2
 ** TODO Document everything in doc/sheeple.texinfo
 ** TODO Clean up and speed up raw dispatch code
+** TODO Fix bug with defmessage's :reply option
 ** TODO Optimize
 *** TODO Property access
     Tests should be written by now, so let's start taking measures to optimize property access.

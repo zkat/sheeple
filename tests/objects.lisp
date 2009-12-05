@@ -44,15 +44,10 @@
     (is (null (%object-property-values object)))
     (is (null (%object-roles object)))))
 
-#+nil
 (test allocate-object
   (let ((object (allocate-object =standard-metaobject=)))
-    (is (eq =standard-metaobject= (%object-metaobject object)))
-    (is (eq nil (%object-parents object)))
-    (is (eq nil (%object-properties object)))
-    (is (eq nil (%object-roles object)))
-    (is (eq nil (%object-hierarchy-cache object)))
-    (is (eq nil (%object-children object)))))
+    (is (eq =standard-metaobject= (object-metaobject object)))
+    (is (eq nil (object-parents object)))))
 
 (in-suite allocation)
 
@@ -258,7 +253,6 @@
     (is (direct-property-p object 'baz))
     (is (eql 'bar (direct-property-value object 'foo)))
     (is (eql 'quux (direct-property-value object 'baz))))
-  #+ (or) ;; other metaobject -- Expected failure, left out of v3.0
   (let* ((test-metaobject (object :parents (list =standard-metaobject=) :nickname 'test-metaobject))
          (object (object :metaobject test-metaobject)))
     ;; metaobject tests

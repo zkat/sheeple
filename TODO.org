@@ -113,33 +113,21 @@
    Then watch this:
    http://www.vimeo.com/1534976?pg=embed&sec=1534976
    Then go write some tests, and test all the fucking time.
-*** DONE Improve test for WITH-SHEEP-HIERARCHY
-*** DONE Convert tests to use WITH-SHEEP-HIERARCHY
 *** TODO Make sure all files have mostly-complete tests
 **** TODO utils.lisp
 **** TODO objects.lisp
 **** TODO properties.lisp
-**** DONE builtins.lisp
 **** TODO lambda-lists.lisp
 **** TODO messages.lisp
 **** TODO reply-definition.lisp
+***** TODO Detailed reply-(un)definition unit tests
 **** TODO reply-dispatch.lisp
+***** TODO Detailed dispatch unit tests
 **** TODO bootstrap.lisp
 **** TODO post-boot.lisp
-** TODO Fix lambda-lists again
-   The following should work:
-
-   (defmessage foo (bar &key))
-   (defreply foo (bar &rest all-stuff) ... )
-
-   Whenever &key is present, &aok should be appended to the end of the method function's ll.
-   Conversely, if &key is not present but &rest is, &aok should NOT be appended.
-** TODO Write unit tests that confirm lambda-list congruence is correct
-** TODO Detailed reply-(un)definition unit tests
-** TODO Detailed dispatch unit tests
-
-* TODO 3.0.2
-** TODO Document everything in doc/sheeple.texinfo
+**** DONE builtins.lisp
+*** DONE Improve test for WITH-SHEEP-HIERARCHY
+*** DONE Convert tests to use WITH-SHEEP-HIERARCHY
 ** TODO Clean up and speed up raw dispatch code
 ** TODO Optimize
 *** TODO Property access
@@ -149,6 +137,18 @@
 *** TODO Message dispatch
     The biggest gain in general will be from just the caching, but it would be nice to have a
     cleaner, faster raw algorithm. The caching itself can get filled up with declarations, too.
+
+* TODO 3.0.2
+** TODO Fix lambda-lists again
+   The following should work:
+
+   (defmessage foo (bar &key))
+   (defreply foo (bar &rest all-stuff) ... )
+
+   Whenever &key is present, &aok should be appended to the end of the method function's ll.
+   Conversely, if &key is not present but &rest is, &aok should NOT be appended.
+** TODO Write unit tests that confirm lambda-list congruence is correct
+** TODO Document everything in doc/sheeple.texinfo
 ** DONE Fix bug with defmessage's :reply option
 * DONE 3.0.1
 ** DONE Compile-time crap

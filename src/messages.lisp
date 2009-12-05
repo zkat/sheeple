@@ -195,12 +195,9 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 ;;;
 ;;; Arg info
 ;;;
-;;; - Arg info objects and the operations on them are meant to check that Message/Reply lambda-lists
-;;;   comply with http://www.lispworks.com/documentation/HyperSpec/Body/07_fd.htm
-;;;
-;;; - These are based on code from SBCL, but have been judiciously frobbed
-;;;
-;;; - Note that Sheeple doesn't follow CLHS 7.6.4 to the letter.
+
+;;; This code ensures that Sheeple follows a simplified form of CLHS 7.6.4
+;;; A lot of duplicated code here... FIXME!
 
 (defun check-reply-arg-info (message reply)
   (multiple-value-bind (nreq nopt keysp restp)
@@ -226,10 +223,28 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 (defun set-arg-info (message lambda-list)
   (multiple-value-bind (nreq nopt keysp restp)
       (analyze-lambda-list lambda-list)
-    (setf (message-lambda-list message) lambda-list
-          (message-number-required message) nreq
+    (setf (message-number-required message) nreq
           (message-number-optional message) nopt
           (message-key/rest-p message) (or keysp restp)))
+  (values))
+
+(defun update-arg-info (message lambda-list)
+  (multiple-value-bind (new-nreq new-nopt new-keysp new-restp)
+      (analyze-lambda-list lambda-list)
+    (let ((new-key/rest-p (or new-keysp new-restp)))
+      (dolist (reply (message-replies message))
+        (multiple-value-bind (reply-nreq reply-nopt reply-keysp reply-restp)
+            (analyze-lambda-list (reply-lambda-list reply))
+          (unless (and (= new-nreq reply-nreq)
+                       (= new-nopt reply-nopt)
+                       (eq new-key/rest-p
+                           (or reply-keysp reply-restp)))
+            (error "The message ~S~%cannot be updated to have lambda-list ~S~@
+                    because it conflicts with reply ~S" message lambda-list reply))))
+      (setf (message-lambda-list message)     lambda-list
+            (message-number-required message) new-nreq
+            (message-number-optional message) new-nopt
+            (message-key/rest-p message)      new-key/rest-p)))
   (values))
 
 ;;;
@@ -240,7 +255,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 ;; its args, checking lamda-list, etc.)
 (defun ensure-message (name &rest all-keys &key lambda-list &allow-other-keys)
   (or (awhen-prog1 (find-message name nil)
-        (set-arg-info it lambda-list))
+        (update-arg-info it lambda-list))
       (setf (%find-message name)
             (apply 'make-message :name name :lambda-list lambda-list all-keys))))
 

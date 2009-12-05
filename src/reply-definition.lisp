@@ -107,7 +107,6 @@
                  Participants: ~S~%Lambda List: ~S~%" participants lambda-list)
     (aprog1 (make-reply message qualifiers lambda-list function)
       (setf (documentation it 't) documentation) ; same as dox for CLOS methods
-      (clear-dispatch-cache message)
       ;; In order to replace existing replies, we must remove them before actually adding them again.
       (remove-specific-reply message qualifiers participants)
       (add-reply-to-message it message)
@@ -161,7 +160,6 @@
 ;;;
 (defun undefine-reply (name &key qualifiers participants)
   (awhen (find-message name nil)
-    (clear-dispatch-cache it)
     (remove-applicable-reply it qualifiers (objectify-list participants))))
 
 (defun remove-specific-reply (message qualifiers participants)

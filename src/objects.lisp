@@ -9,8 +9,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(defvar *caching-enabled* nil)
-
 ;; We declare these base vars here so that bootstrapping won't complain.
 (define-bound-variables =t= =standard-object= =standard-metaobject=)
 
@@ -101,8 +99,7 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
                    (members   lineage-members)) lineage
     (setf hierarchy (compute-hierarchy parents))
     (maphash (lambda (member children)
-               (dolist (role (%object-roles member))
-                 (clear-dispatch-cache (role-message role)))
+               (declare (ignore member))
                (mapcar 'trigger-hierarchy-recalculation children))
              members)))
 

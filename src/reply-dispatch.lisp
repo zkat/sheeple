@@ -28,20 +28,10 @@
     (error-when (< (the fixnum (length args))
                    (the fixnum relevant-args-length))
                 insufficient-message-args :message message)
-    (let ((relevant-args (subseq args 0 relevant-args-length)))
-      (aif (and *caching-enabled* (find-cached-replies message relevant-args))
-           (funcall (find-cached-erfun message it) args)
-           (let ((replies (find-applicable-replies message relevant-args)))
-             (aif (find-cached-erfun message replies)
-                  (progn
-                    (when *caching-enabled*
-                      (cache-replies message relevant-args replies))
-                    (funcall it args))
-                  (let ((erfun (compute-erfun message replies)))
-                    (when *caching-enabled*
-                      (cache-replies message relevant-args replies)
-                      (cache-erfun message replies erfun))
-                    (funcall erfun args))))))))
+    (let* ((relevant-args (subseq args 0 relevant-args-length))
+           (replies (find-applicable-replies message relevant-args))
+           (erfun (compute-erfun message replies)))
+      (funcall erfun args))))
 
 (defun primary-reply-p (reply)
   (null (reply-qualifiers reply)))

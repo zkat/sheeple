@@ -1,0 +1,282 @@
+#+LaTeX_CLASS: beamer
+#+MACRO: BEAMERMODE presentation
+#+TITLE: Sheeple: Dynamic Object-Orientation for CL
+#+AUTHOR: Kat Marchán
+
+* What is Class-orientation?
+** Setting up the strawman...
+#+LaTeX:\pause
+*** Write general blueprints, create objects based on them to hold some (limited) changeable state.
+#+LaTeX:\pause
+*** Otherwise, objects are fairly static
+#+LaTeX:\pause
+*** Nothing object-oriented about classes.
+    Saying class-orientation is "object-oriented" is a damn filthy lie.
+#+LaTeX:\pause
+*** "Static constructs considered harmful" (for dynamic languages)
+** Hope?
+#+LaTeX:\pause
+*** Python - arbitrary attributes
+#+LaTeX:\pause
+*** Ruby - open classes
+#+LaTeX:\pause
+*** Smalltalk - Everything is an instance of a class, including classes.
+#+LaTeX:\pause
+*** CLOS - class redefinition, change-class, EQL specializers, MOP
+** Example: Developing a game
+   Goal: Write a game
+
+   You're mapping to conceptual objects. Class-orientation seems like a perfect fit.
+
+   #+LaTeX:\pause
+   Or is it?
+** Example: The class hierarchy
+   Let's write a class hierarchy!
+   #+LaTeX:\pause
+   #+LaTeX:\begin{verbatim}
+   Class GameObject (no instances)
+    \_ Class Weapon (no instances)
+        \_ Class Sword (no instances)
+            \_ Class FireSword (maybe an instance?)
+                \_ ??? (What now?)
+   #+LaTeX:\end{verbatim}
+   #+LaTeX:\pause
+   #+LaTeX:\begin{center}
+   #+LaTeX:\includegraphics[height=2cm]{/home/zkat/hackery/lisp/sheeple/presentation/jizzinmypants.jpg}
+
+   Suggestions?
+   #+LaTeX:\end{center}
+** Example: Working toward a solution
+   Some solutions:
+*** Class explosion
+*** Programmatic class creation
+*** Data-driven programming
+** Example: Solutions
+Class explosion:
+#+latex:\pause
+*** Still class-oriented.
+*** Lots of manual class writing
+*** Might make code... difficult
+    #+LaTeX:\pause
+    Do you really want to write FireIceMagicMissileGoldenGodForeverSwordOfDoom?
+** Example: Solutions
+Programmatic class creation:
+#+latex:\pause
+*** May not actually be possible in your language
+*** Programmatic classes are sketchy, at best. Using them may be difficult and arcane.
+*** Reusability possibly out the window.
+** Example: Solutions
+Data-driven programming
+#+latex:\pause
+*** Eject! Eject!
+    Class-orientation can't actually do what you want, so you need to use something else
+*** Blessing
+    You've escaped the hell that is class-based programming
+** Example: Screw this.
+   #+latex:\begin{block}{From a paper on Self}
+   "How hardcore do you want to be?
+   How many lifetimes do you want to waste?"
+   #+latex:\end{block}
+* What is Object-oriented Programming?
+** What is Object-Oriented Programming?
+   #+latex:\begin{center}
+   Object-oriented programming: A different paradigm for putting together your program.
+   #+latex:\end{center}
+** Overview of objects
+#+LaTeX:\pause
+*** Objects are like other objects, and share each others' behavior.
+#+LaTeX:\pause
+*** No separate entity to confuse the process.
+#+LaTeX:\pause
+*** Delegate behavior *and* data.
+** Structuring an application with objects
+#+LaTeX:\pause
+*** Create an object
+#+LaTeX:\pause
+*** Copy or delegate to that object
+#+LaTeX:\pause
+*** New object can act as a prototype for other objects
+#+LaTeX:\pause
+*** Don't Panic!
+    Lots of other "object-oriented" design principles you learned still apply, in a good way.
+** Example: Game objects revisited
+Back to the game. Now with objects:
+#+LaTeX:\pause
+   #+LaTeX:\begin{verbatim}
+   Object
+    \_ Object, add some Weapon-like attributes
+        \_ Weapon, add some Sword-like attributes
+            \_ Sword, add some Fire-like attributes
+                \_ ???, add some ???-like attributes
+   #+LaTeX:\end{verbatim}
+#+LaTeX:\pause
+    #+latex:\begin{center}
+    #+LaTeX:\includegraphics[height=2cm]{/home/zkat/hackery/lisp/sheeple/presentation/Awesome_Face_bigger.png}
+
+    Awesome!
+    #+latex:\end{center}
+** Example: That's totally not different at all! D:<
+What's the difference?
+*** Make objects different by making them different
+*** Incremental development on a live system
+*** Objects defined by what they do, and what attributes they have, not by an abstract blueprint
+** Example (cont'd)
+What does this mean?
+*** Create a new object that implements the new behavior. Delegate what you want.
+#+LaTeX:\pause
+*** Programmatic creation of objects is easy and natural (not like there's any other way to do it!)
+#+LaTeX:\pause
+*** Heck, make programmatic object creation part of the design tool
+#+LaTeX:\pause
+    #+latex:\begin{center}
+    #+LaTeX:\includegraphics[height=3.5cm]{/home/zkat/hackery/lisp/sheeple/presentation/caveman.jpg}
+    #+latex:\end{center}
+** Object-orientation in the wild
+*** Prototype and Properties "patterns" (for classes)
+*** JavaScript
+*** MUDs
+**** LambdaMOO
+**** LPC
+**** DGD
+* CLOS
+** CLOS
+*** Common Lisp Object System. Integrates with Common Lisp
+*** Multiple inheritance
+*** Multiple dispatch
+*** Method combination
+*** Metaobject Protocol
+** More dynamic than other class-based systems
+#+LaTeX:\pause
+*** Redefinition of classes with instance updates
+    (Very complicated, though. See CLHS 4.3.6)
+#+LaTeX:\pause
+*** Adding/removing generic functions and methods.
+**** Does not require redefinition of a class.
+**** Generic functions and classes conceptually separate.
+**** Very dynamic
+#+LaTeX:\pause
+*** Instances can change classes
+    (Again, pretty tricky. CLHS 7.2)
+** WANT
+   I want:
+#+latex:\pause
+*** something with CLOS' nice features, but object-oriented
+#+latex:\pause
+*** something portable, built on Common Lisp
+#+latex:\pause
+*** an API similar to CLOS.
+#+latex:\pause
+*** A pony.
+* Sheeple
+** Sheeple
+   #+LateX:\begin{center}
+   #+LaTeX:\pause
+   #+LaTeX:\includegraphics[height=5cm]{/home/zkat/hackery/lisp/sheeple/doc/logo.png}
+
+   Sheeple: Dynamic Object-Orientation for Common Lisp.
+   #+LaTeX:\end{center}
+** Influences
+*** Written by Kat Marchán and Adlai Chandrasekhar
+*** Influenced by:
+**** CLOS
+**** Slate: http://slatelanguage.org
+**** Self: http://research.sun.com/self
+**** Io: http://iolanguage.com
+**** LambdaMOO and similar MUD systems
+** Objects, with delicious CLOS
+*** Lisp is dynamic. The object system should dynamic.
+   #+LaTeX:\pause
+*** CLOS+Object-orientation. What more could you possibly want?
+   #+LaTeX:\pause
+   #+BEGIN_SRC lisp
+   (object :parents *pony*) => Here's your pony.
+   #+END_SRC
+
+** Looks suspiciouly like CLOS on the surface
+*** Multiple inheritance
+*** Multiple dispatch
+*** Method combination
+*** Lisp integration (autoboxing)
+*** Interface looks like a M-% of CLOS' API
+** But has all the proto-goodies you might want underneath...
+*** Objects define behavior
+*** Completely dynamic
+*** Dynamic delegation of data (not just behavior)
+** ...and it still performs well
+   Self showed that prototype languages can be efficient.
+*** Self-inspired maps ("hidden classes")
+*** Fast property access, reuse of known techniques from Class-land
+*** Delegation can lead to smaller memory footprint
+    NewtonScript exploited this for an embedded system.
+** It's fun.
+   Being able to manipulate application on the fly makes programming more fun and productive!
+   #+LaTeX:\pause
+   #+latex:\begin{center}
+   #+LaTeX:\includegraphics[height=4.5cm]{/home/zkat/hackery/lisp/sheeple/presentation/calvin-trex.jpg}
+
+   This T-Rex just downloaded Sheeple.
+   #+latex:\end{center}
+** Object API
+   Object creation
+   #+LaTeX:\pause
+*** Make a new object
+    #+LaTeX:\begin{verbatim}
+    (object)
+    #+LaTeX:\end{verbatim}
+    #+LaTeX:\pause
+*** Make a new object, that delegates to another object
+#+LaTeX:\begin{verbatim}
+    (object :parents *foo*)
+    #+LaTeX:\end{verbatim}
+   #+LaTeX:\pause
+*** Copy an existing object, directly inheriting its properties locally
+    #+LaTeX:\begin{verbatim}
+    (clone *foo*)
+    #+LaTeX:\end{verbatim}
+** Property API
+   Creating and managing properties
+   #+LaTeX:\pause
+*** Add a property
+    #+LaTeX:\begin{verbatim}
+    (add-property *foo* 'name "value")
+    #+LaTeX:\end{verbatim}
+    #+LaTeX:\pause
+*** Access a property
+    #+LaTeX:\begin{verbatim}
+    (property-value *foo* 'name)
+    #+LaTeX:\end{verbatim}
+    #+LaTeX:\pause
+*** Access a delegated property from an object's descendant
+    #+LaTeX:\begin{verbatim}
+    (property-value (object :parents *foo*) 'name)
+    #+LaTeX:\end{verbatim}
+    #+LaTeX:\pause
+*** Remove the property
+    #+LaTeX:\begin{verbatim}
+    (remove-property *foo* 'name)
+    #+LaTeX:\end{verbatim}
+** Message API
+   Creating messages, replies, and dispatching them
+   #+LaTeX:\pause
+*** Create a message (think generic functions)
+#+LaTeX:\begin{verbatim}
+(defmessage synergize (a b)
+  (:documentation "Synergizes A and B")) 
+#+LaTeX:\end{verbatim}
+#+LaTeX:\pause
+*** Create a reply (think methods)
+#+LaTeX:\begin{verbatim}
+(defreply synergize ((a =string=) (b =string=)) 
+  (concatenate 'string a b))
+  #+LaTeX:\end{verbatim}
+#+LaTeX:\pause
+*** Call a message (think uhh... calling a function :D)
+#+LaTeX:\begin{verbatim}
+(synergize "foo" "bar") => "foobar" 
+#+LaTeX:\end{verbatim}
+** Links:
+*** Project page on my site:
+    http://sykosomatic.org/sheeple
+
+*** Project page on Github:
+    http://github.com/zkat/sheeple

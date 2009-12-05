@@ -34,7 +34,6 @@
       )))
 
 (test *message-table*
-  (is (message-table-p *message-table*))
   (let ((test-message (%%make-message)))
     (setf (%find-message 'name) test-message)
     (is (eq test-message (%find-message 'name)))

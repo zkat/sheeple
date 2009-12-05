@@ -92,11 +92,6 @@
 (defvar *message-table* (make-hash-table :test 'equal)
   "Hashtable for storing message objects.") ; EQUAL test accomodates setf messages
 
-(defun message-table-p (table)
-  ;; This is sort of stupid, but I'm sort of hoping it's going to help me make the interface more
-  ;; generic, in case I ever want to change what the message table is actually represented as.
-  (hash-table-p table))
-
 ;; We define these two as internal first, so we don't export (setf find-message)
 (declaim (inline %find-message))
 (defun %find-message (name)

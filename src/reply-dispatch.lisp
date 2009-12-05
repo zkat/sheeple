@@ -24,7 +24,7 @@
 
 (defun apply-message (message args)
   (let ((replies (find-applicable-replies message (required-portion message args))))
-    (when (null replies) (apply 'no-applicable-replies message args))
+    (when (null replies) (apply 'no-applicable-reply message args))
     (funcall (compute-erfun message replies) args)))
 
 (defun primary-reply-p (reply)
@@ -75,8 +75,7 @@
 
 (defun find-applicable-replies (message args)
   "Returns a sorted list of replies on MESSAGE for which appropriate roles
-are present in ARGS. If no such replies are found and ERRORP is true, a
-condition of type `no-applicable-replies' is signaled."
+are present in ARGS."
   (declare (list args))
   (if (null args)
       (message-replies message)

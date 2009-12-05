@@ -210,7 +210,7 @@ creating and linking a new one if necessary."
       (if (fboundp 'print-sheeple-object)
           (funcall 'print-sheeple-object object stream)
           (std-print-sheeple-object object stream))
-    (no-applicable-replies () (std-print-sheeple-object object stream))))
+    (no-applicable-reply () (std-print-sheeple-object object stream))))
 
 ;; The SETF version of this would require that something like CHANGE-METAOBJECT exists.
 (defun object-metaobject (object)

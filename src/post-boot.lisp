@@ -47,7 +47,7 @@
 ;;;
 ;;; Error Reporting and Recovery
 ;;;
-(defmessage no-applicable-replies (message &rest args)
+(defmessage no-applicable-reply (message &rest args)
   (:documentation "Called when no reply is applicable for a message invocation.")
   (:reply (message &rest args)
-    (error 'no-applicable-replies :message message :args args)))
+    (error 'no-applicable-reply :message message :args args)))

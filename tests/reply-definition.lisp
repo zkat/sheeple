@@ -117,7 +117,7 @@
            (defreply test-message ((x object)) x))
          (unless warned (fail "Didn't warn for automatic message creation."))
          (is (not (null (undefreply test-message (object)))))
-         (signals no-applicable-replies (funcall 'test-message object))
+         (signals no-applicable-reply (funcall 'test-message object))
          (is (null (undefreply test-message (object))))
          (is (null (%object-roles object))))
     (undefine-message 'test-message)))

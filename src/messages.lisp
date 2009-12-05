@@ -61,8 +61,7 @@
   ;; These are for argument info
   (number-required 0 :type fixnum)
   (number-optional 0 :type fixnum)
-  (key/rest-p nil :type boolean)
-  (keys nil :type (or list boolean)))
+  (key/rest-p nil :type boolean))
 
 (define-print-object ((message message)) (format t "~S" (message-name message)))
 
@@ -204,7 +203,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 ;;; - Note that Sheeple doesn't follow CLHS 7.6.4 to the letter.
 
 (defun check-reply-arg-info (message reply)
-  (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)
+  (multiple-value-bind (nreq nopt keysp restp)
       (analyze-lambda-list (reply-lambda-list reply))
     (flet ((lose (string &rest args)
              (error 'reply-argument-conflict
@@ -213,8 +212,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
              (if (> x y) "more" "fewer")))
       (with-accessors ((msg-nreq       message-number-required)
                        (msg-nopt       message-number-optional)
-                       (msg-key/rest-p message-key/rest-p)
-                       (msg-keywords   message-keys)) message
+                       (msg-key/rest-p message-key/rest-p)) message
         (cond ((not (= nreq msg-nreq))
                (lose "the reply has ~A required arguments than the message."
                      (comparison-description nreq msg-nreq)))
@@ -223,20 +221,15 @@ more entries the cache will be able to hold, but the slower lookup will be.")
                      (comparison-description nopt msg-nopt)))
               ((not (eq (or keysp restp) msg-key/rest-p))
                (lose "the reply and message differ in whether they accept &REST or &KEY arguments."))
-              ((and (consp msg-keywords)
-                    (not (or (and restp (not keysp)) allow-other-keys-p
-                             (every (rcurry 'memq keywords) msg-keywords))))
-               (lose "the reply does not accept each of the &KEY arguments ~S." msg-keywords))
               (t (values)))))))
 
 (defun set-arg-info (message lambda-list)
-  (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)
+  (multiple-value-bind (nreq nopt keysp restp)
       (analyze-lambda-list lambda-list)
     (setf (message-lambda-list message) lambda-list
           (message-number-required message) nreq
           (message-number-optional message) nopt
-          (message-key/rest-p message) (or keysp restp)
-          (message-keys message) (if allow-other-keys-p t keywords)))
+          (message-key/rest-p message) (or keysp restp)))
   (values))
 
 ;;;

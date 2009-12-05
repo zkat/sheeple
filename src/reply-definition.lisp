@@ -207,10 +207,10 @@
         (parse-specialized-lambda-list reply-ll)
       (declare (ignore parameters required))
       `(progn
-         (eval-when (:compile-toplevel :load-toplevel :execute)
+         (eval-when (:compile-toplevel)
            (unless (find-message ',name nil)
-             (warn 'automatic-message-creation :message-name ',name))
-           (ensure-message ',name :lambda-list ',(create-msg-lambda-list reply-ll)))
+             (warn 'automatic-message-creation :message-name ',name)
+             (ensure-message ',name :lambda-list ',(create-msg-lambda-list reply-ll))))
          (ensure-reply ',name
                        :qualifiers ',qualifiers
                        :lambda-list ',lambda-list

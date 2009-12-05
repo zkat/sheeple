@@ -43,10 +43,7 @@
 ;;                 parse-lambda-list))
 
 (defun parse-lambda-list-like-thing (list &key silent)
-  (collect ((required)
-            (optional)
-            (keys)
-            (aux))
+  (collect (required optional keys aux)
     (let ((restp nil)
           (rest nil)
           (keyp nil)

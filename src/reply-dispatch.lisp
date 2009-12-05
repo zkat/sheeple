@@ -40,26 +40,31 @@
 (defun around-reply-p (reply)
   (eq :around (car (reply-qualifiers reply))))
 
-(defun compute-erfun (message replies)
-  (declare (list replies))
-  (aif (find-if 'around-reply-p replies)
-       (lambda (args)
-         (funcall (reply-function it) args
-                  (compute-erfun message (remove it replies))))
-       (lambda (args)
-         (let ((primaries (member-if 'primary-reply-p replies)))
-           (when (null primaries)
-             (error 'no-primary-replies :message (message-name message)))
-           (dolist (reply replies)
-             (when (before-reply-p reply)
-               (funcall (reply-function reply) args nil)))
-           (multiple-value-prog1
-               (funcall (reply-function (car primaries))
-                        args (compute-primary-erfun (cdr primaries)))
-             (do-reversed (afters replies) ; Has more cowbell!
-               (dolist (reply afters)
-                 (when (after-reply-p reply)
-                   (funcall (reply-function reply) args nil)))))))))
+(defun std-compute-effective-reply (message applicable-replies)
+  (collect (before primary after around)
+    (dolist (reply applicable-replies)
+      (let ((qualifiers (reply-qualifiers reply)))
+        (cond
+          ((null qualifiers) (primary reply))
+          ((cdr qualifiers) (error "FIXME -- bad qualifiers for a standard-message"))
+          (t (case (car qualifiers)
+               (:around (around reply))
+               (:before (before reply))
+               (:after  (after reply))
+               (t (error "FIXME -- bad qualifiers for a standard-message")))))))
+    (cond
+      ((null (primary))
+       (error 'no-primary-replies :message (message-name message)))
+      ;; SBCL has some optimization here. Pull it in, eventually.
+      (t (let ((main-erfun `(multiple-value-prog1
+                                (progn
+                                  ,@(mapcar (fun `(call-reply ,_)) (before))
+                                  (call-reply ,(car (primary)) ,(cdr (primary))))
+                              ,@(mapcar (fun `(call-reply ,_)) (reverse (after))))))
+           (if (not (around)) main-erfun
+               `(call-reply ,(car (around))
+                            (,@(cdr (around))
+                               (make-reply ,main-erfun)))))))))
 
 (defun compute-primary-erfun (replies)
   (reduce (lambda (erfun reply)

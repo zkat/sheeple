@@ -10,7 +10,7 @@
 (in-package :sheeple)
 
 ;;;
-;;; Object creation protocol
+;;; Object Creation Protocol
 ;;;
 (defmessage allocate-object (metaobject)
   (:reply ((metaobject =standard-metaobject=))
@@ -25,11 +25,11 @@
 ;;;
 (defmessage create (proto &key)
   (:documentation "Creates a PROTO. Intended for customization."))
-(defreply create ((proto =standard-object=) &rest properties &key) ; FIXME &aok bug
+(defreply create ((proto =standard-object=) &rest properties)
   (object :parents proto :properties (plist-to-wide-alist properties)))
 
 ;;;
-;;; Printing objects!
+;;; Printing Objects!
 ;;;
 
 (defmessage print-sheeple-object (object stream)

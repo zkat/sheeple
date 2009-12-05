@@ -103,20 +103,20 @@ condition of type `no-applicable-replies' is signaled."
                        (when (fully-specified-p reply)
                          (pushnew reply applicable-replies :test #'eq)))))))
           (declare (dynamic-extent #'find-and-rank-roles))
-          (loop for arg in args
-             for index fixnum upfrom 0
+          (loop
+             for arg in args and index fixnum upfrom 0
              for obj = (ensure-dispatch-object arg)
              ;; To avoid consing, we call f-a-r-r on the root object first
-             do (find-and-rank-roles obj 0 index)
              ;; Then we iterate over its ordered ancestors
-             (loop for hierarchy-object in (mold-hierarchy (%object-mold obj))
-                for hierarchy-position fixnum from 1
-                do (find-and-rank-roles hierarchy-object hierarchy-position index))
+             do (loop initially (find-and-rank-roles obj 0 index)
+                   for hierarchy-object in (mold-hierarchy (%object-mold obj))
+                   for hierarchy-position fixnum from 1
+                   do (find-and-rank-roles hierarchy-object hierarchy-position index))
              finally
-             (if applicable-replies
-                 (return (sort-applicable-replies applicable-replies))
-                 (when errorp
-                   (error 'no-applicable-replies :message (message-name message) :args args))))))))
+               (if applicable-replies
+                   (return (sort-applicable-replies applicable-replies))
+                   (when errorp
+                     (error 'no-applicable-replies :message (message-name message) :args args))))))))
 
 (defun clear-reply-rank (reply &aux (vector (reply-rank-vector reply)))
   (declare (simple-vector vector))

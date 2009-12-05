@@ -290,7 +290,7 @@
                (:reply ((xyzzy obj)) xyzzy))
              (let ((clone3 (clone obj)))
                (is (eq clone3 (funcall 'clone-test clone3)))
-               (signals no-applicable-replies (funcall 'clone-test clone))))
+               (signals no-applicable-reply (funcall 'clone-test clone))))
         (undefmessage clone-test)))))
 
 ;;;

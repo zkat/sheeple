@@ -45,7 +45,7 @@
    #:object-property-error #:unbound-property #:unbound-direct-property
    #:clobbering-function-definition #:sheeple-message-error #:insufficient-message-args
    #:no-such-message #:message-lambda-list-error #:sheeple-reply-error #:reply-argument-conflict
-   #:automatic-message-creation #:reply-lambda-list-conflict #:no-applicable-replies
+   #:automatic-message-creation #:reply-lambda-list-conflict #:no-applicable-reply
    #:no-primary-replies #:specialized-lambda-list-error
    ))
 

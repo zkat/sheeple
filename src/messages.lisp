@@ -282,10 +282,7 @@ more entries the cache will be able to hold, but the slower lookup will be.")
          (aprog1 (ensure-message ',name :lambda-list ',lambda-list
                                  ,@(canonize-message-options options))
            ,@(when replies
-               (mapcar (fun (multiple-value-bind (quals lambda-l dox body)
-                                (parse-defreply (cdr _))
-                              (%defreply name quals lambda-l dox body)))
-                       replies)))))))
+               (mapcar (fun `(defreply ,name ,@(cdr _))) replies)))))))
 
 (defun canonize-message-option (option)
   `(,(car option) ,(cadr option)))

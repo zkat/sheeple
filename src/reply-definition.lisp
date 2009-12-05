@@ -204,26 +204,23 @@
 ;;;
 
 ;;; Definition
-(defun %defreply (name qualifiers specialized-lambda-list docstring body)
-  (multiple-value-bind (parameters lambda-list participants required ignorable)
-      (parse-specialized-lambda-list specialized-lambda-list)
-    (declare (ignore parameters required))
-    `(%ensure-reply (find-message ',name)
-                    ',qualifiers
-                    ',lambda-list
-                    (list ,@participants)
-                    ,(make-reply-lambda name lambda-list ignorable body)
-                    ,docstring)))
-
 (defmacro defreply (name &rest defreply-args)
   (multiple-value-bind (qualifiers reply-ll docstring body)
       (parse-defreply defreply-args)
-    `(progn
-       (eval-when (:compile-toplevel :load-toplevel :execute)
-         (unless (find-message ',name nil)
-           (warn 'automatic-message-creation :message-name ',name))
-         (ensure-message ',name :lambda-list ',(create-msg-lambda-list reply-ll)))
-       ,(%defreply name qualifiers reply-ll docstring body))))
+    (multiple-value-bind (parameters lambda-list participants required ignorable)
+        (parse-specialized-lambda-list reply-ll)
+      (declare (ignore parameters required))
+      `(progn
+         (eval-when (:compile-toplevel :load-toplevel :execute)
+           (unless (find-message ',name nil)
+             (warn 'automatic-message-creation :message-name ',name))
+           (ensure-message ',name :lambda-list ',(create-msg-lambda-list reply-ll)))
+         (%ensure-reply (find-message ',name)
+                        ',qualifiers
+                        ',lambda-list
+                        (list ,@participants)
+                        ,(make-reply-lambda name lambda-list ignorable body)
+                        ,docstring)))))
 
 (defun make-reply-lambda (name lambda-list ignorable body)
   (let* ((msg (find-message name nil))

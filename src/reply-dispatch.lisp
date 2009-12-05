@@ -23,15 +23,9 @@
   (sort (the list reply-list) #'< :key 'score-reply))
 
 (defun apply-message (message args)
-  (declare (list args))
-  (let ((relevant-args-length (message-number-required message)))
-    (error-when (< (the fixnum (length args))
-                   (the fixnum relevant-args-length))
-                insufficient-message-args :message message)
-    (let* ((relevant-args (subseq args 0 relevant-args-length))
-           (replies (find-applicable-replies message relevant-args))
-           (erfun (compute-erfun message replies)))
-      (funcall erfun args))))
+  (let* ((replies (find-applicable-replies message (required-portion message args)))
+         (erfun (compute-erfun message replies)))
+    (funcall erfun args)))
 
 (defun primary-reply-p (reply)
   (null (reply-qualifiers reply)))

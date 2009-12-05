@@ -141,7 +141,6 @@
 * TODO 3.0.2
 ** TODO Document everything in doc/sheeple.texinfo
 ** TODO Clean up and speed up raw dispatch code
-** TODO Fix bug with defmessage's :reply option
 ** TODO Optimize
 *** TODO Property access
     Tests should be written by now, so let's start taking measures to optimize property access.
@@ -150,6 +149,7 @@
 *** TODO Message dispatch
     The biggest gain in general will be from just the caching, but it would be nice to have a
     cleaner, faster raw algorithm. The caching itself can get filled up with declarations, too.
+** DONE Fix bug with defmessage's :reply option
 * DONE 3.0.1
 ** DONE Compile-time crap
    Something is going on. There seem to be some compile-time side-effects we don't want that are

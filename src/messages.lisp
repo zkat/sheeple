@@ -276,13 +276,14 @@ more entries the cache will be able to hold, but the slower lookup will be.")
 (defmacro defmessage (name lambda-list &rest options)
   (let ((replies (remove-if-not (curry 'eq :reply) options :key 'car))
         (options (delete :reply options :test 'eq :key 'car)))
-    `(eval-when (:compile-toplevel :load-toplevel :execute)
-       (check-message-lambda-list ',lambda-list)
-       (eval-when (:load-toplevel :execute)
-         (aprog1 (ensure-message ',name :lambda-list ',lambda-list
-                                 ,@(canonize-message-options options))
-           ,@(when replies
-               (mapcar (fun `(defreply ,name ,@(cdr _))) replies)))))))
+    `(progn
+       (eval-when (:compile-toplevel :load-toplevel :execute)
+         (check-message-lambda-list ',lambda-list)
+         (ensure-message ',name :lambda-list ',lambda-list
+                         ,@(canonize-message-options options)))
+       ,@(when replies
+           `(,@(mapcar (fun `(defreply ,name ,@(cdr _))) replies)
+               (find-message ',name))))))
 
 (defun canonize-message-option (option)
   `(,(car option) ,(cadr option)))

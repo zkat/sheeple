@@ -39,7 +39,7 @@
     (setf (property-value (symbol-value name) 'nickname) name)))
 
 ;;; Well, not really. We still need some messages to create objects:
-(defmessage shared-init (object &rest initargs &key &allow-other-keys)
+(defmessage shared-init (object &rest initargs &key)
   (:documentation "Adds properties to OBJECT and performs general initialization tasks."))
 (defreply shared-init (object &key properties
                               (documentation nil doxp)
@@ -53,14 +53,14 @@
     (setf (documentation object t) documentation))
   object)
 
-(defmessage init-object (object &rest initargs &key &allow-other-keys)
+(defmessage init-object (object &rest initargs &key)
   (:documentation "Performs 'once-only' initialization tasks on OBJECT."))
-(defreply init-object (object &rest initargs &key &allow-other-keys)
+(defreply init-object (object &rest initargs &key)
   (apply #'shared-init object initargs))
 
-(defmessage reinit-object (object &rest initargs &key &allow-other-keys)
+(defmessage reinit-object (object &rest initargs &key)
   (:documentation "Resets parents and properties without changing OBJECT's identity."))
-(defreply reinit-object (object &rest initargs &key parents &allow-other-keys)
+(defreply reinit-object (object &rest initargs &key parents)
   (when (null parents)                  ; Guard against funny business
     (push =standard-object= parents))
   (change-mold object (ensure-mold (objectify-list parents)))

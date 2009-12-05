@@ -79,13 +79,6 @@ by deleting items at the same position from both lists."
   "Constructs a vector of SIZE elements set to INITIAL-ELEMENT. See `make-list'."
   (make-array size :initial-element initial-element))
 
-;;; This only gets called once, during the macroexpansion of collect.
-(defun proper-list-of-length-p (list min &optional (max min))
-  "Returns T if the length of X is between MIN and MAX, NIL otherwise."
-  (let ((length (list-length list)))
-    (when (numberp length)
-      (<= min length max))))
-
 (defun collect-normal-expander (n-value fun forms)
   `(progn
      ,@(mapcar (lambda (form) `(setq ,n-value (,fun ,form ,n-value))) forms)
@@ -105,31 +98,23 @@ by deleting items at the same position from both lists."
        ,n-value)))
 
 (defmacro collect (collections &body body)
-  (let ((macros ())
-        (binds ()))
+  (let (macros binds)
     (dolist (spec collections)
-      (error-when (not (proper-list-of-length-p spec 1 3))
-                  "Malformed collection specifier: ~S" spec)
-      (let* ((name (first spec))
-             (default (second spec))
-             (kind (or (third spec) 'collect))
-             (n-value (gensym (concatenate 'string
-                                           (symbol-name name)
-                                           "-N-VALUE-"))))
-        (push `(,n-value ,default) binds)
-        (if (eq kind 'collect)
-            (let ((n-tail (gensym (concatenate 'string
-                                               (symbol-name name)
-                                               "-N-TAIL-"))))
-              (if default
-                  (push `(,n-tail (last ,n-value)) binds)
-                  (push n-tail binds))
+      (destructuring-bind (name &optional default (kind 'collect))
+          (ensure-list spec)
+        (let ((n-value (gensym (format nil "~A-N-VALUE-" name))))
+          (push `(,n-value ,default) binds)
+          (if (eq kind 'collect)
+              (let ((n-tail (gensym (format nil "~A-N-TAIL-" name))))
+                (if default
+                    (push `(,n-tail (last ,n-value)) binds)
+                    (push n-tail binds))
+                (push `(,name (&rest args)
+                         (collect-list-expander ',n-value ',n-tail args))
+                      macros))
               (push `(,name (&rest args)
-                            (collect-list-expander ',n-value ',n-tail args))
-                    macros))
-            (push `(,name (&rest args)
-                          (collect-normal-expander ',n-value ',kind args))
-                  macros))))
+                       (collect-normal-expander ',n-value ',kind args))
+                    macros)))))
     `(macrolet ,macros (let* ,(nreverse binds) ,@body))))
 
 (declaim (inline memq))

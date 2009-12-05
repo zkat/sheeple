@@ -101,17 +101,13 @@
     (error-when (/= (length participants) (count-required-parameters lambda-list))
                 "~&The number of participants conflicts with the lambda list.~@
                  Participants: ~S~%Lambda List: ~S~%" participants lambda-list)
-    (%ensure-reply message qualifiers lambda-list participants function documentation)))
-
-(defun %ensure-reply (message qualifiers lambda-list participants function documentation
-                      &aux (objectified-participants (objectify-list participants)))
-  (aprog1 (make-reply message qualifiers lambda-list function)
-    (setf (documentation it 't) documentation) ; same as dox for CLOS methods
-    (clear-dispatch-cache message)
-    ;; In order to replace existing replies, we must remove them before actually adding them again.
-    (remove-specific-reply message qualifiers objectified-participants)
-    (add-reply-to-message it message)
-    (add-reply-to-objects it objectified-participants)))
+    (aprog1 (make-reply message qualifiers lambda-list function)
+      (setf (documentation it 't) documentation) ; same as dox for CLOS methods
+      (clear-dispatch-cache message)
+      ;; In order to replace existing replies, we must remove them before actually adding them again.
+      (remove-specific-reply message qualifiers participants)
+      (add-reply-to-message it message)
+      (add-reply-to-objects it participants))))
 
 (defun add-reply-to-message (reply message)
   (check-reply-arg-info message reply)
@@ -215,12 +211,12 @@
            (unless (find-message ',name nil)
              (warn 'automatic-message-creation :message-name ',name))
            (ensure-message ',name :lambda-list ',(create-msg-lambda-list reply-ll)))
-         (%ensure-reply (find-message ',name)
-                        ',qualifiers
-                        ',lambda-list
-                        (list ,@participants)
-                        ,(make-reply-lambda name lambda-list ignorable body)
-                        ,docstring)))))
+         (ensure-reply ',name
+                       :qualifiers ',qualifiers
+                       :lambda-list ',lambda-list
+                       :participants (list ,@participants)
+                       :documentation ,docstring
+                       :function ,(make-reply-lambda name lambda-list ignorable body))))))
 
 (defun make-reply-lambda (name lambda-list ignorable body)
   (let* ((msg (find-message name nil))

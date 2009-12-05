@@ -40,6 +40,44 @@
 (defun around-reply-p (reply)
   (eq :around (car (reply-qualifiers reply))))
 
+(defun std-compute-erfun (message effective-reply)
+  (with-gensyms (args)
+    (labels ((transform-effective-reply (form)
+               (if (atom form) form
+                   (case (car form)
+                     (call-reply (transform-effective-reply
+                                  (let ((the-reply (transform-effective-reply (cadr form))))
+                                    (with-gensyms (reply-var)
+                                      `(let ((,reply-var ,the-reply))
+                                         (declare (ignorable ,reply-var))
+                                         (funcall (reply-function ,(if (replyp the-reply)
+                                                                       the-reply reply-var))
+                                                  ,args
+                                                  ,@(let ((subforms
+                                                           (loop for subform in (cddr form)
+                                                              collect `',subform)))
+                                                      (if subforms subforms '(())))
+                                                  :message ,message
+                                                  :reply ,(if (replyp the-reply)
+                                                              the-reply reply-var)))))))
+                     (make-reply (when (cddr form)
+                                   (error "Incorrect make-reply form: ~S" form))
+                                 (let ((reply-lambda
+                                        (make-reply-lambda
+                                         (message-name message) `(&rest ,args) `(,args)
+                                         `(,(transform-effective-reply (cadr form))))))
+                                   (make-reply message () (message-lambda-list message)
+                                               (compile nil reply-lambda))))
+                     (t (mapcar #'transform-effective-reply form))))))
+      (let ((erf-lambda `(lambda (&rest ,args)
+                           (declare (ignorable ,args))
+                           ,(transform-effective-reply effective-reply))))
+        (multiple-value-bind (function warnings failure)
+            (compile nil erf-lambda)
+          (declare (ignore warnings))
+          (assert (not failure))
+          function)))))
+
 (defun std-compute-effective-reply (message applicable-replies)
   (collect (before primary after around)
     (dolist (reply applicable-replies)

@@ -4,7 +4,7 @@
 
 ;;;; tests/messages.lisp
 ;;;;
-;;;; Unit tests for messages objects, ll-congruence, dispatch-caching, and message interface
+;;;; Unit tests for messages objects, ll-congruence, and message interface
 ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
@@ -24,13 +24,11 @@
     (with-accessors ((name           message-name)
                      (lambda-list    message-lambda-list)
                      (replies        message-replies)
-                     ;; (dispatch-cache message-dispatch-cache)
                      )
         test-message
       (is (eq 'name name))
       (is (equal '(lambda the ultimate list) lambda-list))
       (is (null replies))
-      ;; (is (null dispatch-cache))
       )))
 
 (test *message-table*
@@ -55,43 +53,6 @@
     (is (forget-message 'test))
     (is (null (%find-message 'name)))
     (is (null (forget-message 'test)))))
-
-;; (def-suite dispatch-cache :in messages)
-;; (in-suite dispatch-cache)
-
-;; (test *dispatch-cache-size*
-;;   (is (integerp *dispatch-cache-size*)))
-
-;; (test make-dispatch-cache
-;;   (let ((cache (make-dispatch-cache)))
-;;     (is (dispatch-cache-p cache))
-;;     (is (= *dispatch-cache-size* (length cache)))))
-
-;; (test dispatch-cache-p
-;;   (let ((cache (make-dispatch-cache)))
-;;     (is (dispatch-cache-p cache))))
-
-;; #+nil ;;outdated
-;; (test make-dispatch-cache-entry
-;;   (let ((entry (make-dispatch-cache-entry '(a b) '(c d))))
-;;     (is (dispatch-cache-entry-p entry))
-;;     (is (equal '(a b) (cache-entry-args entry)))
-;;     (is (equal '(c d) (cache-entry-replies entry)))))
-
-;; (test cache-entry-args
-;;   (let ((entry (make-dispatch-cache-entry '(a b) '(c d))))
-;;     (is (equal '(a b) (cache-entry-args entry)))
-;;     (is (not (fboundp '(setf cache-entry-args))))))
-
-;; #+nil ;; needs update
-;; (test cache-entry-erf
-;;   (let ((entry (make-dispatch-cache-entry '(a b) '(c d))))
-;;     (is (equal '(c d) (cache-entry-replies entry)))
-;;     (is (not (fboundp '(setf cache-entry-replies))))))
-
-;; (test add-entry-to-message)
-;; (test clear-dispatch-cache)
-;; (test clear-all-message-caches)
 
 (def-suite arg-info :in messages)
 (in-suite arg-info)

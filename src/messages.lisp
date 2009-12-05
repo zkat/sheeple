@@ -44,20 +44,12 @@
 ;;;   can be defined, and the message object can be used as an obvious place to store the cached
 ;;;   dispatch information.
 
-(deftype dispatch-cache (&optional size)
-  `(simple-vector ,size))
-
-(deftype dispatch-cache-entry ()
-  `(cons list function))
-
 (defstruct (message (:constructor %make-message (name lambda-list))
                     (:predicate messagep))
   (name (error "Must supply a name") :read-only t)
   (lambda-list (error "Must supply a lambda-list") :type list)
   (replies nil :type list)
   (documentation nil :type (or string null))
-  (dispatch-cache (make-dispatch-cache) :type dispatch-cache)
-  (erfun-cache (make-hash-table :test #'equal) :type hash-table)
   ;; These are for argument info
   (number-required 0 :type fixnum)
   (number-optional 0 :type fixnum)
@@ -110,82 +102,6 @@
 Raises an error if no message is found, unless ERRORP is NIL."
   (or (%find-message name)
       (when errorp (error 'no-such-message :message-name name))))
-
-;;;
-;;; Global dispatch cache
-;;;
-;;; Currently disabled due to a nuisance with weak pointers
-;;;
-;;; - We hold a global cache for each message, which is filled as different objects are dispatched on.
-;;;   This allows fairly quick lookup of applicable replies when a particular message is called over
-;;;   and over on the same arguments.
-(defparameter *dispatch-cache-size* 40
-  "This variable determines the size of messages' dispatch caches. The bigger the number, the
-more entries the cache will be able to hold, but the slower lookup will be.")
-
-(defun make-dispatch-cache (&optional (size *dispatch-cache-size*))
-  (make-vector size))
-
-(defun make-dispatch-cache-entry (args replies)
-  (cons (mapcar 'maybe-make-weak-pointer args) replies))
-
-;;; There's a certain uglyness here. Too bad this crap is concise. - Adlai
-(declaim (inline cache-entry-args cache-entry-replies))
-(defun cache-entry-args (entry)
-  (car entry))
-(defun cache-entry-replies (entry)
-  (cdr entry))
-
-(defun cache-replies (message args replies)
-  (let* ((dispatch-cache (message-dispatch-cache message))
-         (entry (make-dispatch-cache-entry args replies))
-         (possible-index (mod (sxhash args) *dispatch-cache-size*)))
-    (declare (dispatch-cache dispatch-cache) (fixnum possible-index))
-    (acond ((typep (svref dispatch-cache possible-index) 'fixnum)
-            (setf (svref dispatch-cache possible-index) entry))
-           ((position-if #'atom dispatch-cache)
-            (setf (svref dispatch-cache it) entry))
-           (t (setf (svref dispatch-cache possible-index) entry)))))
-
-(defun find-cached-replies (message args)
-  (let* ((dispatch-cache (message-dispatch-cache message))
-         (maybe-entry (svref dispatch-cache 0)))
-    (declare (dispatch-cache dispatch-cache))
-    (acond ((and (not (typep maybe-entry 'fixnum))
-                 (desired-entry-p maybe-entry args))
-            (cache-entry-replies maybe-entry))
-           ((dotimes (index (length dispatch-cache))
-              (awhen (desired-entry-p (svref dispatch-cache index) args)
-                (return it)))
-            (cache-entry-replies it))
-           (t nil))))
-
-(defun desired-entry-p (entry target-args)
-  (declare (optimize speed (safety 0)))
-  (let ((entry-args (cache-entry-args entry)))
-    (do ((pointers entry-args (cdr pointers))
-         (pointer (car entry-args) (car pointers))
-         (args target-args (cdr args))
-         (arg (car target-args) (car args)))
-        ((or (null pointers) (null args))
-         (when (and (null pointers) (null args))
-           entry))
-      (unless (eq (maybe-weak-pointer-value pointer) arg)
-        (return nil)))))
-
-(defun clear-dispatch-cache (message)
-  (setf (message-dispatch-cache message) (make-dispatch-cache))
-  (clrhash (message-erfun-cache message))
-  t)
-
-(defun clear-all-message-caches ()
-  (maphash-values 'clear-dispatch-cache *message-table*))
-
-(defun find-cached-erfun (message replies)
-  (gethash replies (message-erfun-cache message)))
-
-(defun cache-erfun (message replies erfun)
-  (setf (gethash replies (message-erfun-cache message)) erfun))
 
 ;;;
 ;;; Arg info

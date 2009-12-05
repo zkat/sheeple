@@ -85,7 +85,7 @@ by deleting items at the same position from both lists."
       (destructuring-bind (name &optional default (kind 'collect))
           (ensure-list spec)
         (let ((value (gensym (format nil "~A-VALUE-" name))))
-          (push `(,value ,default) binds)
+          (push (if (null default) value `(,value ,default)) binds)
           (macrolet ((collect-macro (fun-form)
                        `(push `(,name (&rest forms)
                                       `(progn ,@(mapcar (fun ,,fun-form) forms) ,',value))
@@ -100,7 +100,7 @@ by deleting items at the same position from both lists."
                                               (setf ,',tail  ,n-res ,',value ,n-res))
                                              (t (setf (cdr ,',tail) ,n-res ,',tail ,n-res)))))))
                 (collect-macro ``(setf ,',value (,',kind ,',value ,_))))))))
-    `(macrolet ,macros (let* ,(nreverse binds) ,@body))))
+    `(let* ,(nreverse binds) (macrolet ,macros ,@body))))
 
 (declaim (inline memq))
 (defun memq (item list)

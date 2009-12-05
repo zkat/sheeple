@@ -47,6 +47,7 @@
 (defstruct (message (:constructor %make-message (name lambda-list))
                     (:predicate messagep))
   (name (error "Must supply a name") :read-only t)
+  (discriminating-function (constantly nil) :type function)
   (lambda-list (error "Must supply a lambda-list") :type list)
   (replies nil :type list)
   (documentation nil :type (or string null))
@@ -193,8 +194,13 @@ Raises an error if no message is found, unless ERRORP is NIL."
     ;; check should happen at the start of ensure-message or somesuch?
     (when (and (fboundp name) (not (find-message name nil)))
       (cerror "Replace definition." 'clobbering-function-definition :function name))
-    (setf (fdefinition name) (lambda (&rest args) (apply-message message args))))
+    (setf (message-discriminating-function message)
+          (std-compute-discriminating-function message)
+          (fdefinition name) (message-discriminating-function message)))
   (values))
+
+(defun apply-message (message args)
+  (apply (message-discriminating-function message) args))
 
 ;;; defmessage macro
 

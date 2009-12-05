@@ -22,10 +22,11 @@
 (defun sort-applicable-replies (reply-list)
   (sort (the list reply-list) #'< :key 'score-reply))
 
-(defun apply-message (message args)
-  (let ((replies (find-applicable-replies message (required-portion message args))))
-    (when (null replies) (apply 'no-applicable-reply message args))
-    (funcall (compute-erfun message replies) args)))
+(defun std-compute-discriminating-function (message)
+  (lambda (&rest args)
+    (let ((replies (find-applicable-replies message (required-portion message args))))
+      (when (null replies) (apply 'no-applicable-reply message args))
+      (funcall (compute-erfun message replies) args))))
 
 (defun primary-reply-p (reply)
   (null (reply-qualifiers reply)))

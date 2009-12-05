@@ -1,7 +1,7 @@
 ;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
 
 (asdf:defsystem sheeple
-  :version "2.0"
+  :version "3.0.2"
   :description "Cheeky prototypes for Common Lisp"
   :author "Josh Marchan <sykopomp at sykosomatic-dot-org>"
   :licence "MIT"

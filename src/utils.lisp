@@ -79,41 +79,34 @@ by deleting items at the same position from both lists."
   "Constructs a vector of SIZE elements set to INITIAL-ELEMENT. See `make-list'."
   (make-array size :initial-element initial-element))
 
-(defun collect-normal-expander (n-value fun forms)
-  `(progn
-     ,@(mapcar (lambda (form) `(setq ,n-value (,fun ,form ,n-value))) forms)
-     ,n-value))
-
-(defun collect-list-expander (n-value n-tail forms)
-  (let ((n-res (gensym)))
-    `(progn
-       ,@(mapcar (lambda (form)
-                   `(let ((,n-res (cons ,form nil)))
-                      (cond (,n-tail
-                             (setf (cdr ,n-tail) ,n-res)
-                             (setq ,n-tail ,n-res))
-                            (t
-                             (setq ,n-tail ,n-res  ,n-value ,n-res)))))
-                 forms)
-       ,n-value)))
-
 (defmacro collect (collections &body body)
   (let (macros binds)
     (dolist (spec collections)
       (destructuring-bind (name &optional default (kind 'collect))
           (ensure-list spec)
-        (let ((n-value (gensym (format nil "~A-N-VALUE-" name))))
-          (push `(,n-value ,default) binds)
+        (let ((value (gensym (format nil "~A-VALUE-" name))))
+          (push `(,value ,default) binds)
           (if (eq kind 'collect)
-              (let ((n-tail (gensym (format nil "~A-N-TAIL-" name))))
+              (let ((tail (gensym (format nil "~A-TAIL-" name))))
                 (if default
-                    (push `(,n-tail (last ,n-value)) binds)
-                    (push n-tail binds))
-                (push `(,name (&rest args)
-                         (collect-list-expander ',n-value ',n-tail args))
+                    (push `(,tail (last ,value)) binds)
+                    (push tail binds))
+                (push `(,name (&rest forms)
+                         `(progn
+                            ,@(mapcar (fun (with-gensyms (n-res)
+                                             `(let ((,n-res (list ,_)))
+                                                (cond ((null ,',tail)
+                                                       (setf ,',tail  ,n-res
+                                                             ,',value ,n-res))
+                                                      (t (setf (cdr ,',tail) ,n-res
+                                                               ,',tail ,n-res))))))
+                                      forms)
+                            ,',value))
                       macros))
-              (push `(,name (&rest args)
-                       (collect-normal-expander ',n-value ',kind args))
+              (push `(,name (&rest forms)
+                       `(progn
+                          ,@(mapcar (fun `(setf ,',value (,',kind ,',value ,_))) forms)
+                          ,',value))
                     macros)))))
     `(macrolet ,macros (let* ,(nreverse binds) ,@body))))
 

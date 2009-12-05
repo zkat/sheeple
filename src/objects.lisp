@@ -105,7 +105,7 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
 
 (macrolet ((define-mold-reader (name lineage-reader)
              `(defun ,name (mold)
-               (,lineage-reader (mold-lineage mold)))))
+                (,lineage-reader (mold-lineage mold)))))
   (define-mold-reader mold-parents   lineage-parents)
   (define-mold-reader mold-hierarchy lineage-hierarchy))
 
@@ -271,9 +271,9 @@ regards to the CONSTRAINTS. A future version will undo this change."
                      (unless (member parent ancestors)
                        (push parent ancestors))))
         (chosen-object (car ancestors)
-                      (dolist (ancestor ancestors)
-                        (unless (find ancestor checked :test 'eq)
-                          (return ancestor)))))
+                       (dolist (ancestor ancestors)
+                         (unless (find ancestor checked :test 'eq)
+                           (return ancestor)))))
        ((not chosen-object) ancestors)))
 
 (defun local-precedence-ordering (object)

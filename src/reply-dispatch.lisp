@@ -24,8 +24,7 @@
 
 (defun apply-message (message args)
   (let ((replies (find-applicable-replies message (required-portion message args))))
-    (when (null replies)
-      (error 'no-applicable-replies :message (message-name message) :args args))
+    (when (null replies) (apply 'no-applicable-replies message args))
     (funcall (compute-erfun message replies) args)))
 
 (defun primary-reply-p (reply)

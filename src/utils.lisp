@@ -28,9 +28,9 @@
 (defmacro once-only ((&rest names) &body body)
   (let ((gensyms (mapcar (fun (gensym)) names)))
     `(let (,@(loop for g in gensyms collect `(,g (gensym))))
-      `(let (,,@(loop for g in gensyms for n in names collect ``(,,g ,,n)))
-        ,(let (,@(loop for n in names for g in gensyms collect `(,n ,g)))
-           ,@body)))))
+       `(let (,,@(loop for g in gensyms for n in names collect ``(,,g ,,n)))
+          ,(let (,@(loop for n in names for g in gensyms collect `(,n ,g)))
+                ,@body)))))
 
 (defmacro error-when (condition error-datum &rest error-args)
   "Like `ASSERT', but with fewer bells and whistles."
@@ -87,22 +87,22 @@ by deleting items at the same position from both lists."
       (<= min length max))))
 
 (defun collect-normal-expander (n-value fun forms)
-    `(progn
-       ,@(mapcar (lambda (form) `(setq ,n-value (,fun ,form ,n-value))) forms)
-       ,n-value))
+  `(progn
+     ,@(mapcar (lambda (form) `(setq ,n-value (,fun ,form ,n-value))) forms)
+     ,n-value))
 
 (defun collect-list-expander (n-value n-tail forms)
-    (let ((n-res (gensym)))
-      `(progn
-         ,@(mapcar (lambda (form)
-                     `(let ((,n-res (cons ,form nil)))
-                        (cond (,n-tail
-                               (setf (cdr ,n-tail) ,n-res)
-                               (setq ,n-tail ,n-res))
-                              (t
-                               (setq ,n-tail ,n-res  ,n-value ,n-res)))))
-                   forms)
-         ,n-value)))
+  (let ((n-res (gensym)))
+    `(progn
+       ,@(mapcar (lambda (form)
+                   `(let ((,n-res (cons ,form nil)))
+                      (cond (,n-tail
+                             (setf (cdr ,n-tail) ,n-res)
+                             (setq ,n-tail ,n-res))
+                            (t
+                             (setq ,n-tail ,n-res  ,n-value ,n-res)))))
+                 forms)
+       ,n-value)))
 
 (defmacro collect (collections &body body)
   (let ((macros ())
@@ -243,8 +243,8 @@ will not be affected; otherwise, it will be bound to a recognizeable and unique 
 (defmacro define-print-object (((object class) &key (identity t) (type t)) &body body)
   (with-gensyms (stream)
     `(defmethod print-object ((,object ,class) ,stream)
-      (print-unreadable-object (,object ,stream :type ,type :identity ,identity)
-        (let ((*standard-output* ,stream)) ,@body)))))
+       (print-unreadable-object (,object ,stream :type ,type :identity ,identity)
+         (let ((*standard-output* ,stream)) ,@body)))))
 
 ;;; I thought about Alexandria's COPY-ARRAY, but that's too general.
 ;;; Use with caution.

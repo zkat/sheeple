@@ -188,9 +188,13 @@ Raises an error if no message is found, unless ERRORP is NIL."
 ;; lambda that calls the top-level dispatch function on the message args.
 (defun finalize-message (message)
   (let ((name (message-name message)))
+    ;; I'm not sure that this needs to happen every single time a message
+    ;; is finalized -- that's gonna happen very often now. Maybe this
+    ;; check should happen at the start of ensure-message or somesuch?
     (when (and (fboundp name) (not (find-message name nil)))
       (cerror "Replace definition." 'clobbering-function-definition :function name))
-    (setf (fdefinition name) (lambda (&rest args) (apply-message message args)))))
+    (setf (fdefinition name) (lambda (&rest args) (apply-message message args))))
+  (values))
 
 ;;; defmessage macro
 

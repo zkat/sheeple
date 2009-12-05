@@ -114,7 +114,8 @@
 
 (defun add-reply-to-message (reply message)
   (check-reply-arg-info message reply)
-  (push reply (message-replies message)))
+  (push reply (message-replies message))
+  (finalize-message message))
 
 (defun add-reply-to-objects (reply objects)
   (loop
@@ -158,6 +159,10 @@
 ;;;
 ;;; Reply undefinition
 ;;;
+
+;;; These functions all need clear documentation on what they're supposed to do,
+;;; and what they're supposed to return.
+
 (defun undefine-reply (name &key qualifiers participants)
   (awhen (find-message name nil)
     (remove-applicable-reply it qualifiers (objectify-list participants))))
@@ -190,8 +195,9 @@
       (delete-reply reply)
       t)))
 
-(defun delete-reply (reply)
-  (deletef (message-replies (reply-message reply)) reply)
+(defun delete-reply (reply &aux (message (reply-message reply)))
+  (deletef (message-replies message) reply)
+  (finalize-message message)
   (setf (documentation reply 't) nil))
 
 (defun delete-role (role object)

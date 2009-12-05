@@ -40,31 +40,29 @@
 
 ;;; Well, not really. We still need some messages to create objects:
 (defmessage shared-init (object &rest initargs &key)
-  (:documentation "Adds properties to OBJECT and performs general initialization tasks."))
-(defreply shared-init (object &key properties
-                              (documentation nil doxp)
-                              (nickname nil nicknamep))
-  (dolist (property-spec properties)
-    (destructuring-bind (name &optional value &rest keys) (ensure-list property-spec)
-      (apply #'(setf property-value) value object name keys)))
-  (when nicknamep
-    (setf (object-nickname object) nickname))
-  (when doxp
-    (setf (documentation object t) documentation))
-  object)
+  (:documentation "Adds properties to OBJECT and performs general initialization tasks.")
+  (:reply (object &key properties (documentation nil doxp) (nickname nil nicknamep))
+    (dolist (property-spec properties)
+      (destructuring-bind (name &optional value &rest keys) (ensure-list property-spec)
+        (apply #'(setf property-value) value object name keys)))
+    (when nicknamep
+      (setf (object-nickname object) nickname))
+    (when doxp
+      (setf (documentation object t) documentation))
+    object))
 
 (defmessage init-object (object &rest initargs &key)
-  (:documentation "Performs 'once-only' initialization tasks on OBJECT."))
-(defreply init-object (object &rest initargs &key)
-  (apply #'shared-init object initargs))
+  (:documentation "Performs 'once-only' initialization tasks on OBJECT.")
+  (:reply (object &rest initargs &key)
+    (apply #'shared-init object initargs)))
 
 (defmessage reinit-object (object &rest initargs &key)
-  (:documentation "Resets parents and properties without changing OBJECT's identity."))
-(defreply reinit-object (object &rest initargs &key parents)
-  (when (null parents)                  ; Guard against funny business
-    (push =standard-object= parents))
-  (change-mold object (ensure-mold (objectify-list parents)))
-  (apply #'shared-init object initargs))
+  (:documentation "Resets parents and properties without changing OBJECT's identity.")
+  (:reply (object &rest initargs &key parents)
+    (when (null parents)                ; Guard against funny business
+      (push =standard-object= parents))
+    (change-mold object (ensure-mold (objectify-list parents)))
+    (apply #'shared-init object initargs)))
 
 ;;; And, we need to mirror the CL type system:
 (defproto =boxed-object= =t= ())

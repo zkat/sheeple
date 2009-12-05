@@ -60,12 +60,13 @@
 (defun rolep (maybe-role)
   (typep maybe-role 'role))
 
-(defun make-role (reply position)
-  (cons reply position))
-
-(declaim (ftype (function (role) reply) role-reply)
+(declaim (ftype (function (reply fixnum) role) make-role)
+         (ftype (function (role) reply) role-reply)
          (ftype (function (role) fixnum) role-position)
          (inline make-role role-reply role-position))
+
+(defun make-role (reply position)
+  (cons reply position))
 
 (defun role-reply (role)
   (car role))
@@ -94,6 +95,9 @@
 ;;;
 ;;; Reply definition
 ;;;
+
+;;; FIXME: I do lots of runtime computation on probably constant values.
+;;;        Write me a compiler macro!
 (defun ensure-reply (name &key qualifiers lambda-list participants function (documentation ""))
   (let ((message (or (find-message name nil)
                      (warn 'automatic-message-creation :message-name name) ; Returns NIL
@@ -122,7 +126,9 @@
 
 (defun available-replies (object)
   (delete-duplicates
-   (append (%object-roles object) (mapcan 'available-replies (object-parents object)))
+   (append (%object-roles object)
+           (mapcan 'available-replies
+                   (object-parents object)))
    :test 'equal))
 
 (defun add-reader-to-object (reader prop-name object)

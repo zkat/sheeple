@@ -12,6 +12,12 @@
 
 (in-package :sheeple)
 
+(defun kludge-arglist (lambda-list)
+  (when (find '&key lambda-list)
+    (unless (find '&allow-other-keys lambda-list)
+      (setf lambda-list (append lambda-list '(&allow-other-keys)))))
+  lambda-list)
+
 ;;; Break something like a lambda list (but not necessarily actually a
 ;;; lambda list, e.g. the representation of argument types which is
 ;;; used within an FTYPE specification) into its component parts. We

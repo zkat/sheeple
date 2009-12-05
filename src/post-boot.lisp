@@ -12,14 +12,13 @@
 ;;;
 ;;; Object creation protocol
 ;;;
-(defmessage allocate-object (metaobject))
-(defreply allocate-object ((metaobject =standard-metaobject=))
-  (std-allocate-object metaobject))
+(defmessage allocate-object (metaobject)
+  (:reply ((metaobject =standard-metaobject=))
+    (std-allocate-object metaobject)))
 
-(defmessage compute-object-hierarchy-list-using-metaobject (metaobject object))
-(defreply compute-object-hierarchy-list-using-metaobject
-    ((metaobject =standard-metaobject=) object)
-  (std-compute-object-hierarchy-list object))
+(defmessage compute-object-hierarchy-list-using-metaobject (metaobject object)
+  (:reply ((metaobject =standard-metaobject=) object)
+    (std-compute-object-hierarchy-list object)))
 
 ;;;
 ;;; Extensible Object Creation

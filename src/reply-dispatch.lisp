@@ -23,9 +23,10 @@
   (sort (the list reply-list) #'< :key 'score-reply))
 
 (defun apply-message (message args)
-  (let* ((replies (find-applicable-replies message (required-portion message args)))
-         (erfun (compute-erfun message replies)))
-    (funcall erfun args)))
+  (let ((replies (find-applicable-replies message (required-portion message args))))
+    (when (null replies)
+      (error 'no-applicable-replies :message (message-name message) :args args))
+    (funcall (compute-erfun message replies) args)))
 
 (defun primary-reply-p (reply)
   (null (reply-qualifiers reply)))
@@ -73,7 +74,7 @@
   (and (eq message (role-message role))
        (= index (the fixnum (role-position role)))))
 
-(defun find-applicable-replies (message args &optional (errorp t))
+(defun find-applicable-replies (message args)
   "Returns a sorted list of replies on MESSAGE for which appropriate roles
 are present in ARGS. If no such replies are found and ERRORP is true, a
 condition of type `no-applicable-replies' is signaled."
@@ -107,10 +108,8 @@ condition of type `no-applicable-replies' is signaled."
                    for hierarchy-position fixnum from 1
                    do (find-and-rank-roles hierarchy-object hierarchy-position index))
              finally
-               (if applicable-replies
-                   (return (sort-applicable-replies applicable-replies))
-                   (when errorp
-                     (error 'no-applicable-replies :message (message-name message) :args args))))))))
+               (when applicable-replies
+                 (return (sort-applicable-replies applicable-replies))))))))
 
 (defun clear-reply-rank (reply &aux (vector (reply-rank-vector reply)))
   (declare (simple-vector vector))

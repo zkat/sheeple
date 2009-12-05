@@ -1,0 +1,5 @@
+*.lx*fsl
+*.fasl
+*.fas
+*.o
+*~

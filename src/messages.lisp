@@ -158,6 +158,12 @@ Raises an error if no message is found, unless ERRORP is NIL."
             (message-key/rest-p message)      new-key/rest-p)))
   (values))
 
+(defun required-portion (message args)
+  (let ((number-required (message-number-required message)))
+    (error-when (< (length args) number-required)
+                insufficient-message-args :message message)
+    (subseq args 0 number-required)))
+
 ;;;
 ;;; Message definition (finally!)
 ;;;

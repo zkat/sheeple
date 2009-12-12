@@ -100,7 +100,11 @@
 (def-suite user-interface :in reply-definition)
 (in-suite user-interface)
 
-(test defreply)
+(test defreply
+  ;; Test autoboxing
+  (unwind-protect
+       (5am:finishes (defreply test-message ((n 3))))
+    (undefine-message 'test-message)))
 (test %defreply-expander)
 (test make-reply-lambda)
 (test parse-defreply)

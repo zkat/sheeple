@@ -250,7 +250,7 @@
 (defun parse-defreply (whole &aux qualifiers current (body (cddr whole)))
   (loop
      (setf current (car body))
-     (if (atom current) (push (pop body) qualifiers)
+     (if (not (listp current)) (push (pop body) qualifiers)
          (return
            (multiple-value-bind (real-body declarations docstring)
                (parse-body (cdr body) :documentation t :whole whole)

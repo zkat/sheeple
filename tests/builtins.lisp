@@ -62,8 +62,8 @@
   (is (objectp (ensure-boxed-object 'foo)))
   (is (find-boxed-object 'foo)))
 
-(test objectify-list
-  (is (every #'objectp (objectify-list '(1 "foo" 'bar 42)))))
+(test ensure-boxed-objects
+  (is (every #'objectp (ensure-boxed-objects '(1 "foo" 'bar 42)))))
 
 ;; TODO - implement CLOS autoboxing
 ;; (test clos-boxing)

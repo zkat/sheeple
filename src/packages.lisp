@@ -50,5 +50,11 @@
    #:no-primary-reply #:specialized-lambda-list-error #:no-next-reply
    ))
 
+(defpackage #:standard-sheeple
+  (:use :cl))
+(defpackage #:sheeple-metaobject-protocol
+  (:use :cl)
+  (:nicknames :smop :sheeple-mop))
+
 (defpackage #:sheeple-user
   (:use :cl :sheeple))

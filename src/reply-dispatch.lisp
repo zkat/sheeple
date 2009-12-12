@@ -26,7 +26,8 @@
   (lambda (&rest args)
     (let ((replies (find-applicable-replies message (required-portion message args))))
       (when (null replies) (apply 'no-applicable-reply message args))
-      (funcall (compute-erfun message replies) args))))
+      (let ((effective-reply (std-compute-effective-reply message replies)))
+        (apply (std-compute-erfun message effective-reply) args)))))
 
 (defun primary-reply-p (reply)
   (null (reply-qualifiers reply)))

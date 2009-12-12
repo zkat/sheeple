@@ -26,17 +26,15 @@
 
 (defmacro with-dummy-message (message-arglist &body body)
   (let ((message-name (gensym)))
-    `(unwind-protect
-          (macrolet ((define-dummy-reply (qualifiers specializers &body body)
-                       `(defreply ,',message-name ,@qualifiers
-                          ,(mapcar 'list ',message-arglist specializers)
-                          ,@body)))
-            (flet ((call-dummy-message (,@message-arglist)
-                     (funcall (symbol-function ',message-name) ,@message-arglist)))
-             (defmessage ,message-name ,message-arglist)
-              ,@body))
-       (forget-message ',message-name)
-       (fmakunbound ',message-name))))
+    `(with-test-message ,message-name
+       (macrolet ((define-dummy-reply (qualifiers specializers &body body)
+                    `(defreply ,',message-name ,@qualifiers
+                       ,(mapcar 'list ',message-arglist specializers)
+                       ,@body)))
+         (flet ((call-dummy-message (,@message-arglist)
+                  (,message-name ,@message-arglist)))
+           (defmessage ,message-name ,message-arglist)
+           ,@body)))))
 
 (test standard-combination-primary
   (with-object-hierarchy (a (b a))

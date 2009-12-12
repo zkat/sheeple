@@ -75,9 +75,9 @@
   (unwind-protect
        (progn (defmessage foo (bar))
               (defreply foo ((bar =t=)) 1)
-              (is (= 1 (funcall 'foo 'x)))
+              (is (= 1 (funcall (symbol-function 'foo) 'x)))
               (defreply foo ((bar =t=)) 2)
-              (is (= 2 (funcall 'foo 'x))))
+              (is (= 2 (funcall (symbol-function 'foo) 'x))))
     (undefmessage foo)))
 
 (test add-reply-to-message)
@@ -103,7 +103,9 @@
 (test defreply
   ;; Test autoboxing
   (unwind-protect
-       (5am:finishes (defreply test-message ((n 3))))
+       (5am:finishes (handler-bind
+                         ((automatic-message-creation #'muffle-warning))
+                       (defreply test-message ((n 3)))))
     (undefmessage test-message)))
 (test %defreply-expander)
 (test make-reply-lambda)
@@ -121,7 +123,7 @@
            (defreply test-message ((x object)) x))
          (unless warned (fail "Didn't warn for automatic message creation."))
          (is (not (null (undefreply test-message (object)))))
-         (signals no-applicable-reply (funcall 'test-message object))
+         (signals no-applicable-reply (funcall (symbol-function 'test-message) object))
          (is (null (undefreply test-message (object))))
          (is (null (%object-roles object))))
     (undefmessage test-message)))

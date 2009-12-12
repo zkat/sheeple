@@ -62,16 +62,12 @@ property is not set locally, a condition of type `unbound-property' is signaled.
 If the value does not exist in the hierarchy list, a condition of type `unbound-property'
 is signaled."
   (check-type property-name symbol)
-  (acond ((property-position property-name object)
-          (svref (%object-property-values object) it))
-         ((loop for ancestor in (the list (mold-hierarchy (%object-mold object)))
-             for position = (property-position property-name ancestor)
-             when position
-             do (return-from std-sheeple:property-value
-                  (svref (%object-property-values ancestor) position))
-             finally (return nil))
-          nil)
-         (t (error 'unbound-property :object object :property-name property-name))))
+  (aif (property-position property-name object)
+       (svref (%object-property-values object) it)
+       (dolist (ancestor (mold-hierarchy (%object-mold object))
+                (error 'unbound-property :object object :property-name property-name))
+         (awhen (property-position property-name ancestor)
+           (return (svref (%object-property-values ancestor) it))))))
 
 (defun (setf property-value) (new-value object property-name
                               &key (reader nil readerp) (writer nil writerp) accessor)

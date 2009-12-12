@@ -50,10 +50,13 @@
 
 (defun box-object (object)
   "Wraps OBJECT with a object."
-  (restart-case (error-when (objectp object) "~S is already a object." object)
-    (continue () :report (lambda (s) (format s "Box ~S anyways." object)))
-    (return-object () :report (lambda (s) (format s "Do not box ~S." object))
-                   (return-from box-object object)))
+  (when (objectp object)
+    (restart-case (error "~S is already a object." object)
+      (continue ()
+        :report (lambda (s) (format s "Box ~S anyways." object)))
+      (return-object ()
+        :report (lambda (s) (format s "Do not box ~S." object))
+        (return-from box-object object))))
   (setf (gethash object *boxed-object-table*)
         (defobject ((box-type-of object))
             ((wrapped-object object))

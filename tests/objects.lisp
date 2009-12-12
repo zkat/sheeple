@@ -359,8 +359,7 @@
     ;; TODO - check that options work properly
     (undefreply var (test-proto))
     (undefreply something-else (test-proto))
-    (undefine-message 'var)
-    (undefine-message 'something-else)
-    (makunbound '=test-proto=)
-    ))
+    (undefmessage var)
+    (undefmessage something-else)
+    (makunbound '=test-proto=)))
 (test ensure-object)

@@ -66,16 +66,10 @@
   "Kills object dead"
   (remhash object *boxed-object-table*))
 
-(defun find-boxed-object (object &optional (errorp nil))
+(defun find-boxed-object (object)
   "Finds a previously-boxed object in the boxed object table.
-If ERRORP is T, this signals an error if OBJECT is a object, or if OBJECT
-has not already been boxed."
-  (if (objectp object)
-      (when errorp (error "~S seems to already be a object." object))
-      (multiple-value-bind (object hasp)
-          (gethash object *boxed-object-table*)
-        (if hasp object
-            (when errorp (error "~S has not been boxed." object))))))
+Returns the boxed object, or NIL if OBJECT has not been boxed."
+  (values (gethash object *boxed-object-table*)))
 
 (declaim (inline ensure-dispatch-object))
 (defun ensure-dispatch-object (object)

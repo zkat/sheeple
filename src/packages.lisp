@@ -51,7 +51,8 @@
    ))
 
 (defpackage #:standard-sheeple
-  (:use :cl))
+  (:use :cl)
+  (:nicknames :std-sheeple))
 (defpackage #:sheeple-metaobject-protocol
   (:use :cl)
   (:nicknames :smop :sheeple-mop))

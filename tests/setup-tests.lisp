@@ -9,6 +9,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
+;;; This is a bad situation -- the :SHEEPLE package gets cluttered with useless garbage
+;;; after running the tests. Maybe tests should happen in a :SHEEPLE-TESTS package, which
+;;; automatigally imports all symbols in the :SHEEPLE package?
+
 ;;; Setting up the :SHEEPLE package to include :5AM stuff
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (import '(5am:def-suite 5am:run! 5am:is 5am:in-suite 5am:signals 5am:def-fixture

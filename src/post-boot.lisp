@@ -51,3 +51,8 @@
   (:documentation "Called when no reply is applicable for a message invocation.")
   (:reply (message &rest args)
     (error 'no-applicable-reply :message message :args args)))
+
+(defmessage no-next-reply (message reply &rest args)
+  (:documentation "Called by `call-next-reply' when there is no next reply.")
+  (:reply (message reply &rest args)
+    (error 'no-next-reply :message message :reply reply :args args)))

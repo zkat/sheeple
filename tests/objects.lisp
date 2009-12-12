@@ -17,6 +17,17 @@
   (let ((object (allocate-object metaobject)))
     (&body)))
 
+;;; For lack of a better place, here comes the macro extraordinaire!
+(defmacro with-test-message (message-name &body body)
+  "Ensures that the message MESSAGE-NAME will be cleaned up after the BODY runs.
+Also, sets up a local macro of the same name for invoking the message. This sounds
+confusing, but actually enables crystal clear warning-free test code."
+  `(unwind-protect
+        (macrolet ((,message-name (&rest args)
+                     `(funcall (symbol-function ',',message-name) ,@args)))
+          ,@body)
+     (undefmessage ,message-name)))
+
 (def-suite objects :in sheeple)
 ;;;
 ;;; Allocation

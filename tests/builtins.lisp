@@ -49,12 +49,12 @@
   (box-object 'foo)
   (is (find-boxed-object 'foo))
   (is (null (find-boxed-object 'something-else)))
-  (signals error (find-boxed-object 'something-else t)))
+  (is (null (find-boxed-object (object)))))
 
 (test remove-boxed-object
   (box-object 'foo)
   (is (remove-boxed-object 'foo))
-  (is (null (find-boxed-object 'foo nil))))
+  (is (null (find-boxed-object 'foo))))
 
 (test objectify
   (let ((object (object)))

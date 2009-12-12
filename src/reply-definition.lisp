@@ -228,7 +228,7 @@
                        :function ,(make-reply-lambda name lambda-list ignorable body))))))
 
 (defun make-reply-lambda (name lambda-list ignorable body)
-  (with-gensyms (args next-erfun)
+  (with-gensyms (args next-erfun reply-function)
     `(lambda (,args ,next-erfun)
        (declare (ignorable ,next-erfun))
        (flet ((next-reply-p ()
@@ -238,10 +238,12 @@
                     (error "No next reply")
                     (funcall ,next-erfun (or cnr-args ,args)))))
          (declare (ignorable #'next-reply-p #'call-next-reply))
-         (block ,(if (listp name) (cadr name) name)
-           (destructuring-bind ,(kludge-arglist lambda-list) ,args
-             (declare (ignorable ,@ignorable))
-             ,@body))))))
+         (flet ((,reply-function ,(kludge-arglist lambda-list)
+                  ;; C2MOP builds the declarations and block in DEFMETHOD
+                  (declare (ignorable ,@ignorable))
+                  (block ,(if (listp name) (cadr name) name) ,@body)))
+           (declare (inline ,reply-function))
+           (apply #',reply-function ,args))))))
 
 (defun parse-defreply (args)
   (let ((qualifiers nil)

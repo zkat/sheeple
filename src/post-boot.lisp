@@ -31,18 +31,15 @@
 ;;;
 ;;; Printing Objects!
 ;;;
-
 (defmessage print-sheeple-object (object stream)
-  (:documentation "Defines the expression print-object uses."))
-
-(defreply print-sheeple-object (object (stream =stream=))
-  (std-print-sheeple-object object stream))
-
-(defreply print-sheeple-object ((object =boxed-object=) (stream =stream=))
-  (print-unreadable-object (object stream :identity t)
-    (format stream "Boxed-object ~:[[~S]~;~S~]"
-            (direct-property-p object 'nickname)
-            (ignore-errors (object-nickname object)))))
+  (:documentation "Defines the expression print-object uses.")
+  (:reply (object (stream =stream=))
+    (std-print-sheeple-object object stream))
+  (:reply ((object =boxed-object=) (stream =stream=))
+    (print-unreadable-object (object stream :identity t)
+      (format stream "Boxed-object ~:[[~S]~;~S~]"
+              (direct-property-p object 'nickname)
+              (ignore-errors (object-nickname object))))))
 
 ;;;
 ;;; Error Reporting and Recovery

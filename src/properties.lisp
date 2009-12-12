@@ -44,7 +44,7 @@ would yield a value (i.e. not signal an unbound-property condition)."
   (some (rcurry 'direct-property-p property-name)
         (object-hierarchy-list object)))
 
-(defun remove-property (object property-name &optional (errorp t))
+(defun remove-property (object property-name)
   "Removes OBJECT's direct property named PROPERTY-NAME. Signals an error if there is no such
 direct property. Returns OBJECT."
   (if (direct-property-p object property-name)
@@ -53,8 +53,7 @@ direct property. Returns OBJECT."
                      (ensure-mold (object-parents object)
                                   (remove property-name
                                           (mold-properties (%object-mold object))))))
-      (when errorp
-        (error 'unbound-property :object object :property-name property-name))))
+      (error 'unbound-property :object object :property-name property-name)))
 
 (defun remove-all-direct-properties (object)
   "Wipes out all direct properties and their values from OBJECT."

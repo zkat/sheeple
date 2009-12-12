@@ -289,8 +289,8 @@
              (defmessage clone-test (thingy)
                (:reply ((xyzzy obj)) xyzzy))
              (let ((clone3 (clone obj)))
-               (is (eq clone3 (funcall 'clone-test clone3)))
-               (signals no-applicable-reply (funcall 'clone-test clone))))
+               (is (eq clone3 (funcall (symbol-function 'clone-test) clone3)))
+               (signals no-applicable-reply (funcall (symbol-function 'clone-test) clone))))
         (undefmessage clone-test)))))
 
 ;;;
@@ -350,13 +350,13 @@
          (is (eql test-proto (symbol-value '=test-proto=)))
          (is (eql =standard-object= (car (object-parents test-proto))))
          (is (objectp (symbol-value '=test-proto=)))
-         (is (equal "value" (funcall 'var (symbol-value '=test-proto=))))
+         (is (equal "value" (funcall (symbol-function 'var) (symbol-value '=test-proto=))))
          (defproto =test-proto= () ((something-else "another-one")))
          (is (eql test-proto (symbol-value '=test-proto=)))
          (is (eql =standard-object= (car (object-parents test-proto))))
          (signals unbound-property (direct-property-value test-proto 'var))
-         (is (equal "another-one" (funcall 'something-else (symbol-value '=test-proto=))))
-         (is (equal "another-one" (funcall 'something-else test-proto)))
+         (is (equal "another-one" (funcall (symbol-function 'something-else) (symbol-value '=test-proto=))))
+         (is (equal "another-one" (funcall (symbol-function 'something-else) test-proto)))
          ;; TODO - check that options work properly
          (undefreply var (test-proto))
          (undefreply something-else (test-proto)))

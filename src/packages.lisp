@@ -52,10 +52,21 @@
 
 (defpackage #:standard-sheeple
   (:use :cl)
-  (:nicknames :std-sheeple))
+  (:nicknames :std-sheeple)
+  (:export
+
+   ;; properties
+   :direct-property-p :remove-property :remove-all-direct-properties
+   ))
+
 (defpackage #:sheeple-metaobject-protocol
   (:use :cl)
-  (:nicknames :smop :sheeple-mop))
+  (:nicknames :smop :sheeple-mop)
+  (:export
+   
+   ;; properties
+   :direct-property-p :remove-property :remove-all-direct-properties
+   ))
 
 (defpackage #:sheeple-user
   (:use :cl :sheeple))

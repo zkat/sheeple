@@ -38,11 +38,6 @@ NIL otherwise."
   (handler-case (progn (direct-property-value object property-name) t)
     (unbound-property () nil)))
 
-(defun available-property-p (object property-name)
-  "If a property called PROPERTY-NAME is available to OBJECT, the object that 'owns' the property
-is returned. Otherwise, this function returns NIL."
-  (find-if (rcurry 'direct-property-p property-name) (object-hierarchy-list object)))
-
 (defun remove-property (object property-name)
   "Removes OBJECT's direct property named PROPERTY-NAME. Signals an error if there is no such
 direct property. Returns OBJECT."

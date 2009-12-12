@@ -54,7 +54,7 @@ NIL otherwise."
   "Removes OBJECT's direct property named PROPERTY-NAME. Signals an error if there is no such
 direct property. Returns OBJECT."
   (if (std-object-p object)
-      (%std-property-makunbound object property-name)
+      (std-sheeple:property-makunbound object property-name)
       (smop:property-makunbound (object-metaobject object) object property-name)))
 
 (defun remove-property (object property-name)
@@ -63,10 +63,15 @@ direct property. Returns OBJECT."
   (warn 'deprecated-feature :feature #'remove-property :version "3.0.2")
   (property-makunbound object property-name))
 
-(defun remove-all-direct-properties (object)
-  "Wipes out all direct properties and their values from OBJECT."
+(defun std-sheeple:remove-all-direct-properties (object)
   (change-mold object (ensure-mold (object-parents object) #()))
   object)
+(defun remove-all-direct-properties (object)
+  "Wipes out all direct properties and their values from OBJECT."
+  (if (std-object-p object)
+      (std-sheeple:remove-all-direct-properties object)
+      (smop:remove-all-direct-properties (object-metaobject object) object)))
+
 
 ;;;
 ;;; Value

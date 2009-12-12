@@ -137,7 +137,7 @@
   (ensure-reply reader
                 :lambda-list '(object)
                 :participants (list object)
-                :function (eval (make-reply-lambda
+                :function (eval (std-make-reply-lambda
                                  `(lambda (object) (property-value object ',prop-name))))))
 
 (defun add-readers-to-object (readers prop-name object)
@@ -149,7 +149,7 @@
   (ensure-reply writer
                 :lambda-list '(new-value object)
                 :participants (list =t= object)
-                :function (eval (make-reply-lambda
+                :function (eval (std-make-reply-lambda
                                  `(lambda (new-value object)
                                     (setf (property-value object ',prop-name) new-value))))))
 
@@ -226,12 +226,12 @@
                        :lambda-list ',lambda-list
                        :participants (list ,@participants)
                        :documentation ,docstring
-                       :function ,(make-reply-lambda
+                       :function ,(std-make-reply-lambda
                                    `(lambda ,(kludge-arglist lambda-list)
                                       (declare (ignorable ,@ignorable)) ,@declarations
                                       (block ,(if (listp name) (cadr name) name) ,@body))))))))
 
-(defun make-reply-lambda (lambda-expression)
+(defun std-make-reply-lambda (lambda-expression)
   (with-gensyms (args next-erfun reply-function)
     `(lambda (,args ,next-erfun)
        (declare (ignorable ,next-erfun))

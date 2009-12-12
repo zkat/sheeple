@@ -42,9 +42,7 @@ NIL otherwise."
       (%std-direct-property-p object property-name)
       (smop:direct-property-p metaobject object property-name)))
 
-(defun property-makunbound (object property-name)
-  "Removes OBJECT's direct property named PROPERTY-NAME. Signals an error if there is no such
-direct property. Returns OBJECT."
+(defun %std-property-makunbound (object property-name)
   (if (direct-property-p object property-name)
       (prog1 object
         (change-mold object
@@ -52,6 +50,12 @@ direct property. Returns OBJECT."
                                   (remove property-name
                                           (mold-properties (%object-mold object))))))
       (error 'unbound-property :object object :property-name property-name)))
+(defun property-makunbound (object property-name)
+  "Removes OBJECT's direct property named PROPERTY-NAME. Signals an error if there is no such
+direct property. Returns OBJECT."
+  (if (std-object-p object)
+      (%std-property-makunbound object property-name)
+      (smop:property-makunbound (object-metaobject object) object property-name)))
 
 (defun remove-property (object property-name)
   "Removes OBJECT's direct property named PROPERTY-NAME. Signals an error if there is no such

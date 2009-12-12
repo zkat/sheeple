@@ -56,14 +56,6 @@
   "A valid name for an object's property."
   'symbol)
 
-(deftype transition ()
-  "A link to a mold which adds a certain property. Note that transitions
-are never dealt with directly -- instead, when a transition's property name
-matches a desired property during a search of a mold's transition graph,
-the corresponding mold is examined next. Transitions are stored within the
-mold-transitions of a `mold'."
-  '(cons property-name mold))
-
 (defstruct (mold
              (:predicate moldp)
              (:constructor make-mold (lineage properties)))
@@ -71,8 +63,8 @@ mold-transitions of a `mold'."
 Sheeple to use class-based optimizations yet keep its dynamic power."
   (lineage     nil :read-only t :type lineage) ; A common cache of parent stuff
   (properties  nil :read-only t
-               :type (or simple-vector hash-table)) ; Direct properties
-  (transitions nil :type (list-of transition))) ; V8-like links to other molds
+                   :type (or simple-vector hash-table)) ; Direct properties
+  (transitions nil :type list))         ; V8-like links to other molds
 
 (define-print-object ((object mold) :identity nil)
   (format t "on ~A" (mold-lineage object)))
@@ -82,9 +74,9 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
              (:constructor make-lineage
                            (parents &aux (hierarchy (compute-hierarchy parents)))))
   "Information about an object's ancestors and descendants."
-  (members (make-weak-hash-table :weakness :key :test 'eq)) ; The lineage's members
-  (parents   nil :read-only t) ; A set of objects
-  (hierarchy nil)) ; A precedence list of all the lineage's ancestors
+  (members   (make-weak-hash-table :weakness :key :test 'eq)) ; The lineage's members
+  (parents   nil :read-only t)          ; A set of objects
+  (hierarchy nil))  ; A precedence list of all the lineage's ancestors
 
 (define-print-object ((object lineage) :identity nil)
   (format t "from ~{~{~:[[~A]~;~A~]~}~#[~; and ~:;, ~]~}"

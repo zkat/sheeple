@@ -967,7 +967,6 @@ Both of these properties will be delegated, like any regular Sheeple property.
 * direct-properties::
 * available-properties::
 * direct-property-p::
-* available-property-p::
 * object-nickname::
 * with-properties::
 @end menu
@@ -1126,7 +1125,7 @@ which @code{PROPERTY-VALUE} would return a value when called on @var{object}.
 
 @end defun
 
-@node direct-property-p, available-property-p, available-properties, Properties Dictionary
+@node direct-property-p, object-nickname, available-properties, Properties Dictionary
 @unnumberedsubsubsec direct-property-p
 @defun {direct-property-p} object property-name
         => boolean
@@ -1146,27 +1145,7 @@ named @var{property-name}, false otherwise.
 
 @end defun
 
-@node available-property-p, object-nickname, direct-property-p, Properties Dictionary
-@unnumberedsubsubsec available-property-p
-@defun {available-property-p} object property-name
-        => boolean
-
-@strong{Arguments and Values:}
-
-@var{object} --- An object.
-
-@var{property-name} --- A symbol naming a property.
-
-@var{boolean} --- A generalized boolean.
-
-@strong{Description:}
-
-This function evaluates to true if either @var{object} or one of its ancestors
-has a direct property named @var{property-name}. False otherwise.
-
-@end defun
-
-@node object-nickname, with-properties, available-property-p, Properties Dictionary
+@node object-nickname, with-properties, direct-property-p, Properties Dictionary
 @unnumberedsubsubsec object-nickname
 @defun {object-nickname} object
 => nickname

@@ -91,16 +91,6 @@
     (signals unbound-property (property-value a 'something-else))
     (signals unbound-property (property-value c 'test))))
 
-(test property-value-with-hierarchy-list
-  (let* ((a (object))
-         (b (object :parents (list a)))
-         (c (object)))
-    (setf (property-value a 'test) 'value)
-    (is (eq 'value (property-value-with-hierarchy-list a 'test)))
-    (is (eq 'value (property-value-with-hierarchy-list b 'test)))
-    (signals unbound-property (property-value-with-hierarchy-list a 'something-else))
-    (signals unbound-property (property-value-with-hierarchy-list c 'test))))
-
 (test setf-property-value
   ;; (setf property-value) should add the property directly if it does not already exist,
   ;; then it should set the value. It will add the property regardless of whether it already

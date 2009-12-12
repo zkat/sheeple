@@ -143,7 +143,7 @@ returned list are undefined."
                                (car _) (second _)
                                (unless (eq object (third _))
                                  (third _))))
-                  (mapcar (fun (list  _ (property-value object _) (available-property-p object _)))
+                  (mapcar (fun (list  _ (property-value object _) (property-owner object _)))
                           (available-properties object)))))
 
 ;;;

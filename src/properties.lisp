@@ -39,10 +39,9 @@ NIL otherwise."
     (unbound-property () nil)))
 
 (defun available-property-p (object property-name)
-  "Returns T if calling PROPERTY-VALUE on OBJECT using the same property-name
-would yield a value (i.e. not signal an unbound-property condition)."
-  (some (rcurry 'direct-property-p property-name)
-        (object-hierarchy-list object)))
+  "If a property called PROPERTY-NAME is available to OBJECT, the object that 'owns' the property
+is returned. Otherwise, this function returns NIL."
+  (find-if (rcurry 'direct-property-p property-name) (object-hierarchy-list object)))
 
 (defun remove-property (object property-name)
   "Removes OBJECT's direct property named PROPERTY-NAME. Signals an error if there is no such
@@ -121,13 +120,6 @@ PROPERTY-NAME."
 ;;;
 ;;; Reflection API
 ;;;
-(defun property-owner (object property-name &optional errorp)
-  "Returns the object object with a direct-property called PROPERTY-NAME from which OBJECT inherits
-its value. If ERRORP is T, an error is signaled if the property is unbound. Otherwise, NIL is
-returned."
-  (or (find-if (rcurry 'direct-property-p property-name) (object-hierarchy-list object))
-      (when errorp (error 'unbound-property :object object :property-name property-name))))
-
 (defun direct-properties (object)
   "Returns a list of the names of OBJECT's direct properties -- ie, only ones which have been
 set directly in OBJECT using (setf property-value). The consequences of side-effecting this
@@ -152,7 +144,7 @@ returned list are undefined."
                                (car _) (second _)
                                (unless (eq object (third _))
                                  (third _))))
-                  (mapcar (fun (list  _ (property-value object _) (property-owner object _)))
+                  (mapcar (fun (list  _ (property-value object _) (available-property-p object _)))
                           (available-properties object)))))
 
 ;;;

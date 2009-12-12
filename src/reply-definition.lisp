@@ -209,9 +209,10 @@
 ;;;
 
 ;;; Definition
-(defmacro defreply (name &rest defreply-args)
-  (multiple-value-bind (qualifiers reply-ll docstring body)
-      (parse-defreply defreply-args)
+(defmacro defreply (&whole whole name &body defreply-body)
+  (declare (ignore defreply-body))
+  (multiple-value-bind (qualifiers reply-ll declarations docstring body)
+      (parse-defreply whole)
     (multiple-value-bind (parameters lambda-list participants required ignorable)
         (parse-specialized-lambda-list reply-ll)
       (declare (ignore parameters required))
@@ -225,7 +226,8 @@
                        :lambda-list ',lambda-list
                        :participants (list ,@participants)
                        :documentation ,docstring
-                       :function ,(make-reply-lambda name lambda-list ignorable body))))))
+                       :function ,(make-reply-lambda name lambda-list ignorable
+          #|| FIXME: This is such a kludge ||#       (append declarations body)))))))
 
 (defun make-reply-lambda (name lambda-list ignorable body)
   (with-gensyms (args next-erfun reply-function)
@@ -245,26 +247,15 @@
            (declare (inline ,reply-function))
            (apply #',reply-function ,args))))))
 
-(defun parse-defreply (args)
-  (let ((qualifiers nil)
-        (lambda-list nil)
-        (docstring nil)
-        (body nil)
-        (parse-state :qualifiers))
-    (dolist (arg args)
-      (ecase parse-state
-        (:qualifiers
-         (if (and (atom arg) (not (null arg)))
-             (push arg qualifiers)
-             (progn (setf lambda-list arg)
-                    (setf parse-state :docstring))))
-        (:docstring
-         (if (stringp arg)
-             (setf docstring arg)
-             (push arg body))
-         (setf parse-state :body))
-        (:body (push arg body))))
-    (values qualifiers lambda-list docstring (nreverse body))))
+(defun parse-defreply (whole &aux qualifiers current (body (cddr whole)))
+  (loop
+     (setf current (car body))
+     (if (atom current) (push (pop body) qualifiers)
+         (return
+           (multiple-value-bind (real-body declarations docstring)
+               (parse-body (cdr body) :documentation t :whole whole)
+             (values (nreverse qualifiers) current ; current = reply lambda list
+                     declarations docstring real-body))))))
 
 ;;; Undefinition
 (defmacro undefreply (name &rest args)

@@ -964,7 +964,6 @@ Both of these properties will be delegated, like any regular Sheeple property.
 * setf property-value::
 * remove-property::
 * remove-all-direct-properties::
-* property-owner::
 * direct-properties::
 * available-properties::
 * direct-property-p::
@@ -1072,7 +1071,7 @@ error of type @code{UNBOUND-PROPERTY}.
 
 @end defun
 
-@node remove-all-direct-properties, property-owner, remove-property, Properties Dictionary
+@node remove-all-direct-properties, direct-properties, remove-property, Properties Dictionary
 @unnumberedsubsubsec remove-all-direct-properties
 @defun {remove-all-direct-properties} object
        => object
@@ -1087,35 +1086,7 @@ This function will remove any and all direct-properties currently stored in @var
 
 @end defun
 
-@node property-owner, direct-properties, remove-all-direct-properties, Properties Dictionary
-@unnumberedsubsubsec property-owner
-@defun {property-owner} object property-name &optional errorp
-       => owner
-
-@strong{Arguments and Values:}
-
-@var{object} --- An object.
-
-@var{property-name} --- Symbol naming the property of interest.
-
-@var{errorp} --- A generalized boolean.
-
-@var{owner} --- An object.
-
-@strong{Description:}
-
-This function searches @var{object}'s hierarchy-list for the first ancestor that
-has a direct property named @var{property-name}, and returns
-that @var{owner}. The @var{owner} will be @var{object} itself if the property is
-direct.
-
-If @var{errorp} is true (the default), @code{PROPERTY-OWNER} will signal a
-condition of type @code{UNBOUND-PROPERTY} if it fails to find any ancestor with
-a direct property value for @var{property-name}.
-
-@end defun
-
-@node direct-properties, available-properties, property-owner, Properties Dictionary
+@node direct-properties, available-properties, remove-all-direct-properties, Properties Dictionary
 @unnumberedsubsubsec direct-properties
 @defun {direct-properties} object
        => direct-properties

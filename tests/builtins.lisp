@@ -56,10 +56,10 @@
   (is (remove-boxed-object 'foo))
   (is (null (find-boxed-object 'foo))))
 
-(test objectify
+(test ensure-boxed-object
   (let ((object (object)))
-    (is (eql object (objectify object))))
-  (is (objectp (objectify 'foo)))
+    (is (eql object (ensure-boxed-object object))))
+  (is (objectp (ensure-boxed-object 'foo)))
   (is (find-boxed-object 'foo)))
 
 (test objectify-list

@@ -78,7 +78,7 @@ Returns the boxed object, or NIL if OBJECT has not been boxed."
       (or (find-boxed-object object)
           (box-type-of object))))
 
-(defun objectify (object)
+(defun ensure-boxed-object (object)
   "Returns two values: OBJECT or a boxed object representing it, and a boolean
 specifying whether boxing took place."
   (if (objectp object)
@@ -92,4 +92,4 @@ specifying whether boxing took place."
   ;; Worst case scenario -- traverses a long list twice and conses up a complete copy
   ;; of the CDR when only the CAR needed to be boxed.
   ;; We could maybe make it better by sharing structure for an all-object tail. - Adlai
-  (if (every 'objectp list) list (mapcar 'objectify list)))
+  (if (every 'objectp list) list (mapcar 'ensure-boxed-object list)))

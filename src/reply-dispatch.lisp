@@ -106,13 +106,6 @@
                             (,@(cdr (around))
                                (make-reply ,main-erfun)))))))))
 
-(defun compute-primary-erfun (replies)
-  (reduce (lambda (erfun reply)
-            (if (primary-reply-p reply)
-                (fun (funcall (reply-function reply) _ erfun))
-                erfun))
-          replies :initial-value nil))
-
 (declaim (inline relevant-role-p))
 (defun relevant-role-p (role message index)
   (declare (fixnum index))

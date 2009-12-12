@@ -59,7 +59,9 @@ a condition of type UNBOUND-PROPERTY condition is signalled."
        (error 'unbound-property :object object :property-name property-name)))
 
 (defun property-value (object property-name)
-  "Returns a property-value that is not necessarily local to OBJECT."
+  "Returns the property-value for PROPERTY-NAME found first in OBJECT's hierarchy list.
+If the value does not exist in the hierarchy list, a condition of type `unbound-property'
+is signaled."
   (check-type property-name symbol)
   (acond ((property-position property-name object)
           (svref (%object-property-values object) it))

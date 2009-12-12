@@ -50,9 +50,8 @@ direct property. Returns OBJECT."
 
 ;;; Value
 (defun direct-property-value (object property-name)
-  "Returns the property-value set locally in OBJECT for PROPERTY-NAME.
-If the value is non-local (is delegated or does not exist in the hierarchy list),
-a condition of type UNBOUND-PROPERTY condition is signalled."
+  "Returns the property-value set locally in OBJECT for PROPERTY-NAME. If the
+property is not set locally, a condition of type `unbound-property' is signaled."
   (check-type property-name symbol)
   (aif (property-position property-name object)
        (svref (%object-property-values object) it)

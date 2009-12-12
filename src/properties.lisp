@@ -95,8 +95,8 @@ is signaled."
       (std-sheeple:direct-property-value object property-name)
       (smop:property-value (object-metaobject object) object property-name)))
 
-(defun (setf property-value) (new-value object property-name
-                              &key (reader nil readerp) (writer nil writerp) accessor)
+(defun (setf std-sheeple:property-value) (new-value object property-name
+                                          &key (reader nil readerp) (writer nil writerp) accessor)
   "Sets NEW-VALUE as the value of a direct-property belonging to OBJECT, named
 PROPERTY-NAME."
   (check-type property-name symbol)
@@ -119,6 +119,11 @@ PROPERTY-NAME."
         (add-writer-to-object `(setf ,accessor-name) property-name object))))
   ;; Finally, for SETF-compliance, we return the value.
   new-value)
+(defun (setf property-value) (new-value object property-name &rest options)
+  (if (std-object-p object)
+      (apply #'(setf std-sheeple:property-value) new-value object property-name options)
+      (apply #'(setf smop:property-value) new-value
+             (object-metaobject object) object property-name options)))
 
 ;;;
 ;;; Special Properties

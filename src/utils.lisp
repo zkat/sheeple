@@ -17,20 +17,59 @@
   `(or null
        (cons ,type list)))
 
+;;; From Alexandria
+(deftype string-designator ()
+  "A string designator is either a string, a symbol, or a character."
+  `(or symbol string character))
+
 (defmacro fun (&body body)
   "This macro puts the FUN back in FUNCTION."
   `(lambda (&optional _) (declare (ignorable _)) ,@body))
 
-(defmacro with-gensyms (names &body body)
-  `(let ,(mapcar (fun `(,_ (gensym ,(string _)))) names)
-     ,@body))
+;;; Adapted from Alexandria
+(defmacro with-gensyms (names &body forms)
+  "Binds each variable named by a symbol in NAMES to a unique symbol around
+FORMS. Each of NAMES must either be either a symbol, or of the form:
 
-(defmacro once-only ((&rest names) &body body)
-  (let ((gensyms (mapcar (fun (gensym)) names)))
-    `(let (,@(loop for g in gensyms collect `(,g (gensym))))
-       `(let (,,@(loop for g in gensyms for n in names collect ``(,,g ,,n)))
-          ,(let (,@(loop for n in names for g in gensyms collect `(,n ,g)))
-                ,@body)))))
+ (symbol string-designator)
+
+Bare symbols appearing in NAMES are equivalent to:
+
+ (symbol symbol)
+
+The string-designator is used as the argument to GENSYM when constructing the
+unique symbol the named variable will be bound to."
+  `(let ,(mapcar (fun (multiple-value-bind (symbol string)
+                          (etypecase _
+                            (symbol
+                             (values _ (symbol-name _)))
+                            ((cons symbol (cons string-designator null))
+                             (values (car _) (string (cadr _)))))
+                        `(,symbol (gensym ,string))))
+                 names)
+     ,@forms))
+
+;;; Heavily adapted from Alexandria
+(defmacro once-only (specs &body forms)
+  "Each SPEC must be either a NAME, or a (NAME INITFORM), with plain
+NAME using the named variable as initform.
+
+Evaluates FORMS with names rebound to temporary variables, ensuring
+that each is evaluated only once.
+
+Example:
+  (defmacro cons1 (x) (once-only (x) `(cons ,x ,x)))
+  (let ((y 0)) (cons1 (incf y))) => (1 . 1)"
+  (let ((gensyms (mapcar (fun (gensym "ONCE-ONLY")) specs))
+        (real-specs (mapcar (fun (etypecase _
+                                   (list (cons (car _) (cadr _)))
+                                   (symbol (cons _ _))))
+                            specs)))
+    (flet ((mapcar-gars (thunction) (mapcar thunction gensyms real-specs)))
+      `(let ,(mapcar-gars (lambda (g n) `(,g (gensym ,(string (car n))))))
+         `(let (,,@(mapcar-gars (lambda (g n) ``(,,g ,,(cdr n)))))
+            ,(let ,(mapcar-gars (lambda (g n) `(,(car n) ,g)))
+                  ,@forms))))))
 
 (defmacro error-when (condition error-datum &rest error-args)
   "Like `ASSERT', but with fewer bells and whistles."

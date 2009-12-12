@@ -15,9 +15,7 @@
 ;;;
 ;;; Existential
 ;;;
-(defun direct-property-value (object property-name)
-  "Returns the property-value set locally in OBJECT for PROPERTY-NAME. If the
-property is not set locally, a condition of type `unbound-property' is signaled."
+(defun std-sheeple:direct-property-value (object property-name)
   (check-type property-name symbol)
   (aif (property-position property-name object)
        (svref (%object-property-values object) it)
@@ -31,6 +29,12 @@ property is not set locally, a condition of type `unbound-property' is signaled.
                           (format *query-io* "~&Value to use: ")
                           (list (read *query-io*)))
            value))))
+(defun direct-property-value (object property-name)
+  "Returns the property-value set locally in OBJECT for PROPERTY-NAME. If the
+property is not set locally, a condition of type `unbound-property' is signaled."
+  (if (std-object-p object)
+      (std-sheeple:direct-property-value object property-name)
+      (smop:direct-property-value (object-metaobject object) property-name)))
 
 (defun std-sheeple:direct-property-p (object property-name)
   (handler-case (progn (direct-property-value object property-name) t)

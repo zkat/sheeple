@@ -13,10 +13,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(deftype list-of (type)
-  `(or null
-       (cons ,type list)))
-
 ;;; From Alexandria
 (deftype string-designator ()
   "A string designator is either a string, a symbol, or a character."

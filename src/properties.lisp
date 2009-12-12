@@ -35,12 +35,12 @@ property is not set locally, a condition of type `unbound-property' is signaled.
 (defun %std-direct-property-p (object property-name)
   (handler-case (progn (direct-property-value object property-name) t)
     (unbound-property () nil)))
-(defun direct-property-p (object property-name &aux (metaobject (object-metaobject object)))
+(defun direct-property-p (object property-name)
   "Returns T if OBJECT has a property called PROPERTY-NAME as a direct property.
 NIL otherwise."
-  (if (eq =standard-metaobject= metaobject)
+  (if (std-object-p object)
       (%std-direct-property-p object property-name)
-      (smop:direct-property-p metaobject object property-name)))
+      (smop:direct-property-p (object-metaobject object) object property-name)))
 
 (defun %std-property-makunbound (object property-name)
   (if (direct-property-p object property-name)

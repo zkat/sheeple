@@ -72,13 +72,12 @@
 (test ensure-reply)
 
 (test reply-redefinition
-  (unwind-protect
-       (progn (defmessage foo (bar))
-              (defreply foo ((bar =t=)) 1)
-              (is (= 1 (funcall (symbol-function 'foo) 'x)))
-              (defreply foo ((bar =t=)) 2)
-              (is (= 2 (funcall (symbol-function 'foo) 'x))))
-    (undefmessage foo)))
+  (with-test-message foo
+    (defmessage foo (bar)
+      (:reply ((bar =t=)) 1))
+    (is (= 1 (foo 'x)))
+    (defreply foo ((bar =t=)) 2)
+    (is (= 2 (foo 'x)))))
 
 (test add-reply-to-message)
 (test add-reply-to-objects)
@@ -102,29 +101,30 @@
 
 (test defreply
   ;; Test autoboxing
-  (unwind-protect
-       (5am:finishes (handler-bind
-                         ((automatic-message-creation #'muffle-warning))
-                       (defreply test-message ((n 3)))))
-    (undefmessage test-message)))
+  (with-test-message test-message
+    (5am:finishes (handler-bind
+                      ((automatic-message-creation #'muffle-warning))
+                    (defreply test-message ((n 3)))))))
+
 (test %defreply-expander)
 (test make-reply-lambda)
 (test parse-defreply)
 (test extract-var-name)
 (test confirm-var-name)
+
 (test undefreply
-  (unwind-protect
-       (let ((object (object)) warned)
-         (handler-bind
-             ((automatic-message-creation (fun
-                                            (pass "Warned correctly.")
-                                            (setf warned t)
-                                            (muffle-warning _))))
-           (defreply test-message ((x object)) x))
-         (unless warned (fail "Didn't warn for automatic message creation."))
-         (is (not (null (undefreply test-message (object)))))
-         (signals no-applicable-reply (funcall (symbol-function 'test-message) object))
-         (is (null (undefreply test-message (object))))
-         (is (null (%object-roles object))))
-    (undefmessage test-message)))
+  (with-test-message test-message
+    (let ((object (object)) warned)
+      (handler-bind
+          ((automatic-message-creation (fun
+                                         (pass "Warned correctly.")
+                                         (setf warned t)
+                                         (muffle-warning _))))
+        (defreply test-message ((x object)) x))
+      (unless warned (fail "Didn't warn for automatic message creation."))
+      (is (not (null (undefreply test-message (object)))))
+      (signals no-applicable-reply (test-message object))
+      (is (null (undefreply test-message (object))))
+      (is (null (%object-roles object))))))
+
 (test parse-undefreply)

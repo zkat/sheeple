@@ -295,14 +295,12 @@ confusing, but actually enables crystal clear warning-free test code."
         (is (null (direct-property-p clone 'test)))
         (is (not (null (direct-property-p clone2 'test))))
         (is (eq 'test (direct-property-value clone2 'test))))
-      (unwind-protect
-           (progn
-             (defmessage clone-test (thingy)
-               (:reply ((xyzzy obj)) xyzzy))
-             (let ((clone3 (clone obj)))
-               (is (eq clone3 (funcall (symbol-function 'clone-test) clone3)))
-               (signals no-applicable-reply (funcall (symbol-function 'clone-test) clone))))
-        (undefmessage clone-test)))))
+      (with-test-message clone-test
+        (defmessage clone-test (thingy)
+          (:reply ((xyzzy obj)) xyzzy))
+        (let ((clone3 (clone obj)))
+          (is (eq clone3 (clone-test clone3)))
+          (signals no-applicable-reply (clone-test clone)))))))
 
 ;;;
 ;;; DEFOBJECT
@@ -355,23 +353,23 @@ confusing, but actually enables crystal clear warning-free test code."
 (in-suite protos)
 
 (test defproto
-  (unwind-protect
-       (let ((test-proto (defproto =test-proto= () ((var "value")))))
-         (is (objectp test-proto))
-         (is (eql test-proto (symbol-value '=test-proto=)))
-         (is (eql =standard-object= (car (object-parents test-proto))))
-         (is (objectp (symbol-value '=test-proto=)))
-         (is (equal "value" (funcall (symbol-function 'var) (symbol-value '=test-proto=))))
-         (defproto =test-proto= () ((something-else "another-one")))
-         (is (eql test-proto (symbol-value '=test-proto=)))
-         (is (eql =standard-object= (car (object-parents test-proto))))
-         (signals unbound-property (direct-property-value test-proto 'var))
-         (is (equal "another-one" (funcall (symbol-function 'something-else) (symbol-value '=test-proto=))))
-         (is (equal "another-one" (funcall (symbol-function 'something-else) test-proto)))
-         ;; TODO - check that options work properly
-         (undefreply var (test-proto))
-         (undefreply something-else (test-proto)))
-    (undefmessage var)
-    (undefmessage something-else)
-    (makunbound '=test-proto=)))
+  (with-test-message var
+    (with-test-message something-else
+      (unwind-protect
+           (let ((test-proto (defproto =test-proto= () ((var "value")))))
+             (is (objectp test-proto))
+             (is (eql test-proto (symbol-value '=test-proto=)))
+             (is (eql =standard-object= (car (object-parents test-proto))))
+             (is (objectp (symbol-value '=test-proto=)))
+             (is (equal "value" (var (symbol-value '=test-proto=))))
+             (defproto =test-proto= () ((something-else "another-one")))
+             (is (eql test-proto (symbol-value '=test-proto=)))
+             (is (eql =standard-object= (car (object-parents test-proto))))
+             (signals unbound-property (direct-property-value test-proto 'var))
+             (is (equal "another-one" (something-else (symbol-value '=test-proto=))))
+             (is (equal "another-one" (something-else test-proto)))
+             ;; TODO - check that options work properly
+             (undefreply var (test-proto))
+             (undefreply something-else (test-proto)))
+        (makunbound '=test-proto=)))))
 (test ensure-object)

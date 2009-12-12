@@ -29,26 +29,6 @@
     (is (direct-property-p a 'test))
     (is (not (direct-property-p b 'test)))))
 
-(test available-property-p
-  (let* ((a (object))
-         (b (object :parents (list a))))
-    (setf (property-value a 'test) 'value)
-    (is (direct-property-p a 'test))
-    (is (not (direct-property-p a 'something-else)))
-    (is (not (direct-property-p b 'test)))
-    (is (not (direct-property-p b 'something-else)))))
-
-#+nil
-(test add-property
-  (let ((object (object)))
-    (is (eq object (add-property object 'test 'value)))
-    (is (direct-property-p object 'test))
-    (is (eq 'value (direct-property-value object 'test)))
-    (signals error (add-property object "foo" "uh oh"))
-    (is (not (direct-property-p object "foo")))
-    ;; todo - check that the restart works properly.
-    ))
-
 (test remove-property
   (let ((object (object)))
     (signals error (remove-property object 'something))
@@ -131,9 +111,7 @@
     (is (eq parent (property-owner parent 'var)))
     (is (eq parent (property-owner child 'var)))
     (is (eq child (property-owner child 'child-var)))
-    (is (null (property-owner parent 'some-other-property nil)))
-    (is (null (property-owner parent 'some-other-property)))
-    (signals unbound-property (property-owner parent 'some-other-property t))))
+    (is (null (property-owner parent 'some-other-property)))))
 
 (test direct-properties
   (let ((object (defobject () ((var1 'val) (var2 'val) (var3 'val)))))

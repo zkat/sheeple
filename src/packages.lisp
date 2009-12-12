@@ -25,7 +25,7 @@
 
    ;; Property access
    #:property-value #:direct-property-value #:available-properties
-   #:remove-property #:remove-all-direct-properties #:property-owner #:available-property-p
+   #:remove-property #:remove-all-direct-properties #:available-property-p
    #:direct-property-p #:with-properties #:direct-properties
 
    ;; Messages

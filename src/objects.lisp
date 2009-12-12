@@ -58,9 +58,10 @@
 
 (defstruct (mold
              (:predicate moldp)
-             (:constructor make-mold (lineage properties)))
+             (:constructor make-mold (lineage properties &optional back)))
   "Also known as 'backend classes', molds are hidden caches which enable
 Sheeple to use class-based optimizations yet keep its dynamic power."
+  (back        nil :type (or null mold)) ; Back pointer
   (lineage     nil :read-only t :type lineage) ; A common cache of parent stuff
   (properties  nil :read-only t
                    :type (or simple-vector hash-table)) ; Direct properties
@@ -121,7 +122,7 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
 ;;;
 ;;; Molds
 ;;;
-(defvar *molds* (make-hash-table :test 'equal)
+(defvar *molds* (make-weak-hash-table :test 'equal :weakness :value)
   "Maps parent lists to their corresponding molds. This is the global entry
 point to Sheeple's backend class system.")
 
@@ -165,7 +166,7 @@ linking a new one if necessary."
   (check-type property-name property-name)
   (or (find-transition mold property-name)
       (aprog1 (make-mold (mold-lineage mold)
-                         (hv-cons property-name (mold-properties mold)))
+                         (hv-cons property-name (mold-properties mold)) mold)
         (aconsf (mold-transitions mold) property-name (make-weak-pointer it)))))
 
 (defun ensure-mold (parents &optional (properties #()))

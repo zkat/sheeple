@@ -108,9 +108,9 @@
     (aprog1 (make-reply message qualifiers lambda-list function)
       (setf (documentation it 't) documentation) ; same as dox for CLOS methods
       ;; In order to replace existing replies, we must remove them before actually adding them again.
-      (let ((objectified-participants (ensure-boxed-objects participants)))
-        (remove-specific-reply message qualifiers objectified-participants)
-        (add-reply-to-objects it objectified-participants))
+      (let ((boxed-participants (ensure-boxed-objects participants)))
+        (remove-specific-reply message qualifiers boxed-participants)
+        (add-reply-to-objects it boxed-participants))
       (add-reply-to-message it message))))
 
 (defun add-reply-to-message (reply message)

@@ -115,6 +115,10 @@ PROPERTY-NAME."
 ;;;
 ;;; Reflection API
 ;;;
+(defun property-owner (object property-name)
+  "Returns the object, if any, from which OBJECT would fetch the value for PROPERTY-NAME"
+  (find-if (rcurry 'direct-property-p property-name) (object-hierarchy-list object)))
+
 (defun direct-properties (object)
   "Returns a list of the names of OBJECT's direct properties -- ie, only ones which have been
 set directly in OBJECT using (setf property-value). The consequences of side-effecting this

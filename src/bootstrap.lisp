@@ -61,7 +61,7 @@
   (:reply (object &rest initargs &key parents)
     (when (null parents)                ; Guard against funny business
       (push =standard-object= parents))
-    (change-mold object (ensure-mold (objectify-list parents)))
+    (change-mold object (ensure-mold (ensure-boxed-objects parents)))
     (apply #'shared-init object initargs)))
 
 ;;; And, we need to mirror the CL type system:

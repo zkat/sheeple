@@ -61,19 +61,12 @@ a condition of type UNBOUND-PROPERTY condition is signalled."
 (defun property-value (object property-name)
   "Returns a property-value that is not necessarily local to OBJECT."
   (check-type property-name symbol)
-  (property-value-with-hierarchy-list object property-name))
-
-(defun property-value-with-hierarchy-list (object property-name)
-  "Crawls OBJECT's hierarchy list until it finds an object in the hierarchy with PROPERTY-NAME
-as a direct property. When it finds one, it returns the direct-property-value of that property,
-called on that object. If no object is found in the hierarchy-list with a valid direct-property,
-a condition of type UNBOUND-PROPERTY is signaled."
   (acond ((property-position property-name object)
           (svref (%object-property-values object) it))
          ((loop for ancestor in (the list (mold-hierarchy (%object-mold object)))
              for position = (property-position property-name ancestor)
              when position
-             do (return-from property-value-with-hierarchy-list
+             do (return-from std-sheeple:property-value
                   (svref (%object-property-values ancestor) position))
              finally (return nil))
           nil)

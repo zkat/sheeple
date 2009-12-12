@@ -107,11 +107,12 @@ The conflict information was:~%~A"
   ("The lambda list ~S conflicts with that of ~S" lambda-list message))
 
 (define-sheeple-condition no-applicable-reply sheeple-reply-error
-  ("No applicable reply when calling message ~A with args:~%~S" message args))
+  ("~@<There is no applicable reply for the message ~2I~_~S~
+    ~I~_when called with arguments ~2I~_~S.~:>" message args))
 
 (define-sheeple-condition no-next-reply sheeple-reply-error
-  ("There is no next reply for the message ~S~%when called from reply ~S~@
-    with arguments ~S." message reply args))
+  ("~@<There is no next reply for the message ~2I~_~S~I~_when
+       called from reply ~2I~_~S~_with arguments ~2I~_~S.~:>" message reply args))
 
 (define-sheeple-condition no-primary-replies sheeple-reply-error
   ("There are no primary replies for message ~A." message))

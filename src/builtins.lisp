@@ -89,7 +89,5 @@ specifying whether boxing took place."
 
 (defun ensure-boxed-objects (list)
   "Converts OBJ-LIST to a list where each item is either a object or a boxed object."
-  ;; Worst case scenario -- traverses a long list twice and conses up a complete copy
-  ;; of the CDR when only the CAR needed to be boxed.
-  ;; We could maybe make it better by sharing structure for an all-object tail. - Adlai
-  (if (every 'objectp list) list (mapcar 'ensure-boxed-object list)))
+  ;; Maybe we should share structure for an all-object tail?
+  (mapcar 'ensure-boxed-object list))

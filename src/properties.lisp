@@ -92,7 +92,7 @@ direct property. Returns OBJECT."
 If the value does not exist in the hierarchy list, a condition of type `unbound-property'
 is signaled."
   (if (std-object-p object)
-      (std-sheeple:direct-property-value object property-name)
+      (std-sheeple:property-value object property-name)
       (smop:property-value (object-metaobject object) object property-name)))
 
 (defun (setf std-sheeple:property-value) (new-value object property-name

@@ -377,15 +377,15 @@ This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER 
 ;;; Spawning
 ;;;
 (defun object (&rest all-keys
-               &key (parents (list =standard-object=))
-               (metaobject =standard-metaobject=) &allow-other-keys
+               &key parents (metaobject =standard-metaobject=) &allow-other-keys
                &aux (object (maybe-std-allocate-object metaobject))
-                    (parents (or (ensure-list parents) (list =standard-object=))))
-  "Returns a new object with PARENTS as its parents. METAOBJECT is used as the metaobject when
-allocating the new object object. ALL-KEYS is passed on to INIT-OBJECT."
+                    (parents-list (or (ensure-list parents)
+                                      (list =standard-object=))))
+  "Returns a new object delegating to PARENTS, with metaobject METAOBJECT.
+ALL-KEYS is passed on to INIT-OBJECT."
   (declare (dynamic-extent all-keys))
   (handler-case
-      (setf (%object-mold object) (ensure-mold parents))
+      (setf (%object-mold object) (ensure-mold parents-list))
     (topological-sort-conflict (conflict)
       (error 'object-hierarchy-error :object object :conflict conflict)))
   (setf (%object-children object) nil)

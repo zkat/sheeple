@@ -71,6 +71,27 @@ Example:
             ,(let ,(mapcar-gars (lambda (g n) `(,(car n) ,g)))
                   ,@forms))))))
 
+;;; Lightly adapted from Parse-Declarations
+(defun parse-body (body &key documentation whole)
+  "Parses BODY into (values remaining-forms declarations doc-string).
+Documentation strings are recognized only if DOCUMENTATION is true.
+Syntax errors in body are signalled and WHOLE is used in the signal
+arguments when given."
+  (flet ((starts-with (thing list)
+	   (and (consp list) (eq (first list) thing))))
+    (prog (current decls doc)
+     :scan-body
+       (setf current (car body))
+       (cond ((and documentation (stringp current)) (go :scan-string))
+	     ((starts-with 'declare current)
+              (push (pop body) decls)               (go :scan-body))
+	     (t (go :finish)))
+     :scan-string
+       (cond ((null (cdr body))                     (go :finish))
+	     (doc (error "Too many documentation strings in ~S." (or whole body)))
+	     (t (setf doc (pop body))               (go :scan-body)))
+     :finish (return (values body (nreverse decls) doc)))))
+
 (defmacro error-when (condition error-datum &rest error-args)
   "Like `ASSERT', but with fewer bells and whistles."
   `(when ,condition (error ',error-datum ,@error-args)))

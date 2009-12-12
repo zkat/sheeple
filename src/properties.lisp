@@ -147,9 +147,13 @@ PROPERTY-NAME."
 ;;;
 ;;; Reflection API
 ;;;
+(defun std-sheeple:property-owner (object property-name)
+  (find-if (rcurry 'direct-property-p property-name) (object-hierarchy-list object)))
 (defun property-owner (object property-name)
   "Returns the object, if any, from which OBJECT would fetch the value for PROPERTY-NAME"
-  (find-if (rcurry 'direct-property-p property-name) (object-hierarchy-list object)))
+  (if (std-object-p object)
+      (std-sheeple:property-owner object property-name)
+      (smop:property-owner (object-metaobject object) object property-name)))
 
 (defun direct-properties (object)
   "Returns a list of the names of OBJECT's direct properties -- ie, only ones which have been

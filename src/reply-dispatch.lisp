@@ -64,9 +64,10 @@
                      (make-reply (when (cddr form)
                                    (error "Incorrect make-reply form: ~S" form))
                                  (let ((reply-lambda
-                                        (make-reply-lambda
-                                         (message-name message) `(&rest ,args) `(,args)
-                                         `(,(transform-effective-reply (cadr form))))))
+                                        (std-make-reply-lambda
+                                         `(lambda (&rest ,args)
+                                            (declare (ignorable ,args))
+                                            ,(transform-effective-reply (cadr form))))))
                                    (make-reply message () (message-lambda-list message)
                                                (compile nil reply-lambda))))
                      (t (mapcar #'transform-effective-reply form))))))

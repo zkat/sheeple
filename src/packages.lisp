@@ -57,7 +57,7 @@
 
    ;; properties
    :direct-property-p :remove-property :remove-all-direct-properties
-   :direct-property-value :property-value
+   :direct-property-value :property-value :property-owner
    ))
 
 (defpackage #:sheeple-metaobject-protocol
@@ -67,7 +67,7 @@
    
    ;; properties
    :direct-property-p :remove-property :remove-all-direct-properties
-   :direct-property-value :property-value
+   :direct-property-value :property-value :property-owner
    ))
 
 (defpackage #:sheeple-user

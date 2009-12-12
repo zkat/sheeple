@@ -32,7 +32,7 @@
                           ,(mapcar 'list ',message-arglist specializers)
                           ,@body)))
             (flet ((call-dummy-message (,@message-arglist)
-                     (funcall ',message-name ,@message-arglist)))
+                     (funcall (symbol-function ',message-name) ,@message-arglist)))
              (defmessage ,message-name ,message-arglist)
               ,@body))
        (forget-message ',message-name)

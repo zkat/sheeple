@@ -80,16 +80,20 @@ direct property. Returns OBJECT."
 ;;;
 ;;; Value
 ;;;
-(defun property-value (object property-name)
-  "Returns the property-value for PROPERTY-NAME found first in OBJECT's hierarchy list.
-If the value does not exist in the hierarchy list, a condition of type `unbound-property'
-is signaled."
+(defun std-sheeple:property-value (object property-name)
   (check-type property-name symbol)
   (dolist (ancestor (object-hierarchy-list object)
            (error 'unbound-property :object object :property-name property-name))
     (handler-bind ((unbound-property (fun (go :next))))
       (return (direct-property-value ancestor property-name)))
     :next))
+(defun property-value (object property-name)
+  "Returns the property-value for PROPERTY-NAME found first in OBJECT's hierarchy list.
+If the value does not exist in the hierarchy list, a condition of type `unbound-property'
+is signaled."
+  (if (std-object-p object)
+      (std-sheeple:direct-property-value object property-name)
+      (smop:property-value (object-metaobject object) object property-name)))
 
 (defun (setf property-value) (new-value object property-name
                               &key (reader nil readerp) (writer nil writerp) accessor)

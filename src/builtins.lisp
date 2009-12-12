@@ -81,14 +81,11 @@ Returns the boxed object, or NIL if OBJECT has not been boxed."
 (defun objectify (object)
   "Returns two values: OBJECT or a boxed object representing it, and a boolean
 specifying whether boxing took place."
-  ;; I'm not sure that this is the right way to treat T... imo, it should box
-  ;; to =boolean=; =T= isn't a boxed object.   - Adlai
-  (cond ((eq object t)
-         (values =t= nil))
-        ((not (objectp object))
-         (or (find-boxed-object object)
-             (values (box-object object) t)))
-        (t (values object nil))))
+  (if (objectp object)
+      (values object nil)
+      (aif (find-boxed-object object)
+           (values it nil)
+           (values (box-object object) t))))
 
 (defun objectify-list (list)
   "Converts OBJ-LIST to a list where each item is either a object or a boxed object."

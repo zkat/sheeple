@@ -87,7 +87,7 @@ specifying whether boxing took place."
            (values it nil)
            (values (box-object object) t))))
 
-(defun objectify-list (list)
+(defun ensure-boxed-objects (list)
   "Converts OBJ-LIST to a list where each item is either a object or a boxed object."
   ;; Worst case scenario -- traverses a long list twice and conses up a complete copy
   ;; of the CDR when only the CAR needed to be boxed.

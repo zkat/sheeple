@@ -104,7 +104,7 @@
   ;; Test autoboxing
   (unwind-protect
        (5am:finishes (defreply test-message ((n 3))))
-    (undefine-message 'test-message)))
+    (undefmessage test-message)))
 (test %defreply-expander)
 (test make-reply-lambda)
 (test parse-defreply)
@@ -124,5 +124,5 @@
          (signals no-applicable-reply (funcall 'test-message object))
          (is (null (undefreply test-message (object))))
          (is (null (%object-roles object))))
-    (undefine-message 'test-message)))
+    (undefmessage test-message)))
 (test parse-undefreply)

@@ -142,7 +142,8 @@ point to Sheeple's backend class system.")
 If no such mold exists, returns NIL."
   (check-type mold mold)
   (check-type property-name property-name)
-  (cdr (assoc property-name (mold-transitions mold) :test 'eq)))
+  (awhen (cdr (assoc property-name (mold-transitions mold) :test 'eq))
+    (weak-pointer-value it)))
 
 ;;;
 ;;; Mold API -- Retrieval and Automatic Creation of Molds
@@ -163,9 +164,9 @@ linking a new one if necessary."
   (check-type mold mold)
   (check-type property-name property-name)
   (or (find-transition mold property-name)
-      (aconsf (mold-transitions mold) property-name
-              (make-mold (mold-lineage mold)
-                         (hv-cons property-name (mold-properties mold))))))
+      (aprog1 (make-mold (mold-lineage mold)
+                         (hv-cons property-name (mold-properties mold)))
+        (aconsf (mold-transitions mold) property-name (make-weak-pointer it)))))
 
 (defun ensure-mold (parents &optional (properties #()))
   "Returns the mold with properties PROPERTIES of the mold for PARENTS,

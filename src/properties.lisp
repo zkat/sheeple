@@ -32,17 +32,17 @@ property is not set locally, a condition of type `unbound-property' is signaled.
                           (list (read *query-io*)))
            value))))
 
-(defun %std-direct-property-p (object property-name)
+(defun std-sheeple:direct-property-p (object property-name)
   (handler-case (progn (direct-property-value object property-name) t)
     (unbound-property () nil)))
 (defun direct-property-p (object property-name)
   "Returns T if OBJECT has a property called PROPERTY-NAME as a direct property.
 NIL otherwise."
   (if (std-object-p object)
-      (%std-direct-property-p object property-name)
+      (std-sheeple:direct-property-p object property-name)
       (smop:direct-property-p (object-metaobject object) object property-name)))
 
-(defun %std-property-makunbound (object property-name)
+(defun std-sheeple:property-makunbound (object property-name)
   (if (direct-property-p object property-name)
       (prog1 object
         (change-mold object

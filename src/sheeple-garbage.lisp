@@ -85,12 +85,12 @@
   #+corman (ccl:weak-pointer-obj weak-pointer)
   #+lispworks (svref (weak-pointer-pointer weak-pointer) 0))
 
+(declaim (inline maybe-make-weak-pointer maybe-weak-pointer-value))
+
 (defun maybe-make-weak-pointer (x)
   (when x (make-weak-pointer x)))
 (defun maybe-weak-pointer-value (x)
   (when x (weak-pointer-value x)))
-
-(declaim (inline maybe-make-weak-pointer maybe-weak-pointer-value))
 
 ;;;; Weak Hash-tables
 

@@ -94,10 +94,11 @@ arguments when given."
 
 (defmacro check-list-type (list typespec &optional (string nil string-supplied-p))
   "Calls CHECK-TYPE with each element of LIST, with TYPESPEC and STRING."
-  (let ((var (gensym)))
-    `(dolist (,var ,list)
-       ;; Evaluates STRING multiple times, due to lazyness and spec ambiguity. - Adlai
-       (check-type ,var ,typespec ,@(when string-supplied-p `(,string))))))
+  (with-gensyms (var)
+    (symbol-macrolet
+        ((check `(dolist (,var ,list) (check-type ,var ,typespec ,string))))
+      (if (not string-supplied-p) check
+          (once-only (string) check)))))
 
 (defun ensure-list (x)
   "X if X is a list, otherwise (list X)."

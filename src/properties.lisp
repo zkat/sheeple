@@ -64,14 +64,14 @@ is signaled."
     :next))
 
 (defun (setf property-value) (new-value object property-name &rest options)
+  "Sets NEW-VALUE as the value of a direct-property belonging to OBJECT, named
+PROPERTY-NAME."
   (if (std-object-p object)
       (apply #'(setf std-sheeple:property-value) new-value object property-name options)
       (apply #'(setf smop:property-value) new-value
              (object-metaobject object) object property-name options)))
 (defun (setf std-sheeple:property-value) (new-value object property-name
                                           &key (reader nil readerp) (writer nil writerp) accessor)
-  "Sets NEW-VALUE as the value of a direct-property belonging to OBJECT, named
-PROPERTY-NAME."
   (check-type property-name symbol)
   ;; (SETF PROPERTY-VALUE) is split into two parts.
   ;; The first actually adds a property-value directly on the object:

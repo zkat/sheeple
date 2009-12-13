@@ -12,6 +12,10 @@
 (defun property-position (property-name object)
   (position property-name (mold-properties (%object-mold object))))
 
+(defun find-propd (object property-name)
+  ;; todo
+  )
+
 ;;;
 ;;; Property Metaobjects
 ;;;
@@ -28,13 +32,11 @@
 (defun direct-property-value (object property-name)
   "Returns the property-value set locally in OBJECT for PROPERTY-NAME. If the
 property is not set locally, a condition of type `unbound-property' is signaled."
-  (if (std-object-p object)
-      (std-sheeple:direct-property-value object property-name)
-      (smop:direct-property-value (object-metaobject object) property-name)))
-(defun std-sheeple:direct-property-value (object property-name)
   (check-type property-name symbol)
-  (aif (property-position property-name object)
-       (svref (%object-property-values object) it)
+  (aif (find-propd object property-name)
+       (if (std-object-p object)
+           (std-sheeple:direct-property-value object property-name)
+           (smop:direct-property-value (object-metaobject object) property-name))
        (restart-case (error 'unbound-property :object object :property-name property-name)
          (continue ()
            :report "Try accessing the property again."
@@ -45,6 +47,8 @@ property is not set locally, a condition of type `unbound-property' is signaled.
                           (format *query-io* "~&Value to use: ")
                           (list (read *query-io*)))
            value))))
+(defun std-sheeple:direct-property-value (object propd)
+  (svref (%object-property-values object) (property-position propd object)))
 
 ;;;
 ;;; Value

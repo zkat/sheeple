@@ -424,13 +424,13 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
               "a supported option to DEFPROTO/DEFCLASS")
   `(,(car option) ,(cadr option)))
 
-(defmacro defobject (objects properties &rest options)
+(defmacro defobject (objects &optional ((&rest properties)) &rest options)
   "Standard object-generation macro."
   `(object :parents ,(canonize-parents objects)
            :properties ,(canonize-properties properties)
            ,.(canonize-options options)))
 
-(defmacro defproto (name objects properties &rest options)
+(defmacro defproto (name objects &optional ((&rest properties)) &rest options)
   "Words cannot express how useful this is."
   (let ((canonized-properties (canonize-properties properties t)))
    `(progn

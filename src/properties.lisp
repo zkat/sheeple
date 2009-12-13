@@ -168,6 +168,10 @@ PROPERTY-NAME."
   "Returns a list of the names of OBJECT's direct properties -- ie, only ones which have been
 set directly in OBJECT using (setf property-value). The consequences of side-effecting this
 returned list are undefined."
+  (if (std-object-p object)
+      (std-sheeple:direct-properties object)
+      (smop:direct-properties object)))
+(defun std-sheeple:direct-properties (object)
   (coerce (mold-properties (%object-mold object)) 'list))
 
 (defun available-properties (object)

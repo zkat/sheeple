@@ -430,33 +430,34 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
 
 (defmacro defproto (name objects properties &rest options)
   "Words cannot express how useful this is."
-  (let (messages)
-    (dolist (property-spec (mapcar 'cdr (cdr (canonize-properties properties t))))
-      (loop with type and name do
-           (setf (values type name property-spec)
-                 (get-properties property-spec '(:accessor :reader :writer)))
-           (setf property-spec (cddr property-spec))
+  `(progn
+     (declaim (special ,name))
+     (eval-when (:compile-toplevel)
+       ,.(generate-defproto-messages properties))
+     (setf (symbol-value ',name)
+           (ensure-object (when (boundp ',name)
+                            (symbol-value ',name))
+                          ,(canonize-parents objects)
+                          :properties ,(canonize-properties properties t)
+                          ,@(canonize-options options)
+                          :nickname ',name))))
+
+(defun generate-defproto-messages (property-specs &aux messages)
+  (dolist (property-spec (mapcar 'cdr (cdr (canonize-properties property-specs t))) messages)
+    (loop with type and name do
+         (setf (values type name property-spec)
+               (get-properties property-spec '(:accessor :reader :writer)))
+         (setf property-spec (cddr property-spec))
          while type when name do
-           (flet ((add-reader (name)
-                    (push `(ensure-message ,name :lambda-list '(object)) messages))
-                  (add-writer (name)
-                    (push `(ensure-message ,name :lambda-list '(new-value object)) messages)))
-             (case type
-               (:accessor (add-reader name)
-                          (add-writer ``(setf ,,name)))
-               (:reader (add-reader name))
-               (:writer (add-writer name))))))
-    `(progn
-       (declaim (special ,name))
-       ,@(when messages
-           `((eval-when (:compile-toplevel) ,@messages)))
-       (setf (symbol-value ',name)
-             (ensure-object (when (boundp ',name)
-                              (symbol-value ',name))
-                            ,(canonize-parents objects)
-                            :properties ,(canonize-properties properties t)
-                            ,@(canonize-options options)
-                            :nickname ',name)))))
+         (flet ((add-reader (name)
+                  (push `(ensure-message ,name :lambda-list '(object)) messages))
+                (add-writer (name)
+                  (push `(ensure-message ,name :lambda-list '(new-value object)) messages)))
+           (case type
+             (:accessor (add-reader name)
+                        (add-writer ``(setf ,,name)))
+             (:reader (add-reader name))
+             (:writer (add-writer name)))))))
 
 (defun ensure-object (maybe-object parents &rest options)
   (if maybe-object

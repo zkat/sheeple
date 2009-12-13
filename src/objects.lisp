@@ -420,13 +420,15 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
   (mapcan 'canonize-option options))
 
 (defun canonize-option (option)
-  (list (car option) (cadr option)))
+  (check-type (car option) (member :nickname :documentation :metaobject)
+              "a supported option to DEFPROTO/DEFCLASS")
+  `(,(car option) ,(cadr option)))
 
 (defmacro defobject (objects properties &rest options)
   "Standard object-generation macro."
   `(object :parents ,(canonize-parents objects)
            :properties ,(canonize-properties properties)
-           ,@(canonize-options options)))
+           ,.(canonize-options options)))
 
 (defmacro defproto (name objects properties &rest options)
   "Words cannot express how useful this is."
@@ -440,7 +442,7 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
                              (symbol-value ',name))
                            ,(canonize-parents objects)
                            :properties ,canonized-properties
-                           ,@(canonize-options options)
+                           ,.(canonize-options options)
                            :nickname ',name)))))
 
 (defun generate-defproto-accessors (canonized-properties &aux messages)

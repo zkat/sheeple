@@ -35,8 +35,7 @@
 ;;; Misc
 
 (define-sheeple-condition deprecated-feature sheeple-style-warning
-  ("The following feature is deprecated: ~A~%This feature was deprecated ~
-    in Sheeple version ~A. Please update your code." feature version))
+  ("This feature has been deprecated since version ~A:~%  ~A" version feature))
 
 (define-sheeple-condition topological-sort-conflict sheeple-error
   ("A conflict arose during a topological sort. There's probably also a bug in

@@ -370,16 +370,17 @@ This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER 
 ;;;
 ;;; Spawning
 ;;;
-(defun object (&rest all-keys
-               &key parents (metaobject =standard-metaobject=) &allow-other-keys
-               &aux (object (maybe-std-allocate-object metaobject))
-                    (parents-list (or (ensure-list parents)
-                                      (list =standard-object=))))
+(defun object (&rest all-keys &key parents (metaobject =standard-metaobject=)
+               &allow-other-keys &aux (object (maybe-std-allocate-object metaobject)))
   "Returns a new object delegating to PARENTS, with metaobject METAOBJECT.
 ALL-KEYS is passed on to INIT-OBJECT."
   (declare (dynamic-extent all-keys))
+  (unless (listp parents)
+    (warn 'deprecated-feature :version "3.0.2"
+          :feature "Passing a non-list :parents option to #'OBJECT")
+    (setf parents (list parents)))
   (handler-case
-      (setf (%object-mold object) (ensure-mold parents-list))
+      (setf (%object-mold object) (ensure-mold (or parents (list =standard-object=))))
     (topological-sort-conflict (conflict)
       (error 'object-hierarchy-error :object object :conflict conflict)))
   (setf (%object-children object) nil)

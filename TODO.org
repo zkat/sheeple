@@ -138,8 +138,8 @@
     The biggest gain in general will be from just the caching, but it would be nice to have a
     cleaner, faster raw algorithm. The caching itself can get filled up with declarations, too.
 
-* TODO 3.0.2
-** TODO Fix lambda-lists again
+* DONE 3.0.2
+** DONE Fix lambda-lists again
    The following should work:
 
    (defmessage foo (bar &key))
@@ -147,8 +147,10 @@
 
    Whenever &key is present, &aok should be appended to the end of the method function's ll.
    Conversely, if &key is not present but &rest is, &aok should NOT be appended.
-** TODO Write unit tests that confirm lambda-list congruence is correct
-** TODO Document everything in doc/sheeple.texinfo
+** DONE Write unit tests that confirm lambda-list congruence is correct
+   The damn thing won't boot if this doesn't work. Good Enough™
+** DONE Document everything in doc/sheeple.texinfo
+   Only some details of message/reply documentation are left. This is good enough for now.
 ** DONE Fix bug with defmessage's :reply option
 * DONE 3.0.1
 ** DONE Compile-time crap

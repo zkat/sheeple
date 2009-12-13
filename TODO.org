@@ -107,6 +107,9 @@
 *** TODO Begin work on message/reply MOP (maybe)
 * TODO 3.0.3
   Testing time!
+** TODO Condition format strings should use pprint directives
+   See, for example, the format strings of no-next-reply and
+   no-applicable-replies, taken from SBCL.
 ** TODO "Test all the fucking time."
    This is very important. Watch the entire thing, twice.
    http://rubyhoedown2008.confreaks.com/05-bryan-liles-lightning-talk-tatft-test-all-the-f-in-time.html

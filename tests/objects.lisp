@@ -334,8 +334,9 @@ confusing, but actually enables crystal clear warning-free test code."
              (canonize-properties '((var "value") (another "another-val")) t))))
 
 (test canonize-options
-  (is (equal '(:metaobject foo :other-option 'bar)
-             (canonize-options '((:metaobject foo) (:other-option 'bar))))))
+  (is (equal '(:metaobject foo :nickname 'bar)
+             (canonize-options '((:metaobject foo) (:nickname 'bar)))))
+  (signals error (canonize-options '((|omg undefined behavior|)))))
 
 (test defobject
   (let* ((parent (object))

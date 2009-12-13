@@ -106,7 +106,6 @@
 *** TODO Object-creation MOP
 *** TODO Begin work on message/reply MOP (maybe)
 * TODO 3.0.3
-  Testing time!
 ** TODO Condition format strings should use pprint directives
    See, for example, the format strings of no-next-reply and
    no-applicable-replies, taken from SBCL.
@@ -141,7 +140,18 @@
     The biggest gain in general will be from just the caching, but it would be nice to have a
     cleaner, faster raw algorithm. The caching itself can get filled up with declarations, too.
 
-* DONE 3.0.2
+* TODO 3.0.2
+** TODO Figure out exactly how DEFPROTO options are canonized
+   Ideally this should be user-extensible or something.
+   Also, if we don't have any options that accept multiple arguments
+   (like CLOS's default-initargs) then we should consider making
+   options be a plist rather than a list of lists; ie:
+
+     (defproto foo (bar)
+         (a b c)
+       :nickname foo-object
+       :metaobject my-metaobject)
+
 ** DONE Fix lambda-lists again
    The following should work:
 

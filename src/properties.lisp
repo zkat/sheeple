@@ -24,6 +24,12 @@
 ;;;
 ;;; Existential
 ;;;
+(defun direct-property-value (object property-name)
+  "Returns the property-value set locally in OBJECT for PROPERTY-NAME. If the
+property is not set locally, a condition of type `unbound-property' is signaled."
+  (if (std-object-p object)
+      (std-sheeple:direct-property-value object property-name)
+      (smop:direct-property-value (object-metaobject object) property-name)))
 (defun std-sheeple:direct-property-value (object property-name)
   (check-type property-name symbol)
   (aif (property-position property-name object)
@@ -38,23 +44,23 @@
                           (format *query-io* "~&Value to use: ")
                           (list (read *query-io*)))
            value))))
-(defun direct-property-value (object property-name)
-  "Returns the property-value set locally in OBJECT for PROPERTY-NAME. If the
-property is not set locally, a condition of type `unbound-property' is signaled."
-  (if (std-object-p object)
-      (std-sheeple:direct-property-value object property-name)
-      (smop:direct-property-value (object-metaobject object) property-name)))
 
-(defun std-sheeple:direct-property-p (object property-name)
-  (handler-case (progn (direct-property-value object property-name) t)
-    (unbound-property () nil)))
 (defun direct-property-p (object property-name)
   "Returns T if OBJECT has a property called PROPERTY-NAME as a direct property.
 NIL otherwise."
   (if (std-object-p object)
       (std-sheeple:direct-property-p object property-name)
       (smop:direct-property-p (object-metaobject object) object property-name)))
+(defun std-sheeple:direct-property-p (object property-name)
+  (handler-case (progn (direct-property-value object property-name) t)
+    (unbound-property () nil)))
 
+(defun property-makunbound (object property-name)
+  "Removes OBJECT's direct property named PROPERTY-NAME. Signals an error if there is no such
+direct property. Returns OBJECT."
+  (if (std-object-p object)
+      (std-sheeple:property-makunbound object property-name)
+      (smop:property-makunbound (object-metaobject object) object property-name)))
 (defun std-sheeple:property-makunbound (object property-name)
   (if (direct-property-p object property-name)
       (prog1 object
@@ -63,12 +69,6 @@ NIL otherwise."
                                   (remove property-name
                                           (mold-properties (%object-mold object))))))
       (error 'unbound-property :object object :property-name property-name)))
-(defun property-makunbound (object property-name)
-  "Removes OBJECT's direct property named PROPERTY-NAME. Signals an error if there is no such
-direct property. Returns OBJECT."
-  (if (std-object-p object)
-      (std-sheeple:property-makunbound object property-name)
-      (smop:property-makunbound (object-metaobject object) object property-name)))
 
 (defun remove-property (object property-name)
   "Removes OBJECT's direct property named PROPERTY-NAME. Signals an error if there is no such
@@ -76,26 +76,19 @@ direct property. Returns OBJECT."
   (warn 'deprecated-feature :feature #'remove-property :version "3.0.2")
   (property-makunbound object property-name))
 
-(defun std-sheeple:remove-all-direct-properties (object)
-  (change-mold object (ensure-mold (object-parents object) #()))
-  object)
 (defun remove-all-direct-properties (object)
   "Wipes out all direct properties and their values from OBJECT."
   (if (std-object-p object)
       (std-sheeple:remove-all-direct-properties object)
       (smop:remove-all-direct-properties (object-metaobject object) object)))
+(defun std-sheeple:remove-all-direct-properties (object)
+  (change-mold object (ensure-mold (object-parents object) #()))
+  object)
 
 
 ;;;
 ;;; Value
 ;;;
-(defun std-sheeple:property-value (object property-name)
-  (check-type property-name symbol)
-  (dolist (ancestor (object-hierarchy-list object)
-           (error 'unbound-property :object object :property-name property-name))
-    (handler-bind ((unbound-property (fun (go :next))))
-      (return (direct-property-value ancestor property-name)))
-    :next))
 (defun property-value (object property-name)
   "Returns the property-value for PROPERTY-NAME found first in OBJECT's hierarchy list.
 If the value does not exist in the hierarchy list, a condition of type `unbound-property'
@@ -103,7 +96,19 @@ is signaled."
   (if (std-object-p object)
       (std-sheeple:property-value object property-name)
       (smop:property-value (object-metaobject object) object property-name)))
+(defun std-sheeple:property-value (object property-name)
+  (check-type property-name symbol)
+  (dolist (ancestor (object-hierarchy-list object)
+           (error 'unbound-property :object object :property-name property-name))
+    (handler-bind ((unbound-property (fun (go :next))))
+      (return (direct-property-value ancestor property-name)))
+    :next))
 
+(defun (setf property-value) (new-value object property-name &rest options)
+  (if (std-object-p object)
+      (apply #'(setf std-sheeple:property-value) new-value object property-name options)
+      (apply #'(setf smop:property-value) new-value
+             (object-metaobject object) object property-name options)))
 (defun (setf std-sheeple:property-value) (new-value object property-name
                                           &key (reader nil readerp) (writer nil writerp) accessor)
   "Sets NEW-VALUE as the value of a direct-property belonging to OBJECT, named
@@ -128,11 +133,6 @@ PROPERTY-NAME."
         (add-writer-to-object `(setf ,accessor-name) property-name object))))
   ;; Finally, for SETF-compliance, we return the value.
   new-value)
-(defun (setf property-value) (new-value object property-name &rest options)
-  (if (std-object-p object)
-      (apply #'(setf std-sheeple:property-value) new-value object property-name options)
-      (apply #'(setf smop:property-value) new-value
-             (object-metaobject object) object property-name options)))
 
 ;;;
 ;;; Special Properties
@@ -156,13 +156,13 @@ PROPERTY-NAME."
 ;;;
 ;;; Reflection API
 ;;;
-(defun std-sheeple:property-owner (object property-name)
-  (find-if (rcurry 'direct-property-p property-name) (object-hierarchy-list object)))
 (defun property-owner (object property-name)
   "Returns the object, if any, from which OBJECT would fetch the value for PROPERTY-NAME"
   (if (std-object-p object)
       (std-sheeple:property-owner object property-name)
       (smop:property-owner (object-metaobject object) object property-name)))
+(defun std-sheeple:property-owner (object property-name)
+  (find-if (rcurry 'direct-property-p property-name) (object-hierarchy-list object)))
 
 (defun direct-properties (object)
   "Returns a list of the names of OBJECT's direct properties -- ie, only ones which have been

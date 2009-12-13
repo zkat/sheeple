@@ -35,7 +35,8 @@ property is not set locally, a condition of type `unbound-property' is signaled.
 (defun direct-property-p (object property-name)
   "Returns T if OBJECT has a property called PROPERTY-NAME as a direct property.
 NIL otherwise."
-  (when (property-position property-name object) t))
+  (handler-case (progn (direct-property-value object property-name) t)
+    (unbound-property () nil)))
 
 (defun available-property-p (object property-name)
   "Returns T if calling PROPERTY-VALUE on OBJECT using the same property-name

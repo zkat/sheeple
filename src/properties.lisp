@@ -15,6 +15,7 @@
 ;;;
 ;;; Property Metaobjects
 ;;;
+(define-bound-variable =property=)
 (defparameter *the-property-definition-form*
   '(defproto =property= ()
     ((name nil)

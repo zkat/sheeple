@@ -176,6 +176,10 @@ returned list are undefined."
 
 (defun available-properties (object)
   "Returns a list of the names of all properties available to OBJECT, including inherited ones."
+  (if (std-object-p object)
+      (std-sheeple:available-properties object)
+      (smop:available-properties object)))
+(defun std-sheeple:available-properties (object)
   (delete-duplicates (nconc (copy-list (direct-properties object))
                             (mapcan 'available-properties (object-parents object)))))
 

@@ -430,20 +430,21 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
 
 (defmacro defproto (name objects properties &rest options)
   "Words cannot express how useful this is."
-  `(progn
-     (declaim (special ,name))
-     (eval-when (:compile-toplevel)
-       ,.(generate-defproto-messages properties))
-     (setf (symbol-value ',name)
-           (ensure-object (when (boundp ',name)
-                            (symbol-value ',name))
-                          ,(canonize-parents objects)
-                          :properties ,(canonize-properties properties t)
-                          ,@(canonize-options options)
-                          :nickname ',name))))
+  (let ((canonized-properties (canonize-properties properties t)))
+   `(progn
+      (declaim (special ,name))
+      (eval-when (:compile-toplevel)
+        ,.(generate-defproto-accessors canonized-properties))
+      (setf (symbol-value ',name)
+            (ensure-object (when (boundp ',name)
+                             (symbol-value ',name))
+                           ,(canonize-parents objects)
+                           :properties ,canonized-properties
+                           ,@(canonize-options options)
+                           :nickname ',name)))))
 
-(defun generate-defproto-messages (property-specs &aux messages)
-  (dolist (property-spec (mapcar 'cdr (cdr (canonize-properties property-specs t))) messages)
+(defun generate-defproto-accessors (canonized-properties &aux messages)
+  (dolist (property-spec (mapcar 'cdr (cdr canonized-properties)) messages)
     (loop with type and name do
          (setf (values type name property-spec)
                (get-properties property-spec '(:accessor :reader :writer)))

@@ -13,6 +13,15 @@
   (position property-name (mold-properties (%object-mold object))))
 
 ;;;
+;;; Property Metaobjects
+;;;
+(defparameter *the-property-definition-form*
+  '(defproto =property= ()
+    ((name nil)
+     (readers nil)
+     (writers nil))))
+
+;;;
 ;;; Existential
 ;;;
 (defun std-sheeple:direct-property-value (object property-name)

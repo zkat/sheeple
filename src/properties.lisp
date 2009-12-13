@@ -22,7 +22,7 @@
      (writers nil))))
 
 ;;;
-;;; Existential
+;;; Base Property API
 ;;;
 (defun direct-property-value (object property-name)
   "Returns the property-value set locally in OBJECT for PROPERTY-NAME. If the
@@ -44,47 +44,6 @@ property is not set locally, a condition of type `unbound-property' is signaled.
                           (format *query-io* "~&Value to use: ")
                           (list (read *query-io*)))
            value))))
-
-(defun direct-property-p (object property-name)
-  "Returns T if OBJECT has a property called PROPERTY-NAME as a direct property.
-NIL otherwise."
-  (if (std-object-p object)
-      (std-sheeple:direct-property-p object property-name)
-      (smop:direct-property-p (object-metaobject object) object property-name)))
-(defun std-sheeple:direct-property-p (object property-name)
-  (handler-case (progn (direct-property-value object property-name) t)
-    (unbound-property () nil)))
-
-(defun property-makunbound (object property-name)
-  "Removes OBJECT's direct property named PROPERTY-NAME. Signals an error if there is no such
-direct property. Returns OBJECT."
-  (if (std-object-p object)
-      (std-sheeple:property-makunbound object property-name)
-      (smop:property-makunbound (object-metaobject object) object property-name)))
-(defun std-sheeple:property-makunbound (object property-name)
-  (if (direct-property-p object property-name)
-      (prog1 object
-        (change-mold object
-                     (ensure-mold (object-parents object)
-                                  (remove property-name
-                                          (mold-properties (%object-mold object))))))
-      (error 'unbound-property :object object :property-name property-name)))
-
-(defun remove-property (object property-name)
-  "Removes OBJECT's direct property named PROPERTY-NAME. Signals an error if there is no such
-direct property. Returns OBJECT."
-  (warn 'deprecated-feature :feature #'remove-property :version "3.0.2")
-  (property-makunbound object property-name))
-
-(defun remove-all-direct-properties (object)
-  "Wipes out all direct properties and their values from OBJECT."
-  (if (std-object-p object)
-      (std-sheeple:remove-all-direct-properties object)
-      (smop:remove-all-direct-properties (object-metaobject object) object)))
-(defun std-sheeple:remove-all-direct-properties (object)
-  (change-mold object (ensure-mold (object-parents object) #()))
-  object)
-
 
 ;;;
 ;;; Value
@@ -134,28 +93,51 @@ PROPERTY-NAME."
   ;; Finally, for SETF-compliance, we return the value.
   new-value)
 
-;;;
-;;; Special Properties
-;;;
-(defmethod documentation ((x object) (doc-type (eql 't)))
-  (property-value x 'documentation))
+(defun property-makunbound (object property-name)
+  "Removes OBJECT's direct property named PROPERTY-NAME. Signals an error if there is no such
+direct property. Returns OBJECT."
+  (if (std-object-p object)
+      (std-sheeple:property-makunbound object property-name)
+      (smop:property-makunbound (object-metaobject object) object property-name)))
+(defun std-sheeple:property-makunbound (object property-name)
+  (if (direct-property-p object property-name)
+      (prog1 object
+        (change-mold object
+                     (ensure-mold (object-parents object)
+                                  (remove property-name
+                                          (mold-properties (%object-mold object))))))
+      (error 'unbound-property :object object :property-name property-name)))
 
-(defmethod (setf documentation) ((new-value string) (x object) (doc-type (eql 't)))
-  (handler-bind ((unbound-property 'continue))
-    (setf (property-value x 'documentation) new-value)))
+(defun remove-property (object property-name)
+  "Removes OBJECT's direct property named PROPERTY-NAME. Signals an error if there is no such
+direct property. Returns OBJECT."
+  (warn 'deprecated-feature :feature #'remove-property :version "3.0.2")
+  (property-makunbound object property-name))
 
-(defun object-nickname (object)
-  "Returns OBJECT's nickname"
-  (property-value object 'nickname))
-
-(defun (setf object-nickname) (new-nickname object)
-  "Sets OBJECT's nickname to NEW-NICKNAME"
-  (handler-bind ((unbound-property 'continue))
-    (setf (property-value object 'nickname) new-nickname)))
+(defun remove-all-direct-properties (object)
+  "Wipes out all direct properties and their values from OBJECT."
+  (if (std-object-p object)
+      (std-sheeple:remove-all-direct-properties object)
+      (smop:remove-all-direct-properties (object-metaobject object) object)))
+(defun std-sheeple:remove-all-direct-properties (object)
+  (change-mold object (ensure-mold (object-parents object) #()))
+  object)
 
 ;;;
 ;;; Reflection API
 ;;;
+(defun direct-property-p (object property-name)
+  "Returns T if OBJECT has a property called PROPERTY-NAME as a direct property.
+NIL otherwise."
+  (if (std-object-p object)
+      (std-sheeple:direct-property-p object property-name)
+      (smop:direct-property-p (object-metaobject object) object property-name)))
+(defun std-sheeple:direct-property-p (object property-name)
+  (let ((has-property-p t))
+    (handler-case (direct-property-value object property-name)
+      (unbound-property () (setf has-property-p nil)))
+    has-property-p))
+
 (defun property-owner (object property-name)
   "Returns the object, if any, from which OBJECT would fetch the value for PROPERTY-NAME"
   (if (std-object-p object)
@@ -183,6 +165,29 @@ returned list are undefined."
   (delete-duplicates (nconc (copy-list (direct-properties object))
                             (mapcan 'available-properties (object-parents object)))))
 
+;;;
+;;; Property-related convenience
+;;;
+
+;;; Nicknames
+(defun object-nickname (object)
+  "Returns OBJECT's nickname"
+  (property-value object 'nickname))
+
+(defun (setf object-nickname) (new-nickname object)
+  "Sets OBJECT's nickname to NEW-NICKNAME"
+  (handler-bind ((unbound-property 'continue))
+    (setf (property-value object 'nickname) new-nickname)))
+
+;;; DOCUMENTATION
+(defmethod documentation ((x object) (doc-type (eql 't)))
+  (property-value x 'documentation))
+
+(defmethod (setf documentation) ((new-value string) (x object) (doc-type (eql 't)))
+  (handler-bind ((unbound-property 'continue))
+    (setf (property-value x 'documentation) new-value)))
+
+;;; DESCRIBE
 (defmethod describe-object ((object object) stream)
   (format stream
           "~&Object: ~A~@
@@ -197,7 +202,7 @@ returned list are undefined."
                           (available-properties object)))))
 
 ;;;
-;;; Convenience
+;;; Property symbol-macro
 ;;;
 (defmacro with-properties (properties object &body body)
   (let ((sh (gensym)))

@@ -53,7 +53,7 @@ direct property. Returns OBJECT."
   "Removes OBJECT's direct property named PROPERTY-NAME. Signals an error if there is no such
 direct property. Returns OBJECT."
   (warn 'deprecated-feature :feature #'remove-property :version "3.0.2")
-  (property-make-unbound object property-name))
+  (property-makunbound object property-name))
 
 (defun remove-all-direct-properties (object)
   "Wipes out all direct properties and their values from OBJECT."

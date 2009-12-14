@@ -27,20 +27,24 @@
           =standard-object=   (std-allocate-object =standard-metaobject=)
                  =t=          (std-allocate-object =standard-metaobject=))
 
-  ;; Now, we have a circular link to take care of:
+  ;; Now, we have to hardcode two circular links.
+
+  ;; =STANDARD-METAOBJECT= is its own metaobject. This link isn't created above
+  ;; because '=STANDARD-METAOBJECT= is bound to junk before boot, so we fix
+  ;; this manually now.
   (setf (%object-metaobject =standard-metaobject=) =standard-metaobject=)
 
-  ;; Focus on the family!
+  ;; =T= has a one-object hierarchy list, just itself. Hierarchy lists usually get
+  ;; cached whenever an object's mold changes; however, because objects start out
+  ;; pointing at the "null mold", and =T= remains pointing at this mold, we need
+  ;; to fix =T='s %object-hierarchy manually.
+  (push =t= (%object-hierarchy =t=))
+
+  ;; Now, focus on the family!
   (push =t= (object-parents =standard-object=))
   (push =t= (object-parents =standard-metaobject=))
 
-  ;; FIXME: Too hardcoded. Ideally, this would happen automagically... somehow...
-  (let ((t-list (list =t=)))
-    (setf (%object-hierarchy =t=) t-list
-          (%object-hierarchy =standard-object=) (cons =standard-object= t-list)
-          (%object-hierarchy =standard-metaobject=) (cons =standard-metaobject= t-list)))
-
-  ;; Break the ice by playing the name game:
+  ;; To finish up, break the ice by playing the name game:
   (macrolet ((set-name (name) `(setf (property-value ,name 'nickname) ',name)))
     (set-name =t=)
     (set-name =standard-object=)

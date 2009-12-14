@@ -61,7 +61,7 @@
              (:constructor make-mold (lineage properties &optional back)))
   "Also known as 'backend classes', molds are hidden caches which enable
 Sheeple to use class-based optimizations yet keep its dynamic power."
-  (back        nil :type (or null mold)) ; Back pointer
+  (back        nil :read-only t :type (or null mold)) ; Back pointer
   (lineage     nil :read-only t :type lineage) ; A common cache of parent stuff
   (properties  nil :read-only t :type simple-vector) ; Direct properties
   (transitions nil :type list))         ; V8-like links to other molds
@@ -74,8 +74,9 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
              (:constructor make-lineage
                            (parents &aux (hierarchy (compute-hierarchy parents)))))
   "Information about an object's ancestors and descendants."
-  (members   (make-weak-hash-table :weakness :key :test 'eq)) ; The lineage's members
-  (parents   nil :read-only t)          ; A set of objects
+  (members   (make-weak-hash-table :weakness :key :test #'eq)
+             :read-only t :type hash-table) ; The lineage's members
+  (parents   nil :read-only t)              ; A set of objects
   (hierarchy nil))  ; A precedence list of all the lineage's ancestors
 
 (define-print-object ((object lineage) :identity nil)

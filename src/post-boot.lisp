@@ -26,7 +26,7 @@
 (defmessage create (proto &key)
   (:documentation "Creates a PROTO. Intended for customization.")
   (:reply (proto &rest properties)
-    (object :parents proto :properties (plist-to-wide-alist properties))))
+    (object :parents `(,proto) :properties (plist-to-wide-alist properties))))
 
 ;;;
 ;;; Printing Objects!

@@ -555,7 +555,7 @@ of all kinds@comma{} and it has @code{=NUMBER=} as its only parent}
 
 @var{all-keys} --- a list of keyword args.
 
-@var{parents} --- One object, or a list of objects.
+@var{parents} --- A list of objects.
 
 @var{new-object} --- a new object with @var{parents} as parents.
 
@@ -567,7 +567,8 @@ of @code{=STANDARD-METAOBJECT=}
 @end ifset
 with @var{parents} as its parents. Any non-sheeple objects in @var{parents} will
 be autoboxed and @emph{those} objects will be added as parents. The new object's
-parents will be ordered as they are given. Passing an empty parent list or
+parents will be ordered as they are given, taking into account that parents that
+appear earlier in the list have higher precedence. Passing an empty parent list or
 failing to pass one will automatically set @code{=STANDARD-OBJECT=} as the new
 object's sole parent.
 
@@ -577,7 +578,7 @@ object's sole parent.
 @verbatim
 (object) => #<Object [=STANDARD-OBJECT=] #x30004166BF6D>
 (object-parents (object)) => (#<Object =STANDARD-OBJECT= #x3000414A317D>)
-(object :parents (object)) => #<Object [=STANDARD-OBJECT=] #x3000414EBBED>
+(object :parents (list (object))) => #<Object [=STANDARD-OBJECT=] #x3000414EBBED>
 @end verbatim
 @end smallformat
 
@@ -787,7 +788,7 @@ otherwise.
 
 @smallformat
 @verbatim
-(ancestorp =STANDARD-SHEEP= (object :parents (object))) => Generalized truth value
+(ancestorp =STANDARD-SHEEP= (object :parents (list (object)))) => Generalized truth value
 @end verbatim
 @end smallformat
 @end defun

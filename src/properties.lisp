@@ -55,7 +55,16 @@ property is not set locally, a condition of type `unbound-property' is signaled.
   (check-type property-name symbol)
   (aif (property-position property-name object)
        (svref (%object-property-values object) it)
-       (error 'unbound-property :object object :property-name property-name)))
+       (restart-case (error 'unbound-property :object object :property-name property-name)
+         (continue ()
+           :report "Try accessing the property again."
+           (direct-property-value object property-name))
+         (use-value (value)
+           :report "Return a value."
+           :interactive (lambda ()
+                          (format *query-io* "~&Value to use: ")
+                          (list (read *query-io*)))
+           value))))
 
 (defun property-value (object property-name)
   "Returns the property-value for PROPERTY-NAME found first in OBJECT's hierarchy list.

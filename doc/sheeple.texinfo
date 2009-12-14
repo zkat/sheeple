@@ -1020,7 +1020,7 @@ type @code{UNBOUND-PROPERTY} is signaled.
 
 @node setf property-value, property-makunbound, direct-property-value, Properties Dictionary
 @unnumberedsubsubsec (setf property-value)
-@defun {(setf property-value)} new-value object property-name
+@defun {setf property-value} new-value object property-name
            &key reader writer accessor
 => new-value
 

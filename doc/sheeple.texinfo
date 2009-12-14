@@ -548,6 +548,21 @@ of all kinds@comma{} and it has @code{=NUMBER=} as its only parent}
 
 @node Objects Dictionary,  , Boxed-Object Hierarchy, Objects
 @subsection Objects Dictionary
+
+@menu
+* object::
+* clone::
+* defobject::
+* defproto::
+* parentp::
+* ancestorp::
+* childp::
+* descendantp::
+* object-parents::
+@end menu
+
+@node object, clone, Objects Dictionary, Objects Dictionary
+@unnumberedsubsubsec object
 @defun {object} &rest all-keys &key (parents (list =standard-object=)) &allow-other-keys
 => new-object
 
@@ -587,6 +602,8 @@ object's sole parent.
 None
 @end defun
 
+@node clone, defobject, object, Objects Dictionary
+@unnumberedsubsubsec clone
 @defun {clone} object => new object
 
 @strong{Arguments and Values:}
@@ -603,6 +620,8 @@ roles at the time @code{CLONE} was called.
 
 @end defun
 
+@node defobject, defproto, clone, Objects Dictionary
+@unnumberedsubsubsec defobject
 @defmac {defobject} @{parent-objects@} (@{property-spec@}*) option-spec*
 => new-object
 
@@ -664,6 +683,8 @@ are added to it during SHARED-INIT, using (SETF PROPERTY-VALUE), based on @var{p
 
 @end defmac
 
+@node defproto, parentp, defobject, Objects Dictionary
+@unnumberedsubsubsec defproto
 @defmac {defproto} proto-name @{parent-objects@} (@{property-spec@}*) option-spec*
 => new-object
 
@@ -749,6 +770,8 @@ prototype. This naming convention is observed for all included objects in
 the Sheeple library; however, programs are not required to adhere to it.
 @end defmac
 
+@node parentp, ancestorp, defproto, Objects Dictionary
+@unnumberedsubsubsec parentp
 @defun {parentp} maybe-parent child
 => generalized-boolean
 
@@ -772,6 +795,8 @@ Returns true if @var{maybe-parent} is a parent of @var{child}, false otherwise.
 @end smallformat
 @end defun
 
+@node ancestorp, childp, parentp, Objects Dictionary
+@unnumberedsubsubsec ancestorp
 @defun {ancestorp} maybe-ancestor descendant
 => generalized-boolean
 
@@ -795,6 +820,8 @@ otherwise.
 @end smallformat
 @end defun
 
+@node childp, descendantp, ancestorp, Objects Dictionary
+@unnumberedsubsubsec childp
 @defun {childp} maybe-child parent
 => generalized-boolean
 
@@ -818,6 +845,8 @@ Returns true if @var{maybe-child} is a child of @var{parent}, false otherwise.
 @end smallformat
 @end defun
 
+@node descendantp, object-parents, childp, Objects Dictionary
+@unnumberedsubsubsec descendantp
 @defun {descendantp} maybe-descendant ancestor
 => generalized-boolean
 
@@ -842,6 +871,8 @@ otherwise.
 @end smallformat
 @end defun
 
+@node object-parents,  , descendantp, Objects Dictionary
+@unnumberedsubsubsec object-parents
 @defun {object-parents} object => parents
 
 @strong{Arguments and Values:}

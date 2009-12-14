@@ -34,9 +34,17 @@
   (push =t= (object-parents =standard-object=))
   (push =t= (object-parents =standard-metaobject=))
 
+  ;; FIXME: Too hardcoded. Ideally, this would happen automagically... somehow...
+  (let ((t-list (list =t=)))
+    (setf (%object-hierarchy =t=) t-list
+          (%object-hierarchy =standard-object=) (cons =standard-object= t-list)
+          (%object-hierarchy =standard-metaobject=) (cons =standard-metaobject= t-list)))
+
   ;; Break the ice by playing the name game:
-  (dolist (name '(=t= =standard-object= =standard-metaobject=))
-    (setf (property-value (symbol-value name) 'nickname) name)))
+  (macrolet ((set-name (name) `(setf (property-value ,name 'nickname) ',name)))
+    (set-name =t=)
+    (set-name =standard-object=)
+    (set-name =standard-metaobject=)))
 
 ;;; Well, not really. We still need some messages to create objects:
 (defmessage shared-init (object &rest initargs)

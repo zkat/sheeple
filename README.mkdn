@@ -76,14 +76,11 @@ trying to get it to work on. The test suite depends on [Fiveam][11]. To run it:
 And watch the tests scroll by. All tests should pass as long as you're using a
 tagged release on a supported platform.
 
-Notes
------
+Mailing Lists
+-------------
 
-If you want to get Sheeple to run on your favorite platform, feel free to e-mail
-me: zkat, in the domain of sykosomatic, tld org. I'll help as much as I can
-(or even do the work for you). Any and all comments are also greatly
-appreciated.
-
+There are mailing lists set up in common-lisp.net. Please refer to
+http://common-lisp.net/project/sheeple for more information.
 
 Features
 --------
@@ -112,9 +109,9 @@ Features
 Using Sheeple
 =============
 
-The user guide in "doc/user-guide.org" is currently out-of-date. The best way to
-learn how to use Sheeple is to either read the source and examples, or head on
-over to #sykosomatic @ freenode.
+Sheeple includes a user manual with a full CLHS-style specification of the API. The manual can be
+built from doc/, using make. This requires texinfo to be installed. You can fetch a prebuilt manual
+from http://sykosomatic.org/sheeple/sheeple.pdf.
 
 For a quicker introduction, you can also take a peek at the examples/ directory.
 
@@ -132,19 +129,19 @@ This creates a standard object with only =STANDARD-OBJECT= as its parent
 We can add properties to an object at any time. This particular call also
 auto-generates an accessor based on the property name given.
 
-        SHEEPLE-USER> (add-property *my-object* 'var "value")
+        SHEEPLE-USER> (setf (property-value *my-object* 'var :accessor t) "value")
         #<Object #x1579A04E>
         SHEEPLE-USER> (var *my-object*)
         "value"
 
-Creating a new sheep object is as simple as spawning it.
+Creating a new object is as simple as calling OBJECT.
 
         SHEEPLE-USER> (defparameter *child* (object :parents (list *my-object*)))
         *CHILD*
 
 Sheeple does differential inheritance by default. This means that value lookup
-fetches the first available value found in the sheep's hierarchy list, unless a
-value is set directly in a sheep.
+fetches the first available value found in the object's hierarchy list, unless a
+value is set directly in an object.
 
         SHEEPLE-USER> (var *child*)
         "value"
@@ -200,7 +197,6 @@ its object-parents place:
         SHEEPLE-USER> (object-parents *my-object*)
         (#<Object SOME-OTHER-OBJECT #x30004159311D> #<Object =STANDARD-OBJECT= #x3000413F556D>)
 
-[0]: http://github.com/zkat/sheeple/tree/v2.2
 [1]: http://www.cliki.net/asdf
 [2]: http://common-lisp.net/project/asdf/
 [3]: http://en.wikipedia.org/wiki/CLOS

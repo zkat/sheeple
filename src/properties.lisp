@@ -9,13 +9,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-;;;
-;;; Utility
-;;;
-;;; This is here because it's very property-specific, even though it's a util.
-
 (defun property-position (property-name object)
-  (hv-position property-name (mold-properties (%object-mold object))))
+  (position property-name (mold-properties (%object-mold object))))
 
 ;;;
 ;;; Existential
@@ -38,8 +33,8 @@ direct property. Returns OBJECT."
       (prog1 object
         (change-mold object
                      (ensure-mold (object-parents object)
-                                  (hv-remove property-name
-                                             (mold-properties (%object-mold object))))))
+                                  (remove property-name
+                                          (mold-properties (%object-mold object))))))
       (when errorp
         (error 'unbound-property :object object :property-name property-name))))
 

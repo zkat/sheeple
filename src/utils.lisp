@@ -281,12 +281,6 @@ will not be affected; otherwise, it will be bound to a recognizeable and unique 
   (declare (simple-vector vector) (optimize speed (safety 0) (debug 0)))
   (make-array (length vector) :initial-contents vector))
 
-;;; Hash-Vectors
-
-(deftype hash-vector (&optional size)
-  "Either a `HASH-TABLE' or a `VECTOR' of length SIZE"
-  `(or hash-table (simple-vector ,size)))
-
 (macrolet ((fixnum+ (&rest values) `(the fixnum (+ ,@values))))
   (defun vector-cons (x vector)
     (declare (simple-vector vector)
@@ -299,62 +293,6 @@ will not be affected; otherwise, it will be bound to a recognizeable and unique 
        test (setf index (fixnum+ -1 index)) (unless (zerop index) (go loop)))
       (setf (svref result 0) x)
       result)))
-
-(defun hv-length (hash-vector)
-  (if (simple-vector-p hash-vector)
-      (length (the simple-vector hash-vector))
-      (hash-table-count hash-vector)))
-
-(defun hv-position (key hash-vector)
-  (if (simple-vector-p hash-vector)
-      (position key (the simple-vector hash-vector) :test #'eq)
-      (gethash key hash-vector)))
-
-(defun hv-elements (hash-vector)
-  (if (simple-vector-p hash-vector)
-      (coerce (the simple-vector hash-vector) 'list)
-      (loop for pnames being the hash-keys in hash-vector collect pnames)))
-
-(defvar property-vector-size-limit 30
-  "The exclusive bound on the number of property names stored in a vector.")
-
-(defun hv-cons (key hash-vector)
-  (prog (result)
-     (when (simple-vector-p hash-vector)
-       (go sv))
-     (setf result (make-hash-table :test 'eq :size (1+ (hash-table-count hash-vector))))
-     (loop for pname being each hash-key of hash-vector
-        using (hash-value position) do
-          (setf (gethash pname result) position))
-     hash-end
-     (setf (gethash key result) (hash-table-count result))
-     (return result)
-     sv
-     (when (< (length (the simple-vector hash-vector))
-              property-vector-size-limit)
-       (return (vector-cons key hash-vector)))
-     (setf result (make-hash-table :test 'eq :size property-vector-size-limit))
-     (loop for i fixnum downfrom (1- property-vector-size-limit) to 0 do
-          (setf (gethash (svref hash-vector i) result) i)
-        finally (go hash-end))))
-
-(defmacro do-hash-vector ((key value hv) &body body)
-  (once-only (hv)
-    `(if (simple-vector-p ,hv)
-         (loop for ,value downto 0 from (1- (length ,hv))
-            for ,key = (svref ,hv ,value) do ,@body)
-         (loop for ,key being the hash-keys of ,hv
-            using (hash-value ,value) do ,@body))))
-
-(defun hv-remove (key hash-vector)
-  (if (simple-vector-p hash-vector)
-      (remove key (the simple-vector hash-vector) :test 'eq)
-      (aprog1 (make-hash-table :test 'eq :size (1- (hash-table-count hash-vector)))
-        (loop for k being the hash-keys of hash-vector using (hash-value v)
-           unless (eq k key) do
-             (setf (gethash k it) v)))))
-
-;;; Dynamic allocation
 
 (defmacro do-reversed ((name listform) &body body)
   (with-gensyms (label tail)

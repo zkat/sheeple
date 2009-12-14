@@ -21,7 +21,8 @@
    ;; Objects
    #:object #:defobject #:defproto #:clone #:objectp #:object-parents #:ancestorp #:parentp
    #:descendantp #:childp #:init-object #:shared-init #:reinit-object #:print-sheeple-object
-   #:object-nickname #:object-hierarchy-list #:create
+   #:object-nickname #:object-hierarchy-list #:create #:allocate-object
+   #:compute-object-hierarchy-list-using-metaobject
 
    ;; Property access
    #:property-value #:direct-property-value #:available-properties
@@ -33,9 +34,9 @@
    #:call-next-reply #:next-reply-p
 
    ;; Protos
-   #:=standard-object= #:=t= #:=null= #:=symbol= #:=complex= #:=integer= #:=float= #:=cons=
-   #:=character= #:=hash-table= #:=package= #:=pathname= #:=readtable= #:=stream= #:=number=
-   #:=string= #:=bit-vector= #:=vector= #:=array= #:=function= #:=boxed-object=
+   #:=standard-metaobject= #:=standard-object= #:=t= #:=null= #:=symbol= #:=complex= #:=integer=
+   #:=float= #:=cons= #:=character= #:=hash-table= #:=package= #:=pathname= #:=readtable= #:=stream=
+   #:=number= #:=string= #:=bit-vector= #:=vector= #:=array= #:=function= #:=boxed-object=
 
    ;; built-ins
    #:box-type-of #:find-boxed-object #:objectify

@@ -23,9 +23,9 @@
 (unless (objectp =standard-metaobject=)
 
   ;; First, let's just get our objects:
-  (setf =standard-metaobject= (std-allocate-object)
-          =standard-object=   (std-allocate-object)
-                 =t=          (std-allocate-object))
+  (setf =standard-metaobject= (std-allocate-object =standard-metaobject=)
+          =standard-object=   (std-allocate-object =standard-metaobject=)
+                 =t=          (std-allocate-object =standard-metaobject=))
 
   ;; Now, we have a circular link to take care of:
   (setf (%object-metaobject =standard-metaobject=) =standard-metaobject=)

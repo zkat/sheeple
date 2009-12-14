@@ -8,7 +8,7 @@
 (defparameter *obj* (object :nickname '*obj*)
   "Create an empty object. This object only has =standard-object= as its parent.")
 
-(defparameter *child* (object :parents *obj* :nickname '*child*)
+(defparameter *child* (object :parents (list *obj*) :nickname '*child*)
   "This creates a new object which delegates to *obj*.")
 
 (defparameter *clone* (clone *obj*)
@@ -51,7 +51,7 @@ the original object is simply copied. All properties and roles are (shallow-)cop
 ;;       =standard-object=
 ;;         /   /
 ;;    *mixin* /
-;;       \   /  
+;;       \   /
 ;;       *obj*
 ;;         |
 ;;      *child*
@@ -81,7 +81,7 @@ the original object is simply copied. All properties and roles are (shallow-)cop
 ;;   =standard-object=
 ;;        /      \
 ;; *super-obj*  *mixin*
-;;        \     /  
+;;        \     /
 ;;         *obj*
 ;;           |
 ;;        *child*
@@ -178,14 +178,15 @@ the original object is simply copied. All properties and roles are (shallow-)cop
 
 ;;; DEFOBJECT
 ;;; More convenient syntax for creating new objects
-(defparameter *convenient!* (defobject (*obj*)
-                                ((var "value")
-                                 other-var) ; this is initialized to NIL
-                              (:nickname '*convenient!*)))
+(defparameter *convenient!*
+  (defobject *obj*
+      ((var "value")
+       other-var)                       ; this is initialized to NIL
+    :nickname '*convenient!*))
 
 ;;; DEFPROTO
 ;;; Abstracting the "class" pattern in object-oriented programming.
-(defproto =prototype= (*super-obj*)
+(defproto =prototype= *super-obj*
   ((proto-property "Excellent!")))
 
 (describe =prototype=)
@@ -194,7 +195,7 @@ the original object is simply copied. All properties and roles are (shallow-)cop
 ;; 2. Re-evaluating defproto form reinitializes the object, without changing identity
 ;; 3. Automatically assigns a nickname to the object
 
-(defproto =prototype= (*convenient!*)
+(defproto =prototype= *convenient!*
   ((another-property "Hey ho")))
 
 (describe =prototype=)
@@ -204,12 +205,11 @@ the original object is simply copied. All properties and roles are (shallow-)cop
 ;; For those objects, DEFPROTO is a good option, since it lets you keep re-evaluating a single
 ;; form to alter it. You do not have to start an object off as a prototype, either:
 (defvar =obj= *obj*)
-(defproto =obj= (*super-obj* *mixin*)
-  ())
+(defproto =obj= (*super-obj* *mixin*))
 
 (eq =obj= *obj*)
 
 (describe =obj=)
-;; The variable that DEFPROTO binds/uses is a regular dynamic variable. 
+;; The variable that DEFPROTO binds/uses is a regular dynamic variable.
 ;; It does not need to actually be wrapped by =foo=, but it is a stylistic marker to note
 ;; that the object is specifically meant to be used as a prototype.

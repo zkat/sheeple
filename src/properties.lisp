@@ -79,12 +79,15 @@ is signaled."
   "Sets NEW-VALUE as the value of a direct-property belonging to OBJECT, named
 PROPERTY-NAME."
   (check-type property-name symbol)
+  ;; (SETF PROPERTY-VALUE) is split into two parts.
+  ;; The first actually adds a property-value directly on the object:
   (aif (property-position property-name object)
        (setf (svref (%object-property-values object) it) new-value)
        (progn
          (change-mold object (ensure-transition (%object-mold object) property-name))
          (let ((index (property-position property-name object)))
            (setf (svref (%object-property-values object) index) new-value))))
+  ;; Once that's done, we use the options passed to it to generate readers/writers/accessors:
   (when reader (add-reader-to-object reader property-name object))
   (when writer (add-writer-to-object writer property-name object))
   (when accessor
@@ -93,6 +96,7 @@ PROPERTY-NAME."
         (add-reader-to-object accessor-name property-name object))
       (unless (and writerp (null writer))
         (add-writer-to-object `(setf ,accessor-name) property-name object))))
+  ;; Finally, for SETF-compliance, we return the value.
   new-value)
 
 ;;; Object Documentation

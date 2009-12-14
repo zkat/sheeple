@@ -34,29 +34,29 @@
 ;; SHEEPLE-USER> (property-value =bank-account= 'customer-name) => "NoName"
 ;; SHEEPLE-USER> (account-number =bank-account=) => 0
 
-(defproto =checking-account= (=bank-account=) ())
+(defproto =checking-account= =bank-account=)
 
-(defproto =savings-account= (=bank-account=)
+(defproto =savings-account= =bank-account=
   ((interest-rate 0)))
 
-(defproto =proxy-account= (=bank-account=) ())
+(defproto =proxy-account= =bank-account=)
 
-(defproto =money-market-account= (=checking-account= =savings-account=) ())
+(defproto =money-market-account= (=checking-account= =savings-account=))
 
 ;; defobject provides similar facilities to defproto, but without automatic accessor generation,
 ;; and the objects remain anonymous.
 (defvar *account-of-bank-president*
-  (defobject (=bank-account=)
-      ((customer-name "The Prez Man")
-       (balance 9001))))
+  (create =bank-account=
+          'customer-name "The Prez Man"
+          'balance       9001))
 
 (defvar *janes-account*
-  (defobject (=bank-account=)
-      ((customer-name "Jane Doe")
-       (balance 1000))))
+  (create =bank-account=
+          'customer-name "Jane Doe"
+          'balance       1000))
 
 (defvar *lots-of-accounts*
-  (loop repeat 1000 collect (object :parents =bank-account=)))
+  (loop repeat 1000 collect (create =bank-account=)))
 
 ;; you can add or remove direct properties from an object at any time, too...
 
@@ -85,21 +85,18 @@ Signal an error if the current balance is less than AMOUNT.")
   (:reply ((account =bank-account=) amount)
     (when (< (balance account) amount)
       (error "Account overdrawn."))
-    (decf (balance account) amount)))
-
-(defreply withdraw :before ((account =checking-account=) amount)
-  (let ((overdraft (- amount (balance account))))
+    (decf (balance account) amount))
+  (:reply :before ((account =checking-account=) amount)
+    (let ((overdraft (- amount (balance account))))
+      (when (plusp overdraft)
+        (withdraw (overdraft-account account) overdraft)
+        (incf (balance account) overdraft))))
+  (:reply ((proxy =proxy-account=) amount)
+    (withdraw (proxied-account proxy) amount))
+  (:reply :before ((account *account-of-bank-president*) amount
+                   &aux (overdraft (- amount (balance account))))
     (when (plusp overdraft)
-      (withdraw (overdraft-account account) overdraft)
-      (incf (balance account) overdraft))))
-
-(defreply withdraw ((proxy =proxy-account=) amount)
-  (withdraw (proxied-account proxy) amount))
-
-(defreply withdraw :before ((account *account-of-bank-president*) amount
-                            &aux (overdraft (- amount (balance account))))
-  (when (plusp overdraft)
-    (incf (balance account) (embezzle *bank* overdraft))))
+      (incf (balance account) (embezzle *bank* overdraft)))))
 
 (defreply assess-low-balance-penalty ((account =bank-account=))
   (with-properties ((bal balance)) account

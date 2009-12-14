@@ -86,32 +86,23 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
                              (object-nickname _)))
                   (lineage-parents object))))
 
-(defun trigger-hierarchy-recalculation (lineage)
-  "Updates LINEAGE's hierarchy list, and propagates down the members."
-  (with-accessors ((hierarchy lineage-hierarchy)
-                   (parents   lineage-parents)
-                   (members   lineage-members)) lineage
-    (setf hierarchy (compute-hierarchy parents))
-    (maphash (lambda (member children)
-               (declare (ignore member))
-               (mapcar 'trigger-hierarchy-recalculation children))
-             members)))
-
 (macrolet ((define-mold-reader (name lineage-reader)
              `(defun ,name (mold)
                 (,lineage-reader (mold-lineage mold)))))
   (define-mold-reader mold-parents   lineage-parents)
   (define-mold-reader mold-hierarchy lineage-hierarchy))
 
+(declaim (inline %object-mold %object-metaobject %object-hierarchy
+                 %object-property-values %object-roles))
+
 (defstruct (object (:conc-name %object-) (:predicate objectp)
                    (:constructor std-allocate-object (&optional metaobject))
                    (:print-object print-sheeple-object-wrapper))
   (mold (ensure-mold nil) :type mold)
   (metaobject =standard-metaobject=)
+  (hierarchy nil :type list)
   (property-values nil)
   (roles nil :type list)) ; Roles are used in dispatch -- see reply-foo.lisp
-
-(declaim (inline %object-mold %object-metaobject %object-property-values %object-roles))
 
 (defun %object-children (object)
   (gethash object (lineage-members (mold-lineage (%object-mold object)))))
@@ -119,6 +110,18 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
 (defun (setf %object-children) (new-kids object)
   (setf (gethash object (lineage-members (mold-lineage (%object-mold object))))
         new-kids))
+
+(defun trigger-hierarchy-recalculation (lineage)
+  "Updates LINEAGE's hierarchy list, and propagates down the members."
+  (declare (notinline trigger-hierarchy-recalculation))
+  (with-accessors ((hierarchy lineage-hierarchy)
+                   (parents   lineage-parents)
+                   (members   lineage-members)) lineage
+    (setf hierarchy (compute-hierarchy parents))
+    (maphash (lambda (member children)
+               (setf (%object-hierarchy member) (compute-object-hierarchy-list member))
+               (mapcar 'trigger-hierarchy-recalculation children))
+             members)))
 
 ;;;
 ;;; Molds
@@ -299,12 +302,16 @@ its parents."
 (defun std-compute-object-hierarchy-list (object)
   (cons object (mold-hierarchy (%object-mold object))))
 
-(defun object-hierarchy-list (object)
-  "Returns the full hierarchy-list for OBJECT"
+(defun compute-object-hierarchy-list (object)
+  "Computes the full hierarchy-list for OBJECT"
   (if (eq =standard-metaobject= (%object-metaobject object))
       (std-compute-object-hierarchy-list object)
       (funcall 'compute-object-hierarchy-list-using-metaobject
                (%object-metaobject object) object)))
+
+(defun object-hierarchy-list (object)
+  "Returns the full hierarchy-list for OBJECT"
+  (%object-hierarchy object))
 
 ;;;
 ;;; Modifying mold-level stuff
@@ -340,6 +347,8 @@ This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER 
   (check-type object object)
   (check-list-type new-parents object)
   (change-mold object (ensure-mold new-parents (mold-properties (%object-mold object))))
+  ;; FIXME: This should be computed automagically... somehow
+  (setf (%object-hierarchy object) (compute-object-hierarchy-list object))
   (map 'nil 'trigger-hierarchy-recalculation (%object-children object)))
 
 (defun (setf object-parents) (new-parents object)
@@ -386,7 +395,8 @@ ALL-KEYS is passed on to INIT-OBJECT."
       (setf (%object-mold object) (ensure-mold (or parents (list =standard-object=))))
     (topological-sort-conflict (conflict)
       (error 'object-hierarchy-error :object object :conflict conflict)))
-  (setf (%object-children object) nil)
+  (setf (%object-children object) nil
+        (%object-hierarchy object) (compute-object-hierarchy-list object))
   (apply 'init-object object all-keys))
 
 (defun clone (object &optional (metaobject (%object-metaobject object)))

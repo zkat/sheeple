@@ -24,6 +24,12 @@
     ((propd-name nil)
      (propd-readers nil)
      (propd-writers nil))))
+(defun propd-name (property)
+  (direct-property-value property 'propd-name))
+(defun propd-readers (property)
+  (property-value property 'propd-readers))
+(defun propd-writers (property)
+  (property-value property 'propd-writers))
 
 ;;;
 ;;; Base Property API

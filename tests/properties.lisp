@@ -29,13 +29,14 @@
     (is (direct-property-p a 'test))
     (is (not (direct-property-p b 'test)))))
 
-(test remove-property
+(test property-makunbound
   (let ((object (object)))
-    (signals error (remove-property object 'something))
+    (signals error (property-makunbound object 'something))
     (setf (property-value object 'test) 'value)
-    (is (eq object (remove-property object 'test)))
+    (is (eq object (property-makunbound object 'test)))
     (is (not (direct-property-p object 'test)))
-    (signals error (remove-property object 'test))))
+    (signals error (property-makunbound object 'test))
+    (signals deprecated-feature (remove-property (object :properties '(x)) 'x))))
 
 (test remove-all-direct-properties
   (let ((object (object)))
@@ -98,7 +99,7 @@
                  (cadr pair) new-name))
       verify-properties
       (loop repeat 10 for (pname nil) in properties do
-           (remove-property object pname)
+           (property-makunbound object pname)
            (pop properties))
       verify-properties)))
 

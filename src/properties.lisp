@@ -38,7 +38,7 @@ NIL otherwise."
   (handler-case (progn (direct-property-value object property-name) t)
     (unbound-property () nil)))
 
-(defun remove-property (object property-name)
+(defun property-makunbound (object property-name)
   "Removes OBJECT's direct property named PROPERTY-NAME. Signals an error if there is no such
 direct property. Returns OBJECT."
   (if (direct-property-p object property-name)
@@ -48,6 +48,12 @@ direct property. Returns OBJECT."
                                   (remove property-name
                                           (mold-properties (%object-mold object))))))
       (error 'unbound-property :object object :property-name property-name)))
+
+(defun remove-property (object property-name)
+  "Removes OBJECT's direct property named PROPERTY-NAME. Signals an error if there is no such
+direct property. Returns OBJECT."
+  (warn 'deprecated-feature :feature #'remove-property :version "3.0.2")
+  (property-make-unbound object property-name))
 
 (defun remove-all-direct-properties (object)
   "Wipes out all direct properties and their values from OBJECT."

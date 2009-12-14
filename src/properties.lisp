@@ -129,14 +129,11 @@ PROPERTY-NAME."
   "Returns a list of the names of OBJECT's direct properties -- ie, only ones which have been
 set directly in OBJECT using (setf property-value). The consequences of side-effecting this
 returned list are undefined."
-  (typecase (mold-properties (%object-mold object))
-    (vector (coerce (mold-properties (%object-mold object)) 'list))
-    (hash-table (loop for p being the hash-keys of (mold-properties (%object-mold object))
-                   collect p))))
+  (coerce (mold-properties (%object-mold object)) 'list))
 
 (defun available-properties (object)
   "Returns a list of the names of all properties available to OBJECT, including inherited ones."
-  (delete-duplicates (nconc (coerce (direct-properties object) 'list)
+  (delete-duplicates (nconc (copy-list (direct-properties object))
                             (mapcan 'available-properties (object-parents object)))))
 
 (defmethod describe-object ((object object) stream)

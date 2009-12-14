@@ -405,7 +405,7 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
   (when (eq =t= object)
     (error 'fuck-off :format-control "You ain't allowed to clone =T=. Shoo."))
   (aprog1 (maybe-std-allocate-object metaobject)
-    (change-mold it (%object-mold object))
+    (setf (%object-mold it) (%object-mold object))
     (with-accessors ((props %object-property-values)
                      (roles %object-roles)) object
       (with-accessors ((new-props %object-property-values)

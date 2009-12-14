@@ -290,14 +290,17 @@ regards to the CONSTRAINTS. A future version will undo this change."
   "Generates an abstract hierarchy out of PARENTS; this would be suitable as
 the CDR of the hierarchy-list of a standard object with PARENTS, in order, as
 its parents."
-  ;; This is VERY far from optimal; however, it's a quick prototype  - Adlai
-  (let ((unordered
-         (remove-duplicates (append parents (mapcan 'collect-ancestors parents)))))
-    (topological-sort
-     unordered
-     (remove-duplicates (append (mapcar 'cons parents (cdr parents))
-                                (mapcan 'local-precedence-ordering unordered)))
-     'std-tie-breaker-rule)))
+  (if (null (cdr parents))
+      (unless (null (car parents)) ; FIXME: This happens ONCE during bootstrap
+        (object-hierarchy-list (car parents)))
+      (let ((unordered
+             (delete-duplicates (append parents (mapcan 'collect-ancestors parents)))))
+        (topological-sort
+         unordered
+         (delete-duplicates (nconc (mapcar 'cons parents (cdr parents))
+                                   (mapcan 'local-precedence-ordering unordered))
+                            :test #'equal)
+         #'std-tie-breaker-rule))))
 
 (defun std-compute-object-hierarchy-list (object)
   (cons object (mold-hierarchy (%object-mold object))))

@@ -273,24 +273,28 @@ Confirmed to work (pass all tests):
 @enumerate
 @cindex Steel Bank Common Lisp
 @item
-SBCL
+SBCL 1.0.33
 
 @cindex Clozure Common Lisp
 @cindex OpenMCL
 @item
-Clozure CL
+Clozure CL 1.4
 
 @cindex GNU CLISP
 @item
-GNU CLISP
+GNU CLISP 2.48
+
+@c @cindex Allegro Common Lisp
+@c @item
+@c Allegro CL 8.1
 @end enumerate
 
 Sheeple doesn't use any OS-specific code (or threads), so it should be stable on
-all operating systems. OSX and Linux x86 have both been actually tested on the
-aforementioned platforms. In theory, it should work on any implementation that
-supports hash tables with key weakness through the trivial-garbage portability
-layer. If you run the test suite on a platform not listed above, and all tests
-pass, please e-mail me and I'll add it to the list of supported platforms.
+all operating systems. Sheeple has been tested on OSX, Linux, and Windows
+Vista. In theory, it should work on any implementation that supports hash tables
+with key weakness. If you run the test suite on a platform not listed above, and
+all tests pass, please e-mail me and I'll add it to the list of supported
+platforms.
 
 @node Loading Sheeple,  , Supported Platforms, Installing Sheeple
 @subsection Loading Sheeple

@@ -42,16 +42,16 @@ Supported Platforms
 -------------------
 Confirmed to work (pass all tests):
 
-* SBCL
-* Clozure CL
-* GNU CLISP
-* LispWorks (was tested a while ago -- will probably pass again)
+* SBCL 1.0.33
+* Clozure CL 1.4
+* GNU CLISP 2.48
+* Allegro CL 8.1
 
-Sheeple doesn't use any OS-specific code (or threads), so it should be fairly stable on all
-operating systems. OSX and Linux x86 have both been actually tested on the aforementioned platforms.
-In theory, it should work on any ANSI-compliant implementation that supports weak pointers and weak
-hash table.  If you run the test suite on a platform not listed above, and all tests pass, please
-e-mail me and I'll add it to the list of supported platforms.
+Sheeple doesn't use any OS-specific code (or threads), so it should be stable on all operating
+systems. Sheeple has been tested on OSX, Linux, and Windows Vista. In theory, it should work on any
+implementation that supports hash tables with key weakness. If you run the test suite on a platform
+not listed above, and all tests pass, please e-mail me and I'll add it to the list of supported
+platforms.
 
 Loading Sheeple
 ---------------

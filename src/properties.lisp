@@ -61,8 +61,9 @@ direct property. Returns OBJECT."
   (change-mold object (ensure-mold (object-parents object) #()))
   object)
 
+;;;
 ;;; Value
-
+;;;
 (defun property-value (object property-name)
   "Returns the property-value for PROPERTY-NAME found first in OBJECT's hierarchy list.
 If the value does not exist in the hierarchy list, a condition of type `unbound-property'
@@ -99,7 +100,9 @@ PROPERTY-NAME."
   ;; Finally, for SETF-compliance, we return the value.
   new-value)
 
-;;; Object Documentation
+;;;
+;;; Special Properties
+;;;
 (defmethod documentation ((x object) (doc-type (eql 't)))
   (property-value x 'documentation))
 
@@ -107,7 +110,6 @@ PROPERTY-NAME."
   (handler-bind ((unbound-property 'continue))
     (setf (property-value x 'documentation) new-value)))
 
-;;; Nicknames
 (defun object-nickname (object)
   "Returns OBJECT's nickname"
   (property-value object 'nickname))
@@ -117,7 +119,9 @@ PROPERTY-NAME."
   (handler-bind ((unbound-property 'continue))
     (setf (property-value object 'nickname) new-nickname)))
 
+;;;
 ;;; Reflection API
+;;;
 (defun property-owner (object property-name &optional errorp)
   "Returns the object object with a direct-property called PROPERTY-NAME from which OBJECT inherits
 its value. If ERRORP is T, an error is signaled if the property is unbound. Otherwise, NIL is
@@ -152,7 +156,9 @@ returned list are undefined."
                   (mapcar (fun (list  _ (property-value object _) (property-owner object _)))
                           (available-properties object)))))
 
+;;;
 ;;; Convenience
+;;;
 (defmacro with-properties (properties object &body body)
   (let ((sh (gensym)))
     `(let ((,sh ,object))

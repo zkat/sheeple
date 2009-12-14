@@ -7,8 +7,8 @@
 
 @set EDITION 0.1
 @set VERSION v3.0.2
-@set UPDATED-MONTH November 2009
-@set UPDATED 21 @value{UPDATED-MONTH}
+@set UPDATED-MONTH December 2009
+@set UPDATED 14 @value{UPDATED-MONTH}
 @clear mop
 @syncodeindex fn vr
 
@@ -18,7 +18,7 @@ last updated @value{UPDATED},
 of @cite{The Sheeple Manual},
 for Sheeple @value{VERSION}.
 
-Copyright @copyright{} 2008, 2009 Josh Marchán.
+Copyright @copyright{} 2009 Josh Marchán, Adlai Chandrasekhar
 
 This software is composed in part of code taken from SBCL's version of PCL, and
 Closette as presented in Art of the Metaobject Protocol, at times with only

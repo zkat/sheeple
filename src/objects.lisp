@@ -419,12 +419,26 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
            ,@(when add-accessor-p `(:accessor ',property-name)))))
 
 (defun canonize-options (options)
-  (mapcan 'canonize-option options))
-
-(defun canonize-option (option)
-  (check-type (car option) (member :nickname :documentation :metaobject)
-              "a supported option to DEFPROTO/DEFCLASS")
-  `(,(car option) ,(cadr option)))
+  (flet ((defclass-option-syntax-p (form)
+           (typep form '(cons symbol list))))
+    (declare (dynamic-extent #'defclass-option-syntax-p))
+    (when (every #'defclass-option-syntax-p options)
+      (warn 'deprecated-feature :version "3.0.2"
+            :feature "DEFCLASS-style options to DEFPROTO and DEFOBJECT")
+      (flet ((canonize-defclasslike-option (option)
+               (symbol-macrolet
+                   ((simple-expansion `(,(car option) ,(cadr option))))
+                 (case (car option)
+                   ((:nickname :metaobject) simple-expansion)
+                   (:documentation
+                    (let ((docstring (cadr documentation)))
+                      (check-type docstring string))
+                    simple-expansion)
+                   (otherwise `(',(car option) ',(cdr option)))))))
+        (return-from canonize-options
+          (mapcan #'canonize-defclasslike-option options)))))
+  ;; In the new DEFPROTO option style, this function is a no-op
+  options)
 
 (defmacro defobject (objects &optional ((&rest properties)) &rest options)
   "Standard object-generation macro."

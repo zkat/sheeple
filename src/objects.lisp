@@ -406,10 +406,13 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
     (error 'fuck-off :format-control "You ain't allowed to clone =T=. Shoo."))
   (aprog1 (maybe-std-allocate-object metaobject)
     (change-mold it (%object-mold object))
-    (with-accessors ((roles %object-roles)
-                     (props %object-property-values)) object
-      (setf (%object-roles it)           (copy-list          roles)
-            (%object-property-values it) (when props (copy-simple-vector props))))))
+    (with-accessors ((props %object-property-values)
+                     (roles %object-roles)) object
+      (with-accessors ((new-props %object-property-values)
+                       (new-roles %object-roles)) it
+        (setf new-roles (copy-list roles))
+        (when props
+          (setf new-props (copy-simple-vector props)))))))
 
 ;;;
 ;;; Fancy Macros

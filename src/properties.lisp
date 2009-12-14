@@ -22,9 +22,9 @@
 (define-bound-variable =property=)
 (defparameter *the-property-definition-form*
   '(defproto =property= ()
-    ((name nil)
-     (readers nil)
-     (writers nil))))
+    ((propd-name nil)
+     (propd-readers nil)
+     (propd-writers nil))))
 
 ;;;
 ;;; Base Property API

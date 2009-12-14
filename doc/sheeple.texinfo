@@ -970,6 +970,7 @@ Both of these properties will be delegated, like any regular Sheeple property.
 * direct-properties::
 * available-properties::
 * direct-property-p::
+* property-owner::
 * object-nickname::
 * with-properties::
 @end menu
@@ -1126,7 +1127,7 @@ which @code{PROPERTY-VALUE} would return a value when called on @var{object}.
 
 @end defun
 
-@node direct-property-p, object-nickname, available-properties, Properties Dictionary
+@node direct-property-p, property-owner, available-properties, Properties Dictionary
 @unnumberedsubsubsec direct-property-p
 @defun {direct-property-p} object property-name
         => boolean
@@ -1146,13 +1147,34 @@ named @var{property-name}, false otherwise.
 
 @end defun
 
-@node object-nickname, with-properties, direct-property-p, Properties Dictionary
+@node property-owner, object-nickname, direct-property-p, Properties Dictionary
+@unnumberedsubsubsec property-owner
+@defun  {property-owner} object property-name
+=> owner
+
+@var{object} --- An object.
+
+@var{property-name} --- A symbol naming a property.
+
+@var{owner} --- An object which @var{object} would be delegating property-value
+to.
+
+@strong{Description:}
+
+Returns the object, if any, from which @var{object} would fetch the value for
+@var{property-name}. If no such object exists, @code{PROPERTY-OWNER} returns
+NIL.
+
+@end defun
+
+@node object-nickname, with-properties, property-owner, Properties Dictionary
 @unnumberedsubsubsec object-nickname
 @defun {object-nickname} object
 => nickname
 
 @var{object} --- An object.
-@var{object} --- A nickname (can be any lisp object, but preferably either a
+
+@var{nickname} --- A nickname (can be any lisp object, but preferably either a
 string or a symbol).
 
 @strong{Description:}

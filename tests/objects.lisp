@@ -335,11 +335,14 @@ confusing, but actually enables crystal clear warning-free test code."
 
 (test canonize-options
   (is (equal '(:metaobject foo :nickname 'bar)
-             (canonize-options '((:metaobject foo) (:nickname 'bar)))))
-  (signals deprecated-feature (canonize-options '((|deprecated feature|))))
-  (is (equal '(:metaobject foo :nickname 'bar)
              (canonize-options '(:metaobject foo :nickname 'bar))))
-  (is (equal '('a '(b)) (canonize-options '((a b))))))
+  (is (equal '(a b c d) (canonize-options '(a b c d))))
+  (signals deprecated-feature (canonize-options '((|deprecated feature|))))
+  (handler-bind
+      ((deprecated-feature #'muffle-warning))
+    (is (equal '(:metaobject foo :nickname 'bar)
+               (canonize-options '((:metaobject foo) (:nickname 'bar)))))
+    (is (equal '('a '(b)) (canonize-options '((a b)))))))
 
 (test defobject
   (let* ((parent (object))

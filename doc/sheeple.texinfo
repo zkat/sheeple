@@ -563,7 +563,12 @@ of all kinds@comma{} and it has @code{=NUMBER=} as its only parent}
 
 @node object, clone, Objects Dictionary, Objects Dictionary
 @unnumberedsubsubsec object
-@defun {object} &rest all-keys &key (parents (list =standard-object=)) &allow-other-keys
+@defun {object} &rest all-keys &key (parents (list =standard-object=))
+                                    properties
+@ifset mop
+                                    (metaobject =standard-metaobject=)
+@end ifset
+                                    &allow-other-keys
 => new-object
 
 @strong{Arguments and Values:}

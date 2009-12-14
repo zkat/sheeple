@@ -603,11 +603,12 @@ roles at the time @code{CLONE} was called.
 
 @end defun
 
-@defmac {defobject} (@{parent-object@}*) (@{property-spec@}*) option-spec*
+@defmac {defobject} @{parent-objects@} (@{property-spec@}*) option-spec*
 => new-object
 
 @smallformat
 @verbatim
+parent-objects ::= {object | (object*)}
 property-spec ::= (property-name property-value property-option*)
 property-name ::= symbol
 property-value ::= object
@@ -615,8 +616,8 @@ property-option ::= {:reader {reader-message-name | nil}}* |
                     {:writer {writer-message-name | nil}}* |
                     {:accessor {reader-message-name | t | nil}}*
 message-name ::= {symbol | (quote (setf symbol))}
-option-spec ::= (:nickname lisp-object) |
-                (:documentation docstring)
+option-spec ::= :nickname lisp-object |
+                :documentation docstring
 @end verbatim
 @end smallformat
 
@@ -653,7 +654,7 @@ are added to it during SHARED-INIT, using (SETF PROPERTY-VALUE), based on @var{p
 @smallformat
 @verbatim
 (defobject () ((var "value"))) => #<Object [=STANDARD-OBJECT=] #x30004157569D>
-(defobject (*) ()) => #<Object [=STANDARD-OBJECT=] #x30004158008D>
+(defobject * ()) => #<Object [=STANDARD-OBJECT=] #x30004158008D>
 (object-parents *) => (#<Object [=STANDARD-OBJECT=] #x30004157569D>)
 (available-properties **) => (VAR NICKNAME)
 @end verbatim
@@ -663,12 +664,13 @@ are added to it during SHARED-INIT, using (SETF PROPERTY-VALUE), based on @var{p
 
 @end defmac
 
-@defmac {defproto} proto-name (@{parent-object@}*) (@{property-spec@}*) option-spec*
+@defmac {defproto} proto-name @{parent-objects@} (@{property-spec@}*) option-spec*
 => new-object
 
 @smallformat
 @verbatim
 proto-name ::= symbol
+parent-objects ::= {object | (object*)}
 property-spec ::= (property-name property-value property-option*)
 property-name ::= symbol
 property-value ::= object
@@ -676,8 +678,8 @@ property-option ::= {:reader {reader-message-name | nil}}* |
                     {:writer {writer-message-name | nil}}* |
                     {:accessor {reader-message-name | t | nil}}*
 message-name ::= {symbol | (quote (setf symbol))}
-option-spec ::= (:nickname lisp-object) |
-                (:documentation docstring)
+option-spec ::= :nickname lisp-object |
+                :documentation docstring
 @end verbatim
 @end smallformat
 

@@ -10,7 +10,7 @@
 (in-package :sheeple)
 
 (defun property-position (property-name object)
-  (position property-name (mold-properties (%object-mold object))))
+  (position property-name (mold-properties (%object-mold object)) :test #'eq :key #'propd-name))
 
 (defun find-propd (object property-name)
   (find property-name (mold-properties (%object-mold object)) :test #'eq :key #'propd-name))

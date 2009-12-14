@@ -35,8 +35,8 @@ property is not set locally, a condition of type `unbound-property' is signaled.
   (check-type property-name symbol)
   (aif (find-propd object property-name)
        (if (std-object-p object)
-           (std-sheeple:direct-property-value object property-name)
-           (smop:direct-property-value (object-metaobject object) property-name))
+           (std-sheeple:direct-property-value object it)
+           (smop:direct-property-value (object-metaobject object) it))
        (restart-case (error 'unbound-property :object object :property-name property-name)
          (continue ()
            :report "Try accessing the property again."

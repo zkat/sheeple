@@ -336,7 +336,10 @@ confusing, but actually enables crystal clear warning-free test code."
 (test canonize-options
   (is (equal '(:metaobject foo :nickname 'bar)
              (canonize-options '((:metaobject foo) (:nickname 'bar)))))
-  (signals error (canonize-options '((|omg undefined behavior|)))))
+  (signals deprecated-feature (canonize-options '((|deprecated feature|))))
+  (is (equal '(:metaobject foo :nickname 'bar)
+             (canonize-options '(:metaobject foo :nickname 'bar))))
+  (is (equal '('a '(b)) (canonize-options '((a b))))))
 
 (test defobject
   (let* ((parent (object))

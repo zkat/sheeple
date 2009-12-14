@@ -96,7 +96,7 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
                  %object-property-values %object-roles))
 
 (defstruct (object (:conc-name %object-) (:predicate objectp)
-                   (:constructor std-allocate-object (&optional metaobject))
+                   (:constructor std-allocate-object (metaobject))
                    (:print-object print-sheeple-object-wrapper))
   (mold (ensure-mold nil) :type mold)
   (metaobject =standard-metaobject=)

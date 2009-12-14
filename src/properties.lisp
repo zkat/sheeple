@@ -13,8 +13,7 @@
   (position property-name (mold-properties (%object-mold object))))
 
 (defun find-propd (object property-name)
-  ;; todo
-  )
+  (find property-name (mold-properties (%object-mold object)) :test #'eq :key #'propd-name))
 
 ;;;
 ;;; Property Metaobjects

@@ -63,8 +63,7 @@
 Sheeple to use class-based optimizations yet keep its dynamic power."
   (back        nil :type (or null mold)) ; Back pointer
   (lineage     nil :read-only t :type lineage) ; A common cache of parent stuff
-  (properties  nil :read-only t
-                   :type (or simple-vector hash-table)) ; Direct properties
+  (properties  nil :read-only t :type simple-vector) ; Direct properties
   (transitions nil :type list))         ; V8-like links to other molds
 
 (define-print-object ((object mold) :identity nil)
@@ -166,17 +165,17 @@ linking a new one if necessary."
   (check-type property-name property-name)
   (or (find-transition mold property-name)
       (aprog1 (make-mold (mold-lineage mold)
-                         (hv-cons property-name (mold-properties mold)) mold)
+                         (vector-cons property-name (mold-properties mold)) mold)
         (aconsf (mold-transitions mold) property-name (make-weak-pointer it)))))
 
 (defun ensure-mold (parents &optional (properties #()))
   "Returns the mold with properties PROPERTIES of the mold for PARENTS,
 creating and linking a new one if necessary."
   (check-list-type parents object)
-  (check-type properties hash-vector)
+  (check-type properties vector)
   (let ((top (ensure-toplevel-mold parents)))
     (do* ((mold top (ensure-transition mold (car props-left)))
-          (props-left (hv-elements properties) (cdr props-left)))
+          (props-left (coerce properties 'list) (cdr props-left)))
          ((null props-left) mold))))
 
 ;;;
@@ -316,12 +315,15 @@ right order. Keep in mind that NEW-MOLD might specify some properties in a diffe
   (check-type object object)
   (check-type new-mold mold)
   (let* ((new-properties (mold-properties new-mold))
-         (new-values (make-array (hv-length new-properties)))
+         (new-values (make-array (length new-properties)))
          (old-values (%object-property-values object)))
     (unless (zerop (length old-values))
-      (do-hash-vector (pname position (mold-properties (%object-mold object)))
-        (awhen (hv-position pname new-properties)
-          (setf (svref new-values it) (svref old-values position)))))
+      ;; This simplification of DO-HASH-VECTOR is suboptimal
+      (let ((properties (mold-properties (%object-mold object))))
+        (dotimes (position (length properties))
+          (let ((pname (svref properties position)))
+            (awhen (position pname new-properties)
+              (setf (svref new-values it) (svref old-values position)))))))
     (unless (eq (mold-lineage new-mold)
                 (mold-lineage (%object-mold object)))
       (setf (gethash object (lineage-members (mold-lineage new-mold)))

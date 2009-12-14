@@ -316,6 +316,16 @@ its parents."
 ;;;
 ;;; Modifying mold-level stuff
 ;;;
+(defun (setf object-mold) (new-mold object)
+  (with-accessors ((new-lineage mold-lineage)) new-mold
+    (with-accessors ((old-lineage mold-lineage)) (%object-mold object)
+      (unless (eq new-lineage old-lineage)
+        (setf (gethash object (lineage-members new-lineage)) (%object-children object))
+        (remhash object (lineage-members old-lineage)))))
+  (setf (%object-mold object) new-mold
+        (%object-hierarchy object) (compute-object-hierarchy-list object))
+  new-mold)
+
 (defun change-mold (object new-mold)
   "Creates a new property-value vector in OBJECT, according to NEW-MOLD's specification, and
 automatically takes care of bringing the correct property-values over into the new vector, in the
@@ -332,12 +342,7 @@ right order. Keep in mind that NEW-MOLD might specify some properties in a diffe
           (let ((pname (svref properties position)))
             (awhen (position pname new-properties)
               (setf (svref new-values it) (svref old-values position)))))))
-    (unless (eq (mold-lineage new-mold)
-                (mold-lineage (%object-mold object)))
-      (setf (gethash object (lineage-members (mold-lineage new-mold)))
-            (%object-children object))
-      (remhash object (lineage-members (mold-lineage (%object-mold object)))))
-    (setf (%object-mold object) new-mold
+    (setf (object-mold object) new-mold
           (%object-property-values object) new-values))
   object)
 
@@ -347,8 +352,6 @@ This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER 
   (check-type object object)
   (check-list-type new-parents object)
   (change-mold object (ensure-mold new-parents (mold-properties (%object-mold object))))
-  ;; FIXME: This should be computed automagically... somehow
-  (setf (%object-hierarchy object) (compute-object-hierarchy-list object))
   (map 'nil 'trigger-hierarchy-recalculation (%object-children object)))
 
 (defun (setf object-parents) (new-parents object)
@@ -392,11 +395,9 @@ ALL-KEYS is passed on to INIT-OBJECT."
           :feature "Passing a non-list :parents option to #'OBJECT")
     (setf parents (list parents)))
   (handler-case
-      (setf (%object-mold object) (ensure-mold (or parents (list =standard-object=))))
+      (setf (object-mold object) (ensure-mold (or parents (list =standard-object=))))
     (topological-sort-conflict (conflict)
       (error 'object-hierarchy-error :object object :conflict conflict)))
-  (setf (%object-children object) nil
-        (%object-hierarchy object) (compute-object-hierarchy-list object))
   (apply 'init-object object all-keys))
 
 (defun clone (object &optional (metaobject (%object-metaobject object)))
@@ -405,7 +406,7 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
   (when (eq =t= object)
     (error 'fuck-off :format-control "You ain't allowed to clone =T=. Shoo."))
   (aprog1 (maybe-std-allocate-object metaobject)
-    (setf (%object-mold it) (%object-mold object))
+    (setf (object-mold it) (%object-mold object))
     (with-accessors ((props %object-property-values)
                      (roles %object-roles)) object
       (with-accessors ((new-props %object-property-values)

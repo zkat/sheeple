@@ -64,7 +64,8 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
   (back        nil :read-only t :type (or null mold)) ; Back pointer
   (lineage     nil :read-only t :type lineage) ; A common cache of parent stuff
   (properties  nil :read-only t :type simple-vector) ; Direct properties
-  (transitions nil :type list))         ; V8-like links to other molds
+  (transitions (make-weak-hash-table :weakness :value :test #'eq)
+               :read-only t :type hash-table)) ; V8-like links to other molds
 
 (define-print-object ((object mold) :identity nil)
   (format t "on ~A" (mold-lineage object)))
@@ -143,8 +144,7 @@ point to Sheeple's backend class system.")
 If no such mold exists, returns NIL."
   (check-type mold mold)
   (check-type property-name property-name)
-  (awhen (cdr (assoc property-name (mold-transitions mold) :test 'eq))
-    (weak-pointer-value it)))
+  (values (gethash property-name (mold-transitions mold))))
 
 ;;;
 ;;; Mold API -- Retrieval and Automatic Creation of Molds
@@ -167,7 +167,7 @@ linking a new one if necessary."
   (or (find-transition mold property-name)
       (aprog1 (make-mold (mold-lineage mold)
                          (vector-cons property-name (mold-properties mold)) mold)
-        (aconsf (mold-transitions mold) property-name (make-weak-pointer it)))))
+        (setf (gethash property-name (mold-transitions mold)) it))))
 
 (defun ensure-mold (parents &optional (properties #()))
   "Returns the mold with properties PROPERTIES of the mold for PARENTS,

@@ -62,12 +62,11 @@ property is not set locally, a condition of type `unbound-property' is signaled.
 If the value does not exist in the hierarchy list, a condition of type `unbound-property'
 is signaled."
   (check-type property-name symbol)
-  (aif (property-position property-name object)
-       (svref (%object-property-values object) it)
-       (dolist (ancestor (mold-hierarchy (%object-mold object))
-                (error 'unbound-property :object object :property-name property-name))
-         (awhen (property-position property-name ancestor)
-           (return (svref (%object-property-values ancestor) it))))))
+  (dolist (ancestor (object-hierarchy-list object)
+           (error 'unbound-property :object object :property-name property-name))
+    (handler-bind ((unbound-property (fun (go :next))))
+      (return (direct-property-value ancestor property-name)))
+    :next))
 
 (defun (setf property-value) (new-value object property-name
                               &key (reader nil readerp) (writer nil writerp) accessor)

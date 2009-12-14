@@ -11,21 +11,19 @@
   ((name  "NoName")
    (phone "NoPhone#")))
 
-(defvar *charles*
-  (defsheep (=person=)
-      ((name "Charles"))))
+(defvar *charles* (create =person= 'name "Charles"))
 
-(defvar *jenny* (spawn =person=))
+(defvar *jenny* (create =person=))
 
 (setf (name *jenny*) "Jenny")
 (setf (phone *jenny*) "543-867-5309")
 
 (defmessage greet (person)
-  (:documentation "Greets a person"))
-(defreply greet ((person =person=))
-  (format t "Hello, ~a" (name person)))
-(defreply greet ((person *jenny*))
-  (format t "Hullo, ~a!!!" (name person)))
+  (:documentation "Greets a person")
+  (:reply ((person =person=))
+    (format t "Hello, ~a" (name person)))
+  (:reply ((person *jenny*))
+    (format t "Hullo, ~a!!!" (name person))))
 
 ;; SHEEPLE-USER> (name =person=)
 ;; "NoName"

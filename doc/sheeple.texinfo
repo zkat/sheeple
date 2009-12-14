@@ -881,7 +881,7 @@ value of an existing property, or add a brand new property to the object and set
 the value if it did not already exist.
 
 A property existing directly on a Sheeple object may be removed by using
-@ref{remove-property}, or all direct properties may be removed using
+@ref{property-makunbound}, or all direct properties may be removed using
 @ref{remove-all-direct-properties}.
 
 Finally, Sheeple provides some convenient mechanisms for inspecting and
@@ -930,7 +930,7 @@ an object if and only if there is no direct property by that name defined for
 the object either directly, or for any of its ancestors.
 
 It is important to note that @code{(SETF PROPERTY-VALUE)} is only able to assign
-direct property values only, and @code{REMOVE-PROPERTY} is only able to remove
+direct property values only, and @code{PROPERTY-MAKUNBOUND} is only able to remove
 direct properties. Thus, it is not possible to change an ancestor's direct
 property through the child (unless the value itself is side-effected), nor is it
 possible for a property to be unbound in a descendant with an ancestor that
@@ -962,7 +962,7 @@ Both of these properties will be delegated, like any regular Sheeple property.
 * property-value::
 * direct-property-value::
 * setf property-value::
-* remove-property::
+* property-makunbound::
 * remove-all-direct-properties::
 * direct-properties::
 * available-properties::
@@ -1017,7 +1017,7 @@ type @code{UNBOUND-PROPERTY} is signaled.
 
 @end defun
 
-@node setf property-value, remove-property, direct-property-value, Properties Dictionary
+@node setf property-value, property-makunbound, direct-property-value, Properties Dictionary
 @unnumberedsubsubsec (setf property-value)
 @defun {(setf property-value)} new-value object property-name
            &key reader writer accessor
@@ -1047,9 +1047,9 @@ that property that have been set in @var{object}'s hierarchy list.
 
 @end defun
 
-@node remove-property, remove-all-direct-properties, setf property-value, Properties Dictionary
-@unnumberedsubsubsec remove-property
-@defun {remove-property} object property-name &optional (errorp t)
+@node property-makunbound, remove-all-direct-properties, setf property-value, Properties Dictionary
+@unnumberedsubsubsec property-makunbound
+@defun {property-makunbound} object property-name &optional (errorp t)
        => object
 
 @strong{Arguments and Values:}
@@ -1062,15 +1062,15 @@ that property that have been set in @var{object}'s hierarchy list.
 
 @strong{Description:}
 
-@code{REMOVE-PROPERTY} will remove only a @strong{direct} property
+@code{PROPERTY-MAKUNBOUND} will remove only a @strong{direct} property
 from @var{object}. This will make the property unbound (only directly).
 
-If @var{errorp} is true (the default), @code{REMOVE-PROPERTY} will signal an
+If @var{errorp} is true (the default), @code{PROPERTY-MAKUNBOUND} will signal an
 error of type @code{UNBOUND-PROPERTY}.
 
 @end defun
 
-@node remove-all-direct-properties, direct-properties, remove-property, Properties Dictionary
+@node remove-all-direct-properties, direct-properties, property-makunbound, Properties Dictionary
 @unnumberedsubsubsec remove-all-direct-properties
 @defun {remove-all-direct-properties} object
        => object

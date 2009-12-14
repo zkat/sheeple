@@ -1052,7 +1052,7 @@ that property that have been set in @var{object}'s hierarchy list.
 
 @node property-makunbound, remove-all-direct-properties, setf property-value, Properties Dictionary
 @unnumberedsubsubsec property-makunbound
-@defun {property-makunbound} object property-name &optional (errorp t)
+@defun {property-makunbound} object property-name
        => object
 
 @strong{Arguments and Values:}
@@ -1061,15 +1061,13 @@ that property that have been set in @var{object}'s hierarchy list.
 
 @var{property-name} --- A symbol naming a direct property of @var{object}.
 
-@var{errorp} --- A generalized boolean.
-
 @strong{Description:}
 
 @code{PROPERTY-MAKUNBOUND} will remove only a @strong{direct} property
 from @var{object}. This will make the property unbound (only directly).
 
-If @var{errorp} is true (the default), @code{PROPERTY-MAKUNBOUND} will signal an
-error of type @code{UNBOUND-PROPERTY}.
+Attempting to remove a property which isn't direct will signal a condition of
+type @code{UNBOUND-PROPERTY}.
 
 @end defun
 

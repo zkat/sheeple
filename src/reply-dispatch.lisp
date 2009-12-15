@@ -13,7 +13,8 @@
 
 (defun score-reply (reply)
   (loop for rank fixnum across (the simple-vector (reply-rank-vector reply))
-     with total fixnum = 0 do (setf total (the fixnum (+ total rank)))
+     with total fixnum = 0 do
+       (setf total (the fixnum (+ total rank)))
      finally (return total)))
 
 (defun fully-specified-p (reply)
@@ -25,7 +26,8 @@
 (defun std-compute-discriminating-function (message)
   (lambda (&rest args)
     (let ((replies (find-applicable-replies message (required-portion message args))))
-      (when (null replies) (apply 'no-applicable-reply message args))
+      (when (null replies)
+        (apply 'no-applicable-reply message args))
       (let ((effective-reply (std-compute-effective-reply message replies)))
         (apply (std-compute-erfun message effective-reply) args)))))
 

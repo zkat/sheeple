@@ -106,9 +106,7 @@
                (t (error "FIXME -- bad qualifiers for a standard-message")))))))
     (cond
       ((null (primary))
-       (error 'no-primary-reply
-              :message (message-name message)
-              :args *reply-combination-args*))
+       (apply 'no-primary-reply message *reply-combination-args*))
       ;; SBCL has some optimization here. Pull it in, eventually.
       (t (let ((main-erfun `(multiple-value-prog1
                                 (progn

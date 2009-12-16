@@ -118,7 +118,7 @@ The conflict information was:~%~A"
   ("~@<There is no next reply for the message ~2I~_~S~I~_when called ~
        from reply ~2I~_~S~I~_with arguments ~2I~_~S.~:>" message reply args))
 
-(define-sheeple-condition no-primary-replies sheeple-reply-error
+(define-sheeple-condition no-primary-reply sheeple-reply-error
   ("~@<There is no primary reply for the message ~2I~_~S~
     ~I~_when called with arguments ~2I~_~S.~:>" message args))
 

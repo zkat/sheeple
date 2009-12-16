@@ -50,23 +50,11 @@
    #:no-primary-reply #:specialized-lambda-list-error #:no-next-reply
    ))
 
-(defpackage #:standard-sheeple
-  (:use :cl)
-  (:nicknames :std-sheeple)
-  (:export
-
-   ;; properties
-   :direct-property-p :remove-property :remove-all-direct-properties
-   :direct-property-value :property-value :property-owner
-   :direct-properties :available-properties :property-makunbound
-   :remove-all-direct-properties
-   ))
-
 (defpackage #:sheeple-metaobject-protocol
   (:use :cl)
   (:nicknames :smop :sheeple-mop)
   (:export
-   
+
    ;; properties
    :direct-property-p :remove-property :remove-all-direct-properties
    :direct-property-value :property-value :property-owner

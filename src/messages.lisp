@@ -186,6 +186,8 @@ Raises an error if no message is found, unless ERRORP is NIL."
 ;; The defmessage macro basically expands to a call to this function (after processing
 ;; its args, checking lamda-list, etc.)
 (defun ensure-message (name &rest all-keys &key lambda-list &allow-other-keys)
+  ;; FIXME: We really oughtta perform the fboundp check here. We could do things
+  ;; properly if we had funcallable messages.
   (or (awhen-prog1 (find-message name nil)
         (update-arg-info it lambda-list))
       (setf (%find-message name)
@@ -193,6 +195,10 @@ Raises an error if no message is found, unless ERRORP is NIL."
 
 ;; This handles actual setup of the message object (and finalization)
 (defun make-message (&key name lambda-list documentation)
+  ;; FIXME: This check should really go in ensure-message. We could avoid
+  ;; this kind of kludge if we had funcallable messages.
+  (when (and (fboundp name) (not (find-message name nil)))
+    (cerror "Replace definition." 'clobbering-function-definition :function name))
   (let ((message (%make-message name lambda-list)))
     (set-arg-info message lambda-list)
     (finalize-message message)
@@ -202,15 +208,9 @@ Raises an error if no message is found, unless ERRORP is NIL."
 ;; Finalizing a message sets the function definition of the message to a
 ;; lambda that calls the top-level dispatch function on the message args.
 (defun finalize-message (message)
-  (let ((name (message-name message)))
-    ;; I'm not sure that this needs to happen every single time a message
-    ;; is finalized -- that's gonna happen very often now. Maybe this
-    ;; check should happen at the start of ensure-message or somesuch?
-    (when (and (fboundp name) (not (find-message name nil)))
-      (cerror "Replace definition." 'clobbering-function-definition :function name))
-    (setf (message-discriminating-function message)
-          (std-compute-discriminating-function message)
-          (fdefinition name) (message-discriminating-function message)))
+  (setf (message-discriminating-function message) (std-compute-discriminating-function message)
+        ;; FIXME: We could avoid this kind of kludge IF WE ONLY HAD FUNCALLABLE MESSAGES.
+        (fdefinition (message-name message))      (message-discriminating-function message))
   (flush-erfun-cache message)
   (values))
 

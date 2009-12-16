@@ -26,7 +26,7 @@
 
    ;; Property access
    #:property-value #:direct-property-value #:available-properties
-   #:remove-property #:remove-all-direct-properties
+   #:remove-property #:property-makunbound #:remove-all-direct-properties
    #:direct-property-p #:with-properties #:direct-properties
 
    ;; Messages
@@ -58,7 +58,8 @@
    ;; properties
    :direct-property-p :remove-property :remove-all-direct-properties
    :direct-property-value :property-value :property-owner
-   :direct-properties :available-properties
+   :direct-properties :available-properties :property-makunbound
+   :remove-all-direct-properties
    ))
 
 (defpackage #:sheeple-metaobject-protocol
@@ -69,7 +70,8 @@
    ;; properties
    :direct-property-p :remove-property :remove-all-direct-properties
    :direct-property-value :property-value :property-owner
-   :direct-properties :available-properties
+   :direct-properties :available-properties :property-makunbound
+   :remove-all-direct-properties
    ))
 
 (defpackage #:sheeple-user

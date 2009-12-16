@@ -53,3 +53,8 @@
   (:documentation "Called by `call-next-reply' when there is no next reply.")
   (:reply (message reply &rest args)
     (error 'no-next-reply :message message :reply reply :args args)))
+
+(defmessage no-primary-reply (message &rest args)
+  (:documentation "Called when no primary reply is applicable for a message invocation.")
+  (:reply (message &rest args)
+    (error 'no-primary-reply :message message :args args)))

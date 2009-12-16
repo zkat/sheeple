@@ -26,7 +26,10 @@
 (defun std-compute-discriminating-function (message)
   (lambda (&rest args)
     (let ((replies (find-applicable-replies message (required-portion message args))))
-      (apply (compute-effective-reply-function message replies args) args))))
+      (apply (or (cached-erfun message replies)
+                 (setf (cached-erfun message replies)
+                       (compute-effective-reply-function message replies args)))
+             args))))
 
 (defun primary-reply-p (reply)
   (null (reply-qualifiers reply)))

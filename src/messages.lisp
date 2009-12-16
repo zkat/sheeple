@@ -48,6 +48,7 @@
                     (:predicate messagep))
   (name (error "Must supply a name") :read-only t)
   (discriminating-function (constantly nil) :type function)
+  (erfun-cache (make-hash-table :test #'equal))
   (lambda-list (error "Must supply a lambda-list") :type list)
   (replies nil :type list)
   (documentation nil :type (or string null))
@@ -57,6 +58,19 @@
   (key/rest-p nil :type boolean))
 
 (define-print-object ((message message)) (format t "~S" (message-name message)))
+
+;;;
+;;; Erfun Cache
+;;;
+
+(defun cached-erfun (message replies)
+  (gethash replies (message-erfun-cache message)))
+
+(defun (setf cached-erfun) (new-erfun message replies)
+  (setf (gethash replies (message-erfun-cache message)) new-erfun))
+
+(defun flush-erfun-cache (message)
+  (clrhash (message-erfun-cache message)))
 
 ;;;
 ;;; Message Documentation
@@ -197,6 +211,7 @@ Raises an error if no message is found, unless ERRORP is NIL."
     (setf (message-discriminating-function message)
           (std-compute-discriminating-function message)
           (fdefinition name) (message-discriminating-function message)))
+  (flush-erfun-cache message)
   (values))
 
 (defun apply-message (message args)

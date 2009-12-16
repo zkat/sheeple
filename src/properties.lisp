@@ -21,7 +21,7 @@ property is not set locally, a condition of type `unbound-property' is signaled.
   (check-type property-name symbol)
   (if (std-object-p object)
       (std-direct-property-value object property-name)
-      (smop:direct-property-value (object-metaobject object) property-name)))
+      (smop:direct-property-value (object-metaobject object) object property-name)))
 (defun std-direct-property-value (object property-name)
   (aif (property-position property-name object)
        (svref (%object-property-values object) it)
@@ -140,7 +140,7 @@ set directly in OBJECT using (setf property-value). The consequences of side-eff
 returned list are undefined."
   (if (std-object-p object)
       (std-direct-properties object)
-      (smop:direct-properties object)))
+      (smop:direct-properties (object-metaobject object) object)))
 (defun std-direct-properties (object)
   (coerce (mold-properties (%object-mold object)) 'list))
 
@@ -148,7 +148,7 @@ returned list are undefined."
   "Returns a list of the names of all properties available to OBJECT, including inherited ones."
   (if (std-object-p object)
       (std-available-properties object)
-      (smop:available-properties object)))
+      (smop:available-properties (object-metaobject object) object)))
 (defun std-available-properties (object)
   (delete-duplicates (nconc (copy-list (direct-properties object))
                             (mapcan 'available-properties (object-parents object)))))

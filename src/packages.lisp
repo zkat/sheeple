@@ -47,7 +47,7 @@
    #:clobbering-function-definition #:sheeple-message-error #:insufficient-message-args
    #:no-such-message #:message-lambda-list-error #:sheeple-reply-error #:reply-argument-conflict
    #:automatic-message-creation #:reply-lambda-list-conflict #:no-applicable-reply
-   #:no-primary-reply #:specialized-lambda-list-error
+   #:no-primary-reply #:specialized-lambda-list-error #:no-next-reply
    ))
 
 (defpackage #:sheeple-user

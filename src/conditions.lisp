@@ -119,7 +119,8 @@ The conflict information was:~%~A"
        from reply ~2I~_~S~I~_with arguments ~2I~_~S.~:>" message reply args))
 
 (define-sheeple-condition no-primary-replies sheeple-reply-error
-  ("There are no primary replies for message ~A." message))
+  ("~@<There is no primary reply for the message ~2I~_~S~
+    ~I~_when called with arguments ~2I~_~S.~:>" message args))
 
 (define-condition specialized-lambda-list-error (sheeple-error) ())
 

@@ -25,7 +25,7 @@
 
 (defun std-compute-discriminating-function (message)
   (lambda (&rest args)
-    (let ((replies (find-applicable-replies message (required-portion message args))))
+    (let ((replies (compute-applicable-replies message (required-portion message args))))
       (apply (or (cached-erfun message replies)
                  (setf (cached-erfun message replies)
                        (compute-effective-reply-function message replies args)))
@@ -127,7 +127,7 @@
   (and (eq message (role-message role))
        (= index (the fixnum (role-position role)))))
 
-(defun find-applicable-replies (message args)
+(defun compute-applicable-replies (message args)
   "Returns a sorted list of replies on MESSAGE for which appropriate roles
 are present in ARGS."
   (declare (list args))

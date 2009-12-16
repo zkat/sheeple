@@ -10,26 +10,7 @@
 (in-package :sheeple)
 
 (defun property-position (property-name object)
-  (position property-name (mold-properties (%object-mold object)) :test #'eq :key #'propd-name))
-
-(defun find-propd (object property-name)
-  (find property-name (mold-properties (%object-mold object)) :test #'eq :key #'propd-name))
-
-;;;
-;;; Property Metaobjects
-;;;
-(define-bound-variable =property=)
-(defparameter *the-property-definition-form*
-  '(defproto =property= ()
-    ((propd-name nil)
-     (propd-readers nil)
-     (propd-writers nil))))
-(defun propd-name (property)
-  (direct-property-value property 'propd-name))
-(defun propd-readers (property)
-  (property-value property 'propd-readers))
-(defun propd-writers (property)
-  (property-value property 'propd-writers))
+  (position property-name (mold-properties (%object-mold object)) :test #'eq))
 
 ;;;
 ;;; Base Property API
@@ -38,10 +19,12 @@
   "Returns the property-value set locally in OBJECT for PROPERTY-NAME. If the
 property is not set locally, a condition of type `unbound-property' is signaled."
   (check-type property-name symbol)
-  (aif (find-propd object property-name)
-       (if (std-object-p object)
-           (std-sheeple:direct-property-value object it)
-           (smop:direct-property-value (object-metaobject object) it))
+  (if (std-object-p object)
+      (std-sheeple:direct-property-value object property-name)
+      (smop:direct-property-value (object-metaobject object) property-name)))
+(defun std-sheeple:direct-property-value (object property-name)
+  (aif (property-position property-name object)
+       (svref (%object-property-values object) it)
        (restart-case (error 'unbound-property :object object :property-name property-name)
          (continue ()
            :report "Try accessing the property again."
@@ -52,12 +35,7 @@ property is not set locally, a condition of type `unbound-property' is signaled.
                           (format *query-io* "~&Value to use: ")
                           (list (read *query-io*)))
            value))))
-(defun std-sheeple:direct-property-value (object propd)
-  (svref (%object-property-values object) (property-position propd object)))
 
-;;;
-;;; Value
-;;;
 (defun property-value (object property-name)
   "Returns the property-value for PROPERTY-NAME found first in OBJECT's hierarchy list.
 If the value does not exist in the hierarchy list, a condition of type `unbound-property'

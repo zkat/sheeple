@@ -26,7 +26,7 @@
 (defun std-compute-discriminating-function (message)
   (lambda (&rest args)
     (let ((replies (find-applicable-replies message (required-portion message args))))
-      (apply (compute-effective-reply-function message replies) args))))
+      (apply (compute-effective-reply-function message replies args) args))))
 
 (defun primary-reply-p (reply)
   (null (reply-qualifiers reply)))
@@ -40,7 +40,12 @@
 (defun around-reply-p (reply)
   (eq :around (car (reply-qualifiers reply))))
 
-(defun compute-effective-reply-function (message replies #|*reply-combination-arguments*|#)
+;;; This makes the argument list accessible to error functions like `no-primary-replies'
+;;; which are called from deeper within the dispatch machinery. Passing the arguments
+;;; down through each function call would suck.
+(defvar *reply-combination-args*)
+
+(defun compute-effective-reply-function (message replies *reply-combination-args*)
   ;; This will eventually have some special-casing to break MOP
   ;; metacircularities, and call `sheeple:compute-effective-reply'
   ;; if MESSAGE isn't a standard-message or special message.

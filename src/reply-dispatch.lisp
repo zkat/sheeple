@@ -28,8 +28,7 @@
     (let ((replies (find-applicable-replies message (required-portion message args))))
       (when (null replies)
         (apply 'no-applicable-reply message args))
-      (let ((effective-reply (std-compute-effective-reply message replies)))
-        (apply (compile-effective-reply message effective-reply) args)))))
+      (apply (compute-effective-reply-function message replies) args))))
 
 (defun primary-reply-p (reply)
   (null (reply-qualifiers reply)))
@@ -42,6 +41,12 @@
 
 (defun around-reply-p (reply)
   (eq :around (car (reply-qualifiers reply))))
+
+(defun compute-effective-reply-function (message replies #|*reply-combination-arguments*|#)
+  ;; This will eventually have some special-casing to break MOP
+  ;; metacircularities, and call `sheeple:compute-effective-reply'
+  ;; if MESSAGE isn't a standard-message or special message.
+  (compile-effective-reply message (std-compute-effective-reply message replies)))
 
 (defun compile-effective-reply (message effective-reply)
   (with-gensyms (args)

@@ -26,8 +26,6 @@
 (defun std-compute-discriminating-function (message)
   (lambda (&rest args)
     (let ((replies (find-applicable-replies message (required-portion message args))))
-      (when (null replies)
-        (apply 'no-applicable-reply message args))
       (apply (compute-effective-reply-function message replies) args))))
 
 (defun primary-reply-p (reply)
@@ -46,7 +44,9 @@
   ;; This will eventually have some special-casing to break MOP
   ;; metacircularities, and call `sheeple:compute-effective-reply'
   ;; if MESSAGE isn't a standard-message or special message.
-  (compile-effective-reply message (std-compute-effective-reply message replies)))
+  (if (null replies)
+      (lambda (&rest args) (apply 'no-applicable-reply message args))
+      (compile-effective-reply message (std-compute-effective-reply message replies))))
 
 (defun compile-effective-reply (message effective-reply)
   (with-gensyms (args)

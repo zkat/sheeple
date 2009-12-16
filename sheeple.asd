@@ -24,7 +24,11 @@
              (:file "reply-definition")
              (:file "reply-dispatch")
              (:file "bootstrap")
-             (:file "post-boot")))))
+             (:file "post-boot")
+             (:module mop
+                      :serial t
+                      :components
+                      ((:file "properties")))))))
 
 (asdf:defsystem sheeple-tests
   :version "Baahh"

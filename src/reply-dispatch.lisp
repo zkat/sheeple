@@ -29,7 +29,7 @@
       (when (null replies)
         (apply 'no-applicable-reply message args))
       (let ((effective-reply (std-compute-effective-reply message replies)))
-        (apply (std-compute-erfun message effective-reply) args)))))
+        (apply (compile-effective-reply message effective-reply) args)))))
 
 (defun primary-reply-p (reply)
   (null (reply-qualifiers reply)))
@@ -43,7 +43,7 @@
 (defun around-reply-p (reply)
   (eq :around (car (reply-qualifiers reply))))
 
-(defun std-compute-erfun (message effective-reply)
+(defun compile-effective-reply (message effective-reply)
   (with-gensyms (args)
     (labels ((transform-effective-reply (form)
                (if (atom form) form

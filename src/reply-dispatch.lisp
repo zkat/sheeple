@@ -40,7 +40,7 @@
 (defun around-reply-p (reply)
   (eq :around (car (reply-qualifiers reply))))
 
-;;; This makes the argument list accessible to error functions like `no-primary-replies'
+;;; This makes the argument list accessible to error functions like `no-primary-reply'
 ;;; which are called from deeper within the dispatch machinery. Passing the arguments
 ;;; down through each function call would suck.
 (defvar *reply-combination-args*)
@@ -106,7 +106,7 @@
                (t (error "FIXME -- bad qualifiers for a standard-message")))))))
     (cond
       ((null (primary))
-       (error 'no-primary-replies
+       (error 'no-primary-reply
               :message (message-name message)
               :args *reply-combination-args*))
       ;; SBCL has some optimization here. Pull it in, eventually.

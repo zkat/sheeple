@@ -229,7 +229,7 @@
                          ,@(canonize-message-options options)))
        ,@(when replies
            `(,@(mapcar (fun `(defreply ,name ,@(cdr _))) replies)
-               (find-message ',name))))))
+               #',name)))))
 
 (defun canonize-message-option (option)
   `(,(car option) ,(cadr option)))

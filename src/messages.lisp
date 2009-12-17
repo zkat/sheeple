@@ -185,31 +185,28 @@
 ;; The defmessage macro basically expands to a call to this function (after processing
 ;; its args, checking lamda-list, etc.)
 (defun ensure-message (name &rest all-keys &key lambda-list &allow-other-keys)
-  ;; FIXME: We really oughtta perform the fboundp check here. We could do things
-  ;; properly if we had funcallable messages.
-  (or (awhen-prog1 (find-message name nil)
-        (update-arg-info it lambda-list))
-      (setf (%find-message name)
-            (apply 'make-message :name name :lambda-list lambda-list all-keys))))
+  (let* ((fn (fboundp name))
+         (messagep (messagep fn)))
+    (when (and fn (not messagep))
+      (cerror "Replace definition." 'clobbering-function-definition :function name))
+    (if messagep (update-arg-info fn lambda-list)
+        (setf (fdefinition name)
+              (apply 'make-message :name name :lambda-list lambda-list all-keys))))
+  (fdefinition name))
 
 ;; This handles actual setup of the message object (and finalization)
 (defun make-message (&key name lambda-list documentation)
-  ;; FIXME: This check should really go in ensure-message. We could avoid
-  ;; this kind of kludge if we had funcallable messages.
-  (when (and (fboundp name) (not (find-message name nil)))
-    (cerror "Replace definition." 'clobbering-function-definition :function name))
-  (let ((message (%make-message name lambda-list)))
-    (set-arg-info message lambda-list)
-    (finalize-message message)
-    (setf (documentation message t) documentation)
-    message))
+  (aprog1 (allocate-message)
+    (setf (message-name        it) name
+          (message-lambda-list it) lambda-list)
+    (set-arg-info it lambda-list)
+    (finalize-message it)
+    (setf (documentation it t) documentation)))
 
 ;; Finalizing a message sets the function definition of the message to a
 ;; lambda that calls the top-level dispatch function on the message args.
 (defun finalize-message (message)
-  (setf (message-discriminating-function message) (std-compute-discriminating-function message)
-        ;; FIXME: We could avoid this kind of kludge IF WE ONLY HAD FUNCALLABLE MESSAGES.
-        (fdefinition (message-name message))      (message-discriminating-function message))
+  (setf (message-function message) (std-compute-discriminating-function message))
   (flush-erfun-cache message)
   (values))
 

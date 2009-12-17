@@ -104,6 +104,12 @@
   ;; FIXME: Now would be a nice time to chat about what a message is
   '(satisfies messagep))
 
+(defun pprint-message (stream message)
+  (print-unreadable-object (message stream :identity t)
+    (format stream "MESSAGE ~S" (message-name message))))
+
+(set-pprint-dispatch 'message #'pprint-message)
+
 ;;;
 ;;; Erfun Cache
 ;;;

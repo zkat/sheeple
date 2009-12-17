@@ -21,8 +21,7 @@
    ;; Objects
    #:object #:defobject #:defproto #:clone #:objectp #:object-parents #:ancestorp #:parentp
    #:descendantp #:childp #:init-object #:shared-init #:reinit-object #:print-sheeple-object
-   #:object-nickname #:object-hierarchy-list #:create #:allocate-object
-   #:compute-object-hierarchy-list-using-metaobject
+   #:object-nickname #:object-hierarchy-list #:create
 
    ;; Property access
    #:property-value #:direct-property-value #:available-properties
@@ -54,8 +53,10 @@
   (:use :cl)
   (:nicknames :smop :sheeple-mop)
   (:export
+   ;; Objects
+   #:allocate-object #:compute-object-hierarchy-list-using-metaobject
 
-   ;; properties
+   ;; Properties
    :direct-property-p :remove-property :remove-all-direct-properties
    :direct-property-value :property-value :property-owner
    :direct-properties :available-properties :property-makunbound

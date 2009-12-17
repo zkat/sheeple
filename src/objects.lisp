@@ -187,7 +187,7 @@ creating and linking a new one if necessary."
 (defun maybe-std-allocate-object (metaobject)
   (if (eq =standard-metaobject= metaobject)
       (std-allocate-object metaobject)
-      (funcall 'allocate-object metaobject)))
+      (funcall 'smop:allocate-object metaobject)))
 
 (defun std-print-sheeple-object (object stream)
   (print-unreadable-object (object stream :identity t)
@@ -303,7 +303,7 @@ its parents."
   "Computes the full hierarchy-list for OBJECT"
   (if (eq =standard-metaobject= (%object-metaobject object))
       (std-compute-object-hierarchy-list object)
-      (funcall 'compute-object-hierarchy-list-using-metaobject
+      (funcall 'smop:compute-object-hierarchy-list-using-metaobject
                (%object-metaobject object) object)))
 
 (defun object-hierarchy-list (object)

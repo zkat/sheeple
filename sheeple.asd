@@ -5,7 +5,6 @@
   :description "Cheeky prototypes for Common Lisp"
   :author "Josh Marchan <sykopomp at sykosomatic-dot-org>"
   :licence "MIT"
-  :depends-on ()
   :serial t
   :components
   ((:module src
@@ -25,10 +24,11 @@
              (:file "reply-dispatch")
              (:file "bootstrap")
              (:file "post-boot")
-             (:module mop
+             (:module "mop"
                       :serial t
                       :components
-                      ((:file "properties")))))))
+                      ((:file "objects")
+                       (:file "properties")))))))
 
 (asdf:defsystem sheeple-tests
   :version "Baahh"
@@ -38,7 +38,7 @@
   :depends-on (:sheeple :fiveam)
   :serial t
   :components
-  ((:module tests
+  ((:module "tests"
             :serial t
             :components
             ((:file "setup-tests")

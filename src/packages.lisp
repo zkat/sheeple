@@ -4,17 +4,17 @@
   (:use :cl)
   (:shadow :make-hash-table)
   (:export
+   #:cancel-finalization
+   #:finalize
    #:gc
-   #:weak-pointer
+   #:hash-table-weakness
+   #:make-weak-hash-table
    #:make-weak-pointer
-   #:weak-pointer-value
-   #:weak-pointer-p
    #:maybe-make-weak-pointer
    #:maybe-weak-pointer-value
-   #:make-weak-hash-table
-   #:hash-table-weakness
-   #:finalize
-   #:cancel-finalization
+   #:weak-pointer
+   #:weak-pointer-p
+   #:weak-pointer-value
    ))
 
 (defpackage #:sheeple
@@ -22,68 +22,68 @@
   (:export
 
    ;; Objects
-   #:object
+   #:ancestorp
+   #:childp
+   #:clone
+   #:create
    #:defobject
    #:defproto
-   #:clone
-   #:objectp
-   #:object-parents
-   #:ancestorp
-   #:parentp
    #:descendantp
-   #:childp
    #:init-object
-   #:shared-init
-   #:reinit-object
-   #:print-sheeple-object
-   #:object-nickname
+   #:object
    #:object-hierarchy-list
-   #:create
+   #:object-nickname
+   #:object-parents
+   #:objectp
+   #:parentp
+   #:print-sheeple-object
+   #:reinit-object
+   #:shared-init
 
    ;; Property access
-   #:property-value
-   #:direct-property-value
    #:available-properties
-   #:remove-property
-   #:property-makunbound
-   #:remove-all-direct-properties
-   #:direct-property-p
-   #:with-properties
    #:direct-properties
+   #:direct-property-p
+   #:direct-property-value
+   #:property-makunbound
+   #:property-value
+   #:remove-all-direct-properties
+   #:remove-property
+   #:with-properties
 
    ;; Messages
+   #:call-next-reply
+   #:available-replies
    #:defmessage
    #:defreply
-   #:available-replies
+   #:next-reply-p
+   #:participantp
    #:undefmessage
    #:undefreply
-   #:participantp
-   #:call-next-reply
-   #:next-reply-p
 
    ;; Protos
-   #:=standard-metaobject=
-   #:=standard-object=
-   #:=t=
-   #:=null=
-   #:=symbol=
-   #:=complex=
-   #:=integer=
-   #:=float=
-   #:=cons=
+   #:=array=
+   #:=bit-vector=
+   #:=boxed-object=
    #:=character=
+   #:=complex=
+   #:=cons=
+   #:=float=
+   #:=function=
    #:=hash-table=
+   #:=integer=
+   #:=null=
+   #:=number=
    #:=package=
    #:=pathname=
    #:=readtable=
+   #:=standard-metaobject=
+   #:=standard-object=
    #:=stream=
-   #:=number=
    #:=string=
-   #:=bit-vector=
+   #:=symbol=
+   #:=t=
    #:=vector=
-   #:=array=
-   #:=function=
-   #:=boxed-object=
 
    ;; built-ins
    #:box-type-of
@@ -91,26 +91,26 @@
    #:objectify
 
    ;; Conditions
-   #:sheeple-error
-   #:sheeple-warning
-   #:topological-sort-conflict
+   #:automatic-message-creation
+   #:clobbering-function-definition
+   #:insufficient-message-args
+   #:message-lambda-list-error
+   #:no-applicable-reply
+   #:no-next-reply
+   #:no-primary-reply
+   #:no-such-message
    #:object-hierarchy-error
    #:object-property-error
+   #:reply-argument-conflict
+   #:reply-lambda-list-conflict
+   #:sheeple-error
+   #:sheeple-message-error
+   #:sheeple-reply-error
+   #:sheeple-warning
+   #:specialized-lambda-list-error
+   #:topological-sort-conflict
    #:unbound-property
    #:unbound-direct-property
-   #:clobbering-function-definition
-   #:sheeple-message-error
-   #:insufficient-message-args
-   #:no-such-message
-   #:message-lambda-list-error
-   #:sheeple-reply-error
-   #:reply-argument-conflict
-   #:automatic-message-creation
-   #:reply-lambda-list-conflict
-   #:no-applicable-reply
-   #:no-primary-reply
-   #:specialized-lambda-list-error
-   #:no-next-reply
    ))
 
 (defpackage #:sheeple-metaobject-protocol
@@ -122,16 +122,16 @@
    #:compute-object-hierarchy-list-using-metaobject
 
    ;; Properties
-   :direct-property-p
-   :remove-property
-   :remove-all-direct-properties
-   :direct-property-value
-   :property-value
-   :property-owner
-   :direct-properties
    :available-properties
+   :direct-properties
+   :direct-property-p
+   :direct-property-value
    :property-makunbound
+   :property-owner
+   :property-value
    :remove-all-direct-properties
+   :remove-all-direct-properties
+   :remove-property
    ))
 
 (defpackage #:sheeple-user

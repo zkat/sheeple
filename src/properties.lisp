@@ -22,8 +22,8 @@
 ;;;
 (define-bound-variables =property= *the-standard-property-child-mold*)
 (defvar *the-standard-property-form*
-  '(defproto =standard-property= ()
-    ((property-name nil))))
+  `(defproto =standard-property= ()
+     ((name nil :accessor property-name))))
 
 (defun std-property-p (propd)
   (eq (%object-mold propd) *the-standard-property-child-mold*))

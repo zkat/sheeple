@@ -20,13 +20,13 @@
 ;;;
 ;;; Property prototype
 ;;;
-(define-bound-variables =property= *the-standard-property-child*)
+(define-bound-variables =property= *the-standard-property-child-mold*)
 (defvar *the-standard-property-form*
   '(defproto =standard-property= ()
     ((property-name nil))))
 
 (defun std-property-p (propd)
-  (eq propd *the-standard-property-child*))
+  (eq (%object-mold propd) *the-standard-property-child-mold*))
 
 ;;;
 ;;; Base Property API

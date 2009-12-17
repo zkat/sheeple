@@ -13,6 +13,14 @@
   (position property-name (mold-properties (%object-mold object)) :test #'eq))
 
 ;;;
+;;; Property prototype
+;;;
+(define-bound-variable =property=)
+(defvar *the-standard-property-form*
+  '(defproto =property= ()
+    ((property-name nil))))
+
+;;;
 ;;; Base Property API
 ;;;
 (defun direct-property-value (object property-name)

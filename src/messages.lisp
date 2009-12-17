@@ -44,15 +44,14 @@
 ;;;   can be defined, and the message object can be used as an obvious place to store the cached
 ;;;   dispatch information.
 
-(defstruct (message (:constructor %make-message (name lambda-list))
+(defstruct (message (:constructor %make-message)
                     (:predicate messagep))
-  (name (error "Must supply a name") :read-only t)
-  (discriminating-function (constantly nil) :type function)
+  name function
   (erfun-cache (make-hash-table :test #'equal))
-  (lambda-list (error "Must supply a lambda-list") :type list)
   (replies nil :type list)
   (documentation nil :type (or string null))
   ;; These are for argument info
+  (lambda-list nil :type list)
   (number-required 0 :type fixnum)
   (number-optional 0 :type fixnum)
   (key/rest-p nil :type boolean))

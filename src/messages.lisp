@@ -44,8 +44,9 @@
 ;;;   can be defined, and the message object can be used as an obvious place to store the cached
 ;;;   dispatch information.
 
-(defstruct (message (:constructor %make-message)
-                    (:predicate messagep))
+(defstruct (%message
+             (:constructor %make-message ())
+             (:predicate %messagep))
   name function
   (erfun-cache (make-hash-table :test #'equal))
   (replies nil :type list)

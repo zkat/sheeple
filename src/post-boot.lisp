@@ -10,14 +10,6 @@
 (in-package :sheeple)
 
 ;;;
-;;; Extensible Object Creation
-;;;
-(defmessage create (proto &key)
-  (:documentation "Creates a PROTO. Intended for customization.")
-  (:reply (proto &rest properties)
-    (object :parents `(,proto) :properties (plist-to-wide-alist properties))))
-
-;;;
 ;;; Printing Objects!
 ;;;
 (defmessage print-sheeple-object (object stream)

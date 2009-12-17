@@ -210,9 +210,6 @@
   (flush-erfun-cache message)
   (values))
 
-(defun apply-message (message args)
-  (apply (message-discriminating-function message) args))
-
 ;;; defmessage macro
 
 ;; This is the actual message definition macro.
@@ -240,9 +237,5 @@
 ;;;
 ;;; Undefinition
 ;;;
-(defun undefine-message (name)
-  (forget-message name)
-  (fmakunbound name))
-
 (defmacro undefmessage (name)
-  `(undefine-message ',name))
+  `(fmakunbound ',name))

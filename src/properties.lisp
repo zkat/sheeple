@@ -35,16 +35,17 @@
   "Returns the property-value set locally in OBJECT for PROPERTY-NAME. If the
 property is not set locally, a condition of type `unbound-property' is signaled."
   (check-type property-name symbol)
-  (if (std-object-p object)
-      (std-direct-property-value object property-name)
-      (smop:direct-property-value (object-metaobject object) object property-name)))
-(defun std-direct-property-value (object property-name)
-  (aif (property-position property-name object)
+  (let ((propd (find-property-definition object property-name)))
+    (if (and (std-object-p object) (std-property-p propd))
+        (std-direct-property-value object propd)
+        (smop:direct-property-value (object-metaobject object) object property-name))))
+(defun std-direct-property-value (object propd)
+  (aif (property-position object propd)
        (svref (%object-property-values object) it)
-       (restart-case (error 'unbound-property :object object :property-name property-name)
+       (restart-case (error 'unbound-property :object object :property-name (property-name propd))
          (continue ()
            :report "Try accessing the property again."
-           (direct-property-value object property-name))
+           (direct-property-value object propd))
          (use-value (value)
            :report "Return a value."
            :interactive (lambda ()

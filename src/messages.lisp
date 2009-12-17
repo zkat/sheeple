@@ -56,8 +56,6 @@
   (number-optional 0 :type fixnum)
   (key/rest-p nil :type boolean))
 
-(define-print-object ((message message)) (format t "~S" (message-name message)))
-
 ;;;
 ;;; Erfun Cache
 ;;;

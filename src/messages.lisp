@@ -70,6 +70,33 @@
               (apply (%message-function message) args))
       (setf (gethash it *funcallable-messages*) message))))
 
+(macrolet ((with-%message ((name message) &body body)
+             (with-gensyms (foundp)
+               `(multiple-value-bind (,name ,foundp)
+                    (gethash ,message *funcallable-messages*)
+                  (if ,foundp (progn ,@body)
+                      ;; Note the multiple evaluation of ,message
+                      (error 'type-error :datum ,message :expected-type 'message))))))
+  (macrolet ((define-message-accessor (slot)
+               (let ((%message-accessor (symbolicate '#:%message- slot))
+                     (message-accessor (symbolicate '#:message- slot)))
+                 `(progn
+                    (defun ,message-accessor (message)
+                      (with-%message (%message message)
+                        (,%message-accessor %message)))
+                    (defun (setf ,message-accessor) (new-value message)
+                      (with-%message (%message message)
+                        (setf (,%message-accessor %message) new-value)))))))
+    (define-message-accessor name)
+    (define-message-accessor function)
+    (define-message-accessor erfun-cache)
+    (define-message-accessor replies)
+    (define-message-accessor documentation)
+    (define-message-accessor lambda-list)
+    (define-message-accessor number-required)
+    (define-message-accessor number-optional)
+    (define-message-accessor key/rest-p)))
+
 ;;;
 ;;; Erfun Cache
 ;;;

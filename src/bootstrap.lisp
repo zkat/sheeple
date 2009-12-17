@@ -77,7 +77,7 @@
     (apply #'shared-init object initargs)))
 
 ;;; And, we need to mirror the CL type system:
-(defproto =boxed-object= =t= ())
+(defproto =boxed-object= =t=)
 
 (macrolet ((define-boxed-objects (&body names)
              `(progn ,@(loop for (name . parents) in (mapcar 'ensure-list names)

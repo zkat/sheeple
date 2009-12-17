@@ -18,7 +18,6 @@
 (defun direct-property-value (object property-name)
   "Returns the property-value set locally in OBJECT for PROPERTY-NAME. If the
 property is not set locally, a condition of type `unbound-property' is signaled."
-  (check-type property-name symbol)
   (if (std-object-p object)
       (std-direct-property-value object property-name)
       (smop:direct-property-value (object-metaobject object) object property-name)))
@@ -44,7 +43,6 @@ is signaled."
       (std-property-value object property-name)
       (smop:property-value (object-metaobject object) object property-name)))
 (defun std-property-value (object property-name)
-  (check-type property-name symbol)
   (dolist (ancestor (object-hierarchy-list object)
            (error 'unbound-property :object object :property-name property-name))
     (handler-bind ((unbound-property (fun (go :next))))
@@ -60,7 +58,6 @@ PROPERTY-NAME."
              (object-metaobject object) object property-name options)))
 (defun (setf std-property-value) (new-value object property-name
                                           &key (reader nil readerp) (writer nil writerp) accessor)
-  (check-type property-name symbol)
   ;; (SETF PROPERTY-VALUE) is split into two parts.
   ;; The first actually adds a property-value directly on the object:
   (aif (property-position property-name object)

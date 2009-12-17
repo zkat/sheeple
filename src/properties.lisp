@@ -108,7 +108,7 @@ direct property. Returns OBJECT."
       (std-remove-all-direct-properties object)
       (smop:remove-all-direct-properties (object-metaobject object) object)))
 (defun std-remove-all-direct-properties (object)
-  (change-mold object (ensure-mold (object-parents object) #()))
+  (change-mold object (ensure-mold (object-parents object)))
   object)
 
 ;;;

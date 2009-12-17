@@ -52,10 +52,6 @@
 ;;;
 ;;; Data definitions
 ;;;
-(deftype property-name ()
-  "A valid name for an object's property."
-  'symbol)
-
 (defstruct (mold
              (:predicate moldp)
              (:constructor make-mold (lineage properties &optional back)))
@@ -146,7 +142,6 @@ point to Sheeple's backend class system.")
   "Returns the mold which adds a property named PROPERTY-NAME to MOLD.
 If no such mold exists, returns NIL."
   (check-type mold mold)
-  (check-type property-name property-name)
   (values (gethash property-name (mold-transitions mold))))
 
 ;;;
@@ -166,7 +161,6 @@ If no such mold exists, returns NIL."
   "Returns the transition from MOLD indexed by PROPERTY-NAME, creating and
 linking a new one if necessary."
   (check-type mold mold)
-  (check-type property-name property-name)
   (or (find-transition mold property-name)
       (aprog1 (make-mold (mold-lineage mold)
                          (vector-cons property-name (mold-properties mold)) mold)

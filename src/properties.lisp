@@ -9,15 +9,20 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(defun property-position (property-name object)
-  (position property-name (mold-properties (%object-mold object)) :test #'eq))
+(defun property-position (object propd)
+  (if (std-property-p propd) ; do we need the name, too?
+      0 ; what goes here?...
+      (position propd (mold-properties (%object-mold object)) :test #'eq :key #'property-name)))
 
+(defun find-property-definition (object property-name)
+  ;; todo
+  )
 ;;;
 ;;; Property prototype
 ;;;
 (define-bound-variables =property= *the-standard-property-child*)
 (defvar *the-standard-property-form*
-  '(defproto =property= ()
+  '(defproto =standard-property= ()
     ((property-name nil))))
 
 (defun std-property-p (propd)

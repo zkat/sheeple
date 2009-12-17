@@ -93,32 +93,6 @@
     (no-such-message ())))
 
 ;;;
-;;; Message definition
-;;;
-
-(defvar *message-table* (make-hash-table :test 'equal)
-  "Hashtable for storing message objects.") ; EQUAL test accomodates setf messages
-
-;; We define these two as internal first, so we don't export (setf find-message)
-(declaim (inline %find-message))
-(defun %find-message (name)
-  (values (gethash name *message-table*)))
-(defun (setf %find-message) (new-value name)
-  (setf (gethash name *message-table*) new-value))
-
-(defun forget-message (name)
-  (remhash name *message-table*))
-
-(defun forget-all-messages ()
-  (clrhash *message-table*) t)
-
-(defun find-message (name &optional (errorp t))
-  "Finds a message object named NAME in `*MESSAGE-TABLE*'.
-Raises an error if no message is found, unless ERRORP is NIL."
-  (or (%find-message name)
-      (when errorp (error 'no-such-message :message-name name))))
-
-;;;
 ;;; Arg info
 ;;;
 

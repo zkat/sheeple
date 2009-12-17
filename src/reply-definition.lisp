@@ -101,9 +101,8 @@
 (defun ensure-reply (name &key qualifiers lambda-list participants function (documentation ""))
   ;; FIXME: This is a slight kludge, because the -same- checks on
   ;; `fboundp' and `messagep' will be done in `ensure-message'.
-  (awhen (fboundp name)
-    (unless (messagep it)
-      (warn 'automatic-message-creation :message-name name)))
+  (unless (messagep (safe-fdefinition name))
+    (warn 'automatic-message-creation :message-name name))
   (assert (= (length participants) (count-required-parameters lambda-list))
           (participants lambda-list)
           "~&The number of participants conflicts with the lambda list.~@

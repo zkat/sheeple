@@ -88,6 +88,16 @@ arguments when given."
 	     (t (setf doc (pop body))               (go :scan-body)))
      :finish (return (values body (nreverse decls) doc)))))
 
+;;; Also adapted from Alexandria
+(defun symbolicate (&rest things &aux (index 0))
+  "Concatenate together the names of some strings and symbols,
+producing a symbol in the current package."
+  (let ((name (make-string (reduce #'+ things :key (compose 'length 'string)))))
+    (dolist (thing things (values (intern name)))
+      (let ((x (string thing)))
+        (replace name x :start1 index)
+        (incf index (length x))))))
+
 (defmacro error-when (condition error-datum &rest error-args)
   "Like `ASSERT', but with fewer bells and whistles."
   `(when ,condition (error ',error-datum ,@error-args)))

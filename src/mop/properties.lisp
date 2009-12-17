@@ -2,7 +2,7 @@
 
 ;;;; This file is part of Sheeple
 
-;;;; properties.lisp
+;;;; mop/properties.lisp
 ;;;;
 ;;;; Property access, inspection, and management stuff, for the most part.
 ;;;;

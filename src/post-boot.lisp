@@ -10,17 +10,6 @@
 (in-package :sheeple)
 
 ;;;
-;;; Object Creation Protocol
-;;;
-(defmessage allocate-object (metaobject)
-  (:reply ((metaobject =standard-metaobject=))
-    (std-allocate-object metaobject)))
-
-(defmessage compute-object-hierarchy-list-using-metaobject (metaobject object)
-  (:reply ((metaobject =standard-metaobject=) object)
-    (std-compute-object-hierarchy-list object)))
-
-;;;
 ;;; Extensible Object Creation
 ;;;
 (defmessage create (proto &key)

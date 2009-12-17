@@ -58,6 +58,19 @@
   (key/rest-p nil :type boolean))
 
 ;;;
+;;; Funcallable Messages!
+;;;
+
+(defvar *funcallable-messages*
+  (make-weak-hash-table :test #'eq :weakness :key))
+
+(defun allocate-message ()
+  (let ((message (%make-message)))
+    (aprog1 (lambda (&rest args)
+              (apply (%message-function message) args))
+      (setf (gethash it *funcallable-messages*) message))))
+
+;;;
 ;;; Erfun Cache
 ;;;
 

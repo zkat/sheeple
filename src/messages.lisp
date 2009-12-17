@@ -97,6 +97,13 @@
     (define-message-accessor number-optional)
     (define-message-accessor key/rest-p)))
 
+(defun messagep (x)
+  (nth-value 1 (gethash x *funcallable-messages*)))
+
+(deftype message ()
+  ;; FIXME: Now would be a nice time to chat about what a message is
+  '(satisfies messagep))
+
 ;;;
 ;;; Erfun Cache
 ;;;

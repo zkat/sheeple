@@ -72,26 +72,6 @@
   (clrhash (message-erfun-cache message)))
 
 ;;;
-;;; Message Documentation
-;;;
-
-(defmethod documentation ((x message) (doc-type (eql 't)))
-  (message-documentation x))
-
-(defmethod documentation ((x symbol) (doc-type (eql 'message)))
-  (handler-case
-      (documentation (find-message x) t)
-    (no-such-message ())))
-
-(defmethod (setf documentation) (new-value (x message) (doc-type (eql 't)))
-  (setf (message-documentation x) new-value))
-
-(defmethod (setf documentation) (new-value (x symbol) (doc-type (eql 'message)))
-  (handler-case
-      (setf (documentation (find-message x) t) new-value)
-    (no-such-message ())))
-
-;;;
 ;;; Arg info
 ;;;
 

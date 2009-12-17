@@ -47,7 +47,7 @@
 (defstruct (%message
              (:constructor %make-message ())
              (:predicate %messagep))
-  name function
+  name function message
   (erfun-cache (make-hash-table :test #'equal))
   (replies nil :type list)
   (documentation nil :type (or string null))
@@ -65,10 +65,11 @@
   (make-weak-hash-table :test #'eq :weakness :key))
 
 (defun allocate-message ()
-  (let ((message (%make-message)))
+  (let ((%message (%make-message)))
     (aprog1 (lambda (&rest args)
-              (apply (%message-function message) args))
-      (setf (gethash it *funcallable-messages*) message))))
+              (apply (%message-function %message) args))
+      (setf (gethash it *funcallable-messages*) %message
+            (%message-message %message)         it))))
 
 (macrolet ((with-%message ((name message) &body body)
              (with-gensyms (foundp)
@@ -109,6 +110,9 @@
     (format stream "MESSAGE ~S" (message-name message))))
 
 (set-pprint-dispatch 'message #'pprint-message)
+
+(define-print-object ((%message %message) :type nil)
+  (format t "Internal data for ~S" (%message-message %message)))
 
 ;;;
 ;;; Erfun Cache

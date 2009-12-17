@@ -458,7 +458,7 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
            :properties ,(canonize-properties properties)
            ,.(canonize-options options)))
 
-(defmacro defproto (name objects &optional ((&rest properties)) &rest options)
+(defmacro defproto (name &optional objects ((&rest properties)) &rest options)
   "Words cannot express how useful this is."
   (let ((canonized-properties (canonize-properties properties t)))
    `(progn

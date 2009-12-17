@@ -99,7 +99,7 @@
 ;;; FIXME: I do lots of runtime computation on probably constant values.
 ;;;        Write me a compiler macro!
 (defun ensure-reply (name &key qualifiers lambda-list participants function (documentation ""))
-  (let ((message (or (find-message name nil)
+  (let ((message (or (messagep (fboundp name))
                      (warn 'automatic-message-creation :message-name name) ; Returns NIL
                      (ensure-message name :lambda-list (create-msg-lambda-list lambda-list)))))
     (error-when (/= (length participants) (count-required-parameters lambda-list))
@@ -165,7 +165,7 @@
 ;;; and what they're supposed to return.
 
 (defun undefine-reply (name &key qualifiers participants)
-  (awhen (find-message name nil)
+  (awhen (fboundp name)
     (remove-applicable-reply it qualifiers (ensure-boxed-objects participants))))
 
 (defun remove-specific-reply (message qualifiers participants)
@@ -218,7 +218,7 @@
       (declare (ignore parameters required))
       `(progn
          (eval-when (:compile-toplevel)
-           (unless (find-message ',name nil)
+           (unless (fboundp ',name)
              (warn 'automatic-message-creation :message-name ',name)
              (ensure-message ',name :lambda-list ',(create-msg-lambda-list reply-ll))))
          (ensure-reply ',name

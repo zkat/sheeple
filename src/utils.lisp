@@ -98,6 +98,11 @@ producing a symbol in the current package."
         (replace name x :start1 index)
         (incf index (length x))))))
 
+(declaim (inline safe-fdefinition))
+(defun safe-fdefinition (name)
+  (declare (optimize speed (safety 0) (debug 0))) ; The irony kills me
+  (when (fboundp name) (fdefinition name)))
+
 (defmacro error-when (condition error-datum &rest error-args)
   "Like `ASSERT', but with fewer bells and whistles."
   `(when ,condition (error ',error-datum ,@error-args)))

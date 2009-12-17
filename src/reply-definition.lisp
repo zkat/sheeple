@@ -99,12 +99,17 @@
 ;;; FIXME: I do lots of runtime computation on probably constant values.
 ;;;        Write me a compiler macro!
 (defun ensure-reply (name &key qualifiers lambda-list participants function (documentation ""))
-  (let ((message (or (messagep (fboundp name))
-                     (warn 'automatic-message-creation :message-name name) ; Returns NIL
-                     (ensure-message name :lambda-list (create-msg-lambda-list lambda-list)))))
-    (error-when (/= (length participants) (count-required-parameters lambda-list))
-                "~&The number of participants conflicts with the lambda list.~@
-                 Participants: ~S~%Lambda List: ~S~%" participants lambda-list)
+  ;; FIXME: This is a slight kludge, because the -same- checks on
+  ;; `fboundp' and `messagep' will be done in `ensure-message'.
+  (awhen (fboundp name)
+    (unless (messagep it)
+      (warn 'automatic-message-creation :message-name name)))
+  (assert (= (length participants) (count-required-parameters lambda-list))
+          (participants lambda-list)
+          "~&The number of participants conflicts with the lambda list.~@
+             Participants: ~S~%Lambda List:  ~S~%" participants lambda-list)
+  (ensure-message name :lambda-list (create-msg-lambda-list lambda-list))
+  (let ((message (fdefinition name)))
     (aprog1 (make-reply message qualifiers lambda-list function)
       (setf (documentation it 't) documentation) ; same as dox for CLOS methods
       ;; In order to replace existing replies, we must remove them before actually adding them again.

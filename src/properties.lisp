@@ -13,11 +13,6 @@
 
 (defvar *std-propd-mold*)
 
-(defun propd-position (propd object)
-  (position (%object-mold propd)
-            (mold-properties (%object-mold object))
-            :key #'%object-mold :test #'eq))
-
 (defun propd-name (propd)
   ;; Figure out some way to have *std-propd-mold* compiled in, rather than
   ;; accessed dynamically each time this function is called
@@ -35,6 +30,11 @@
 (defun find-propd (pname object)
   (find pname (mold-properties (%object-mold object))
         :test #'eq :key #'propd-name))
+
+(defun (setf propd-value) (new-value object propd)
+  (aif (position propd (mold-properties (%object-mold object)) :test #'eq)
+       (setf (svref (%object-property-values object) it) new-value)
+       (error "wut")))
 
 ;;;
 ;;; Base Property API

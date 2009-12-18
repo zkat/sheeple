@@ -5,17 +5,29 @@
 
 (in-package :sheeple-user)
 
+;; The first step is to create the metaobject. MOP messages will dispatch in this to alter behavior.
 (defproto =monitored-metaobject= =standard-metaobject=
+  ;; The AMOP example puts the access history in a closure. In our case, we can simply use the
+  ;; metaobject to hold this 'global' data.
   ((access-history nil)))
 
+;; We use NOTE-OPERATION to actually register each property operation in our access history.
 (defmessage note-operation (metaobject object property-name operation)
   (:reply ((metaobject =monitored-metaobject=) object property-name operation)
     (push (list operation object property-name (get-universal-time)) (access-history metaobject))))
 
-(defmessage reset-access-history (metaobject)
-  (:reply ((metaobject =monitored-metaobject=))
-    (setf (access-history metaobject) nil)))
-
+;; Now we can actually define our MOP replies. The Sheeple MOP lives in the Sheeple-MOP package.
+;; It has an smop: nickname for convenience, since the package is not meant to be :used by anything
+;; that already :uses Sheeple.
+;;
+;; MOP messages are named identically to their standard Sheeple counterparts, and have the same
+;; lambda-list except for an extra argument, the metaobject, which the message uses to dispatch.
+;; Users of the MOP should not specialize these replies on anything but the metaobjects.
+;;
+;; The pattern for actually defining our replies is simple: We just write a :before reply for each
+;; bit of property access we want to keep track of, and make it call NOTE-OPERATION before continuing
+;; with their standard behavior.
+;;
 (defreply smop:direct-property-value :before ((mo =monitored-metaobject=) object pname)
   (note-operation mo object pname 'direct-property-access))
 
@@ -33,6 +45,9 @@
 (defreply smop:property-makunbound :before ((mo =monitored-metaobject=) object pname)
   (note-operation mo object pname 'property-removal))
 
+;; Once we've defined our 'alternate' object system, it's just a matter of creating a new object
+;; and making it use our =monitored-metaobject=, which essentially puts it in the realm of
+;; 'The fork of Sheeple that happens to monitor some property-related stuff'.
 (defproto =monitored-object= ()
   ((prop1 "var")
    (prop2 234))
@@ -42,4 +57,4 @@
 ;; You can see which ones have already been performed by doing
 ;; (access-history =monitored-metaobject=)
 ;;
-;; To try it further, try performing some of the operations we wrote replies for.
+;; To try it further, perform some of the operations we wrote replies for.

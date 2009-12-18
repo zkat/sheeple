@@ -89,7 +89,14 @@ PROPERTY-NAME."
   (aif (pname-position property-name object)
        (setf (svref (%object-property-values object) it) new-value)
        (progn
-         (change-mold object (ensure-transition (%object-mold object) property-name))
+         (change-mold object
+                      (ensure-transition (%object-mold object)
+                                         ;; FIXME
+                                         ;; Instead of property-name, we need to have
+                                         ;; here a propd object. I'm not sure how to
+                                         ;; create it though, because this potentially
+                                         ;; happens before bootstrap is complete.
+                                         property-name))
          (let ((index (pname-position property-name object)))
            (setf (svref (%object-property-values object) index) new-value))))
   ;; Once that's done, we use the options passed to it to generate readers/writers/accessors:

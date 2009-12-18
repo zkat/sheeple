@@ -41,8 +41,26 @@
   (push =t= (object-parents =standard-object=))
   (push =t= (object-parents =standard-metaobject=))
 
+  ;; A bootstrapping convenience function
+  (flet ((pseudo-create (parent)
+           (aprog1 (std-allocate-object =standard-metaobject=)
+             (push parent (object-parents it)))))
+
+    ;; Build =STANDARD-PROPERTY= by hand, since we can't call #'OBJECT yet
+    (setf =standard-property= (pseudo-create =standard-object=))
+
+    ;; Bootstrap the 'NAME property
+    ;; FIXME: Give an explanation for this, as detailed as the comments above
+    (let* ((propd (pseudo-create =standard-property=))
+           (mold  (ensure-transition (%object-mold propd) propd)))
+      (change-mold propd mold)
+      (setf *std-propd-mold* mold
+            (property-value propd propd) 'name
+            (property-value =standard-property= propd) nil)))
+
   ;; To finish up, break the ice by playing the name game:
   (macrolet ((set-name (name) `(setf (property-value ,name 'nickname) ',name)))
     (set-name =t=)
     (set-name =standard-object=)
-    (set-name =standard-metaobject=)))
+    (set-name =standard-metaobject=)
+    (set-name =standard-property=)))

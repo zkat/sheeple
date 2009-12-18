@@ -58,3 +58,24 @@
 ;; (access-history =monitored-metaobject=)
 ;;
 ;; To try it further, perform some of the operations we wrote replies for.
+
+;; One neat feature of Sheeple's MOP is that you are able to, when appropriate, change metaobjects
+;; for existing objects.
+
+;; Let's clear the existing access history to demonstrate...
+(setf (access-history =monitored-metaobject=) nil)
+
+;; We first create our object normally...
+(defproto =initially-unmonitored= ()
+  ((unmonitored-property "Test")))
+
+;; Now we can swap the metaobjects...
+(setf (object-metaobject =initially-unmonitored=) =monitored-metaobject=)
+
+(print "History is empty...")
+(print (access-history =monitored-metaobject=))
+
+(setf (unmonitored-property =initially-unmonitored=) "Big Brother is watching me.")
+
+(print "Object is now monitored!")
+(print (access-history =monitored-metaobject=))

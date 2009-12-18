@@ -37,6 +37,11 @@
   ;; to fix =T='s %object-hierarchy manually.
   (push =t= (%object-hierarchy =t=))
 
+  ;; We gotta put this guy here. Sorry, Adlai! -- zkat
+  (defmessage smop:validate-parent-metaobject (child-mo parent-mo)
+    (:reply ((child =t=) (parent =t=)) nil)
+    (:reply ((child =standard-metaobject=) (parent =standard-metaobject=)) t))
+
   ;; Now, focus on the family!
   (push =t= (object-parents =standard-object=))
   (push =t= (object-parents =standard-metaobject=))

@@ -225,11 +225,6 @@ corresponding PARENTS, and the nickname is set to the symbol to facilitate debug
 ;;;
 ;;; Inheritance
 ;;;
-(defun validate-parent (parent child)
-  (handler-case
-      (compute-hierarchy (cons parent (coerce (object-parents child) 'list)))
-    (topological-sort-conflict ())))
-
 (defun topological-sort (elements constraints tie-breaker)
   "Sorts ELEMENTS such that they satisfy the CONSTRAINTS, falling back
 on the TIE-BREAKER in the case of ambiguous constraints. On the assumption
@@ -354,6 +349,10 @@ This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER 
 (defun (setf object-parents) (new-parents object)
   (check-type object object)
   (check-list-type new-parents object)
+  (map nil (fun (unless (smop:validate-parent-metaobject (object-metaobject _)
+                                                         (object-metaobject object))
+                  (error "~A cannot be a parent of ~A" _ object)))
+       new-parents)
   (flet ((lose (reason) (error 'object-hierarchy-error :object object :conflict reason)))
     (let ((hierarchy (handler-case (compute-hierarchy new-parents)
                        (topological-sort-conflict (conflict) (lose conflict)))))

@@ -36,25 +36,17 @@
 (defproto s (a b))
 (defproto r (a c))
 
-(defproto q-sheeple (s r)
-  ()
-  :nickname 'q)
-
-(defproto q-flavors (s r)
-  ()
-  :metaobject =flavors-object=
-  :nickname 'q)
-
-(defproto q-loops (s r)
-  ()
-  :metaobject =loops-object=
-  :nickname 'q)
+(defproto q (s r))
 
 (flet ((hierarchy-nicks (object)
          (mapcar #'object-nickname (object-hierarchy-list object))))
   (format t "~&Sheeple hierarchy: ~S~@
                Flavors hierarchy: ~S~@
                LOOPS   hierarchy: ~S~%"
-          (hierarchy-nicks q-sheeple)
-          (hierarchy-nicks q-flavors)
-          (hierarchy-nicks q-loops)))
+          ;; We can change metaobjects at runtime, but we must actually
+          ;; reinitialize them before their hierarchy-list changes.
+          (hierarchy-nicks q)
+          (progn (defproto q (s r) () :metaobject =flavors-object=)
+                 (hierarchy-nicks q))
+          (progn (defproto q (s r) () :metaobject =loops-object=)
+                 (hierarchy-nicks q))))

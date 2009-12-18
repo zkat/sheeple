@@ -15,15 +15,13 @@
           (mapcan #'depth-first-preorder-ancestors*
                   (object-parents object)))))
 
-(defreply compute-object-hierarchy-list-using-metaobject
-    ((metaobject =flavors-object=) object)
+(defreply smop:compute-object-hierarchy-list ((metaobject =flavors-object=) object)
   (nconc (delete-duplicates
           (depth-first-preorder-ancestors* object)
           :from-end t)
          (list =standard-object= =t=)))
 
-(defreply compute-object-hierarchy-list-using-metaobject
-    ((metaobject =loops-object=) object)
+(defreply smop:compute-object-hierarchy-list ((metaobject =loops-object=) object)
   (nconc (delete-duplicates
           (depth-first-preorder-ancestors* object)
           :from-end nil)
@@ -55,8 +53,8 @@
 (flet ((hierarchy-nicks (object)
          (mapcar #'object-nickname (object-hierarchy-list object))))
   (format t "~&Sheeple hierarchy: ~S~@
-             Flavors hierarchy: ~S~@
-             LOOPS   hierarchy: ~S~%"
+               Flavors hierarchy: ~S~@
+               LOOPS   hierarchy: ~S~%"
           (hierarchy-nicks q-sheeple)
           (hierarchy-nicks q-flavors)
           (hierarchy-nicks q-loops)))

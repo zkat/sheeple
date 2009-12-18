@@ -203,9 +203,11 @@ creating and linking a new one if necessary."
           (std-print-sheeple-object object stream))
     (no-applicable-reply () (std-print-sheeple-object object stream))))
 
-;; The SETF version of this would require that something like CHANGE-METAOBJECT exists.
 (defun object-metaobject (object)
   (%object-metaobject object))
+(defun (setf object-metaobject) (new-metaobject object)
+  ;; todo - this should take care of switching out molds accordingly -before- calling the smop:
+  (setf (smop:object-metaobject (object-metaobject object) object) new-metaobject))
 
 (defun object-parents (object)
   (mold-parents (%object-mold object)))

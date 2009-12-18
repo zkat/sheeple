@@ -32,6 +32,7 @@
    #:init-object
    #:object
    #:object-hierarchy-list
+   #:object-metaobject
    #:object-nickname
    #:object-parents
    #:objectp
@@ -121,6 +122,7 @@
    #:allocate-object
    #:compute-object-hierarchy-list
    #:validate-parent-metaobject
+   #:object-metaobject
 
    ;; Properties
    :available-properties

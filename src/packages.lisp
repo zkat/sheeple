@@ -119,7 +119,7 @@
   (:export
    ;; Objects
    #:allocate-object
-   #:compute-object-hierarchy-list-using-metaobject
+   #:compute-object-hierarchy-list
 
    ;; Properties
    :available-properties

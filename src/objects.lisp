@@ -303,7 +303,7 @@ its parents."
   "Computes the full hierarchy-list for OBJECT"
   (if (eq =standard-metaobject= (%object-metaobject object))
       (std-compute-object-hierarchy-list object)
-      (funcall 'smop:compute-object-hierarchy-list-using-metaobject
+      (funcall 'smop:compute-object-hierarchy-list
                (%object-metaobject object) object)))
 
 (defun object-hierarchy-list (object)

@@ -13,6 +13,6 @@
   (:reply ((metaobject =standard-metaobject=))
     (std-allocate-object metaobject)))
 
-(defmessage smop:compute-object-hierarchy-list-using-metaobject (metaobject object)
+(defmessage smop:compute-object-hierarchy-list (metaobject object)
   (:reply ((metaobject =standard-metaobject=) object)
     (std-compute-object-hierarchy-list object)))

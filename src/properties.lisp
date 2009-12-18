@@ -18,6 +18,24 @@
             (mold-properties (%object-mold object))
             :key #'%object-mold :test #'eq))
 
+(defun propd-name (propd)
+  ;; Figure out some way to have *std-propd-mold* compiled in, rather than
+  ;; accessed dynamically each time this function is called
+  (if (eq (%object-mold propd) *std-propd-mold*)
+      (svref (%object-property-values propd) 0)
+      (aif (position 'name (mold-properties (%object-mold propd))
+                     :test #'eq :key (fun (property-value _ 'name)))
+           (svref (%object-property-values propd) it)
+           (error "weird"))))
+
+(defun pname-position (pname object)
+  (position pname (mold-properties (%object-mold object))
+            :test #'eq :key #'propd-name))
+
+(defun find-propd (pname object)
+  (find pname (mold-properties (%object-mold object))
+        :test #'eq :key #'propd-name))
+
 ;;;
 ;;; Base Property API
 ;;;
@@ -28,7 +46,7 @@ property is not set locally, a condition of type `unbound-property' is signaled.
       (std-direct-property-value object property-name)
       (smop:direct-property-value (object-metaobject object) object property-name)))
 (defun std-direct-property-value (object property-name)
-  (aif (property-position property-name object)
+  (aif (pname-position property-name object)
        (svref (%object-property-values object) it)
        (restart-case (error 'unbound-property :object object :property-name property-name)
          (continue ()
@@ -66,11 +84,11 @@ PROPERTY-NAME."
                                           &key (reader nil readerp) (writer nil writerp) accessor)
   ;; (SETF PROPERTY-VALUE) is split into two parts.
   ;; The first actually adds a property-value directly on the object:
-  (aif (property-position property-name object)
+  (aif (pname-position property-name object)
        (setf (svref (%object-property-values object) it) new-value)
        (progn
          (change-mold object (ensure-transition (%object-mold object) property-name))
-         (let ((index (property-position property-name object)))
+         (let ((index (pname-position property-name object)))
            (setf (svref (%object-property-values object) index) new-value))))
   ;; Once that's done, we use the options passed to it to generate readers/writers/accessors:
   (when reader (add-reader-to-object reader property-name object))

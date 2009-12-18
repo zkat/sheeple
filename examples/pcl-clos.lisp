@@ -62,7 +62,7 @@
 
 ;; this auto-generates accessors:
 (setf (property-value (car *lots-of-accounts*) 'unique :accessor t) "I'm a unique butterfly!")
-(remove-property (car *lots-of-accounts*) 'unique) ;poof. Accessors stay, though!
+(property-makunbound (car *lots-of-accounts*) 'unique) ;poof. Accessors stay, though!
 
 ;; You can also inspect objects and their internals at the REPL...
 ;;

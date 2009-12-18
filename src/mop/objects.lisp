@@ -16,3 +16,7 @@
 (defmessage smop:compute-object-hierarchy-list (metaobject object)
   (:reply ((metaobject =standard-metaobject=) object)
     (std-compute-object-hierarchy-list object)))
+
+(defmessage smop:validate-parent-metaobject (child-mo parent-mo)
+  (:reply ((child =t=) (parent =t=)) nil)
+  (:reply ((child =standard-metaobject=) (parent =standard-metaobject=)) t))

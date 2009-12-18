@@ -38,14 +38,13 @@
   (push =t= (%object-hierarchy =t=))
 
   ;; We gotta put this guy here. Sorry, Adlai! -- sykopomp
-  (defmessage smop:validate-parent-metaobject (child-mo parent-mo)
-    (:reply ((child =t=) (parent =t=)) nil)
-    (:reply ((child =standard-metaobject=) (parent =standard-metaobject=)) t))
 
   ;; Now, focus on the family!
-  (push =t= (object-parents =standard-object=))
-  (push =t= (object-parents =standard-metaobject=))
-
+  ;; We can't (push =t= (object-parents ...)) because VALIDATE-PARENT-METAOBJECT
+  ;; doesn't exist yet.
+  (change-parents =standard-object= (list =t=))
+  (change-parents =standard-metaobject= (list =t=))
+  
   ;; To finish up, break the ice by playing the name game:
   (macrolet ((set-name (name) `(setf (property-value ,name 'nickname) ',name)))
     (set-name =t=)

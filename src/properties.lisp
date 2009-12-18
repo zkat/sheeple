@@ -9,8 +9,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(defun property-position (property-name object)
-  (position property-name (mold-properties (%object-mold object)) :test #'eq))
+(define-bound-variable =standard-property=)
+
+(defvar *std-propd-mold*)
+
+(defun propd-position (propd object)
+  (position (%object-mold propd)
+            (mold-properties (%object-mold object))
+            :key #'%object-mold :test #'eq))
 
 ;;;
 ;;; Base Property API

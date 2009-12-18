@@ -120,6 +120,7 @@
    ;; Objects
    #:allocate-object
    #:compute-object-hierarchy-list
+   #:validate-parent-metaobject
 
    ;; Properties
    :available-properties

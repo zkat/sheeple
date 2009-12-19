@@ -243,7 +243,7 @@
                          ,@(canonize-message-options options)))
        ,@(when replies
            `(,@(mapcar (fun `(defreply ,name ,@(cdr _))) replies)
-               #',name)))))
+               (fdefinition ',name))))))
 
 (defun canonize-message-option (option)
   `(,(car option) ,(cadr option)))

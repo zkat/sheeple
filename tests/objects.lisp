@@ -14,7 +14,7 @@
     (&body)))
 
 (def-fixture allocate-object (metaobject)
-  (let ((object (allocate-object metaobject)))
+  (let ((object (smop:allocate-object metaobject)))
     (&body)))
 
 ;;; For lack of a better place, here comes the macro extraordinaire!
@@ -56,7 +56,7 @@ confusing, but actually enables crystal clear warning-free test code."
     (is (null (%object-roles object)))))
 
 (test allocate-object
-  (let ((object (allocate-object =standard-metaobject=)))
+  (let ((object (smop:allocate-object =standard-metaobject=)))
     (is (eq =standard-metaobject= (object-metaobject object)))
     (is (eq nil (object-parents object)))))
 
@@ -106,8 +106,7 @@ confusing, but actually enables crystal clear warning-free test code."
 (in-suite interface-accessors)
 
 (test (object-metaobject :fixture with-std-object)
-  (is (eql =standard-metaobject= (object-metaobject object)))
-  (is (null (fboundp '(setf object-metaobject)))))
+  (is (eql =standard-metaobject= (object-metaobject object))))
 
 (def-suite inheritance :in objects)
 (def-suite inheritance-basic :in inheritance)

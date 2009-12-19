@@ -104,7 +104,9 @@
   (with-test-message test-message
     (5am:finishes (handler-bind
                       ((automatic-message-creation #'muffle-warning))
-                    (defreply test-message ((n 3))))))
+                    (defreply test-message ((n 3)))))))
+(test defreply-bug
+  "Expected failure"
   (with-test-message test-message
     (defmessage test-message ())
     (handler-case

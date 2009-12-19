@@ -13,9 +13,9 @@
   (:reply ((metaobject =standard-metaobject=))
     (std-allocate-object metaobject)))
 
-(defmessage smop:compute-object-hierarchy-list (metaobject object)
+(defmessage smop:compute-object-precedence-list (metaobject object)
   (:reply ((metaobject =standard-metaobject=) object)
-    (std-compute-object-hierarchy-list object)))
+    (std-compute-object-precedence-list object)))
 
 (defmessage smop:validate-parent (child-metaobject child parent-metaobject parent)
   (:reply (child-mo child parent-mo parent)

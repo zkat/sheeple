@@ -140,7 +140,7 @@ Creating a new object is as simple as calling OBJECT.
         *CHILD*
 
 Sheeple does differential inheritance by default. This means that value lookup
-fetches the first available value found in the object's hierarchy list, unless a
+fetches the first available value found in the object's precedence list, unless a
 value is set directly in an object.
 
         SHEEPLE-USER> (var *child*)

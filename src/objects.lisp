@@ -20,12 +20,12 @@
 ;;; a single object, and have many similar objects use the data stored in the mold.
 ;;; Right now, molds are used to keep track of direct properties and store the parents list.
 ;;; One big win already possible with molds is that they allow us to cache the entire
-;;; hierarchy list for an object without having to worry about recalculating it every time
+;;; precedence list for an object without having to worry about recalculating it every time
 ;;; a new object is created.
 ;;;
 ;;; In fact, there are two levels of caching going on; molds have their own shared data
-;;; storage for 'lineages'. Lineages cache shared parent and hierarchy lists, and are also
-;;; cached by objects, so that changes in hierarchy lists get propagated to children.
+;;; storage for 'lineages'. Lineages cache shared parent and precedence lists, and are also
+;;; cached by objects, so that changes in precedence lists get propagated to children.
 ;;;
 ;;; A properties-related win is that since we hold information about *which* properties are
 ;;; available in the mold, our actual object instances can simply carry a lightweight vector
@@ -42,7 +42,7 @@
 ;;; Every time a mold is switched up, care must be taken that relevant properties are copied
 ;;; over appropriately, and caches are reset. Additionally, when (setf object-parents) is called,
 ;;; all sub-molds must be alerted (and they must alert -their- sub-molds), and each sub-mold must
-;;; recalculate its hierarchy list.
+;;; recalculate its precedence list.
 ;;;
 ;;; One significant problem with the current transition model is that it does not try to reuse
 ;;; potentially similar transitions. For example, if there are two molds, A and B, an object
@@ -68,13 +68,13 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
 
 (defstruct (lineage
              (:predicate lineagep)
-             (:constructor make-lineage
-                           (parents &aux (hierarchy (compute-hierarchy parents)))))
+             (:constructor
+              make-lineage (parents &aux (precedence-list (compute-precedence parents)))))
   "Information about an object's ancestors and descendants."
-  (members   (make-weak-hash-table :weakness :key :test #'eq)
-             :read-only t :type hash-table) ; The lineage's members
-  (parents   nil :read-only t)              ; A set of objects
-  (hierarchy nil))  ; A precedence list of all the lineage's ancestors
+  (members         (make-weak-hash-table :weakness :key :test #'eq)
+                   :read-only t :type hash-table) ; The lineage's members
+  (parents         nil :read-only t)              ; A set of objects
+  (precedence-list nil)) ; A precedence list of all the lineage's ancestors
 
 (define-print-object ((object lineage) :identity nil)
   (format t "from ~{~{~:[[~A]~;~A~]~}~#[~; and ~:;, ~]~}"
@@ -86,9 +86,9 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
              `(defun ,name (mold)
                 (,lineage-reader (mold-lineage mold)))))
   (define-mold-reader mold-parents   lineage-parents)
-  (define-mold-reader mold-hierarchy lineage-hierarchy))
+  (define-mold-reader mold-precedence-list lineage-precedence-list))
 
-(declaim (inline %object-mold %object-metaobject %object-hierarchy
+(declaim (inline %object-mold %object-metaobject %object-precedence-list
                  %object-property-values %object-roles))
 
 (defstruct (object (:conc-name %object-) (:predicate objectp)
@@ -96,7 +96,7 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
                    (:print-object print-sheeple-object-wrapper))
   (mold (ensure-mold nil) :type mold)
   (metaobject =standard-metaobject=)
-  (hierarchy nil :type list)
+  (precedence-list nil :type list)
   (property-values nil)
   (roles nil :type list)) ; Roles are used in dispatch -- see reply-foo.lisp
 
@@ -107,16 +107,16 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
   (setf (gethash object (lineage-members (mold-lineage (%object-mold object))))
         new-kids))
 
-(defun trigger-hierarchy-recalculation (lineage)
-  "Updates LINEAGE's hierarchy list, and propagates down the members."
-  (declare (notinline trigger-hierarchy-recalculation))
-  (with-accessors ((hierarchy lineage-hierarchy)
+(defun trigger-precedence-recalculation (lineage)
+  "Updates LINEAGE's precedence list, and propagates down the members."
+  (declare (notinline trigger-precedence-recalculation))
+  (with-accessors ((precedence lineage-precedence-list)
                    (parents   lineage-parents)
                    (members   lineage-members)) lineage
-    (setf hierarchy (compute-hierarchy parents))
+    (setf precedence (compute-precedence parents))
     (maphash (lambda (member children)
-               (setf (%object-hierarchy member) (compute-object-hierarchy-list member))
-               (mapcar 'trigger-hierarchy-recalculation children))
+               (setf (%object-hierarchy member) (compute-object-precedence-list member))
+               (mapcar 'trigger-precedence-recalculation children))
              members)))
 
 ;;;
@@ -271,19 +271,18 @@ regards to the CONSTRAINTS. A future version will undo this change."
     (mapcar 'cons (cons object parents) parents)))
 
 (defun std-tie-breaker-rule (minimal-elements chosen-elements)
-  ;; Pick the one with a direct leftmost in the hierarchy list computed so far
+  ;; Pick the one with a direct leftmost in the precedence list computed so far
   (dolist (candidate chosen-elements)
     (awhen (dolist (parent (object-parents candidate))
              (awhen (find parent (the list minimal-elements) :test 'eq) (return it)))
       (return-from std-tie-breaker-rule it))))
 
-(defun compute-hierarchy (parents)
-  "Generates an abstract hierarchy out of PARENTS; this would be suitable as
-the CDR of the hierarchy-list of a standard object with PARENTS, in order, as
-its parents."
+(defun compute-precedence (parents)
+  "Generates an abstract precedence list out of PARENTS; this would be suitable as the
+CDR of the precedence list of a standard object with PARENTS, in order, as its parents."
   (if (null (cdr parents))
       (unless (null (car parents)) ; FIXME: This happens ONCE during bootstrap
-        (object-hierarchy-list (car parents)))
+        (object-precedence-list (car parents)))
       (let ((unordered
              (delete-duplicates (append parents (mapcan 'collect-ancestors parents)))))
         (topological-sort
@@ -293,19 +292,19 @@ its parents."
                             :test #'equal)
          #'std-tie-breaker-rule))))
 
-(defun std-compute-object-hierarchy-list (object)
-  (cons object (mold-hierarchy (%object-mold object))))
+(defun std-compute-object-precedence-list (object)
+  (cons object (mold-precedence-list (%object-mold object))))
 
-(defun compute-object-hierarchy-list (object)
-  "Computes the full hierarchy-list for OBJECT"
+(defun compute-object-precedence-list (object)
+  "Computes the full precedence list for OBJECT"
   (if (eq =standard-metaobject= (%object-metaobject object))
-      (std-compute-object-hierarchy-list object)
-      (funcall 'smop:compute-object-hierarchy-list
+      (std-compute-object-precedence-list object)
+      (funcall 'smop:compute-object-precedence-list
                (%object-metaobject object) object)))
 
-(defun object-hierarchy-list (object)
-  "Returns the full hierarchy-list for OBJECT"
-  (%object-hierarchy object))
+(defun object-precedence-list (object)
+  "Returns the full precedence list for OBJECT"
+  (%object-precedence-list object))
 
 ;;;
 ;;; Modifying mold-level stuff
@@ -317,7 +316,7 @@ its parents."
         (setf (gethash object (lineage-members new-lineage)) (%object-children object))
         (remhash object (lineage-members old-lineage)))))
   (setf (%object-mold object) new-mold
-        (%object-hierarchy object) (compute-object-hierarchy-list object))
+        (%object-precedence-list object) (compute-object-precedence-list object))
   new-mold)
 
 (defun change-mold (object new-mold)
@@ -346,7 +345,7 @@ This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER 
   (check-type object object)
   (check-list-type new-parents object)
   (change-mold object (ensure-mold new-parents (mold-properties (%object-mold object))))
-  (map 'nil 'trigger-hierarchy-recalculation (%object-children object)))
+  (map 'nil 'trigger-precedence-recalculation (%object-children object)))
 
 (defun (setf object-parents) (new-parents object)
   (check-type object object)
@@ -355,11 +354,12 @@ This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER 
     (dolist (parent new-parents)
       (unless (smop:validate-parent metaobject object (object-metaobject parent) parent)
         (error "~A cannot be a parent of ~A" parent object))))
-  (flet ((lose (reason) (error 'object-hierarchy-error :object object :conflict reason)))
-    (let ((hierarchy (handler-case (compute-hierarchy new-parents)
-                       (topological-sort-conflict (conflict) (lose conflict)))))
-      (cond ((null hierarchy) (lose "Hierarchy list is empty"))
-            ((find object hierarchy) (lose "Object appears multiple times in hierarchy"))
+  (flet ((lose (reason) (error 'object-precedence-error :object object :conflict reason)))
+    (let ((precedence (handler-case (compute-precedence new-parents)
+                        (topological-sort-conflict (conflict) (lose conflict)))))
+      (cond ((null precedence) (lose "Precedence list is empty"))
+            ((find object precedence)
+             (lose "Object appears multiple times in the precedence list"))
             (t (change-parents object new-parents)))))
   new-parents)
 
@@ -369,15 +369,15 @@ This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER 
   (member maybe-parent (object-parents child)))
 
 (defun ancestorp (maybe-ancestor descendant)
-  "A parent is a object somewhere in CHILD's hierarchy list."
-  (member maybe-ancestor (cdr (object-hierarchy-list descendant))))
+  "A parent is a object somewhere in CHILD's precedence list."
+  (member maybe-ancestor (cdr (object-precedence-list descendant))))
 
 (defun childp (maybe-child parent)
   "A child is a object that has PARENT in its parent list."
   (parentp parent maybe-child))
 
 (defun descendantp (maybe-descendant ancestor)
-  "A descendant is a object that has ANCESTOR in its hierarchy-list."
+  "A descendant is a object that has ANCESTOR in its precedence list."
   (ancestorp ancestor maybe-descendant))
 
 ;;;
@@ -395,7 +395,7 @@ ALL-KEYS is passed on to INIT-OBJECT."
   (handler-case
       (setf (object-mold object) (ensure-mold (or parents (list =standard-object=))))
     (topological-sort-conflict (conflict)
-      (error 'object-hierarchy-error :object object :conflict conflict)))
+      (error 'object-precedence-error :object object :conflict conflict)))
   (apply 'init-object object all-keys))
 
 (defun clone (object &optional (metaobject (%object-metaobject object)))

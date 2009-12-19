@@ -26,25 +26,26 @@
 
   ;; Now, we have to hardcode two circular links.
 
-  ;; =STANDARD-METAOBJECT= is its own metaobject. This link isn't created above
-  ;; because '=STANDARD-METAOBJECT= is bound to junk before boot, so we fix
-  ;; this manually now.
+  ;; The first circular link is =STANDARD-METAOBJECT='s own metaobject. This
+  ;; link isn't created above because '=STANDARD-METAOBJECT= is bound to junk
+  ;; before boot, so we fix this manually now.
   (setf (%object-metaobject =standard-metaobject=) =standard-metaobject=)
 
-  ;; =T= has a one-object hierarchy list, just itself. Hierarchy lists usually get
-  ;; cached whenever an object's mold changes; however, because objects start out
-  ;; pointing at the "null mold", and =T= remains pointing at this mold, we need
-  ;; to fix =T='s %object-hierarchy manually.
-  (push =t= (%object-hierarchy =t=))
+  ;; We also show off Sheeple's freedom from side-effects is by consing less.
+  (let ((the-list (list =t=)))
 
-  ;; We gotta put this guy here. Sorry, Adlai! -- zkat
+    ;; The second circular link is =T='s hierarchy list. Hierarchy lists usually get
+    ;; cached whenever an object's mold changes; however, because objects start out
+    ;; pointing at the "null mold", and =T= remains pointing at this mold, we need
+    ;; to fix =T='s %object-hierarchy manually.
+    (setf (%object-hierarchy =t=) the-list)
 
-  ;; Now, focus on the family!
-  ;; We can't (push =t= (object-parents ...)) because VALIDATE-PARENT-METAOBJECT
-  ;; doesn't exist yet.
-  (change-parents =standard-object= (list =t=))
-  (change-parents =standard-metaobject= (list =t=))
-  
+    ;; Now, focus on the family!
+    ;; We can't (push =t= (object-parents ...)) because VALIDATE-PARENT-METAOBJECT
+    ;; doesn't exist yet.
+    (change-parents =standard-object=     the-list)
+    (change-parents =standard-metaobject= the-list))
+
   ;; To finish up, break the ice by playing the name game:
   (macrolet ((set-name (name) `(setf (property-value ,name 'nickname) ',name)))
     (set-name =t=)

@@ -58,11 +58,11 @@ Current sort status:
 
 ;;; Objects
 
-(define-sheeple-condition object-hierarchy-error sheeple-error
-  ("A conflict was encountered while generating a hierarchy list for ~A.
+(define-sheeple-condition object-precedence-error sheeple-error
+  ("A conflict was encountered while generating a precedence list for ~A.
 The conflict information was:~%~A"
    object conflict)
-  (:documentation "Signaled whenever there is a problem computing the hierarchy list."))
+  (:documentation "Signaled whenever there is a problem computing the precedence list."))
 
 ;;; Properties
 

@@ -187,13 +187,6 @@
   (is (around-reply-p (%%make-reply :qualifiers '(:around :another))))
   (is (not (around-reply-p (%%make-reply :qualifiers '(:oogly :boogly))))))
 
-(test apply-message
-  (with-test-message apply-message-test
-    (defmessage apply-message-test (x) (:reply (x) x))
-    (let ((unique (list)))
-      (is (eq unique (apply-message (find-message 'apply-message-test) (list unique)))))
-    (undefreply apply-message-test (=t=))))
-
 (test apply-replies)
 (test next-reply-p)
 (test call-next-reply)

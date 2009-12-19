@@ -110,9 +110,10 @@
   (with-test-message test-message
     (defmessage test-message ())
     (handler-case
-        (defreply test-message (x))
+        (defreply test-message ((x =t=)))
       (simple-error () (pass))
       (:no-error (&rest values)
+        (declare (ignore values))
         (fail "~<DEFREPLY silently added a reply with an incompatible ~
                ~_lambda-list to a message with no replies~:>")))))
 

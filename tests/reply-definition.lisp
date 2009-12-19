@@ -104,7 +104,15 @@
   (with-test-message test-message
     (5am:finishes (handler-bind
                       ((automatic-message-creation #'muffle-warning))
-                    (defreply test-message ((n 3)))))))
+                    (defreply test-message ((n 3))))))
+  (with-test-message test-message
+    (defmessage test-message ())
+    (handler-case
+        (defreply test-message (x))
+      (simple-error () (pass))
+      (:no-error (&rest values)
+        (fail "~<DEFREPLY silently added a reply with an incompatible ~
+               ~_lambda-list to a message with no replies~:>")))))
 
 (test %defreply-expander)
 (test make-reply-lambda)

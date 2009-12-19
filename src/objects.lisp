@@ -111,7 +111,7 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
                    (members   lineage-members)) lineage
     (setf precedence (compute-precedence parents))
     (maphash (lambda (member children)
-               (setf (%object-hierarchy member) (compute-object-precedence-list member))
+               (setf (%object-precedence-list member) (compute-object-precedence-list member))
                (mapcar 'trigger-precedence-recalculation children))
              members)))
 

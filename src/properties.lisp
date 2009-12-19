@@ -43,7 +43,7 @@ is signaled."
       (std-property-value object property-name)
       (smop:property-value (object-metaobject object) object property-name)))
 (defun std-property-value (object property-name)
-  (dolist (ancestor (object-hierarchy-list object)
+  (dolist (ancestor (object-precedence-list object)
            (error 'unbound-property :object object :property-name property-name))
     (handler-bind ((unbound-property (fun (go :next))))
       (return (direct-property-value ancestor property-name)))
@@ -129,7 +129,7 @@ NIL otherwise."
       (std-property-owner object property-name)
       (smop:property-owner (object-metaobject object) object property-name)))
 (defun std-property-owner (object property-name)
-  (find-if (rcurry 'direct-property-p property-name) (object-hierarchy-list object)))
+  (find-if (rcurry 'direct-property-p property-name) (object-precedence-list object)))
 
 (defun direct-properties (object)
   "Returns a list of the names of OBJECT's direct properties -- ie, only ones which have been

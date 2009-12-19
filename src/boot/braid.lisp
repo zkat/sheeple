@@ -38,7 +38,7 @@
     ;; cached whenever an object's mold changes; however, because objects start out
     ;; pointing at the "null mold", and =T= remains pointing at this mold, we need
     ;; to fix =T='s %object-hierarchy manually.
-    (setf (%object-hierarchy =t=) the-list)
+    (setf (%object-precedence-list =t=) the-list)
 
     ;; Now, focus on the family!
     ;; We can't (push =t= (object-parents ...)) because VALIDATE-PARENT-METAOBJECT

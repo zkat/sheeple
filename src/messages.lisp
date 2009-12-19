@@ -166,7 +166,7 @@
 (defun update-arg-info (message lambda-list)
   (multiple-value-bind (new-nreq new-nopt new-keysp new-restp)
       (analyze-lambda-list lambda-list)
-    (let ((new-key/rest-p (or new-keysp new-restp)))
+    (let ((new-key/rest-p (or new-keysp new-restp)) remove-conflicts)
       (dolist (reply (message-replies message))
         (multiple-value-bind (reply-nreq reply-nopt reply-keysp reply-restp)
             (analyze-lambda-list (reply-lambda-list reply))
@@ -174,8 +174,16 @@
                        (= new-nopt reply-nopt)
                        (eq new-key/rest-p
                            (or reply-keysp reply-restp)))
-            (error "The message ~S~%cannot be updated to have lambda-list ~S~@
-                    because it conflicts with reply ~S" message lambda-list reply))))
+            (unless remove-conflicts
+              (restart-case
+                  (cerror "Remove this reply from the message."
+                          "~@<The message ~2I~_~S~I~_cannot be updated to have lambda-list ~2I~_~S~
+                           ~I~_because it conflicts with reply ~2I~_~S.~:>"
+                          message lambda-list reply)
+                (remove-all ()
+                  :report "Remove all conflicting replies from the message."
+                  (setf remove-conflicts t))))
+            (delete-reply reply))))
       (setf (message-lambda-list message)     lambda-list
             (message-number-required message) new-nreq
             (message-number-optional message) new-nopt

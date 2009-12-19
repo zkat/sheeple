@@ -121,7 +121,7 @@
    ;; Objects
    #:allocate-object
    #:compute-object-hierarchy-list
-   #:validate-parent-metaobject
+   #:validate-parent
    #:object-metaobject
 
    ;; Properties

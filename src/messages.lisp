@@ -44,9 +44,7 @@
 ;;;   can be defined, and the message object can be used as an obvious place to store the cached
 ;;;   dispatch information.
 
-(defstruct (%message
-             (:constructor %make-message ())
-             (:predicate %messagep))
+(defstruct (%message (:predicate %messagep))
   name function message
   (erfun-cache (make-hash-table :test #'equal))
   (replies nil :type list)
@@ -65,11 +63,16 @@
   (make-weak-hash-table :test #'eq :weakness :key))
 
 (defun allocate-message ()
-  (let ((%message (%make-message)))
+  (let ((%message (make-%message)))
     (aprog1 (lambda (&rest args)
               (apply (%message-function %message) args))
       (setf (gethash it *funcallable-messages*) %message
             (%message-message %message)         it))))
+
+(defun %make-message (name lambda-list)
+  (aprog1 (allocate-message)
+    (setf (message-name        it) name
+          (message-lambda-list it) lambda-list)))
 
 (macrolet ((with-%message ((name message) &body body)
              (with-gensyms (foundp)
@@ -213,9 +216,7 @@
 
 ;; This handles actual setup of the message object (and finalization)
 (defun make-message (&key name lambda-list documentation)
-  (aprog1 (allocate-message)
-    (setf (message-name        it) name
-          (message-lambda-list it) lambda-list)
+  (aprog1 (%make-message name lambda-list)
     (set-arg-info it lambda-list)
     (finalize-message it)
     (setf (documentation it t) documentation)))

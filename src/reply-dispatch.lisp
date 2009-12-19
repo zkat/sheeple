@@ -136,7 +136,7 @@ are present in ARGS."
       (let (discovered-replies applicable-replies)
         (declare (list discovered-replies applicable-replies))
         (flet ((find-and-rank-roles (object hposition index)
-                 ;; Given an object, and a specified place in the hierarchy,
+                 ;; Given an object, and a specified place in the precedence list,
                  ;; find the roles we want for a lambda-list position, and
                  ;; rank the respective replies.
                  (declare (fixnum hposition index))
@@ -156,9 +156,9 @@ are present in ARGS."
              ;; To avoid consing, we call f-a-r-r on the root object first
              ;; Then we iterate over its ordered ancestors
              do (loop initially (find-and-rank-roles obj 0 index)
-                   for hierarchy-object in (mold-hierarchy (%object-mold obj))
-                   for hierarchy-position fixnum from 1
-                   do (find-and-rank-roles hierarchy-object hierarchy-position index))
+                   for precedence-object in (mold-precedence-list (%object-mold obj))
+                   for precedence-position fixnum from 1
+                   do (find-and-rank-roles precedence-object precedence-position index))
              finally
                (when applicable-replies
                  (return (sort-applicable-replies applicable-replies))))))))

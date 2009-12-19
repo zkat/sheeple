@@ -88,9 +88,6 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
   (define-mold-reader mold-parents   lineage-parents)
   (define-mold-reader mold-precedence-list lineage-precedence-list))
 
-(declaim (inline %object-mold %object-metaobject %object-precedence-list
-                 %object-property-values %object-roles))
-
 (defstruct (object (:conc-name %object-) (:predicate objectp)
                    (:constructor std-allocate-object (metaobject))
                    (:print-object print-sheeple-object-wrapper))
@@ -109,7 +106,6 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
 
 (defun trigger-precedence-recalculation (lineage)
   "Updates LINEAGE's precedence list, and propagates down the members."
-  (declare (notinline trigger-precedence-recalculation))
   (with-accessors ((precedence lineage-precedence-list)
                    (parents   lineage-parents)
                    (members   lineage-members)) lineage

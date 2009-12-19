@@ -33,29 +33,6 @@
       (is (null replies))
       )))
 
-(test *message-table*
-  (let ((test-message (%%make-message)))
-    (setf (%find-message 'name) test-message)
-    (is (eq test-message (%find-message 'name)))
-    (forget-message 'name)
-    (is (eq nil (%find-message 'name)))
-    (signals no-such-message (find-message 'name))))
-
-(test %find-message
-  (let ((test-message (%%make-message)))
-    (is (eq test-message (setf (%find-message 'name) test-message)))
-    (is (eq test-message (%find-message 'name)))
-    (forget-message 'name)
-    (is (eq nil (%find-message 'name)))
-    (signals no-such-message (find-message 'name))))
-
-(test forget-message
-  (let ((test-message (%%make-message)))
-    (setf (%find-message 'test) test-message)
-    (is (forget-message 'test))
-    (is (null (%find-message 'name)))
-    (is (null (forget-message 'test)))))
-
 (def-suite arg-info :in messages)
 (in-suite arg-info)
 

@@ -17,9 +17,16 @@
   (:reply ((metaobject =standard-metaobject=) object)
     (std-compute-object-hierarchy-list object)))
 
-(defmessage smop:validate-parent-metaobject (child-mo parent-mo)
-  (:reply ((child =t=) (parent =t=)) nil)
-  (:reply ((child =standard-metaobject=) (parent =standard-metaobject=)) t))
+(defmessage smop:validate-parent (child-metaobject child parent-metaobject parent)
+  (:reply (child-mo child parent-mo parent)
+    (declare (ignore child))
+    ;; This reply implements behavior similar to that perscribed in AMOP for the
+    ;; default primary method on `validate-superclass'; it returns T when
+    ;;   the PARENT argument is the object =t=, or
+    ;;   the two metaobjects are identical.
+    ;; Sheeple doesn't yet have an equilavent of `funcallable-standard-class'.
+    (or (eq parent =t=)
+        (eq parent-mo child-mo))))
 
 (defmessage (setf smop:object-metaobject) (new-metaobject old-metaobject object)
   (:reply ((new-mo =t=) (old-mo =t=) object)

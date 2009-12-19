@@ -14,21 +14,19 @@
 (def-suite message-basics :in messages)
 (in-suite message-basics)
 
-(defun %%make-message (&key (name 'name) (lambda-list '(lambda the ultimate list)))
-  "Just for testing purposes!"
-  (aprog1 (allocate-message)
-    (setf (message-name        it) name
-          (message-lambda-list it) lambda-list)))
-
 (test message-struct
-  (let ((test-message (%%make-message)))
+  (let ((test-message (allocate-message)))
     (is (messagep test-message))
     (with-accessors ((name           message-name)
                      (lambda-list    message-lambda-list)
                      (replies        message-replies)
                      )
         test-message
-      (is (eq 'name name))
+      (is (null name))
+      (setf name 'foo)
+      (is (eq 'foo name))
+      (is (null lambda-list))
+      (setf lambda-list '(lambda the ultimate list))
       (is (equal '(lambda the ultimate list) lambda-list))
       (is (null replies))
       )))

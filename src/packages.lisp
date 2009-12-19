@@ -31,7 +31,7 @@
    #:descendantp
    #:init-object
    #:object
-   #:object-hierarchy-list
+   #:object-precedence-list
    #:object-metaobject
    #:object-nickname
    #:object-parents
@@ -100,7 +100,7 @@
    #:no-next-reply
    #:no-primary-reply
    #:no-such-message
-   #:object-hierarchy-error
+   #:object-precedence-error
    #:object-property-error
    #:reply-argument-conflict
    #:reply-lambda-list-conflict
@@ -120,7 +120,7 @@
   (:export
    ;; Objects
    #:allocate-object
-   #:compute-object-hierarchy-list
+   #:compute-object-precedence-list
    #:validate-parent
    #:object-metaobject
 

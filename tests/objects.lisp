@@ -130,16 +130,16 @@ confusing, but actually enables crystal clear warning-free test code."
 ;;; how to test what this actually SHOULD do
 (test std-tie-breaker-rule)
 
-(test object-hierarchy-list
+(test object-precedence-list
   (with-object-hierarchy (parent (child parent))
     (is (equal (list child parent =standard-object= =t=)
-               (object-hierarchy-list child))))
+               (object-precedence-list child))))
   (with-object-hierarchy (a (b a) (c b))
     (is (equal (list c b a =standard-object= =t=)
-               (object-hierarchy-list c))))
+               (object-precedence-list c))))
   (with-object-hierarchy (a b (c a) (d a) (e b c) (f d) (g c f) (h g e))
     (is (equal (list h g e b c f d a =standard-object= =t=)
-               (object-hierarchy-list h)))))
+               (object-precedence-list h)))))
 
 ;;; Testing the utility...
 (in-suite objects)
@@ -150,7 +150,7 @@ confusing, but actually enables crystal clear warning-free test code."
     (is (eq a (car (object-parents c))))
     (is (eq b (car (object-parents d))))
     (is (eq c (cadr (object-parents d)))))
-  (signals object-hierarchy-error
+  (signals object-precedence-error
     (with-object-hierarchy (a (b a) (c b) (d a c))
       (declare (ignore d)))))
 
@@ -161,27 +161,27 @@ confusing, but actually enables crystal clear warning-free test code."
   (with-object-hierarchy (a b (c a))
     (push b (object-parents a))
     (is (equal (list c a b =standard-object= =t=)
-               (object-hierarchy-list c)))
+               (object-precedence-list c)))
     (setf (object-parents c) (list b))
     (is (equal (list c b =standard-object= =t=)
-               (object-hierarchy-list c)))
+               (object-precedence-list c)))
     (push c (object-parents a))
     (is (equal (list a c b =standard-object= =t=)
-               (object-hierarchy-list a)))))
+               (object-precedence-list a)))))
 
 (test cache-update-moderate
   (with-object-hierarchy (a (b a) (c a) (d b) (e c) x)
     (push x (object-parents a))
     (is (equal (list a x =standard-object= =t=)
-               (object-hierarchy-list a)))
+               (object-precedence-list a)))
     (is (equal (list b a x =standard-object= =t=)
-               (object-hierarchy-list b)))
+               (object-precedence-list b)))
     (is (equal (list c a x =standard-object= =t=)
-               (object-hierarchy-list c)))
+               (object-precedence-list c)))
     (is (equal (list d b a x =standard-object= =t=)
-               (object-hierarchy-list d)))
+               (object-precedence-list d)))
     (is (equal (list e c a x =standard-object= =t=)
-               (object-hierarchy-list e)))))
+               (object-precedence-list e)))))
 
 (test cache-update-extensive
   (with-object-hierarchy (a b c d e f g h)
@@ -190,17 +190,17 @@ confusing, but actually enables crystal clear warning-free test code."
             (list g f e c d b a c a)
             (list h g h g f e c e d))
     (is (equal (list c a =standard-object= =t=)
-               (object-hierarchy-list c)))
+               (object-precedence-list c)))
     (is (equal (list d a =standard-object= =t=)
-               (object-hierarchy-list d)))
+               (object-precedence-list d)))
     (is (equal (list e c a b =standard-object= =t=)
-               (object-hierarchy-list e)))
+               (object-precedence-list e)))
     (is (equal (list f d a =standard-object= =t=)
-               (object-hierarchy-list f)))
+               (object-precedence-list f)))
     (is (equal (list g c f d a =standard-object= =t=)
-               (object-hierarchy-list g)))
+               (object-precedence-list g)))
     (is (equal (list h e g c b f d a =standard-object= =t=)
-               (object-hierarchy-list h)))))
+               (object-precedence-list h)))))
 
 (def-suite inheritance-predicates :in inheritance)
 (in-suite inheritance-predicates)

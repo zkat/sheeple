@@ -74,7 +74,7 @@ confusing, but actually enables crystal clear warning-free test code."
 (test (equality-basic :fixture with-std-object)
   (is (eq object object))
   (is (eql object object))
-  (5am:finishes                         ; Does the heap blow up?
+  (Eos:finishes                         ; Does the heap blow up?
     (equal object object)
     (equalp object object)))
 

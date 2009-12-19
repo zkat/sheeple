@@ -16,7 +16,9 @@
 
 (defun %%make-message (&key (name 'name) (lambda-list '(lambda the ultimate list)))
   "Just for testing purposes!"
-  (%make-message name lambda-list))
+  (aprog1 (allocate-message)
+    (setf (message-name        it) name
+          (message-lambda-list it) lambda-list)))
 
 (test message-struct
   (let ((test-message (%%make-message)))

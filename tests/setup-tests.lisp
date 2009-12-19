@@ -13,10 +13,10 @@
 ;;; after running the tests. Maybe tests should happen in a :SHEEPLE-TESTS package, which
 ;;; automatigally imports all symbols in the :SHEEPLE package?
 
-;;; Setting up the :SHEEPLE package to include :5AM stuff
+;;; Setting up the :SHEEPLE package to include :Eos stuff
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (import '(5am:def-suite 5am:run! 5am:is 5am:in-suite 5am:signals 5am:def-fixture
-            5am:for-all 5am:gen-integer 5am:gen-list 5am:gen-tree))
+  (import '(Eos:def-suite Eos:run! Eos:is Eos:in-suite Eos:signals Eos:def-fixture
+            Eos:for-all Eos:gen-integer Eos:gen-list Eos:gen-tree))
   (export 'run-all-tests))
 
 (defun gen-vector (&key (length (gen-integer :min 0 :max 10))
@@ -27,16 +27,16 @@
                               :elements elements)))))
 
 (defmacro test (name &body body)
-  `(5am:test ,name ,@body))
+  `(Eos:test ,name ,@body))
 
-(macrolet ((import-5am-test-macros (&rest names)
+(macrolet ((import-Eos-test-macros (&rest names)
              `(progn
                 ,@(mapcar #'(lambda (name)
                               `(defmacro ,name (&rest message-args)
-                                 `(,(intern (symbol-name ',name) :5am)
+                                 `(,(intern (symbol-name ',name) :Eos)
                                     ,@message-args)))
                           names))))
-  (import-5am-test-macros pass fail skip))
+  (import-Eos-test-macros pass fail skip))
 
 ;;; Preparing the test suite
 (def-suite sheeple)

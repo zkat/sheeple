@@ -40,7 +40,7 @@
   :description "Unit tests for Sheeple"
   :author "Josh Marchan <sykopomp at sykosomatic-dot-org>"
   :licence "MIT"
-  :depends-on (:sheeple :fiveam)
+  :depends-on (:sheeple :Eos)
   :serial t
   :components
   ((:module "tests"

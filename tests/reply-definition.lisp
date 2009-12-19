@@ -14,13 +14,13 @@
 (def-suite reply-objects :in reply-definition)
 (in-suite reply-objects)
 
-(defun %%make-reply (&key (message (%%make-message))
+(defun %%make-reply (&key (message (allocate-message))
                      qualifiers lambda-list (function #'eq))
   "Just for testing purposes!"
   (make-reply message qualifiers lambda-list function))
 
 (test make-reply
-  (let* ((message (%%make-message))
+  (let* ((message (allocate-message))
          (qualifiers (list nil))
          (lambda-list (list nil))
          (test-reply (make-reply message qualifiers lambda-list #'eq)))
@@ -32,7 +32,7 @@
     (is (eq #'eq (reply-function test-reply)))))
 
 (test reply-name
-  (let* ((message (%%make-message :name (gensym)))
+  (let* ((message (%make-message (gensym) nil))
          (reply   (%%make-reply :message message)))
     (is (eq (message-name message) (reply-name reply)))))
 
@@ -52,11 +52,11 @@
     (is (rolep (make-role reply position)))))
 
 (test role-message
-  (for-all ((message '%%make-message))
+  (for-all ((message 'allocate-message))
     (is (eq message (role-message (make-role (%%make-reply :message message) 0))))))
 
 (test role-name
-  (for-all ((message (fun (%%make-message :name (gensym)))))
+  (for-all ((message (fun (%make-message (gensym) nil))))
     (is (eq (message-name message)
             (role-name (make-role (%%make-reply :message message) 0))))))
 

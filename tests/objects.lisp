@@ -9,13 +9,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(def-fixture with-std-object ()
-  (let ((object (std-allocate-object =standard-metaobject=)))
-    (&body)))
+(defmacro with-std-object (name &body body)
+  `(let ((,name (std-allocate-object =standard-metaobject=))) ,@body))
 
-(def-fixture allocate-object (metaobject)
-  (let ((object (smop:allocate-object metaobject)))
-    (&body)))
+(defmacro with-object ((name &optional (metaobject '=standard-metaobject=)) &body body)
+  `(let ((,name (smop:allocate-object ,metaobject))) ,@body))
 
 ;;; For lack of a better place, here comes the macro extraordinaire!
 (defmacro with-test-message (message-name &body body)
@@ -44,9 +42,10 @@ confusing, but actually enables crystal clear warning-free test code."
 (def-suite std-allocate-object :in allocation)
 (in-suite std-allocate-object)
 
-(test (std-object-basic-structure :fixture with-std-object)
-  (is (typep object 'structure-object))
-  (is (typep object 'object)))
+(test std-object-basic-structure
+  (let ((object (std-allocate-object =standard-metaobject=)))
+    (is (typep object 'structure-object))
+    (is (typep object 'object))))
 
 (test std-object-initial-values
   (let ((object (std-allocate-object =standard-metaobject=)))
@@ -68,45 +67,52 @@ confusing, but actually enables crystal clear warning-free test code."
   (for-all ((object (fun (std-allocate-object =standard-metaobject=))))
     (is (std-object-p object))))
 
-(test (objectp :fixture (allocate-object =standard-metaobject=))
-  (is (objectp object)))
+(test objectp
+  (with-object (object)
+    (is (objectp object))))
 
-(test (equality-basic :fixture with-std-object)
-  (is (eq object object))
-  (is (eql object object))
-  (Eos:finishes                         ; Does the heap blow up?
-    (equal object object)
-    (equalp object object)))
+(test equality-basic
+  (with-std-object object
+    (is (eq object object))
+    (is (eql object object))
+    (Eos:finishes                       ; Does the heap blow up?
+      (equal object object)
+      (equalp object object))))
 
 (def-suite low-level-accessors :in objects)
 (in-suite low-level-accessors)
 
-(test (%object-metaobject :fixture with-std-object)
-  (is (eql =standard-metaobject= (%object-metaobject object)))
-  (is (null (setf (%object-metaobject object) nil)))
-  (is (null (%object-metaobject object))))
+(test %object-metaobject
+  (with-std-object object
+    (is (eql =standard-metaobject= (%object-metaobject object)))
+    (is (null (setf (%object-metaobject object) nil)))
+    (is (null (%object-metaobject object)))))
 
-(test (%object-mold :fixture with-std-object)
-  (is (eq (ensure-mold nil) (%object-mold object)))
-  (let ((mold (ensure-mold nil #(nickname))))
-    (is (eq mold (setf (%object-mold object) mold)))
-    (is (eq mold (%object-mold object)))))
+(test %object-mold
+  (with-std-object object
+    (is (eq (ensure-mold nil) (%object-mold object)))
+    (let ((mold (ensure-mold nil #(nickname))))
+      (is (eq mold (setf (%object-mold object) mold)))
+      (is (eq mold (%object-mold object))))))
 
-(test (%object-property-values :fixture with-std-object)
-  (is (null (%object-property-values object)))
-  (is (equal 'test (setf (%object-property-values object) 'test)))
-  (is (equal 'test (%object-property-values object))))
+(test %object-property-values
+  (with-std-object object
+    (is (null (%object-property-values object)))
+    (is (equal 'test (setf (%object-property-values object) 'test)))
+    (is (equal 'test (%object-property-values object)))))
 
-(test (%object-roles :fixture with-std-object)
-  (is (null (%object-roles object)))
-  (is (equal '(foo) (setf (%object-roles object) '(foo))))
-  (is (equal '(foo) (%object-roles object))))
+(test %object-roles
+  (with-std-object object
+    (is (null (%object-roles object)))
+    (is (equal '(foo) (setf (%object-roles object) '(foo))))
+    (is (equal '(foo) (%object-roles object)))))
 
 (def-suite interface-accessors :in objects)
 (in-suite interface-accessors)
 
-(test (object-metaobject :fixture with-std-object)
-  (is (eql =standard-metaobject= (object-metaobject object))))
+(test object-metaobject
+  (with-std-object object
+    (is (eql =standard-metaobject= (object-metaobject object)))))
 
 (def-suite inheritance :in objects)
 (def-suite inheritance-basic :in inheritance)

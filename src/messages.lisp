@@ -9,16 +9,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
+(defstruct (arg-info (:constructor make-arg-info ()))
+  (lambda-list     nil :type list)
+  (number-required 0   :type fixnum)
+  (number-optional 0   :type fixnum)
+  (key/rest-p      nil :type boolean)
+  (keys            nil :type list))
+
 (defstruct (%message (:predicate %messagep))
   name message
   (function #'identity :type function)
   (erfun-cache (make-hash-table :test #'equal))
   (replies nil :type list)
-  ;; These are for argument info
-  (lambda-list nil :type list)
-  (number-required 0 :type fixnum)
-  (number-optional 0 :type fixnum)
-  (key/rest-p nil :type boolean))
+  (arg-info (make-arg-info) :type arg-info))
 
 ;;;
 ;;; Funcallable Messages!
@@ -37,8 +40,8 @@
 
 (defun %make-message (name lambda-list)
   (aprog1 (allocate-message)
-    (setf (message-name        it) name
-          (message-lambda-list it) lambda-list)))
+    (setf (message-name it) name
+          (arg-info-lambda-list (message-arg-info it)) lambda-list)))
 
 (macrolet ((with-%message ((name message) &body body)
              (with-gensyms (foundp)
@@ -61,10 +64,10 @@
     (define-message-accessor function)
     (define-message-accessor erfun-cache)
     (define-message-accessor replies)
-    (define-message-accessor lambda-list)
-    (define-message-accessor number-required)
-    (define-message-accessor number-optional)
-    (define-message-accessor key/rest-p)))
+    (define-message-accessor arg-info)))
+
+(defun message-lambda-list (message)
+  (arg-info-lambda-list (message-arg-info message)))
 
 (defun messagep (x)
   (nth-value 1 (gethash x *funcallable-messages*)))
@@ -110,9 +113,10 @@
                     :reply reply :message message :reason (apply 'format nil string args)))
            (comparison-description (x y)
              (if (> x y) "more" "fewer")))
-      (with-accessors ((msg-nreq       message-number-required)
-                       (msg-nopt       message-number-optional)
-                       (msg-key/rest-p message-key/rest-p)) message
+      (with-accessors ((msg-nreq       arg-info-number-required)
+                       (msg-nopt       arg-info-number-optional)
+                       (msg-key/rest-p arg-info-key/rest-p))
+          (message-arg-info message)
         (cond ((not (= nreq msg-nreq))
                (lose "the reply has ~A required arguments than the message."
                      (comparison-description nreq msg-nreq)))
@@ -126,9 +130,13 @@
 (defun set-arg-info (message lambda-list)
   (multiple-value-bind (nreq nopt keysp restp)
       (analyze-lambda-list lambda-list)
-    (setf (message-number-required message) nreq
-          (message-number-optional message) nopt
-          (message-key/rest-p message) (or keysp restp)))
+    (with-accessors ((msg-nreq arg-info-number-required)
+                     (msg-nopt arg-info-number-optional)
+                     (msg-kr-p arg-info-key/rest-p))
+        (message-arg-info message)
+      (setf msg-nreq nreq
+            msg-nopt nopt
+            msg-kr-p (or keysp restp))))
   (values))
 
 (defun update-arg-info (message lambda-list)
@@ -152,17 +160,22 @@
                   :report "Remove all conflicting replies from the message."
                   (setf remove-conflicts t))))
             (delete-reply reply))))
-      (setf (message-lambda-list message)     lambda-list
-            (message-number-required message) new-nreq
-            (message-number-optional message) new-nopt
-            (message-key/rest-p message)      new-key/rest-p)))
+      (with-accessors ((msg-nreq arg-info-number-required)
+                       (msg-nopt arg-info-number-optional)
+                       (msg-ll   arg-info-lambda-list)
+                       (msg-kr-p arg-info-key/rest-p))
+          (message-arg-info message)
+        (setf msg-ll   lambda-list
+              msg-nreq new-nreq
+              msg-nopt new-nopt
+              msg-kr-p new-key/rest-p))))
   (values))
 
 (defun required-portion (message args)
-  (let ((number-required (message-number-required message)))
-    (error-when (< (length args) number-required)
+  (let ((nreq (arg-info-number-required (message-arg-info message))))
+    (error-when (< (length args) nreq)
                 insufficient-message-args :message message)
-    (subseq args 0 number-required)))
+    (subseq args 0 nreq)))
 
 ;; The defmessage macro basically expands to a call to this function (after processing
 ;; its args, checking lamda-list, etc.)

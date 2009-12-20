@@ -48,7 +48,6 @@
   name function message
   (erfun-cache (make-hash-table :test #'equal))
   (replies nil :type list)
-  (documentation nil :type (or string null))
   ;; These are for argument info
   (lambda-list nil :type list)
   (number-required 0 :type fixnum)
@@ -95,7 +94,6 @@
     (define-message-accessor function)
     (define-message-accessor erfun-cache)
     (define-message-accessor replies)
-    (define-message-accessor documentation)
     (define-message-accessor lambda-list)
     (define-message-accessor number-required)
     (define-message-accessor number-optional)

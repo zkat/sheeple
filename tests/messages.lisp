@@ -14,23 +14,6 @@
 (def-suite message-basics :in messages)
 (in-suite message-basics)
 
-(test message-struct
-  (let ((test-message (allocate-message)))
-    (is (messagep test-message))
-    (with-accessors ((name           message-name)
-                     (lambda-list    message-lambda-list)
-                     (replies        message-replies)
-                     )
-        test-message
-      (is (null name))
-      (setf name 'foo)
-      (is (eq 'foo name))
-      (is (null lambda-list))
-      (setf lambda-list '(lambda the ultimate list))
-      (is (equal '(lambda the ultimate list) lambda-list))
-      (is (null replies))
-      )))
-
 (def-suite arg-info :in messages)
 (in-suite arg-info)
 

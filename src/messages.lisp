@@ -9,41 +9,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-#+sheeple3.1
-(define-bound-variable =standard-message=)
-#+sheeple3.1
-(defparameter the-std-message-form '(defproto =standard-message= ()
-                                     ((name nil :accessor nil)
-                                      (lambda-list nil :accessor nil)
-                                      (replies nil :accessor nil)
-                                      (memo-vector (make-vector 40) :accessor nil)
-                                      (arg-info (make-arg-info) :accessor nil))))
-
-#+sheeple3.1
-(defun %make-message (&key name lambda-list replies (documentation ""))
-  (defsheep (=standard-message=) ((name name) (lambda-list lambda-list)
-                                  (replies replies)
-                                  (memo-vector (make-vector 40))
-                                  (arg-info (make-arg-info)))))
-
-;;;
-;;; Message object
-;;;
-;;; - Messages are the Sheeple equivalent of a generic function. Unlike CLOS' generic functions,
-;;;   though, the role messages take is smaller. Messages themselves are fairly blind to the dispatch
-;;;   mechanism. As far as the user interface goes, they're used as a sort of interface definition.
-;;;   The main role they take on (visible to the user) is to maintain lambda-list congruence across
-;;;   different replies (sheeple-speak for methods). Sheeple messages follow the same rules as
-;;;   CLOS generic functions use for lambda-list congruence, as outlined in
-;;;   http://www.lispworks.com/documentation/HyperSpec/Body/07_fd.htm
-;;;
-;;;   Design-wise, this is a bit of an annoyance, since it means Replies aren't entirely independent.
-;;;   I made the decision many tags ago, though, that maintaining CLOS-style lambda-list congruence
-;;;   was worth the price. As it turns out, there were other convenient reasons to have a global
-;;;   'registry' of replies: All existing replies can be listed for the user, an obvious interface
-;;;   can be defined, and the message object can be used as an obvious place to store the cached
-;;;   dispatch information.
-
 (defstruct (%message (:predicate %messagep))
   name function message
   (erfun-cache (make-hash-table :test #'equal))

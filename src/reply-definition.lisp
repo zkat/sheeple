@@ -21,7 +21,8 @@
                    make-reply (message qualifiers lambda-list function
                                        &aux (rank-vector ; This dies if MESSAGE is not a
                                              (make-array ; message -- as it should!
-                                              (message-number-required message))))))
+                                              (arg-info-number-required
+                                               (message-arg-info message)))))))
   ;; These are set permanently when the reply is created
   (message (error "Must supply a message") :type message :read-only t)
   (qualifiers (error "Must supply qualifiers") :type list :read-only t)

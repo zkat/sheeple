@@ -15,7 +15,10 @@
 (defun kludge-arglist (lambda-list)
   (when (find '&key lambda-list)
     (unless (find '&allow-other-keys lambda-list)
-      (setf lambda-list (append lambda-list '(&allow-other-keys)))))
+      (setf lambda-list
+            (aif (position '&aux lambda-list)
+                 (concatenate 'list (subseq lambda-list 0 it) '(&allow-other-keys) (subseq lambda-list it))
+                 (append lambda-list '(&allow-other-keys))))))
   lambda-list)
 
 ;;; Break something like a lambda list (but not necessarily actually a

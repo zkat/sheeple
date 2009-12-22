@@ -231,7 +231,7 @@
                        :participants (list ,@participants)
                        :documentation ,docstring
                        :function ,(std-make-reply-lambda
-                                   `(lambda ,(kludge-arglist lambda-list)
+                                   `(lambda ,(allow-other-keys lambda-list)
                                       (declare (ignorable ,@ignorable)) ,@declarations
                                       (block ,(if (listp name) (cadr name) name) ,@body))))))))
 

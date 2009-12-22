@@ -179,6 +179,7 @@ by deleting items at the same position from both lists."
   "Return tail of LIST beginning with first element EQ to ITEM."
   (do ((i list (cdr i)))
       ((null i))
+    (declare (list i))
     (when (eq (car i) item)
       (return i))))
 

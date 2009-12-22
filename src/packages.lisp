@@ -73,11 +73,13 @@
    #:=function=
    #:=hash-table=
    #:=integer=
+   #:=list=
    #:=null=
    #:=number=
    #:=package=
    #:=pathname=
    #:=readtable=
+   #:=sequence=
    #:=standard-metaobject=
    #:=standard-object=
    #:=stream=

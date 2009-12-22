@@ -199,7 +199,7 @@
 ;; This pair just pretties up the options during macro expansion
 (defmacro defmessage (name lambda-list &rest options)
   (let ((replies (remove-if-not (curry 'eq :reply) options :key 'car))
-        (options (delete :reply options :test 'eq :key 'car)))
+        (options (remove :reply options :test 'eq :key 'car)))
     `(progn
        (eval-when (:compile-toplevel :load-toplevel :execute)
          (check-message-lambda-list ',lambda-list)

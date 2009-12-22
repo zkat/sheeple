@@ -12,14 +12,19 @@
 
 (in-package :sheeple)
 
-(defun kludge-arglist (lambda-list)
-  (when (find '&key lambda-list)
-    (unless (find '&allow-other-keys lambda-list)
-      (setf lambda-list
-            (aif (position '&aux lambda-list)
-                 (concatenate 'list (subseq lambda-list 0 it) '(&allow-other-keys) (subseq lambda-list it))
-                 (append lambda-list '(&allow-other-keys))))))
-  lambda-list)
+(defun allow-other-keys (lambda-list)
+  (declare (optimize speed) (list lambda-list))
+  (if (aand (memq '&key lambda-list)
+            (not (memq '&allow-other-keys it)))
+      (aprog1 (cons (car lambda-list) (cdr lambda-list))
+        (do ((tail it (cdr tail))
+             (next (cdr it) (cdr tail)))
+            ((null next) (setf (cdr tail) '(&allow-other-keys)))
+          (declare (list next) (cons tail))
+          (if (eq (car next) '&aux)
+              (return (setf (cdr tail) (cons '&allow-other-keys (cdr tail))))
+              (setf (cdr tail) (cons (car next) (cdr next))))))
+      lambda-list))
 
 ;;; Break something like a lambda list (but not necessarily actually a
 ;;; lambda list, e.g. the representation of argument types which is

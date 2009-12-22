@@ -156,7 +156,6 @@
   ;; Classify parameters without checking their validity individually.
   (multiple-value-bind (required optional restp rest keyp keys allowp auxp aux)
       (parse-lambda-list-like-thing lambda-list)
-
     ;; Check validity of parameters.
     (flet ((need-symbol (x why)
              (unless (symbolp x)
@@ -190,7 +189,6 @@
             (t
              (error "&KEY parameter is not a symbol or cons: ~S"
                     i))))))
-
     ;; Voila.
     (values required optional restp rest keyp keys allowp auxp aux)))
 
@@ -307,15 +305,13 @@
   ;; any lambda-list, or defmessage lambda-lists? Should it do error
   ;; reporting, or no error reporting? Right now it's not clear what
   ;; the answers are...
-  (labels ((make-keyword (symbol)
-             (intern (symbol-name symbol)
-                     (find-package 'keyword)))
-           (parse-key-arg (arg)
-             (if (listp arg)
-                 (if (listp (car arg))
-                     (caar arg)
-                     (make-keyword (car arg)))
-                 (make-keyword arg))))
+  (labels ((parse-key-arg (arg)
+             (flet ((make-keyword (symbol)
+                      (intern (symbol-name symbol)
+                              (find-package 'keyword))))
+               (cond ((not (listp arg)) (make-keyword arg))
+                     ((listp (car arg)) (caar arg))
+                     (t (make-keyword (car arg)))))))
     (let ((nrequired 0) (noptional 0) (keysp nil) (restp nil) (nrest 0)
           (allow-other-keys-p nil) (keywords nil) (keyword-parameters nil)
           (state 'required))
@@ -323,12 +319,10 @@
         (if (memq x lambda-list-keywords)
             (case x
               (&optional         (setf state 'optional))
-              (&key              (setf keysp t
-                                       state 'key))
+              (&rest             (setf state 'rest restp t))
+              (&key              (setf state 'key  keysp t))
               (&allow-other-keys (setf allow-other-keys-p t))
-              (&rest             (setf restp t
-                                       state 'rest))
-              (&aux           (return t))
+              (&aux              (return))
               (otherwise
                (error "encountered the non-standard lambda list keyword ~S" x)))
             (ecase state
@@ -338,8 +332,7 @@
                          (push x keyword-parameters))
               (rest      (incf nrest)))))
       (when (and restp (zerop nrest))
-        (error "A &REST in a DEFMESSAGE lambda-list ~
+        (error "A &REST keyword in a lambda-list ~
                 must be followed by at least one variable."))
       (values nrequired noptional keysp restp allow-other-keys-p
-              (reverse keywords)
-              (reverse keyword-parameters)))))
+              (reverse keywords) (reverse keyword-parameters)))))

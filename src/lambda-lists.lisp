@@ -18,7 +18,7 @@
             (not (memq '&allow-other-keys it)))
       (aprog1 (cons (car lambda-list) (cdr lambda-list))
         (do ((tail it (cdr tail))
-             (next (cdr it) (cdr tail)))
+             (next (cdr it) (cdr next)))
             ((null next) (setf (cdr tail) '(&allow-other-keys)))
           (declare (list next) (cons tail))
           (if (eq (car next) '&aux)

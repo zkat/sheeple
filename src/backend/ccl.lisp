@@ -10,3 +10,6 @@
 
 (define-compiler-macro safe-fdefinition (name)
   `(fboundp ,name))
+
+(define-compiler-macro copy-simple-vector (vector)
+  `(ccl::copy-uvector ,vector))

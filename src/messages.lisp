@@ -162,10 +162,6 @@
                 insufficient-message-args :message message)
     (subseq args 0 number-required)))
 
-;;;
-;;; Message definition (finally!)
-;;;
-
 ;; The defmessage macro basically expands to a call to this function (after processing
 ;; its args, checking lamda-list, etc.)
 (defun ensure-message (name &rest all-keys &key lambda-list &allow-other-keys)
@@ -174,6 +170,8 @@
       (update-arg-info it lambda-list)
       (return-from ensure-message it))
     (cerror "Replace definition." 'clobbering-function-definition :function name))
+  (record-message-source name)
+  (record-message-arglist name lambda-list)
   (setf (fdefinition name)
         (apply 'make-message :name name :lambda-list lambda-list all-keys)))
 
@@ -191,23 +189,28 @@
   (flush-erfun-cache message)
   (values))
 
-;;; defmessage macro
+;;;
+;;; Message definition (finally!)
+;;;
 
-;; This is the actual message definition macro.
-;; It first verifies that the lambda-list provided is a valid message ll,
-;; then expands to a call to ensure-message
-;; This pair just pretties up the options during macro expansion
-(defmacro defmessage (name lambda-list &rest options)
-  (let ((replies (remove-if-not (curry 'eq :reply) options :key 'car))
-        (options (remove :reply options :test 'eq :key 'car)))
+(defun parse-defmessage (name lambda-list options-and-replies)
+  (check-message-lambda-list lambda-list)
+  (let (replies options)
+    (dolist (option options-and-replies)
+      (ecase (car option) ; Choke on unsupported types
+        (:reply (push `(defreply ,name ,@(cdr option)) replies))
+        (:documentation (push option options))))
+    (values replies options)))
+
+(defmacro defmessage (name lambda-list &rest options &environment env)
+  (multiple-value-bind (replies options)
+      (parse-defmessage name lambda-list options)
     `(progn
-       (eval-when (:compile-toplevel :load-toplevel :execute)
-         (check-message-lambda-list ',lambda-list)
-         (ensure-message ',name :lambda-list ',lambda-list
-                         ,@(canonize-message-options options)))
-       ,@(when replies
-           `(,@(mapcar (fun `(defreply ,name ,@(cdr _))) replies)
-               (fdefinition ',name))))))
+       (eval-when (:compile-toplevel)
+         ,(record-message-compilation name lambda-list env))
+       (aprog1 (ensure-message ',name :lambda-list ',lambda-list
+                               ,@(canonize-message-options options))
+         ,.replies))))
 
 (defun canonize-message-option (option)
   `(,(car option) ,(cadr option)))
@@ -215,8 +218,5 @@
 (defun canonize-message-options (options)
   (mapcan 'canonize-message-option options))
 
-;;;
-;;; Undefinition
-;;;
 (defmacro undefmessage (name)
   `(fmakunbound ',name))

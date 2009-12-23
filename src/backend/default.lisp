@@ -10,26 +10,16 @@
 
 (declaim (inline safe-fdefinition))
 (defun safe-fdefinition (name)
-  (declare (optimize speed (safety 0) (debug 0))) ; The irony kills me
   (when (fboundp name) (fdefinition name)))
 
-;;; I thought about Alexandria's COPY-ARRAY, but that's too general.
-;;; Use with caution.
 (declaim (inline copy-simple-vector))
 (defun copy-simple-vector (vector)
-  "Creates a new simple-vector with the same elements as VECTOR."
-  (declare (simple-vector vector) (optimize speed (safety 0) (debug 0)))
+  (declare (simple-vector vector) (optimize speed))
   (make-array (length vector) :initial-contents vector))
 
-(macrolet ((fixnum+ (&rest values) `(the fixnum (+ ,@values))))
-  (defun vector-cons (x vector)
-    (declare (simple-vector vector)
-             (optimize speed (safety 0) (debug 0))) ; --omg-optimized
-    (let* ((index (fixnum+ 1 (length vector)))
-           (result (make-array index)))
-      (declare (fixnum index) (simple-vector result))
-      (tagbody (go test)
-       loop (setf (svref result index) (svref vector (fixnum+ -1 index)))
-       test (setf index (fixnum+ -1 index)) (unless (zerop index) (go loop)))
-      (setf (svref result 0) x)
-      result)))
+(defun vector-cons (x vector)
+  (declare (simple-vector vector) (optimize speed))
+  (aprog1 (make-array (1+ (length vector)))
+    (loop for elt across vector and i from 1
+       do (setf (svref it i) elt)
+       finally (setf (svref it 0) x))))

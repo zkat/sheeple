@@ -17,7 +17,8 @@
              (:module "backend"
                       :serial t
                       :components
-                      ((:file "default")))
+                      ((:file "default")
+                       #+ccl (:file "ccl")))
              (:file "conditions")
              (:file "objects")
              (:file "properties")

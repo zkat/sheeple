@@ -20,7 +20,7 @@
 property is not set locally, a condition of type `unbound-property' is signaled."
   (if (std-object-p object)
       (std-direct-property-value object property-name)
-      (smop:direct-property-value (object-metaobject object) object property-name)))
+      (funcall 'smop:direct-property-value (object-metaobject object) object property-name)))
 (defun std-direct-property-value (object property-name)
   (aif (property-position property-name object)
        (svref (%object-property-values object) it)
@@ -41,7 +41,7 @@ If the value does not exist in the hierarchy list, a condition of type `unbound-
 is signaled."
   (if (std-object-p object)
       (std-property-value object property-name)
-      (smop:property-value (object-metaobject object) object property-name)))
+      (funcall 'smop:property-value (object-metaobject object) object property-name)))
 (defun std-property-value (object property-name)
   (dolist (ancestor (object-precedence-list object)
            (error 'unbound-property :object object :property-name property-name))
@@ -54,7 +54,7 @@ is signaled."
 PROPERTY-NAME."
   (if (std-object-p object)
       (apply #'(setf std-property-value) new-value object property-name options)
-      (apply #'(setf smop:property-value) new-value
+      (apply '(setf smop:property-value) new-value
              (object-metaobject object) object property-name options)))
 (defun (setf std-property-value) (new-value object property-name
                                           &key (reader nil readerp) (writer nil writerp) accessor)
@@ -83,7 +83,7 @@ PROPERTY-NAME."
 direct property. Returns OBJECT."
   (if (std-object-p object)
       (std-property-makunbound object property-name)
-      (smop:property-makunbound (object-metaobject object) object property-name)))
+      (funcall 'smop:property-makunbound (object-metaobject object) object property-name)))
 (defun std-property-makunbound (object property-name)
   (if (direct-property-p object property-name)
       (prog1 object
@@ -103,7 +103,7 @@ direct property. Returns OBJECT."
   "Wipes out all direct properties and their values from OBJECT."
   (if (std-object-p object)
       (std-remove-all-direct-properties object)
-      (smop:remove-all-direct-properties (object-metaobject object) object)))
+      (funcall 'smop:remove-all-direct-properties (object-metaobject object) object)))
 (defun std-remove-all-direct-properties (object)
   (change-mold object (ensure-mold (object-parents object)))
   object)
@@ -116,7 +116,7 @@ direct property. Returns OBJECT."
 NIL otherwise."
   (if (std-object-p object)
       (std-direct-property-p object property-name)
-      (smop:direct-property-p (object-metaobject object) object property-name)))
+      (funcall 'smop:direct-property-p (object-metaobject object) object property-name)))
 (defun std-direct-property-p (object property-name)
   (let ((has-property-p t))
     (handler-case (direct-property-value object property-name)
@@ -127,7 +127,7 @@ NIL otherwise."
   "Returns the object, if any, from which OBJECT would fetch the value for PROPERTY-NAME"
   (if (std-object-p object)
       (std-property-owner object property-name)
-      (smop:property-owner (object-metaobject object) object property-name)))
+      (funcall 'smop:property-owner (object-metaobject object) object property-name)))
 (defun std-property-owner (object property-name)
   (find-if (rcurry 'direct-property-p property-name) (object-precedence-list object)))
 
@@ -137,7 +137,7 @@ set directly in OBJECT using (setf property-value). The consequences of side-eff
 returned list are undefined."
   (if (std-object-p object)
       (std-direct-properties object)
-      (smop:direct-properties (object-metaobject object) object)))
+      (funcall 'smop:direct-properties (object-metaobject object) object)))
 (defun std-direct-properties (object)
   (coerce (mold-properties (%object-mold object)) 'list))
 
@@ -145,7 +145,7 @@ returned list are undefined."
   "Returns a list of the names of all properties available to OBJECT, including inherited ones."
   (if (std-object-p object)
       (std-available-properties object)
-      (smop:available-properties (object-metaobject object) object)))
+      (funcall 'smop:available-properties (object-metaobject object) object)))
 (defun std-available-properties (object)
   (delete-duplicates (nconc (copy-list (direct-properties object))
                             (mapcan 'available-properties (object-parents object)))))

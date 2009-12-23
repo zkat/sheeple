@@ -15,7 +15,7 @@
 
 ;;; Setting up the :SHEEPLE package to include :Eos stuff
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (import '(Eos:def-suite Eos:run! Eos:is Eos:in-suite Eos:signals Eos:def-fixture
+  (import '(Eos:def-suite Eos:run! Eos:is Eos:in-suite Eos:signals
             Eos:for-all Eos:gen-integer Eos:gen-list Eos:gen-tree))
   (export 'run-all-tests))
 

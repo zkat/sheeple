@@ -169,7 +169,7 @@
 ;;; and what they're supposed to return.
 
 (defun undefine-reply (name &key qualifiers participants)
-  (awhen (fboundp name)
+  (awhen (safe-fdefinition name)
     (remove-applicable-reply it qualifiers (ensure-boxed-objects participants))))
 
 (defun remove-specific-reply (message qualifiers participants)

@@ -283,27 +283,6 @@ will not be affected; otherwise, it will be bound to a recognizeable and unique 
        (print-unreadable-object (,object ,stream :type ,type :identity ,identity)
          (let ((*standard-output* ,stream)) ,@body)))))
 
-;;; I thought about Alexandria's COPY-ARRAY, but that's too general.
-;;; Use with caution.
-(declaim (inline copy-simple-vector))
-(defun copy-simple-vector (vector)
-  "Creates a new simple-vector with the same elements as VECTOR."
-  (declare (simple-vector vector) (optimize speed (safety 0) (debug 0)))
-  (make-array (length vector) :initial-contents vector))
-
-(macrolet ((fixnum+ (&rest values) `(the fixnum (+ ,@values))))
-  (defun vector-cons (x vector)
-    (declare (simple-vector vector)
-             (optimize speed (safety 0) (debug 0))) ; --omg-optimized
-    (let* ((index (fixnum+ 1 (length vector)))
-           (result (make-array index)))
-      (declare (fixnum index) (simple-vector result))
-      (tagbody (go test)
-       loop (setf (svref result index) (svref vector (fixnum+ -1 index)))
-       test (setf index (fixnum+ -1 index)) (unless (zerop index) (go loop)))
-      (setf (svref result 0) x)
-      result)))
-
 (defmacro do-reversed ((name listform) &body body)
   (with-gensyms (label tail)
     `(labels ((,label (,tail &rest ,name)

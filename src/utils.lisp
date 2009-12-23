@@ -101,7 +101,8 @@ producing a symbol in the current package."
 (declaim (inline safe-fdefinition))
 (defun safe-fdefinition (name)
   (declare (optimize speed (safety 0) (debug 0))) ; The irony kills me
-  (when (fboundp name) (fdefinition name)))
+  #+ccl (fboundp name)
+  #-ccl (when (fboundp name) (fdefinition name)))
 
 (defmacro error-when (condition error-datum &rest error-args)
   "Like `ASSERT', but with fewer bells and whistles."

@@ -203,7 +203,7 @@ creating and linking a new one if necessary."
   (%object-metaobject object))
 (defun (setf object-metaobject) (new-metaobject object)
   ;; todo - this should take care of switching out molds accordingly -before- calling the smop:
-  (setf (smop:object-metaobject (object-metaobject object) object) new-metaobject))
+  (funcall '(setf smop:object-metaobject) new-metaobject (object-metaobject object) object))
 
 (defun object-parents (object)
   (mold-parents (%object-mold object)))
@@ -348,7 +348,7 @@ This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER 
   (check-list-type new-parents object)
   (let ((metaobject (object-metaobject object)))
     (dolist (parent new-parents)
-      (unless (smop:validate-parent metaobject object (object-metaobject parent) parent)
+      (unless (funcall 'smop:validate-parent metaobject object (object-metaobject parent) parent)
         (error "~A cannot be a parent of ~A" parent object))))
   (flet ((lose (reason) (error 'object-precedence-error :object object :conflict reason)))
     (let ((precedence (handler-case (compute-precedence new-parents)

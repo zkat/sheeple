@@ -14,6 +14,10 @@
              (:file "sheeple-garbage")
              (:file "functions")
              (:file "utils")
+             (:module "backend"
+                      :serial t
+                      :components
+                      ((:file "default")))
              (:file "conditions")
              (:file "objects")
              (:file "properties")

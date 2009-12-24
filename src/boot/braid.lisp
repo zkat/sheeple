@@ -29,7 +29,11 @@
   ;; The first circular link is =STANDARD-METAOBJECT='s own metaobject. This
   ;; link isn't created above because '=STANDARD-METAOBJECT= is bound to junk
   ;; before boot, so we fix this manually now.
-  (setf (%object-metaobject =standard-metaobject=) =standard-metaobject=)
+
+  ;; Due to the new way of storing metaobjects, this is some kludgy shit... this
+  ;; setf is the sole reason that lineage-metaobject can't be read-only.
+  (setf (lineage-metaobject (mold-lineage (%object-mold =standard-metaobject=)))
+        =standard-metaobject=)
 
   ;; We also show off Sheeple's freedom from side-effects is by consing less.
   (let ((the-list (list =t=)))

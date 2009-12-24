@@ -27,11 +27,13 @@
 
 (defmessage reinit-object (object &rest initargs)
   (:documentation "Resets parents and properties without changing OBJECT's identity.")
-  (:reply (object &rest initargs &key parents metaobject)
+  (:reply (object &rest initargs &key parents (metaobject =standard-metaobject=))
     (when (null parents)                ; Guard against funny business
       (push =standard-object= parents))
-    (setf (object-metaobject object) (or metaobject =standard-metaobject=))
-    (change-mold object (ensure-mold parents))
+    ;; This code relies on a CHECK-TYPE in `(setf object-metaobject)' to guard
+    ;; against explicitly passing a non-object METAOBJECT arg.
+    (setf (object-metaobject object) metaobject)
+    (change-mold object (ensure-mold metaobject parents))
     (apply #'shared-init object initargs)))
 
 (defmessage create (proto &key)

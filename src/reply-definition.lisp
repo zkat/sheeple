@@ -213,8 +213,8 @@
 ;;;
 
 ;;; Definition
-(defmacro defreply (&whole whole name &body defreply-body)
-  (declare (ignore defreply-body))
+(defmacro defreply (&whole whole name lambda-list &body body)
+  (declare (ignore lambda-list body))
   (multiple-value-bind (qualifiers reply-ll declarations docstring body)
       (parse-defreply whole)
     (multiple-value-bind (parameters lambda-list participants required ignorable)

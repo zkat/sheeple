@@ -292,3 +292,6 @@ will not be affected; otherwise, it will be bound to a recognizeable and unique 
                     (apply #',label (cdr ,tail) (car ,tail) ,name))))
        (declare (dynamic-extent #',label))
        (,label ,listform))))
+
+(defmacro define-backend (default-form &body customized-forms)
+  (or (car customized-forms) default-form))

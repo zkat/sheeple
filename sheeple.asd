@@ -14,11 +14,7 @@
              (:file "sheeple-garbage")
              (:file "functions")
              (:file "utils")
-             (:module "backend"
-                      :serial t
-                      :components
-                      ((:file "default")
-                       #+ccl (:file "ccl")))
+             (:file "backend")
              (:file "conditions")
              (:file "objects")
              (:file "properties")

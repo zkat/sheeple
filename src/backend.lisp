@@ -12,10 +12,18 @@
 (defun safe-fdefinition (name)
   (when (fboundp name) (fdefinition name)))
 
+#+ccl
+(define-compiler-macro safe-fdefinition (name)
+  `(fboundp ,name))
+
 (declaim (inline copy-simple-vector))
 (defun copy-simple-vector (vector)
   (declare (simple-vector vector) (optimize speed))
   (make-array (length vector) :initial-contents vector))
+
+#+ccl
+(define-compiler-macro copy-simple-vector (vector)
+  `(ccl::copy-uvector ,vector))
 
 (defun vector-cons (x vector)
   (declare (simple-vector vector) (optimize speed))
@@ -29,8 +37,16 @@
   (declare (ignore lambda-list env))
   `(proclaim `(ftype function ,',name)))
 
+#- (or ccl)
 (defun record-message-source (name)
   (declare (ignore name)))
+#+ccl
+(defun record-message-source (name)
+  (ccl:record-source-file name 'message))
 
+#- (or ccl)
 (defun record-message-arglist (name arglist)
   (declare (ignore name arglist)))
+#+ccl
+(defun record-message-arglist (name arglist)
+  (ccl::record-arglist name arglist))

@@ -49,33 +49,44 @@ is signaled."
       (return (direct-property-value ancestor property-name)))
     :next))
 
-(defun (setf property-value) (new-value object property-name &rest options)
+(defun (setf direct-property-value) (new-value object property-name &rest options)
+  "Tries to set a direct property value for OBJECT. If it succeeds, returns T, otherwise NIL."
+  (if (std-object-p object)
+      (apply '(setf std-direct-property-value) new-value object property-name options)
+      (apply '(setf smop:direct-property-value) new-value (object-metaobject object) object property-name options)))
+(defun (setf std-direct-property-value) (new-value object property-name &rest options)
+  (declare (ignore options))
+  (awhen (property-position property-name object)
+    (setf (svref (%object-property-values object) it) new-value)
+    t))
+
+(defun add-direct-property (object property-name &rest options)
+  "Adds a direct property to object, which involves any necessary allocation."
+  (if (std-object-p object)
+      (apply 'std-add-direct-property object property-name options)
+      (apply 'smop:add-direct-property (object-metaobject object) object property-name options)))
+(defun std-add-direct-property (object property-name &rest options)
+  (declare (ignore options))
+  (change-mold object (ensure-transition (%object-mold object) property-name)))
+
+(defun (setf property-value) (new-value object property-name &rest options
+                              &key (reader nil readerp) (writer nil writerp) accessor)
   "Sets NEW-VALUE as the value of a direct-property belonging to OBJECT, named
 PROPERTY-NAME."
-  (if (std-object-p object)
-      (apply #'(setf std-property-value) new-value object property-name options)
-      (apply '(setf smop:property-value) new-value
-             (object-metaobject object) object property-name options)))
-(defun (setf std-property-value) (new-value object property-name
-                                          &key (reader nil readerp) (writer nil writerp) accessor)
-  ;; (SETF PROPERTY-VALUE) is split into two parts.
-  ;; The first actually adds a property-value directly on the object:
-  (aif (property-position property-name object)
-       (setf (svref (%object-property-values object) it) new-value)
-       (progn
-         (change-mold object (ensure-transition (%object-mold object) property-name))
-         (let ((index (property-position property-name object)))
-           (setf (svref (%object-property-values object) index) new-value))))
-  ;; Once that's done, we use the options passed to it to generate readers/writers/accessors:
-  (when reader (add-reader-to-object reader property-name object))
-  (when writer (add-writer-to-object writer property-name object))
-  (when accessor
-    (let ((accessor-name (if (eq t accessor) property-name accessor)))
-      (unless (and readerp (null reader))
-        (add-reader-to-object accessor-name property-name object))
-      (unless (and writerp (null writer))
-        (add-writer-to-object `(setf ,accessor-name) property-name object))))
-  ;; Finally, for SETF-compliance, we return the value.
+  (flet ((maybe-set-prop () (apply '(setf direct-property-value) new-value object property-name options)))
+    (or (maybe-set-prop)                                                 ; try to set it
+        (progn (apply 'add-direct-property object property-name options) ; couldn't set it, try adding it
+               (maybe-set-prop))                                         ; then try setting it again
+        (error "Could not set direct property value.")))                 ; bought the farm
+  (when options             ; if we know there's no options, we may as well skip all of the checks..
+    (when reader (add-reader-to-object reader property-name object))
+    (when writer (add-writer-to-object writer property-name object))
+    (when accessor
+      (let ((accessor-name (if (eq t accessor) property-name accessor)))
+        (unless (and readerp (null reader))
+          (add-reader-to-object accessor-name property-name object))
+        (unless (and writerp (null writer))
+          (add-writer-to-object `(setf ,accessor-name) property-name object)))))
   new-value)
 
 (defun property-makunbound (object property-name)

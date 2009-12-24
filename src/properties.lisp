@@ -99,7 +99,7 @@ direct property. Returns OBJECT."
   (if (direct-property-p object property-name)
       (prog1 object
         (change-mold object
-                     (ensure-mold (object-parents object)
+                     (ensure-mold (%object-metaobject object) (%object-parents object)
                                   (remove property-name
                                           (mold-properties (%object-mold object))))))
       (error 'unbound-property :object object :property-name property-name)))
@@ -116,7 +116,7 @@ direct property. Returns OBJECT."
       (std-remove-all-direct-properties object)
       (funcall 'smop:remove-all-direct-properties (object-metaobject object) object)))
 (defun std-remove-all-direct-properties (object)
-  (change-mold object (ensure-mold (object-parents object)))
+  (change-mold object (ensure-mold (%object-metaobject object) (%object-parents object)))
   object)
 
 ;;;

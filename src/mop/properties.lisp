@@ -17,9 +17,13 @@
   (:reply ((metaobject =standard-metaobject=) object property-name)
     (std-property-value object property-name)))
 
-(defmessage (setf smop:property-value) (new-value metaobject object property-name &key)
+(defmessage smop:add-direct-property (metaobject object property-name &key)
+  (:reply ((metaobject =standard-metaobject=) object property-name &rest options)
+    (apply #'std-add-direct-property object property-name options)))
+
+(defmessage (setf smop:direct-property-value) (new-value metaobject object property-name &key)
   (:reply (new-value (metaobject =standard-metaobject=) object property-name &rest options)
-    (apply #'(setf std-property-value) new-value object property-name options)))
+    (apply #'(setf std-direct-property-value) new-value object property-name options)))
 
 (defmessage smop:property-makunbound (metaobject object property-name)
   (:reply ((metaobject =standard-metaobject=) object property-name)

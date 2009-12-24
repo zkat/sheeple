@@ -50,7 +50,7 @@ confusing, but actually enables crystal clear warning-free test code."
 (test std-object-initial-values
   (let ((object (std-allocate-object =standard-metaobject=)))
     (is (eq =standard-metaobject= (%object-metaobject object)))
-    (is (eq (ensure-mold nil)  (%object-mold object)))
+    (is (eq (ensure-mold =standard-metaobject= nil) (%object-mold object)))
     (is (null (%object-property-values object)))
     (is (null (%object-roles object)))))
 
@@ -84,14 +84,12 @@ confusing, but actually enables crystal clear warning-free test code."
 
 (test %object-metaobject
   (with-std-object object
-    (is (eql =standard-metaobject= (%object-metaobject object)))
-    (is (null (setf (%object-metaobject object) nil)))
-    (is (null (%object-metaobject object)))))
+    (is (eql =standard-metaobject= (%object-metaobject object)))))
 
 (test %object-mold
   (with-std-object object
-    (is (eq (ensure-mold nil) (%object-mold object)))
-    (let ((mold (ensure-mold nil #(nickname))))
+    (is (eq (ensure-mold =standard-metaobject= nil) (%object-mold object)))
+    (let ((mold (ensure-mold =standard-metaobject= nil #(nickname))))
       (is (eq mold (setf (%object-mold object) mold)))
       (is (eq mold (%object-mold object))))))
 

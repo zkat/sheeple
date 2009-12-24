@@ -134,6 +134,7 @@
    :property-makunbound
    :property-owner
    :property-value
+   :add-direct-property
    :remove-all-direct-properties
    :remove-all-direct-properties
    :remove-property

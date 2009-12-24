@@ -29,7 +29,6 @@
         (eq parent-mo child-mo))))
 
 (defmessage (setf smop:object-metaobject) (new-metaobject old-metaobject object)
-  (:reply ((new-mo =t=) (old-mo =t=) object)
+  (:reply (new-mo old-mo object)
     (error "Cannot change metaobject of ~A from ~A to ~A" object old-mo new-mo))
-  (:reply ((new-mo =standard-metaobject=) (old-mo =standard-metaobject=) object)
-    (setf (%object-metaobject object) new-mo)))
+  (:reply ((new-mo =standard-metaobject=) (old-mo =standard-metaobject=) (object =t=))))

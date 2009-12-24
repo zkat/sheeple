@@ -69,8 +69,10 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
 (defstruct (lineage
              (:predicate lineagep)
              (:constructor
-              make-lineage (parents &aux (precedence-list (compute-precedence parents)))))
+              make-lineage (metaobject parents
+                                       &aux (precedence-list (compute-precedence parents)))))
   "Information about an object's ancestors and descendants."
+  metaobject ; Not readonly for ease of bootstrapping
   (members         (make-weak-hash-table :weakness :key :test #'eq)
                    :read-only t :type hash-table) ; The lineage's members
   (parents         nil :read-only t)              ; A set of objects
@@ -89,13 +91,21 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
   (define-mold-reader mold-precedence-list lineage-precedence-list))
 
 (defstruct (object (:conc-name %object-) (:predicate objectp)
-                   (:constructor std-allocate-object (metaobject))
+                   (:constructor std-allocate-object
+                                 (metaobject &aux (mold (ensure-mold metaobject ()))))
                    (:print-object print-sheeple-object-wrapper))
-  (mold (ensure-mold nil) :type mold)
-  (metaobject =standard-metaobject=)
+  (mold (assert NIL) :type mold)
   (precedence-list nil :type list)
   (property-values nil)
   (roles nil :type list)) ; Roles are used in dispatch -- see reply-foo.lisp
+
+(declaim (inline %object-metaobject %object-parents))
+(defun %object-metaobject (object)
+  (declare (optimize speed (safety 0)))
+  (lineage-metaobject (mold-lineage (%object-mold object))))
+(defun %object-parents (object)
+  (declare (optimize speed (safety 0)))
+  (lineage-parents (mold-lineage (%object-mold object))))
 
 (defun %object-children (object)
   (gethash object (lineage-members (mold-lineage (%object-mold object)))))
@@ -122,14 +132,16 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
   "Maps parent lists to their corresponding molds. This is the global entry
 point to Sheeple's backend class system.")
 
-(defun find-mold (parents)
+(defun find-mold (metaobject parents)
+;  (check-type metaobject object)
   (check-list-type parents object)
-  (values (gethash parents *molds*)))
+  (values (gethash (cons metaobject parents) *molds*)))
 
-(defun (setf find-mold) (mold parents)
+(defun (setf find-mold) (mold metaobject parents)
+;  (check-type metaobject object)
   (check-list-type parents object)
   (check-type mold mold)
-  (setf (gethash parents *molds*) mold))
+  (setf (gethash (cons metaobject parents) *molds*) mold))
 
 ;;;
 ;;; Transitions
@@ -143,12 +155,13 @@ If no such mold exists, returns NIL."
 ;;;
 ;;; Mold API -- Retrieval and Automatic Creation of Molds
 ;;;
-(defun ensure-toplevel-mold (parents)
+(defun ensure-toplevel-mold (metaobject parents)
   "Returns the mold for PARENTS, creating and caching a new one if necessary."
+;  (check-type metaobject object)
   (check-list-type parents object)
-  (or (find-mold parents)
-      (setf (find-mold parents)
-            (make-mold (aprog1 (make-lineage parents)
+  (or (find-mold metaobject parents)
+      (setf (find-mold metaobject parents)
+            (make-mold (aprog1 (make-lineage metaobject parents)
                          (dolist (parent parents)
                            (push it (%object-children parent))))
                        (vector)))))
@@ -162,12 +175,13 @@ linking a new one if necessary."
                          (vector-cons property-name (mold-properties mold)) mold)
         (setf (gethash property-name (mold-transitions mold)) it))))
 
-(defun ensure-mold (parents &optional (properties #()))
+(defun ensure-mold (metaobject parents &optional (properties #()))
   "Returns the mold with properties PROPERTIES of the mold for PARENTS,
 creating and linking a new one if necessary."
+;  (check-type metaobject object)
   (check-list-type parents object)
   (check-type properties vector)
-  (let ((top (ensure-toplevel-mold parents)))
+  (let ((top (ensure-toplevel-mold metaobject parents)))
     (do* ((mold top (ensure-transition mold (car props-left)))
           (props-left (coerce properties 'list) (cdr props-left)))
          ((null props-left) mold))))
@@ -200,13 +214,12 @@ creating and linking a new one if necessary."
     (no-applicable-reply () (std-print-sheeple-object object stream))))
 
 (defun object-metaobject (object)
+  (check-type object object)
   (%object-metaobject object))
-(defun (setf object-metaobject) (new-metaobject object)
-  ;; todo - this should take care of switching out molds accordingly -before- calling the smop:
-  (funcall '(setf smop:object-metaobject) new-metaobject (object-metaobject object) object))
 
 (defun object-parents (object)
-  (mold-parents (%object-mold object)))
+  (check-type object object)
+  (%object-parents object))
 
 ;;; This utility is useful for concisely setting up object hierarchies
 (defmacro with-object-hierarchy (object-and-parents &body body)
@@ -340,7 +353,8 @@ right order. Keep in mind that NEW-MOLD might specify some properties in a diffe
 This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER CODE."
   (check-type object object)
   (check-list-type new-parents object)
-  (change-mold object (ensure-mold new-parents (mold-properties (%object-mold object))))
+  (change-mold object (ensure-mold (%object-metaobject object) new-parents
+                                   (mold-properties (%object-mold object))))
   (map 'nil 'trigger-precedence-recalculation (%object-children object)))
 
 (defun (setf object-parents) (new-parents object)
@@ -358,6 +372,13 @@ This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER 
              (lose "Object appears multiple times in the precedence list"))
             (t (change-parents object new-parents)))))
   new-parents)
+
+(defun (setf object-metaobject) (new-metaobject object)
+  (check-type object object)
+  (check-type new-metaobject object)
+  (change-mold object (ensure-mold new-metaobject (%object-parents object)
+                                   (mold-properties (%object-mold object))))
+  (funcall '(setf smop:object-metaobject) new-metaobject (object-metaobject object) object))
 
 ;;; Inheritance predicates
 (defun parentp (maybe-parent child)
@@ -389,7 +410,7 @@ ALL-KEYS is passed on to INIT-OBJECT."
           :feature "Passing a non-list :parents option to #'OBJECT")
     (setf parents (list parents)))
   (handler-case
-      (setf (object-mold object) (ensure-mold (or parents (list =standard-object=))))
+      (setf (object-mold object) (ensure-mold metaobject (or parents (list =standard-object=))))
     (topological-sort-conflict (conflict)
       (error 'object-precedence-error :object object :conflict conflict)))
   (apply 'init-object object all-keys))

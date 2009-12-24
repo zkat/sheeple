@@ -13,3 +13,9 @@
 
 (define-compiler-macro copy-simple-vector (vector)
   `(ccl::copy-uvector ,vector))
+
+(defun record-message-source (name)
+  (ccl:record-source-file name 'message))
+
+(defun record-message-arglist (name arglist)
+  (ccl::record-arglist name arglist))

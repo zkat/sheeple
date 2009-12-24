@@ -17,8 +17,8 @@ Sheeple was originally written as a persistent library for use with
 rewritten as a regular prototype object system and provided as a standalone
 library meant for general-purpose OO hackery.
 
-Persistent Sheeple has not been abandoned. Instead, it's being implemented as a
-[separate library][7] using Sheeple's reflection features.
+The goal of having a Sheeple-like persistent object store has not been abandoned. Instead, it's
+being implemented as a [separate library][7] using Sheeple's reflection features.
 
 Sheeple is inspired by a number of Object-Oriented systems, mainly:
 
@@ -69,7 +69,7 @@ Sheeple should work on most Lisp implementations that support weak pointers and 
 although it's mainly developed and tested on SBCL and Clozure CL.
 
 Sheeple also includes a suite of tests you can run on whatever platform you're
-trying to get it to work on. The test suite depends on [Fiveam][11]. To run it:
+trying to get it to work on. The test suite depends on [Eos][11]. To run it:
 
          (asdf:oos 'asdf:test-op 'sheeple)
 
@@ -202,7 +202,7 @@ its object-parents place:
 [3]: http://en.wikipedia.org/wiki/CLOS
 [4]: http://en.wikipedia.org/wiki/Io_(programming_language)
 [6]: http://slatelanguage.org/
-[7]: http://github.com/zkat/persistent-sheeple/
+[7]: http://github.com/zkat/shepherdb/
 [9]: http://github.com/zkat/sykosomatic/
 [10]: http://research.sun.com/self/
-[11]: http://www.cliki.net/FiveAM
+[11]: http://www.cliki.net/Eos

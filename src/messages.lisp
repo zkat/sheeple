@@ -10,7 +10,8 @@
 (in-package :sheeple)
 
 (defstruct (%message (:predicate %messagep))
-  name function message
+  name message
+  (function #'identity :type function)
   (erfun-cache (make-hash-table :test #'equal))
   (replies nil :type list)
   ;; These are for argument info
@@ -29,6 +30,7 @@
 (defun allocate-message ()
   (let ((%message (make-%message)))
     (aprog1 (lambda (&rest args)
+              (declare (dynamic-extent args) (optimize speed (safety 0)))
               (apply (%message-function %message) args))
       (setf (gethash it *funcallable-messages*) %message
             (%message-message %message)         it))))

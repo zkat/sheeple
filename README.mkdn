@@ -11,24 +11,24 @@ assist them in leveraging modern paradigms in order to proactively achieve next-
 in tomorrow's web 3.0 world. It is implemented in (mostly) ANSI Common Lisp. Sheeple is fully
 buzzword compliant.
 
-Sheeple was originally written as a persistent library for use with [Sykosomatic][9]. Because of a
+Sheeple was originally written as a persistent library for use with [Sykosomatic][1]. Because of a
 desire to use it in other applications, it was rewritten as a regular prototype object system and
 provided as a standalone library meant for general-purpose OO hackery.
 
 The goal of having a Sheeple-like persistent object store has not been abandoned. Instead, it's
-being implemented as a [separate library][7] using Sheeple's reflection features.
+being implemented as a [separate library][2] using Sheeple's reflection features.
 
 Sheeple is inspired by a number of Object-Oriented systems, mainly:
 
 * [CLOS][3], the Common Lisp Object System.
 
-* [Slate][6], a Smalltalk-like language with Prototype Multiple Dispatch which lies at the root of
+* [Slate][4], a Smalltalk-like language with Prototype Multiple Dispatch which lies at the root of
   Sheeple's message dispatch system.
 
-* [Self][10], another Smalltalk-like language with much literature discussing both it and the
+* [Self][5], another Smalltalk-like language with much literature discussing both it and the
   concept of prototype OO. The Self compiler's maps were also an inspiration for Sheeple's molds.
 
-* [Io][4], a pure prototype language build around differential inheritance.
+* [Io][6], a pure prototype language build around differential inheritance.
 
 We are designing Sheeple with the purpose of providing the goodies of CLOS programming in a
 completely prototype-based environment. As such, Sheeple shares a lot of features and syntax with
@@ -59,10 +59,10 @@ It's fairly effortless to get Sheeple working. To get started, simply
 
 And mess around from there. Be aware that if your implementation does not include ASDF, you will
 have to acquire it and load it yourself. CLISP, for example, will require this. For information on
-how to do this, check out [Cliki][1], or the [ASDF Homepage][2].
+how to do this, check out [Cliki][7], or the [ASDF Homepage][8].
 
 Sheeple also includes a suite of tests you can run on whatever platform you're trying to get it to
-work on. The test suite depends on [Eos][11]. To run it:
+work on. The test suite depends on [Eos][9]. To run it:
 
          (asdf:oos 'asdf:test-op 'sheeple)
 
@@ -72,7 +72,7 @@ supported platform.
 Mailing Lists
 -------------
 
-There are mailing lists set up in common-lisp.net. Please refer to [Sheeple's project page][5] for
+There are mailing lists set up in common-lisp.net. Please refer to [Sheeple's project page][10] for
 more information.
 
 Features
@@ -102,7 +102,7 @@ Using Sheeple
 =============
 
 Sheeple includes a user manual with a full CLHS-style specification of the API. The manual can be
-built from doc/, using make. This requires texinfo to be installed. A [prebuilt manual][8] in PDF
+built from doc/, using make. This requires texinfo to be installed. A [prebuilt manual][11] in PDF
 format is also available..
 
 For a quicker introduction, you can also take a peek at the examples/ directory.
@@ -188,14 +188,14 @@ object-parents place:
         SHEEPLE-USER> (object-parents *my-object*)
         (#<Object SOME-OTHER-OBJECT #x30004159311D> #<Object =STANDARD-OBJECT= #x3000413F556D>)
 
-[1]: http://www.cliki.net/asdf
-[2]: http://common-lisp.net/project/asdf/
+[1]: http://github.com/zkat/sykosomatic/
+[2]: http://github.com/zkat/shepherdb/
 [3]: http://en.wikipedia.org/wiki/CLOS
-[4]: http://en.wikipedia.org/wiki/Io_(programming_language)
-[5]: http://common-lisp.net/project/sheeple
-[6]: http://slatelanguage.org/
-[7]: http://github.com/zkat/shepherdb/
-[8]: http://sykosomatic.org/sheeple/sheeple.pdf
-[9]: http://github.com/zkat/sykosomatic/
-[10]: http://research.sun.com/self/
-[11]: http://www.cliki.net/Eos
+[4]: http://slatelanguage.org/
+[5]: http://research.sun.com/self/
+[6]: http://en.wikipedia.org/wiki/Io_(programming_language)
+[7]: http://www.cliki.net/asdf
+[8]: http://common-lisp.net/project/asdf/
+[9]: http://www.cliki.net/Eos
+[10]: http://common-lisp.net/project/sheeple
+[11]: http://sykosomatic.org/sheeple/sheeple.pdf

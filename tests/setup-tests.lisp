@@ -18,13 +18,6 @@
   (import '(Eos:def-suite Eos:run! Eos:is Eos:in-suite Eos:signals))
   (export 'run-all-tests))
 
-(defun gen-vector (&key (length (gen-integer :min 0 :max 10))
-                        (elements (gen-integer :min -10 :max 10)))
-  (lambda ()
-    (apply #'vector
-           (funcall (gen-list :length length
-                              :elements elements)))))
-
 (defmacro test (name &body body)
   `(Eos:test ,name ,@body))
 

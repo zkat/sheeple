@@ -4,18 +4,16 @@ About Sheeple
 Vision
 ------
 
-Sheeple is a Dynamic, CLOS-like, Delegative Prototype-based Object-Oriented
-Programming Framework (or "POOP Framework") that strives to optimize application
-flexibility, minimize cost while increasing value, maximize programmer
-resources, and empower application implementers to better assist them in
-leveraging modern paradigms in order to proactively achieve next-generation
-synergy in tomorrow's web 3.0 world. It is implemented in (mostly) ANSI Common
-Lisp. Sheeple is fully buzzword compliant.
+Sheeple is a Dynamic, CLOS-like, Delegative Prototype-based Object-Oriented Programming Framework
+(or "POOP Framework") that strives to optimize application flexibility, minimize cost while
+increasing value, maximize programmer resources, and empower application implementers to better
+assist them in leveraging modern paradigms in order to proactively achieve next-generation synergy
+in tomorrow's web 3.0 world. It is implemented in (mostly) ANSI Common Lisp. Sheeple is fully
+buzzword compliant.
 
-Sheeple was originally written as a persistent library for use with
-[Sykosomatic][9]. Because of a desire to use it in other applications, it was
-rewritten as a regular prototype object system and provided as a standalone
-library meant for general-purpose OO hackery.
+Sheeple was originally written as a persistent library for use with [Sykosomatic][9]. Because of a
+desire to use it in other applications, it was rewritten as a regular prototype object system and
+provided as a standalone library meant for general-purpose OO hackery.
 
 The goal of having a Sheeple-like persistent object store has not been abandoned. Instead, it's
 being implemented as a [separate library][7] using Sheeple's reflection features.
@@ -24,19 +22,17 @@ Sheeple is inspired by a number of Object-Oriented systems, mainly:
 
 * [CLOS][3], the Common Lisp Object System.
 
-* [Slate][6], a Smalltalk-like language with Prototype Multiple Dispatch that
-  Sheeple bases its message dispatch system on.
+* [Slate][6], a Smalltalk-like language with Prototype Multiple Dispatch which lies at the root of
+  Sheeple's message dispatch system.
 
-* [Self][10], another Smalltalk-like language with lots of papers written about it, and the concept
-  of prototype OO. The Self compiler's maps were also an inspiration for Sheeple's molds.
+* [Self][10], another Smalltalk-like language with much literature discussing both it and the
+  concept of prototype OO. The Self compiler's maps were also an inspiration for Sheeple's molds.
 
-* [Io][4], a pure prototype-based language. Sheeple, like Io, implements
-  differential inheritance as a central thing.
+* [Io][4], a pure prototype language build around differential inheritance.
 
-It was written with the purpose of providing a lot of the goodies of CLOS
-programming in a completely prototype-based environment. As such, it shares a
-lot of features and syntax with CLOS. The most notable of these are multiple
-inheritance and multiple dispatch of methods.
+We are designing Sheeple with the purpose of providing the goodies of CLOS programming in a
+completely prototype-based environment. As such, Sheeple shares a lot of features and syntax with
+CLOS, most notably multiple inheritance and multiply-dispatched methods.
 
 Supported Platforms
 -------------------
@@ -48,45 +44,42 @@ Confirmed to work (pass all tests):
 * Allegro CL 8.1
 
 Sheeple doesn't use any OS-specific code (or threads), so it should be stable on all operating
-systems. Sheeple has been tested on OSX, Linux, and Windows Vista. In theory, it should work on any
-implementation that supports hash tables with key weakness. If you run the test suite on a platform
-not listed above, and all tests pass, please e-mail me and I'll add it to the list of supported
-platforms.
+systems. Sheeple has been tested on OSX, Linux, and Windows Vista. It should work on any
+implementation that supports both key-weak and value-weak hashtables. If you run the test suite on a
+platform not listed above, and all tests pass, please e-mail me and I'll add it to the list of
+supported platforms.
 
 Loading Sheeple
 ---------------
 It's fairly effortless to get Sheeple working. To get started, simply
 
-         (asdf:oos 'asdf:load-op 'sheeple)
+         (require 'asdf)
+         (asdf:load-system 'sheeple)
          (in-package sheeple-user)
 
-And mess around from there. Be aware that if your implementation does not
-include ASDF, you will have to acquire it and load it yourself. CLISP, for
-example, will require this.  For information on how to do this, check out
-[Cliki][1], or the [ASDF Homepage][2].
+And mess around from there. Be aware that if your implementation does not include ASDF, you will
+have to acquire it and load it yourself. CLISP, for example, will require this. For information on
+how to do this, check out [Cliki][1], or the [ASDF Homepage][2].
 
-Sheeple should work on most Lisp implementations that support weak pointers and weak hash tables,
-although it's mainly developed and tested on SBCL and Clozure CL.
-
-Sheeple also includes a suite of tests you can run on whatever platform you're
-trying to get it to work on. The test suite depends on [Eos][11]. To run it:
+Sheeple also includes a suite of tests you can run on whatever platform you're trying to get it to
+work on. The test suite depends on [Eos][11]. To run it:
 
          (asdf:oos 'asdf:test-op 'sheeple)
 
-And watch the tests scroll by. All tests should pass as long as you're using a
-tagged release on a supported platform.
+And watch the tests scroll by. All tests should pass as long as you're using a tagged release on a
+supported platform.
 
 Mailing Lists
 -------------
 
-There are mailing lists set up in common-lisp.net. Please refer to
-http://common-lisp.net/project/sheeple for more information.
+There are mailing lists set up in common-lisp.net. Please refer to [Sheeple's project page][5] for
+more information.
 
 Features
 --------
 
-* Dynamic object management tools (inspection of objects, addition/removal of
-  properties, all without requiring full redefinition/object updating).
+* Dynamic object management tools (inspection of objects, addition/removal of properties, all
+  without requiring full redefinition/object updating).
 
 * Differential inheritance of property values
 
@@ -96,12 +89,11 @@ Features
 
 * Integration with built-in Lisp types through autoboxing.
 
-* Multiple inheritance with dynamic inspection and management
-  (adding/removing) of parents.
+* Multiple inheritance with dynamic inspection and management (adding/removing) of parents.
 
-* Multiple dispatch on replies (methods) -- replies specialize on specific
-  objects, and follow their inheritance hierarchies. Reply definition is
-  almost identical to the core of CLOS methods, and shares similar semantics.
+* Multiple dispatch on replies (methods) -- replies specialize on specific objects, and follow their
+  inheritance hierarchies. Reply definition is almost identical to the core of CLOS methods, and
+  shares similar semantics.
 
 * CLOS-style standard combination for replies (:before, :after, and :around)
 
@@ -110,13 +102,13 @@ Using Sheeple
 =============
 
 Sheeple includes a user manual with a full CLHS-style specification of the API. The manual can be
-built from doc/, using make. This requires texinfo to be installed. You can fetch a prebuilt manual
-from http://sykosomatic.org/sheeple/sheeple.pdf.
+built from doc/, using make. This requires texinfo to be installed. A [prebuilt manual][8] in PDF
+format is also available..
 
 For a quicker introduction, you can also take a peek at the examples/ directory.
 
-As usual, you can always contact me directly with questions. I also regularly
-lurk in #lisp@freenode (as sykopomp).
+As usual, you can always contact me directly with questions. I also regularly lurk in #lisp@freenode
+(as sykopomp).
 
 Quick Example
 -------------
@@ -126,8 +118,8 @@ This creates a standard object with only =STANDARD-OBJECT= as its parent
         SHEEPLE-USER> (defparameter *my-object* (object))
         *MY-OBJECT*
 
-We can add properties to an object at any time. This particular call also
-auto-generates an accessor based on the property name given.
+We can add properties to an object at any time. This particular call also auto-generates an accessor
+based on the property name given.
 
         SHEEPLE-USER> (setf (property-value *my-object* 'var :accessor t) "value")
         #<Object #x1579A04E>
@@ -139,9 +131,8 @@ Creating a new object is as simple as calling OBJECT.
         SHEEPLE-USER> (defparameter *child* (object :parents (list *my-object*)))
         *CHILD*
 
-Sheeple does differential inheritance by default. This means that value lookup
-fetches the first available value found in the object's precedence list, unless a
-value is set directly in an object.
+Sheeple does differential inheritance by default. This means that value lookup fetches the first
+available value found in the object's precedence list, unless a value is set directly in an object.
 
         SHEEPLE-USER> (var *child*)
         "value"
@@ -171,8 +162,8 @@ prototypes.
         SHEEPLE-USER> (synergize 5 5)
         10
 
-Replies are defined on sheep objects themselves. No need for eql-specialization,
-everything is an 'instance' in Sheeple.
+Replies are defined on sheep objects themselves. No need for eql-specialization, everything is an
+'instance' in Sheeple.
 
         SHEEPLE-USER> (defreply synergize ((a *my-object*) (b *my-object*))
                         (object :parents (list a b)))
@@ -185,8 +176,8 @@ everything is an 'instance' in Sheeple.
         SHEEPLE-USER> (var (synergize *child* *my-object*))
         "new-value"
 
-Finally, since objects are fully-dynamic, you can even add and remove parents by simply setting
-its object-parents place:
+Finally, since objects are fully-dynamic, you can even add and remove parents by simply setting its
+object-parents place:
 
         SHEEPLE-USER> (defparameter *my-object* (object))
         *MY-OBJECT*
@@ -201,8 +192,10 @@ its object-parents place:
 [2]: http://common-lisp.net/project/asdf/
 [3]: http://en.wikipedia.org/wiki/CLOS
 [4]: http://en.wikipedia.org/wiki/Io_(programming_language)
+[5]: http://common-lisp.net/project/sheeple
 [6]: http://slatelanguage.org/
 [7]: http://github.com/sykopomp/shepherdb/
+[8]: http://sykosomatic.org/sheeple/sheeple.pdf
 [9]: http://github.com/sykopomp/sykosomatic/
 [10]: http://research.sun.com/self/
 [11]: http://www.cliki.net/Eos

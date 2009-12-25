@@ -30,8 +30,6 @@
   (:reply (object &rest initargs &key parents (metaobject =standard-metaobject=))
     (when (null parents)                ; Guard against funny business
       (push =standard-object= parents))
-    ;; This code relies on a CHECK-TYPE in `(setf object-metaobject)' to guard
-    ;; against explicitly passing a non-object METAOBJECT arg.
     (setf (object-metaobject object) metaobject)
     (change-mold object (ensure-mold metaobject parents))
     (apply #'shared-init object initargs)))

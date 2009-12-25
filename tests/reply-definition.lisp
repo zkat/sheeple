@@ -40,30 +40,31 @@
 (in-suite role-objects)
 
 (test role-implementation
-  (for-all ((dummy-reply '%%make-reply) (dummy-position (gen-integer)))
-    (let ((role (make-role dummy-reply dummy-position)))
-      (is (eq dummy-reply (role-reply role)))
-      (is (eq dummy-position (role-position role))))))
+  (let* ((dummy-reply (%%make-reply))
+         (dummy-position (random lambda-parameters-limit))
+         (role (make-role dummy-reply dummy-position)))
+    (is (eq dummy-reply (role-reply role)))
+    (is (= dummy-position (role-position role)))))
 
 (test role-type
-  (for-all ((reply '%%make-reply)
-            (position (gen-integer)))
+  (let ((reply (%%make-reply))
+        (position (random lambda-parameters-limit)))
     (is (typep (make-role reply position) 'role))
     (is (rolep (make-role reply position)))))
 
 (test role-message
-  (for-all ((message 'allocate-message))
+  (let ((message (allocate-message)))
     (is (eq message (role-message (make-role (%%make-reply :message message) 0))))))
 
 (test role-name
-  (for-all ((message (fun (%make-message (gensym) nil))))
+  (let ((message (%make-message (gensym) nil)))
     (is (eq (message-name message)
             (role-name (make-role (%%make-reply :message message) 0))))))
 
 (test participantp
-  (for-all ((object (fun (std-allocate-object =standard-metaobject=)))
-            (reply '%%make-reply)
-            (position (gen-integer)))
+  (let ((object (smop:allocate-object =standard-metaobject=))
+        (reply (%%make-reply))
+        (position (random lambda-parameters-limit)))
     (push (make-role reply position) (%object-roles object))
     (is (not (null (participantp object reply))))))
 

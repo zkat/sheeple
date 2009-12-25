@@ -62,10 +62,8 @@ confusing, but actually enables crystal clear warning-free test code."
 (in-suite allocation)
 
 (test std-object-p
-  (for-all ((object (fun (std-allocate-object (funcall (gen-integer))))))
-    (is (not (std-object-p object))))
-  (for-all ((object (fun (std-allocate-object =standard-metaobject=))))
-    (is (std-object-p object))))
+  (is (std-object-p (smop:allocate-object =standard-metaobject=)))
+  (is (not (std-object-p (smop:allocate-object (clone =standard-metaobject=))))))
 
 (test objectp
   (with-object (object)

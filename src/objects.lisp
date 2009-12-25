@@ -373,13 +373,6 @@ This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER 
             (t (change-parents object new-parents)))))
   new-parents)
 
-(defun (setf object-metaobject) (new-metaobject object)
-  (check-type object object)
-  (check-type new-metaobject object)
-  (change-mold object (ensure-mold new-metaobject (%object-parents object)
-                                   (mold-properties (%object-mold object))))
-  (funcall '(setf smop:object-metaobject) new-metaobject (object-metaobject object) object))
-
 ;;; Inheritance predicates
 (defun parentp (maybe-parent child)
   "A parent is a object directly in CHILD's parent list."

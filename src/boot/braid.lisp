@@ -15,6 +15,7 @@
 ;;;           =T=          | =STANDARD-METAOBJECT= |     NIL
 ;;;    =STANDARD-OBJECT=   | =STANDARD-METAOBJECT= |    (=T=)
 ;;;  =STANDARD-METAOBJECT= | =STANDARD-METAOBJECT= |    (=T=)
+;;;   =STANDARD-PROPERTY=  | =STANDARD-METAOBJECT= |    (=STANDARD-OBJECT=)
 
 ;;; We only want to bootstrap an image once, so we perform a little check:
 (unless (objectp =standard-metaobject=)
@@ -22,7 +23,8 @@
   ;; First, let's just get our objects:
   (setf =standard-metaobject= (std-allocate-object =standard-metaobject=)
           =standard-object=   (std-allocate-object =standard-metaobject=)
-                 =t=          (std-allocate-object =standard-metaobject=))
+                 =t=          (std-allocate-object =standard-metaobject=)
+         =standard-property=  (std-allocate-object =standard-metaobject=))
 
   ;; Now, we have to hardcode two circular links.
 
@@ -50,8 +52,10 @@
     (change-parents =standard-object=     the-list)
     (change-parents =standard-metaobject= the-list))
 
-  ;; To finish up, break the ice by playing the name game:
-  (macrolet ((set-name (name) `(setf (property-value ,name 'nickname) ',name)))
-    (set-name =t=)
-    (set-name =standard-object=)
-    (set-name =standard-metaobject=)))
+  ;; Now we actually have to bootstrap property definitions.
+  (change-parents =standard-property= (list =standard-object=))
+
+  ;; We need to fudge a mold with a single standard property called NAME, to identify
+  ;; what standard properties are supposed to be.
+  (setf *std-propd-mold* (ensure-mold =standard-metaobject= (list =standard-property=)
+                                      (vector (cons 'name =standard-property=)))))

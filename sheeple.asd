@@ -28,6 +28,7 @@
                       :components
                       ((:file "braid")
                        (:file "init")
+                       (:file "post-braid")
                        (:file "boxed")))
              (:file "post-boot")
              (:module "mop"

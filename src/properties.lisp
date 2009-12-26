@@ -9,14 +9,20 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-
-
 ;;;
 ;;; Property metaobjects
 ;;;
 (defparameter *the-std-propd-form*
-  '(defproto =standard-property-definition= ()
-    (name :accessor nil)))
+  '(defproto =standard-property= ()
+    ((name 'name :accessor nil))))
+(define-bound-variables *std-propd-mold* =standard-property=)
+(defun property-name (propd)
+  (if (eq =standard-property= propd)
+      'name
+      (property-value propd 'name)))
+
+(defun std-property-p (propd)
+  (eq (%object-mold propd) *std-propd-mold*))
 
 (defun property-position (object property-name)
   (position property-name (mold-properties (%object-mold object)) :test #'eq :key #'car))

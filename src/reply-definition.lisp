@@ -108,6 +108,8 @@
           (participants lambda-list)
           "~&The number of participants conflicts with the lambda list.~@
              Participants: ~S~%Lambda List:  ~S~%" participants lambda-list)
+  (awhen (safe-fdefinition name)
+    (assert (= (length participants) (arg-info-number-required (message-arg-info it)))))
   (ensure-message name :lambda-list (create-msg-lambda-list lambda-list))
   (let ((message (fdefinition name)))
     (aprog1 (make-reply message qualifiers lambda-list function)

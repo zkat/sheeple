@@ -148,11 +148,11 @@ point to Sheeple's backend class system.")
 ;;;
 ;;; Transitions
 ;;;
-(defun find-transition (mold property-name)
+(defun find-transition (mold propd)
   "Returns the mold which adds a property named PROPERTY-NAME to MOLD.
 If no such mold exists, returns NIL."
   (check-type mold mold)
-  (values (gethash property-name (mold-transitions mold))))
+  (values (gethash propd (mold-transitions mold))))
 
 ;;;
 ;;; Mold API -- Retrieval and Automatic Creation of Molds
@@ -168,14 +168,14 @@ If no such mold exists, returns NIL."
                            (push it (%object-children parent))))
                        (vector)))))
 
-(defun ensure-transition (mold property-name)
+(defun ensure-transition (mold propd)
   "Returns the transition from MOLD indexed by PROPERTY-NAME, creating and
 linking a new one if necessary."
   (check-type mold mold)
-  (or (find-transition mold property-name)
+  (or (find-transition mold propd)
       (aprog1 (make-mold (mold-lineage mold)
-                         (vector-cons property-name (mold-properties mold)) mold)
-        (setf (gethash property-name (mold-transitions mold)) it))))
+                         (vector-cons (cons (property-name propd) propd) (mold-properties mold)) mold)
+        (setf (gethash propd (mold-transitions mold)) it))))
 
 (defun ensure-mold (metaobject parents &optional (properties #()))
   "Returns the mold with properties PROPERTIES of the mold for PARENTS,
@@ -184,7 +184,7 @@ creating and linking a new one if necessary."
   (check-list-type parents object)
   (check-type properties vector)
   (let ((top (ensure-toplevel-mold metaobject parents)))
-    (do* ((mold top (ensure-transition mold (car props-left)))
+    (do* ((mold top (ensure-transition mold (cdar props-left)))
           (props-left (coerce properties 'list) (cdr props-left)))
          ((null props-left) mold))))
 

@@ -9,8 +9,20 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-(defun property-position (property-name object)
-  (position property-name (mold-properties (%object-mold object)) :test #'eq))
+
+
+;;;
+;;; Property metaobjects
+;;;
+(defparameter *the-std-propd-form*
+  '(defproto =standard-property-definition= ()
+    (name :accessor nil)))
+
+(defun property-position (object property-name)
+  (position property-name (mold-properties (%object-mold object)) :test #'eq :key #'car))
+
+(defun property-definition (object property-name)
+  (cdr (find property-name (mold-properties (%object-mold object)) :test #'eq :key #'car)))
 
 ;;;
 ;;; Base Property API
@@ -22,7 +34,7 @@ property is not set locally, a condition of type `unbound-property' is signaled.
       (std-direct-property-value object property-name)
       (funcall 'smop:direct-property-value (object-metaobject object) object property-name)))
 (defun std-direct-property-value (object property-name)
-  (aif (property-position property-name object)
+  (aif (property-position object property-name)
        (svref (%object-property-values object) it)
        (restart-case (error 'unbound-property :object object :property-name property-name)
          (continue ()
@@ -56,7 +68,7 @@ is signaled."
       (apply '(setf smop:direct-property-value) new-value (object-metaobject object) object property-name options)))
 (defun (setf std-direct-property-value) (new-value object property-name &rest options)
   (declare (ignore options))
-  (awhen (property-position property-name object)
+  (awhen (property-position object property-name)
     (setf (svref (%object-property-values object) it) new-value)
     t))
 

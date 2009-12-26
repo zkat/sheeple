@@ -36,9 +36,10 @@
 (defun direct-property-value (object property-name)
   "Returns the property-value set locally in OBJECT for PROPERTY-NAME. If the
 property is not set locally, a condition of type `unbound-property' is signaled."
-  (if (std-object-p object)
-      (std-direct-property-value object property-name)
-      (funcall 'smop:direct-property-value (object-metaobject object) object property-name)))
+  (let ((propd (property-definition object property-name)))
+    (if (and (std-object-p object) (std-property-p propd))
+        (std-direct-property-value object property-name)
+        (smop:direct-property-value (object-metaobject object) object propd))))
 (defun std-direct-property-value (object property-name)
   (aif (property-position object property-name)
        (svref (%object-property-values object) it)
@@ -57,9 +58,10 @@ property is not set locally, a condition of type `unbound-property' is signaled.
   "Returns the property-value for PROPERTY-NAME found first in OBJECT's hierarchy list.
 If the value does not exist in the hierarchy list, a condition of type `unbound-property'
 is signaled."
-  (if (std-object-p object)
-      (std-property-value object property-name)
-      (funcall 'smop:property-value (object-metaobject object) object property-name)))
+  (let ((propd (property-definition object property-name)))
+    (if (and (std-object-p object) (std-property-p propd))
+        (std-property-value object property-name)
+        (smop:property-value (object-metaobject object) object propd))))
 (defun std-property-value (object property-name)
   (dolist (ancestor (object-precedence-list object)
            (error 'unbound-property :object object :property-name property-name))
@@ -69,9 +71,11 @@ is signaled."
 
 (defun (setf direct-property-value) (new-value object property-name &rest options)
   "Tries to set a direct property value for OBJECT. If it succeeds, returns T, otherwise NIL."
-  (if (std-object-p object)
-      (apply '(setf std-direct-property-value) new-value object property-name options)
-      (apply '(setf smop:direct-property-value) new-value (object-metaobject object) object property-name options)))
+  (let ((propd (property-definition object property-name)))
+    (when propd
+      (if (and (std-object-p object) (std-property-p propd))
+          (apply '(setf std-direct-property-value) new-value object property-name options)
+          (apply '(setf smop:direct-property-value) new-value (object-metaobject object) object propd options)))))
 (defun (setf std-direct-property-value) (new-value object property-name &rest options)
   (declare (ignore options))
   (awhen (property-position object property-name)
@@ -85,7 +89,8 @@ is signaled."
       (apply 'smop:add-direct-property (object-metaobject object) object property-name options)))
 (defun std-add-direct-property (object property-name &rest options)
   (declare (ignore options))
-  (change-mold object (ensure-transition (%object-mold object) property-name)))
+  (change-mold object (ensure-transition (%object-mold object) (defobject =standard-property=
+                                                                   (name property-name)))))
 
 (defun (setf property-value) (new-value object property-name &rest options
                               &key (reader nil readerp) (writer nil writerp) accessor)
@@ -110,16 +115,18 @@ PROPERTY-NAME."
 (defun property-makunbound (object property-name)
   "Removes OBJECT's direct property named PROPERTY-NAME. Signals an error if there is no such
 direct property. Returns OBJECT."
-  (if (std-object-p object)
-      (std-property-makunbound object property-name)
-      (funcall 'smop:property-makunbound (object-metaobject object) object property-name)))
+  (let ((propd (property-definition object property-name)))
+    (if (and (std-object-p object) (std-property-p propd))
+        (std-property-makunbound object property-name)
+        (funcall 'smop:property-makunbound (object-metaobject object) object propd))))
 (defun std-property-makunbound (object property-name)
   (if (direct-property-p object property-name)
       (prog1 object
         (change-mold object
                      (ensure-mold (%object-metaobject object) (%object-parents object)
                                   (remove property-name
-                                          (mold-properties (%object-mold object))))))
+                                          (mold-properties (%object-mold object))
+                                          :key #'car :test #'eq))))
       (error 'unbound-property :object object :property-name property-name)))
 
 (defun remove-property (object property-name)
@@ -132,7 +139,7 @@ direct property. Returns OBJECT."
   "Wipes out all direct properties and their values from OBJECT."
   (if (std-object-p object)
       (std-remove-all-direct-properties object)
-      (funcall 'smop:remove-all-direct-properties (object-metaobject object) object)))
+      (smop:remove-all-direct-properties (object-metaobject object) object)))
 (defun std-remove-all-direct-properties (object)
   (change-mold object (ensure-mold (%object-metaobject object) (%object-parents object)))
   object)
@@ -143,20 +150,20 @@ direct property. Returns OBJECT."
 (defun direct-property-p (object property-name)
   "Returns T if OBJECT has a property called PROPERTY-NAME as a direct property.
 NIL otherwise."
-  (if (std-object-p object)
-      (std-direct-property-p object property-name)
-      (funcall 'smop:direct-property-p (object-metaobject object) object property-name)))
+  (let ((propd (property-definition object property-name)))
+    (if (and (std-object-p object) (std-property-p propd))
+        (std-direct-property-p object property-name)
+        (funcall 'smop:direct-property-p (object-metaobject object) object propd))))
 (defun std-direct-property-p (object property-name)
-  (let ((has-property-p t))
-    (handler-case (direct-property-value object property-name)
-      (unbound-property () (setf has-property-p nil)))
-    has-property-p))
+  (handler-case (progn (direct-property-value object property-name) t)
+    (unbound-property () nil)))
 
 (defun property-owner (object property-name)
   "Returns the object, if any, from which OBJECT would fetch the value for PROPERTY-NAME"
-  (if (std-object-p object)
-      (std-property-owner object property-name)
-      (funcall 'smop:property-owner (object-metaobject object) object property-name)))
+  (let ((propd (property-definition object property-name)))
+    (if (and (std-object-p object) (std-property-p propd))
+        (std-property-owner object property-name)
+        (smop:property-owner (object-metaobject object) object propd))))
 (defun std-property-owner (object property-name)
   (find-if (rcurry 'direct-property-p property-name) (object-precedence-list object)))
 
@@ -166,7 +173,7 @@ set directly in OBJECT using (setf property-value). The consequences of side-eff
 returned list are undefined."
   (if (std-object-p object)
       (std-direct-properties object)
-      (funcall 'smop:direct-properties (object-metaobject object) object)))
+      (smop:direct-properties (object-metaobject object) object)))
 (defun std-direct-properties (object)
   (coerce (mold-properties (%object-mold object)) 'list))
 
@@ -174,7 +181,7 @@ returned list are undefined."
   "Returns a list of the names of all properties available to OBJECT, including inherited ones."
   (if (std-object-p object)
       (std-available-properties object)
-      (funcall 'smop:available-properties (object-metaobject object) object)))
+      (smop:available-properties (object-metaobject object) object)))
 (defun std-available-properties (object)
   (delete-duplicates (nconc (copy-list (direct-properties object))
                             (mapcan 'available-properties (object-parents object)))))

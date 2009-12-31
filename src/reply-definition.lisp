@@ -108,6 +108,8 @@
           (participants lambda-list)
           "~&The number of participants conflicts with the lambda list.~@
              Participants: ~S~%Lambda List:  ~S~%" participants lambda-list)
+  ;; FIXME: This is a quick and dirty way of not clobbering reply-less messages with a
+  ;; conflicting arglist. Ideally, we should use some arg-info functions or something...
   (awhen (safe-fdefinition name)
     (assert (= (length participants) (arg-info-number-required (message-arg-info it)))))
   (ensure-message name :lambda-list (create-msg-lambda-list lambda-list))

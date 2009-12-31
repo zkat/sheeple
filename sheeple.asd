@@ -23,12 +23,9 @@
              (:file "messages")
              (:file "reply-definition")
              (:file "reply-dispatch")
-             (:module "boot"
-                      :serial t
-                      :components
-                      ((:file "braid")
-                       (:file "init")
-                       (:file "boxed")))
+             (:file "braid")
+             (:file "init")
+             (:file "boxed")
              (:file "post-boot")
              (:module "mop"
                       :serial t

@@ -1,5 +1,27 @@
-*.lx*fsl
+# CCL uses a different extension for each architecture/OS combination
+*.dfsl    # DarwinPPC32
+*.pfsl    # LinuxPPC32
+*.d64fsl  # DarwinPPC64
+*.p64fsl  # LinuxPPC64
+*.lx64fsl # LinuxX8664
+*.lx32fsl # LinuxX8632
+*.dx64fsl # DarwinX8664
+*.dx32fsl # DarwinX8632
+*.fx64fsl # FreeBSDX8664
+*.fx32fsl # FreeBSDX8632
+*.sx64fsl # SolarisX64
+*.sx32fsl # SolarisX86
+*.wx64fsl # Win64
+*.wx32fsl # Win32
+
+# SBCL (I think Allegro uses this too)
 *.fasl
+
+# CLISP
 *.fas
+
+# ECL
 *.o
+
+# Editor backups
 *~

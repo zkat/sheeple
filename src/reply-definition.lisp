@@ -136,10 +136,9 @@
 
 (defun available-replies (object)
   (delete-duplicates
-   (append (%object-roles object)
-           (mapcan 'available-replies
-                   (object-parents object)))
-   :test 'equal))
+   (nconc (mapcar 'car (%object-roles object))
+          (mapcan 'available-replies
+                  (object-parents object)))))
 
 (defun add-reader-to-object (reader prop-name object)
   (ensure-message reader :lambda-list '(object))

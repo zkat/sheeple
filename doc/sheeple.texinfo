@@ -5,10 +5,10 @@
 @firstparagraphindent insert
 @c %**end of header
 
-@set EDITION 0.1
-@set VERSION v3.0.2
-@set UPDATED-MONTH December 2009
-@set UPDATED 14 @value{UPDATED-MONTH}
+@set EDITION 0.2
+@set VERSION v3.0.4
+@set UPDATED-MONTH January 2010
+@set UPDATED 06 @value{UPDATED-MONTH}
 @clear mop
 @syncodeindex fn vr
 
@@ -18,7 +18,7 @@ last updated @value{UPDATED},
 of @cite{The Sheeple Manual},
 for Sheeple @value{VERSION}.
 
-Copyright @copyright{} 2009 Kat Marchán, Adlai Chandrasekhar
+Copyright @copyright{} 2009, 2010 Kat Marchán, Adlai Chandrasekhar
 
 This software is composed in part of code taken from SBCL's version of PCL, and
 Closette as presented in Art of the Metaobject Protocol, at times with only
@@ -347,7 +347,7 @@ object-creation facilities are @code{OBJECT}, which creates a new empty object
 by default, and @code{CLONE}, which shallow-copies an existing object's
 characteristics.
 
-Beyond @code{OBJECT} and @code{CLONE}, operators like @code{CREATE} and
+Beyond @code{OBJECT} and @code{CLONE}, operators like @code{MAKE} and
 @code{DEFPROTO} provide more advanced creation facilities on top of
 @code{OBJECT} and @code{CLONE}, but are strictly for convenience.
 

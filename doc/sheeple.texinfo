@@ -563,6 +563,7 @@ of all kinds@comma{} and it has @code{=NUMBER=} as its only parent}
 * childp::
 * descendantp::
 * object-parents::
+* object-precedence-list::
 @end menu
 
 @node object, clone, Objects Dictionary, Objects Dictionary
@@ -880,7 +881,7 @@ otherwise.
 @end smallformat
 @end defun
 
-@node object-parents,  , descendantp, Objects Dictionary
+@node object-parents, object-precedence-list, descendantp, Objects Dictionary
 @unnumberedsubsubsec object-parents
 @defun {object-parents} object => parents
 
@@ -900,6 +901,29 @@ The macro @code{SETF} may be used to set a new list as @var{object}'s list of pa
 
 The consequences are undefined if destructive operations are performed on the
 list returned by @code{OBJECT-PARENTS}.
+
+@end defun
+
+@node object-precedence-list,  , object-parents, Objects Dictionary
+@unnumberedsubsubsec object-precedence-list
+@defun {object-precedence-list} object => precedence-list
+
+@strong{Arguments and Values:}
+
+@var{object} --- an object.
+
+@var{precedence-list} --- a list of objects
+
+@strong{Description:}
+
+Returns a list of objects representing an ordered set of @var{object} and its
+ancestors. This same ordering of objects will be traversed by Sheeple when
+behavior that involves delegation is triggered, such as delegated property
+access or reply dispatch.
+
+@strong{Exceptional Situations:}
+
+The consequences are undefined if the user directly side-effects @var{precedence-list}.
 
 @end defun
 

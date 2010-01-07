@@ -37,7 +37,8 @@
 (defmessage create (proto &key)
   (:documentation "Creates a PROTO. Intended for customization.")
   (:reply :before ((proto =t=) &key)
-    (warn "Use of CREATE was deprecated in 3.0.4. Please use MAKE instead."))
+    (warn 'deprecated-feature :version "3.0.4"
+          :feature (symbol-function 'create)))
   (:reply (proto &rest properties)
     (object :parents `(,proto) :properties (plist-to-wide-alist properties))))
 

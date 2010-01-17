@@ -412,8 +412,8 @@ apply. On the other hand, Sheeple provides certain facilities that make dealing
 with this prototype pattern simpler. The most important of these is the macro
 @code{DEFPROTO}. This macro is a wrapper around @code{OBJECT} that adds some
 convenience sugar such as an easier method for defining property values and
-accessors, options for objects, and automatically binding the new new object to
-a variable (the ``prototype name''). Additionally, @code{DEFPROTO} supports the
+accessors, options for objects, and automatically binding the new object to a
+variable (the ``prototype name''). Additionally, @code{DEFPROTO} supports the
 redefinition of the same object by simply re-evaluating a @code{DEFPROTO} form
 that refers to the object, which will take care of adding/removing any
 properties. This is supported by automatically calling @code{REINIT-OBJECT} if

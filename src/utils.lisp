@@ -293,5 +293,14 @@ will not be affected; otherwise, it will be bound to a recognizeable and unique 
        (declare (dynamic-extent #',label))
        (,label ,listform))))
 
-(defmacro define-backend (default-form &body customized-forms)
-  (or (car customized-forms) default-form))
+(defmacro feature-case (default &body ports)
+  "Expands to the first form in PORTS. If there are no PORTS, the DEFAULT is used.
+
+For example, to exit a few different lisps with a reasonable default, do:
+
+  (feature-case
+      (break \"Program Terminated\")
+    #+ccl  (ccl:quit)
+    #+sbcl (sb-ext:quit)
+    #+ecl  (si:quit)"
+  (or (car ports) default))

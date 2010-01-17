@@ -26,6 +26,7 @@
    #:childp
    #:clone
    #:create
+   #:make
    #:defobject
    #:defproto
    #:descendantp

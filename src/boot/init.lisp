@@ -9,7 +9,9 @@
 (in-package :sheeple)
 
 (defmessage shared-init (object &rest initargs)
-  (:documentation "Adds properties to OBJECT and performs general initialization tasks.")
+  (:documentation "Performs shared initialization tasks shared by both INIT-OBJECT and
+  REINIT-OBJECT. Such tasks include handling of the :PROPERTIES, :NICKNAME, and :DOCUMENTATION
+  arguments to both INIT-OBJECT and REINIT-OBJECT.")
   (:reply (object &key properties (documentation nil doxp) (nickname nil nicknamep))
     (dolist (property-spec properties)
       (destructuring-bind (name &optional value &rest keys) (ensure-list property-spec)
@@ -21,15 +23,23 @@
     object))
 
 (defmessage init-object (object &rest initargs)
-  (:documentation "Performs 'once-only' initialization tasks on OBJECT.")
+  (:documentation "Called by the `OBJECT' function when a new object is first created. The standard
+  primary reply for this message simply calls `SHARED-INIT' on OBJECT using INITARGS.")
   (:reply (object &rest initargs &key)
     (apply #'shared-init object initargs)))
 
 (defmessage reinit-object (object &rest initargs)
-  (:documentation "Resets parents and properties without changing OBJECT's identity.")
+  (:documentation "Reinitializes OBJECT, removing all properties and parents. The primary reply for
+this message accepts :parents and :metaobject keywords. Providing these allows users to give the
+object a new set of parents, or provide a new metaobject. Any other arguments passed to
+REINIT-OBJECT will be passed to SHARED-INIT after parents and metaobject are reset.  This message's
+primary client is DEFPROTO, which calls REINIT-OBJECT on existing prototypes to reset them whenever
+the DEFPROTO form is re-evaluated.")
   (:reply (object &rest initargs &key parents (metaobject =standard-metaobject=))
     (when (null parents)                ; Guard against funny business
       (push =standard-object= parents))
+    ;; This is a bit ugly. (SETF SMOP:OBJECT-METAOBJECT) also calls CHANGE-MOLD.
+    ;; Calling change-mold in here is probably too ugly, anyway -- zkat
     (setf (object-metaobject object) metaobject)
     (change-mold object (ensure-mold metaobject parents))
     (apply #'shared-init object initargs)))

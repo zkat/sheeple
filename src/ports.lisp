@@ -10,18 +10,14 @@
 
 (declaim (inline safe-fdefinition))
 (defun safe-fdefinition (name)
-  (when (fboundp name) (fdefinition name)))
-#+ccl
-(define-compiler-macro safe-fdefinition (name)
-  `(fboundp ,name))
+  #+ccl (fboundp name)
+  #-ccl (when (fboundp name) (fdefinition name)))
 
 (declaim (inline copy-simple-vector))
 (defun copy-simple-vector (vector)
   (declare (simple-vector vector) (optimize speed))
-  (make-array (length vector) :initial-contents vector))
-#+ccl
-(define-compiler-macro copy-simple-vector (vector)
-  `(ccl::copy-uvector ,vector))
+  #+ccl (ccl::copy-uvector vector)
+  #-ccl (make-array (length vector) :initial-contents vector))
 
 (define-backend
     (defun vector-cons (x vector)

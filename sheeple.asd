@@ -24,7 +24,6 @@
              (:file "messages")
              (:file "reply-definition")
              (:file "reply-dispatch")
-             (:file "braid")
              (:file "init")
              (:file "boxed")
              (:file "post-boot")

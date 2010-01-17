@@ -216,3 +216,11 @@ returned list are undefined."
                                        (property-value ,sh ',property-name))))
                                  properties)
          ,@body))))
+
+;;;
+;;; Property Bootstrap
+;;;
+(macrolet ((set-name (name) `(setf (property-value ,name 'nickname) ',name)))
+  (set-name =t=)
+  (set-name =standard-object=)
+  (set-name =standard-metaobject=))

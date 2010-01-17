@@ -156,37 +156,6 @@
 (def-suite reply-dispatch :in messages)
 (in-suite reply-dispatch)
 
-(test primary-reply-p
-  (is (primary-reply-p (%%make-reply :qualifiers nil)))
-  (is (not (primary-reply-p (%%make-reply :qualifiers '(:before)))))
-  (is (not (primary-reply-p (%%make-reply :qualifiers '(:after)))))
-  (is (not (primary-reply-p (%%make-reply :qualifiers '(:around)))))
-  (is (not (primary-reply-p (%%make-reply :qualifiers '(:oogly :boogly))))))
-
-(test before-reply-p
-  (is (not (before-reply-p (%%make-reply :qualifiers nil))))
-  (is (before-reply-p (%%make-reply :qualifiers '(:before))))
-  (is (before-reply-p (%%make-reply :qualifiers '(:before :another))))
-  (is (not (before-reply-p (%%make-reply :qualifiers '(:after)))))
-  (is (not (before-reply-p (%%make-reply :qualifiers '(:around)))))
-  (is (not (before-reply-p (%%make-reply :qualifiers '(:oogly :boogly))))))
-
-(test after-reply-p
-  (is (not (after-reply-p (%%make-reply :qualifiers nil))))
-  (is (not (after-reply-p (%%make-reply :qualifiers '(:before)))))
-  (is (after-reply-p (%%make-reply :qualifiers '(:after))))
-  (is (after-reply-p (%%make-reply :qualifiers '(:after :another))))
-  (is (not (after-reply-p (%%make-reply :qualifiers '(:around)))))
-  (is (not (after-reply-p (%%make-reply :qualifiers '(:oogly :boogly))))))
-
-(test around-reply-p
-  (is (not (around-reply-p (%%make-reply :qualifiers nil))))
-  (is (not (around-reply-p (%%make-reply :qualifiers '(:before)))))
-  (is (not (around-reply-p (%%make-reply :qualifiers '(:after)))))
-  (is (around-reply-p (%%make-reply :qualifiers '(:around))))
-  (is (around-reply-p (%%make-reply :qualifiers '(:around :another))))
-  (is (not (around-reply-p (%%make-reply :qualifiers '(:oogly :boogly))))))
-
 (test apply-replies)
 (test next-reply-p)
 (test call-next-reply)

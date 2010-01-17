@@ -8,9 +8,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 
-;; We declare these base vars here so that bootstrapping won't complain.
-(define-bound-variables =t= =standard-object= =standard-metaobject=)
-
 ;;;
 ;;; Mold Overview
 ;;;
@@ -69,7 +66,8 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
              (:predicate lineagep)
              (:constructor
               make-lineage (metaobject parents
-                                       &aux (precedence-list (compute-precedence parents)))))
+                                       &aux (precedence-list (when parents
+                                                               (compute-precedence parents))))))
   "Information about an object's ancestors and descendants."
   metaobject ; Not readonly for ease of bootstrapping
   (members         (make-weak-hash-table :weakness :key :test #'eq)
@@ -186,3 +184,11 @@ creating and linking a new one if necessary."
     (do* ((mold top (ensure-transition mold (car props-left)))
           (props-left (coerce properties 'list) (cdr props-left)))
          ((null props-left) mold))))
+
+;;;
+;;; Backend Bootstrap
+;;;
+(defvar =standard-metaobject= (std-allocate-object nil))
+
+(setf (lineage-metaobject (mold-lineage (%object-mold =standard-metaobject=)))
+      =standard-metaobject=)

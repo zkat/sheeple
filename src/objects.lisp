@@ -198,6 +198,17 @@ This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER 
 (defun (setf object-metaobject) (new-metaobject object)
   (funcall '(setf smop:object-metaobject) new-metaobject (%object-metaobject object) object))
 
+;;;
+;;; Object Bootstrap
+;;;
+(defvar        =t=        (std-allocate-object =standard-metaobject=))
+(defvar =standard-object= (std-allocate-object =standard-metaobject=))
+
+(let ((the-list (list =t=)))
+  (setf (%object-precedence-list =t=)   the-list)
+  (change-parents =standard-object=     the-list)
+  (change-parents =standard-metaobject= the-list))
+
 ;;; Inheritance predicates
 (defun parentp (maybe-parent child)
   "A parent is a object directly in CHILD's parent list."

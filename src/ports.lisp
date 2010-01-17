@@ -19,7 +19,7 @@
   #+ccl (ccl::copy-uvector vector)
   #-ccl (make-array (length vector) :initial-contents vector))
 
-(define-backend
+(feature-case
     (defun vector-cons (x vector)
       (declare (simple-vector vector) (optimize speed))
       (aprog1 (make-array (1+ (length vector)))
@@ -27,20 +27,20 @@
            do (setf (svref it i) elt)
            finally (setf (svref it 0) x)))))
 
-(define-backend
+(feature-case
     (defun record-message-compilation (name lambda-list env)
       ;; What should be the default way to note a message at compile time?
       (declare (ignore lambda-list env))
       `(proclaim `(ftype function ,',name))))
 
-(define-backend
+(feature-case
     (defun record-message-source (name)
       (declare (ignore name)))
   #+ccl
   (defun record-message-source (name)
     (ccl:record-source-file name 'message)))
 
-(define-backend
+(feature-case
     (defun record-message-arglist (name arglist)
       (declare (ignore name arglist)))
   #+ccl

@@ -265,18 +265,6 @@ the result of calling DELETE with ITEM, place, and the REMOVE-KEYWORDS.")
              (funcall function v))
            table))
 
-(defmacro define-bound-variable (variable &optional docstring)
-  "Define a global dynamic variable. If the variable is already bound, the binding
-will not be affected; otherwise, it will be bound to a recognizeable and unique value."
-  `(defvar ,variable (make-symbol ,(symbol-name variable))
-     ,@(when (stringp docstring) (list docstring))))
-
-(defmacro define-bound-variables (&rest variables)
-  `(progn ,@(mapcar (fun `(define-bound-variable ,@(ensure-list _))) variables)))
-
-(defmacro define-unbound-variables (&rest variables)
-  `(progn ,@(mapcar (fun `(defvar ,@(ensure-list _))) variables)))
-
 (defmacro define-print-object (((object class) &key (identity t) (type t)) &body body)
   (with-gensyms (stream)
     `(defmethod print-object ((,object ,class) ,stream)

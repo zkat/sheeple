@@ -15,13 +15,13 @@
           (mapcan #'depth-first-preorder-ancestors*
                   (object-parents object)))))
 
-(defreply smop:compute-object-hierarchy-list ((metaobject =flavors-object=) object)
+(defreply smop:compute-object-precedence-list ((metaobject =flavors-object=) object)
   (nconc (delete-duplicates
           (depth-first-preorder-ancestors* object)
           :from-end t)
          (list =standard-object= =t=)))
 
-(defreply smop:compute-object-hierarchy-list ((metaobject =loops-object=) object)
+(defreply smop:compute-object-precedence-list ((metaobject =loops-object=) object)
   (nconc (delete-duplicates
           (depth-first-preorder-ancestors* object)
           :from-end nil)
@@ -39,12 +39,12 @@
 (defproto q (s r))
 
 (flet ((hierarchy-nicks (object)
-         (mapcar #'object-nickname (object-hierarchy-list object))))
+         (mapcar #'object-nickname (object-precedence-list object))))
   (format t "~&Sheeple hierarchy: ~S~@
                Flavors hierarchy: ~S~@
                LOOPS   hierarchy: ~S~%"
           ;; We can change metaobjects at runtime, but we must actually
-          ;; reinitialize them before their hierarchy-list changes.
+          ;; reinitialize them before their precedence list changes.
           (hierarchy-nicks q)
           (progn (defproto q (s r) () :metaobject =flavors-object=)
                  (hierarchy-nicks q))

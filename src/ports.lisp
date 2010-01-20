@@ -2,9 +2,9 @@
 ;;;;
 ;;;; This file is part of Sheeple
 
-;;;; backend/default.lisp
+;;;; ports.lisp
 ;;;;
-;;;; Portable versions of backend-customizable bits
+;;;; Bits which can be customized for various platforms
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (in-package :sheeple)
 

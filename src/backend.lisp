@@ -47,22 +47,50 @@
 ;;; mold B will transition to mold BA. Later on, this should (and -will-) be resolved.
 
 ;;;
-;;; Data definitions
+;;; Molds
 ;;;
 
 (defstruct (mold
              (:predicate moldp)
-             (:constructor make-mold (lineage properties &optional back)))
+             (:constructor make-mold (properties back)))
   "Also known as 'backend classes', molds are hidden caches which enable
 Sheeple to use class-based optimizations yet keep its dynamic power."
   (back        nil :read-only t :type (or null mold)) ; Back pointer
-  (lineage     nil :read-only t :type lineage) ; A common cache of parent stuff
   (properties  nil :read-only t :type simple-vector) ; Direct properties
   (transitions (make-weak-hash-table :weakness :value :test #'eq)
                :read-only t :type hash-table)) ; V8-like links to other molds
 
-(define-print-object ((object mold) :identity nil)
-  (format t "on ~A" (mold-lineage object)))
+(define-print-object (mold :identity nil)
+  (format t "with ~:[no properties~;~:*~{~A~#[~; and ~:;, ~]~}~]"
+          (coerce (mold-properties mold) 'list)))
+
+(defvar *empty-mold* (make-mold #() nil))
+
+(defun find-transition (mold property-name)
+  "Returns the mold which adds a property named PROPERTY-NAME to MOLD.
+If no such mold exists, returns NIL."
+  (check-type mold mold)
+  (values (gethash property-name (mold-transitions mold))))
+
+(defun ensure-transition (mold property-name)
+  "Returns the transition from MOLD indexed by PROPERTY-NAME, creating and
+linking a new one if necessary."
+  (check-type mold mold)
+  (or (find-transition mold property-name)
+      (aprog1 (make-mold (vector-cons property-name (mold-properties mold)) mold)
+        (setf (gethash property-name (mold-transitions mold)) it))))
+
+(defun ensure-mold (properties)
+  "Returns the mold with properties PROPERTIES of the mold for PARENTS,
+creating and linking a new one if necessary."
+  (check-type properties vector)
+  (do* ((mold *empty-mold* (ensure-transition mold (car props-left)))
+        (props-left (coerce properties 'list) (cdr props-left)))
+       ((null props-left) mold)))
+
+;;;
+;;; Lineages and Objects
+;;;
 
 (defstruct (lineage
              (:predicate lineagep)
@@ -71,29 +99,23 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
                                        &aux (precedence-list (when parents
                                                                (compute-precedence parents))))))
   "Information about an object's ancestors and descendants."
-  metaobject ; Not readonly for ease of bootstrapping
+  (metaobject      (assert NIL) :read-only t) ; I want recursive struct slot types
   (members         (make-weak-hash-table :weakness :key :test #'eq)
                    :read-only t :type hash-table) ; The lineage's members
   (parents         nil :type list :read-only t)              ; A set of objects
   (precedence-list nil :type list)) ; A precedence list of all the lineage's ancestors
 
-(define-print-object ((object lineage) :identity nil)
-  (format t "from ~{~{~:[[~A]~;~A~]~}~#[~; and ~:;, ~]~}"
-          (mapcar (fun (list (direct-property-p _ 'nickname)
-                             (object-nickname _)))
-                  (lineage-parents object))))
-
-(macrolet ((define-mold-reader (name lineage-reader)
-             `(defun ,name (mold)
-                (,lineage-reader (mold-lineage mold)))))
-  (define-mold-reader mold-parents   lineage-parents)
-  (define-mold-reader mold-precedence-list lineage-precedence-list))
+(define-print-object (lineage :identity nil)
+  (format t "~:[with no parents~;from ~:*~{~A~#[~; and ~:;, ~]~}~]"
+          (lineage-parents lineage)))
 
 (defstruct (object (:conc-name %object-) (:predicate objectp)
                    (:constructor std-allocate-object
-                                 (metaobject &aux (mold (ensure-mold metaobject ()))))
+                                 (metaobject &aux (lineage (ensure-lineage metaobject ()))))
+                   (:constructor %make-empty-object ())
                    (:print-object print-sheeple-object-wrapper))
-  (mold (assert NIL) :type mold)
+  (mold *empty-mold* :type mold)
+  (lineage nil :type (or null lineage)) ; I _really_ want recursive struct slot types.
   (precedence-list nil :type list)
   (property-values nil)
   (roles nil :type list)) ; Roles are used in dispatch -- see reply-foo.lisp
@@ -101,16 +123,16 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
 (declaim (inline %object-metaobject %object-parents))
 (defun %object-metaobject (object)
   (declare (optimize speed (safety 0)))
-  (lineage-metaobject (mold-lineage (%object-mold object))))
+  (lineage-metaobject (%object-lineage object)))
 (defun %object-parents (object)
   (declare (optimize speed (safety 0)))
-  (lineage-parents (mold-lineage (%object-mold object))))
+  (lineage-parents (%object-lineage object)))
 
 (defun %object-children (object)
-  (gethash object (lineage-members (mold-lineage (%object-mold object)))))
+  (gethash object (lineage-members (%object-lineage object))))
 
 (defun (setf %object-children) (new-kids object)
-  (setf (gethash object (lineage-members (mold-lineage (%object-mold object))))
+  (setf (gethash object (lineage-members (%object-lineage object)))
         new-kids))
 
 (defun trigger-precedence-recalculation (lineage)
@@ -125,76 +147,39 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
              members)))
 
 ;;;
-;;; Molds
+;;; Lineages
 ;;;
 
-(defvar *molds* (make-weak-hash-table :test 'equal :weakness :value)
-  "Maps parent lists to their corresponding molds. This is the global entry
-point to Sheeple's backend class system.")
+(defvar *lineages* (make-weak-hash-table :test 'equal :weakness :value)
+  "Maps a (metaobject . parent-list) pair to the corresponding lineage.")
 
-(defun find-mold (metaobject parents)
-;  (check-type metaobject object)
+(defun find-lineage (metaobject parents)
+  (check-type metaobject object)
   (check-list-type parents object)
   (let ((cons (cons metaobject parents)))
     (declare (dynamic-extent cons))
-    (values (gethash cons *molds*))))
+    (values (gethash cons *lineages*))))
 
-(defun (setf find-mold) (mold metaobject parents)
-;  (check-type metaobject object)
+(defun (setf find-lineage) (lineage metaobject parents)
+  (check-type metaobject object)
   (check-list-type parents object)
-  (check-type mold mold)
-  (setf (gethash (cons metaobject parents) *molds*) mold))
+  (check-type lineage lineage)
+  (setf (gethash (cons metaobject parents) *lineages*) lineage))
 
-;;;
-;;; Transitions
-;;;
-
-(defun find-transition (mold property-name)
-  "Returns the mold which adds a property named PROPERTY-NAME to MOLD.
-If no such mold exists, returns NIL."
-  (check-type mold mold)
-  (values (gethash property-name (mold-transitions mold))))
-
-;;;
-;;; Mold API -- Retrieval and Automatic Creation of Molds
-;;;
-
-(defun ensure-toplevel-mold (metaobject parents)
-  "Returns the mold for PARENTS, creating and caching a new one if necessary."
-;  (check-type metaobject object)
+(defun ensure-lineage (metaobject parents)
+  "Returns the lineage for METAOBJECT and PARENTS, creating a new one if necessary."
+  (check-type metaobject object)
   (check-list-type parents object)
-  (or (find-mold metaobject parents)
-      (setf (find-mold metaobject parents)
-            (make-mold (aprog1 (make-lineage metaobject parents)
-                         (dolist (parent parents)
-                           (push it (%object-children parent))))
-                       (vector)))))
-
-(defun ensure-transition (mold property-name)
-  "Returns the transition from MOLD indexed by PROPERTY-NAME, creating and
-linking a new one if necessary."
-  (check-type mold mold)
-  (or (find-transition mold property-name)
-      (aprog1 (make-mold (mold-lineage mold)
-                         (vector-cons property-name (mold-properties mold)) mold)
-        (setf (gethash property-name (mold-transitions mold)) it))))
-
-(defun ensure-mold (metaobject parents &optional (properties #()))
-  "Returns the mold with properties PROPERTIES of the mold for PARENTS,
-creating and linking a new one if necessary."
-;  (check-type metaobject object)
-  (check-list-type parents object)
-  (check-type properties vector)
-  (let ((top (ensure-toplevel-mold metaobject parents)))
-    (do* ((mold top (ensure-transition mold (car props-left)))
-          (props-left (coerce properties 'list) (cdr props-left)))
-         ((null props-left) mold))))
+  (or (find-lineage metaobject parents)
+      (setf (find-lineage metaobject parents)
+            (aprog1 (make-lineage metaobject parents)
+              (dolist (parent parents)
+                (push it (%object-children parent)))))))
 
 ;;;
 ;;; Backend Bootstrap
 ;;;
 
-(defvar =standard-metaobject= (std-allocate-object nil))
+(defvar =standard-metaobject= (%make-empty-object))
 
-(setf (lineage-metaobject (mold-lineage (%object-mold =standard-metaobject=)))
-      =standard-metaobject=)
+(setf (%object-lineage =standard-metaobject=) (ensure-lineage =standard-metaobject= ()))

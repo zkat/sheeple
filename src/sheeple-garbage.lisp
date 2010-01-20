@@ -9,7 +9,9 @@
 
 (in-package :%sheeple-garbage)
 
+;;;
 ;;;; GC
+;;;
 
 (defun gc (&key full verbose)
   "Initiates a garbage collection."

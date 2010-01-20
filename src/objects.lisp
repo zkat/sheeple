@@ -6,11 +6,13 @@
 ;;;;
 ;;;; Object creation, cloning, inspection
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (in-package :sheeple)
 
 ;;;
 ;;; Objects
 ;;;
+
 (defun std-object-p (x)
   (when (objectp x)
     (eq (%object-metaobject x) =standard-metaobject=)))
@@ -58,6 +60,7 @@ corresponding PARENTS, and the nickname is set to the symbol to facilitate debug
 ;;;
 ;;; Inheritance
 ;;;
+
 (defun topological-sort (elements constraints tie-breaker)
   "Sorts ELEMENTS such that they satisfy the CONSTRAINTS, falling back
 on the TIE-BREAKER in the case of ambiguous constraints. On the assumption
@@ -140,6 +143,7 @@ CDR of the precedence list of a standard object with PARENTS, in order, as its p
 ;;;
 ;;; Modifying mold-level stuff
 ;;;
+
 (defun (setf object-mold) (new-mold object)
   (with-accessors ((new-lineage mold-lineage)) new-mold
     (with-accessors ((old-lineage mold-lineage)) (%object-mold object)
@@ -201,6 +205,7 @@ This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER 
 ;;;
 ;;; Object Bootstrap
 ;;;
+
 (defvar        =t=        (std-allocate-object =standard-metaobject=))
 (defvar =standard-object= (std-allocate-object =standard-metaobject=))
 
@@ -229,6 +234,7 @@ This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER 
 ;;;
 ;;; Spawning
 ;;;
+
 (defun object (&rest all-keys &key parents (metaobject =standard-metaobject=)
                &allow-other-keys &aux (object (maybe-std-allocate-object metaobject)))
   "Returns a new object delegating to PARENTS, with metaobject METAOBJECT.
@@ -262,6 +268,7 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
 ;;;
 ;;; Fancy Macros
 ;;;
+
 (defun canonize-parents (parents)
   `(list ,@(ensure-list parents)))
 

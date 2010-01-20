@@ -6,16 +6,19 @@
 ;;;;
 ;;;; Reply and role metasheeple, reply definition and undefinition, role management.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (in-package :sheeple)
 
 ;;;
 ;;; Reply objects
 ;;;
+
 ;;; Replies are the Sheeple equivalent of methods. Replies themselves are objects that hold
 ;;; some basic information about what the reply does, what kind of reply it is, etc.
 ;;; When reply objects are 'called', their reply-function is fetched directly. By using lambdas,
 ;;; we're able to latch on to the lexical environment the reply was defined in (so they can be
 ;;; closures)
+
 (defstruct (reply (:predicate replyp)
                   (:constructor
                    make-reply (message qualifiers lambda-list function
@@ -51,11 +54,13 @@
 ;;;
 ;;; Roles
 ;;;
-;;; - Roles encapsulate the idea of dispatch. Roles live in object objects themselves and represent
-;;;   the basic information about what 'role' that particular object has in dispatching on a
-;;;   particular message. As it turns out, all the information roles have to hold is the position
-;;;   in which it is supposed to be called, and the actual reply object it's associated with.
-;;;   The algorithm takes care of putting everything else together.
+
+;;; Roles encapsulate the idea of dispatch. Roles live in object objects themselves and represent
+;;; the basic information about what 'role' that particular object has in dispatching on a
+;;; particular message. As it turns out, all the information roles have to hold is the position
+;;; in which it is supposed to be called, and the actual reply object it's associated with.
+;;; The algorithm takes care of putting everything else together.
+
 (deftype role ()
   '(cons reply fixnum))
 (defun rolep (maybe-role)
@@ -216,7 +221,6 @@
 ;;; User interface
 ;;;
 
-;;; Definition
 (defmacro defreply (&whole whole name lambda-list &body body)
   (declare (ignore lambda-list body))
   (multiple-value-bind (qualifiers reply-ll declarations docstring body)
@@ -266,7 +270,6 @@
              (values (nreverse qualifiers) current ; current = reply lambda list
                      declarations docstring real-body))))))
 
-;;; Undefinition
 (defmacro undefreply (name &rest args)
   (multiple-value-bind (qualifiers specializers)
       (parse-undefreply args)

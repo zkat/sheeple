@@ -7,6 +7,7 @@
 ;;;; Property access, inspection, and management stuff, for the most part.
 ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (in-package :sheeple)
 
 (defun property-position (property-name object)
@@ -15,6 +16,7 @@
 ;;;
 ;;; Base Property API
 ;;;
+
 (defun direct-property-value (object property-name)
   "Returns the property-value set locally in OBJECT for PROPERTY-NAME. If the
 property is not set locally, a condition of type `unbound-property' is signaled."
@@ -122,6 +124,7 @@ direct property. Returns OBJECT."
 ;;;
 ;;; Reflection API
 ;;;
+
 (defun direct-property-p (object property-name)
   "Returns T if OBJECT has a property called PROPERTY-NAME as a direct property.
 NIL otherwise."
@@ -200,6 +203,7 @@ returned list are undefined."
 ;;;
 ;;; Property symbol-macro
 ;;;
+
 (defmacro with-properties (properties object &body body)
   (let ((sh (gensym)))
     `(let ((,sh ,object))
@@ -220,6 +224,7 @@ returned list are undefined."
 ;;;
 ;;; Property Bootstrap
 ;;;
+
 (macrolet ((set-name (name) `(setf (property-value ,name 'nickname) ',name)))
   (set-name =t=)
   (set-name =standard-object=)

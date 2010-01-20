@@ -152,6 +152,7 @@
 ;;; can barf on things which're illegal as arguments in lambda lists
 ;;; even if they could conceivably be legal in not-quite-a-lambda-list
 ;;; weirdosities
+
 (defun parse-lambda-list (lambda-list)
   ;; Classify parameters without checking their validity individually.
   (multiple-value-bind (required optional restp rest keyp keys allowp auxp aux)

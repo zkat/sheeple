@@ -4,6 +4,7 @@
 ;;;;
 ;;;; Holds all special conditions used by Sheeple
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (in-package :sheeple)
 
 (define-condition sheeple-condition ()
@@ -32,7 +33,9 @@
 (define-sheeple-condition sheeple-error (sheeple-condition error) ())
 (define-sheeple-condition sheeple-style-warning (style-warning sheeple-warning) ())
 
+;;;
 ;;; Misc
+;;;
 
 (define-sheeple-condition deprecated-feature sheeple-style-warning
   ("This feature has been deprecated since version ~A:~%  ~A" version feature))
@@ -46,7 +49,9 @@ Current sort status:
   Conflicting constraints: ~A"
    conflicting-elements sorted-elements constraints))
 
+;;;
 ;;; Molds
+;;;
 
 (define-sheeple-condition mold-error sheeple-error
   ("An error has occured in Sheeple's backend data structures -- this is a bug ~
@@ -56,7 +61,9 @@ Current sort status:
   ("Can't link ~A, because doing so would conflict with the already-linked ~A."
    new-mold collision-mold))
 
+;;;
 ;;; Objects
+;;;
 
 (define-sheeple-condition object-precedence-error sheeple-error
   ("A conflict was encountered while generating a precedence list for ~A.
@@ -64,7 +71,9 @@ The conflict information was:~%~A"
    object conflict)
   (:documentation "Signaled whenever there is a problem computing the precedence list."))
 
+;;;
 ;;; Properties
+;;;
 
 (define-sheeple-condition object-property-error sheeple-error ()
   (:documentation "Encompasses all that can go wrong with properties."))
@@ -75,10 +84,9 @@ The conflict information was:~%~A"
 (define-sheeple-condition unbound-direct-property unbound-property
   ("Object ~A has no direct property named ~A" object property-name))
 
-;;; Looks like somebody's a long way from home. - Adlai
-;;; (define-condition property-locked (sheeple-error) ())
-
+;;;
 ;;; Messages
+;;;
 
 (define-sheeple-condition clobbering-function-definition sheeple-warning
   ("Clobbering regular function or generic function definition for ~A" function))
@@ -95,7 +103,9 @@ The conflict information was:~%~A"
 (define-sheeple-condition message-lambda-list-error sheeple-message-error
   ("~@<Invalid ~S ~_in the message lambda list ~S~:>" arg lambda-list))
 
+;;;
 ;;; Replies
+;;;
 
 (define-sheeple-condition sheeple-reply-error sheeple-message-error ()
   (:documentation "Encompasses all that can go wrong with replies."))

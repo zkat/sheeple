@@ -6,6 +6,7 @@
 ;;;;
 ;;;; Backend Datastructures Of The Object Hierarchy
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (in-package :sheeple)
 
 ;;;
@@ -48,6 +49,7 @@
 ;;;
 ;;; Data definitions
 ;;;
+
 (defstruct (mold
              (:predicate moldp)
              (:constructor make-mold (lineage properties &optional back)))
@@ -125,6 +127,7 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
 ;;;
 ;;; Molds
 ;;;
+
 (defvar *molds* (make-weak-hash-table :test 'equal :weakness :value)
   "Maps parent lists to their corresponding molds. This is the global entry
 point to Sheeple's backend class system.")
@@ -145,6 +148,7 @@ point to Sheeple's backend class system.")
 ;;;
 ;;; Transitions
 ;;;
+
 (defun find-transition (mold property-name)
   "Returns the mold which adds a property named PROPERTY-NAME to MOLD.
 If no such mold exists, returns NIL."
@@ -154,6 +158,7 @@ If no such mold exists, returns NIL."
 ;;;
 ;;; Mold API -- Retrieval and Automatic Creation of Molds
 ;;;
+
 (defun ensure-toplevel-mold (metaobject parents)
   "Returns the mold for PARENTS, creating and caching a new one if necessary."
 ;  (check-type metaobject object)
@@ -188,6 +193,7 @@ creating and linking a new one if necessary."
 ;;;
 ;;; Backend Bootstrap
 ;;;
+
 (defvar =standard-metaobject= (std-allocate-object nil))
 
 (setf (lineage-metaobject (mold-lineage (%object-mold =standard-metaobject=)))

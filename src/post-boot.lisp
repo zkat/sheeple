@@ -7,11 +7,13 @@
 ;;;; Once sheeple is booted up, we can define messages/replies normally
 ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (in-package :sheeple)
 
 ;;;
 ;;; Printing Objects!
 ;;;
+
 (defmessage print-sheeple-object (object stream)
   (:documentation "Defines the expression print-object uses.")
   (:reply (object (stream =stream=))
@@ -25,6 +27,7 @@
 ;;;
 ;;; Error Reporting and Recovery
 ;;;
+
 (defmessage no-applicable-reply (message &rest args)
   (:documentation "Called when no reply is applicable for a message invocation.")
   (:reply (message &rest args)

@@ -6,6 +6,7 @@
 ;;;;
 ;;;; Boxing of built-in lisp types
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (in-package :sheeple)
 
 (macrolet ((defvars (&rest syms) `(progn ,@(mapcar (fun `(defvar ,_)) syms))))
@@ -38,10 +39,11 @@
     (function                                      =function=)
     (t                                             =boxed-object=)))
 
-;; This thing is a bit problematic. We don't necessarily want to keep references around to
-;; objects that have been autoboxed, right? I'm tempted to say that the ideal here would
-;; be a weak hash table with both key *and* value weakness. For now, though, we hold on
-;; to references until a solution is thought out.
+;;; This thing is a bit problematic. We don't necessarily want to keep references around to
+;;; objects that have been autoboxed, right? I'm tempted to say that the ideal here would
+;;; be a weak hash table with both key *and* value weakness. For now, though, we hold on
+;;; to references until a solution is thought out.
+
 (defvar *boxed-object-table* (make-hash-table)
   "Lisp objects boxed by Objects are stored in here.")
 

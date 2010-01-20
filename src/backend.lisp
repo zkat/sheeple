@@ -89,15 +89,12 @@ creating and linking a new one if necessary."
        ((null props-left) mold)))
 
 ;;;
-;;; Lineages and Objects
+;;; Lineages
 ;;;
 
 (defstruct (lineage
              (:predicate lineagep)
-             (:constructor
-              make-lineage (metaobject parents
-                                       &aux (precedence-list (when parents
-                                                               (compute-precedence parents))))))
+             (:constructor %make-lineage (metaobject parents precedence-list)))
   "Information about an object's ancestors and descendants."
   (metaobject      (assert NIL) :read-only t) ; I want recursive struct slot types
   (members         (make-weak-hash-table :weakness :key :test #'eq)
@@ -108,6 +105,26 @@ creating and linking a new one if necessary."
 (define-print-object (lineage :identity nil)
   (format t "~:[with no parents~;from ~:*~{~A~#[~; and ~:;, ~]~}~]"
           (lineage-parents lineage)))
+
+(defvar *lineages* (make-weak-hash-table :test 'equal :weakness :value)
+  "Maps a (metaobject . parent-list) pair to the corresponding lineage.")
+
+(defun find-lineage (metaobject parents)
+  (check-type metaobject object)
+  (check-list-type parents object)
+  (let ((cons (cons metaobject parents)))
+    (declare (dynamic-extent cons))
+    (values (gethash cons *lineages*))))
+
+(defun (setf find-lineage) (lineage metaobject parents)
+  (check-type metaobject object)
+  (check-list-type parents object)
+  (check-type lineage lineage)
+  (setf (gethash (cons metaobject parents) *lineages*) lineage))
+
+;;;
+;;; Objects
+;;;
 
 (defstruct (object (:conc-name %object-) (:predicate objectp)
                    (:constructor std-allocate-object
@@ -135,51 +152,11 @@ creating and linking a new one if necessary."
   (setf (gethash object (lineage-members (%object-lineage object)))
         new-kids))
 
-(defun trigger-precedence-recalculation (lineage)
-  "Updates LINEAGE's precedence list, and propagates down the members."
-  (with-accessors ((precedence lineage-precedence-list)
-                   (parents   lineage-parents)
-                   (members   lineage-members)) lineage
-    (setf precedence (compute-precedence parents))
-    (maphash (lambda (member children)
-               (setf (%object-precedence-list member) (compute-object-precedence-list member))
-               (mapcar 'trigger-precedence-recalculation children))
-             members)))
-
-;;;
-;;; Lineages
-;;;
-
-(defvar *lineages* (make-weak-hash-table :test 'equal :weakness :value)
-  "Maps a (metaobject . parent-list) pair to the corresponding lineage.")
-
-(defun find-lineage (metaobject parents)
-  (check-type metaobject object)
-  (check-list-type parents object)
-  (let ((cons (cons metaobject parents)))
-    (declare (dynamic-extent cons))
-    (values (gethash cons *lineages*))))
-
-(defun (setf find-lineage) (lineage metaobject parents)
-  (check-type metaobject object)
-  (check-list-type parents object)
-  (check-type lineage lineage)
-  (setf (gethash (cons metaobject parents) *lineages*) lineage))
-
-(defun ensure-lineage (metaobject parents)
-  "Returns the lineage for METAOBJECT and PARENTS, creating a new one if necessary."
-  (check-type metaobject object)
-  (check-list-type parents object)
-  (or (find-lineage metaobject parents)
-      (setf (find-lineage metaobject parents)
-            (aprog1 (make-lineage metaobject parents)
-              (dolist (parent parents)
-                (push it (%object-children parent)))))))
-
 ;;;
 ;;; Backend Bootstrap
 ;;;
 
 (defvar =standard-metaobject= (%make-empty-object))
 
-(setf (%object-lineage =standard-metaobject=) (ensure-lineage =standard-metaobject= ()))
+(setf (%object-lineage =standard-metaobject=)
+      (%make-lineage =standard-metaobject= () ()))

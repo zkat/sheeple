@@ -9,6 +9,7 @@
 ;;;; TODO
 ;;;; * Figure out an optimization to make accessors about as fast as calling property-value
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (in-package :sheeple)
 
 (defun score-reply (reply)
@@ -34,6 +35,7 @@
 ;;; This makes the argument list accessible to error functions like `no-primary-reply'
 ;;; which are called from deeper within the dispatch machinery. Passing the arguments
 ;;; down through each function call would suck.
+
 (defvar *reply-combination-args*)
 
 (defun compute-effective-reply-function (message replies *reply-combination-args*)

@@ -6,6 +6,7 @@
 ;;;;
 ;;;; Defining the object initialization protocol
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (in-package :sheeple)
 
 (defmessage shared-init (object &rest initargs)

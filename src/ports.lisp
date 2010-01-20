@@ -6,6 +6,7 @@
 ;;;;
 ;;;; Bits which can be customized for various platforms
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (in-package :sheeple)
 
 (declaim (inline safe-fdefinition))

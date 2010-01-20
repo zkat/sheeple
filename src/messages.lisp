@@ -7,6 +7,7 @@
 ;;;; Message metasheep, message definition and management
 ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (in-package :sheeple)
 
 (defstruct (arg-info (:constructor make-arg-info ()))
@@ -177,8 +178,8 @@
                 insufficient-message-args :message message)
     (subseq args 0 nreq)))
 
-;; The defmessage macro basically expands to a call to this function (after processing
-;; its args, checking lamda-list, etc.)
+;;; The defmessage macro basically expands to a call to this function (after processing
+;;; its args, checking lamda-list, etc.)
 (defun ensure-message (name &rest all-keys &key lambda-list &allow-other-keys)
   (awhen-prog1 (safe-fdefinition name)
     (when (messagep it)

@@ -141,23 +141,48 @@ CDR of the precedence list of a standard object with PARENTS, in order, as its p
   (%object-precedence-list object))
 
 ;;;
-;;; Modifying mold-level stuff
+;;; Lineages, Take 2
 ;;;
 
-(defun (setf object-mold) (new-mold object)
-  (with-accessors ((new-lineage mold-lineage)) new-mold
-    (with-accessors ((old-lineage mold-lineage)) (%object-mold object)
-      (unless (eq new-lineage old-lineage)
-        (setf (gethash object (lineage-members new-lineage)) (%object-children object))
-        (remhash object (lineage-members old-lineage)))))
-  (setf (%object-mold object) new-mold
+;;; We define these two here because backend.lisp doesn't know about fancy
+;;; things like ancestry and calculating precedence lists.
+
+(defun make-lineage (metaobject parents)
+  (%make-lineage metaobject parents (compute-precedence parents)))
+
+(defun ensure-lineage (metaobject parents)
+  "Returns the lineage for METAOBJECT and PARENTS, creating a new one if necessary."
+  (check-type metaobject object)
+  (check-list-type parents object)
+  (or (find-lineage metaobject parents)
+      (setf (find-lineage metaobject parents)
+            (aprog1 (make-lineage metaobject parents)
+              (dolist (parent parents)
+                (push it (%object-children parent)))))))
+
+;;;
+;;; Backend Entry Points
+;;;
+
+(defun trigger-precedence-recalculation (lineage)
+  "Updates LINEAGE's precedence list, and propagates down the members."
+  (check-type lineage lineage)
+  (setf (lineage-precedence-list lineage) (compute-precedence (lineage-parents lineage)))
+  (do-hash (member children (lineage-members lineage))
+    (setf (%object-precedence-list member) (compute-object-precedence-list member))
+    (dolist (child children)
+      (trigger-precedence-recalculation child))))
+
+(defun change-lineage (object new-lineage)
+  (check-type object object)
+  (check-type lineage lineage)
+  (setf (gethash object (lineage-members new-lineage)) (%object-children object))
+  (remhash object (lineage-members (%object-lineage object)))
+  (setf (%object-lineage object) new-lineage
         (%object-precedence-list object) (compute-object-precedence-list object))
-  new-mold)
+  (map nil #'trigger-precedence-recalculation (%object-children object)))
 
 (defun change-mold (object new-mold)
-  "Creates a new property-value vector in OBJECT, according to NEW-MOLD's specification, and
-automatically takes care of bringing the correct property-values over into the new vector, in the
-right order. Keep in mind that NEW-MOLD might specify some properties in a different order."
   (check-type object object)
   (check-type new-mold mold)
   (let* ((new-properties (mold-properties new-mold))
@@ -170,13 +195,11 @@ right order. Keep in mind that NEW-MOLD might specify some properties in a diffe
           (let ((pname (svref properties position)))
             (awhen (position pname new-properties)
               (setf (svref new-values it) (svref old-values position)))))))
-    (setf (object-mold object) new-mold
+    (setf (%object-mold object) new-mold
           (%object-property-values object) new-values))
-  object)
+  (values))
 
 (defun change-parents (object new-parents)
-  "Wraps around `change-mold' to give OBJECT a mold with the requested NEW-PARENTS.
-This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER CODE."
   (check-type object object)
   (check-list-type new-parents object)
   (change-mold object (ensure-mold (%object-metaobject object) new-parents

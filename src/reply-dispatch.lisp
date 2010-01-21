@@ -143,8 +143,7 @@ are present in ARGS."
           (loop
              for arg in args and index fixnum upfrom 0
              for obj = (ensure-dispatch-object arg)
-             ;; To avoid consing, we call f-a-r-r on the root object first
-             ;; Then we iterate over its ordered ancestors
+             ;; FIXME: Horrible ugly hack. Apparently filtered dispatch will fix this.
              do (loop initially (find-and-rank-roles obj 0 index)
                    for precedence-object in (mold-precedence-list (%object-mold obj))
                    for precedence-position fixnum from 1

@@ -94,7 +94,7 @@ creating and linking a new one if necessary."
 
 (defstruct (lineage
              (:predicate lineagep)
-             (:constructor %make-lineage (metaobject parents precedence-list)))
+             (:constructor make-lineage (metaobject parents precedence-list)))
   "Information about an object's ancestors and descendants."
   (metaobject      (assert NIL) :read-only t) ; I want recursive struct slot types
   (members         (make-weak-hash-table :weakness :key :test #'eq)
@@ -159,4 +159,4 @@ creating and linking a new one if necessary."
 (defvar =standard-metaobject= (%make-empty-object))
 
 (setf (%object-lineage =standard-metaobject=)
-      (%make-lineage =standard-metaobject= () ()))
+      (make-lineage =standard-metaobject= () ()))

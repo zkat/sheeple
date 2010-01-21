@@ -144,11 +144,8 @@ CDR of the precedence list of a standard object with PARENTS, in order, as its p
 ;;; Lineages, Take 2
 ;;;
 
-;;; We define these two here because backend.lisp doesn't know about fancy
+;;; We define this function here because backend.lisp doesn't know about fancy
 ;;; things like ancestry and calculating precedence lists.
-
-(defun make-lineage (metaobject parents)
-  (%make-lineage metaobject parents (compute-precedence parents)))
 
 (defun ensure-lineage (metaobject parents)
   "Returns the lineage for METAOBJECT and PARENTS, creating a new one if necessary."
@@ -156,7 +153,7 @@ CDR of the precedence list of a standard object with PARENTS, in order, as its p
   (check-list-type parents object)
   (or (find-lineage metaobject parents)
       (setf (find-lineage metaobject parents)
-            (aprog1 (make-lineage metaobject parents)
+            (aprog1 (make-lineage metaobject parents (compute-precedence parents))
               (dolist (parent parents)
                 (push it (%object-children parent)))))))
 

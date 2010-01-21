@@ -276,6 +276,13 @@ the result of calling DELETE with ITEM, place, and the REMOVE-KEYWORDS.")
          (print-unreadable-object (,object-var ,stream :type ,type :identity ,identity)
            (let ((*standard-output* ,stream)) ,@body))))))
 
+;;; FIXME: I need http://common-lisp.net/project/parse-declarations/
+(defmacro do-hash ((key value hash-form &optional result) &body body)
+  (with-gensyms (iter more?)
+    `(with-hash-table-iterator (,iter ,hash-form)
+       (loop (multiple-value-bind (,more? ,key ,value) (,iter)
+               (if ,more? (tagbody ,@body) (return ,result)))))))
+
 (defmacro feature-case (default &body ports)
   "Expands to the first form in PORTS. If there are no PORTS, the DEFAULT is used.
 

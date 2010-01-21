@@ -214,21 +214,24 @@ This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER 
   (change-parents =standard-object=     the-list)
   (change-parents =standard-metaobject= the-list))
 
-;;; Inheritance predicates
+;;;
+;;; Inheritance Utilities
+;;;
+
 (defun parentp (maybe-parent child)
-  "A parent is a object directly in CHILD's parent list."
+  "Tests whether CHILD delegates directly to MAYBE-PARENT. See `childp'."
   (member maybe-parent (object-parents child)))
 
 (defun ancestorp (maybe-ancestor descendant)
-  "A parent is a object somewhere in CHILD's precedence list."
+  "Tests whether DESCENDANT delegates to MAYBE-ANCESTOR. See `descendantp'."
   (member maybe-ancestor (cdr (object-precedence-list descendant))))
 
 (defun childp (maybe-child parent)
-  "A child is a object that has PARENT in its parent list."
+  "Tests whether MAYBE-CHILD delegates directly to PARENT. See `parentp'."
   (parentp parent maybe-child))
 
 (defun descendantp (maybe-descendant ancestor)
-  "A descendant is a object that has ANCESTOR in its precedence list."
+  "Tests whether MAYBE-DESCENDANT delegates to ANCESTOR. See `ancestorp'."
   (ancestorp ancestor maybe-descendant))
 
 ;;;

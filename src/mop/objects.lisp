@@ -30,5 +30,4 @@
 
 (defmessage (setf smop:object-metaobject) (new-metaobject old-metaobject object)
   (:reply ((new-mo =standard-metaobject=) (old-mo =standard-metaobject=) object)
-    (change-mold object (ensure-mold new-mo (%object-parents object)
-                                     (mold-properties (%object-mold object))))))
+    (change-lineage object (ensure-lineage new-mo (%object-parents object)))))

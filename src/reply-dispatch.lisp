@@ -145,7 +145,7 @@ are present in ARGS."
              for obj = (ensure-dispatch-object arg)
              ;; FIXME: Horrible ugly hack. Apparently filtered dispatch will fix this.
              do (loop initially (find-and-rank-roles obj 0 index)
-                   for precedence-object in (mold-precedence-list (%object-mold obj))
+                   for precedence-object in (lineage-precedence-list (%object-lineage obj))
                    for precedence-position fixnum from 1
                    do (find-and-rank-roles precedence-object precedence-position index))
              finally

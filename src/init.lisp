@@ -39,10 +39,11 @@ the DEFPROTO form is re-evaluated.")
   (:reply (object &rest initargs &key parents (metaobject =standard-metaobject=))
     (when (null parents)                ; Guard against funny business
       (push =standard-object= parents))
-    ;; This is a bit ugly. (SETF SMOP:OBJECT-METAOBJECT) also calls CHANGE-MOLD.
-    ;; Calling change-mold in here is probably too ugly, anyway -- zkat
+    ;; This is a bit ugly. (SETF SMOP:OBJECT-METAOBJECT) also calls CHANGE-LINEAGE,
+    ;; so we're actually changing the lineage twice.
     (setf (object-metaobject object) metaobject)
-    (change-mold object (ensure-mold metaobject parents))
+    (change-lineage object (ensure-lineage metaobject parents))
+    (change-mold object *empty-mold*)
     (apply #'shared-init object initargs)))
 
 (defmessage create (proto &key)

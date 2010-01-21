@@ -127,7 +127,7 @@ CDR of the precedence list of a standard object with PARENTS, in order, as its p
          #'std-tie-breaker-rule))))
 
 (defun std-compute-object-precedence-list (object)
-  (cons object (mold-precedence-list (%object-mold object))))
+  (cons object (lineage-precedence-list (%object-lineage object))))
 
 (defun compute-object-precedence-list (object)
   "Computes the full precedence list for OBJECT"
@@ -175,7 +175,7 @@ CDR of the precedence list of a standard object with PARENTS, in order, as its p
 
 (defun change-lineage (object new-lineage)
   (check-type object object)
-  (check-type lineage lineage)
+  (check-type new-lineage lineage)
   (setf (gethash object (lineage-members new-lineage)) (%object-children object))
   (remhash object (lineage-members (%object-lineage object)))
   (setf (%object-lineage object) new-lineage
@@ -202,8 +202,7 @@ CDR of the precedence list of a standard object with PARENTS, in order, as its p
 (defun change-parents (object new-parents)
   (check-type object object)
   (check-list-type new-parents object)
-  (change-mold object (ensure-mold (%object-metaobject object) new-parents
-                                   (mold-properties (%object-mold object))))
+  (change-lineage object (ensure-lineage (%object-metaobject object) new-parents))
   (map 'nil 'trigger-precedence-recalculation (%object-children object)))
 
 (defun (setf object-parents) (new-parents object)
@@ -287,7 +286,7 @@ ALL-KEYS is passed on to INIT-OBJECT."
           :feature "Passing a non-list :parents option to #'OBJECT")
     (setf parents (list parents)))
   (handler-case
-      (setf (object-mold object) (ensure-mold metaobject (or parents (list =standard-object=))))
+      (change-lineage object (ensure-lineage metaobject (or parents (list =standard-object=))))
     (topological-sort-conflict (conflict)
       (error 'object-precedence-error :object object :conflict conflict)))
   (apply 'init-object object all-keys))
@@ -298,14 +297,13 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
   (when (eq =t= object)
     (error 'fuck-off :format-control "You ain't allowed to clone =T=. Shoo."))
   (aprog1 (maybe-std-allocate-object metaobject)
-    (setf (object-mold it) (%object-mold object))
-    (with-accessors ((props %object-property-values)
-                     (roles %object-roles)) object
-      (with-accessors ((new-props %object-property-values)
-                       (new-roles %object-roles)) it
-        (setf new-roles (copy-list roles))
-        (when props
-          (setf new-props (copy-simple-vector props)))))))
+    (change-lineage it (%object-lineage object))
+    (setf (%object-mold it)  (%object-mold object)
+          (%object-roles it) (copy-list (%object-roles object)))
+    ;; FIXME: Use some sort of anaphora
+    (let ((props (%object-property-values object)))
+      (when props
+        (setf (%object-property-values it) (copy-simple-vector props))))))
 
 ;;;
 ;;; Fancy Macros

@@ -74,8 +74,8 @@ Sheeple to use class-based optimizations yet keep its dynamic power."
   metaobject ; Not readonly for ease of bootstrapping
   (members         (make-weak-hash-table :weakness :key :test #'eq)
                    :read-only t :type hash-table) ; The lineage's members
-  (parents         nil :read-only t)              ; A set of objects
-  (precedence-list nil)) ; A precedence list of all the lineage's ancestors
+  (parents         nil :type list :read-only t)              ; A set of objects
+  (precedence-list nil :type list)) ; A precedence list of all the lineage's ancestors
 
 (define-print-object ((object lineage) :identity nil)
   (format t "from ~{~{~:[[~A]~;~A~]~}~#[~; and ~:;, ~]~}"

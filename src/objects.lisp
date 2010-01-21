@@ -218,21 +218,37 @@ This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER 
 ;;; Inheritance Utilities
 ;;;
 
+(declaim (inline %parentp %ancestorp))
+(declaim (ftype (function (object object) (values list)) %parentp %ancestorp))
+(locally (declare (optimize speed (safety 0)))
+  (defun %parentp (maybe-parent child)
+    (memq maybe-parent (%object-parents child)))
+  (defun %ancestorp (maybe-ancestor descendant)
+    (memq maybe-ancestor (cdr (%object-precedence-list descendant)))))
+
 (defun parentp (maybe-parent child)
   "Tests whether CHILD delegates directly to MAYBE-PARENT. See `childp'."
-  (member maybe-parent (object-parents child)))
+  (check-type maybe-parent object)
+  (check-type child        object)
+  (%parentp maybe-parent child))
 
 (defun ancestorp (maybe-ancestor descendant)
   "Tests whether DESCENDANT delegates to MAYBE-ANCESTOR. See `descendantp'."
-  (member maybe-ancestor (cdr (object-precedence-list descendant))))
+  (check-type maybe-ancestor object)
+  (check-type descendant     object)
+  (%ancestorp maybe-ancestor descendant))
 
 (defun childp (maybe-child parent)
   "Tests whether MAYBE-CHILD delegates directly to PARENT. See `parentp'."
-  (parentp parent maybe-child))
+  (check-type maybe-child object)
+  (check-type parent      object)
+  (%parentp parent maybe-child))
 
 (defun descendantp (maybe-descendant ancestor)
   "Tests whether MAYBE-DESCENDANT delegates to ANCESTOR. See `ancestorp'."
-  (ancestorp ancestor maybe-descendant))
+  (check-type maybe-descendant object)
+  (check-type ancestor         object)
+  (%ancestorp ancestor maybe-descendant))
 
 ;;;
 ;;; Spawning

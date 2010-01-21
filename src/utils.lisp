@@ -276,16 +276,6 @@ the result of calling DELETE with ITEM, place, and the REMOVE-KEYWORDS.")
          (print-unreadable-object (,object-var ,stream :type ,type :identity ,identity)
            (let ((*standard-output* ,stream)) ,@body))))))
 
-(defmacro do-reversed ((name listform) &body body)
-  (with-gensyms (label tail)
-    `(labels ((,label (,tail &rest ,name)
-                (declare (dynamic-extent ,name))
-                (if (endp ,tail)
-                    (progn ,@body)
-                    (apply #',label (cdr ,tail) (car ,tail) ,name))))
-       (declare (dynamic-extent #',label))
-       (,label ,listform))))
-
 (defmacro feature-case (default &body ports)
   "Expands to the first form in PORTS. If there are no PORTS, the DEFAULT is used.
 

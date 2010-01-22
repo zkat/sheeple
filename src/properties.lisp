@@ -26,16 +26,25 @@ property is not set locally, a condition of type `unbound-property' is signaled.
 (defun std-direct-property-value (object property-name)
   (aif (property-position property-name object)
        (svref (%object-property-values object) it)
-       (restart-case (error 'unbound-property :object object :property-name property-name)
-         (continue ()
-           :report "Try accessing the property again."
-           (direct-property-value object property-name))
-         (use-value (value)
-           :report "Return a value."
-           :interactive (lambda ()
-                          (format *query-io* "~&Value to use: ")
-                          (list (read *query-io*)))
-           value))))
+       ;; Now comes some tricky [ab]use of control flow
+       (handler-case
+           ;; We give std-property-value and std-direct-property-p a chance to catch this tag
+           ;; and skip the condition system altogether. This is a big win when property-value
+           ;; is called on a delegated property.
+           (throw '%unbound-property nil)
+         ;; The absence of a catch frame indicates that we were called directly, rather than
+         ;; through property-value or direct-property-p, so we go ahead and signal.
+         (control-error ()
+           (restart-case (error 'unbound-property :object object :property-name property-name)
+             (continue ()
+               :report "Try accessing the property again."
+               (direct-property-value object property-name))
+             (use-value (value)
+               :report "Return a value."
+               :interactive (lambda ()
+                              (format *query-io* "~&Value to use: ")
+                              (list (read *query-io*)))
+               value))))))
 
 (defun property-value (object property-name)
   "Returns the property-value for PROPERTY-NAME found first in OBJECT's hierarchy list.
@@ -45,11 +54,15 @@ is signaled."
       (std-property-value object property-name)
       (funcall 'smop:property-value (object-metaobject object) object property-name)))
 (defun std-property-value (object property-name)
+  ;; Walk down the precedence list...
   (dolist (ancestor (object-precedence-list object)
+           ;; If none of the ancestors has it, signal an error.
+           ;; FIXME: I should bind the same restarts as direct-property-value
            (error 'unbound-property :object object :property-name property-name))
-    (handler-case
-        (return (direct-property-value ancestor property-name))
-      (unbound-property ()))))
+    ;; If this ancestor doesn't have the property, move on to the next one
+    (catch '%unbound-property
+      ;; If it does, return the value
+      (return (direct-property-value ancestor property-name)))))
 
 (defun (setf direct-property-value) (new-value object property-name &rest options)
   "Tries to set a direct property value for OBJECT. If it succeeds, returns T, otherwise NIL."
@@ -131,10 +144,9 @@ NIL otherwise."
       (std-direct-property-p object property-name)
       (funcall 'smop:direct-property-p (object-metaobject object) object property-name)))
 (defun std-direct-property-p (object property-name)
-  (let ((has-property-p t))
-    (handler-case (direct-property-value object property-name)
-      (unbound-property () (setf has-property-p nil)))
-    has-property-p))
+  ;; All we're interested in here is whether or not %unbound-property is thrown
+  (catch '%unbound-property
+    (progt (direct-property-value object property-name))))
 
 (defun property-owner (object property-name)
   "Returns the object, if any, from which OBJECT would fetch the value for PROPERTY-NAME"

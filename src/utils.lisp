@@ -294,3 +294,7 @@ For example, to exit a few different lisps with a reasonable default, do:
     #+sbcl (sb-ext:quit)
     #+ecl  (si:quit)"
   (or (car ports) default))
+
+(defmacro progt (&body body)
+  "Wraps BODY with a `progn', and returns T."
+  `(progn ,@body t))

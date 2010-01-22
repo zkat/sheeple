@@ -47,9 +47,9 @@ is signaled."
 (defun std-property-value (object property-name)
   (dolist (ancestor (object-precedence-list object)
            (error 'unbound-property :object object :property-name property-name))
-    (handler-bind ((unbound-property (fun (go :next))))
-      (return (direct-property-value ancestor property-name)))
-    :next))
+    (handler-case
+        (return (direct-property-value ancestor property-name))
+      (unbound-property ()))))
 
 (defun (setf direct-property-value) (new-value object property-name &rest options)
   "Tries to set a direct property value for OBJECT. If it succeeds, returns T, otherwise NIL."

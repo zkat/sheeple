@@ -16,13 +16,16 @@
   `(let ((,name (smop:allocate-object ,metaobject))) ,@body))
 
 ;;; For lack of a better place, here comes the macro extraordinaire!
-(defmacro with-test-message (message-name &body body)
+(defmacro with-test-message ((message-name lambda-list &key setfp) &body body)
   "Ensures that the message MESSAGE-NAME will be cleaned up after the BODY runs.
 Also, sets up a local macro of the same name for invoking the message. This sounds
 confusing, but actually enables crystal clear warning-free test code."
   `(unwind-protect
         (macrolet ((,message-name (&rest args)
                      `(funcall (symbol-function ',',message-name) ,@args)))
+          (defmessage ,message-name ,lambda-list)
+          ,.(when setfp
+              `((defmessage (setf ,message-name) (new-value ,@lambda-list))))
           ,@body)
      (undefmessage ,message-name)))
 
@@ -288,7 +291,7 @@ confusing, but actually enables crystal clear warning-free test code."
         (is (null (direct-property-p clone 'test)))
         (is (not (null (direct-property-p clone2 'test))))
         (is (eq 'test (direct-property-value clone2 'test))))
-      (with-test-message clone-test
+      (with-test-message (clone-test (thingy))
         (defmessage clone-test (thingy)
           (:reply ((xyzzy obj)) xyzzy))
         (let ((clone3 (clone obj)))
@@ -308,23 +311,14 @@ confusing, but actually enables crystal clear warning-free test code."
   (is (equal '(list foo) (canonize-parents 'foo))))
 
 (test canonize-property
-  (is (equal '(list 'VAR "value") (canonize-property '(var "value"))))
-  (is (equal '(list 'VAR "value" :accessor 'var)
-             (canonize-property '(var "value") t)))
-  (is (equal '(list 'VAR "value" :reader nil :accessor 'var)
-             (canonize-property '(var "value" :reader nil) t)))
-  (is (equal '(list 'VAR "value" :writer nil :accessor 'var)
-             (canonize-property '(var "value" :writer nil) t)))
-  (is (equal '(list 'VAR "value" :accessor nil)
-             (canonize-property '(var "value" :accessor nil) t))))
+  (is (equal '(list 'var "value") (canonize-property '(var "value"))))
+  (is (equal '(list 'var "value" :reader 'var)
+             (canonize-property '(var "value" :reader 'var)))))
 
 (test canonize-properties
   (is (equal '(list (list 'VAR "value")) (canonize-properties '((var "value")))))
   (is (equal '(list (list 'VAR "value") (list 'ANOTHER "another-val"))
-             (canonize-properties '((var "value") (another "another-val")))))
-  (is (equal '(list (list 'VAR "value" :accessor 'var)
-               (list 'ANOTHER "another-val" :accessor 'another))
-             (canonize-properties '((var "value") (another "another-val")) t))))
+             (canonize-properties '((var "value") (another "another-val"))))))
 
 (test canonize-options
   (is (equal '(:metaobject foo :nickname 'bar)
@@ -368,15 +362,17 @@ confusing, but actually enables crystal clear warning-free test code."
   (macrolet ((test ()
                (with-gensyms (name)
                  `(symbol-macrolet ((,name (proto ',name))) ; FIXME: This is cheating
-                    (with-test-message var
-                      (with-test-message something-else
-                        (let ((test-proto (defproto ,name () ((var "value")))))
+                    (with-test-message (var (x))
+                      (with-test-message (something-else (x))
+                        (let ((test-proto (defproto ,name ()
+                                            ((var "value" :reader 'var)))))
                           (is (objectp test-proto))
                           (is (eql test-proto ,name))
                           (is (eql =standard-object= (car (object-parents test-proto))))
                           (is (objectp ,name))
                           (is (equal "value" (var ,name)))
-                          (defproto ,name () ((something-else "another-one")))
+                          (defproto ,name ()
+                            ((something-else "another-one" :reader 'something-else)))
                           (is (eql test-proto ,name))
                           (is (eql =standard-object= (car (object-parents test-proto))))
                           (signals unbound-property (direct-property-value test-proto 'var))

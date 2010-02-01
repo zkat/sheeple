@@ -26,14 +26,13 @@
 
 (defmacro with-dummy-message (message-arglist &body body)
   (let ((message-name (gensym)))
-    `(with-test-message ,message-name
+    `(with-test-message (,message-name ,message-arglist)
        (macrolet ((define-dummy-reply (qualifiers specializers &body body)
                     `(defreply ,',message-name ,@qualifiers
                        ,(mapcar 'list ',message-arglist specializers)
                        ,@body)))
          (flet ((call-dummy-message (,@message-arglist)
                   (,message-name ,@message-arglist)))
-           (defmessage ,message-name ,message-arglist)
            ,@body)))))
 
 (test standard-combination-primary

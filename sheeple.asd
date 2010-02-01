@@ -1,7 +1,7 @@
 ;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10; indent-tabs-mode: nil -*-
 
 (asdf:defsystem sheeple
-  :version "3.0.2"
+  :version "3.0.5"
   :description "Cheeky prototypes for Common Lisp"
   :author "Kat Marchan <zkat at sykosomatic-dot-org>"
   :licence "MIT"
@@ -35,7 +35,6 @@
                        (:file "properties")))))))
 
 (asdf:defsystem sheeple-tests
-  :version "Baahh"
   :description "Unit tests for Sheeple"
   :author "Kat Marchan <zkat at sykosomatic-dot-org>"
   :licence "MIT"

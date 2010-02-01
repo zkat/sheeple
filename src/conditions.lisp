@@ -65,7 +65,7 @@ Current sort status:
 ;;; Objects
 ;;;
 
-(define-sheeple-condition nonexistant-prototype sheeple-error
+(define-sheeple-condition no-such-prototype sheeple-error
   ("There is no prototype object named ~S." name))
 
 (define-sheeple-condition object-precedence-error sheeple-error

@@ -352,11 +352,11 @@ confusing, but actually enables crystal clear warning-free test code."
 (def-suite protos :in creation)
 (in-suite protos)
 
-(test nonexistant-prototype
+(test no-such-prototype
   (let ((name (gensym)))
     (handler-case (proto name)
-      (nonexistant-prototype (condition)
-        (let ((cname (nonexistant-prototype-name condition)))
+      (no-such-prototype (condition)
+        (let ((cname (no-such-prototype-name condition)))
           (is (eq name cname)
               ;; FIXME: I'm ugly-printed. Prettify me!
               "Signaled condition was named ~S (instead of ~S)." cname name)))

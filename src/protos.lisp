@@ -39,7 +39,7 @@
   (multiple-value-bind (proto foundp)
       (gethash name *prototype-objects*)
     (when (and (not foundp) errorp)
-      (error 'nonexistant-prototype :name name))
+      (error 'no-such-prototype :name name))
     proto))
 
 (defun (setf proto) (new-proto name &optional errorp)

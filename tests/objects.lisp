@@ -353,23 +353,26 @@ confusing, but actually enables crystal clear warning-free test code."
 (in-suite protos)
 
 (test defproto
-  (with-test-message var
-    (with-test-message something-else
-      (unwind-protect
-           (let ((test-proto (defproto =test-proto= () ((var "value")))))
-             (is (objectp test-proto))
-             (is (eql test-proto (symbol-value '=test-proto=)))
-             (is (eql =standard-object= (car (object-parents test-proto))))
-             (is (objectp (symbol-value '=test-proto=)))
-             (is (equal "value" (var (symbol-value '=test-proto=))))
-             (defproto =test-proto= () ((something-else "another-one")))
-             (is (eql test-proto (symbol-value '=test-proto=)))
-             (is (eql =standard-object= (car (object-parents test-proto))))
-             (signals unbound-property (direct-property-value test-proto 'var))
-             (is (equal "another-one" (something-else (symbol-value '=test-proto=))))
-             (is (equal "another-one" (something-else test-proto)))
-             ;; TODO - check that options work properly
-             (undefreply var (test-proto))
-             (undefreply something-else (test-proto)))
-        (makunbound '=test-proto=)))))
+  ;; FIXME: I'm ugly.
+  (macrolet ((test ()
+               (with-gensyms (name)
+                 `(symbol-macrolet ((,name (proto ',name))) ; FIXME: This is cheating
+                    (with-test-message var
+                      (with-test-message something-else
+                        (let ((test-proto (defproto ,name () ((var "value")))))
+                          (is (objectp test-proto))
+                          (is (eql test-proto ,name))
+                          (is (eql =standard-object= (car (object-parents test-proto))))
+                          (is (objectp ,name))
+                          (is (equal "value" (var ,name)))
+                          (defproto ,name () ((something-else "another-one")))
+                          (is (eql test-proto ,name))
+                          (is (eql =standard-object= (car (object-parents test-proto))))
+                          (signals unbound-property (direct-property-value test-proto 'var))
+                          (is (equal "another-one" (something-else ,name)))
+                          (is (equal "another-one" (something-else test-proto)))
+                          ;; TODO - check that options work properly
+                          (undefreply var (test-proto))
+                          (undefreply something-else (test-proto)))))))))
+    (test)))
 (test ensure-object)

@@ -65,6 +65,9 @@ Current sort status:
 ;;; Objects
 ;;;
 
+(define-sheeple-condition nonexistant-prototype sheeple-error
+  ("There is no prototype object named ~S." name))
+
 (define-sheeple-condition object-precedence-error sheeple-error
   ("A conflict was encountered while generating a precedence list for ~A.
 The conflict information was:~%~A"

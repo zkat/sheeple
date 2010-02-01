@@ -84,8 +84,19 @@ is signaled."
   (declare (ignore options))
   (change-mold object (ensure-transition (%object-mold object) property-name)))
 
-(defun (setf property-value) (new-value object property-name &rest options
-                              &key (reader nil readerp) (writer nil writerp) accessor)
+(defun add-accessors (object property-name options)
+  (multiple-value-bind (type value tail)
+      (get-properties options '(:reader :writer :accessor))
+    (when type
+      (if (eq type :writer)
+          (add-writer-to-object value property-name object)
+          (progn
+            (add-reader-to-object value property-name object)
+            (when (eq type :accessor)
+              (add-writer-to-object `(setf ,value) property-name object))))
+      (add-accessors object property-name (cddr tail)))))
+
+(defun (setf property-value) (new-value object property-name &rest options)
   "Sets NEW-VALUE as the value of a direct-property belonging to OBJECT, named
 PROPERTY-NAME."
   (flet ((maybe-set-prop () (apply '(setf direct-property-value) new-value object property-name options)))
@@ -93,15 +104,7 @@ PROPERTY-NAME."
         (progn (apply 'add-direct-property object property-name options) ; couldn't set it, try adding it
                (maybe-set-prop))                                         ; then try setting it again
         (error "Could not set direct property value.")))                 ; bought the farm
-  (when options             ; if we know there's no options, we may as well skip all of the checks..
-    (when reader (add-reader-to-object reader property-name object))
-    (when writer (add-writer-to-object writer property-name object))
-    (when accessor
-      (let ((accessor-name (if (eq t accessor) property-name accessor)))
-        (unless (and readerp (null reader))
-          (add-reader-to-object accessor-name property-name object))
-        (unless (and writerp (null writer))
-          (add-writer-to-object `(setf ,accessor-name) property-name object)))))
+  (add-accessors object property-name options)
   new-value)
 
 (defun property-makunbound (object property-name)

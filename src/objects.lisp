@@ -312,17 +312,12 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
 (defun canonize-parents (parents)
   `(list ,@(ensure-list parents)))
 
-(defun canonize-properties (properties &optional (accessors-by-default nil))
-  `(list ,@(mapcar (rcurry 'canonize-property accessors-by-default) properties)))
+(defun canonize-properties (properties)
+  `(list ,@(mapcar (compose 'ensure-list 'canonize-property) properties)))
 
-(defun canonize-property (property &optional (accessors-by-default nil))
-  (let* ((property-name (if (consp property) (car property) property))
-         (property-value (when (consp property) (cadr property)))
-         (rest-of-property (when (consp property) (cddr property)))
-         (add-accessor-p (and (if (consp property) (not (find :accessor (cddr property))) t)
-                              accessors-by-default)))
-    `(list ',property-name ,property-value ,@rest-of-property
-           ,@(when add-accessor-p `(:accessor ',property-name)))))
+(defun canonize-property (property)
+  (destructuring-bind (name &optional value &rest rest) property
+    `(list ',name ,value ,@rest)))
 
 (defun canonize-options (options)
   (flet ((defclass-option-syntax-p (form)
@@ -354,33 +349,13 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
 
 (defmacro defproto (name &optional objects ((&rest properties)) &rest options)
   "Words cannot express how useful this is."
-  (let ((canonized-properties (canonize-properties properties t)))
-   `(progn
-      (define-proto-name ,name)
-      (eval-when (:compile-toplevel)
-        ,.(generate-defproto-accessors canonized-properties))
-      (setf ,name (ensure-object (proto ',name nil)
-                                 ,(canonize-parents objects)
-                                 :properties ,canonized-properties
-                                 ,.(canonize-options options)
-                                 :nickname ',name)))))
-
-(defun generate-defproto-accessors (canonized-properties &aux messages)
-  (dolist (property-spec (mapcar 'cdr (cdr canonized-properties)) messages)
-    (loop with type and name do
-         (setf (values type name property-spec)
-               (get-properties property-spec '(:accessor :reader :writer)))
-         (setf property-spec (cddr property-spec))
-         while type when name do
-         (flet ((add-reader (name)
-                  (push `(ensure-message ,name :lambda-list '(object)) messages))
-                (add-writer (name)
-                  (push `(ensure-message ,name :lambda-list '(new-value object)) messages)))
-           (case type
-             (:accessor (add-reader name)
-                        (add-writer ``(setf ,,name)))
-             (:reader (add-reader name))
-             (:writer (add-writer name)))))))
+  `(progn
+     (define-proto-name ,name)
+     (setf ,name (ensure-object (proto ',name nil)
+                                ,(canonize-parents objects)
+                                :properties ,(canonize-properties properties)
+                                ,.(canonize-options options)
+                                :nickname ',name))))
 
 (defun ensure-object (maybe-object parents &rest options)
   (if maybe-object

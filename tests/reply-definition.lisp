@@ -73,7 +73,7 @@
 (test ensure-reply)
 
 (test reply-redefinition
-  (with-test-message foo
+  (with-test-message (foo (bar))
     (defmessage foo (bar)
       (:reply ((bar =t=)) 1))
     (is (= 1 (foo 'x)))
@@ -102,14 +102,13 @@
 
 (test defreply
   ;; Test autoboxing
-  (with-test-message test-message
+  (with-test-message (test-message (x))
     (Eos:finishes (handler-bind
                       ((automatic-message-creation #'muffle-warning))
                     (defreply test-message ((n 3)))))))
 (test defreply-bug
   "Expected failure"
-  (with-test-message test-message
-    (defmessage test-message ())
+  (with-test-message (test-message ())
     (handler-case
         (defreply test-message ((x =t=)))
       (simple-error () (pass))
@@ -125,15 +124,9 @@
 (test confirm-var-name)
 
 (test undefreply
-  (with-test-message test-message
-    (let ((object (object)) warned)
-      (handler-bind
-          ((automatic-message-creation (fun
-                                         (pass "Warned correctly.")
-                                         (setf warned t)
-                                         (muffle-warning _))))
-        (defreply test-message ((x object)) x))
-      (unless warned (fail "Didn't warn for automatic message creation."))
+  (with-test-message (test-message (x))
+    (let ((object (object)))
+      (defreply test-message ((x object)) x)
       (is (not (null (undefreply test-message (object)))))
       (signals no-applicable-reply (test-message object))
       (is (null (undefreply test-message (object))))

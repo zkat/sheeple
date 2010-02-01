@@ -17,6 +17,7 @@
              (:file "ports")
              (:file "conditions")
              (:file "backend")
+             (:file "protos")
              (:file "objects")
              (:file "properties")
              (:file "builtins")

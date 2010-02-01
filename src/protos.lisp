@@ -52,3 +52,13 @@
 (defmacro define-proto-name (name)
   (check-type name symbol)
   `(define-symbol-macro ,name (proto ',name)))
+
+;;;
+;;; Backend Bootstrap
+;;;
+
+(define-proto-name =standard-metaobject=)
+
+(setf =standard-metaobject= (%make-empty-object)
+      (%object-lineage =standard-metaobject=)
+      (make-lineage =standard-metaobject= () ()))

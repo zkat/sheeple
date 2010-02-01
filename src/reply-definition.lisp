@@ -107,16 +107,16 @@
 (defun ensure-reply (name &key qualifiers lambda-list participants function (documentation ""))
   ;; FIXME: This is a slight kludge, because the -same- checks on
   ;; `fboundp' and `messagep' will be done in `ensure-message'.
-  (unless (messagep (safe-fdefinition name))
-    (warn 'automatic-message-creation :message-name name))
   (assert (= (length participants) (count-required-parameters lambda-list))
           (participants lambda-list)
           "~&The number of participants conflicts with the lambda list.~@
              Participants: ~S~%Lambda List:  ~S~%" participants lambda-list)
-  ;; FIXME: This is a quick and dirty way of not clobbering reply-less messages with a
-  ;; conflicting arglist. Ideally, we should use some arg-info functions or something...
-  (awhen (safe-fdefinition name)
-    (assert (= (length participants) (arg-info-number-required (message-arg-info it)))))
+  (let ((message (safe-fdefinition name)))
+    (unless (messagep message)
+      (error 'no-such-message :message-name name))
+    ;; FIXME: This is a quick and dirty way of not clobbering reply-less messages with a
+    ;; conflicting arglist. Ideally, we should use some arg-info functions or something...
+    (assert (= (length participants) (arg-info-number-required (message-arg-info message)))))
   (ensure-message name :lambda-list (create-msg-lambda-list lambda-list))
   (let ((message (fdefinition name)))
     (aprog1 (make-reply message qualifiers lambda-list function)
@@ -146,7 +146,6 @@
                   (object-parents object)))))
 
 (defun add-reader-to-object (reader prop-name object)
-  (ensure-message reader :lambda-list '(object))
   (ensure-reply reader
                 :lambda-list '(object)
                 :participants (list object)
@@ -158,7 +157,6 @@
   object)
 
 (defun add-writer-to-object (writer prop-name object)
-  (ensure-message writer :lambda-list '(new-value object))
   (ensure-reply writer
                 :lambda-list '(new-value object)
                 :participants (list =t= object)
@@ -229,10 +227,6 @@
         (parse-specialized-lambda-list reply-ll)
       (declare (ignore parameters required))
       `(progn
-         (eval-when (:compile-toplevel)
-           (unless (fboundp ',name)
-             (warn 'automatic-message-creation :message-name ',name)
-             (ensure-message ',name :lambda-list ',(create-msg-lambda-list reply-ll))))
          (ensure-reply ',name
                        :qualifiers ',qualifiers
                        :lambda-list ',lambda-list

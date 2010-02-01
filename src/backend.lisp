@@ -151,12 +151,3 @@ creating and linking a new one if necessary."
 (defun (setf %object-children) (new-kids object)
   (setf (gethash object (lineage-members (%object-lineage object)))
         new-kids))
-
-;;;
-;;; Backend Bootstrap
-;;;
-
-(defvar =standard-metaobject= (%make-empty-object))
-
-(setf (%object-lineage =standard-metaobject=)
-      (make-lineage =standard-metaobject= () ()))

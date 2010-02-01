@@ -352,6 +352,17 @@ confusing, but actually enables crystal clear warning-free test code."
 (def-suite protos :in creation)
 (in-suite protos)
 
+(test nonexistant-prototype
+  (let ((name (gensym)))
+    (handler-case (proto name)
+      (nonexistant-prototype (condition)
+        (let ((cname (nonexistant-prototype-name condition)))
+          (is (eq name cname)
+              ;; FIXME: I'm ugly-printed. Prettify me!
+              "Signaled condition was named ~S (instead of ~S)." cname name)))
+      (:no-error (proto)
+        (fail "Bogus proto ~S returned instead of an error." proto)))))
+
 (test defproto
   ;; FIXME: I'm ugly.
   (macrolet ((test ()

@@ -356,16 +356,14 @@ will be used instead of OBJECT's metaobject, but OBJECT itself remains unchanged
   "Words cannot express how useful this is."
   (let ((canonized-properties (canonize-properties properties t)))
    `(progn
-      (declaim (special ,name))
+      (define-proto-name ,name)
       (eval-when (:compile-toplevel)
         ,.(generate-defproto-accessors canonized-properties))
-      (setf (symbol-value ',name)
-            (ensure-object (when (boundp ',name)
-                             (symbol-value ',name))
-                           ,(canonize-parents objects)
-                           :properties ,canonized-properties
-                           ,.(canonize-options options)
-                           :nickname ',name)))))
+      (setf ,name (ensure-object (proto ',name nil)
+                                 ,(canonize-parents objects)
+                                 :properties ,canonized-properties
+                                 ,.(canonize-options options)
+                                 :nickname ',name)))))
 
 (defun generate-defproto-accessors (canonized-properties &aux messages)
   (dolist (property-spec (mapcar 'cdr (cdr canonized-properties)) messages)

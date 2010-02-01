@@ -9,7 +9,7 @@
 
 (in-package :sheeple)
 
-(macrolet ((defvars (&rest syms) `(progn ,@(mapcar (fun `(defvar ,_)) syms))))
+(macrolet ((defvars (&rest syms) `(progn ,@(mapcar (fun `(define-proto-name ,_)) syms))))
   (defvars =boxed-object= =symbol= =sequence= =array= =number= =character= =function=
            =hash-table= =package= =pathname= =readtable= =stream= =list= =null= =cons=
            =vector= =bit-vector= =string= =complex= =integer= =float= =boolean=))

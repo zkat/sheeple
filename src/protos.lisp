@@ -30,3 +30,25 @@
 ;;; but we add symbol macro support, so that proto names can be used just like
 ;;; global lexical variables. Eventually, this system can also be made blazingly
 ;;; efficient through judicious use of LOAD-TIME-VALUE and friends.
+
+(defvar *prototype-objects* (make-weak-hash-table :test #'eq :weakness :key)
+  "A mapping from symbols to the prototype objects which they designate")
+
+(defun proto (name &optional (errorp t))
+  (check-type name symbol)
+  (multiple-value-bind (proto foundp)
+      (gethash name *prototype-objects*)
+    (when (and (not foundp) errorp)
+      ;; FIXME: Needs a proper condition class
+      (error "No prototype object named ~S" name))
+    proto))
+
+(defun (setf proto) (new-proto name &optional errorp)
+  (declare (ignore errorp))
+  (check-type name symbol)
+  (check-type new-proto object)
+  (setf (gethash name *prototype-objects*) new-proto))
+
+(defmacro define-proto-name (name)
+  (check-type name symbol)
+  `(define-symbol-macro ,name (proto ',name)))

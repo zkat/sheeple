@@ -32,9 +32,16 @@
 
 (defun record-message-compilation (name lambda-list env)
   ;; What should be the default way to note a message at compile time?
-  (declare (ignore lambda-list env))
+  ;; FIXME: Better than the current one.
+  (declare (ignorable lambda-list env))
   (feature-case
-      `(proclaim `(ftype function ,',name))))
+      `(proclaim `(ftype function ,',name))
+    #+ccl `(ccl::record-function-info ',(ccl::maybe-setf-function-name name)
+                                      ',(multiple-value-bind (bits keyvect)
+                                            (ccl::encode-lambda-list lambda-list t)
+                                          ;; Let's stay away from 'defgeneric for now
+                                          (ccl::%cons-def-info 'defun bits keyvect))
+                                      ,env)))
 
 (defun record-message-source (name)
   (declare (ignorable name))

@@ -225,8 +225,11 @@ CDR of the precedence list of a standard object with PARENTS, in order, as its p
 ;;; Object Bootstrap
 ;;;
 
-(defvar        =t=        (std-allocate-object =standard-metaobject=))
-(defvar =standard-object= (std-allocate-object =standard-metaobject=))
+(macrolet ((define-proto (name)
+             `(progn (define-proto-name ,name)
+                     (setf ,name (std-allocate-object =standard-metaobject=)))))
+  (define-proto =t=)
+  (define-proto =standard-object=))
 
 (let ((the-list (list =t=)))
   (setf (%object-precedence-list =t=)   the-list)

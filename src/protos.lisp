@@ -39,8 +39,7 @@
   (multiple-value-bind (proto foundp)
       (gethash name *prototype-objects*)
     (when (and (not foundp) errorp)
-      ;; FIXME: Needs a proper condition class
-      (error "No prototype object named ~S" name))
+      (error 'nonexistant-prototype :name name))
     proto))
 
 (defun (setf proto) (new-proto name &optional errorp)

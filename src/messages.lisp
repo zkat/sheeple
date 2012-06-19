@@ -80,7 +80,7 @@
   (print-unreadable-object (message stream :identity t)
     (format stream "MESSAGE ~S" (message-name message))))
 
-#+:ccl #-:ccl-1.8
+#+:ccl #-:ccl-1.9
 ;; Work around a bug in certain Clozure CL versions where *PRINT-PPRINT-DISPATCH*
 ;; is NIL by default, which upsets SET-PPRINT-DISPATCH.
 ;;

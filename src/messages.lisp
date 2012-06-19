@@ -81,6 +81,14 @@
   (print-unreadable-object (message stream :identity t)
     (format stream "MESSAGE ~S" (message-name message))))
 
+#+:ccl #-:ccl-1.8
+;; Work around a bug in certain Clozure CL versions where *PRINT-PPRINT-DISPATCH*
+;; is NIL by default, which upsets SET-PPRINT-DISPATCH.
+;;
+;; Ticket reference: http://trac.clozure.com/ccl/ticket/784
+(when (null *print-pprint-dispatch*)
+  (setq *print-pprint-dispatch* (copy-pprint-dispatch nil)))
+
 (set-pprint-dispatch 'message #'pprint-message)
 
 (define-print-object ((%message %message) :type nil)

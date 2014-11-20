@@ -106,7 +106,7 @@
                (:around (around reply))
                (:before (before reply))
                (:after  (after reply))
-               (t (error "FIXME -- bad qualifiers for a standard-message")))))))
+               (t (error "FIXME -- unsupported qualifiers for a standard-message~%Violating qualifiers: ~S~%" (car qualifiers))))))))
     (cond
       ((null (primary))
        (apply 'no-primary-reply message *reply-combination-args*))

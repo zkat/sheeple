@@ -30,6 +30,7 @@
    #:defproto
    #:descendantp
    #:init-object
+   #:make
    #:object
    #:object-precedence-list
    #:object-metaobject

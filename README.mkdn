@@ -153,7 +153,7 @@ prototypes.
 
         SHEEPLE-USER> (defmessage synergize (a b))
         #<Message: SYNERGIZE #x157AAC36>
-        SHEEPLE-USER> (defreply synergize ((a =string=)) (b =string=))) (concatenate 'string a b))
+        SHEEPLE-USER> (defreply synergize ((a =string=) (b =string=)) (concatenate 'string a b))
         #<Reply: SYNERGIZE #x157D90FE>
         SHEEPLE-USER> (defreply synergize ((a =number=) (b =number=)) (+ a b))
         #<Reply: SYNERGIZE #x15815B76>

@@ -103,7 +103,7 @@
 (test defreply
   ;; Test autoboxing
   (with-test-message test-message
-    (Eos:finishes (handler-bind
+    (fiveam:finishes (handler-bind
                       ((automatic-message-creation #'muffle-warning))
                     (defreply test-message ((n 3)))))))
 (test defreply-bug

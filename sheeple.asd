@@ -41,7 +41,7 @@
   :description "Unit tests for Sheeple"
   :author "Kat Marchan <zkat at sykosomatic-dot-org>"
   :licence "MIT"
-  :depends-on (:sheeple :Eos)
+  :depends-on (:sheeple :fiveam)
   :serial t
   :components
   ((:module "tests"

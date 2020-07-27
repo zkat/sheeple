@@ -73,7 +73,7 @@ confusing, but actually enables crystal clear warning-free test code."
   (with-std-object object
     (is (eq object object))
     (is (eql object object))
-    (Eos:finishes                       ; Does the heap blow up?
+    (fiveam:finishes                       ; Does the heap blow up?
       (equal object object)
       (equalp object object))))
 

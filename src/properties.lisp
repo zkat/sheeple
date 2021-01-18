@@ -52,8 +52,8 @@ is signaled."
 (defun (setf direct-property-value) (new-value object property-name &rest options)
   "Tries to set a direct property value for OBJECT. If it succeeds, returns T, otherwise NIL."
   (if (std-object-p object)
-      (apply '(setf std-direct-property-value) new-value object property-name options)
-      (apply '(setf smop:direct-property-value) new-value (object-metaobject object) object property-name options)))
+      (apply #'(setf std-direct-property-value) new-value object property-name options)
+      (apply #'(setf smop:direct-property-value) new-value (object-metaobject object) object property-name options)))
 (defun (setf std-direct-property-value) (new-value object property-name &rest options)
   (declare (ignore options))
   (awhen (property-position property-name object)
@@ -73,7 +73,7 @@ is signaled."
                               &key (reader nil readerp) (writer nil writerp) accessor)
   "Sets NEW-VALUE as the value of a direct-property belonging to OBJECT, named
 PROPERTY-NAME."
-  (flet ((maybe-set-prop () (apply '(setf direct-property-value) new-value object property-name options)))
+  (flet ((maybe-set-prop () (apply #'(setf direct-property-value) new-value object property-name options)))
     (or (maybe-set-prop)                                                 ; try to set it
         (progn (apply 'add-direct-property object property-name options) ; couldn't set it, try adding it
                (maybe-set-prop))                                         ; then try setting it again

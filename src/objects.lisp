@@ -376,7 +376,7 @@ This function has no high-level error checks and SHOULD NOT BE CALLED FROM USER 
   new-parents)
 
 (defun (setf object-metaobject) (new-metaobject object)
-  (funcall '(setf smop:object-metaobject) new-metaobject (%object-metaobject object) object))
+  (funcall #'(setf smop:object-metaobject) new-metaobject (%object-metaobject object) object))
 
 ;;; Inheritance predicates
 (defun parentp (maybe-parent child)
